@@ -1,0 +1,40 @@
+{
+	"name": "ledspicerui",
+	"version": "0.1.0",
+	"description": "LEDSpicer UI is a front end for the LEDSpicer linear LED controller daemon.",
+	"main": "main.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"start": "electron ."
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/meduzapat/LEDSpicerUI.git"
+	},
+	"keywords": [
+		"LED",
+		"Front End",
+		"LEDSpicer",
+		"RGB LED",
+		"Ultimarc",
+		"LedWiz",
+		"Howler"
+	],
+	"author": "Patricio Rossi",
+	"license": "GPL-3.0",
+	"bugs": {
+		"url": "https://github.com/meduzapat/LEDSpicerUI/issues"
+	},
+	"homepage": "https://github.com/meduzapat/LEDSpicerUI#readme",
+	"devDependencies": {
+		"electron": "^8.2.1"
+	},
+	"dependencies": {
+		"@fortawesome/fontawesome-svg-core": "^1.2",
+		"@fortawesome/free-regular-svg-icons": "^5.13",
+		"bootstrap": "^4.3.1",
+		"@popperjs/core": "^2",
+		"jquery": "^3.5.0",
+		"jquery-ui": "^1.12.1"
+	}
+}

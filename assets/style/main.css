@@ -1,0 +1,17 @@
+@charset "UTF-8";
+
+:root {
+	--background-color : ;
+	--text-color       : ;
+}
+
+body {
+	background : #e5e5e5;
+	color      : #2d2d2d;
+}
+
+body.dark {
+	background : #1f2935;
+	color      : #babdb6;
+	}
+}

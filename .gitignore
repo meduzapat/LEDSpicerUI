@@ -1,0 +1,19 @@
+# IDE
+.project
+.cproject
+.settings/
+.metadata/
+
+# Common
+*~
+*.cache
+*.log
+Debug/
+
+#external
+node_modules
+package.json.*
+
+# Compiled Documentation
+doc/
+
