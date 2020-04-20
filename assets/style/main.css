@@ -1,17 +1,246 @@
 @charset "UTF-8";
 
-:root {
-	--background-color : ;
-	--text-color       : ;
+.hide {
+	display: none;
 }
 
 body {
-	background : #e5e5e5;
-	color      : #2d2d2d;
+	background : #888a85;
+	color      : #000000;
+	font-family: "Lucida Console", Monaco, monospace;
+	font-size  : 11pt;
 }
 
-body.dark {
-	background : #1f2935;
-	color      : #babdb6;
-	}
+body.dark, .dark .modal-content {
+	background: #1f2935;
+	color     : #babdb6;
+}
+
+.modal {
+	background: rgba(10, 10, 10, 0.75) !important;
+	margin    : 0;
+}
+
+section {
+	background   : #555753;
+	color        : #000000;
+	margin       : 0.5rem 0 auto;
+	padding      : 0.5rem;
+	border-radius: 0.25rem;
+}
+
+.dark section {
+	background: #0d0f12;
+	color     : #babdb6;
+}
+
+h1 {
+	font-size: 18pt;
+	color    : #888a85;
+	display  : inline;
+}
+
+#header img.btn {
+	width: 50px;
+}
+
+#header .dropdown-menu {
+	right: -66px !important;
+	left : auto !important;
+}
+
+fieldset {
+	border-color : #babdb6;
+	border-radius: 0.2rem;
+	padding      : 0.4rem 1rem;
+	min-height   : 80px;
+	margin       : 0 0 1rem 0 !important;
+}
+
+legend {
+	display         : inline;
+	width           : 250px;
+	margin-left     : 20px;
+	padding         : 2px 10px;
+	background-color: #babdb6;
+	color           : #000;
+	border-radius   : 5px;
+	font-size       : 12pt;
+}
+
+fieldset.input-group  {
+	border       : solid 1px #888a85;
+	border-radius: 3px;
+	padding      : 2px;
+	min-height   : 80px;
+	margin       : 0 1em !important;
+}
+
+fieldset.input-group legend {
+	display    : inline;
+	margin-left: 20px;
+	padding    : 2px 10px;
+	background : none;
+	color      : #000;
+	font-size  : 12pt;
+}
+
+button {
+	font-size: 12pt !important;
+	padding  : 0 5px !important;
+}
+
+span.tooltipElem {
+	background-color: #5f5f5f;
+	color           : #fff;
+	border-radius   : 50%;
+	text-align      : center;
+	padding         : 6px 3px;
+	border          : 1px solid black;
+	margin          : 0;
+	line-height     : 0;
+	font-size       : 7pt;
+	font-weight     : bold;
+	position        : relative;
+	top             : 0;
+	right           : 5px;
+}
+
+span.tooltipElem:hover {
+	text-shadow : 0px 0px 5px red;
+	border-color: red;
+}
+
+/** Elements **/
+
+.elementBox {
+	display   : inline-block;
+	padding   : 0 0 0 5px;
+	margin    : 2px 4px;
+	color     : #fff;
+	min-width : 150px;
+	text-align: right;
+	font-size : 12pt;
+}
+
+.elementBox.placeholder {
+	background-color: transparent !important;
+	border          : 1px solid black !important;
+	box-shadow      : 0px 0px 20px #fff;
+	display         : inline-block;
+}
+
+.elementBox code {
+	color         : black;
+	vertical-align: middle;
+	margin        : 0 4px;
+}
+
+.elementBox.element {
+	background-color: #4e9a06;
+}
+
+.dark .elementBox.element {
+	background-color: #2f5d04;
+}
+
+.elementBox.device {
+	background-color: #3465a4;
+}
+
+.dark .elementBox.device {
+	background-color: #204a87;
+}
+
+.elementBox.group {
+	background-color: #8c822e;
+}
+
+.dark .elementBox.group {
+	background-color: #484e0b;
+}
+
+.elementBox.profile {
+	
+}
+
+.elementBox:not(.element) {
+	padding: 2px 5px;
+}
+
+.elementBox:not(.element) code {
+	display: none;
+}
+
+#groupElementList,
+#allElementList {
+	min-height: 100px;
+}
+
+.list {
+	list-style: none;
+	padding   : 2px 3px;
+	margin    : 0;
+}
+
+.btn:hover {
+	color: #9cc0e4
+}
+
+.btn-dark:disabled {
+	color: #fff;
+}
+
+.dark .modal-header {
+	background-color: #172029;
+}
+
+label.input-group-text {
+	max-height: 38px;
+}
+
+input {
+	text-align: center;
+}
+
+.input-group-text {
+	border-radius: .25rem 0 0 .25rem;
+}
+
+.dark .input-group-text {
+	color           : #fff;
+	background-color: #40423f;
+	border-color    : #1f2426;
+}
+
+.dark .form-control,
+.dark .custom-select {
+	color           : #e8e8e8;
+	background-color: #61625e;
+	border-color    : #555753;
+}
+
+#elementDialog .modal-header label.active {
+	color      : #8ae234;
+	text-shadow: 0px 0px 5px #24F500;
+}
+
+.error {
+	background-color: #ffa6a6;
+	border          : 1px solid #ef2929;
+}
+
+#messages {
+	position  : absolute;
+	top       :0;
+	right     :0;
+	list-style: none;
+	padding   : 0;
+	margin    : 0 1rem 0 0;
+	width     : 40%;
+	z-index   : 10000;
+}
+
+#messages strong {
+	margin-right: 1rem;
 }

@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>LEDSpicer UI</title>
+<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+<link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.min.css" />
+<link rel="stylesheet" href="../assets/style/main.css" />
+<script>
+let $ = jQuery = require('jquery');
+require('popper.js');
+require('bootstrap');
+require('jquery-validation');
+let Device = require('./device.js').Device;
+let Group  = require('./group.js').Group;
+require('./settings.js');
+require('./view.js');
+</script>
+<script src="../node_modules/html5sortable/dist/html5sortable.js"></script>
+</head>
+<body>
+	<section id="header" class="container">
+		<div class="row">
+			<h1 class="col-9">LEDSpicer UI</h1>
+			<div class="col-3">
+				<div class="btn-group float-right">
+					<img class="btn btn-dark disabled" src="../assets/images/reload.svg" alt="Reload" title="Reload"/>
+					<img class="btn btn-dark disabled" src="../assets/images/save.svg" alt="Save" title="Save" />
+					<img class="btn btn-dark tooltipElem" src="../assets/images/folder.svg" alt="Folder" title="Select working directory"/>
+					<img
+						class="btn btn-dark tooltipElem"
+						src="../assets/images/settings.svg"
+						alt="Settings"
+						data-toggle="modal"
+						data-target="#settingsDialog"
+					/>
+				</div>
+			</div>
+		</div>
+	</section>
+	<section id="devices" class="container">
+		<fieldset class="border">
+			<legend>Configuration</legend>
+			<div class="row mb-3">
+				<div class="col-4 input-group">
+					<label for="fps" class="input-group-text">Frames Per Second</label>
+					<input type="number" min="1" max="60" class="form-control px-1" name="fps" value="30" required />
+				</div>
+				<div class="col-4 input-group">
+					<label for="port" class="input-group-text">Port Number</label>
+					<input type="number" min="1" max="65535" class="form-control px-1" name="port" value="16161" required />
+				</div>
+				<div class="col-4 input-group">
+					<label for="colors" class="input-group-text">Color File</label>
+					<select name="colors" class="custom-select" required >
+						<option value="singleColor">Monochrome (Black and White)</option>
+						<option value="basicColors" selected>Basic Colors</option>
+						<option value="WebColors">Web Colors</option>
+					</select>
+				</div>
+			</div>
+			<div class="row mb-3">
+				<div class="col-4 input-group">
+					<label for="logLevel" class="input-group-text">Log Level</label>
+					<select name="logLevel" class="custom-select" required >
+						<option value="Debug">Debug</option>
+						<option value="Info" selected>Info</option>
+						<option value="Notice">Notice</option>
+						<option value="Warning">Warning</option>
+						<option value="Error">Error</option>
+					</select>
+				</div>
+				<div class="col-4 input-group">
+					<label for="userId" class="input-group-text">User ID</label>
+					<input type="number" min="1" class="form-control px-1" name="userId" value="1000" required />
+				</div>
+				<div class="col-4 input-group">
+					<label for="groupId" class="input-group-text">Group ID</label>
+					<input type="number" min="1" class="form-control px-1" name="groupId" value="1000" required />
+				</div>
+			</div>
+			<div class="row mb-3">
+				<div class="col-4 input-group">
+					<label for="defaultProfile" class="input-group-text">Default Profile</label>
+					<select name="defaultProfile" class="custom-select" required >
+						<option value="default">default</option>
+					</select>
+				</div>
+			</div>
+		</fieldset>
+		<fieldset class="border">
+			<legend>Devices
+				<button id="addDevice" type="button" data-toggle="modal" data-target="#devicesDialog" class="btn btn-dark float-right">
+					<span>+</span> Add
+				</button>
+			</legend>
+			<ul id="devicesList" class="list"></ul>
+		</fieldset>
+		<fieldset class="border">
+			<legend>Groups
+				<button id="addGroup" type="button" data-toggle="modal" data-target="#groupsDialog" class="btn btn-dark float-right">
+					<span>+</span> Add
+				</button>
+			</legend>
+			<ul id="groupList" class="list"></ul>
+		</fieldset>
+	</section>
+	<section id="profiles" class="container">
+		<fieldset class="border">
+			<legend>Profiles
+				<button id="createProfile" type="button" class="btn btn-dark float-right">
+					<span>+</span> Add
+				</button>
+			</legend>
+			<ul id="profilesList" class="list"></ul>
+		</fieldset>
+	</section>
+	<section id="animations" class="container">
+		<fieldset class="border">
+			<legend>Animations
+				<button id="createAnimation" type="button" class="btn btn-dark float-right">
+					<span>+</span> Add
+				</button>
+			</legend>
+			<ul id="animationsList" class="list"></ul>
+		</fieldset>
+	</section>
+	<section id="inputs" class="container">
+		<fieldset class="border">
+			<legend>Inputs
+				<button id="createInput" type="button" class="btn btn-dark float-right">
+					<span>+</span> Add
+				</button>
+			</legend>
+			<ul id="inputsList" class="list"></ul>
+		</fieldset>
+	</section>
+	<!-- Dialogs -->
+	<!-- Devices -->
+	<section id="devicesDialog" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+	<form>
+		<div class="modal-dialog modal-content modal-lg">
+		<div class="modal-header">
+			<h5 class="modal-title">Device Setup</h5>
+		</div>
+		<div class="modal-body">
+			<div class="row mb-3">
+				<div class="col-8 input-group">
+					<label for="deviceCode" class="input-group-text">Device</label>
+					<select name="deviceCode" class="custom-select" required >
+					</select>
+				</div>
+				<div class="col-4 input-group">
+					<label for="deviceId" class="input-group-text">
+						<span class="tooltipElem" title="The device ID is normally provided by the manufacturer, if you are unsure normally 1 is the default">?</span>
+						Device ID
+					</label>
+					<select name="deviceId" class="custom-select" required >
+					</select>
+				</div>
+			</div>
+			<fieldset class="border row mb-3">
+				<legend>Elements
+					<button id="addElement" type="button" class="btn btn-dark float-right" data-toggle="modal" data-target="#elementDialog" >
+						<span>+</span> Add
+					</button>
+				</legend>
+				<div id="elementList"></div>
+			</fieldset>
+			<fieldset id="deviceOptions" class="border mb-3"></fieldset>
+		</div>
+		<div class="modal-footer">
+			<button type="button" class="btn btn-danger float-left" data-toggle="modal" data-target="#deleteDeviceConfirmation">Delete</button>
+			<button type="button" class="btn btn-primary" id="saveDevice">Save</button>
+			<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+		</div>
+		</div>
+	</form>
+	</section>
+	<!-- Elements -->
+	<section id="elementDialog" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+	<form>
+		<div class="modal-dialog modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Element Setup</h5>
+				<div class="btn-group-toggle float-right" data-toggle="buttons">
+					<label class="btn btn-secondary btn-sm">
+						<input type="checkbox" name="keepOpen"/>
+						Keep open
+					</label>
+				</div>
+			</div>
+			<div class="modal-body">
+				<div class="input-group mb-3">
+					<label class="input-group-text" for="elementName">
+						<span class="tooltipElem" title="Use something intuitive like P1_BUTTON1, P1_JOYSTICK, LIGHT1, ect">?</span>
+						Name
+					</label>
+					<input type="text" class="form-control px-1" name="elementName" value="" required />
+				</div>
+				<div class="row">
+					<div class="col-5 btn-group btn-group-toggle mb-3" data-toggle="buttons">
+						<span class="input-group-text">Type</span>
+						<label class="btn btn btn-dark form-check-label active">
+							<input type="radio" name="elementType" id="rgbSel" value="rgb" checked />
+							RGB
+						</label>
+						<label class="btn btn-dark form-check-label">
+							<input type="radio" name="elementType" id="singleSel" value="single" />
+							Single
+						</label>
+					</div>
+					<div class="col-7 input-group mb-3 collapse show" id="RGB">
+						<label class="input-group-text bg-danger border-danger" for="elementName">R</label>
+						<input type="number" class="form-control px-1" name="R" value="" min="1" max="0" required />
+						<label class="input-group-text bg-success border-success" for="elementName">G</label>
+						<input type="number" class="form-control px-1" name="G" value="" min="1" max="0" required />
+						<label class="input-group-text bg-primary border-primary" for="elementName">B</label>
+						<input type="number" class="form-control px-1" name="B" value="" min="1" max="0" required />
+					</div>
+					<div class="col-7 input-group mb-3 collapse" id="single">
+						<label class="input-group-text" for="elementName">Pin</label>
+						<input type="number" min="1" max="0" class="form-control px-1" name="pin" value="" min="1" max="0" required />
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-danger float-left" data-toggle="modal" data-target="#deleteElementConfirmation">Delete</button>
+				<button type="button" class="btn btn-primary" id="saveElement">Save</button>
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+			</div>
+		</div>
+	</form>
+	</section>
+	<!-- Groups -->
+	<section id="groupsDialog" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+	<form>
+		<div class="modal-dialog modal-content modal-lg">
+			<div class="modal-header">
+				<h5 class="modal-title">Group Setup</h5>
+			</div>
+			<div class="modal-body">
+				<div class="input-group mb-3">
+					<label class="input-group-text" for="groupName">
+						<span class="tooltipElem" id="allTip" title="The group All is autogenerated and will always exist, it includes the list of every registered element. You cannot change its name but you can arrange the elements order.">?</span>
+						Name
+					</label>
+					<input type="text" class="form-control px-1" name="groupName" value="" required />
+				</div>
+				<fieldset class="border row mb-3">
+					<legend>Elements
+					</legend>
+					<div id="groupElementList"></div>
+				</fieldset>
+				<fieldset class="border row mb-3">
+					<legend>All Elements
+					</legend>
+					<div id="allElementList"></div>
+				</fieldset>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-danger float-left" data-toggle="modal" data-target="#deleteElementConfirmation">Delete</button>
+				<button type="button" class="btn btn-primary" id="saveElement">Save</button>
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+			</div>
+		</div>
+	</form>
+	</section>
+	<!-- Profiles -->
+	<!-- Settings -->
+	<section id="settingsDialog" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+	<form>
+		<div class="modal-dialog modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Settings</h5>
+			</div>
+			<div class="modal-body">
+				<div class="row mb-3">
+					<div class="col-4 input-group">
+						<div class="btn-group btn-group-toggle" data-toggle="buttons">
+							<span class="input-group-text">Dark Mode</span>
+							<label class="btn btn btn-dark form-check-label active">
+								<input type="radio" name="darkMode" value="off" checked autocomplete="off"/>
+								Off
+							</label>
+							<label class="btn btn-dark form-check-label">
+								<input type="radio" name="darkMode" value="on" autocomplete="off"/>
+								On
+							</label>
+						</div>
+						<div class="btn-group btn-group-toggle" data-toggle="buttons">
+							<span class="input-group-text">Display Help</span>
+							<label class="btn btn-dark form-check-label">
+								<input type="radio" name="displayHelp" value="off" autocomplete="off"/>
+								Off
+							</label>
+							<label class="btn btn btn-dark form-check-label active">
+								<input type="radio" name="displayHelp" value="on" checked autocomplete="off"/>
+								On
+							</label>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+			</div>
+		</div>
+	</form>
+	</section>
+	<!-- Messages -->
+	<!-- Delete Element Confirmation Dialog -->
+	<div class="modal fade" tabindex="-1" role="dialog" id="deleteElementConfirmation">
+		<div class="modal-dialog modal-sm">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Are you Sure?</h5>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-danger" data-dismiss="modal" id="deleteElement">Delete</button>
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- Delete Device Confirmation Dialog -->
+	<div class="modal fade" tabindex="-1" role="dialog" id="deleteDeviceConfirmation">
+		<div class="modal-dialog modal-sm">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Are you Sure?</h5>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-danger" data-dismiss="modal" id="deleteDevice">Delete</button>
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<ul id="messages"></ul>
+</body>
+</html>

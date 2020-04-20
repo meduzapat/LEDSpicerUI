@@ -2,10 +2,39 @@
 	"name": "ledspicerui",
 	"version": "0.1.0",
 	"description": "LEDSpicer UI is a front end for the LEDSpicer linear LED controller daemon.",
-	"main": "main.js",
+	"main": "src/main.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"start": "electron ."
+		"start": "electron src/main.js",
+		"dist": "build"
+	},
+	"build": {
+		"appId": "com.electron.${name}",
+		"category": "your.app.category.type",
+		"dmg": {
+			"contents": [
+				{
+					"x": 110,
+					"y": 150
+				},
+				{
+					"x": 240,
+					"y": 150,
+					"type": "link",
+					"path": "/Applications"
+				}
+			]
+		},
+		"linux": {
+			"target": [
+				"AppImage",
+				"deb"
+			]
+		},
+		"win": {
+			"target": "nsis",
+			"icon": "assets/icons/ledspicer.ico"
+		}
 	},
 	"repository": {
 		"type": "git",
@@ -27,14 +56,14 @@
 	},
 	"homepage": "https://github.com/meduzapat/LEDSpicerUI#readme",
 	"devDependencies": {
-		"electron": "^8.2.1"
+		"electron-builder": "latest"
 	},
 	"dependencies": {
-		"@fortawesome/fontawesome-svg-core": "^1.2",
-		"@fortawesome/free-regular-svg-icons": "^5.13",
-		"bootstrap": "^4.3.1",
-		"@popperjs/core": "^2",
+		"bootstrap": "^4",
+		"electron": "latest",
+		"html5sortable": "^0.9.17",
 		"jquery": "^3.5.0",
-		"jquery-ui": "^1.12.1"
+		"jquery-validation": "^1.19",
+		"popper.js": "^1.16"
 	}
 }
