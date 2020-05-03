@@ -9,6 +9,7 @@
 *.cache
 *.log
 Debug/
+dist/
 
 #external
 node_modules
