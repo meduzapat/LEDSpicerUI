@@ -475,6 +475,7 @@ $(document).ready(() => {
 			groupId.val(data.getAttribute('groupId'));
 			devicesList.html('');
 			Device.reset();
+			setDirtyConfiguration(false);
 
 			// Extract Devices.
 			let
@@ -797,6 +798,10 @@ $(document).ready(() => {
 		setDirtyConfiguration(true)
 	});
 
+	devicesDialog.on('hide.bs.modal', function(e) {
+		devicesDialog.data('current', null);
+	});
+
 /****************
  * Element Form *
  ****************/
@@ -963,6 +968,10 @@ $(document).ready(() => {
 		$('#RGB').removeClass('show');
 	});
 
+	elementDialog.on('hide.bs.modal', function(e) {
+		elementDialog.data('current', null);
+	});
+
 /**********
  * Groups *
  **********/
@@ -1126,6 +1135,9 @@ $(document).ready(() => {
 		setDirtyConfiguration(true)
 	});
 
+	groupsDialog.on('show.bs.modal', function(e) {
+		groupsDialog.data('current', null);
+	});
 /************
  * Profiles *
  ************/
