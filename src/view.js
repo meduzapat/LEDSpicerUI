@@ -434,6 +434,7 @@ $(document).ready(() => {
 		configurationForm[0].reset();
 		devicesList.html('');
 		currentFile.text('none').attr('title', 'none');
+		resetErrors(configurationForm);
 		updateGroups();
 		setDirtyConfiguration(false);
 	});
@@ -476,6 +477,7 @@ $(document).ready(() => {
 			devicesList.html('');
 			Device.reset();
 			setDirtyConfiguration(false);
+			resetErrors(configurationForm);
 
 			// Extract Devices.
 			let
@@ -1135,7 +1137,7 @@ $(document).ready(() => {
 		setDirtyConfiguration(true)
 	});
 
-	groupsDialog.on('show.bs.modal', function(e) {
+	groupsDialog.on('hide.bs.modal', function(e) {
 		groupsDialog.data('current', null);
 	});
 /************

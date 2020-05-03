@@ -19,15 +19,15 @@ app.on('activate', () => {
  */
 function createWindow () {
 	window = new BrowserWindow({
-		width:     1024,
-		height:    720,
+		width : 1024,
+		height: 720,
 		webPreferences: {
 			nodeIntegration: true
 		}
 	});
 	window.setMenu(null);
 	window.openDevTools();
-	window.loadFile('index.html');
+	window.loadFile(`${__dirname}/index.html`);
 	window.on('closed', () => {
 		window = null;
 	});

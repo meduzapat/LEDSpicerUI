@@ -1,30 +1,19 @@
 {
 	"name": "ledspicerui",
+	"productName": "LEDSpicer UI",
 	"version": "0.1.0",
 	"description": "LEDSpicer UI is a front end for the LEDSpicer linear LED controller daemon.",
+	"author": "Patricio Rossi <meduzapat@netscape.net>",
+	"license": "GPL-3.0",
+	"copyright": "Copyright © 2020 ${author}",
 	"main": "src/main.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"start": "electron src/main.js",
-		"dist": "build"
+		"start": "electron ./src/main.js",
+		"dist": "electron-builder"
 	},
 	"build": {
 		"appId": "com.electron.${name}",
-		"category": "your.app.category.type",
-		"dmg": {
-			"contents": [
-				{
-					"x": 110,
-					"y": 150
-				},
-				{
-					"x": 240,
-					"y": 150,
-					"type": "link",
-					"path": "/Applications"
-				}
-			]
-		},
 		"linux": {
 			"target": [
 				"AppImage",
@@ -32,8 +21,8 @@
 			]
 		},
 		"win": {
-			"target": "nsis",
-			"icon": "assets/icons/ledspicer.ico"
+			"target": "NSIS",
+			"icon": "build/icons/icon.ico"
 		}
 	},
 	"repository": {
@@ -49,18 +38,16 @@
 		"LedWiz",
 		"Howler"
 	],
-	"author": "Patricio Rossi",
-	"license": "GPL-3.0",
 	"bugs": {
 		"url": "https://github.com/meduzapat/LEDSpicerUI/issues"
 	},
 	"homepage": "https://github.com/meduzapat/LEDSpicerUI#readme",
 	"devDependencies": {
+		"electron": "latest",
 		"electron-builder": "latest"
 	},
 	"dependencies": {
 		"bootstrap": "^4",
-		"electron": "latest",
 		"html5sortable": "^0.9.17",
 		"jquery": "^3.5.0",
 		"jquery-validation": "^1.19",
