@@ -1,14 +1,13 @@
 /**
- * Class to handle Devices code.
+ * Storage static singleton class.
  */
-let Device = (function () {
+const DeviceStorage = (function() {
 
-	let
-		code,
-		id,
-		elements,
-		options,
-		devices = {};
+	/**
+	 * used devices in the form of:
+	 * name:[ids]
+	 */
+	let storage = {};
 
 	const defaultDevices = {
 		UltimarcUltimate : {
@@ -64,153 +63,207 @@ let Device = (function () {
 		}
 	};
 
-	class Device {
-
 	/**
-	 * Creates a new device.
-	 * @param string mewCode,
-	 * @param number newId
-	 * @param array newElements
-	 * @param Object newOptions
-	 */
-	constructor(newCode, newId, newElements = [], newOptions = {}) {
-		code     = newCode;
-		id       = newId;
-		elements = newElements;
-		options  = newOptions;
-		Device.registerUsed(code, id);
-	}
-
-	/**
-	 * @returns the device code.
-	 */
-	getCode() {
-		return code;
-	}
-
-	/**
-	 * @returns the devices ID.
-	 */
-	getId() {
-		return id;
-	}
-
-	/**
-	 * Changes the code and id.
-	 * @param string newCode
-	 * @param number newId
-	 * @returns Device
-	 */
-	change(newCode, newId) {
-		Device.updateUsed(code, id, newCode, newId);
-		code = newCode;
-		id   = newId;
-		return this;
-	}
-
-	/**
-	 * @returns the device name.
-	 */
-	getName() {
-		return defaultDevices[code].name;
-	}
-
-	/**
-	 * @return the device elements.
-	 */
-	getElements() {
-		return elements;
-	}
-
-	/**
-	 * Populates the elements.
-	 * @param array newElements
-	 * @returns Device
-	 */
-	setElements(newElements) {
-		elements = newElements;
-		return this;
-	}
-
-	/**
-	 * @returns the device special options.
-	 */
-	getOptions() {
-		return options;
-	}
-
-	/**
-	 * Sets the device extra options.
-	 * @param Object newOptions
-	 * @returns Device
-	 */
-	setOptions(newOptions) {
-		options = newOptions;
-		return this;
-	}
-
-	/**
+	 * Register a device.
 	 * @param string code
-	 * @returns the device name for code.
+	 * @param number id
 	 */
-	static convertCode(code) {
-		return defaultDevices[code].name;
+	function register(code, id) {
+		storage[code] ? storage[code].push(id) : storage[code] = [id];
 	}
 
-	/**
-	 * @return the device default values.
-	 */
-	static getValues(code) {
-		return defaultDevices[code];
-	}
+	return Object.freeze({
 
-	/**
-	 * @return the XML for device.
-	 */
-	toXML() {
-		return "<device/>";
-	}
+		register: register,
 
-	/**
-	 * register a device.
-	 */
-	static registerUsed(code, id) {
-		devices[code] ? devices[code].push(id) : devices[code] = [id];
-	}
+		defaultDevices: defaultDevices,
 
-	static updateUsed(code, id, newCode, newId) {
-		let oldIdIdx = devices[code].indexOf(id);
-		if (code == newCode) {
-			devices[code][oldIdIdx] = newId;
-			return;
+		/**
+		 * @param string code
+		 * @returns the device name for code.
+		 */
+		getName(code){
+			return defaultDevices[code].name;
+		},
+
+		/**
+		 * @return the device default Id values.
+		 */
+		getIdValues(code) {
+			return defaultDevices[code];
+		},
+
+		/**
+		 * Replaces a registered devices with a different one.
+		 * @param string code of device to replace
+		 * @param number id of  device to replace
+		 * @param string newCode new code
+		 * @param number id new id
+		 */
+		update(code, id, newCode, newId) {
+			let oldIdIdx = storage[code].indexOf(id);
+			if (code == newCode) {
+				storage[code][oldIdIdx] = newId;
+				return;
+			}
+			storage[code].splice(oldIdIdx, 1);
+			register(newCode, newId);
+		},
+
+		/**
+		 * Removes a device from the registered devices.
+		 * @param string code
+		 * @param number id
+		 */
+		remove(code, id) {
+			storage[code].splice(storage[code].indexOf(id), 1)
+		},
+
+		/**
+		 * @returns true if the Id for a device is available.
+		 */
+		isIdAvailable(code, id){
+			return (!storage[code] || (storage[code] && storage[code].indexOf(id) == -1));
+		},
+
+		/**
+		 * @Returns true if a device code is not available.
+		 */
+		isAvailable(code) {
+			return (!storage[code] || (storage[code] && storage[code].length < defaultDevices[code]['maxDevices']));
+		},
+
+		reset() {
+			storage = {};
+		},
+
+		/**
+		 * @return an array with the devices codes and names.
+		 */
+		getList() {
+			return defaultDevices;
 		}
-		devices[code].splice(oldIndex, 1);
-		Device.registerUsed(newCode, newId);
-	}
-
-	/**
-	 * @returns true if the Id for a device is available.
-	 */
-	static isIdAvailable(code, id) {
-		return (!devices[code] || (devices[code] && devices[code].indexOf(id) == -1));
-	}
-
-	/**
-	 * @Returns true if a device code is not available.
-	 */
-	static isAvailable(code) {
-		return (!devices[code] || (devices[code] && devices[code].length < defaultDevices[code]['maxDevices']));
-	}
-
-	/**
-	 * @return an array with the devices codes and names.
-	 */
-	static getList() {
-		return defaultDevices;
-	}
-
-	// close class
-	}
-	module.exports.Device = Device;
+	});
 
 })();
+
+/**
+ * Class to handle Devices code.
+ *
+ * @param string mewCode,
+ * @param number newId
+ * @param array newElements
+ * @param Object newOptions
+ */
+module.exports = function(code, id, elements = [], options = {}) {
+
+		let _code     = code;
+		let _id       = id;
+		let _elements = elements;
+		let _options  = options;
+
+	DeviceStorage.register(code, id);
+
+	return Object.freeze({
+
+		/**
+		 * @returns the device code.
+		 */
+		getCode() {
+			return _code;
+		},
+
+		/**
+		 * @returns the devices ID.
+		 */
+		getId() {
+			return _id;
+		},
+
+		/**
+		 * Changes the code and id.
+		 * @param string newCode
+		 * @param number newId
+		 * @returns Device
+		 */
+		change(newCode, newId) {
+			DeviceStorage.update(_code, _id, newCode, newId);
+			_code = newCode;
+			_id   = newId;
+			return this;
+		},
+
+		/**
+		 * @returns the device name.
+		 */
+		getName() {
+			return DeviceStorage.defaultDevices[_code].name;
+		},
+
+		/**
+		 * @return the device elements.
+		 */
+		getElements() {
+			return _elements;
+		},
+
+		/**
+		 * Populates the elements.
+		 * @param array newElements
+		 * @returns Device
+		 */
+		setElements(newElements) {
+			_elements = newElements;
+			return this;
+		},
+
+		/**
+		 * @return string[]
+		 */
+		getElementsName() {
+			let r = [];
+			_elements.forEach(e => r.push(e.getName()));
+			return r;
+		},
+
+		/**
+		 * @returns the device special options.
+		 */
+		getOptions() {
+			return _options;
+		},
+
+		/**
+		 * Sets the device extra options.
+		 * @param Object newOptions
+		 * @returns Device
+		 */
+		setOptions(newOptions) {
+			_options = newOptions;
+			return this;
+		},
+
+		remove() {
+			DeviceStorage.remove(_code, _id);
+		},
+
+		/**
+		 * @returns string the object converted into XML.
+		 */
+		toXML() {
+			let r = '\t\t<device name="' + _code + '" boardId="' + _id + '"';
+			for (let o in _options)
+				r += ' ' + o + '="' + _options[o] + '"';
+			r += '>\n';
+			_elements.forEach(e => r += e.toXML());
+			r += '\t\t</device>\n';
+			return r;
+		},
+	});
+};
+
+module.exports.getList       = DeviceStorage.getList;
+module.exports.isAvailable   = DeviceStorage.isAvailable;
+module.exports.isIdAvailable = DeviceStorage.isIdAvailable;
+module.exports.reset         = DeviceStorage.reset;
+

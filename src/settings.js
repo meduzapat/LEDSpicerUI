@@ -1,6 +1,6 @@
 $(document).ready(() => {
 
-	(function () {
+	(function() {
 
 		let
 			settingsDialog = $('#settingsDialog'),
@@ -33,7 +33,7 @@ $(document).ready(() => {
 			if (!displayHelpVal)
 				displayHelpVal = 'on';
 			$('input[name="displayHelp"][value="' + displayHelpVal + '"]', settingsDialog).click();
-			if (displayHelp == 'on')
+			if (displayHelpVal == 'on')
 				$('span.tooltipElem').tooltip();
 			else
 				$('span.tooltipElem').addClass('hide')
@@ -52,7 +52,7 @@ $(document).ready(() => {
 		});
 
 		/**
-		 * Handle the dark mode switch.
+		 * Handle the display Help switch.
 		 */
 		displayHelp.on('change', () => {
 			localStorage.setItem('displayHelp', $('input[name="displayHelp"]:checked', settingsDialog).val());

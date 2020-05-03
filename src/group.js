@@ -1,53 +1,54 @@
 /**
  * Class to keep Group data.
  */
-let Group = (function () {
+module.exports = function(newName, newElements = []) {
 
 	let
-		name,
-		elements,
-		allGroups = {};
-
-	class Group {
-
-	constructor(newName, newElements = []) {
-		name     = newName;
+		name     = newName,
 		elements = newElements;
-		Group.registerGroup(name, elements);
-	}
 
-	getName() {
-		return name;
-	}
+	return Object.freeze({
 
-	setName(newName) {
-		name = newName;
-		return this;
-	}
+		/**
+		 * @returns string the group name.
+		 */
+		getName() {
+			return name;
+		},
 
-	getElements() {
-		return elements;
-	}
+		/**
+		 * Replaces the name.
+		 * @param string newName
+		 */
+		setName(newName) {
+			name = newName;
+			return this;
+		},
 
-	setElements(newElemennts) {
-		elements = newElemennts;
-		return this;
-	}
+		/**
+		 * @return string[] elements
+		 */
+		getElements() {
+			return elements;
+		},
 
-	static removeGroup(name) {
-		delete allGroups[name];
-	}
+		/**
+		 * Adds elements into the group.
+		 * @param string[] newElements.
+		 */
+		setElements(newElemennts) {
+			elements = newElemennts;
+			return this;
+		},
 
-	static registerGroup(newName, newElements) {
-		allGroups[newName] = newElements;
-	}
-
-	toXML() {
-		return '<groups/>';
-	}
-
-	}
-
-	module.exports.Group = Group;
-
-})();
+		/**
+		 * @returns string the object converted into XML.
+		 */
+		toXML() {
+			let r = '\t\t<group name="' + name + '">\n';
+			elements.forEach(e => r += '\t\t\t<element name="' + e + '"/>\n');
+			r += '\t\t</group>\n';
+			return r;
+		}
+	});
+}

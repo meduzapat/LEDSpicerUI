@@ -21,6 +21,11 @@ body.dark, .dark .modal-content {
 	margin    : 0;
 }
 
+.modal-footer {
+	display   : block;
+	text-align: right;
+}
+
 section {
 	background   : #555753;
 	color        : #000000;
@@ -49,23 +54,56 @@ h1 {
 	left : auto !important;
 }
 
+#infoBox {
+	background-color: #c7c7c7;
+	border          : 1px inset #000;
+	padding         : 0;
+	margin          : 0;
+	overflow        : visible;
+	white-space     : nowrap;
+	overflow        : hidden;
+	text-overflow   : ellipsis;
+}
+
+.dark #infoBox {
+	background-color: #151515;
+}
+
 fieldset {
 	border-color : #babdb6;
 	border-radius: 0.2rem;
-	padding      : 0.4rem 1rem;
+	padding      : 0.4rem 0.5rem;
 	min-height   : 80px;
 	margin       : 0 0 1rem 0 !important;
 }
 
 legend {
 	display         : inline;
-	width           : 250px;
+	width           : auto;
+	min-width       : 14rem;
 	margin-left     : 20px;
 	padding         : 2px 10px;
 	background-color: #babdb6;
 	color           : #000;
 	border-radius   : 5px;
 	font-size       : 12pt;
+}
+
+legend button:not(disabled) {
+	background-color: #b9b9b9;
+}
+
+legend img {
+	height          : 30px;
+	padding         : 1px 5px;
+}
+
+legend img.disabled {
+    filter: brightness(1.4);
+}
+
+legend img:not(.disabled):hover {
+	border-color: #ababab;
 }
 
 fieldset.input-group  {
@@ -90,6 +128,11 @@ button {
 	padding  : 0 5px !important;
 }
 
+button:disabled  {
+	background-color: #717171;
+	opacity: .5;
+}
+
 span.tooltipElem {
 	background-color: #5f5f5f;
 	color           : #fff;
@@ -104,6 +147,8 @@ span.tooltipElem {
 	position        : relative;
 	top             : 0;
 	right           : 5px;
+	height          : 14px;
+	display         : inline-block;
 }
 
 span.tooltipElem:hover {
@@ -114,13 +159,23 @@ span.tooltipElem:hover {
 /** Elements **/
 
 .elementBox {
-	display   : inline-block;
-	padding   : 0 0 0 5px;
-	margin    : 2px 4px;
-	color     : #fff;
-	min-width : 150px;
-	text-align: right;
-	font-size : 12pt;
+	display      : inline-block;
+	padding      : 0 0 0 5px;
+	margin       : 2px 4px;
+	color        : #fff;
+	min-width    : 150px;
+	text-align   : right;
+	font-size    : 12pt;
+	border-radius: 5px;
+	border       : 1px solid #fff;
+}
+
+.elementBox:hover {
+	border-color: white !important;
+}
+
+.elementBox[data-toggle="modal"] {
+	cursor: pointer;
 }
 
 .elementBox.placeholder {
@@ -134,30 +189,37 @@ span.tooltipElem:hover {
 	color         : black;
 	vertical-align: middle;
 	margin        : 0 4px;
+	cursor        : move;
 }
 
 .elementBox.element {
 	background-color: #4e9a06;
+	border-color    : #1d3704;
 }
 
 .dark .elementBox.element {
 	background-color: #2f5d04;
+	border-color    : #73d216;
 }
 
 .elementBox.device {
 	background-color: #3465a4;
+	border-color    : #204a87;
 }
 
 .dark .elementBox.device {
 	background-color: #204a87;
+	border-color    : #729fcf;
 }
 
 .elementBox.group {
 	background-color: #8c822e;
+	border-color    : #433d12;
 }
 
 .dark .elementBox.group {
 	background-color: #484e0b;
+	border-color    : #fce94f;
 }
 
 .elementBox.profile {
@@ -165,7 +227,7 @@ span.tooltipElem:hover {
 }
 
 .elementBox:not(.element) {
-	padding: 2px 5px;
+	padding: 8px 15px;
 }
 
 .elementBox:not(.element) code {
@@ -174,7 +236,7 @@ span.tooltipElem:hover {
 
 #groupElementList,
 #allElementList {
-	min-height: 100px;
+	min-height: 40px;
 }
 
 .list {
@@ -225,9 +287,30 @@ input {
 	text-shadow: 0px 0px 5px #24F500;
 }
 
+#elementDialog label.btn.form-check-label.active {
+	background-color: #879c77;
+}
+
+.dark #elementDialog label.btn.form-check-label.active {
+	color           : #fff;
+	background-color: #232323;
+	border-color    : #343a40;
+}
+
+#elementDialog label.btn.form-check-label {
+	background-color: #b7b7b7;
+}
+
+.dark #elementDialog label.btn.form-check-label {
+	color           : #fff;
+	background-color: #333333;
+	border-color    : #343a40;
+}
+
 .error {
-	background-color: #ffa6a6;
-	border          : 1px solid #ef2929;
+	color           : #1d0303 !important;
+	background-color: #ffa6a6 !important;
+	border          : 1px solid #ef2929 !important;
 }
 
 #messages {
