@@ -1,66 +1,63 @@
-$(document).ready(() => {
+(function() {
 
-	(function() {
+	let
+		settingsDialog = $('#settingsDialog'),
+		darkMode       = $('input[name="darkMode"]', settingsDialog),
+		displayHelp    = $('input[name="displayHelp"]', settingsDialog);
 
-		let
-			settingsDialog = $('#settingsDialog'),
-			darkMode       = $('input[name="darkMode"]', settingsDialog),
-			displayHelp    = $('input[name="displayHelp"]', settingsDialog);
+	(() => {
+		// Check Storage.
+		if (typeof(Storage) === "undefined") {
+			console.warn('no storage found');
+			$('input, select', settingsDialog).prop('disabled',true);
+		}
 
-		(() => {
-			// Check Storage.
-			if (typeof(Storage) === "undefined") {
-				console.warn('no storage found');
-				$('input, select', settingsDialog).prop('disabled',true);
-			}
+		// Set Dark Mode.
+		let darkModeVal = localStorage.darkMode;
+		if (!darkModeVal)
+			darkModeVal = 'off';
+		$('input[name="darkMode"][value="' + darkModeVal + '"]', settingsDialog).click();
 
-			// Set Dark Mode.
-			let darkModeVal = localStorage.darkMode;
-			if (!darkModeVal)
-				darkModeVal = 'off';
-			$('input[name="darkMode"][value="' + darkModeVal + '"]', settingsDialog).click();
+		if (darkModeVal == 'on')
+			$('body').addClass('dark');
 
-			if (darkModeVal == 'on')
-				$('body').addClass('dark');
-
-			// Set Display Help.
-			/**
-			 * Activate tooltips
-			 */
-			$('.tooltipElem:not(span)').tooltip();
-
-			let displayHelpVal = localStorage.displayHelp;
-			if (!displayHelpVal)
-				displayHelpVal = 'on';
-			$('input[name="displayHelp"][value="' + displayHelpVal + '"]', settingsDialog).click();
-			if (displayHelpVal == 'on')
-				$('span.tooltipElem').tooltip();
-			else
-				$('span.tooltipElem').addClass('hide')
-
-		})();
-
+		// Set Display Help.
 		/**
-		 * Handle the dark mode switch.
+		 * Activate tooltips
 		 */
-		darkMode.on('change', () => {
-			localStorage.setItem('darkMode', $('input[name="darkMode"]:checked', settingsDialog).val());
-			if (localStorage.darkMode == 'on')
-				$('body').addClass('dark');
-			else
-				$('body').removeClass('dark');
-		});
+		$('.tooltipElem:not(span)').tooltip();
 
-		/**
-		 * Handle the display Help switch.
-		 */
-		displayHelp.on('change', () => {
-			localStorage.setItem('displayHelp', $('input[name="displayHelp"]:checked', settingsDialog).val());
-			if (localStorage.displayHelp == 'on')
-				$('span.tooltipElem').removeClass('hide').tooltip('enable');
-			else
-				$('span.tooltipElem').tooltip('disable').addClass('hide')
-		});
+		let displayHelpVal = localStorage.displayHelp;
+		if (!displayHelpVal)
+			displayHelpVal = 'on';
+		$('input[name="displayHelp"][value="' + displayHelpVal + '"]', settingsDialog).click();
+		if (displayHelpVal == 'on')
+			$('span.tooltipElem').tooltip();
+		else
+			$('span.tooltipElem').addClass('hide')
 
 	})();
-});
+
+	/**
+	 * Handle the dark mode switch.
+	 */
+	darkMode.on('change', () => {
+		localStorage.setItem('darkMode', $('input[name="darkMode"]:checked', settingsDialog).val());
+		if (localStorage.darkMode == 'on')
+			$('body').addClass('dark');
+		else
+			$('body').removeClass('dark');
+	});
+
+	/**
+	 * Handle the display Help switch.
+	 */
+	displayHelp.on('change', () => {
+		localStorage.setItem('displayHelp', $('input[name="displayHelp"]:checked', settingsDialog).val());
+		if (localStorage.displayHelp == 'on')
+			$('span.tooltipElem').removeClass('hide').tooltip('enable');
+		else
+			$('span.tooltipElem').tooltip('disable').addClass('hide')
+	});
+
+})();

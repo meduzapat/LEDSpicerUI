@@ -21,7 +21,7 @@
 			]
 		},
 		"win": {
-			"target": "NSIS",
+			"target": "nsis",
 			"icon": "build/icons/icon.ico"
 		}
 	},
@@ -43,13 +43,13 @@
 	},
 	"homepage": "https://github.com/meduzapat/LEDSpicerUI#readme",
 	"devDependencies": {
-		"electron": "latest",
-		"electron-builder": "latest"
+		"electron": "^8.2.5",
+		"electron-builder": "^22.6.0"
 	},
 	"dependencies": {
 		"bootstrap": "^4",
 		"html5sortable": "^0.9.17",
-		"jquery": "^3.5.0",
+		"jquery": "^3.5.1",
 		"jquery-validation": "^1.19",
 		"popper.js": "^1.16"
 	}

@@ -8,19 +8,25 @@
 <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.min.css" />
 <link rel="stylesheet" href="../assets/style/main.css" />
 <script>
-const remote   = require('electron').remote;
-const dialog   = remote.dialog;
-const fs       = require('fs');
-let $ = jQuery = require('jquery');
+const $ = jQuery = require('jquery');
 require('popper.js');
 require('bootstrap');
 require('jquery-validation');
-let Element = require('./element');
-let Device  = require('./device');
-let Group   = require('./group');
-let Config  = require('./configuration');
-require('./settings');
-require('./view.js');
+
+'use strict'
+$(document).ready(() => {
+	require('./configuration')
+	require('./settings');
+	require('./element');
+	require('./device');
+	const Group   = require('./group');
+
+	require('./generic').setConfigurationDirty(false);
+	
+	// Init groups.
+	Group.updateGroups();
+});
+
 </script>
 <script src="../node_modules/html5sortable/dist/html5sortable.js"></script>
 </head>
