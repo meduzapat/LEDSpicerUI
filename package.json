@@ -43,7 +43,7 @@
 	},
 	"homepage": "https://github.com/meduzapat/LEDSpicerUI#readme",
 	"devDependencies": {
-		"electron": "^8.2.5",
+		"electron": "^18.3.7",
 		"electron-builder": "^22.6.0"
 	},
 	"dependencies": {
