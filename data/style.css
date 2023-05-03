@@ -1,0 +1,100 @@
+combobox.noRoundLeft button.combo,
+.noRoundLeft {
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+}
+
+combobox.noRoundRight button.combo,
+.noRoundRight {
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
+}
+
+.backgroundGreen {
+	background: #008000;
+}
+
+.backgroundRed {
+	background: #e01b24;
+}
+
+.backgroundBlue {
+	background: #1a5fb4;
+}
+
+
+.On {
+	background: #FFF;
+	color: #000;
+}
+
+.Off {
+	background: #000;
+	color: #FFF;
+}
+
+.Random {
+	background: linear-gradient(90deg, rgba(255,0,0,1) 0%, rgba(255,251,0,1) 21%, rgba(0,250,2,1) 52%, rgba(0,0,255,1) 79%, rgba(237,0,255,1) 100%);
+	color: #FFF;
+}
+
+.pin_white {
+	background: #f6f5f4;
+	color: #000;
+}
+
+.pin_solenoid {
+	background: #813d9c;
+}
+
+.pin_red {
+	background: #e01b24;
+	color: #fff;
+}
+
+.pin_green {
+	background: #3da81b;
+	color: #fff;
+}
+
+.pin_blue {
+	background: #1c71d8;
+	color: #fff;
+}
+
+.BoxButton {
+	border: 2px outset rgba(61,56,70,1);
+	background-position: center center;
+	background-repeat :  repeat;
+	padding:             5px 2px;
+}
+
+.BoxButton label {
+	background: rgba(0,0,0,0.75);
+	color:      white;
+}
+
+.DeviceBoxButton {
+	background:          #26a269;
+	background-image:    url("images/deviceButtonBackground.png");
+	border-color:        #35751a;
+}
+
+.RestrictorBoxButton {
+	background:          #1a5fb4;
+	background-image:    url("images/restrictorButtonBackground.png");
+	border-color:        #62a0ea;
+}
+
+.ElementBoxButton {
+	background:          #613583;
+	background-image:    url("images/elementButtonBackground.png");
+	border-color:        #9141ac;
+}
+
+.GroupBoxButton {
+	background:          #e5a50a;
+	background-image:    url("images/groupButtonBackground.png");
+	border-color:        #f9f06b;
+}
+

@@ -9,12 +9,50 @@
 *.cache
 *.log
 Debug/
-dist/
 
-#external
-node_modules
-package.json.*
+# Autotools
+/stamp-h1
+/ltmain.sh
+/libtool
+/depcomp
+/config.sub
+/config.guess
+.autotools
+**/Makefile.in
+config.h.in
+*.m4
+Makefile
+*.status
+configure
+configure.scan
+install-sh
+config.h
+compile
+missing
 
-# Compiled Documentation
+# Compiled and others
+ledspicerui
+.dirstamp
+.libs/
+*.slo
+*.lo
+*.Plo
+*.o
+*.Tpo
+data/main.glade
 doc/
+*.Po
+po/
 
+# Compiled Dynamic libraries
+*.so
+*.so.*
+*.dylib
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+
+# Packages
+*.deb
