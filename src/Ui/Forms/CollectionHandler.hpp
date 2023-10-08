@@ -58,6 +58,19 @@ public:
 	size_t getSize();
 
 	/**
+	 * Refresh a single combobox contents with the collection values.
+	 * @param comboBox the combobox to refresh.
+	 */
+	void refreshComboBox(Gtk::ComboBoxText* comboBox);
+
+	/**
+	 * Refresh a single combobox contents with the collection values.
+	 * @param comboBox the combobox to refresh.
+	 * @param ignoreList if set will ignore any elements in this list.
+	 */
+	void refreshComboBox(Gtk::ComboBoxText* comboBox, const vector<string>& ignoreList);
+
+	/**
 	 * Returns true if the item is registered.
 	 * @param item
 	 * @return
@@ -102,6 +115,10 @@ public:
 	 */
 	void registerDestination(BoxButtonCollection* destination);
 
+	/**
+	 * Register a collection consumer.
+	 * @param destination
+	 */
 	void registerDestination(Gtk::ComboBoxText* destination);
 
 	/**
@@ -110,6 +127,10 @@ public:
 	 */
 	void release(BoxButtonCollection* destination);
 
+	/**
+	 * Removes a collection consumer.
+	 * @param destination
+	 */
 	void release(Gtk::ComboBoxText* destination);
 
 	vector<string>::iterator begin();
@@ -127,14 +148,21 @@ protected:
 	/// List of collection names.
 	vector<string> collection;
 
+	string key;
+
 	/// List of containers.
 	vector<BoxButtonCollection*> destinationGroups;
 
 	/// List of selectors.
-	vector<Gtk::ComboBoxText*> comboboxes;
+	vector<Gtk::ComboBoxText*> destinationComboBoxes;
 
 	/// Keeps collections instances.
 	static unordered_map<string, CollectionHandler*> collections;
+
+	/**
+	 * Sort and populates comboboxes.
+	 */
+	void populateComboboxesSorted();
 
 };
 

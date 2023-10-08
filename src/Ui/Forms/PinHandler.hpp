@@ -41,15 +41,21 @@ public:
 
 	virtual ~PinHandler() = default;
 
-	static PinHandler* getInstance();
+	static void initialize(Glib::RefPtr<Gtk::Builder> const &builder);
 
-	static PinHandler* getInstance(Glib::RefPtr<Gtk::Builder> const &builder);
+	/**
+	 * Returns an instance of PinHandler or null if not initialized.
+	 * @return self
+	 */
+	static PinHandler* getInstance();
 
 	void setCurrentDevicePins(unordered_map<string, string>* pinClasses);
 
 	void reset();
 
 	size_t getSize();
+
+	bool exists(const std::string& pin);
 
 	bool isUsed(const std::string& pin);
 
@@ -63,7 +69,7 @@ protected:
 
 	unordered_map<string, string>* pinClasses = nullptr;
 
-	static PinHandler* ph;
+	static PinHandler* instance;
 };
 
 } /* namespace */

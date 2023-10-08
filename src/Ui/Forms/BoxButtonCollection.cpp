@@ -24,6 +24,10 @@
 
 using namespace LEDSpicerUI::Ui::Forms;
 
+size_t BoxButtonCollection::size() {
+	return items.size();
+}
+
 BoxButton* BoxButtonCollection::add(string type, Form* form) {
 	// Create the button.
 	auto b = new BoxButton(type, form);
@@ -40,9 +44,8 @@ void BoxButtonCollection::remove(BoxButton* item) {
 }
 
 void BoxButtonCollection::remove(const string& name) {
-
 	for (auto b : items)
-		if (b->getForm()->getValue(NAME) == name) {
+		if (b->getForm()->getValue(key) == name) {
 			remove(b);
 			break;
 		}
@@ -50,8 +53,8 @@ void BoxButtonCollection::remove(const string& name) {
 
 void BoxButtonCollection::rename(const string& name, const string& newName) {
 	for (auto b : items) {
-		if (b->getForm()->getValue(NAME) == name) {
-			b->getForm()->setValue(NAME, newName);
+		if (b->getForm()->getValue(key) == name) {
+			b->getForm()->setValue(key, newName);
 			b->updateLabel();
 			break;
 		}

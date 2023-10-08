@@ -41,9 +41,9 @@ public:
 
 	DialogSelectElements() = delete;
 
-	static DialogSelectElements* getInstance();
+	static void initialize(Glib::RefPtr<Gtk::Builder> const &builder);
 
-	static DialogSelectElements* getInstance(Glib::RefPtr<Gtk::Builder> const &builder);
+	static DialogSelectElements* getInstance();
 
 	virtual ~DialogSelectElements() = default;
 
@@ -53,7 +53,7 @@ public:
 
 protected:
 
-	static DialogSelectElements* dse;
+	static DialogSelectElements* instance;
 
 	Gtk::FlowBox* boxAllElements = nullptr;
 

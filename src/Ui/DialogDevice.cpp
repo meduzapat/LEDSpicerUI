@@ -65,11 +65,13 @@ DialogDevice::DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 			return;
 		// Add.
 		if (currentForm) {
+			// Switching devices.
 			delete currentForm;
 			currentForm = nullptr;
 			DialogElement::getInstance()->wipeContents();
 		}
 		if (fields.comboBoxDevices->get_active_id().empty()) {
+			// reset to nothing.
 			BtnAddElement->set_sensitive(false);
 			btnApply->set_sensitive(false);
 		}
@@ -80,32 +82,28 @@ DialogDevice::DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 			currentForm = getForm(rawData);
 		}
 	});
-/*
-		// Sets the device options disable if there is no more available devices of that type.
-		auto model     = comboBoxDevices->get_model();
-		auto children  = model->children();
-		for (auto iter = children.begin(); iter != children.end(); ++iter) {
-			auto child = *iter;
-			string val;
-			child->get_value(0, val);
-			if (val == "") {
-				continue;
-			}
-			child->set_value(2, Forms::Device::isAvailable(val));
-		}
-		if (mode == Forms::Form::Modes::EDIT) {
-			// this prevents the onchange to fail, because device have no access to the combobox.
-			comboBoxDevices->set_active(0);
-			comboBoxDevices->set_active_id(currentForm->getValue(NAME));
-			return;
-		}
-		// completes initialization for add.
-		comboBoxDevices->set_active(0);
-	});*/
+}
+
+string DialogDevice::toXml() {
+	string r(Defaults::tab() + "<devices>\n");
+	Defaults::increaseTab();
+	mode = Forms::Form::Modes::LOAD;
+	for (auto b : items) {
+		// load elements
+		b->getForm()->retrieveData(mode);
+		r += b->toXML(DialogElement::getInstance()->toXml());
+		// unload elements
+		b->getForm()->storeData(mode);
+	}
+	Defaults::reduceTab();
+	return (r + Defaults::tab() + "</devices>\n");
 }
 
 Forms::Form* DialogDevice::getForm(unordered_map<string, string>& rawData) {
-	return new Forms::Device(rawData);
+	if (mode == Forms::Form::Modes::ADD and fields.comboBoxDevices->get_active_id().empty())
+		return nullptr;
+	else
+		return new Forms::Device(rawData);
 }
 
 string DialogDevice::getType() {

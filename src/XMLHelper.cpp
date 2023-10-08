@@ -80,38 +80,14 @@ void XMLHelper::checkAttributes(
 			throw Message("Missing attribute '" + attribute + "' inside " + place);
 }
 
-vector<string> XMLHelper::explode(const string& text, const char delimiter, const size_t limit) {
-
-	vector<string> temp;
-
-	if (text.empty())
-		return temp;
-
-	size_t start = 0, end = 0;
-
-	for (size_t c = 0; limit ? c < limit : true; c++) {
-		end = text.find(delimiter, start);
-		if (end == string::npos) {
-			temp.push_back(text.substr(start));
-			break;
-		}
-		temp.push_back(text.substr(start, end - start));
-		start = end + 1;
-	}
-
-	return temp;
-}
-
-string XMLHelper::implode(const vector<string>& values, const char delimiter) {
-	string r;
-	for (const string& s : values) {
-		r += s + delimiter;
-	}
-	r.resize(r.size() -1);
-	return r;
-}
-
-
 string XMLHelper::valueOf(const unordered_map<string, string>& values, const string& value, string def) {
 	return (values.count(value) ? values.at(value) : def);
 }
+
+string XMLHelper::toXML(const unordered_map<string, string>& values) {
+	string r;
+	for (const auto& v : values)
+		r += Defaults::tab() + v.first + "=\"" + v.second + "\"\n";
+	return r;
+}
+

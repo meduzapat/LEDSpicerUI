@@ -26,15 +26,6 @@
 #ifndef RESTRICTOR_HPP_
 #define RESTRICTOR_HPP_ 1
 
-#define PLAYER               "player"
-#define JOYSTICK             "joystick"
-#define US360_HAS_RESTRICTOR "hasRestrictor"
-#define US360_USE_MOUSE      "handleMouse"
-#define GZ49_WILLIAMS        "williams"
-#define GZ40_SPEED_ON        "speedOn"
-#define GZ40_SPEED_OFF       "speedOff"
-#define GZ40_DEFAULT_SPEED 12
-
 namespace LEDSpicerUI::Ui::Forms {
 
 /**
@@ -45,27 +36,24 @@ class Restrictor : public Form {
 
 public:
 
-	/// Taken from Restrictors.
-	enum class Ways : uint8_t {invalid, w2, w2v, w4, w4x, w8, w16, w49, analog, mouse, rotary8, rotary12};
-
-	struct RestrictorInfo {
-		const string       name;
-		const uint8_t      maxIds;
-		const vector<Ways> ways;
-	};
-
 	struct RestrictorFields {
-		Gtk::ComboBox* comboBoxRestrictors   = nullptr;
-		Gtk::ComboBox* comboBoxId            = nullptr;
-		Gtk::ComboBoxText* player            = nullptr;
-		Gtk::ComboBoxText* joystick          = nullptr;
-		Gtk::CheckButton* williamsMode       = nullptr;
-		Gtk::CheckButton* hasRestrictor      = nullptr;
-		Gtk::CheckButton* handleMouse        = nullptr;
-		Gtk::SpinButton* speedOn             = nullptr;
-		Gtk::SpinButton* speedOff            = nullptr;
-		Gtk::ListStore* restrictorsListstore = nullptr;
-		Gtk::ListStore* idListstore          = nullptr;
+		Gtk::ComboBox
+			* comboBoxRestrictors = nullptr,
+			* comboBoxId          = nullptr;
+		Gtk::ComboBoxText
+			* player   = nullptr,
+			* joystick = nullptr;
+		Gtk::ToggleButton
+			* williamsMode  = nullptr,
+			* hasRestrictor = nullptr,
+			* handleMouse   = nullptr;
+		Gtk::SpinButton
+			* speedOn  = nullptr,
+			* speedOff = nullptr;
+		Gtk::ListStore
+			* restrictorsListstore = nullptr,
+			* idListstore          = nullptr;
+		unordered_map<Defaults::Ways, Gtk::FlowBoxChild*> waysIcons;
 	};
 
 	Restrictor() = delete;
@@ -90,6 +78,8 @@ public:
 
 	virtual const string createName() const;
 
+	virtual void resetForm(Modes mode);
+
 	virtual void isValid(Modes mode);
 
 	virtual void storeData(Modes mode);
@@ -99,6 +89,10 @@ public:
 	virtual void cancelData(Modes mode);
 
 	virtual const string getCssClass() const;
+
+	static bool isDual(const string& name);
+
+	static string getMaps(const string name, const string id, vector<unordered_map<string, string>> data);
 
 protected:
 
@@ -112,10 +106,6 @@ protected:
 	 */
 	static CollectionHandler* restrictors;
 
-	/// A list of restrictor to their information.
-	static const unordered_map<string, RestrictorInfo> restrictorsInfo;
-
-	static bool isDual(const string& name);
 
 	/**
 	 * Due to the GPWiz40RotoX been able to use 2 players this replaces the collection is used.

@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      ProfileDialog.cpp
+ * @file      DialogProfile.cpp
  * @since     Feb 14, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
@@ -20,18 +20,15 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <Ui/DialogProfile.hpp>
+#include "DialogProfile.hpp"
 
 using namespace LEDSpicerUI::Ui;
 
-void DialogProfile::resetFields() {
 
+string DialogProfile::getType() {
+	return "profile";
 }
 
-void DialogProfile::setFields(unordered_map<string, string> parameters) {
-
-}
-
-unordered_map<string, string> DialogProfile::readFields() {
-
+Forms::Form* DialogProfile::getForm(unordered_map<string, string>& rawData) {
+	return new Forms::Profile(rawData);
 }

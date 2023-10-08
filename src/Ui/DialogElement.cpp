@@ -24,16 +24,15 @@
 
 using namespace LEDSpicerUI::Ui;
 
-DialogElement* DialogElement::de = nullptr;
+DialogElement* DialogElement::instance = nullptr;
 
 DialogElement* DialogElement::getInstance() {
-	return de ? de : throw Message("Dialog Elements not initialized.");
+	return instance;
 }
 
-DialogElement* DialogElement::getInstance(Glib::RefPtr<Gtk::Builder> const &builder) {
-	if (not de)
-		builder->get_widget_derived("DialogElement", de);
-	return getInstance();
+void DialogElement::initialize(Glib::RefPtr<Gtk::Builder> const &builder) {
+	if (not instance)
+		builder->get_widget_derived("DialogElement", instance);
 }
 
 DialogElement::DialogElement(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
@@ -79,35 +78,33 @@ DialogElement::DialogElement(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 	builder->get_widget("ComboBoxEN3", ComboBoxEN3);
 	builder->get_widget("ComboBoxEN4", ComboBoxEN4);
 
+	ComboBoxEN1->signal_changed().connect([=]() {
+		ComboBoxEN2->set_sensitive(not ComboBoxEN1->get_active_text().empty());
+	});
+	ComboBoxEN2->signal_changed().connect([=]() {
+		ComboBoxEN3->set_sensitive(not ComboBoxEN2->get_active_text().empty());
+	});
+	ComboBoxEN3->signal_changed().connect([=]() {
+		ComboBoxEN4->set_sensitive(not ComboBoxEN3->get_active_text().empty());
+	});
+
 	btnGenerateElementName->signal_clicked().connect([=]() {
 		ComboBoxEN1->set_active(-1);
 		ComboBoxEN2->set_active(-1);
 		ComboBoxEN3->set_active(-1);
 		ComboBoxEN4->set_active(-1);
+		ComboBoxEN2->set_sensitive(false);
+		ComboBoxEN3->set_sensitive(false);
+		ComboBoxEN4->set_sensitive(false);
 		if (dialogGenerateElementName->run() == Gtk::ResponseType::RESPONSE_APPLY) {
-			fields.InputElementName->set_text(
-				ComboBoxEN1->get_active_id() +
-				ComboBoxEN2->get_active_id() + '_' +
-				ComboBoxEN3->get_active_id() +
-				ComboBoxEN4->get_active_id()
-			);
-			if (ComboBoxEN3->get_active_id() == "JOYSTICK") {
-				fields.InputElementType->set_active_id("2");
+			string name(ComboBoxEN1->get_active_id() + ComboBoxEN2->get_active_id());
+			if (not name.empty()) {
+				if (not ComboBoxEN3->get_active_id().empty())
+					name +=  '_' + ComboBoxEN3->get_active_id() + ComboBoxEN4->get_active_id();
+				fields.InputElementName->set_text(name);
+				fields.InputElementType->set_active_id(Defaults::detectElementType(name));
+				fields.InputElementName->grab_focus();
 			}
-			else if (ComboBoxEN3->get_active_id() == "TRACKBALL") {
-				fields.InputElementType->set_active_id("3");
-			}
-			else if (ComboBoxEN3->get_active_id() == "SPINNER") {
-				fields.InputElementType->set_active_id("4");
-			}
-			else if (
-				ComboBoxEN3->get_active_id() == "BUTTON" or
-				ComboBoxEN3->get_active_id() == "CREDIT" or
-				ComboBoxEN3->get_active_id() == "START"
-			) {
-				fields.InputElementType->set_active_id("1");
-			}
-			fields.InputElementName->grab_focus();
 		}
 		dialogGenerateElementName->hide();
 	});
@@ -129,10 +126,12 @@ DialogElement::DialogElement(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 	});
 
 	// When show up reset the notebook to RGB.
-/*	notebookDevice->signal_show().connect([&, notebookDevice]() {
+	/*
+	notebookDevice->signal_show().connect([&, notebookDevice]() {
 		if (not editMode)
 			notebookDevice->set_current_page(0);
-	});*/
+	});
+	*/
 
 	signal_show().connect([&, notebookDevice]() {
 		// PinHandler is not accepting signal show for some reason do reset here.
@@ -140,11 +139,18 @@ DialogElement::DialogElement(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 		if (mode == Forms::Form::Modes::EDIT) {
 			// If led or solenoid is set, set page 1, 0 for RGB.
 			notebookDevice->set_current_page(not currentForm->getValue(PIN).empty() or not currentForm->getValue(SOLENOID).empty());
-			return;
 		}
-		unordered_map<string, string> rd;
-		currentForm = getForm(rd);
 	});
+}
+
+string DialogElement::toXml() {
+	Defaults::increaseTab();
+	string r;
+	for (auto b : items) {
+		r += b->toXML("");
+	}
+	Defaults::reduceTab();
+	return r;
 }
 
 string DialogElement::getType() {

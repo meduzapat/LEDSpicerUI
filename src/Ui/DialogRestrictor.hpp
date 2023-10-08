@@ -42,6 +42,8 @@ public:
 
 	virtual ~DialogRestrictor() = default;
 
+	string toXml();
+
 protected:
 
 	Forms::Restrictor::RestrictorFields fields;

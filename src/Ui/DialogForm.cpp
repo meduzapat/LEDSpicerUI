@@ -20,7 +20,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <Ui/DialogForm.hpp>
+#include "DialogForm.hpp"
 
 using namespace LEDSpicerUI::Ui;
 
@@ -42,16 +42,29 @@ string DialogForm::toXml() {
 	return r;
 }
 
-Forms::BoxButtonCollection* DialogForm::createItems(vector<unordered_map<string, string>>& rawCollection, bool wipe) {
+vector<Forms::BoxButton*> DialogForm::createItems(vector<unordered_map<string, string>>& rawCollection, bool wipe) {
+	mode = Forms::Form::Modes::LOAD;
+	vector<Forms::BoxButton*> created;
+	string errors;
 	if (wipe)
 		wipeContents();
 	for (auto& rawItem : rawCollection) {
-		auto b = items.add(getType(), getForm(rawItem));
+		Forms::BoxButton* b;
+		try {
+			b = items.add(getType(), getForm(rawItem));
+			created.push_back(b);
+		}
+		catch (Message& e) {
+			errors += e.getMessage();
+			continue;
+		}
 		setSignals(b);
 		box->add(*b);
 	}
+	if (not errors.empty())
+		Message::displayError("Errors:\n" + errors);
 	box->show_all();
-	return &items;
+	return created;
 }
 
 void DialogForm::createItems(vector<unordered_map<string, string>>& rawCollection, Forms::BoxButton* owner, bool wipe) {
@@ -82,6 +95,10 @@ vector<const unordered_map<string, string>*> DialogForm::getValues() {
 	for (auto b : items)
 		values.push_back(b->getForm()->getValues());
 	return values;
+}
+
+void DialogForm::setSignalAdd() {
+	btnAdd->signal_clicked().connect(sigc::mem_fun(*this, &DialogForm::onAddClicked));
 }
 
 void DialogForm::setSignalApply() {
@@ -118,8 +135,12 @@ void DialogForm::onAddClicked() {
 	// Set label and title.
 	set_title("Add New " + getType());
 	btnApply->set_label("Create");
+	unordered_map<string, string> rawData;
+	currentForm = getForm(rawData);
 	// Run Dialog.
 	if (run() == Gtk::ResponseType::RESPONSE_APPLY) {
+		// NOTE this can be moved into the after create of the dialog to be more precise.
+		Defaults::markDirty();
 		currentForm->storeData(mode);
 		// store.
 		auto bPtr = items.add(getType(), currentForm);
@@ -147,6 +168,8 @@ void DialogForm::onEditClicked(Forms::BoxButton* boxButton) {
 	// populate form.
 	currentForm->retrieveData(mode);
 	if (run() == Gtk::RESPONSE_APPLY) {
+		// NOTE this can be moved into the after edit of the dialog to be more precise.
+		Defaults::markDirty();
 		afterEdit(boxButton);
 		// store data.
 		currentForm->storeData(mode);
@@ -161,6 +184,8 @@ void DialogForm::onEditClicked(Forms::BoxButton* boxButton) {
 
 void DialogForm::onDelClicked(Forms::BoxButton* boxButton) {
 	afterDeleteConfirmation(boxButton);
+	// NOTE this can be moved into the after delete of the dialog to be more precise.
+	Defaults::markDirty();
 	box->remove(*boxButton);
 	items.remove(boxButton);
 }

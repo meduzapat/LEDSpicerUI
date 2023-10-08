@@ -94,6 +94,10 @@ public:
 	 */
 	Form* getForm();
 
+	/**
+	 * Return the Form
+	 * @return
+	 */
 	const Form* getForm() const;
 
 	/**

@@ -38,9 +38,8 @@ const string Form::createName() const {
 
 string Form::toXML() {
 	string r;
-	for (const auto& v : fieldsData) {
-		r += v.first + "=\"" + v.second + "\" ";
-	}
+	for (const auto& v : fieldsData)
+		r += Defaults::tab() + v.first + "=\"" + v.second + "\"\n";
 	return r;
 }
 

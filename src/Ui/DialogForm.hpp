@@ -44,15 +44,15 @@ public:
 
 	virtual ~DialogForm();
 
-	string toXml();
+	virtual string toXml();
 
 	/**
 	 * Creates items from raw data and returns a pointer to the new created items.
 	 * @param rawCollection
 	 * @param wipe set to true to clean before import.
-	 * @returns a pointer to the populated list.
+	 * @returns a vector with references to the created items.
 	 */
-	Forms::BoxButtonCollection* createItems(vector<unordered_map<string, string>>& rawCollection, bool wipe);
+	vector<Forms::BoxButton*> createItems(vector<unordered_map<string, string>>& rawCollection, bool wipe);
 
 	/**
 	 * Creates items from raw data and send them to its owner.
@@ -119,7 +119,12 @@ protected:
 	virtual Forms::Form* getForm(unordered_map<string, string>& rawData) = 0;
 
 	/**
-	 * Functio to add generic Apply functionality.
+	 * Method to add generic Add functionality.
+	 */
+	void setSignalAdd();
+
+	/**
+	 * Method to add generic Apply functionality.
 	 */
 	virtual void setSignalApply();
 

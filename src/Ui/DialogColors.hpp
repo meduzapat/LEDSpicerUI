@@ -79,6 +79,19 @@ public:
 	 */
 	void resetColorButtons();
 
+	/**
+	 * Fills a flow box with color buttons that can be removed.
+	 * @param destination
+	 * @param colors
+	 */
+	void populateColorBox(Gtk::FlowBox* destination, const vector<string>& colors);
+
+	/**
+	 * @param destination
+	 * @return A list of colors from inside a flowbox.
+	 */
+	vector<string> getColorBoxValues(Gtk::FlowBox* destination);
+
 protected:
 
 	DialogColors(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &builder);
@@ -119,6 +132,13 @@ protected:
 	 * @return a CCS string representing the new color set.
 	 */
 	string setColors(unordered_map<string, string>& colors);
+
+	/**
+	 * Creates a deletiable button with the desired color.
+	 * @param destination
+	 * @param color
+	 */
+	void createColorButton(Gtk::FlowBox* destination, const string& color);
 
 };
 

@@ -25,41 +25,19 @@
 using namespace LEDSpicerUI::Ui::Forms;
 
 Restrictor::RestrictorFields* Restrictor::fields = nullptr;
-
-CollectionHandler* Restrictor::restrictors = nullptr;
-
-const unordered_map<string, Restrictor::RestrictorInfo> Restrictor::restrictorsInfo = {
-//        ID                        NAME
-	{"UltraStik360", {"Ultimarc UltraStik360",         4, {Ways::w2, Ways::w2v, Ways::w4, Ways::w4x, Ways::w8, Ways::w16, Ways::w49, Ways::analog, Ways::mouse}}},
-	{"ServoStik",    {"Ultimarc ServoStik",            4, {Ways::w4, Ways::w8}}},
-	{"GPWiz40RotoX", {"Groovy Game Gear GPWiz40RotoX", 4, {Ways::rotary8, Ways::rotary12}}},
-	{"GPWiz49",      {"Groovy Game Gear GPWiz49",      4, {Ways::w2, Ways::w2v, Ways::w4, Ways::w4x, Ways::w8, Ways::w16, Ways::w49, Ways::analog, Ways::mouse}}},
-};
+CollectionHandler* Restrictor::restrictors       = nullptr;
 
 Restrictor::Restrictor(unordered_map<string, string>& data) :
 	Form(data)
 {
 	// Check load.
 	if (not fieldsData.empty()) {
-		retrieveData(Forms::Form::Modes::LOAD);
-		isValid(Forms::Form::Modes::LOAD);
-		storeData(Forms::Form::Modes::LOAD);
-		restrictors->add(createName());
+		retrieveData(Modes::LOAD);
+		isValid(Modes::LOAD);
+		storeData(Modes::LOAD);
 		return;
 	}
-
-	// Restrictors are created after a valid restrictor name is selected.
-	fieldsData[NAME] = fields->comboBoxRestrictors->get_active_id();
-	processIdComboBox();
-	fields->comboBoxRestrictors->set_sensitive(true);
-	fields->comboBoxId->set_active_id("");
-	fields->player->set_active(0);
-	fields->joystick->set_active(0);
-	fields->hasRestrictor->set_active(false);
-	fields->handleMouse->set_active(false);
-	fields->williamsMode->set_active(false);
-	fields->speedOn->set_value(GZ40_DEFAULT_SPEED);
-	fields->speedOff->set_value(GZ40_DEFAULT_SPEED);
+	resetForm(Modes::ADD);
 }
 
 Restrictor::~Restrictor() {
@@ -80,7 +58,7 @@ void Restrictor::initialize(RestrictorFields* fields) {
 	row.set_value(0, string());
 	row.set_value(1, string("Select Restrictor"));
 	row.set_value(2, false);
-	for (auto& d : restrictorsInfo) {
+	for (auto& d : Defaults::restrictorsInfo) {
 		row = *(fields->restrictorsListstore->append());
 		row.set_value(0, d.first);
 		row.set_value(1, d.second.name);
@@ -104,6 +82,8 @@ void Restrictor::initialize(RestrictorFields* fields) {
 		fields->comboBoxId->set_sensitive(false);
 		fields->player->set_sensitive(false);
 		fields->joystick->set_sensitive(false);
+		for (auto& w : Defaults::allWays)
+			fields->waysIcons.at(w)->set_visible(false);
 		if (name.empty())
 			return;
 		fields->comboBoxId->set_sensitive(true);
@@ -115,11 +95,13 @@ void Restrictor::initialize(RestrictorFields* fields) {
 			fields->williamsMode->show();
 		if (name == "GPWiz40RotoX")
 			fields->speedOn->get_parent()->get_parent()->show();
+		for (auto& w : Defaults::restrictorsInfo.at(name).ways)
+			fields->waysIcons.at(w)->set_visible(true);
 	});
 }
 
 string const Restrictor::createPrettyName() const {
-	return restrictorsInfo.at(fieldsData.at(NAME)).name +
+	return Defaults::restrictorsInfo.at(fieldsData.at(NAME)).name +
 		" Id: " + fieldsData.at(ID) +
 		" P" + fieldsData.at(PLAYER) +
 		" J" + fieldsData.at(JOYSTICK);
@@ -128,6 +110,23 @@ string const Restrictor::createPrettyName() const {
 string const Restrictor::createName() const {
 	string extra(isDual(fieldsData.at(NAME)) ?  '-' + fieldsData.at(PLAYER) + '_' + fieldsData.at(JOYSTICK) : "");
 	return fieldsData.at(NAME) + "_" + fieldsData.at(ID) + extra;
+}
+
+void Restrictor::resetForm(Modes mode) {
+	if (mode == Modes::ADD) {
+		// Restrictors are created after a valid restrictor name is selected.
+		fieldsData[NAME] = fields->comboBoxRestrictors->get_active_id();
+		processIdComboBox();
+		fields->comboBoxRestrictors->set_sensitive(true);
+		fields->comboBoxId->set_active_id("");
+		fields->player->set_active(0);
+		fields->joystick->set_active(0);
+		fields->hasRestrictor->set_active(false);
+		fields->handleMouse->set_active(false);
+		fields->williamsMode->set_active(false);
+		fields->speedOn->set_value(GZ40_DEFAULT_SPEED);
+		fields->speedOff->set_value(GZ40_DEFAULT_SPEED);
+	}
 }
 
 void Restrictor::isValid(Modes mode) {
@@ -140,15 +139,15 @@ void Restrictor::isValid(Modes mode) {
 		nameId(name + "_" + id);
 
 	if (name.empty())
-		throw Message("Select a valid restrictor");
+		throw Message("Invalid restrictor\n");
 
 	if (id.empty())
-		throw Message("Select a valid restrictor number");
+		throw Message("Invalid restrictor number\n");
 
 	if (player == "0")
-		throw Message("Select a valid player number");
+		throw Message("Invalid player number\n");
 	if (joystick == "0")
-		throw Message("Select a valid joystick number");
+		throw Message("Invalid joystick number\n");
 
 	// Dual restrictors need extra check.
 	if (isDual(name)) {
@@ -159,7 +158,7 @@ void Restrictor::isValid(Modes mode) {
 	}
 	// Is imposible to duplicate restrictors because the selectors gets disable but LOAD and dual can.
 	if ((mode == Modes::LOAD or isDual(name)) and restrictors->isUsed(nameId))
-		throw Message("Restrictor " + restrictorsInfo.at(name).name + " ID " + id + " already exists");
+		throw Message("Restrictor " + Defaults::restrictorsInfo.at(name).name + " ID " + id + " already exists\n");
 }
 
 void Restrictor::storeData(Modes mode) {
@@ -168,6 +167,9 @@ void Restrictor::storeData(Modes mode) {
 		newId = fields->comboBoxId->get_active_id(),
 		// only for edit:
 		oldId = mode == Modes::EDIT ? createName() : "";
+
+	// This will clean any anomaly.
+	fieldsData.clear();
 
 	fieldsData[NAME] = name;
 	fieldsData[ID]   = newId;
@@ -188,11 +190,12 @@ void Restrictor::storeData(Modes mode) {
 		fieldsData[GZ49_WILLIAMS] = fields->williamsMode->get_active() ? "true" : "false";
 	}
 	else if (name == "GPWiz40RotoX") {
-		fieldsData[GZ40_SPEED_ON]  = std::to_string(fields->speedOn->get_value());
-		fieldsData[GZ40_SPEED_OFF] = std::to_string(fields->speedOff->get_value());
+		fieldsData[GZ40_SPEED_ON]  = std::to_string(static_cast<uint8_t>(fields->speedOn->get_value()));
+		fieldsData[GZ40_SPEED_OFF] = std::to_string(static_cast<uint8_t>(fields->speedOff->get_value()));
 	}
 
 	markRestrictorUsed();
+	resetForm(mode);
 }
 
 void Restrictor::retrieveData(Modes mode) {
@@ -214,12 +217,12 @@ void Restrictor::retrieveData(Modes mode) {
 	}
 	else if (fieldsData[NAME] == "GPWiz40RotoX") {
 		fields->speedOn->set_value(fieldsData.count(GZ40_SPEED_ON) ? std::stod(fieldsData.at(GZ40_SPEED_ON)) : GZ40_DEFAULT_SPEED);
-		fields->speedOn->set_value(fieldsData.count(GZ40_SPEED_OFF) ? std::stod(fieldsData.at(GZ40_SPEED_OFF)) : GZ40_DEFAULT_SPEED);
+		fields->speedOff->set_value(fieldsData.count(GZ40_SPEED_OFF) ? std::stod(fieldsData.at(GZ40_SPEED_OFF)) : GZ40_DEFAULT_SPEED);
 	}
 }
 
 void Restrictor::cancelData(Modes mode) {
-
+	resetForm(mode);
 }
 
 string const Restrictor::getCssClass() const {
@@ -254,7 +257,7 @@ void Restrictor::processIdComboBox() {
 	row.set_value(0, string());
 	row.set_value(1, string("Select Device Number"));
 	row.set_value(2, false);
-	for (int c = 0; c < restrictorsInfo.at(name).maxIds; ++c) {
+	for (int c = 0; c < Defaults::restrictorsInfo.at(name).maxIds; ++c) {
 		auto row = *(fields->idListstore->append());
 		auto id(std::to_string(c + 1));
 		row.set_value(0, id);
@@ -264,7 +267,7 @@ void Restrictor::processIdComboBox() {
 }
 
 void Restrictor::markRestrictorUsed() {
-	for (auto& ri : restrictorsInfo) {
+	for (auto& ri : Defaults::restrictorsInfo) {
 		// count used devices.
 		int total = restrictors->count(ri.first);
 		// duales
@@ -282,9 +285,4 @@ void Restrictor::markRestrictorUsed() {
 			}
 		}
 	}
-	/*
-	 // Mark new Id used
-	auto a = idComboBox->get_active();
-	a->set_value(2, false);
-	 */
 }

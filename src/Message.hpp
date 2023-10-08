@@ -20,44 +20,11 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <gtkmm.h>
-
-#include <unordered_map>
-using std::unordered_map;
-
-#include <vector>
-using std::vector;
-
-#include <string>
-using std::string;
-
-// Compiler settings.
-#include "config.h"
+#include "Defaults.hpp"
 
 #ifndef MESSAGE_HPP_
 #define MESSAGE_HPP_ 1
 
-#define NAME      "name"
-#define ID        "boardId"
-
-#define PIN       "led"
-#define RED_PIN   "red"
-#define GREEN_PIN "green"
-#define BLUE_PIN  "blue"
-#define SOLENOID  "solenoid"
-#define TIME_ON   "timeOn"
-
-#define DEFAULT_COLOR  "defaultColor"
-#define DEFAULT_SOLENOID 50
-
-#define PIN_COLOR      "pin_white"
-#define SOLENOID_COLOR "pin_solenoid"
-#define RED_COLOR      "pin_red"
-#define GREEN_COLOR    "pin_green"
-#define BLUE_COLOR     "pin_blue"
-#define NO_COLOR       ""
-
-#define DEFAULT_ELEMENT_TYPE "9"
 namespace LEDSpicerUI {
 
 /**
@@ -117,29 +84,6 @@ public:
 	 * @return
 	 */
 	string getMessage();
-
-	/**
-	 * Check if a string stores a numeric value
-	 * @param number
-	 * @return true if the content is a number
-	 */
-	static bool isNumber(const string& number);
-
-	/**
-	 * Check if a string number is between two values (inclusive)
-	 * @param number
-	 * @param low
-	 * @param hight
-	 * @return
-	 */
-	static bool isBetween(const string& number, int low, int hight);
-
-	/**
-	 * Returns the color luminance.
-	 * @param color
-	 * @return
-	 */
-	static double getLiminance(const string& color);
 
 protected:
 

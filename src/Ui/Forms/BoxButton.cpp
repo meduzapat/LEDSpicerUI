@@ -41,7 +41,12 @@ BoxButton::BoxButton(
 	set_margin_left(2);
 	set_margin_right(2);
 
-	pack_start(*label, Gtk::PACK_EXPAND_WIDGET);
+	Gtk::HBox* lbox(Gtk::make_managed<Gtk::HBox>());
+	label->set_margin_left(5);
+	label->set_margin_right(5);
+	label->set_halign(Gtk::ALIGN_START);
+	lbox->pack_start(*label, Gtk::PACK_EXPAND_WIDGET);
+	pack_start(*lbox, Gtk::PACK_EXPAND_WIDGET);
 
 	if (form->canEdit()) {
 		btnE->set_image_from_icon_name("applications-engineering", Gtk::ICON_SIZE_BUTTON);
@@ -75,11 +80,16 @@ void BoxButton::setDelFn(std::function<void()> delCallback) {
 }
 
 string BoxButton::toXML(const string& contents) const {
-	string r("<" + type + " " + form->toXML());
+	string r(Defaults::tab() + "<" + type);
+	Defaults::increaseTab();
+	string x(form->toXML());
+	Defaults::reduceTab();
+	if (x.size())
+		r += '\n' + x;
 	if (contents.empty())
-		r +=  "/>";
+		r += Defaults::tab() + "/>\n";
 	else
-		r += ">" + contents + "</" + type + ">";
+		r += Defaults::tab() + ">\n" + contents + Defaults::tab() + "</" + type + ">\n";
 	return r;
 }
 

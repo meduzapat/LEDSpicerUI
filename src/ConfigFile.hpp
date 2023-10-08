@@ -38,28 +38,13 @@ public:
 
 	ConfigFile(const string& ledspicerconf);
 
-	const vector<string> elementTypes{
-		"",
-		"button",
-		"joystick",
-		"trackball",
-		"spinner",
-		"credit",
-		"light",
-		"bar",
-		"knocker"
-		"misc"
-	};
-
 	virtual ~ConfigFile() = default;
 
 	unordered_map<string, string> getSettings();
 
-	vector<string>& getDevicesList();
-
-	vector<string>& getElementsList();
-
 	vector<unordered_map<string, string>>& getDevices();
+
+	vector<unordered_map<string, string>>& getRestrictors();
 
 	vector<unordered_map<string, string>>& getDeviceElements(const string& deviceName);
 
@@ -67,21 +52,23 @@ public:
 
 	vector<unordered_map<string, string>>& getGroupElements(const string& groupName);
 
+	vector<unordered_map<string, string>>& getProcess();
+
 	string getDefaultProfile();
 
-	string detectElementType(const Glib::ustring& name);
+	string getProcessLookupRunEvery();
 
 protected:
 
 	string defaultProfile;
 
-	vector<string> allDevices;
-
-	vector<string> allElements;
+	string processLookupRunEvery;
 
 	unordered_map<string, string> nodeSettings;
 
 	vector<unordered_map<string, string>> devices;
+
+	vector<unordered_map<string, string>> restrictors;
 
 	unordered_map<string, vector<unordered_map<string, string>>> devicesElements;
 
@@ -89,7 +76,13 @@ protected:
 
 	unordered_map<string, vector<unordered_map<string, string>>> groupElements;
 
+	vector<unordered_map<string, string>> process;
+
 	string processDevices();
+
+	string processRestrictors();
+
+	string processProcessLookup();
 
 	string processElements(tinyxml2::XMLElement* deviceNode, const string& deviceName);
 

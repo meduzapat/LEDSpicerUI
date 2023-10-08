@@ -26,7 +26,7 @@ using namespace LEDSpicerUI::Ui::Forms;
 
 void NameOnly::isValid(Modes mode) {
 	if (fieldsData[NAME].empty())
-		throw Message("Select a valid name");
+		throw Message("Invalid name\n");
 }
 
 const string NameOnly::createPrettyName() const {

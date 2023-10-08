@@ -20,13 +20,13 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "DialogForm.hpp"
+#include "Forms/Input.hpp"
+
 #ifndef UI_DIALOGINPUT_HPP_
 #define UI_DIALOGINPUT_HPP_ 1
 
-#include "DialogForm.hpp"
-
-namespace LEDSpicerUI {
-namespace Ui {
+namespace LEDSpicerUI::Ui {
 
 /**
  * LEDSpicerUI::Ui::DialogInput
@@ -36,19 +36,20 @@ class DialogInput: public DialogForm {
 
 public:
 
-	using DialogForm::DialogForm;
+	DialogInput() = delete;
+
+	DialogInput(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
 
 	virtual ~DialogInput() = default;
 
-	void resetFields();
+protected:
 
-	void setFields(unordered_map<string, string> parameters);
+	virtual string getType();
 
-	unordered_map<string, string> readFields();
+	virtual Forms::Form* getForm(unordered_map<string, string>& rawData);
 
 };
 
-} /* namespace Ui */
-} /* namespace LEDSpicerUI */
+} /* namespace */
 
 #endif /* UI_DIALOGINPUT_HPP_ */

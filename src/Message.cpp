@@ -60,35 +60,8 @@ string Message::getMessage() {
 	return std::move(error);
 }
 
-bool Message::isNumber(const string& number) {
-	for (char const &ch : number) {
-		if (not std::isdigit(ch))
-			return false;
-	}
-	return true;
-}
-
-bool Message::isBetween(const string& number, int low, int hight) {
-	if (not isNumber(number))
-		return false;
-	int n = std::stoi(number);
-	if (hight == -1)
-		return (n >= low);
-	return (n >= low and n <= hight);
-}
-
-double Message::getLiminance(const string& color) {
-	Gdk::Color c("#" + color);
-	double r = c.get_red_p() * 255;
-	double g = c.get_green_p() * 255;
-	double b = c.get_blue_p() * 255;
-	return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-}
-
 int Message::handleDialog(const string& message, Gtk::MessageDialog* dialog, Gtk::Window* transient) {
-	if (transient)
-		dialog->set_transient_for(transient ? *transient : *main);
-
+	dialog->set_transient_for(transient ? *transient : *main);
 	dialog->set_secondary_text(message);
 	int r = dialog->run();
 	dialog->hide();

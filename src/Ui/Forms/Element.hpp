@@ -50,7 +50,7 @@ public:
 			* pinB = nullptr,
 		// onTime
 			* timeOn = nullptr;
-		Gtk::CheckButton* solenoid = nullptr;
+		Gtk::ToggleButton* solenoid = nullptr;
 		Gtk::Button* InputDefaultColor = nullptr;
 		// Only used by the UI
 		Gtk::ComboBoxText* InputElementType = nullptr;
@@ -62,7 +62,7 @@ public:
 
 	static void initialize(ElementFields* fields);
 
-	virtual const string createPrettyName() const;
+	virtual void resetForm(Modes mode);
 
 	virtual void isValid(Modes mode);
 
@@ -70,7 +70,9 @@ public:
 
 	virtual void retrieveData(Modes mode);
 
-	virtual void cancelData(Modes mode);
+	virtual void cancelData(Modes mode) {}
+
+	virtual const string createPrettyName() const;
 
 	virtual const string getCssClass() const;
 
@@ -82,7 +84,7 @@ protected:
 	static ElementFields* fields;
 
 	/// Reference to element handler.
-	static CollectionHandler* ElementHandler;
+	static CollectionHandler* elementHandler;
 
 	/// Clean up used pins.
 	void unmarkMyPins();

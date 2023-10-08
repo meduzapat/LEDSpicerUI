@@ -42,6 +42,8 @@ public:
 
 	virtual ~NameOnly() = default;
 
+	virtual void resetForm(Modes mode) {}
+
 	virtual void isValid(Modes mode);
 
 	virtual void storeData(Modes mode) {}

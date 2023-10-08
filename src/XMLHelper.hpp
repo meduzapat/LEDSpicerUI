@@ -26,9 +26,6 @@
 #ifndef XMLHELPER_HPP_
 #define XMLHELPER_HPP_ 1
 
-#define CONFIG_FILE PACKAGE_CONF_DIR PACKAGE ".conf"
-#define XML_FILE_FOREIGN ""
-
 namespace LEDSpicerUI {
 
 /**
@@ -87,28 +84,6 @@ public:
 	);
 
 	/**
-	 * Explodes a string into chunks using a delimiter.
-	 *
-	 * @param text
-	 * @param delimiter
-	 * @param limit
-	 * @return an array with the string chunks.
-	 */
-	static vector<string> explode(
-		const string& text,
-		const char delimiter,
-		const size_t limit = 0
-	);
-
-	/**
-	 * Merge an array into a string using a delimiter.
-	 * @param values
-	 * @param delimiter
-	 * @return
-	 */
-	static string implode(const vector<string>& values, const char delimiter);
-
-	/**
 	 * Return the value from the map or empty string.
 	 * @param values
 	 * @param value
@@ -119,6 +94,13 @@ public:
 		const string& value,
 		string def = ""
 	);
+
+	/**
+	 * Converts a map into xml string.
+	 * @param values
+	 * @return
+	 */
+	static string toXML(const unordered_map<string, string>& values);
 
 protected:
 

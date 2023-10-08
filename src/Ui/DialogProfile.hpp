@@ -20,13 +20,12 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "DialogForm.hpp"
+
 #ifndef UI_DIALOGPROFILE_HPP_
 #define UI_DIALOGPROFILE_HPP_ 1
 
-#include "DialogForm.hpp"
-
-namespace LEDSpicerUI {
-namespace Ui {
+namespace LEDSpicerUI::Ui {
 
 /**
  * LEDSpicerUI::Ui::DialogProfile
@@ -40,15 +39,14 @@ public:
 
 	virtual ~DialogProfile() = default;
 
-	void resetFields();
+protected:
 
-	void setFields(unordered_map<string, string> parameters);
+	virtual string getType();
 
-	unordered_map<string, string> readFields();
+	virtual Forms::Form* getForm(unordered_map<string, string>& rawData);
 
 };
 
-} /* namespace Ui */
-} /* namespace LEDSpicerUI */
+} /* namespace */
 
 #endif /* UI_DIALOGPROFILE_HPP_ */

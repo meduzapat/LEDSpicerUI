@@ -50,6 +50,8 @@ public:
 
 	static void initialize(GroupFields& groupFields);
 
+	virtual void resetForm(Modes mode);
+
 	virtual void isValid(Modes mode);
 
 	virtual void storeData(Modes mode);
@@ -64,13 +66,11 @@ protected:
 
 	static GroupFields groupFields;
 
-	static DialogSelectElements* dialogSelectElements;
+	static CollectionHandler
+		* groupHandler,
+		* elementHandler;
 
-	static CollectionHandler* groupHandler;
-
-	static CollectionHandler* elementHandler;
-
-	Forms::BoxButtonCollection elements;
+	BoxButtonCollection elements;
 
 	virtual void onActivate();
 

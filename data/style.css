@@ -10,6 +10,10 @@ combobox.noRoundRight button.combo,
 	border-bottom-right-radius: 0;
 }
 
+.formContainer button.toggle:checked {
+  background: #359021;
+}
+
 .backgroundGreen {
 	background: #008000;
 }
@@ -35,7 +39,7 @@ combobox.noRoundRight button.combo,
 
 .Random {
 	background: linear-gradient(90deg, rgba(255,0,0,1) 0%, rgba(255,251,0,1) 21%, rgba(0,250,2,1) 52%, rgba(0,0,255,1) 79%, rgba(237,0,255,1) 100%);
-	color: #FFF;
+	color: #000;
 }
 
 .pin_white {
@@ -69,32 +73,36 @@ combobox.noRoundRight button.combo,
 	padding:             5px 2px;
 }
 
-.BoxButton label {
+.BoxButton > box {
 	background: rgba(0,0,0,0.75);
-	color:      white;
+}
+
+.BoxButton > box > label {
+	color: white;
 }
 
 .DeviceBoxButton {
-	background:          #26a269;
 	background-image:    url("images/deviceButtonBackground.png");
 	border-color:        #35751a;
 }
 
 .RestrictorBoxButton {
-	background:          #1a5fb4;
 	background-image:    url("images/restrictorButtonBackground.png");
 	border-color:        #62a0ea;
 }
 
 .ElementBoxButton {
-	background:          #613583;
 	background-image:    url("images/elementButtonBackground.png");
-	border-color:        #9141ac;
+	border-color:        #3584e4;
 }
 
 .GroupBoxButton {
-	background:          #e5a50a;
 	background-image:    url("images/groupButtonBackground.png");
 	border-color:        #f9f06b;
+}
+
+.ProcessBoxButton {
+	background-image:    url("images/processButtonBackground.png");
+	border-color:        #99c1f1;
 }
 

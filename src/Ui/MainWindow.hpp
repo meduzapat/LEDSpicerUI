@@ -23,10 +23,22 @@
 #ifndef MAINWINDOW_HPP_
 #define MAINWINDOW_HPP_ 1
 
+#include "DialogImport.hpp"
 #include "DialogDevice.hpp"
 #include "DialogRestrictor.hpp"
+#include "DialogProcess.hpp"
 #include "DialogGroup.hpp"
+#include "DialogInput.hpp"
 #include "XMLHelper.hpp"
+#include "OrdenableListBox.hpp"
+
+// for file and dir stats
+#include <sys/stat.h>
+#include <sys/types.h>
+
+// for file accessing.
+#include <iostream>
+#include <fstream>
 
 namespace LEDSpicerUI::Ui {
 
@@ -47,18 +59,16 @@ protected:
 		dataDirectory,
 		workingDirectory;
 
-	static bool dirty;
-
-	Gtk::HeaderBar* header = nullptr;
-
-	Gtk::FileChooserDialog* dds = nullptr;
+	DialogImport dic;
+	Gtk::FileChooserDialog dds;
 
 	Gtk::Entry
 		* InputUserId     = nullptr,
 		* InputGroupId    = nullptr,
-		* InputPortNumber = nullptr;
+		* InputPortNumber = nullptr,
+		* InputRunEvery   = nullptr;
 
-	Gtk::CheckButton
+	Gtk::ToggleButton
 		* InputCraftProfiles = nullptr,
 		* InputColorsFile    = nullptr;
 
@@ -68,14 +78,17 @@ protected:
 		* InputColors   = nullptr,
 		* InputLogLevel = nullptr;
 
-	Gtk::Button * btnSaveProject = nullptr;
+	OrdenableListBox* ListBoxDataSource = nullptr;
 
-	Gtk::ListBox* ListBoxDataSource = nullptr;
 
 	// keep this dialogs only to clean up.
-	DialogGroup*      dg  = nullptr;
-	DialogDevice*     dd  = nullptr;
-	DialogRestrictor* dr  = nullptr;
+	DialogDevice*     dd = nullptr;
+	DialogRestrictor* dr = nullptr;
+	DialogProcess*    dp = nullptr;
+	DialogGroup*      dg = nullptr;
+	DialogInput*      di = nullptr;
+
+	Gtk::FlowBox* boxRandomColors = nullptr;
 
 	/**
 	 * Process the selected data directory.
@@ -92,7 +105,13 @@ protected:
 	void setConfiguration(unordered_map<string, string>& values);
 
 	/**
+	 * @return a XML string with the configuration.
+	 */
+	string readConfiguration();
+
+	/**
 	 * Process the selected working directory.
+	 * @param builder
 	 */
 	void prepareWorkingDirectory(Glib::RefPtr<Gtk::Builder> const &builder);
 
@@ -103,7 +122,7 @@ protected:
 	 * @return the conf data.
 	 * @throws LEDSpicerUI::Message
 	 */
-	unordered_map<string, string> import(const string& ledspicerconf, bool wipe);
+	void import(const string& ledspicerconf, bool wipe, uint8_t importFlags);
 
 	/**
 	 * Sets the color file.
@@ -111,17 +130,6 @@ protected:
 	 * @throws Message
 	 */
 	void setColorFile(const string& colorFile);
-
-	/**
-	 * Returns true if changes are unsaved
-	 * @return
-	 */
-	bool isDirty();
-
-	/**
-	 * Sets the header info.
-	 */
-	void setHeader();
 
 };
 

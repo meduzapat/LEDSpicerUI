@@ -37,18 +37,19 @@ class DialogElement: public DialogForm {
 
 public:
 
-	static DialogElement* getInstance();
+	static void initialize(Glib::RefPtr<Gtk::Builder> const &builder);
 
-	static DialogElement* getInstance(Glib::RefPtr<Gtk::Builder> const &builder);
+	static DialogElement* getInstance();
 
 	DialogElement() = delete;
 
-
 	virtual ~DialogElement() = default;
+
+	virtual string toXml();
 
 protected:
 
-	static DialogElement* de;
+	static DialogElement* instance;
 
 	DialogElement(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
 

@@ -47,7 +47,7 @@ OrdenableFlowBox::OrdenableFlowBox(
 		}
 		int index = get_selected_children().at(0)->get_index();
 		btnUp->set_sensitive(index);
-		btnDn->set_sensitive(index != get_children().size() - 1);
+		btnDn->set_sensitive(index != getSize() - 1);
 	});
 
 	btnUp->signal_clicked().connect([=]() {
@@ -57,6 +57,7 @@ OrdenableFlowBox::OrdenableFlowBox(
 		insert(*selectedChild, index - 1);
 		unselect_all();
 		select_child(*selectedChild);
+		Defaults::markDirty();
 	});
 
 	btnDn->signal_clicked().connect([=]() {
@@ -66,6 +67,7 @@ OrdenableFlowBox::OrdenableFlowBox(
 		insert(*selectedChild, index + 1);
 		unselect_all();
 		select_child(*selectedChild);
+		Defaults::markDirty();
 	});
 }
 

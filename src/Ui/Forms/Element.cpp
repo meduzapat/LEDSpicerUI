@@ -26,22 +26,21 @@ using namespace LEDSpicerUI::Ui::Forms;
 
 PinHandler* Element::pinLayout             = nullptr;
 Element::ElementFields* Element::fields    = nullptr;
-CollectionHandler* Element::ElementHandler = nullptr;
+CollectionHandler* Element::elementHandler = nullptr;
 
 Element::Element(unordered_map<string, string>& data) : Form(data) {
 	if (not fieldsData.empty()) {
-		retrieveData(Forms::Form::Modes::LOAD);
-		isValid(Forms::Form::Modes::LOAD);
-		storeData(Forms::Form::Modes::LOAD);
-		ElementHandler->add(fieldsData[NAME]);
+		retrieveData(Modes::LOAD);
+		isValid(Modes::LOAD);
+		storeData(Modes::LOAD);
 		return;
 	}
-	cancelData(Forms::Form::Modes::ADD);
+	resetForm(Modes::ADD);
 }
 
 Element::~Element() {
 	if (fieldsData.count(NAME) and not fieldsData.at(NAME).empty())
-		ElementHandler->remove(fieldsData.at(NAME));
+		elementHandler->remove(fieldsData.at(NAME));
 	if (pinLayout)
 		unmarkMyPins();
 }
@@ -52,30 +51,40 @@ void Element::initialize(ElementFields* fields) {
 		fields->timeOn->set_sensitive(fields->solenoid->get_active());
 		fields->timeOn->set_text("");
 	});
-	ElementHandler = CollectionHandler::getInstance("elements");
+	elementHandler = CollectionHandler::getInstance("elements");
 	pinLayout      = PinHandler::getInstance();
 }
 
-const string Element::createPrettyName() const {
-	return fieldsData.at(NAME);
+void Element::resetForm(Modes mode) {
+	fields->pin->set_text("");
+	fields->pinR->set_text("");
+	fields->pinG->set_text("");
+	fields->pinB->set_text("");
+	fields->timeOn->set_text("");
+	fields->solenoid->set_active(false);
+	fields->timeOn->set_sensitive(false);
+	fields->InputElementName->set_text("");
+	fields->InputElementName->grab_focus();
+	fields->InputElementType->set_active_id("0");
+	DialogColors::getInstance()->colorizeButton(fields->InputDefaultColor, NO_COLOR);
 }
 
 void Element::isValid(Modes mode) {
 	// Check invalid name
-	if (fields->InputElementName->get_text().empty()) {
-		fields->InputElementName->grab_focus();
-		throw Message("Missing element name");
+	string name(fields->InputElementName->get_text());
+	if (name.empty()) {
+		if (mode != Modes::LOAD)
+			fields->InputElementName->grab_focus();
+		throw Message("Missing element name\n");
 	}
 
-	auto name = fields->InputElementName->get_text();
-
-	// Check element dupes.
-	if (
-		(mode == Forms::Form::Modes::EDIT and name != fieldsData.at(NAME) and ElementHandler->isUsed(name)) or
-		(mode != Forms::Form::Modes::EDIT and ElementHandler->isUsed(name))
-	) {
-		fields->InputElementName->grab_focus();
-		throw Message("Element with name " + name + " already exist");
+	// If is not edit, or data is not the same, check for dupes.
+	if (elementHandler->isUsed(name)) {
+		if (mode != Modes::EDIT or fieldsData[NAME] != name) {
+			if (mode != Modes::LOAD)
+				fields->InputElementName->grab_focus();
+			throw Message("Element with name " + name + " already exist\n");
+		}
 	}
 
 	// Check missing type.
@@ -83,21 +92,26 @@ void Element::isValid(Modes mode) {
 		throw Message("Missing element type");*/
 
 	std::function<void(Gtk::Entry*)> checkPin = [&](Gtk::Entry* pin) {
+		string p(pin->get_text());
+		string name(pin->get_placeholder_text());
 		// Check empty.
-		if (pin->get_text().empty()) {
-			pin->grab_focus();
-			throw Message("Enter a valid pin number for " + pin->get_placeholder_text());
+		if (p.empty()) {
+			if (mode != Modes::LOAD)
+				pin->grab_focus();
+			throw Message("Enter a valid pin number for " + name + '\n');
 		}
 
 		// Numeric check and range.
-		if (not Message::isBetween(pin->get_text(), 1, pinLayout->getSize())) {
-			pin->grab_focus();
-			throw Message("The " + pin->get_placeholder_text() + " must be a number from 1 and " + std::to_string(pinLayout->getSize()));
+		if (not Defaults::isBetween(pin->get_text(), 1, pinLayout->getSize())) {
+			if (mode != Modes::LOAD)
+				pin->grab_focus();
+			throw Message("The " + name + " must be a number from 1 and " + std::to_string(pinLayout->getSize()) + '\n');
 		}
 		// Check others elements for used pins.
-		if (pinLayout->isUsed(pin->get_text())) {
-			pin->grab_focus();
-			throw Message("Pin " + pin->get_text() + " Is already in use");
+		if (pinLayout->isUsed(p)) {
+			if (mode != Modes::LOAD)
+				pin->grab_focus();
+			throw Message("Pin " + p + " Is already in use\n");
 		}
 
 		if (pin == fields->pin)
@@ -106,15 +120,16 @@ void Element::isValid(Modes mode) {
 		// Check local form for duplicated pins in RGB, ignore single pin.
 		int times = 0;
 		for (auto e: {fields->pinR, fields->pinG, fields->pinB})
-			if (e->get_text() == pin->get_text())
+			if (e->get_text() == p)
 				++times;
 		if (times > 1) {
-			pin->grab_focus();
-			throw Message("Pin " + pin->get_text() + " is set more than once ");
+			if (mode != Modes::LOAD)
+				pin->grab_focus();
+			throw Message("Pin " + p + " is set more than once\n");
 		}
 	};
 	// remove marks
-	if (mode == Forms::Form::Modes::EDIT)
+	if (mode != Modes::ADD)
 		unmarkMyPins();
 	try {
 		if (fields->pin->get_text().empty()) {
@@ -124,56 +139,54 @@ void Element::isValid(Modes mode) {
 				fields->pinG->get_text().empty() and
 				fields->pinB->get_text().empty()
 			) {
-				throw Message("Missing element pin information");
+				throw Message("Missing element connection information\n");
 			}
 			// RGB checks
 			for (auto e: {fields->pinR, fields->pinG, fields->pinB}) {
-				// check pin if changed (the field name is stored  in the entry name).
-				if (e->get_text() != fieldsData[e->get_name()])
+				// check for changes.
+				if (mode != Modes::EDIT or e->get_text() != fieldsData[e->get_name()])
 					checkPin(e);
 			}
 		}
 		// check single pin numeric.
 		else {
-			// check for no changes.
-			if (fields->pin->get_text() != (fieldsData.count(SOLENOID) ? fieldsData[SOLENOID] : fieldsData[PIN]))
+			// check for changes.
+			if (mode != Modes::EDIT or fields->pin->get_text() != (fieldsData.count(SOLENOID) ? fieldsData[SOLENOID] : fieldsData[PIN]))
 				checkPin(fields->pin);
 			// check solenoids fields.
 			if (
 					fields->solenoid->get_active() and
 					not fields->timeOn->get_text().empty() and
-					not Message::isBetween(fields->timeOn->get_text(), 1, -1)
+					not Defaults::isNumber(fields->timeOn->get_text())
 			) {
-				fields->timeOn->grab_focus();
-				throw Message("Enter a number bigger than 0 for the milliseconds.");
+				if (mode != Modes::LOAD)
+					fields->timeOn->grab_focus();
+				throw Message("Enter a number for the milliseconds.\n");
 			}
 		}
 	}
 	catch (Message& e) {
 		// set the pins back
-		if (mode == Forms::Form::Modes::EDIT)
+		if (mode != Modes::ADD)
 			markMyPins();
 		throw e;
 	}
-	if (mode == Forms::Form::Modes::EDIT)
+	if (mode != Modes::ADD)
 		markMyPins();
 }
 
 void Element::storeData(Modes mode) {
 
-	const auto& name = fields->InputElementName->get_text();
-	// Add.
-	if (mode == Forms::Form::Modes::ADD) {
-		ElementHandler->add(name);
-	}
-	// Edit.
-	else if (mode == Forms::Form::Modes::EDIT) {
-		if (fieldsData[NAME] != name)
-			ElementHandler->replace(fieldsData.at(NAME), name);
-		// Clean up.
-		unmarkMyPins();
-		fieldsData.clear();
-	}
+	const string name(fields->InputElementName->get_text());
+
+	if (mode == Modes::EDIT)
+		elementHandler->replace(fieldsData.at(NAME), name);
+	else
+		elementHandler->add(name);
+
+	unmarkMyPins();
+	// This will clean any anomaly.
+	fieldsData.clear();
 
 	fieldsData[NAME] = name;
 
@@ -198,7 +211,7 @@ void Element::storeData(Modes mode) {
 	}
 	fieldsData[E_TYPE] = fields->InputElementType->get_active_id() == "0" ? DEFAULT_ELEMENT_TYPE : fields->InputElementType->get_active_id();
 	markMyPins();
-	cancelData(mode);
+	resetForm(mode);
 }
 
 void Element::retrieveData(Modes mode) {
@@ -222,22 +235,11 @@ void Element::retrieveData(Modes mode) {
 		fields->InputDefaultColor,
 		fieldsData.count(DEFAULT_COLOR) ? fieldsData[DEFAULT_COLOR] : NO_COLOR
 	);
-	fields->InputElementType->set_active_id(fieldsData[E_TYPE]);
+	fields->InputElementType->set_active_id(fieldsData.count(E_TYPE) ? fieldsData[E_TYPE] : DEFAULT_ELEMENT_TYPE);
 }
 
-void Element::cancelData(Modes mode) {
-	// if in the future cancelData is needed, this will be moved.
-	fields->pin->set_text("");
-	fields->pinR->set_text("");
-	fields->pinG->set_text("");
-	fields->pinB->set_text("");
-	fields->timeOn->set_text("");
-	fields->solenoid->set_active(false);
-	fields->timeOn->set_sensitive(false);
-	fields->InputElementName->set_text("");
-	fields->InputElementName->grab_focus();
-	fields->InputElementType->set_active_id("0");
-	DialogColors::getInstance()->colorizeButton(fields->InputDefaultColor, NO_COLOR);
+const string Element::createPrettyName() const {
+	return fieldsData.at(NAME);
 }
 
 const string Element::getCssClass() const {

@@ -42,6 +42,8 @@ public:
 
 	virtual ~DialogDevice() = default;
 
+	virtual string toXml();
+
 protected:
 
 	Forms::Device::DeviceFields fields;

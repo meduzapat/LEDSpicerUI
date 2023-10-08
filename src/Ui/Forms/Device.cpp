@@ -24,45 +24,37 @@
 
 using namespace LEDSpicerUI::Ui::Forms;
 
-LEDSpicerUI::Ui::Forms::Device::DeviceFields* Device::fields = nullptr;
-
+Device::DeviceFields* Device::fields                  = nullptr;
 LEDSpicerUI::Ui::DialogElement* Device::dialogElement = nullptr;
-
-LEDSpicerUI::Ui::Forms::CollectionHandler* Device::devices = nullptr;
-
-const unordered_map<string, Device::DeviceInfo> Device::devicesInfo = {
-//        ID                        NAME                MI  B/W    ML
-	{"UltimarcUltimate", {"Ultimarc Ipac Ultimate IO",   4, false, 96}},
-	{"UltimarcPacLed64", {"Ultimarc PacLed 64",          4, false, 64}},
-	{"UltimarcPacDrive", {"Ultimarc Pac Drive",          4, true,  16}},
-	{"UltimarcNanoLed",  {"Ultimarc NanoLed",            4, false, 60}},
-	{"LedWiz32",         {"Groovy Game Gear Led-Wiz 32", 4, false, 32}},
-	{"Howler",           {"Wolfware Howler",             4, false, 96}},
-	{"Adalight",         {"Adalight (ESP8266)",          1, false, 60}},
-	{"RaspberryPi",      {"Raspberry Pi GPIO pins",      1, false, 28}}
-};
+CollectionHandler* Device::devices                    = nullptr;
 
 Device::Device(unordered_map<string, string>& data) :
 	Form(data)
 {
+	// Populate device pins with empty class (this is needed for LOAD as well so the classes are created).
+	Glib::ustring name(
+		fieldsData.count(NAME) ?
+			Glib::ustring(fieldsData.at(NAME)) :
+			(not fields->comboBoxDevices->get_active_id().empty() ? fields->comboBoxDevices->get_active_id() : "")
+	);
+
+	if (not name.empty())
+		for (int i = 1; i <= Defaults::devicesInfo.at(name).pins; i++)
+			pinClasses.emplace(std::to_string(i), NO_COLOR);
 	// Check load.
 	if (not fieldsData.empty()) {
-		retrieveData(Forms::Form::Modes::LOAD);
-		isValid(Forms::Form::Modes::LOAD);
-		storeData(Forms::Form::Modes::LOAD);
-		devices->add(createName());
+		retrieveData(Modes::LOAD);
+		isValid(Modes::LOAD);
+		storeData(Modes::LOAD);
 		return;
 	}
 
 	// Devices are created after a valid device name is selected.
 	fieldsData[NAME] = fields->comboBoxDevices->get_active_id();
-	// Populate device pins with empty class.
-	for (int i = 1; i <= devicesInfo.at(fieldsData[NAME]).pins; i++)
-		pinClasses.emplace(std::to_string(i), NO_COLOR);
 	onActivate();
-	fields->changePoint->set_value(DEFAULT_CHANGE_VALUE);
-	fields->comboBoxId->set_active_id("");
 	fields->comboBoxDevices->set_sensitive(true);
+	fields->comboBoxId->set_active_id("");
+	fields->changePoint->set_value(DEFAULT_CHANGE_VALUE);
 }
 
 Device::~Device() {
@@ -86,7 +78,7 @@ void Device::initialize(DeviceFields* fields) {
 	row.set_value(0, string());
 	row.set_value(1, string("Select Device"));
 	row.set_value(2, false);
-	for (auto& d : devicesInfo) {
+	for (auto& d : Defaults::devicesInfo) {
 		row = *(fields->devicesListstore->append());
 		row.set_value(0, d.first);
 		row.set_value(1, d.second.name);
@@ -96,39 +88,35 @@ void Device::initialize(DeviceFields* fields) {
 	 * When the device selector changes, update fields.
 	 */
 	fields->comboBoxDevices->signal_changed().connect([fields]() {
-		auto name = fields->comboBoxDevices->get_active_id();
-		// empty Name is reset.
+		const string name(fields->comboBoxDevices->get_active_id());
 		if (name.empty()) {
+			// reset to nothing.
 			fields->comboBoxId->get_parent()->hide();
 			fields->changePoint->get_parent()->hide();
 			return;
 		}
-		if (isMultiple(name))
+		if (Defaults::isMultiple(name))
 			fields->comboBoxId->get_parent()->show();
 		else
 			fields->comboBoxId->get_parent()->hide();
 
-		if (isMonocrome(name))
+		if (Defaults::isMonocrome(name))
 			fields->changePoint->get_parent()->show();
 		else
 			fields->changePoint->get_parent()->hide();
 	});
 }
 
-bool Device::isMultiple(const string& name) {
-	return (devicesInfo.at(name).maxIds > 1);
-}
-
-bool Device::isMonocrome(const string& name) {
-	return (devicesInfo.at(name).monochrome);
-}
-
 string const Device::createPrettyName() const {
-	return devicesInfo.at(fieldsData.at(NAME)).name + " Id: " + fieldsData.at(ID);
+	return Defaults::devicesInfo.at(fieldsData.at(NAME)).name + " Id: " + fieldsData.at(ID);
 }
 
 string const Device::createName() const {
 	return fieldsData.at(NAME) + "_" + fieldsData.at(ID);
+}
+
+void Device::resetForm(Modes mode) {
+	fields->comboBoxDevices->set_active(0);
 }
 
 void Device::isValid(Modes mode) {
@@ -138,25 +126,25 @@ void Device::isValid(Modes mode) {
 		id(fields->comboBoxId->get_active_id());
 
 	if (name.empty())
-		throw Message("Select a valid device");
+		throw Message("Invalid device\n");
 
 	if (id.empty())
-		throw Message("Select a valid device number");
+		throw Message("Invalid device number\n");
 
-	// Is imposible to duplicate devices because the selectors gets disable but LOAD can.
+	// Is imposible to duplicate devices when Adding or editing because the selectors gets disable but LOAD can.
 	if (mode == Modes::LOAD and devices->isUsed(name + "_" + id))
-		throw Message("Devices " + devicesInfo.at(name).name + " ID " + id + " already exists");
+		throw Message("Devices " + Defaults::devicesInfo.at(name).name + " ID " + id + " already exists\n");
 }
 
 void Device::storeData(Modes mode) {
 
-	onDeActivate();
 	string
 		name  = fields->comboBoxDevices->get_active_id(),
 		newId = fields->comboBoxId->get_active_id(),
 		// only for edit:
 		oldId = mode == Modes::EDIT ? createName() : "";
-
+	// This will clean any anomaly.
+	fieldsData.clear();
 	fieldsData[NAME] = name;
 	fieldsData[ID]   = newId;
 
@@ -165,22 +153,24 @@ void Device::storeData(Modes mode) {
 	else
 		devices->add(createName());
 
-	if (isMonocrome(name))
-		fieldsData[CHANGE_POINT] = std::to_string(fields->changePoint->get_value());
+	if (Defaults::isMonocrome(name))
+		fieldsData[CHANGE_POINT] = std::to_string(static_cast<uint8_t>(fields->changePoint->get_value()));
 	markDevicesUsed();
+	onDeActivate();
 }
 
 void Device::retrieveData(Modes mode) {
 	onActivate();
+	const string name(fieldsData[NAME]);
 	fields->comboBoxDevices->set_sensitive(false);
-	fields->comboBoxDevices->set_active_id(fieldsData[NAME]);
+	fields->comboBoxDevices->set_active_id(name);
 	fields->comboBoxId->set_active_id(fieldsData[ID]);
-	if (isMultiple(fieldsData[NAME]))
+	if (Defaults::isMultiple(name))
 		fields->comboBoxId->get_parent()->show();
 	else
 		fields->comboBoxId->get_parent()->hide();
-	if (isMonocrome(fieldsData[NAME])) {
-		fields->changePoint->set_value(std::stod(fieldsData[CHANGE_POINT]));
+	if (Defaults::isMonocrome(name)) {
+		fields->changePoint->set_value(fieldsData.count(CHANGE_POINT) ? std::stod(fieldsData[CHANGE_POINT]) : DEFAULT_CHANGE_VALUE);
 		fields->changePoint->get_parent()->show();
 	}
 	else {
@@ -215,12 +205,12 @@ void Device::processIdComboBox() {
 	for (const auto& iter : rowsToRemove)
 		fields->idListstore->erase(*iter);
 	const string& name = fieldsData.at(NAME);
-	if (isMultiple(name)) {
+	if (Defaults::isMultiple(name)) {
 		auto row = *(fields->idListstore->append());
 		row.set_value(0, string());
 		row.set_value(1, string("Select Device"));
 		row.set_value(2, false);
-		for (int c = 0; c < devicesInfo.at(name).maxIds; ++c) {
+		for (int c = 0; c < Defaults::devicesInfo.at(name).maxIds; ++c) {
 			auto row = *(fields->idListstore->append());
 			auto id(std::to_string(c + 1));
 			row.set_value(0, id);
@@ -240,7 +230,7 @@ void Device::processIdComboBox() {
 }
 
 void Device::markDevicesUsed() {
-	for (auto& di : devicesInfo) {
+	for (auto& di : Defaults::devicesInfo) {
 		int total = 0;
 		// count used devices.
 		for (auto& d : *devices)
@@ -257,9 +247,4 @@ void Device::markDevicesUsed() {
 			}
 		}
 	}
-	/*
-	 // Mark new Id used
-	auto a = idComboBox->get_active();
-	a->set_value(2, false);
-	 */
 }

@@ -47,6 +47,12 @@ DialogRestrictor::DialogRestrictor(BaseObjectType* obj, const Glib::RefPtr<Gtk::
 	builder->get_widget("InputSpeedOff",        fields.speedOff);
 	fields.restrictorsListstore = dynamic_cast<Gtk::ListStore*>(builder->get_object("liststoreRestrictors").get());
 	fields.idListstore          = dynamic_cast<Gtk::ListStore*>(builder->get_object("liststoreRestrictorsId").get());
+	for (auto& w : Defaults::wayIds) {
+		Gtk::FlowBoxChild* i;
+		builder->get_widget(w.first, i);
+		i->set_visible(false);
+		fields.waysIcons.emplace(w.second, i);
+	}
 	Forms::Restrictor::initialize(&fields);
 
 	// When the dialog shows, do some clean up for new restrictors.
@@ -88,10 +94,24 @@ DialogRestrictor::DialogRestrictor(BaseObjectType* obj, const Glib::RefPtr<Gtk::
 	});
 }
 
-Forms::Form* DialogRestrictor::getForm(unordered_map<string, string>& rawData) {
-	return new Forms::Restrictor(rawData);
+string DialogRestrictor::toXml() {
+
+	string r(Defaults::tab() + "<restrictors>\n");
+	Defaults::increaseTab();
+	for (auto b : items) {
+		r += b->toXML("");
+	}
+	Defaults::reduceTab();
+	return (r + Defaults::tab() + "</restrictors>\n");
 }
 
 string DialogRestrictor::getType() {
 	return "restrictor";
+}
+
+Forms::Form* DialogRestrictor::getForm(unordered_map<string, string>& rawData) {
+	if (mode == Forms::Form::Modes::ADD and fields.comboBoxRestrictors->get_active_id().empty())
+		return nullptr;
+	else
+		return new Forms::Restrictor(rawData);
 }

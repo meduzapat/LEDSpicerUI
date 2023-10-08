@@ -56,23 +56,42 @@ public:
 	virtual ~Form() = default;
 
 	/**
-	 * Checks of the form fields are valid.
-	 * @throw Message with error if something is wrong
+	 * @brief Resets the form.
+	 *
+	 * The Controller dialog will provide the form fields, this function will do a reset on them when needed.
+	 * @param mode
+	 */
+	virtual void resetForm(Modes mode) = 0;
+
+	/**
+	 * @brief Checks if the form fields are valid.
+	 *
+	 * If possible, the erroneous fields need to be focused.
+	 * When uniquenes is necesary, will check for duplicated.
+	 * Will only check for form fields, internal values can only be checkd for Edit and Load.
+	 * @throw Message with error if something is wrong.
 	 */
 	virtual void isValid(Modes mode) = 0;
 
 	/**
-	 * Read the fields and store the values.
+	 * @brief Read the fields and store the values.
+	 *
+	 * Should erase all internal data before storing,
+	 * Need to reset any non required field to its defaults after storing.
 	 */
 	virtual void storeData(Modes mode) = 0;
 	
 	/**
-	 * Retrieves data back to the fields.
+	 * @brief Retrieves data back to the fields.
+	 *
+	 * Populates the data from the internal storate into the form.
 	 */
 	virtual void retrieveData(Modes mode) = 0;
 
 	/**
-	 * Cancel changes.
+	 * @brief Cancel changes.
+	 *
+	 * When the dialgo is cancelled this method will be called to do any necesary clean up.
 	 */
 	virtual void cancelData(Modes mode) = 0;
 
@@ -88,7 +107,7 @@ public:
 	virtual const string createPrettyName() const = 0;
 
 	/**
-	 * Create a name for the form entry.
+	 * Create an unique name for the form entry.
 	 * @return
 	 */
 	virtual const string createName() const;
@@ -107,7 +126,7 @@ public:
 	string getValue(const string& key) const;
 
 	/**
-	 * Allows the change of an element.
+	 * Allows the change of an internal value.
 	 * @param key
 	 * @param value
 	 */

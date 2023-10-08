@@ -30,13 +30,13 @@ vector<Gtk::FlowBox*> DialogColors::colorBoxes;
 DialogColors* DialogColors::dc = nullptr;
 
 DialogColors* DialogColors::getInstance() {
-	return dc ? dc : throw Message("Dialog Colors not initialized.");
+	return dc;
 }
 
 DialogColors* DialogColors::getInstance(Glib::RefPtr<Gtk::Builder> const &builder) {
 	if (not dc)
 		builder->get_widget_derived("DialogColors", dc);
-	return getInstance();
+	return dc;
 }
 
 DialogColors::DialogColors(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &builder) :
@@ -169,6 +169,7 @@ void DialogColors::activateColorButton(Gtk::Button* button) {
 	colorButtons.push_back(button);
 	button->signal_clicked().connect([&, button]() {
 		if (run() == Gtk::ResponseType::RESPONSE_OK) {
+			Defaults::markDirty();
 			colorizeButton(button, selectedColor);
 		}
 		hide();
@@ -177,31 +178,13 @@ void DialogColors::activateColorButton(Gtk::Button* button) {
 
 void DialogColors::activateColorPicker(Gtk::Button* button, Gtk::FlowBox* destination) {
 	colorBoxes.push_back(destination);
-	button->signal_clicked().connect([&, button, destination]() {
+	button->signal_clicked().connect([&, destination]() {
 		// Random cannot be used for list.
 		BtnColorRandom->hide();
 		BtnClearColor->hide();
 		if (run() == Gtk::ResponseType::RESPONSE_OK) {
-			auto box = Gtk::make_managed<Gtk::HBox>(false, 2);
-			box->set_valign(Gtk::ALIGN_START);
-			box->set_vexpand(false);
-			box->set_margin_top(2);
-			box->set_margin_bottom(2);
-			box->set_margin_left(2);
-			box->set_margin_right(2);
-			box->get_style_context()->add_class("ColorButton");
-			box->set_tooltip_text(selectedColor);
-			auto l = Gtk::make_managed<Gtk::Label>(selectedColor);
-			l->get_style_context()->add_class(selectedColor);
-			auto b = Gtk::make_managed<Gtk::Button>();
-			b->set_image_from_icon_name("edit-delete", Gtk::ICON_SIZE_BUTTON);
-			b->signal_clicked().connect([box, destination]() {
-				destination->remove(*box);
-			});
-			box->pack_start(*l, Gtk::PACK_EXPAND_WIDGET);
-			box->pack_start(*b, Gtk::PACK_SHRINK);
-			destination->add(*box);
-			box->show_all();
+			createColorButton(destination, selectedColor);
+			Defaults::markDirty();
 		}
 		BtnColorRandom->show();
 		BtnClearColor->show();
@@ -216,6 +199,20 @@ void DialogColors::resetColorButtons() {
 	for (auto box : colorBoxes)
 		for (auto c : box->get_children())
 			box->remove(*c);
+}
+
+void DialogColors::populateColorBox(Gtk::FlowBox* destination, const vector<string>& colors) {
+	for (auto& c : colors)
+		createColorButton(destination, c);
+}
+
+vector<string> DialogColors::getColorBoxValues(Gtk::FlowBox* destination) {
+	vector<string> r;
+	for (auto child : destination->get_children()) {
+		auto c = dynamic_cast<Gtk::FlowBoxChild*>(child);
+		r.push_back(c->get_child()->get_tooltip_text());
+	}
+	return r;
 }
 
 void DialogColors::onColorSelected(Gtk::Button* button) {
@@ -234,7 +231,7 @@ string DialogColors::setColors(unordered_map<string, string>& colors) {
 			// Discard any special color.
 			continue;
 		cssData += '.' + c.first + "{background:#" + c.second + ';';
-		if (Message::getLiminance(c.second) > 0.5)
+		if (Defaults::getLiminance(c.second) > 0.5)
 			cssData += "color:black;";
 		cssData += '}';
 		// Create Button.
@@ -250,4 +247,33 @@ string DialogColors::setColors(unordered_map<string, string>& colors) {
 	}
 	ContainerColorPicker->show_all();
 	return cssData;
+}
+
+void DialogColors::createColorButton(Gtk::FlowBox* destination, const string& color) {
+
+	auto box = Gtk::make_managed<Gtk::HBox>(false, 2);
+	box->set_valign(Gtk::ALIGN_START);
+	box->set_vexpand(false);
+	box->set_margin_top(2);
+	box->set_margin_bottom(2);
+	box->set_margin_left(2);
+	box->set_margin_right(2);
+	box->get_style_context()->add_class("ColorButton");
+	box->set_tooltip_text(color);
+
+	auto l = Gtk::make_managed<Gtk::Label>(color);
+	l->get_style_context()->add_class(color);
+
+	// Button delete.
+	auto b = Gtk::make_managed<Gtk::Button>();
+	b->set_image_from_icon_name("edit-delete", Gtk::ICON_SIZE_BUTTON);
+	b->signal_clicked().connect([box, destination]() {
+		Defaults::markDirty();
+		destination->remove(*box);
+	});
+
+	box->pack_start(*l, Gtk::PACK_EXPAND_WIDGET);
+	box->pack_start(*b, Gtk::PACK_SHRINK);
+	destination->add(*box);
+	box->show_all();
 }

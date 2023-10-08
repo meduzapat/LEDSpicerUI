@@ -26,9 +26,6 @@
 #ifndef DEVICE_HPP_
 #define DEVICE_HPP_ 1
 
-#define CHANGE_POINT "changePoint"
-#define DEFAULT_CHANGE_VALUE 64.00
-
 namespace LEDSpicerUI::Ui::Forms {
 
 /**
@@ -38,13 +35,6 @@ namespace LEDSpicerUI::Ui::Forms {
 class Device : public Form {
 
 public:
-
-	struct DeviceInfo {
-		const string  name;
-		const uint8_t maxIds;
-		const bool    monochrome;
-		const uint8_t pins;
-	};
 
 	struct DeviceFields {
 		Gtk::ComboBox*  comboBoxDevices  = nullptr;
@@ -67,27 +57,11 @@ public:
 	 */
 	static void initialize(DeviceFields* fields);
 
-	/**
-	 * @param name
-	 * @return true if the device support multiple connected boards.
-	 */
-	static bool isMultiple(const string& name);
-
-	/**
-	 * @param name
-	 * @return true if the device is multiple and monocrome.
-	 */
-	static bool isMonocrome(const string& name);
-
-	/**
-	 * @param name
-	 * @return returns true if the device can be used.
-	 */
-	static bool isAvailable(const string& name);
-
 	virtual const string createPrettyName() const;
 
 	virtual const string createName() const;
+
+	virtual void resetForm(Modes mode);
 
 	virtual void isValid(Modes mode);
 
@@ -111,9 +85,6 @@ protected:
 	 */
 	static CollectionHandler* devices;
 
-	/// A list of device to their information.
-	static const unordered_map<string, DeviceInfo> devicesInfo;
-
 	/// Shared dialog for elements.
 	static DialogElement* dialogElement;
 
@@ -121,7 +92,7 @@ protected:
 	unordered_map<string, string> pinClasses;
 
 	/// Store a copy of elements from the elements dialog.
-	Forms::BoxButtonCollection elements;
+	BoxButtonCollection elements;
 
 	virtual void onActivate();
 

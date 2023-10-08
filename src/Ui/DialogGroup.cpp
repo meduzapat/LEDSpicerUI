@@ -61,15 +61,6 @@ DialogGroup::DialogGroup(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& 
 	});
 
 	Forms::Group::initialize(groupFields);
-
-	signal_show().connect([&]() {
-		// Create group for add.
-		if (mode == Forms::Form::Modes::ADD) {
-			// create an empty group.
-			unordered_map<string, string> rawData;
-			currentForm = getForm(rawData);
-		}
-	});
 }
 
 string DialogGroup::getType() {

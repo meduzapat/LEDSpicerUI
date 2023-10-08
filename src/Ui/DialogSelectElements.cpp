@@ -24,27 +24,39 @@
 
 using namespace LEDSpicerUI::Ui;
 
-DialogSelectElements* DialogSelectElements::dse = nullptr;
+DialogSelectElements* DialogSelectElements::instance = nullptr;
 
-DialogSelectElements* DialogSelectElements::getInstance() {
-	return dse ? dse : throw Message("Dialog Select Elements not initialized.");
+void DialogSelectElements::initialize(Glib::RefPtr<Gtk::Builder> const &builder) {
+	if (not instance)
+		builder->get_widget_derived("DialogSelectElements", instance);
 }
 
-DialogSelectElements* DialogSelectElements::getInstance(Glib::RefPtr<Gtk::Builder> const &builder) {
-	if (not dse)
-		builder->get_widget_derived("DialogSelectElements", dse);
-	return getInstance();
+DialogSelectElements* DialogSelectElements::getInstance() {
+	return instance;
 }
 
 DialogSelectElements::DialogSelectElements(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
-	DialogForm(obj, builder)
+DialogForm(obj, builder)
 {
+	Gtk::Button
+		* btnSelectAll,
+		* btnSelectNone;
 	builder->get_widget_derived("BoxGroupElements", box, "BtnGroupElementUp", "BtnGroupElementDn");
 	builder->get_widget("BtnAddGroupElements", btnAdd);
 	builder->get_widget("BntElementsSelect",   btnApply);
 	builder->get_widget("BoxAllElements",      boxAllElements);
+	builder->get_widget("BtnSelectAll",        btnSelectAll);
+	builder->get_widget("BtnSelectNone",       btnSelectNone);
 
 	btnAdd->signal_clicked().connect(sigc::mem_fun(*this, &DialogSelectElements::onAddClicked));
+
+	btnSelectAll->signal_clicked().connect([&]() {
+		boxAllElements->select_all();
+	});
+
+	btnSelectNone->signal_clicked().connect([&]() {
+		boxAllElements->unselect_all();
+	});
 
 	signal_show().connect([&]() {
 		populateElements();
@@ -106,6 +118,7 @@ void DialogSelectElements::populateElements() {
 	}
 	for (auto& e : *Forms::CollectionHandler::getInstance("elements")) {
 		auto b = Gtk::make_managed<Gtk::Button>(e);
+		b->get_child()->set_halign(Gtk::Align::ALIGN_START);
 		auto c = Gtk::make_managed<Gtk::FlowBoxChild>();
 		b->signal_clicked().connect([&, c, b]() {
 			bool a = c->is_selected();

@@ -24,15 +24,15 @@
 
 using namespace LEDSpicerUI::Ui::Forms;
 
-PinHandler* PinHandler::ph = nullptr;
+PinHandler* PinHandler::instance = nullptr;
 
 PinHandler* PinHandler::getInstance() {
-	return ph ? ph : throw Message("Pin Handler not initialized.");
+	return instance;
 }
 
-PinHandler* PinHandler::getInstance(Glib::RefPtr<Gtk::Builder> const &builder) {
-	builder->get_widget_derived("FlowBoxPinLayout", ph);
-	return getInstance();
+void PinHandler::initialize(Glib::RefPtr<Gtk::Builder> const &builder) {
+	if (not instance)
+		builder->get_widget_derived("FlowBoxPinLayout", instance);
 }
 
 void PinHandler::setCurrentDevicePins(unordered_map<string, string>* pinClasses) {
@@ -62,18 +62,22 @@ size_t PinHandler::getSize() {
 	return pinClasses->size();
 }
 
+bool PinHandler::exists(const std::string& pin) {
+	return (pinClasses->count(pin) != 0);
+}
+
 bool PinHandler::isUsed(const std::string& pin) {
-	for (auto& p : *pinClasses)
-		if (not p.second.empty() && p.first == pin)
-			return true;
+	if (exists(pin) and not pinClasses->at(pin).empty())
+		return true;
 	return false;
 }
 
 void PinHandler::unmarkPin(const std::string& pin) {
-	if (not pin.empty() and pinClasses->count(pin))
+	if (not pin.empty() and exists(pin))
 		pinClasses->at(pin) = NO_COLOR;
 }
 
 void PinHandler::markPin(const std::string& pin, const std::string& color) {
-	pinClasses->at(pin) = color;
+	if (exists(pin))
+		pinClasses->at(pin) = color;
 }

@@ -25,24 +25,18 @@
 using namespace LEDSpicerUI::Ui::Forms;
 
 Group::GroupFields Group::groupFields;
-LEDSpicerUI::Ui::DialogSelectElements* Group::dialogSelectElements = nullptr;
-CollectionHandler* Group::groupHandler                             = nullptr;
-CollectionHandler* Group::elementHandler                           = nullptr;
+CollectionHandler* Group::groupHandler   = nullptr;
+CollectionHandler* Group::elementHandler = nullptr;
 
 Group::Group(unordered_map<string, string>& data) : Form(data) {
 	elementHandler->registerDestination(&elements);
 	if (not fieldsData.empty()) {
-		retrieveData(Forms::Form::Modes::LOAD);
-		isValid(Forms::Form::Modes::LOAD);
-		storeData(Forms::Form::Modes::LOAD);
-		groupHandler->add(fieldsData[NAME]);
+		retrieveData(Modes::LOAD);
+		isValid(Modes::LOAD);
+		storeData(Modes::LOAD);
 		return;
 	}
-	groupFields.InputGroupName->set_text("");
-	DialogColors::getInstance()->colorizeButton(
-		groupFields.BtnGroupDefaultColor,
-		NO_COLOR
-	);
+	resetForm(Modes::ADD);
 	onActivate();
 }
 
@@ -52,57 +46,68 @@ Group::~Group() {
 		groupHandler->remove(fieldsData.at(NAME));
 }
 
-void Group::initialize(
-	GroupFields& groupFields
-) {
-	Group::groupFields   = std::move(groupFields);
-	dialogSelectElements = DialogSelectElements::getInstance();
-	groupHandler         = CollectionHandler::getInstance("groups");
-	elementHandler       = CollectionHandler::getInstance("elements");
+void Group::initialize(GroupFields& groupFields) {
+	Group::groupFields = std::move(groupFields);
+	groupHandler       = CollectionHandler::getInstance("groups");
+	elementHandler     = CollectionHandler::getInstance("elements");
 }
 
 string const Group::createPrettyName() const {
 	return fieldsData.at(NAME);
 }
 
+void Group::resetForm(Modes mode) {
+	groupFields.InputGroupName->set_text("");
+	DialogColors::getInstance()->colorizeButton(
+		groupFields.BtnGroupDefaultColor,
+		NO_COLOR
+	);
+}
+
 void Group::isValid(Modes mode) {
-	if (groupFields.InputGroupName->get_text().empty()) {
-		groupFields.InputGroupName->grab_focus();
-		throw Message("Missing group name.");
+	string name(groupFields.InputGroupName->get_text());
+	if (name.empty()) {
+		if (mode != Modes::LOAD)
+			groupFields.InputGroupName->grab_focus();
+		throw Message("Invalid group name.\n");
 	}
+
+	// If data is the same, just continue.
+	if (mode == Modes::EDIT and fieldsData[NAME] == name)
+		return;
+
 	// Check for dupe group name.
-	if (groupFields.InputGroupName->get_text() != fieldsData[NAME] and groupHandler->isUsed(groupFields.InputGroupName->get_text())) {
-		groupFields.InputGroupName->grab_focus();
-		throw Message("Group Name already exists.");
+	if (groupHandler->isUsed(name)) {
+		if (mode != Modes::LOAD)
+			groupFields.InputGroupName->grab_focus();
+		throw Message("Group " + name + " already exists.\n");
 	}
 
 	// Check no selected elements.
 	/*if (not dialogSelectElements->getNumberElements()) {
 		if (editMode or (not editMode and not fieldsData.count(NAME)))
-			throw Message("You need to add at least one element.");
+			throw Message("You need to add at least one element.\n");
 	}*/
 }
 
 void Group::storeData(Modes mode) {
 
-	const auto& name = groupFields.InputGroupName->get_text();
-	// Add.
-	if (mode == Forms::Form::Modes::ADD) {
+	const string name(groupFields.InputGroupName->get_text());
+
+	if (mode == Modes::EDIT)
+		groupHandler->replace(fieldsData.at(NAME), name);
+	else
 		groupHandler->add(name);
-	}
-	// Edit.
-	else if (mode == Forms::Form::Modes::EDIT) {
-		// Replace name if changed
-		if (fieldsData[NAME] != name)
-			groupHandler->replace(fieldsData.at(NAME), name);
-		fieldsData.clear();
-	}
+
+	// This will clean any anomaly.
+	fieldsData.clear();
+
 	fieldsData[NAME] = name;
 	if (groupFields.BtnGroupDefaultColor->get_tooltip_text().empty())
 		fieldsData.erase(DEFAULT_COLOR);
 	else
 		fieldsData[DEFAULT_COLOR] = groupFields.BtnGroupDefaultColor->get_tooltip_text();
-	// Save elemenmts.
+	// Save elements.
 	onDeActivate();
 }
 
@@ -125,9 +130,9 @@ const string Group::getCssClass() const {
 }
 
 void Group::onDeActivate() {
-	dialogSelectElements->getItems(elements);
+	DialogSelectElements::getInstance()->getItems(elements);
 }
 
 void Group::onActivate() {
-	dialogSelectElements->setItems(elements);
+	DialogSelectElements::getInstance()->setItems(elements);
 }

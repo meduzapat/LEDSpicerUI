@@ -37,18 +37,25 @@ public:
 
 	BoxButtonCollection() = default;
 
+	BoxButtonCollection(const string& key) : key(key) {}
+
 	BoxButtonCollection(BoxButtonCollection&& other) noexcept :
-		items(std::move(other.items)), itemsOrder(std::move(other.itemsOrder)) {}
+		key(std::move(other.key)),
+		items(std::move(other.items)),
+		itemsOrder(std::move(other.itemsOrder)) {}
 
 	BoxButtonCollection& operator=(BoxButtonCollection&& other) noexcept {
 		if (this != &other) {
+			key        = std::move(other.key);
 			items      = std::move(other.items);
 			itemsOrder = std::move(other.itemsOrder);
 		}
 		return *this;
 	}
 
-	virtual ~BoxButtonCollection() = default;
+	~BoxButtonCollection() = default;
+
+	size_t size();
 
 	BoxButton* add(string type, Form* form);
 
@@ -73,6 +80,8 @@ public:
 	vector<BoxButton*>::const_iterator end() const;
 
 protected:
+
+	string key = NAME;
 
 	/// Created items in the dialog.
 	vector<BoxButton*> items;
