@@ -4,7 +4,7 @@
  * @since     Feb 13, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2023 - 2024 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -26,52 +26,23 @@ using namespace LEDSpicerUI::Ui;
 
 MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &builder) :
 	Gtk::ApplicationWindow(obj),
-	// Set import dialog
-	dic(DialogImport::Types::CONFIG, this),
-	// Project directoy openner.
-	dds(
-		"Select Project Directory",
-		Gtk::FileChooserAction::FILE_CHOOSER_ACTION_SELECT_FOLDER,
-		Gtk::DialogFlags::DIALOG_MODAL | Gtk::DialogFlags::DIALOG_DESTROY_WITH_PARENT | Gtk::DialogFlags::DIALOG_USE_HEADER_BAR
-	)
+	MainDialogs(builder, this)
 {
-
 	// Setup ledspicer fields.
-	builder->get_widget("InputUserId",     InputUserId);
-	builder->get_widget("InputGroupId",    InputGroupId);
-	builder->get_widget("InputPortNumber", InputPortNumber);
-	builder->get_widget("InputFPS",        InputFPS);
-	builder->get_widget("InputColors",     InputColors);
-	builder->get_widget("InputLogLevel",   InputLogLevel);
+	builder->get_widget("InputUserId",     inputUserId);
+	builder->get_widget("InputGroupId",    inputGroupId);
+	builder->get_widget("InputPortNumber", inputPortNumber);
+	builder->get_widget("InputFPS",        inputFPS);
+	builder->get_widget("InputColors",     inputColors);
+	builder->get_widget("InputLogLevel",   inputLogLevel);
 
 	// Register Widgets that changes the status to not saved.
-	Defaults::registerWidget(InputUserId);
-	Defaults::registerWidget(InputGroupId);
-	Defaults::registerWidget(InputPortNumber);
-	Defaults::registerWidget(InputFPS);
-	Defaults::registerWidget(InputColors);
-	Defaults::registerWidget(InputLogLevel);
-
-	// Initialize Dialog Colors.
-	Gtk::Button* btnAddRandomColor;
-	builder->get_widget("BtnAddRandomColor", btnAddRandomColor);
-	builder->get_widget("BoxRandomColors",   boxRandomColors);
-	DialogColors::getInstance(builder)->activateColorPicker(btnAddRandomColor, boxRandomColors);
-
-	// Initialize Pin Handler.
-	Forms::PinHandler::initialize(builder);
-
-	// Initialize secondary dialogs.
-	DialogElement::initialize(builder);
-	DialogSelectElements::initialize(builder);
-	DialogInputLinkMaps::initialize(builder);
-	DialogInputMap::initialize(builder);
-
-	// get Primary Dialogs
-	builder->get_widget_derived("DialogDevice",     dd);
-	builder->get_widget_derived("DialogRestrictor", dr);
-	builder->get_widget_derived("DialogGroup",      dg);
-	builder->get_widget_derived("DialogInput",      di);
+	Defaults::registerWidget(inputUserId);
+	Defaults::registerWidget(inputGroupId);
+	Defaults::registerWidget(inputPortNumber);
+	Defaults::registerWidget(inputFPS);
+	Defaults::registerWidget(inputColors);
+	Defaults::registerWidget(inputLogLevel);
 
 	// Setup top buttons
 	Gtk::Button
@@ -89,24 +60,11 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 	builder->get_widget("Header", header);
 	Defaults::initialize(header, btnSaveProject);
 
-
 	Gtk::Fixed* FixedLayout;
 	builder->get_widget("FixedLayout",  FixedLayout);
 
-	// Import config file Dialog.
-	Gtk::Button* btnImportConfig;
-	builder->get_widget("BtnImportConfig", btnImportConfig);
-	btnImportConfig->signal_clicked().connect([&]() {
-		if (dic.run() == Gtk::ResponseType::RESPONSE_OK) {
-			string newPath = dic.get_file()->get_path();
-			import(newPath, false, dic.getConfigParameters());
-			Defaults::markDirty();
-		}
-		dic.hide();
-	});
-
-	// Create select work directory FileChooserDialog
-	prepareWorkingDirectory(builder);
+	// connect dialogs
+	prepareDialogs(builder);
 
 	// Data selector action.
 	dataDirSelect->set_current_folder(PACKAGE_DATA_DIR"..");
@@ -128,17 +86,17 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 	// Save project
 	btnSaveProject->signal_clicked().connect([&]() {
 		try {
-			// Prepare dicrectories
+			// Prepare directories
 			for (string d : {"/animations", "/inputs", "/profiles"}) {
 				string path(workingDirectory + d);
 				struct stat info;
 				if (stat(path.c_str(), &info) != 0) {
-					// Create new dir
+					// Create new directory
 					if (mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0)
 						throw Message("Unable to save, failed to create directory " + d);
 				}
 				else if (not S_ISDIR(info.st_mode)) {
-					// name exist but is not a dir.
+					// name exist but is not a directory.
 					throw Message("Unable to save, a file with the name " + d + " already exist.");
 				}
 			}
@@ -150,12 +108,48 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 			xmlData += ">\n";
 			// Create devices, restrictors and process
 			Defaults::increaseTab();
-			xmlData += dp->toXml() + dd->toXml() + dr->toXml();
+
+			if (processes.getSize()) {
+				xmlData += "<processLookup runEvery=\"" + inputRunEvery->get_text() + "\">\n";
+				Defaults::increaseTab();
+				for (auto p : processes) {
+					xmlData += p->getData()->toXML();
+				}
+				Defaults::reduceTab();
+				xmlData += "</processLookup>\n";
+			}
+
+			xmlData += "<devices>\n";
+			Defaults::increaseTab();
+			for (auto d : devices) {
+				xmlData += d->getData()->toXML();
+			}
+			Defaults::reduceTab();
+			xmlData += "</devices>\n";
+
+			if (restrictors.getSize()) {
+				xmlData += "<restrictors>\n";
+				Defaults::increaseTab();
+				for (auto r : restrictors) {
+					xmlData += r->getData()->toXML();
+				}
+				Defaults::reduceTab();
+				xmlData += "</restrictors>\n";
+			}
+
 			// Add layout.
-			//"<layout defaultProfile="default">";
+			xmlData += "<layout defaultProfile=\"" + inputDefaultProfile->get_active_id() + "\">";
+			Defaults::increaseTab();
+			for (auto g : groups) {
+				xmlData += g->getData()->toXML();
+			}
+			Defaults::reduceTab();
+			xmlData += "</layout>\n";
+
 			Defaults::reduceTab();
 			xmlData += "</LEDSpicer>\n";
-			// Save conf
+
+			// Save config
 			string configFile(CONFIG_FILE);
 			Glib::file_set_contents(configFile, xmlData);
 			Defaults::cleanDirty();
@@ -180,41 +174,30 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 	/***********
 	 * Emitter *
 	 ***********/
-	builder->get_widget("InputColorsFile",    InputColorsFile);
-	builder->get_widget("InputCraftProfiles", InputCraftProfiles);
-	Defaults::registerWidget(InputColorsFile);
-	Defaults::registerWidget(InputCraftProfiles);
-	builder->get_widget_derived("ListBoxDatasource", ListBoxDataSource, "BtnDatasourceUp", "BtnDatasourceDown");
-	InputColors->signal_changed().connect([&]() {
-		DialogColors::getInstance()->setColorsFromFile(dataDirectory + InputColors->get_active_id() + ".xml");
+	builder->get_widget("InputColorsFile",    inputColorsFile);
+	builder->get_widget("InputCraftProfiles", inputCraftProfiles);
+	Defaults::registerWidget(inputColorsFile);
+	Defaults::registerWidget(inputCraftProfiles);
+	builder->get_widget_derived("ListBoxDatasource", listBoxDataSource, "BtnDatasourceUp", "BtnDatasourceDown");
+	inputColors->signal_changed().connect([&]() {
+		DialogColors::getInstance()->setColorsFromFile(dataDirectory + inputColors->get_active_id() + ".xml");
 	});
 
 	/*******************
 	 * Process Handler *
 	 *******************/
-	builder->get_widget_derived("DialogProcess", dp);
-	builder->get_widget("InputRunEvery", InputRunEvery);
+	builder->get_widget("InputRunEvery", inputRunEvery);
+	Defaults::registerWidget(inputRunEvery);
 }
 
 MainWindow::~MainWindow() {
-	// derived classes.
-	delete dp;
-	delete di;
-	delete dg;
-	delete dd;
-	delete dr;
-	delete DialogElement::getInstance();
-	delete DialogSelectElements::getInstance();
-	delete DialogColors::getInstance();
-	delete Forms::PinHandler::getInstance();
-	Forms::CollectionHandler::wipe();
-	delete ListBoxDataSource;
+	delete listBoxDataSource;
 }
 
 void MainWindow::openDataDirectory(const string& dataDirectory) {
 	// Set color list.
-	InputColors->remove_all();
-	InputColors->append("", "Select Colors");
+	inputColors->remove_all();
+	inputColors->append("", "Select Colors");
 	string msg;
 
 	auto directory = Gio::File::create_for_path(dataDirectory);
@@ -226,24 +209,19 @@ void MainWindow::openDataDirectory(const string& dataDirectory) {
 		throw Message(dataDirectory + " is invalid, try a different directory");
 
 	this->dataDirectory = dataDirectory;
-	Glib::RefPtr<Gio::FileInfo> file_info;
-	while ((file_info = enumerator->next_file())) {
-		auto type = file_info->get_file_type();
+	Glib::RefPtr<Gio::FileInfo> fileInfo;
+	while ((fileInfo = enumerator->next_file())) {
+		auto type = fileInfo->get_file_type();
 		if (type == Gio::FILE_TYPE_DIRECTORY)
 			continue;
 
-		string filename(file_info->get_name());
-		if (filename == "gameData.xml") {
-			msg += "Games data file gameData.xml Found\n";
-			continue;
-		}
-		if (filename == "colors.ini") {
-			msg += "Games data file colors.ini Found\n";
-			continue;
-		}
-		if (filename == "controls.ini") {
-			msg += "Games data file controls.ini Found\n";
-			continue;
+		string filename(fileInfo->get_name());
+		for (auto& f : {"gameData.xml", "colors.ini", "controls.ini"}) {
+			string f2(f);
+			if (filename == f2) {
+				msg += "✅ Games data file " + f2 + " Found\n";
+				continue;
+			}
 		}
 		auto parts = Defaults::explode(filename, '.');
 		string ext(parts.back());
@@ -252,8 +230,8 @@ void MainWindow::openDataDirectory(const string& dataDirectory) {
 			string name(Defaults::implode(parts, '.'));
 			try {
 				XMLHelper testCol(dataDirectory + filename, "Colors");
-				msg += "Colors file " + filename + " Found\n";
-				InputColors->append(name, name);
+				msg += "✅ Colors file " + filename + " Found\n";
+				inputColors->append(name, name);
 			}
 			catch(...) {}
 		}
@@ -261,39 +239,85 @@ void MainWindow::openDataDirectory(const string& dataDirectory) {
 
 	if (msg.empty())
 		throw Message("The directory does not contain any useful file");
+	// Warning game data files not found.
+	for (auto& f : {"gameData.xml", "colors.ini", "controls.ini"}) {
+		if (msg.find(f) == string::npos) {
+			msg += "❌ Games data file " + string(f) + " Not Found\n";
+		}
+	}
 	Message::displayInfo(msg);
 }
 
-void MainWindow::prepareWorkingDirectory(Glib::RefPtr<Gtk::Builder> const &builder) {
-	// Create select work directory FileChooserDialog
-	dds.set_transient_for(*this);
-	dds.set_position(Gtk::WindowPosition::WIN_POS_CENTER_ON_PARENT);
-	dds.set_default_size(900, 700);
+void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {
 
-	// Prepare open project dialog functionality.
-	dds.add_button("_Cancel", Gtk::ResponseType::RESPONSE_CANCEL)->get_style_context()->add_class("backgroundRed");
-	dds.add_button("_Select", Gtk::ResponseType::RESPONSE_OK)->get_style_context()->add_class("backgroundGreen");
+	// Initialize Dialog Colors.
+	Gtk::Button* btnAddRandomColor;
+	builder->get_widget("BtnAddRandomColor", btnAddRandomColor);
+	builder->get_widget("BoxRandomColors",   boxRandomColors);
+	DialogColors::getInstance()->activateColorPicker(btnAddRandomColor, boxRandomColors);
 
-	Gtk::Button* btnOpenProject;
+	// Dialog to import config files.
+	Gtk::Button* btnImportConfig;
+	builder->get_widget("BtnImportConfig", btnImportConfig);
+	btnImportConfig->signal_clicked().connect([&]() {
+		if (dialogImportConfig.run() == Gtk::ResponseType::RESPONSE_OK) {
+			string newPath = dialogImportConfig.get_file()->get_path();
+			import(newPath, false, dialogImportConfig.getConfigParameters());
+			Defaults::markDirty();
+		}
+		dialogImportConfig.hide();
+	});
+
+	// Dialog to import input plugin files.
+	Gtk::Button* btnImportInput;
+	builder->get_widget("BtnImportInput", btnImportInput);
+	btnImportInput->signal_clicked().connect([&]() {
+		if (dialogImportInput.run() == Gtk::ResponseType::RESPONSE_OK) {
+			// Retrieve the selected files or directories
+			vector<string> selectedFiles(dialogImportInput.get_filenames());
+			// Process each selected file or directory
+			for (const auto& selectedFile : selectedFiles) {
+				import(selectedFile, false, IMPORT_INPUTS);
+			}
+		}
+		dialogImportInput.hide();
+	});
+
+	Gtk::Button
+		* btnOpenProject,
+		* btnAddInput;
 	builder->get_widget("BtnSelectDir", btnOpenProject);
+	builder->get_widget("BtnAddInput",  btnAddInput);
 
 	// Activate configuration tabs.
 	Gtk::Notebook* MainTabs = nullptr;
 	builder->get_widget("MainTabs", MainTabs);
+
+	MainTabs->signal_switch_page().connect([=](Gtk::Widget* page, guint pageNum) {
+		// Inputs
+		if (pageNum == 4) {
+			bool sensitive(
+				Storage::CollectionHandler::getInstance(COLLECTION_ELEMENT)->getSize() and
+				Storage::CollectionHandler::getInstance(COLLECTION_GROUP)->getSize());
+			btnImportInput->set_sensitive(sensitive);
+			btnAddInput->set_sensitive(sensitive);
+		}
+	});
+
 	btnOpenProject->signal_clicked().connect([&, MainTabs]() {
-		if (dds.run() != Gtk::ResponseType::RESPONSE_OK) {
-			dds.hide();
+		if (dialogSelectWorkingDirectory.run() != Gtk::ResponseType::RESPONSE_OK) {
+			dialogSelectWorkingDirectory.hide();
 			return;
 		}
-		string newPath = dds.get_file()->get_path();
+		string newPath = dialogSelectWorkingDirectory.get_file()->get_path();
 		if (newPath == workingDirectory) {
 			// TODO add revert option
-			Message::displayInfo("Already working on that project", &dds);
-			dds.hide();
+			Message::displayInfo("Already working on that project", &dialogSelectWorkingDirectory);
+			dialogSelectWorkingDirectory.hide();
 			return;
 		}
-		if (Defaults::isDirty() and Message::ask("All unsaved changes will be loss, are you sure?", &dds) != Gtk::RESPONSE_YES) {
-			dds.hide();
+		if (Defaults::isDirty() and Message::ask("All unsaved changes will be loss, are you sure?", &dialogSelectWorkingDirectory) != Gtk::RESPONSE_YES) {
+			dialogSelectWorkingDirectory.hide();
 			return;
 		}
 		// set working directory
@@ -302,46 +326,46 @@ void MainWindow::prepareWorkingDirectory(Glib::RefPtr<Gtk::Builder> const &build
 
 		// wipe random colors and any other color
 		setColorFile("");
-		// set values.
+
+		// Old data.
 		try {
-			// Old.
 			import(workingDirectory + "/ledspicer.conf", true, IMPORT_ALL);
 		}
+		// New data.
 		catch (Message& e) {
-			// New.
-			// wipe forms.
-			dr->wipeContents();
-			dp->wipeContents();
-			dg->wipeContents();
-			DialogSelectElements::getInstance()->wipeContents();
-			DialogElement::getInstance()->wipeContents();
-			dd->wipeContents();
+			// wipe all data.
+			devices.wipe();
+			restrictors.wipe();
+			processes.wipe();
+			groups.wipe();
+			inputs.wipe();
 			unordered_map<string, string> values;
 			setConfiguration(values);
 		}
 		Defaults::cleanDirty();
 		MainTabs->set_sensitive(true);
-		dds.hide();
+		dialogSelectWorkingDirectory.hide();
 	});
 }
 
 void MainWindow::setConfiguration(unordered_map<string, string>& values) {
 	// ledspicerd
-	InputUserId->set_text(XMLHelper::valueOf(values,        "userId",   DEFAULT_USERID));
-	InputGroupId->set_text(XMLHelper::valueOf(values,       "groupId",  DEFAULT_GROUPID));
-	InputPortNumber->set_text(XMLHelper::valueOf(values,    "port",     DEFAULT_PORT));
-	InputFPS->set_text(XMLHelper::valueOf(values,           "fps",      DEFAULT_FPS));
+	inputUserId->set_text(XMLHelper::valueOf(values,        "userId",   DEFAULT_USERID));
+	inputGroupId->set_text(XMLHelper::valueOf(values,       "groupId",  DEFAULT_GROUPID));
+	inputPortNumber->set_text(XMLHelper::valueOf(values,    "port",     DEFAULT_PORT));
+	inputFPS->set_text(XMLHelper::valueOf(values,           "fps",      DEFAULT_FPS));
 	setColorFile(XMLHelper::valueOf(values,                 "colors",   DEFAULT_COLORS));
-	InputLogLevel->set_active_id(XMLHelper::valueOf(values, "logLevel", DEFAULT_LOGLEVEL));
-	ListBoxDataSource->sortAndMark(Defaults::explode(XMLHelper::valueOf(values, "dataSource", DEFAULT_DATASOURCE), ','));
+	inputLogLevel->set_active_id(XMLHelper::valueOf(values, "logLevel", DEFAULT_LOGLEVEL));
+	listBoxDataSource->sortAndMark(Defaults::explode(XMLHelper::valueOf(values, "dataSource", DEFAULT_DATASOURCE), ','));
 	auto randomColors(Defaults::explode(XMLHelper::valueOf(values, "randomColors", ""), ','));
-	if (not randomColors.empty())
+	if (not randomColors.empty()) {
 		DialogColors::getInstance()->populateColorBox(boxRandomColors, randomColors);
+	}
 
 	// DEFAULT_PROFILE
 	// emitter
-	InputColorsFile->set_active(XMLHelper::valueOf(values,    "colorsFile",   DEFAULT_COLORSINFO)   == "true");
-	InputCraftProfiles->set_active(XMLHelper::valueOf(values, "craftProfile", DEFAULT_CRAFTPROFILE) == "true");
+	inputColorsFile->set_active(XMLHelper::valueOf(values,    "colorsFile",   DEFAULT_COLORSINFO)   == "true");
+	inputCraftProfiles->set_active(XMLHelper::valueOf(values, "craftProfile", DEFAULT_CRAFTPROFILE) == "true");
 }
 
 string MainWindow::readConfiguration() {
@@ -349,67 +373,90 @@ string MainWindow::readConfiguration() {
 		// ledspicerd
 		{"version", "1.0"},
 		{"type",    "Configuration"},
-		{"userId",  InputUserId->get_text()},
-		{"userId",  InputUserId->get_text()},
-		{"groupId", InputGroupId->get_text()},
-		{"port",    InputPortNumber->get_text()},
-		{"fps",     InputFPS->get_text()},
-		{"logLevel", InputLogLevel->get_active_id()},
-		{"colors",   InputColors->get_active_id()},
-		{"dataSource",   Defaults::implode(ListBoxDataSource->getCheckedValues(), ',')},
+		{"userId",  inputUserId->get_text()},
+		{"userId",  inputUserId->get_text()},
+		{"groupId", inputGroupId->get_text()},
+		{"port",    inputPortNumber->get_text()},
+		{"fps",     inputFPS->get_text()},
+		{"logLevel", inputLogLevel->get_active_id()},
+		{"colors",   inputColors->get_active_id()},
+		{"dataSource",   Defaults::implode(listBoxDataSource->getCheckedValues(), ',')},
 		{"randomColors", Defaults::implode(DialogColors::getInstance()->getColorBoxValues(boxRandomColors), ',')},
 	};
 	// emitter
-	if (InputColorsFile->get_active())
+	if (inputColorsFile->get_active()) {
 		r.emplace("colorsFile", "true");
-	if (InputCraftProfiles->get_active())
+	}
+	if (inputCraftProfiles->get_active()) {
 		r.emplace("craftProfile", "true");
+	}
 
 	return XMLHelper::toXML(r);
 }
 
-void MainWindow::import(const string& ledspicerconf, bool wipe, uint8_t importFlags) {
-	ConfigFile datafile(ledspicerconf);
+void MainWindow::import(const string& dataFilePath, bool wipe, uint8_t importFlags) {
+	if (importFlags & IMPORT_INPUTS) {
+		InputFile datafile(dataFilePath);
+		if (wipe) {
+			inputs.wipe();
+		}
+		DataDialogs::DialogInput::getInstance()->load(&datafile);
+		return;
+	}
+
+	ConfigFile datafile(dataFilePath);
 	if (importFlags & IMPORT_CONFIG) {
 		auto c(datafile.getSettings());
 		// check if color are different.
 		const string
 			colorFile(c.count("colorsFile") ? c.at("colorsFile") : ""),
-			previous(InputColors->get_active_id());
+			previous(inputColors->get_active_id());
 		if (not previous.empty() and previous != colorFile)
 			Message::displayInfo("Warning\nColors definition file changed, element color changed");
 		setConfiguration(c);
 	}
 	if (importFlags & IMPORT_DEVICES) {
-		for (auto i : dd->createItems(datafile.getDevices(), wipe))
-			DialogElement::getInstance()->createItems(datafile.getDeviceElements(i->getForm()->createName()), i, wipe);
-
-		for (auto i : dg->createItems(datafile.getGroups(), wipe))
-			DialogSelectElements::getInstance()->createItems(datafile.getGroupElements(i->getForm()->createName()), i, wipe);
+		if (wipe) {
+			devices.wipe();
+			groups.wipe();
+		}
+		DataDialogs::DialogDevice::getInstance()->load(&datafile);
+		DataDialogs::DialogGroup::getInstance()->load(&datafile);
 		// TODO: set default profile
+
 	}
 	if (importFlags & IMPORT_RESTRICTORS) {
-		dr->createItems(datafile.getRestrictors(), wipe);
+		if (wipe) {
+			restrictors.wipe();
+		}
+		DataDialogs::DialogRestrictor::getInstance()->load(&datafile);
 	}
 
 	if (importFlags & IMPORT_MAPPINGS) {
-		dp->createItems(datafile.getProcess(), wipe);
-		dp->setRunEvery(datafile.getProcessLookupRunEvery());
+		if (wipe) {
+			processes.wipe();
+		}
+		DataDialogs::DialogProcess::getInstance()->load(&datafile);
+		inputRunEvery->set_text(datafile.getProcessLookupRunEvery());
 	}
+
+	// todo: using default profile load inputs and animations.
+	/*	if (wipe) {
+		inputs.wipe();
+	}*/
 }
 
 void MainWindow::setColorFile(const string& colorFile) {
 
 	if (colorFile.empty()) {
-		InputColors->set_active_id("");
+		inputColors->set_active_id("");
 		return;
 	}
 	try {
 		XMLHelper datafile(dataDirectory + colorFile + ".xml", "Colors");
-		InputColors->set_active_id(colorFile);
+		inputColors->set_active_id(colorFile);
 	}
 	catch (Message& e) {
 		e.displayError();
 	}
 }
-

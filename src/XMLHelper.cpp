@@ -4,7 +4,7 @@
  * @since     Feb 19, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2023 - 2024 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -89,5 +89,9 @@ string XMLHelper::toXML(const unordered_map<string, string>& values) {
 	for (const auto& v : values)
 		r += Defaults::tab() + v.first + "=\"" + v.second + "\"\n";
 	return r;
+}
+
+vector<unordered_map<string, string>>& XMLHelper::getData(const string& dataName) {
+	return extractedData[dataName];
 }
 

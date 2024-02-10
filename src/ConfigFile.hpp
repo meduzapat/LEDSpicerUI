@@ -4,7 +4,7 @@
  * @since     Apr 15, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2023 - 2024 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -25,7 +25,7 @@
 #ifndef CONFIGFILE_HPP_
 #define CONFIGFILE_HPP_ 1
 
-namespace LEDSpicerUI::Ui {
+namespace LEDSpicerUI {
 
 /**
  * LEDSpicerUI::Ui::ConfigFile
@@ -42,21 +42,9 @@ public:
 
 	unordered_map<string, string> getSettings();
 
-	vector<unordered_map<string, string>>& getDevices();
+	const string getDefaultProfile() const;
 
-	vector<unordered_map<string, string>>& getRestrictors();
-
-	vector<unordered_map<string, string>>& getDeviceElements(const string& deviceName);
-
-	vector<unordered_map<string, string>>& getGroups();
-
-	vector<unordered_map<string, string>>& getGroupElements(const string& groupName);
-
-	vector<unordered_map<string, string>>& getProcess();
-
-	string getDefaultProfile();
-
-	string getProcessLookupRunEvery();
+	const string getProcessLookupRunEvery() const;
 
 protected:
 
@@ -66,27 +54,17 @@ protected:
 
 	unordered_map<string, string> nodeSettings;
 
-	vector<unordered_map<string, string>> devices;
+	const string processDevices();
 
-	vector<unordered_map<string, string>> restrictors;
+	const string processRestrictors();
 
-	unordered_map<string, vector<unordered_map<string, string>>> devicesElements;
+	const string processProcessLookup();
 
-	vector<unordered_map<string, string>> groups;
+	const string processElements(tinyxml2::XMLElement* deviceNode, const string& deviceName);
 
-	unordered_map<string, vector<unordered_map<string, string>>> groupElements;
+	const string processRestrictorMaps(tinyxml2::XMLElement* restrictorNode, const string& restrictorName);
 
-	vector<unordered_map<string, string>> process;
-
-	string processDevices();
-
-	string processRestrictors();
-
-	string processProcessLookup();
-
-	string processElements(tinyxml2::XMLElement* deviceNode, const string& deviceName);
-
-	string processGroups();
+	const string processGroups();
 
 };
 

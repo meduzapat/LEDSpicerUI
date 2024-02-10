@@ -4,7 +4,7 @@
  * @since     Feb 19, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2023 - 2024 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -27,6 +27,8 @@
 #define XMLHELPER_HPP_ 1
 
 namespace LEDSpicerUI {
+
+using Ui::Message;
 
 /**
  * LEDSpicerUI::Ui::XMLHelper
@@ -102,10 +104,19 @@ public:
 	 */
 	static string toXML(const unordered_map<string, string>& values);
 
+	/**
+	 * @param dataName
+	 * @return The stored values for that collection.
+	 */
+	vector<unordered_map<string, string>>& getData(const string& dataName);
+
 protected:
 
 	/// Pointer to the root element.
 	tinyxml2::XMLElement* root = nullptr;
+
+	/// Stores the procceded file information by section.
+	unordered_map<string, vector<unordered_map<string, string>>> extractedData;
 
 };
 

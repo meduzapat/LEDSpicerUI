@@ -4,7 +4,7 @@
  * @since     Feb 22, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2023 - 2024 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -20,6 +20,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "XMLHelper.hpp"
 #include "Message.hpp"
 
 #ifndef UI_DIALOGCOLORS_HPP_
@@ -43,7 +44,7 @@ public:
 
 	static DialogColors* getInstance();
 
-	static DialogColors* getInstance(Glib::RefPtr<Gtk::Builder> const &builder);
+	static void initialize(Glib::RefPtr<Gtk::Builder> const &builder);
 
 	void setColorsFromFile(const string& colorsFilename);
 

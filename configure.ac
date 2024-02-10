@@ -2,7 +2,7 @@ dnl Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.69)
 
-COPYRIGHT="Copyright © 2023 Patricio A. Rossi (MeduZa)"
+COPYRIGHT="Copyright © 2023 - 2024 Patricio A. Rossi (MeduZa)"
 DESCRIPTION="This is the UI for the LEDSpicer daemon. The program will allow to setup LEDSpicer daemon, generate layouts, elements and animations."
 
 AC_INIT([LEDSpicerUI],[0.0.1],[https://github.com/meduzapat/LEDSpicerUI/issues],[ledspicerui],[https://github.com/meduzapat/LEDSpicerUI], [src/Message.cpp])

@@ -20,7 +20,7 @@ Debug/
 .autotools
 **/Makefile.in
 config.h.in
-*.m4
+#*.m4
 Makefile
 *.status
 configure
