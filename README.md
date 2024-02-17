@@ -12,11 +12,17 @@ The program will allow to setup LEDSpicer daemon, generate layouts, elements and
 
 ## Getting Started
 
-TODO
-
+```
+git clone git@github.com:meduzapat/LEDSpicerUI.git
+cd LEDSpicerUI
+./autogen.sh
+./configure CXXFLAGS='-g0 -O2'
+make
+sudo make install
+```
 ## Usage
 
-TODO
+I need to create a .desktop laucher so right now open the terminal and type ```ledspicerui``` or open you run dialog (alt f2 ?) and type ledspicerui.
 
 ## Comments are welcome.
 
