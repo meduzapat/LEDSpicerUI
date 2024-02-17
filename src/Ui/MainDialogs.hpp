@@ -26,6 +26,7 @@
 #include "DataDialogs/DialogProcess.hpp"
 #include "DataDialogs/DialogGroup.hpp"
 #include "DataDialogs/DialogInput.hpp"
+#include "DataDialogs/DialogProfile.hpp"
 
 #ifndef UI_MAINDIALOGS_HPP_
 #define UI_MAINDIALOGS_HPP_ 1
@@ -66,24 +67,22 @@ protected:
 	 * @}
 	 */
 
-	/**
-	 * @name Storage Collections
-	 *  @{
-	 */
+
+	/// @name Storage Collections
 	Storage::BoxButtonCollection
 		/// Created devices in the dialog devices.
 		devices,
-		/// Created restrictors in the dialog devices.
+		/// Created restrictors in the dialog restrictors.
 		restrictors,
-		/// Created processes in the dialog devices.
+		/// Created processes in the dialog processes.
 		processes,
-		/// Created groups in the dialog devices.
+		/// Created groups in the dialog groups.
 		groups,
-		/// Created inputs in the dialog devices.
-		inputs;
-	/**
-	 * @}
-	 */
+		/// Created inputs in the dialog inputs.
+		inputs,
+		/// Created profiles in the dialog profiles.
+		profiles;
+
 };
 
 } /* namespace */

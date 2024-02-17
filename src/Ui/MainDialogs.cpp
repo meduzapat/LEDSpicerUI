@@ -44,7 +44,7 @@ MainDialogs::MainDialogs(Glib::RefPtr<Gtk::Builder> const &builder, Gtk::Applica
 
 	// Initialize secondary dialogs.
 	DataDialogs::DialogElement::initialize(builder);
-	DataDialogs::DialogSelectElements::initialize(builder);
+	DataDialogs::DialogSelect::initialize(builder);
 	DataDialogs::DialogInputLinkMaps::initialize(builder);
 	DataDialogs::DialogInputMap::initialize(builder);
 	DataDialogs::DialogRestrictorMap::initialize(builder);
@@ -54,6 +54,7 @@ MainDialogs::MainDialogs(Glib::RefPtr<Gtk::Builder> const &builder, Gtk::Applica
 	DataDialogs::DialogProcess::initialize(builder);
 	DataDialogs::DialogGroup::initialize(builder);
 	DataDialogs::DialogInput::initialize(builder);
+	DataDialogs::DialogProfile::initialize(builder);
 
 	// Connect primary dialogs with the collections.
 	DataDialogs::DialogDevice::getInstance()->setOwner(&devices);
@@ -61,6 +62,7 @@ MainDialogs::MainDialogs(Glib::RefPtr<Gtk::Builder> const &builder, Gtk::Applica
 	DataDialogs::DialogProcess::getInstance()->setOwner(&processes);
 	DataDialogs::DialogGroup::getInstance()->setOwner(&groups);
 	DataDialogs::DialogInput::getInstance()->setOwner(&inputs);
+	DataDialogs::DialogProfile::getInstance()->setOwner(&profiles);
 
 	// Create select work directory FileChooserDialog
 	dialogSelectWorkingDirectory.set_transient_for(*window);
@@ -75,7 +77,8 @@ MainDialogs::MainDialogs(Glib::RefPtr<Gtk::Builder> const &builder, Gtk::Applica
 MainDialogs::~MainDialogs() {
 
 	// data dialogs.
-	delete DataDialogs::DialogSelectElements::getInstance();
+	delete DataDialogs::DialogSelect::getInstance();
+	delete DataDialogs::DialogProfile::getInstance();
 	delete DataDialogs::DialogElement::getInstance();
 	delete DataDialogs::DialogRestrictorMap::getInstance();
 	delete DataDialogs::DialogRestrictor::getInstance();
@@ -91,6 +94,7 @@ MainDialogs::~MainDialogs() {
 	delete Storage::PinHandler::getInstance();
 
 	// the order is important.
+	profiles.wipe();
 	processes.wipe();
 	inputs.wipe();
 	groups.wipe();

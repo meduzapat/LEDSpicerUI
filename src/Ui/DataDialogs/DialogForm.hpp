@@ -78,11 +78,6 @@ public:
 	virtual void setOwner(Storage::BoxButtonCollection* collection, Storage::Data* owner = nullptr);
 
 	/**
-	 * Remove the ownership.
-	 */
-	void releaseOwner();
-
-	/**
 	 * Reset form.
 	 */
 	virtual void clearForm() = 0;
@@ -181,15 +176,31 @@ protected:
 	void setSignalAdd();
 
 	/**
+	 * Utility to create and add a button that allows deletion of the BoxButtons.
+	 *
+	 * @param boxButton the boxButton that will receive this delete button to delete itself.
+	 * @param askConfirmation if set will ask, default yes.
+	 */
+	virtual void createDeleteButton(Storage::BoxButton* boxButton, bool askConfirmation = true);
+
+	/**
+	 * Utility to create and add a button that allows to edit the BoxButtons.
+	 *
+	 * @param boxButton the BoxButton that will receive this edit button to been able to get edited.
+	 */
+	virtual void createEditButton(Storage::BoxButton* boxButton);
+
+	/**
+	 * Function to create the necesary buttons in the boxButton.
+	 *
+	 * @param boxButton The BoxButton that will get buttons.
+	 */
+	virtual void addButtons(Storage::BoxButton* boxButton);
+
+	/**
 	 * Method to add generic Apply functionality.
 	 */
 	virtual void setSignalApply();
-
-	/**
-	 * Set any necessary signal.
-	 * @param button
-	 */
-	virtual void setSignals(Storage::BoxButton* button);
 
 	/**
 	 * When the add button is clicked.

@@ -60,14 +60,6 @@ const unordered_map<string, string>* Data::getValues() const {
 	return &fieldsData;
 }
 
-bool Data::canEdit() const {
-	return true;
-}
-
-bool Data::canDelete() const {
-	return true;
-}
-
 void Data::wipe() {
 	fieldsData.clear();
 }

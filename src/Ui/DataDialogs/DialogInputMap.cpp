@@ -72,7 +72,7 @@ DialogForm(obj, builder)
 }
 
 void DialogInputMap::load(XMLHelper* values) {
-	createItems(values->getData(owner->createUniqueId() + COLLECTION_INPUT_MAPS), values);
+	createItems(values->getData(Defaults::createCommonUniqueId({owner->createUniqueId(), COLLECTION_INPUT_MAPS})), values);
 }
 
 void DialogInputMap::clearForm() {

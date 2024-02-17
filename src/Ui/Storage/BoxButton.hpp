@@ -46,17 +46,13 @@ public:
 	BoxButton(BoxButton&& other) :
 		Gtk::HBox(std::move(other)),
 		data(std::exchange(other.data, nullptr)),
-		label(std::move(other.label)),
-		btnE(std::exchange(other.btnE, nullptr)),
-		btnD(std::exchange(other.btnD, nullptr)) {}
+		label(std::move(other.label)) {}
 
 	BoxButton& operator=(BoxButton&& other) {
 		if (this != &other) {
 			Gtk::HBox::operator=(std::move(other));
 			data  = std::exchange(other.data, nullptr);
 			label = std::move(other.label);
-			btnE  = std::exchange(other.btnE, nullptr);
-			btnD  = std::exchange(other.btnD, nullptr);
 		}
 		return *this;
 	}
@@ -68,16 +64,10 @@ public:
 	virtual ~BoxButton();
 
 	/**
-	 * Set the function to edit itself.
-	 * @param ediCallback
+	 * Adds a button to the front of the buttons.
+	 * @param button
 	 */
-	void setEditFn(std::function<void()> ediCallback);
-
-	/**
-	 * Set the function to delete itself.
-	 * @param delCallback
-	 */
-	void setDelFn(std::function<void()> delCallback);
+	void packButtonStart(Gtk::Button& button);
 
 	/**
 	 * Returns the internal form that contains the values.
@@ -104,10 +94,6 @@ protected:
 	/// Label to display.
 	Gtk::Label* label;
 
-	/// Button delete and edit.
-	Gtk::Button
-		* btnE,
-		* btnD;
 };
 
 } /* namespace */

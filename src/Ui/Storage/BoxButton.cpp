@@ -27,8 +27,6 @@ using namespace LEDSpicerUI::Ui::Storage;
 BoxButton::BoxButton(Data* form) :
 	data(form),
 	label(Gtk::make_managed<Gtk::Label>()),
-	btnE(form->canEdit()   ? Gtk::make_managed<Gtk::Button>() : nullptr),
-	btnD(form->canDelete() ? Gtk::make_managed<Gtk::Button>() : nullptr),
 	Gtk::HBox(false, 2)
 {
 	set_valign(Gtk::ALIGN_START);
@@ -45,15 +43,6 @@ BoxButton::BoxButton(Data* form) :
 	lbox->pack_start(*label, Gtk::PACK_EXPAND_WIDGET);
 	pack_start(*lbox, Gtk::PACK_EXPAND_WIDGET);
 
-	if (form->canEdit()) {
-		btnE->set_image_from_icon_name("applications-engineering", Gtk::ICON_SIZE_BUTTON);
-		pack_start(*btnE, Gtk::PACK_SHRINK);
-	}
-
-	if (form->canDelete()) {
-		btnD->set_image_from_icon_name("edit-delete", Gtk::ICON_SIZE_BUTTON);
-		pack_start(*btnD, Gtk::PACK_SHRINK);
-	}
 	get_style_context()->add_class("BoxButton");
 	if (not form->getCssClass().empty())
 		get_style_context()->add_class(form->getCssClass());
@@ -68,12 +57,8 @@ BoxButton::~BoxButton() {
 	}
 }
 
-void BoxButton::setEditFn(std::function<void()> ediCallback) {
-	btnE->signal_clicked().connect(ediCallback);
-}
-
-void BoxButton::setDelFn(std::function<void()> delCallback) {
-	btnD->signal_clicked().connect(delCallback);
+void BoxButton::packButtonStart(Gtk::Button& button) {
+	pack_start(button, Gtk::PACK_SHRINK);
 }
 
 Data* BoxButton::getData() {

@@ -23,7 +23,7 @@
 #include "Data.hpp"
 #include "BoxButtonCollection.hpp"
 #include "CollectionHandler.hpp"
-#include "DataDialogs/DialogSelectElements.hpp"
+#include "DataDialogs/DialogSelect.hpp"
 
 #ifndef GROUP_HPP_
 #define GROUP_HPP_ 1

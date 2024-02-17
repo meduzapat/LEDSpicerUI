@@ -21,7 +21,6 @@
  */
 
 #include "Storage/Group.hpp"
-#include "DialogSelectElements.hpp"
 
 #ifndef GROUPDIALOG_HPP_
 #define GROUPDIALOG_HPP_ 1
@@ -76,6 +75,9 @@ protected:
 
 	Gtk::Entry*  inputGroupName       = nullptr;
 	Gtk::Button* btnGroupDefaultColor = nullptr;
+
+	/// The box where group elements are displayed.
+	OrdenableFlowBox* boxElements = nullptr;
 
 	DialogGroup(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
 

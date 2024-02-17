@@ -62,7 +62,7 @@ DialogRestrictorMap::DialogRestrictorMap(BaseObjectType* obj, const Glib::RefPtr
 }
 
 void DialogRestrictorMap::load(XMLHelper* values) {
-	createItems(values->getData(owner->createUniqueId() + COLLECTION_RESTRICTOR_MAP), values);
+	createItems(values->getData(Defaults::createCommonUniqueId({owner->createUniqueId(), COLLECTION_RESTRICTOR_MAP})), values);
 }
 
 void DialogRestrictorMap::clearForm() {

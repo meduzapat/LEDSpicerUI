@@ -62,6 +62,14 @@ DialogGroup::DialogGroup(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& 
 	builder->get_widget("ComboBoxGN1", comboBoxGN1);
 	builder->get_widget("ComboBoxGN2", comboBoxGN2);
 
+	// Element Selector
+	builder->get_widget_derived("BoxGroupElements", boxElements, "BtnGroupElementUp", "BtnGroupElementDn");
+	Gtk::Button* btnAddElements = nullptr;
+	builder->get_widget("BtnAddGroupElements", btnAddElements);
+	btnAddElements->signal_clicked().connect([&]() {
+		DialogSelect::getInstance()->RunDialog();
+	});
+
 	btnGenerateGroupName->signal_clicked().connect([=]() {
 		comboBoxGN1->set_active(-1);
 		comboBoxGN2->set_active(-1);
@@ -71,7 +79,6 @@ DialogGroup::DialogGroup(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& 
 		}
 		dialogGenerateGroupName->hide();
 	});
-
 }
 
 void DialogGroup::load(XMLHelper* values) {
@@ -79,19 +86,22 @@ void DialogGroup::load(XMLHelper* values) {
 }
 
 void DialogGroup::createSubItems(XMLHelper* values) {
-	DataDialogs::DialogSelectElements::getInstance()->load(values);
+	DataDialogs::DialogSelect::getInstance()->load(values);
 }
 
 void DialogGroup::clearForm() {
 	inputGroupName->set_text("");
-	DialogColors::getInstance()->colorizeButton(
-		btnGroupDefaultColor,
-		NO_COLOR
+	DialogColors::getInstance()->colorizeButton(btnGroupDefaultColor, NO_COLOR);
+	// This need to be run before activate.
+	DataDialogs::DialogSelect::getInstance()->setDestinationSettings(
+		boxElements,
+		COLLECTION_ELEMENT,
+		COLLECTION_GROUP,
+		DialogSelect::DELETER
 	);
 }
 
 void DialogGroup::isValid() const {
-	//string name(inputGroupName->get_text());
 	string name(createUniqueId());
 	if (name.empty()) {
 		if (mode != Modes::LOAD)
@@ -106,13 +116,6 @@ void DialogGroup::isValid() const {
 				inputGroupName->grab_focus();
 			throw Message("Group with name " + name + " already exist.");
 		}
-	}
-
-	// Check for dupe group name.
-	if (Storage::CollectionHandler::getInstance(COLLECTION_GROUP)->isUsed(createUniqueId())) {
-		if (mode != Modes::LOAD)
-			inputGroupName->grab_focus();
-		throw Message("Group " + name + " already exists.");
 	}
 
 	// Check no selected elements.

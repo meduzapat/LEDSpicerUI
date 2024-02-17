@@ -101,7 +101,7 @@ DialogInputLinkMaps::DialogInputLinkMaps(BaseObjectType* obj, const Glib::RefPtr
 		auto map  = getData(rawData);
 		auto bPtr = items->add(map);
 		// Set signals and store.
-		setSignals(bPtr);
+		addButtons(bPtr);
 		box->add(*bPtr);
 	});
 
@@ -113,7 +113,7 @@ DialogInputLinkMaps::~DialogInputLinkMaps() {
 }
 
 void DialogInputLinkMaps::load(XMLHelper* values) {
-	createItems(values->getData(owner->createUniqueId() + COLLECTION_INPUT_LINKED_MAPS), values);
+	createItems(values->getData(Defaults::createCommonUniqueId({owner->createUniqueId(), COLLECTION_INPUT_LINKED_MAPS})), values);
 }
 
 void DialogInputLinkMaps::clearForm() {
@@ -173,7 +173,6 @@ void DialogInputLinkMaps::retrieveData() {
 			rawData,
 			"",
 			"LinkBoxButton",
-			false, false,
 			[](const unordered_map<string, string>& data) {
 				const auto parts(Defaults::explode(data.at(NAME), FIELD_SEPARATOR));
 				return parts.at(1);

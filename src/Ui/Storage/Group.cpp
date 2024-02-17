@@ -49,7 +49,7 @@ const string Group::getCssClass() const {
 }
 
 void Group::activate() {
-	DataDialogs::DialogSelectElements::getInstance()->setOwner(&elements, this);
+	DataDialogs::DialogSelect::getInstance()->setOwner(&elements, this);
 }
 
 const string Group::toXML() const {

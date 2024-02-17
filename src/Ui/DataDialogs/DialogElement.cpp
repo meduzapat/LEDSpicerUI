@@ -131,7 +131,7 @@ DialogElement::DialogElement(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 }
 
 void DialogElement::load(XMLHelper* values) {
-	createItems(values->getData(owner->createUniqueId() + COLLECTION_ELEMENT), values);
+	createItems(values->getData(Defaults::createCommonUniqueId({owner->createUniqueId(), COLLECTION_ELEMENT})), values);
 }
 
 void DialogElement::clearForm() {

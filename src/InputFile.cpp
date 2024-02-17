@@ -67,7 +67,7 @@ const string InputFile::processMaps(const string& inputName) {
 		}
 		maps.push_back(mapAttr);
 	}
-	extractedData.emplace(inputName + COLLECTION_INPUT_MAPS, maps);
+	extractedData.emplace(Defaults::createCommonUniqueId({inputName, COLLECTION_INPUT_MAPS}), maps);
 	return errors;
 }
 
@@ -109,6 +109,6 @@ const string InputFile::processLinkedMaps(const string& inputLinkedMaps, const s
 			linkedMaps.emplace_back(unordered_map<string, string>{{NAME, Defaults::implode(linkedMapTrigger, RECORD_SEPARATOR)}});
 		}
 	}
-	extractedData.emplace(inputName + COLLECTION_INPUT_LINKED_MAPS, std::move(linkedMaps));
+	extractedData.emplace(Defaults::createCommonUniqueId({inputName, COLLECTION_INPUT_LINKED_MAPS}), std::move(linkedMaps));
 	return errors;
 }

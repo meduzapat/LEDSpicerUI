@@ -40,14 +40,6 @@ const string NameOnly::createUniqueId() const {
 	return getValue(NAME);
 }
 
-bool NameOnly::canEdit() const {
-	return allowEdit;
-}
-
-bool NameOnly::canDelete() const {
-	return allowDelete;
-}
-
 const string NameOnly::getCssClass() const {
 	return cssClass;
 }

@@ -65,6 +65,9 @@ using std::string;
 #define DEFAULT_RUNEVERY ""
 #define DEFAULT_PROFILE  "default"
 
+#define BACKGROUND_COLOR "backgroundColor"
+#define DEFAULT_PROFILE_BACKGROUND_COLOR "Off"
+
 #define NAME     "name"
 #define ID       "boardId"
 #define FILENAME "filename"
@@ -135,6 +138,8 @@ using std::string;
 #define COLLECTION_INPUT             "inputNames"
 #define COLLECTION_INPUT_MAPS        "triggers"
 #define COLLECTION_INPUT_LINKED_MAPS "linkedMaps"
+#define COLLECTION_ANIMATIONS        "animations"
+#define COLLECTION_PROFILES          "profiles"
 
 namespace LEDSpicerUI {
 

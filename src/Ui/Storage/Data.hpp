@@ -101,16 +101,6 @@ public:
 	const unordered_map<string, string>* getValues() const;
 
 	/**
-	 * @return true if the allows editions.
-	 */
-	virtual bool canEdit() const;
-
-	/**
-	 * @return true if the allows deletions.
-	 */
-	virtual bool canDelete() const;
-
-	/**
 	 * Removes all data.
 	 */
 	virtual void wipe();

@@ -178,6 +178,15 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 	builder->get_widget("InputCraftProfiles", inputCraftProfiles);
 	Defaults::registerWidget(inputColorsFile);
 	Defaults::registerWidget(inputCraftProfiles);
+	// When the input profiles is active, and the arcade profile is missing, ask for creating an empty arcade profile
+	inputCraftProfiles->signal_toggled().connect([&]() {
+			if (inputCraftProfiles->get_active()) {
+				// check if the arcade profile exist.
+				if (Message::ask("The foundation profile for arcades is missing\nDo you want to create an empty arcade profile?") == Gtk::RESPONSE_YES) {
+					Message::displayInfo("The profile was created");
+				}
+			}
+		});
 	builder->get_widget_derived("ListBoxDatasource", listBoxDataSource, "BtnDatasourceUp", "BtnDatasourceDown");
 	inputColors->signal_changed().connect([&]() {
 		DialogColors::getInstance()->setColorsFromFile(dataDirectory + inputColors->get_active_id() + ".xml");
@@ -334,6 +343,7 @@ void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {
 		// New data.
 		catch (Message& e) {
 			// wipe all data.
+			profiles.wipe();
 			devices.wipe();
 			restrictors.wipe();
 			processes.wipe();

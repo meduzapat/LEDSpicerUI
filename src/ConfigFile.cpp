@@ -187,7 +187,7 @@ const string ConfigFile::processElements(tinyxml2::XMLElement* deviceNode, const
 		elementAttr["type"] = Defaults::detectElementType(elementAttr[NAME]);
 		elements.push_back(elementAttr);
 	}
-	extractedData.emplace(deviceName + COLLECTION_ELEMENT, std::move(elements));
+	extractedData.emplace(Defaults::createCommonUniqueId({deviceName, COLLECTION_ELEMENT}), std::move(elements));
 	return errors;
 }
 
@@ -209,7 +209,7 @@ const string ConfigFile::processRestrictorMaps(tinyxml2::XMLElement* restrictorN
 		}
 		maps.push_back(mapAttr);
 	}
-	extractedData.emplace(restrictorName + COLLECTION_RESTRICTOR_MAP, std::move(maps));
+	extractedData.emplace(Defaults::createCommonUniqueId({restrictorName, COLLECTION_RESTRICTOR_MAP}), std::move(maps));
 	return errors;
 }
 
@@ -253,7 +253,7 @@ const string ConfigFile::processGroups() {
 			}
 			elements.push_back(elementAttr);
 		}
-		extractedData.emplace(group[NAME] + COLLECTION_GROUP, std::move(elements));
+		extractedData.emplace(Defaults::createCommonUniqueId({group[NAME], COLLECTION_GROUP}), std::move(elements));
 	}
 	extractedData.emplace(COLLECTION_GROUP, std::move(groups));
 	return errors;

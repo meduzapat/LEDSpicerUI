@@ -25,7 +25,8 @@
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
 DialogForm::DialogForm(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) : Gtk::Dialog(obj) {
-	signal_show().connect(sigc::mem_fun(*this, &DialogForm::refreshBox));
+	// this needs to be run last
+	signal_show().connect(sigc::mem_fun(*this, &DialogForm::refreshBox), true);
 }
 
 DialogForm::~DialogForm() {
@@ -52,7 +53,7 @@ void DialogForm::createItems(vector<unordered_map<string, string>>& rawCollectio
 		storeData();
 		// BoxButton will take care for data.
 		auto b = items->add(currentData);
-		setSignals(b);
+		addButtons(b);
 		box->add(*b);
 		createSubItems(values);
 		currentData->deActivate();
@@ -78,11 +79,6 @@ void DialogForm::setOwner(Storage::BoxButtonCollection* collection, Storage::Dat
 	DialogForm::owner = owner;
 	items = collection;
 	items->populateBox(box);
-}
-
-void DialogForm::releaseOwner() {
-	owner = nullptr;
-	items = nullptr;
 }
 
 vector<const unordered_map<string, string>*> DialogForm::getValues() {
@@ -114,37 +110,53 @@ void DialogForm::setSignalApply() {
 	});
 }
 
-void DialogForm::setSignals(Storage::BoxButton* button) {
-	if (button->getData()->canEdit()) {
-		button->setEditFn([&, button]() {
-			onEditClicked(button);
-		});
-	}
-	if (button->getData()->canDelete()) {
-		button->setDelFn([&, button]() {
-			if (Message::ask("Are you sure you want to remove " + button->getData()->createPrettyName() + "?") == Gtk::ResponseType::RESPONSE_YES) {
-				onDelClicked(button);
+void DialogForm::createDeleteButton(Storage::BoxButton* boxButton, bool askConfirmation) {
+	auto button(Gtk::make_managed<Gtk::Button>());
+	boxButton->pack_start(*button, Gtk::PACK_SHRINK);
+	button->set_image_from_icon_name("edit-delete", Gtk::ICON_SIZE_BUTTON);
+	button->signal_clicked().connect([&, boxButton, askConfirmation]() {
+		if (askConfirmation) {
+			if (Message::ask("Are you sure you want to remove " + boxButton->getData()->createPrettyName() + "?") == Gtk::ResponseType::RESPONSE_YES) {
+				onDelClicked(boxButton);
 			}
-		});
-	}
+		}
+		else {
+			onDelClicked(boxButton);
+		}
+	});
+}
+
+void DialogForm::createEditButton(Storage::BoxButton* boxButton) {
+	auto button(Gtk::make_managed<Gtk::Button>());
+	boxButton->pack_start(*button, Gtk::PACK_SHRINK);
+	button->set_image_from_icon_name("applications-engineering", Gtk::ICON_SIZE_BUTTON);
+	button->signal_clicked().connect([&, boxButton]() {
+		onEditClicked(boxButton);
+	});
+}
+
+void DialogForm::addButtons(Storage::BoxButton* boxButton) {
+	createEditButton(boxButton);
+	createDeleteButton(boxButton);
+	boxButton->show_all();
 }
 
 void DialogForm::onAddClicked() {
 	// set dialog to add.
 	mode = Modes::ADD;
+	clearForm();
 	// Set label and title.
 	set_title("Add New " + getType());
 	btnApply->set_label("Create");
 	currentData = getData();
 	currentData->activate();
-	clearForm();
 	// Run Dialog.
 	if (run() == Gtk::ResponseType::RESPONSE_APPLY) {
 		storeData();
 		Defaults::markDirty();
 		// store.
 		auto bPtr = items->add(currentData);
-		setSignals(bPtr);
+		addButtons(bPtr);
 		// Add into the box.
 		box->add(*bPtr);
 		// Custom stuff.
@@ -188,7 +200,7 @@ void DialogForm::onDelClicked(Storage::BoxButton* boxButton) {
 	afterDeleteConfirmation(boxButton);
 	Defaults::markDirty();
 	box->remove(*boxButton);
-	// this will also delete the object, the destructor must call deActivate if necessary.
+	// This will also delete the object, the destructor must call deActivate if necessary.
 	items->remove(boxButton);
 	currentData = nullptr;
 }

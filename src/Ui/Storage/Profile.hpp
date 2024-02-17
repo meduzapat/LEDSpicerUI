@@ -21,6 +21,9 @@
  */
 
 #include "Data.hpp"
+#include "BoxButtonCollection.hpp"
+#include "CollectionHandler.hpp"
+#include "DataDialogs/DialogSelect.hpp"
 
 #ifndef PROFILE_HPP_
 #define PROFILE_HPP_ 1
@@ -34,9 +37,18 @@ class Profile: public Data {
 
 public:
 
-	using Data::Data;
+	enum class Selectors : uint8_t {
+		AlwaysOnElements,
+		AlwaysOnGroups,
+		Inputs,
+		Animationss,
+		StartTransitions,
+		EndTransitions
+	};
 
-	virtual ~Profile() = default;
+	Profile(unordered_map<string, string>& data);
+
+	virtual ~Profile();
 
 	const string createPrettyName() const override;
 
@@ -46,9 +58,17 @@ public:
 
 	const string toXML() const override;
 
+	void lateActivate(Selectors selector);
+
 protected:
 
-	//BoxButtonCollection profiles;
+	BoxButtonCollection
+		alwaysOnElements,
+		alwaysOnGroups,
+		inputs,
+		animationss,
+		startTransitions,
+		endTransitions;
 
 };
 

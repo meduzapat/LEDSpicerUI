@@ -29,6 +29,9 @@ namespace LEDSpicerUI::Ui::Storage {
 
 /**
  * LEDSpicerUI::Ui::Storage::NameOnly
+ *
+ * A very generic container for data that allows some customization
+ * to avoid creating specialized classes for very common data types.
  */
 class NameOnly: public Data {
 
@@ -42,16 +45,12 @@ public:
 		unordered_map<string, string>& data,
 		const string& node     = "",
 		const string& cssClass = "",
-		bool canEdit           = false,
-		bool canDelete         = true,
 		textGeneratorFunction prettyNamedFunction = nullptr,
 		textGeneratorFunction tooltipFunction     = nullptr
 	) :
 		Data(data),
 		node(node),
 		cssClass(cssClass),
-		allowEdit(canEdit),
-		allowDelete(canDelete),
 		prettyNamedFunction(prettyNamedFunction),
 		tooltipFunction(tooltipFunction) {}
 
@@ -65,17 +64,9 @@ public:
 
 	const string createUniqueId() const override;
 
-	bool canEdit() const override;
-
-	bool canDelete() const override;
-
 	const string toXML() const override;
 
 protected:
-
-	bool
-		allowEdit,
-		allowDelete;
 
 	const string
 		cssClass,

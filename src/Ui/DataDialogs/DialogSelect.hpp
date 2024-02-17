@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      DialogSelectElements.hpp
+ * @file      DialogSelect.hpp
  * @since     Feb 22, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
@@ -24,24 +24,41 @@
 #include "Storage/CollectionHandler.hpp"
 #include "Storage/NameOnly.hpp"
 
-#ifndef DIALOGSELECTELEMENTS_HPP_
-#define DIALOGSELECTELEMENTS_HPP_ 1
+#ifndef DIALOGSELECT_HPP_
+#define DIALOGSELECT_HPP_ 1
 
 namespace LEDSpicerUI::Ui::DataDialogs {
 
 /**
  * LEDSpicerUI::Ui::DialogSelect
- * Handles the selection of already created elements by dialog elements.
+ * Handles the selection of already created items by other dialogs.
  */
-class DialogSelectElements: public DialogForm {
+class DialogSelect: public DialogForm {
 
 	friend class Gtk::Builder;
 
 public:
 
-	DialogSelectElements() = delete;
+	/**
+	 * ButtonFlags Button Flags
+	 *
+	 * Constants representing flags for different button types.
+	 * @{
+	 */
+	static const uint8_t
+		/// Flag indicating a delete button.
+		DELETER = 1,
+		/// Flag indicating a default color picker button.
+		COLORER = 2,
+		/// Flag indicating an edit button.
+		EDITER  = 4;
+	/** @} */
 
-	virtual ~DialogSelectElements() = default;
+	DialogSelect() = delete;
+
+	virtual ~DialogSelect() = default;
+
+	void RunDialog();
 
 	/**
 	 * Instanciate an object of its class.
@@ -54,15 +71,23 @@ public:
 	 * Return an instance of this class.
 	 * @return
 	 */
-	static DialogSelectElements* getInstance();
+	static DialogSelect* getInstance();
+
 
 	void load(XMLHelper* values) override;
+
+	void setDestinationSettings(
+		OrdenableFlowBox* box,
+		const string& type,
+		const string& collection,
+		uint8_t buttons
+	);
 
 	void clearForm() override {};
 
 	void clearFormOthers();
 
-	void isValid() const override {};
+	void isValid() const override;
 
 	void storeData() override {}
 
@@ -70,29 +95,58 @@ public:
 
 	const string createUniqueId() const override {return "";}
 
-	const size_t getNumberOfSelectedElements() const;
+	/**
+	 * @return The number of selected boxes.
+	 */
+	const size_t getNumberOfSelections() const;
 
-	const size_t getNumberElements() const;
+	/**
+	 * @return The numbner of available boxes to select from.
+	 */
+	const size_t getNumberOfSelectables() const;
 
 protected:
 
 	/// Self instance.
-	static DialogSelectElements* instance;
+	static DialogSelect* instance;
 
-	Gtk::FlowBox* boxAllElements = nullptr;
+	/// Box where the selectables are displayed.
+	Gtk::FlowBox* boxAll = nullptr;
 
-	DialogSelectElements(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
+	/// The current form type.
+	string type;
+
+	/// The current Collection name.
+	string collection;
+
+	/// List of buttons to assign to the selected buttons.
+	uint8_t buttons = 0;
+
+	DialogSelect(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
 
 	const string getType() const override;
 
 	Storage::Data* getData(unordered_map<string, string>& rawData) override;
 
-	void populateElements();
+	/**
+	 * Creates a color picket button.
+	 * @param boxButton
+	 */
+	void createColorButton(Storage::BoxButton* boxButton);
 
-	bool elementExist(const string& name);
+	void addButtons(Storage::BoxButton* boxButton) override;
+
+	void populateSelectables();
+
+	/**
+	 * Checks if name exist in the items.
+	 * @param name
+	 * @return true if  found.
+	 */
+	bool exist(const string& name);
 
 };
 
 } /* namespace */
 
-#endif /* DIALOGSELECTELEMENTS_HPP_ */
+#endif /* DIALOGSELECT_HPP_ */

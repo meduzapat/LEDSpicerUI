@@ -36,22 +36,24 @@ ledspicerui_SOURCES =   \
 	src/Ui/Storage/InputMapLink.cpp  \
 	src/Ui/Storage/InputMap.cpp      \
 	src/Ui/Storage/Input.cpp         \
+	src/Ui/Storage/Profile.cpp       \
 	src/Ui/Storage/BoxButton.cpp     \
-	src/Ui/Storage/BoxButtonCollection.cpp      \
-	src/Ui/DataDialogs/DialogForm.cpp           \
-	src/Ui/DataDialogs/DialogSelectElements.cpp \
-	src/Ui/DataDialogs/DialogElement.cpp        \
-	src/Ui/DataDialogs/DialogGroup.cpp          \
-	src/Ui/DataDialogs/DialogDevice.cpp         \
-	src/Ui/DataDialogs/DialogRestrictorMap.cpp  \
-	src/Ui/DataDialogs/DialogRestrictor.cpp     \
-	src/Ui/DataDialogs/DialogInputLinkMaps.cpp  \
-	src/Ui/DataDialogs/DialogInputMap.cpp       \
-	src/Ui/DataDialogs/DialogInput.cpp          \
-	src/Ui/DataDialogs/DialogProcess.cpp        \
-	src/Ui/DialogImport.cpp                     \
-	src/Ui/MainDialogs.cpp                      \
-	src/Ui/MainWindow.cpp                       \
+	src/Ui/Storage/BoxButtonCollection.cpp     \
+	src/Ui/DataDialogs/DialogForm.cpp          \
+	src/Ui/DataDialogs/DialogSelect.cpp        \
+	src/Ui/DataDialogs/DialogElement.cpp       \
+	src/Ui/DataDialogs/DialogGroup.cpp         \
+	src/Ui/DataDialogs/DialogDevice.cpp        \
+	src/Ui/DataDialogs/DialogRestrictorMap.cpp \
+	src/Ui/DataDialogs/DialogRestrictor.cpp    \
+	src/Ui/DataDialogs/DialogInputLinkMaps.cpp \
+	src/Ui/DataDialogs/DialogInputMap.cpp      \
+	src/Ui/DataDialogs/DialogInput.cpp         \
+	src/Ui/DataDialogs/DialogProcess.cpp       \
+	src/Ui/DataDialogs/DialogProfile.cpp       \
+	src/Ui/DialogImport.cpp                    \
+	src/Ui/MainDialogs.cpp                     \
+	src/Ui/MainWindow.cpp                      \
 	src/LEDSpicerUI.cpp
 
 ledspicerui_CPPFLAGS = \
@@ -111,19 +113,21 @@ EXTRA_DIST =            \
 	src/Ui/Storage/InputMapLink.hpp  \
 	src/Ui/Storage/InputMap.hpp      \
 	src/Ui/Storage/Input.hpp         \
+	src/Ui/Storage/Profile.hpp       \
 	src/Ui/Storage/BoxButton.hpp     \
-	src/Ui/Storage/BoxButtonCollection.hpp     \
-	src/Ui/DataDialog/DialogForm.hpp           \
-	src/Ui/DataDialog/DialogElement.hpp        \
-	src/Ui/DataDialog/DialogSelectElements.hpp \
-	src/Ui/DataDialog/DialogGroup.hpp  \
-	src/Ui/DataDialog/DialogDevice.hpp \
-	src/Ui/DataDialog/DialogRestrictorMap.hpp \
-	src/Ui/DataDialog/DialogRestrictor.hpp    \
-	src/Ui/DataDialog/DialogInputLinkMaps.hpp \
-	src/Ui/DataDialog/DialogInputMap.hpp      \
-	src/Ui/DataDialog/DialogInput.hpp   \
-	src/Ui/DataDialog/DialogProcess.hpp \
+	src/Ui/Storage/BoxButtonCollection.hpp \
+	src/Ui/DataDialogs/DialogForm.hpp       \
+	src/Ui/DataDialogs/DialogElement.hpp    \
+	src/Ui/DataDialogs/DialogSelect.hpp     \
+	src/Ui/DataDialogs/DialogGroup.hpp  \
+	src/Ui/DataDialogs/DialogDevice.hpp \
+	src/Ui/DataDialogs/DialogRestrictorMap.hpp \
+	src/Ui/DataDialogs/DialogRestrictor.hpp    \
+	src/Ui/DataDialogs/DialogInputLinkMaps.hpp \
+	src/Ui/DataDialogs/DialogInputMap.hpp      \
+	src/Ui/DataDialogs/DialogInput.hpp   \
+	src/Ui/DataDialogs/DialogProcess.hpp \
+	src/Ui/DataDialogs/DialogProfile.hpp \
 	src/Ui/DialogImport.hpp  \
 	src/Ui/MainDialogs.hpp   \
 	src/Ui/MainWindow.hpp    \

@@ -46,6 +46,10 @@ public:
 
 	static void initialize(Glib::RefPtr<Gtk::Builder> const &builder);
 
+	/**
+	 * Process a file with colors information and store the colors to be used.
+	 * @param colorsFilename
+	 */
 	void setColorsFromFile(const string& colorsFilename);
 
 	/**
