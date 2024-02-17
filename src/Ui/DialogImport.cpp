@@ -4,7 +4,7 @@
  * @since     May 7, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2023 - 2024 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -25,7 +25,8 @@
 using namespace LEDSpicerUI::Ui;
 
 const unordered_map<const DialogImport::Types, const string> DialogImport::setups {
-	{Types::CONFIG, "Select a config file"}
+	{Types::CONFIG, "Select a config file"},
+	{Types::INPUT,  "Select one or more input plugin files"}
 };
 
 DialogImport::DialogImport(const Types type, Gtk::Window* parent) :
@@ -36,10 +37,13 @@ DialogImport::DialogImport(const Types type, Gtk::Window* parent) :
 	)
 {
 
-	set_select_multiple(false);
 	set_position(Gtk::WindowPosition::WIN_POS_CENTER_ON_PARENT);
 	set_transient_for(*parent);
 	set_default_size(900, 700);
+
+	Glib::RefPtr<Gtk::FileFilter> filter(Gtk::FileFilter::create());
+	filter->add_mime_type("application/xml");
+
 	// Set buttons.
 	add_button("_Cancel", Gtk::RESPONSE_CANCEL)->get_style_context()->add_class("backgroundRed");
 	btbOk = add_button("_Open",   Gtk::RESPONSE_OK);
@@ -48,8 +52,17 @@ DialogImport::DialogImport(const Types type, Gtk::Window* parent) :
 	switch (type) {
 	case Types::CONFIG:
 		setConfigBox(box);
+		set_select_multiple(false);
+		filter->set_name("LEDSpicer config");
+		filter->add_pattern("*.conf");
+		break;
+	default:
+		set_select_multiple(true);
+		filter->set_name("LEDSpicer data Files");
+		filter->add_pattern("*.xml");
 		break;
 	}
+	add_filter(filter);
 	box->show_all();
 }
 

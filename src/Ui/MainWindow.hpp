@@ -4,7 +4,7 @@
  * @since     Feb 13, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2023 - 2024 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -23,14 +23,10 @@
 #ifndef MAINWINDOW_HPP_
 #define MAINWINDOW_HPP_ 1
 
-#include "DialogImport.hpp"
-#include "DialogDevice.hpp"
-#include "DialogRestrictor.hpp"
-#include "DialogProcess.hpp"
-#include "DialogGroup.hpp"
-#include "DialogInput.hpp"
-#include "XMLHelper.hpp"
+#include "ConfigFile.hpp"
+#include "InputFile.hpp"
 #include "OrdenableListBox.hpp"
+#include "MainDialogs.hpp"
 
 // for file and dir stats
 #include <sys/stat.h>
@@ -45,7 +41,7 @@ namespace LEDSpicerUI::Ui {
 /**
  * LEDSpicerUI::MainWindow
  */
-class MainWindow: public Gtk::ApplicationWindow {
+class MainWindow: public Gtk::ApplicationWindow, public MainDialogs {
 
 public:
 
@@ -59,34 +55,25 @@ protected:
 		dataDirectory,
 		workingDirectory;
 
-	DialogImport dic;
-	Gtk::FileChooserDialog dds;
-
 	Gtk::Entry
-		* InputUserId     = nullptr,
-		* InputGroupId    = nullptr,
-		* InputPortNumber = nullptr,
-		* InputRunEvery   = nullptr;
+		* inputUserId     = nullptr,
+		* inputGroupId    = nullptr,
+		* inputPortNumber = nullptr,
+		* inputRunEvery   = nullptr;
 
 	Gtk::ToggleButton
-		* InputCraftProfiles = nullptr,
-		* InputColorsFile    = nullptr;
+		* inputCraftProfiles = nullptr,
+		* inputColorsFile    = nullptr;
 
-	Gtk::SpinButton* InputFPS = nullptr;
+	Gtk::SpinButton* inputFPS = nullptr;
 
 	Gtk::ComboBoxText
-		* InputColors   = nullptr,
-		* InputLogLevel = nullptr;
+		* inputColors         = nullptr,
+		* inputLogLevel       = nullptr,
+		* inputDefaultProfile = nullptr;
 
-	OrdenableListBox* ListBoxDataSource = nullptr;
-
-
-	// keep this dialogs only to clean up.
-	DialogDevice*     dd = nullptr;
-	DialogRestrictor* dr = nullptr;
-	DialogProcess*    dp = nullptr;
-	DialogGroup*      dg = nullptr;
-	DialogInput*      di = nullptr;
+	/// The list of data sources for ROM names.
+	OrdenableListBox* listBoxDataSource = nullptr;
 
 	Gtk::FlowBox* boxRandomColors = nullptr;
 
@@ -110,10 +97,10 @@ protected:
 	string readConfiguration();
 
 	/**
-	 * Process the selected working directory.
+	 * Connects Dialogs with buttons.
 	 * @param builder
 	 */
-	void prepareWorkingDirectory(Glib::RefPtr<Gtk::Builder> const &builder);
+	void prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder);
 
 	/**
 	 * Reads a ledspicer.conf file.

@@ -6,6 +6,7 @@ ACLOCAL_AMFLAGS = -I m4
 
 AM_CPPFLAGS =                             \
 	-I$(srcdir)/src                       \
+	-I$(srcdir)/src/Ui                    \
 	-DPACKAGE_CONF_DIR=\"$(sysconfdir)/\" \
 	-DPACKAGE_DATA_DIR=\"$(pkgdatadir)/\" \
 	-Wl,--no-as-needed                    \
@@ -15,37 +16,44 @@ bin_PROGRAMS = ledspicerui
 
 ledspicerui_SOURCES =   \
 	src/Defaults.cpp    \
-	src/Message.cpp     \
 	src/XMLHelper.cpp   \
 	src/ConfigFile.cpp  \
-	src/Ui/OrdenableFlowBox.cpp \
-	src/Ui/OrdenableListBox.cpp \
-	src/Ui/Forms/PinHandler.cpp \
-	src/Ui/Forms/CollectionHandler.cpp \
-	src/Ui/Forms/Form.cpp              \
-	src/Ui/Forms/NameOnly.cpp          \
-	src/Ui/Forms/Element.cpp           \
-	src/Ui/Forms/Group.cpp             \
-	src/Ui/Forms/Device.cpp       \
-	src/Ui/Forms/Restrictor.cpp   \
-	src/Ui/Forms/Process.cpp      \
-	src/Ui/Forms/InputMap.cpp     \
-	src/Ui/Forms/Input.cpp        \
-	src/Ui/Forms/BoxButton.cpp    \
-	src/Ui/Forms/BoxButtonCollection.cpp \
-	src/Ui/DialogColors.cpp  \
-	src/Ui/DialogForm.cpp    \
-	src/Ui/DialogSelectElements.cpp \
-	src/Ui/DialogGroup.cpp  \
-	src/Ui/DialogDevice.cpp \
-	src/Ui/DialogRestrictor.cpp    \
-	src/Ui/DialogElement.cpp       \
-	src/Ui/DialogInputLinkMaps.cpp \
-	src/Ui/DialogInputMap.cpp      \
-	src/Ui/DialogInput.cpp   \
-	src/Ui/DialogProcess.cpp \
-	src/Ui/DialogImport.cpp  \
-	src/Ui/MainWindow.cpp    \
+	src/InputFile.cpp   \
+	src/Ui/Message.cpp  \
+	src/Ui/DialogColors.cpp \
+	src/Ui/OrdenableFlowBox.cpp   \
+	src/Ui/OrdenableListBox.cpp   \
+	src/Ui/Storage/PinHandler.cpp \
+	src/Ui/Storage/CollectionHandler.cpp \
+	src/Ui/Storage/Data.cpp          \
+	src/Ui/Storage/NameOnly.cpp      \
+	src/Ui/Storage/Element.cpp       \
+	src/Ui/Storage/Group.cpp         \
+	src/Ui/Storage/Device.cpp        \
+	src/Ui/Storage/RestrictorMap.cpp \
+	src/Ui/Storage/Restrictor.cpp    \
+	src/Ui/Storage/Process.cpp       \
+	src/Ui/Storage/InputMapLink.cpp  \
+	src/Ui/Storage/InputMap.cpp      \
+	src/Ui/Storage/Input.cpp         \
+	src/Ui/Storage/Profile.cpp       \
+	src/Ui/Storage/BoxButton.cpp     \
+	src/Ui/Storage/BoxButtonCollection.cpp     \
+	src/Ui/DataDialogs/DialogForm.cpp          \
+	src/Ui/DataDialogs/DialogSelect.cpp        \
+	src/Ui/DataDialogs/DialogElement.cpp       \
+	src/Ui/DataDialogs/DialogGroup.cpp         \
+	src/Ui/DataDialogs/DialogDevice.cpp        \
+	src/Ui/DataDialogs/DialogRestrictorMap.cpp \
+	src/Ui/DataDialogs/DialogRestrictor.cpp    \
+	src/Ui/DataDialogs/DialogInputLinkMaps.cpp \
+	src/Ui/DataDialogs/DialogInputMap.cpp      \
+	src/Ui/DataDialogs/DialogInput.cpp         \
+	src/Ui/DataDialogs/DialogProcess.cpp       \
+	src/Ui/DataDialogs/DialogProfile.cpp       \
+	src/Ui/DialogImport.cpp                    \
+	src/Ui/MainDialogs.cpp                     \
+	src/Ui/MainWindow.cpp                      \
 	src/LEDSpicerUI.cpp
 
 ledspicerui_CPPFLAGS = \
@@ -85,38 +93,45 @@ DISTCLEANFILES = \
 EXTRA_DIST =            \
 	autogen.sh          \
 	src/Defaults.hpp    \
-	src/Message.hpp     \
 	src/XMLHelper.hpp   \
 	src/ConfigFile.hpp  \
+	src/InputFile.hpp   \
+	src/Ui/Message.hpp  \
+	src/Ui/DialogColors.hpp \
 	src/Ui/OrdenableFlowBox.hpp \
 	src/Ui/OrdenableListBox.hpp \
-	src/Ui/Forms/PinHandler.hpp \
-	src/Ui/Forms/CollectionHandler.hpp \
-	src/Ui/Forms/Form.hpp              \
-	src/Ui/Forms/NameOnly.hpp          \
-	src/Ui/Forms/Element.hpp           \
-	src/Ui/Forms/Group.hpp             \
-	src/Ui/Forms/Device.hpp       \
-	src/Ui/Forms/Restrictor.hpp   \
-	src/Ui/Forms/Process.hpp      \
-	src/Ui/Forms/InputMap.hpp     \
-	src/Ui/Forms/Input.hpp        \
-	src/Ui/Forms/BoxButton.hpp    \
-	src/Ui/Forms/BoxButtonCollection.hpp \
-	src/Ui/DialogColors.hpp              \
-	src/Ui/DialogForm.hpp                \
-	src/Ui/DialogSelectElements.hpp      \
-	src/Ui/DialogGroup.hpp               \
-	src/Ui/DialogDevice.hpp              \
-	src/Ui/DialogRestrictor.hpp          \
-	src/Ui/DialogElement.hpp             \
-	src/Ui/DialogInputLinkMaps.hpp       \
-	src/Ui/DialogInputMap.hpp            \
-	src/Ui/DialogInput.hpp   \
-	src/Ui/DialogProcess.hpp \
+	src/Ui/Storage/PinHandler.hpp \
+	src/Ui/Storage/CollectionHandler.hpp \
+	src/Ui/Storage/Data.hpp        \
+	src/Ui/Storage/NameOnly.hpp      \
+	src/Ui/Storage/Element.hpp       \
+	src/Ui/Storage/Group.hpp         \
+	src/Ui/Storage/Device.hpp        \
+	src/Ui/Storage/RestrictorMap.hpp \
+	src/Ui/Storage/Restrictor.hpp    \
+	src/Ui/Storage/Process.hpp       \
+	src/Ui/Storage/InputMapLink.hpp  \
+	src/Ui/Storage/InputMap.hpp      \
+	src/Ui/Storage/Input.hpp         \
+	src/Ui/Storage/Profile.hpp       \
+	src/Ui/Storage/BoxButton.hpp     \
+	src/Ui/Storage/BoxButtonCollection.hpp \
+	src/Ui/DataDialogs/DialogForm.hpp       \
+	src/Ui/DataDialogs/DialogElement.hpp    \
+	src/Ui/DataDialogs/DialogSelect.hpp     \
+	src/Ui/DataDialogs/DialogGroup.hpp  \
+	src/Ui/DataDialogs/DialogDevice.hpp \
+	src/Ui/DataDialogs/DialogRestrictorMap.hpp \
+	src/Ui/DataDialogs/DialogRestrictor.hpp    \
+	src/Ui/DataDialogs/DialogInputLinkMaps.hpp \
+	src/Ui/DataDialogs/DialogInputMap.hpp      \
+	src/Ui/DataDialogs/DialogInput.hpp   \
+	src/Ui/DataDialogs/DialogProcess.hpp \
+	src/Ui/DataDialogs/DialogProfile.hpp \
 	src/Ui/DialogImport.hpp  \
+	src/Ui/MainDialogs.hpp   \
 	src/Ui/MainWindow.hpp    \
-	src/LEDSpicerUI.hpp \
+	src/LEDSpicerUI.hpp      \
 	AUTHORS             \
 	ChangeLog           \
 	NEWS

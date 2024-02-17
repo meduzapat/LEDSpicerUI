@@ -4,7 +4,7 @@
  * @since     Apr 10, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2023 - 2024 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -76,9 +76,14 @@ size_t OrdenableFlowBox::getSize() {
 }
 
 void OrdenableFlowBox::wipe() {
-	for (auto child : get_children()) {
-		auto boxChild = dynamic_cast<Gtk::FlowBoxChild*>(child);
+	foreach([this](Gtk::Widget& child) {
+		auto boxChild = dynamic_cast<Gtk::FlowBoxChild*>(&child);
 		boxChild->remove();
 		remove(*boxChild);
-	}
+	});
+//	for (auto child : get_children()) {
+//		auto boxChild = dynamic_cast<Gtk::FlowBoxChild*>(child);
+//		boxChild->remove();
+//		remove(*dynamic_cast<Gtk::FlowBoxChild*>(child)->get_child());
+//	}
 }

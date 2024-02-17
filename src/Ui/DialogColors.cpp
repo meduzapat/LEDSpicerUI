@@ -4,7 +4,7 @@
  * @since     Feb 22, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2023 - 2024 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -21,7 +21,6 @@
  */
 
 #include "DialogColors.hpp"
-#include "XMLHelper.hpp"
 
 using namespace LEDSpicerUI::Ui;
 
@@ -33,10 +32,9 @@ DialogColors* DialogColors::getInstance() {
 	return dc;
 }
 
-DialogColors* DialogColors::getInstance(Glib::RefPtr<Gtk::Builder> const &builder) {
+void DialogColors::initialize(Glib::RefPtr<Gtk::Builder> const &builder) {
 	if (not dc)
 		builder->get_widget_derived("DialogColors", dc);
-	return dc;
 }
 
 DialogColors::DialogColors(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &builder) :
@@ -86,7 +84,7 @@ DialogColors::DialogColors(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const
 			auto c = dynamic_cast<Gtk::FlowBoxChild*>(child);
 			auto b = dynamic_cast<Gtk::Button*>(c->get_child());
 			auto t = b->get_tooltip_text().lowercase();
-			if (t.find(filterText) != std::string::npos)
+			if (t.find(filterText) != string::npos)
 				child->show();
 			else
 				child->hide();

@@ -16,16 +16,18 @@ combobox.noRoundRight button.combo,
 
 .backgroundGreen {
 	background: #008000;
+	color: #FFF;
 }
 
 .backgroundRed {
 	background: #e01b24;
+	color: #FFF;
 }
 
 .backgroundBlue {
 	background: #1a5fb4;
+	color: #FFF;
 }
-
 
 .On {
 	background: #FFF;
@@ -104,5 +106,10 @@ combobox.noRoundRight button.combo,
 .ProcessBoxButton {
 	background-image:    url("images/processButtonBackground.png");
 	border-color:        #99c1f1;
+}
+
+.InputBoxButton {
+	background-image:    url("images/profileButtonBackground.png");
+	border-color:        #3584e4;
 }
 

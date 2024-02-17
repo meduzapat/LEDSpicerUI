@@ -4,7 +4,7 @@
  * @since     May 6, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2023 - 2024 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -30,23 +30,24 @@ Gtk::HeaderBar* Defaults::header = nullptr;
 Gtk::Button* Defaults::btnSave   = nullptr;
 
 const unordered_map<string, Defaults::DeviceInfo> Defaults::devicesInfo = {
-//        ID                        NAME                MI  B/W    ML
-	{"UltimarcUltimate", {"Ultimarc Ipac Ultimate IO",   4, false, 96}},
-	{"UltimarcPacLed64", {"Ultimarc PacLed 64",          4, false, 64}},
-	{"UltimarcPacDrive", {"Ultimarc Pac Drive",          4, true,  16}},
-	{"UltimarcNanoLed",  {"Ultimarc NanoLed",            4, false, 60}},
-	{"LedWiz32",         {"Groovy Game Gear Led-Wiz 32", 4, false, 32}},
-	{"Howler",           {"Wolfware Howler",             4, false, 96}},
-	{"Adalight",         {"Adalight (ESP8266)",          1, false, 60}},
-	{"RaspberryPi",      {"Raspberry Pi GPIO pins",      1, false, 28}}
+//  ID                   NAME                            MaxI B/W    varia MaxPin Connection
+	{"UltimarcUltimate", {"Ultimarc Ipac Ultimate IO",     4, false, false, 96, Connection::USB}},
+	{"UltimarcPacLed64", {"Ultimarc PacLed 64",            4, false, false, 64, Connection::USB}},
+	{"UltimarcPacDrive", {"Ultimarc Pac Drive",            4, true,  false, 16, Connection::USB}},
+	{"UltimarcNanoLed",  {"Ultimarc NanoLed",              4, false, false, 60, Connection::USB}},
+	{"LedWiz32",         {"Groovy Game Gear Led-Wiz 32",  16, false, false, 32, Connection::USB}},
+	{"Howler",           {"Wolfware Howler",               4, false, false, 96, Connection::USB}},
+	{"Adalight",         {"Adalight Compatible",         127, false, true,  60, Connection::SERIAL}},
+	{"RaspberryPi",      {"Raspberry Pi GPIO",             1, false, false, 28, Connection::NONE}}
 };
 
 const unordered_map<string, Defaults::RestrictorInfo> Defaults::restrictorsInfo = {
-//        ID                        NAME
-	{"UltraStik360", {"Ultimarc UltraStik360",          4, {Ways::w2, Ways::w2v, Ways::w4, Ways::w4x, Ways::w8, Ways::w16, Ways::w49, Ways::analog, Ways::mouse}}},
-	{"ServoStik",    {"Ultimarc ServoStik",             4, {Ways::w4, Ways::w8}}},
-	{"GPWiz40RotoX", {"Groovy Game Gear GPWiz40 RotoX", 4, {Ways::rotary8, Ways::rotary12}}},
-	{"GPWiz49",      {"Groovy Game Gear GPWiz49",       4, {Ways::w2, Ways::w2v, Ways::w4, Ways::w4x, Ways::w8, Ways::w16, Ways::w49, Ways::analog, Ways::mouse}}},
+//  ID               NAME                               MaxI Connection         Is  ways
+	{"UltraStik360", {"Ultimarc UltraStik360",            4, Connection::USB,    1, {Ways::w2, Ways::w2v, Ways::w4, Ways::w4x, Ways::w8, Ways::w16, Ways::w49, Ways::analog, Ways::mouse}}},
+	{"ServoStik",    {"Ultimarc ServoStik",               4, Connection::USB,    1, {Ways::w4, Ways::w8}}},
+	{"GPWiz40RotoX", {"Groovy Game Gear GPWiz40 RotoX",   4, Connection::USB,    2, {Ways::rotary8, Ways::rotary12}}},
+	{"GPWiz49",      {"Groovy Game Gear GPWiz49",         4, Connection::USB,    1, {Ways::w2, Ways::w2v, Ways::w4, Ways::w4x, Ways::w8, Ways::w16, Ways::w49, Ways::analog, Ways::mouse}}},
+	{"TOS428",       {"TOS GRS Gate Restrictor",        127, Connection::SERIAL, 4, {Ways::w4, Ways::w8}}}
 };
 
 const vector<Defaults::Ways> Defaults::allWays{Ways::w2, Ways::w2v, Ways::w4, Ways::w4x, Ways::w8, Ways::w16, Ways::w49, Ways::analog, Ways::mouse, Ways::rotary8, Ways::rotary12};
@@ -78,12 +79,46 @@ const vector<string> Defaults::elementTypes{
 	"misc"
 };
 
-bool Defaults::isMultiple(const string& name) {
-	return (devicesInfo.at(name).maxIds > 1);
+// This can be wrong if a weird device came in, but at this moment only USB is ID user.
+bool Defaults::isIdUser(const string& name, bool isDevice) {
+	if (isDevice)
+		return (devicesInfo.at(name).connection == Connection::USB);
+	else
+		return (restrictorsInfo.at(name).connection == Connection::USB);
 }
 
 bool Defaults::isMonocrome(const string& name) {
 	return (devicesInfo.at(name).monochrome);
+}
+
+bool Defaults::isVariable(const string& name) {
+	return (devicesInfo.at(name).variable);
+}
+
+bool Defaults::isSerial(const string& name, bool isDevice) {
+	if (isDevice)
+		return (devicesInfo.at(name).connection == Connection::SERIAL);
+	else
+		return (restrictorsInfo.at(name).connection == Connection::SERIAL);
+}
+
+bool Defaults::isMulti(const string& name) {
+	return (restrictorsInfo.at(name).interfaces > 1);
+}
+
+string Defaults::createHardwareUniqueId(const unordered_map<string, string>& data, bool isDevice) {
+	string name(data.at(NAME));
+	if (Defaults::isIdUser(name, isDevice)) {
+		return (name + FIELD_SEPARATOR + data.at(ID));
+	}
+	if (Defaults::isSerial(name, isDevice)) {
+		return (name + FIELD_SEPARATOR + data.at(PORT));
+	}
+	return name;
+}
+
+string Defaults::createCommonUniqueId(const vector<string>& fieldsData) {
+	return implode(fieldsData, FIELD_SEPARATOR);
 }
 
 bool Defaults::isNumber(const string& number) {
@@ -94,20 +129,26 @@ bool Defaults::isNumber(const string& number) {
 	return true;
 }
 
-bool Defaults::isBetween(const string& number, int low, int hight) {
+bool Defaults::isBetween(const string& number, int low, int high) {
+	if (number.empty())
+		return false;
 	if (not isNumber(number))
 		return false;
 	int n = std::stoi(number);
-	if (hight == -1)
+	if (high == -1)
 		return (n >= low);
-	return (n >= low and n <= hight);
+	return (n >= low and n <= high);
+}
+
+string Defaults::addUnitSeparator(const string& unit) {
+	return UNIT_SEPARATOR + unit + UNIT_SEPARATOR;
 }
 
 double Defaults::getLiminance(const string& color) {
 	Gdk::Color c("#" + color);
-	double r = c.get_red_p() * 255;
+	double r = c.get_red_p()   * 255;
 	double g = c.get_green_p() * 255;
-	double b = c.get_blue_p() * 255;
+	double b = c.get_blue_p()  * 255;
 	return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
 }
 
@@ -137,12 +178,23 @@ vector<string> Defaults::explode(const string& text, const char delimiter, const
 	return temp;
 }
 
-string Defaults::implode(const vector<string>& values, const char delimiter) {
+string Defaults::implode(const vector<string>& values, const char& delimiter) {
+	string r;
+	if (values.empty())
+		return r;
+	for (const string& s : values) {
+		r += s + delimiter;
+	}
+	r.resize(r.size() - 1);
+	return r;
+}
+
+string Defaults::implode(const vector<string>& values, const string& delimiter) {
 	string r;
 	for (const string& s : values) {
 		r += s + delimiter;
 	}
-	r.resize(r.size() -1);
+	r.resize(r.size() - delimiter.size());
 	return r;
 }
 
@@ -234,4 +286,51 @@ void Defaults::reduceTab() {
 
 string Defaults::tab() {
 	return tabs;
+}
+
+void Defaults::populateComboBoxText(Gtk::ComboBoxText* comboBox, const vector<string>& values) {
+	comboBox->remove_all();
+	for (const auto& item : values)
+		comboBox->append(item);
+}
+
+void Defaults::populateComboBoxTextWithNumbers(Gtk::ComboBoxText* comboBox, int from, int to, const vector<string>& ignoreList) {
+	comboBox->remove_all();
+	for (int c = from; c <= to; c++) {
+		string v(std::to_string(c));
+		if (std::find(ignoreList.begin(), ignoreList.end(), v) == ignoreList.end()) {
+			comboBox->append(v);
+		}
+	}
+}
+
+void Defaults::populateComboBoxWithIds(
+	Gtk::ListStore* store,
+	uint max,
+	std::function<bool(const string&)> isUsedFn,
+	const string& emptyLabel,
+	const string& label
+) {
+	// clean id combobox.
+	auto children = store->children();
+	std::vector<Gtk::TreeIter> rowsToRemove;
+	for (auto iter = children.begin(); iter != children.end(); ++iter)
+		rowsToRemove.push_back(*iter);
+	for (const auto& iter : rowsToRemove)
+		store->erase(*iter);
+
+	if (not emptyLabel.empty()) {
+		auto row = *(store->append());
+		row.set_value(0, string());
+		row.set_value(1, string(emptyLabel));
+		row.set_value(2, false);
+	}
+
+	for (int c = 0; c < max; ++c) {
+		auto row = *(store->append());
+		const auto& id(std::to_string(c + 1));
+		row.set_value(0, id);
+		row.set_value(1, label + id);
+		row.set_value(2, not isUsedFn(id));
+	}
 }

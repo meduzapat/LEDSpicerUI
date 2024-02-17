@@ -4,7 +4,7 @@
  * @since     Apr 15, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2023 - 2024 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -22,7 +22,7 @@
 
 #include "ConfigFile.hpp"
 
-using namespace LEDSpicerUI::Ui;
+using namespace LEDSpicerUI;
 
 ConfigFile::ConfigFile(const string& ledspicerconf) : XMLHelper(ledspicerconf, "Configuration") {
 	// extract settings
@@ -37,35 +37,15 @@ unordered_map<string, string> ConfigFile::getSettings() {
 	return nodeSettings;
 }
 
-vector<unordered_map<string, string>>& ConfigFile::getDevices() {
-	return devices;
+const string ConfigFile::getDefaultProfile() const {
+	return defaultProfile;
 }
 
-vector<unordered_map<string, string>>& ConfigFile::getRestrictors() {
-	return restrictors;
-}
-
-vector<unordered_map<string, string>>& ConfigFile::getDeviceElements(const string& deviceName) {
-	return devicesElements.at(deviceName);
-}
-
-vector<unordered_map<string, string>>& ConfigFile::getGroups() {
-	return groups;
-}
-
-vector<unordered_map<string, string>>& ConfigFile::getGroupElements(const string& groupName) {
-	return groupElements.at(groupName);
-}
-
-vector<unordered_map<string, string>>& ConfigFile::getProcess() {
-	return process;
-}
-
-string ConfigFile::getProcessLookupRunEvery() {
+const string ConfigFile::getProcessLookupRunEvery() const {
 	return processLookupRunEvery;
 }
 
-string ConfigFile::processDevices() {
+const string ConfigFile::processDevices() {
 
 	tinyxml2::XMLElement* deviceNode = root->FirstChildElement("devices");
 	if (not deviceNode)
@@ -75,28 +55,36 @@ string ConfigFile::processDevices() {
 	if (not deviceNode )
 		return "Empty device section\n";
 
-	string errors;
+	string errors, name;
+	vector<unordered_map<string, string>> devices;
 	for (; deviceNode; deviceNode = deviceNode->NextSiblingElement("device")) {
 		unordered_map<string, string> deviceAttr = processNode(deviceNode);
 		try {
-			checkAttributes({NAME, ID}, deviceAttr, "device");
+			checkAttributes({NAME}, deviceAttr, "device");
 		}
 		catch (Message& e) {
 			errors += e.getMessage() + '\n';
 			continue;
 		}
-
-		if (not Defaults::devicesInfo.count(deviceAttr[NAME])) {
-			errors += "Ignored device, unknown type " + deviceAttr[NAME] + '\n';
+		name = deviceAttr[NAME];
+		if (not Defaults::devicesInfo.count(name)) {
+			errors += "Ignored device, unknown type " + name + '\n';
 			continue;
 		}
-
-		string name = deviceAttr[NAME] + "_" + deviceAttr[ID];
+		// Create Unique ID.
+		unordered_map<string, string> data{
+			{NAME, name},
+			// Device ID is no mandatory, and if is missing on a ID device, is assumed 1
+			{ID,   deviceAttr.count(ID)   ? deviceAttr[ID] : "1"},
+			// Serial Devices allows empty device serial PORT, that defaults to /dev/ttyUSB0or auto-detects.
+			{PORT, deviceAttr.count(PORT) ? deviceAttr[PORT] : ""}
+		};
 
 		devices.push_back(deviceAttr);
-		string elementErrors(processElements(deviceNode, name));
+		string elementErrors(processElements(deviceNode, Defaults::createHardwareUniqueId(data)));
 		errors += (not elementErrors.empty() ? elementErrors  + '\n' : "");
 	}
+	extractedData.emplace(COLLECTION_DEVICES, std::move(devices));
 
 	string groupErrors(processGroups());
 	string restrictorErrors(processRestrictors());
@@ -104,7 +92,7 @@ string ConfigFile::processDevices() {
 	return errors;
 }
 
-string ConfigFile::processRestrictors() {
+const string ConfigFile::processRestrictors() {
 	tinyxml2::XMLElement* restrictorNode = root->FirstChildElement("restrictors");
 	// Restrictors are optional.
 	if (not restrictorNode)
@@ -114,55 +102,45 @@ string ConfigFile::processRestrictors() {
 	if (not restrictorNode )
 		return "";
 
-	string errors;
+	string errors, name;
+	vector<unordered_map<string, string>> restrictors;
 	for (; restrictorNode; restrictorNode = restrictorNode->NextSiblingElement("restrictor")) {
 		unordered_map<string, string> restrictorAttr = processNode(restrictorNode);
 		try {
-			checkAttributes({NAME, ID}, restrictorAttr, "device");
+			checkAttributes({NAME}, restrictorAttr, "device");
 		}
 		catch (Message& e) {
 			errors += '\n' + e.getMessage();
 			continue;
 		}
-		string name = restrictorAttr[NAME] + "_" + restrictorAttr[ID];
-
-		if (not Defaults::restrictorsInfo.count(restrictorAttr[NAME])) {
-			errors += "Ignored restrictor, unknown type " + restrictorAttr[NAME] + '\n';
+		name = restrictorAttr[NAME];
+		if (not Defaults::restrictorsInfo.count(name)) {
+			errors += "Ignored restrictor, unknown type " + name + '\n';
 			continue;
 		}
+		// Create Unique ID.
+		unordered_map<string, string> data{
+			{NAME, name},
+			// Restrictor ID is no mandatory, and if is missing on a ID restrictor, is assumed 1
+			{ID,   not restrictorAttr.count(ID)   ? "1" : restrictorAttr[ID]},
+			// Serial restrictors allows empty port, that defaults to /dev/ttyUSB0 or auto-detects.
+			{PORT, not restrictorAttr.count(PORT) ? ""  : restrictorAttr[PORT]}
+		};
 
-		// check for single vs multiple restrinctors.
-		if (not restrictorAttr.count(PLAYER)) {
-			tinyxml2::XMLElement* restrictorMap = restrictorNode->FirstChildElement("map");
-			if (not restrictorMap) {
-				errors += "Ignored restrictor, invalid settings for " + name + '\n';
-				continue;
-			}
-			for (; restrictorMap; restrictorMap = restrictorMap->NextSiblingElement("map")) {
-				unordered_map<string, string> restrictorAttrTemp(restrictorAttr);
-				for (auto& pair : processNode(restrictorMap))
-					restrictorAttrTemp.insert(pair);
-				if (not restrictorAttrTemp.count(PLAYER) or not restrictorAttrTemp.count(JOYSTICK) ) {
-					errors += "Ignored restrictor, Missing or invalid mappings for " + name + '\n';
-					continue;
-				}
-				restrictors.push_back(restrictorAttrTemp);
-				continue;
-			}
-			continue;
-		}
 		restrictors.push_back(restrictorAttr);
+		string mapErrors(processRestrictorMaps(restrictorNode, Defaults::createHardwareUniqueId(data, false)));
+		errors += (not mapErrors.empty() ? mapErrors  + '\n' : "");
 	}
+	extractedData.emplace(COLLECTION_RESTRICTORS, std::move(restrictors));
 	return errors;
 }
 
-string ConfigFile::processProcessLookup() {
+const string ConfigFile::processProcessLookup() {
 	tinyxml2::XMLElement* plNode = root->FirstChildElement("processLookup");
 	if (not plNode)
 		return "";
 
 	unordered_map<string, string> plAttr = processNode(plNode);
-
 	processLookupRunEvery = plAttr.count(PARAM_MILLISECONDS) ? plAttr.at(PARAM_MILLISECONDS) : "";
 
 	plNode = plNode->FirstChildElement("map");
@@ -170,6 +148,7 @@ string ConfigFile::processProcessLookup() {
 		return "";
 
 	string errors;
+	vector<unordered_map<string, string>> process;
 	for (; plNode; plNode = plNode->NextSiblingElement("map")) {
 		plAttr = processNode(plNode);
 		try {
@@ -181,18 +160,19 @@ string ConfigFile::processProcessLookup() {
 		}
 		process.push_back(plAttr);
 	}
+	extractedData.emplace(COLLECTION_PROCESS, std::move(process));
 	return errors;
 }
 
-string ConfigFile::processElements(tinyxml2::XMLElement* deviceNode, const string& deviceName) {
+const string ConfigFile::processElements(tinyxml2::XMLElement* deviceNode, const string& deviceName) {
 
-	tinyxml2::XMLElement* elementNote = deviceNode->FirstChildElement("element");
-	if (not elementNote)
+	tinyxml2::XMLElement* elementNode = deviceNode->FirstChildElement("element");
+	if (not elementNode)
 		return "Missing elements node for " + deviceName + '\n';
 	vector<unordered_map<string, string>> elements;
 	string errors;
-	for (; elementNote; elementNote = elementNote->NextSiblingElement("element")) {
-		unordered_map<string, string> elementAttr = processNode(elementNote);
+	for (; elementNode; elementNode = elementNode->NextSiblingElement("element")) {
+		unordered_map<string, string> elementAttr = processNode(elementNode);
 		if (not elementAttr.count(NAME)) {
 			errors += "Ignored element, Missing element name in " + deviceName + '\n';
 			continue;
@@ -207,11 +187,33 @@ string ConfigFile::processElements(tinyxml2::XMLElement* deviceNode, const strin
 		elementAttr["type"] = Defaults::detectElementType(elementAttr[NAME]);
 		elements.push_back(elementAttr);
 	}
-	devicesElements.emplace(deviceName, elements);
+	extractedData.emplace(Defaults::createCommonUniqueId({deviceName, COLLECTION_ELEMENT}), std::move(elements));
 	return errors;
 }
 
-string ConfigFile::processGroups() {
+const string ConfigFile::processRestrictorMaps(tinyxml2::XMLElement* restrictorNode, const string& restrictorName) {
+	tinyxml2::XMLElement* mapNode = restrictorNode->FirstChildElement("map");
+	if (not mapNode)
+		return "Missing player map node for " + restrictorName + '\n';
+	vector<unordered_map<string, string>> maps;
+	string errors;
+	for (; mapNode; mapNode = mapNode->NextSiblingElement("map")) {
+
+		unordered_map<string, string> mapAttr = processNode(mapNode);
+		try {
+			checkAttributes({PLAYER, JOYSTICK, RESTRICTOR_INTERFACE}, mapAttr, "restrictor map");
+		}
+		catch (Message& e) {
+			errors += '\n' + e.getMessage();
+			continue;
+		}
+		maps.push_back(mapAttr);
+	}
+	extractedData.emplace(Defaults::createCommonUniqueId({restrictorName, COLLECTION_RESTRICTOR_MAP}), std::move(maps));
+	return errors;
+}
+
+const string ConfigFile::processGroups() {
 	unordered_map<string, string> group;
 	tinyxml2::XMLElement* layoutNode = root->FirstChildElement("layout");
 	if (not layoutNode)
@@ -224,6 +226,7 @@ string ConfigFile::processGroups() {
 	group.clear();
 
 	tinyxml2::XMLElement* groupNode = layoutNode->FirstChildElement("group");
+	vector<unordered_map<string, string>> groups;
 	if (groupNode)
 	for (; groupNode; groupNode = groupNode->NextSiblingElement("group")) {
 		group = processNode(groupNode);
@@ -250,9 +253,8 @@ string ConfigFile::processGroups() {
 			}
 			elements.push_back(elementAttr);
 		}
-		groupElements.emplace(group[NAME], elements);
+		extractedData.emplace(Defaults::createCommonUniqueId({group[NAME], COLLECTION_GROUP}), std::move(elements));
 	}
+	extractedData.emplace(COLLECTION_GROUP, std::move(groups));
 	return errors;
 }
-
-

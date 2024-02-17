@@ -4,7 +4,7 @@
  * @since     Feb 14, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2023 - 2024 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -20,10 +20,10 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "Message.hpp"
+
 #ifndef UI_DIALOGIMPORT_HPP_
 #define UI_DIALOGIMPORT_HPP_ 1
-
-#include "Message.hpp"
 
 namespace LEDSpicerUI::Ui {
 
@@ -35,7 +35,7 @@ class DialogImport: public Gtk::FileChooserDialog {
 
 public:
 
-	enum class Types : uint8_t {CONFIG};
+	enum class Types : uint8_t {CONFIG, INPUT};
 
 	DialogImport(const Types type, Gtk::Window* parent);
 
