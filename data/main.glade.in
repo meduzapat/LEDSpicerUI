@@ -924,7 +924,7 @@ Very usefull when MAME does not provide game's data, or when you want to  custom
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
                                 <property name="tooltip-text">This is the time the pin will receive power, after this time the pin will stop receiving power, this is useful for solenoid to avoid damage, or motors to run for a specific period of time.
-If nothing is set, the default is 50ms.</property>
+If nothing is set, the default is 1000ms.</property>
                                 <property name="max-length">5</property>
                                 <property name="width-chars">5</property>
                                 <property name="input-purpose">digits</property>

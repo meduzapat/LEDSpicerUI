@@ -73,12 +73,12 @@ public:
 	 */
 	static DialogSelect* getInstance();
 
-
 	void load(XMLHelper* values) override;
 
 	void setDestinationSettings(
 		OrdenableFlowBox* box,
 		const string& type,
+		const string& node,
 		const string& collection,
 		uint8_t buttons
 	);
@@ -113,11 +113,13 @@ protected:
 	/// Box where the selectables are displayed.
 	Gtk::FlowBox* boxAll = nullptr;
 
-	/// The current form type.
-	string type;
-
-	/// The current Collection name.
-	string collection;
+	string
+		/// The current form type.
+		type,
+		/// The node for XML.
+		node,
+		/// The current Collection name.
+		collection;
 
 	/// List of buttons to assign to the selected buttons.
 	uint8_t buttons = 0;

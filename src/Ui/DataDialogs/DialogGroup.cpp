@@ -96,6 +96,7 @@ void DialogGroup::clearForm() {
 	DataDialogs::DialogSelect::getInstance()->setDestinationSettings(
 		boxElements,
 		COLLECTION_ELEMENT,
+		"element",
 		COLLECTION_GROUP,
 		DialogSelect::DELETER
 	);

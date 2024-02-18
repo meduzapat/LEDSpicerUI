@@ -86,6 +86,13 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 	// Save project
 	btnSaveProject->signal_clicked().connect([&]() {
 		try {
+			// sanity checks.
+			if (inputDefaultProfile->get_active_text().empty()) {
+				throw Message("Select a default profile in the profile section");
+			}
+			if (boxRandomColors->get_children().size() == 1) {
+				throw Message("The number of random colors need to be more than one or zero.");
+			}
 			// Prepare directories
 			for (string d : {"/animations", "/inputs", "/profiles"}) {
 				string path(workingDirectory + d);
@@ -108,49 +115,52 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 			xmlData += ">\n";
 			// Create devices, restrictors and process
 			Defaults::increaseTab();
-
 			if (processes.getSize()) {
-				xmlData += "<processLookup runEvery=\"" + inputRunEvery->get_text() + "\">\n";
+				xmlData += Defaults::tab() + "<processLookup";
+				if (not inputRunEvery->get_text().empty()) {
+					xmlData += " runEvery=\"" + inputRunEvery->get_text() + "\"";
+				}
+				xmlData += ">\n";
 				Defaults::increaseTab();
 				for (auto p : processes) {
 					xmlData += p->getData()->toXML();
 				}
 				Defaults::reduceTab();
-				xmlData += "</processLookup>\n";
+				xmlData += Defaults::tab() + "</processLookup>\n";
 			}
 
-			xmlData += "<devices>\n";
+			xmlData += Defaults::tab() + "<devices>\n";
 			Defaults::increaseTab();
 			for (auto d : devices) {
 				xmlData += d->getData()->toXML();
 			}
 			Defaults::reduceTab();
-			xmlData += "</devices>\n";
+			xmlData += Defaults::tab() + "</devices>\n";
 
 			if (restrictors.getSize()) {
-				xmlData += "<restrictors>\n";
+				xmlData += Defaults::tab() + "<restrictors>\n";
 				Defaults::increaseTab();
 				for (auto r : restrictors) {
 					xmlData += r->getData()->toXML();
 				}
 				Defaults::reduceTab();
-				xmlData += "</restrictors>\n";
+				xmlData += Defaults::tab() + "</restrictors>\n";
 			}
 
 			// Add layout.
-			xmlData += "<layout defaultProfile=\"" + inputDefaultProfile->get_active_id() + "\">";
+			xmlData += Defaults::tab() + "<layout defaultProfile=\"" + inputDefaultProfile->get_active_id() + "\">\n";
 			Defaults::increaseTab();
 			for (auto g : groups) {
 				xmlData += g->getData()->toXML();
 			}
 			Defaults::reduceTab();
-			xmlData += "</layout>\n";
+			xmlData += Defaults::tab() + "</layout>\n";
 
 			Defaults::reduceTab();
 			xmlData += "</LEDSpicer>\n";
 
 			// Save config
-			string configFile(CONFIG_FILE);
+			string configFile(workingDirectory + CONFIG_FILE);
 			Glib::file_set_contents(configFile, xmlData);
 			Defaults::cleanDirty();
 			Message::displayInfo("Project saved successfully.");
@@ -197,6 +207,20 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 	 *******************/
 	builder->get_widget("InputRunEvery", inputRunEvery);
 	Defaults::registerWidget(inputRunEvery);
+
+	/*******************
+	 * Default Profile *
+	 *******************/
+	builder->get_widget("InputDefaultProfile", inputDefaultProfile);
+	Defaults::registerWidget(inputDefaultProfile);
+
+	// Check for unsaved project.
+	signal_delete_event().connect([](GdkEventAny* event) {
+		if (Defaults::isDirty())
+			if (Message::ask("Are you sure you want to exit without saving your changes?") == Gtk::RESPONSE_YES)
+				return false;
+		return true;
+	});
 }
 
 MainWindow::~MainWindow() {
@@ -329,7 +353,7 @@ void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {
 			dialogSelectWorkingDirectory.hide();
 			return;
 		}
-		// set working directory
+		// Set working directory.
 		workingDirectory = newPath;
 		Defaults::setSubtitle(workingDirectory);
 
@@ -338,7 +362,7 @@ void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {
 
 		// Old data.
 		try {
-			import(workingDirectory + "/ledspicer.conf", true, IMPORT_ALL);
+			import(workingDirectory + CONFIG_FILE, true, IMPORT_ALL);
 		}
 		// New data.
 		catch (Message& e) {
@@ -419,9 +443,9 @@ void MainWindow::import(const string& dataFilePath, bool wipe, uint8_t importFla
 		auto c(datafile.getSettings());
 		// check if color are different.
 		const string
-			colorFile(c.count("colorsFile") ? c.at("colorsFile") : ""),
+			colors(c.count("colors") ? c.at("colors") : ""),
 			previous(inputColors->get_active_id());
-		if (not previous.empty() and previous != colorFile)
+		if (not previous.empty() and previous != colors)
 			Message::displayInfo("Warning\nColors definition file changed, element color changed");
 		setConfiguration(c);
 	}
@@ -449,6 +473,11 @@ void MainWindow::import(const string& dataFilePath, bool wipe, uint8_t importFla
 		DataDialogs::DialogProcess::getInstance()->load(&datafile);
 		inputRunEvery->set_text(datafile.getProcessLookupRunEvery());
 	}
+
+	// Detect files in directory
+	Defaults::populateComboBoxText(inputDefaultProfile, {datafile.getDefaultProfile()});
+	// this will trigger load.
+	inputDefaultProfile->set_active_text(datafile.getDefaultProfile());
 
 	// todo: using default profile load inputs and animations.
 	/*	if (wipe) {

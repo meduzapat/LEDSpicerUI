@@ -45,10 +45,10 @@ const string NameOnly::getCssClass() const {
 }
 
 const string NameOnly::toXML() const {
-	string r("<" + node + "\n");
+	string r(Defaults::tab() + "<" + node + "\n");
 	Defaults::increaseTab();
 	r += Data::toXML();
 	Defaults::reduceTab();
-	r += ">\n";
+	r += Defaults::tab() + ">\n";
 	return r;
 }

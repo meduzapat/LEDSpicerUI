@@ -69,7 +69,7 @@ void Device::deActivate() {
 }
 
 const string Device::toXML() const {
-	string r("<device\n");
+	string r(Defaults::tab() + "<device\n");
 	Defaults::increaseTab();
 	Data::toXML();
 	Defaults::reduceTab();
@@ -79,7 +79,7 @@ const string Device::toXML() const {
 		r += e->getData()->toXML();
 	}
 	Defaults::reduceTab();
-	return r + "</device>\n";
+	return r + Defaults::tab() + "</device>\n";
 }
 
 

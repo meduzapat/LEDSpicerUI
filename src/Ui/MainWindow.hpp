@@ -52,7 +52,9 @@ public:
 protected:
 
 	string
+		/// The directory, without / at the end, where the data files are located.
 		dataDirectory,
+		/// The working directory, without / at the end, is where the project will be loaded/saved
 		workingDirectory;
 
 	Gtk::Entry
@@ -75,6 +77,7 @@ protected:
 	/// The list of data sources for ROM names.
 	OrdenableListBox* listBoxDataSource = nullptr;
 
+	/// Contains the possible pickers for colors when selecting colors randomly.
 	Gtk::FlowBox* boxRandomColors = nullptr;
 
 	/**

@@ -192,6 +192,7 @@ void DialogProfile::prepareSelect(Selectors selector) const {
 		DataDialogs::DialogSelect::getInstance()->setDestinationSettings(
 			boxProfileAlwaysOnElements,
 			COLLECTION_ELEMENT,
+			"element",
 			COLLECTION_PROFILES,
 			DialogSelect::COLORER | DialogSelect::DELETER
 		);
@@ -200,6 +201,7 @@ void DialogProfile::prepareSelect(Selectors selector) const {
 		DataDialogs::DialogSelect::getInstance()->setDestinationSettings(
 			boxProfileAlwaysOnGroups,
 			COLLECTION_GROUP,
+			"group",
 			COLLECTION_PROFILES,
 			DialogSelect::COLORER | DialogSelect::DELETER
 		);
@@ -208,6 +210,7 @@ void DialogProfile::prepareSelect(Selectors selector) const {
 		DataDialogs::DialogSelect::getInstance()->setDestinationSettings(
 			boxProfileInputs,
 			COLLECTION_INPUT,
+			"input",
 			COLLECTION_PROFILES,
 			DialogSelect::DELETER
 		);
@@ -215,7 +218,8 @@ void DialogProfile::prepareSelect(Selectors selector) const {
 	case Selectors::Animationss:
 		DataDialogs::DialogSelect::getInstance()->setDestinationSettings(
 			boxProfileAnimations,
-			COLLECTION_ELEMENT,
+			COLLECTION_ANIMATIONS,
+			"animation",
 			COLLECTION_PROFILES,
 			DialogSelect::DELETER
 		);
@@ -223,7 +227,8 @@ void DialogProfile::prepareSelect(Selectors selector) const {
 	case Selectors::StartTransitions:
 		DataDialogs::DialogSelect::getInstance()->setDestinationSettings(
 			boxProfileStartTransitions,
-			COLLECTION_ELEMENT,
+			COLLECTION_ANIMATIONS,
+			"startTransitions",
 			COLLECTION_PROFILES,
 			DialogSelect::DELETER
 		);
@@ -231,7 +236,8 @@ void DialogProfile::prepareSelect(Selectors selector) const {
 	case Selectors::EndTransitions:
 		DataDialogs::DialogSelect::getInstance()->setDestinationSettings(
 			boxProfileEndTransitions,
-			COLLECTION_ELEMENT,
+			COLLECTION_ANIMATIONS,
+			"endTransitions",
 			COLLECTION_GROUP,
 			DialogSelect::DELETER
 		);
