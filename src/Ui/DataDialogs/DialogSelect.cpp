@@ -93,11 +93,13 @@ void DialogSelect::load(XMLHelper* values) {
 void DialogSelect::setDestinationSettings(
 	OrdenableFlowBox* box,
 	const string& type,
+	const string& node,
 	const string& collection,
 	uint8_t buttons
 ) {
 	this->box        = box;
 	this->type       = type;
+	this->node       = node;
 	this->collection = collection;
 	this->buttons    = buttons;
 }
@@ -125,7 +127,7 @@ const string DialogSelect::getType() const {
 }
 
 LEDSpicerUI::Ui::Storage::Data* DialogSelect::getData(unordered_map<string, string>& rawData) {
-	return new Storage::NameOnly(rawData, type + "BoxButton");
+	return new Storage::NameOnly(rawData, node, type + "BoxButton");
 }
 
 void DialogSelect::createColorButton(Storage::BoxButton* boxButton) {

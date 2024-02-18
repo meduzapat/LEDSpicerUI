@@ -62,10 +62,10 @@ void Element::destroy() {
 }
 
 const string Element::toXML() const {
-	string r("<element\n");
+	string r(Defaults::tab() + "<element\n");
 	Defaults::increaseTab();
 	r += Data::toXML();
 	Defaults::reduceTab();
-	r += " />\n";
+	r += Defaults::tab() + " />\n";
 	return r;
 }

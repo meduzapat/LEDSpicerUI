@@ -39,7 +39,8 @@ using std::string;
 #ifndef DEFAULTS_HPP_
 #define DEFAULTS_HPP_ 1
 
-#define CONFIG_FILE PACKAGE_CONF_DIR "ledspicer.conf"
+//#define CONFIG_FILE PACKAGE_CONF_DIR "ledspicer.conf"
+#define CONFIG_FILE "/ledspicer.conf"
 #define XML_FILE_FOREIGN ""
 
 #define DEFAULT_MESSAGE "This is an auto-generated file by " PACKAGE_STRING "."

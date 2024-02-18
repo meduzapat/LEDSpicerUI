@@ -61,7 +61,7 @@ void Restrictor::activate() {
 }
 
 const string Restrictor::toXML() const {
-	string r("<restrictor\n");
+	string r(Defaults::tab() + "<restrictor\n");
 	Defaults::increaseTab();
 	r += Data::toXML();
 	Defaults::reduceTab();
@@ -71,6 +71,6 @@ const string Restrictor::toXML() const {
 		r += e->getData()->toXML();
 	}
 	Defaults::reduceTab();
-	return r + "</restrictor>\n";
+	return r + Defaults::tab() + "</restrictor>\n";
 }
 
