@@ -4598,6 +4598,19 @@ you can set the same trigger multiple time on different maps but only the last o
             <property name="can-focus">False</property>
             <property name="layout-style">end</property>
             <child>
+              <object class="GtkLabel" id="BreafDevice">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="halign">start</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+                <property name="non-homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
               <object class="GtkButton" id="BtnApplyDevices">
                 <property name="label">Apply</property>
                 <property name="visible">True</property>
@@ -4609,7 +4622,7 @@ you can set the same trigger multiple time on different maps but only the last o
               <packing>
                 <property name="expand">True</property>
                 <property name="fill">True</property>
-                <property name="position">0</property>
+                <property name="position">1</property>
               </packing>
             </child>
           </object>
@@ -4838,9 +4851,11 @@ you can set the same trigger multiple time on different maps but only the last o
                       <object class="GtkEntry" id="InputDevicePort">
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
-                        <property name="tooltip-text" translatable="yes">Serial port number.
-If you leave it empty the default serial port will be used (/dev/ttyUSB0)
-Some hardware supports autodetection.</property>
+                        <property name="tooltip-text" translatable="yes">Serial Port Number.
+If left empty, the system will attempt to detect the port automatically.
+Note that autodetection is supported by some hardware.
+If you have multiple serial devices, avoid using autodetect.</property>
+                        <property name="placeholder-text" translatable="yes">ex: /dev/ttyUSB0</property>
                       </object>
                       <packing>
                         <property name="expand">True</property>
@@ -5668,6 +5683,19 @@ Default is 50ms</property>
             <property name="can-focus">False</property>
             <property name="layout-style">end</property>
             <child>
+              <object class="GtkLabel" id="BreafRestrictor">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="halign">start</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+                <property name="non-homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
               <object class="GtkButton" id="BtnApplyRestrictors">
                 <property name="label">Apply</property>
                 <property name="visible">True</property>
@@ -5679,7 +5707,7 @@ Default is 50ms</property>
               <packing>
                 <property name="expand">True</property>
                 <property name="fill">True</property>
-                <property name="position">0</property>
+                <property name="position">1</property>
               </packing>
             </child>
           </object>
@@ -5819,7 +5847,10 @@ Default is 50ms</property>
                       <object class="GtkEntry" id="InputRestrictorPort">
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
-                        <property name="tooltip-text" translatable="yes">The serial port</property>
+                        <property name="tooltip-text" translatable="yes">Serial Port Number.
+If left empty, the system will attempt to detect the port automatically.
+Note that autodetection is supported by some hardware.
+If you have multiple serial devices, avoid using autodetect.</property>
                         <property name="placeholder-text" translatable="yes">ex: /dev/ttyUSB0</property>
                       </object>
                       <packing>

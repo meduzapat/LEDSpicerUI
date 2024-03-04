@@ -191,6 +191,13 @@ protected:
 	virtual void createEditButton(Storage::BoxButton* boxButton);
 
 	/**
+	 * Utility to create and add a button that allows to clone the BoxButtons.
+	 *
+	 * @param boxButton the BoxButton that will receive this clone button to been able to get cloned.
+	 */
+	void createCloneButton(Storage::BoxButton* boxButton);
+
+	/**
 	 * Function to create the necesary buttons in the boxButton.
 	 *
 	 * @param boxButton The BoxButton that will get buttons.
@@ -236,6 +243,12 @@ protected:
 	 * @param boxButton the button that called delete.
 	 */
 	virtual void afterDeleteConfirmation(Storage::BoxButton* boxButton) {}
+
+	/**
+	 * When the clone button is clicked.
+	 * @param boxButton the button that called clone.
+	 */
+	virtual void onCloneClicked(Storage::BoxButton* boxButton);
 };
 
 } /* namespace */

@@ -30,24 +30,24 @@ Gtk::HeaderBar* Defaults::header = nullptr;
 Gtk::Button* Defaults::btnSave   = nullptr;
 
 const unordered_map<string, Defaults::DeviceInfo> Defaults::devicesInfo = {
-//  ID                   NAME                            MaxI B/W    varia MaxPin Connection
-	{"UltimarcUltimate", {"Ultimarc Ipac Ultimate IO",     4, false, false, 96, Connection::USB}},
-	{"UltimarcPacLed64", {"Ultimarc PacLed 64",            4, false, false, 64, Connection::USB}},
-	{"UltimarcPacDrive", {"Ultimarc Pac Drive",            4, true,  false, 16, Connection::USB}},
-	{"UltimarcNanoLed",  {"Ultimarc NanoLed",              4, false, false, 60, Connection::USB}},
-	{"LedWiz32",         {"Groovy Game Gear Led-Wiz 32",  16, false, false, 32, Connection::USB}},
-	{"Howler",           {"Wolfware Howler",               4, false, false, 96, Connection::USB}},
-	{"Adalight",         {"Adalight Compatible",         127, false, true,  60, Connection::SERIAL}},
-	{"RaspberryPi",      {"Raspberry Pi GPIO",             1, false, false, 28, Connection::NONE}}
+//  ID                   NAME                            MaxI B/W    varia MaxPin Connection        Description
+	{"UltimarcUltimate", {"Ultimarc Ipac Ultimate IO",     4, false, false, 96, Connection::USB,    ""}},
+	{"UltimarcPacLed64", {"Ultimarc PacLed 64",            4, false, false, 64, Connection::USB,    ""}},
+	{"UltimarcPacDrive", {"Ultimarc Pac Drive",            4, true,  false, 16, Connection::USB,    ""}},
+	{"UltimarcNanoLed",  {"Ultimarc NanoLed",              4, false, true,  60, Connection::USB,    ""}},
+	{"LedWiz32",         {"Groovy Game Gear Led-Wiz 32",  16, false, false, 32, Connection::USB,    ""}},
+	{"Howler",           {"Wolfware Howler",               4, false, false, 96, Connection::USB,    ""}},
+	{"Adalight",         {"Adalight Compatible",         127, false, true,  60, Connection::SERIAL, ""}},
+	{"RaspberryPi",      {"Raspberry Pi GPIO",             1, false, false, 28, Connection::NONE,   ""}},
 };
 
 const unordered_map<string, Defaults::RestrictorInfo> Defaults::restrictorsInfo = {
-//  ID               NAME                               MaxI Connection         Is  ways
-	{"UltraStik360", {"Ultimarc UltraStik360",            4, Connection::USB,    1, {Ways::w2, Ways::w2v, Ways::w4, Ways::w4x, Ways::w8, Ways::w16, Ways::w49, Ways::analog, Ways::mouse}}},
-	{"ServoStik",    {"Ultimarc ServoStik",               4, Connection::USB,    1, {Ways::w4, Ways::w8}}},
-	{"GPWiz40RotoX", {"Groovy Game Gear GPWiz40 RotoX",   4, Connection::USB,    2, {Ways::rotary8, Ways::rotary12}}},
-	{"GPWiz49",      {"Groovy Game Gear GPWiz49",         4, Connection::USB,    1, {Ways::w2, Ways::w2v, Ways::w4, Ways::w4x, Ways::w8, Ways::w16, Ways::w49, Ways::analog, Ways::mouse}}},
-	{"TOS428",       {"TOS GRS Gate Restrictor",        127, Connection::SERIAL, 4, {Ways::w4, Ways::w8}}}
+//  ID               NAME                              MaxId Connection         Is  ways
+	{"UltraStik360", {"Ultimarc UltraStik360",            4, Connection::USB,    1, {Ways::w2, Ways::w2v, Ways::w4, Ways::w4x, Ways::w8, Ways::w16, Ways::w49, Ways::analog, Ways::mouse},    "Logical restrictor, it allows mechanical attachments"}},
+	{"ServoStik",    {"Ultimarc ServoStik",               4, Connection::USB,    2, {Ways::w4, Ways::w8},                                                                                     "Mechanical restrictor, it supports two non independent mechanism"}},
+	{"GPWiz40RotoX", {"Groovy Game Gear GPWiz40 RotoX",   4, Connection::USB,    2, {Ways::rotary8, Ways::rotary12},                                                                          "Mechanical rotator"}},
+	{"GPWiz49",      {"Groovy Game Gear GPWiz49",         4, Connection::USB,    1, {Ways::w2, Ways::w2v, Ways::w4, Ways::w4x, Ways::w8, Ways::w16, Ways::w49, Ways::analog, Ways::mouse},    "Logical restrictor"}},
+	{"TOS428",       {"TOS GRS Gate Restrictor",        127, Connection::SERIAL, 4, {Ways::w4, Ways::w8},                                                                                     "Mechanical rotator, supports up to four independent mechanisms"}}
 };
 
 const vector<Defaults::Ways> Defaults::allWays{Ways::w2, Ways::w2v, Ways::w4, Ways::w4x, Ways::w8, Ways::w16, Ways::w49, Ways::analog, Ways::mouse, Ways::rotary8, Ways::rotary12};

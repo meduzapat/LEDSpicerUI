@@ -57,6 +57,7 @@ DialogDevice::DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 	builder->get_widget("ScaleDeviceChangePoint", changePoint);
 	builder->get_widget("SpinnerDeviceLeds",      spinnerLeds);
 	builder->get_widget("InputDevicePort",        inputDevicePort);
+	builder->get_widget("BreafDevice",            breaf);
 
 	devicesListstore = dynamic_cast<Gtk::ListStore*>(builder->get_object("ListstoreDevices").get());
 	idListstore      = dynamic_cast<Gtk::ListStore*>(builder->get_object("liststoreDeviceId").get());
@@ -77,23 +78,12 @@ DialogDevice::DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 		const string pins(spinnerLeds->get_text());
 		if (comboBoxDevices->get_active_id().empty() or pins.empty())
 			return;
-		size_t
-			before = pinHandler->getSize(),
-			after  = std::stoi(pins);
-		if (before == after) {
-			pinHandler->reset();
-			return;
-		}
-		if (before > after) {
-			for (size_t c = after + 1; c <= before; ++c) {
-				DialogElement::getInstance()->deleteElementByPin(std::to_string(c));
-			}
-		}
-		pinHandler->resize(std::stoi(pins), false);
+		DataDialogs::DialogElement::getInstance()->changeNumberOfPins(std::stoi(pins));
 	});
 
 	comboBoxDevices->signal_changed().connect([&, btnAddElement]() {
 		const string name(comboBoxDevices->get_active_id());
+		// If current ID is empty just reset the form for Add task.
 		if (name.empty()) {
 			clearFormOthers();
 			btnAddElement->set_sensitive(false);
@@ -102,31 +92,27 @@ DialogDevice::DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 			return;
 		}
 
+		// If the name is the same do nothing.
 		if (previousName == name) {
 			return;
 		}
 
 		const uint8_t pins(Defaults::devicesInfo.at(name).pins);
 		const string currentName(currentData->getValue(NAME));
-		// Changed Device option.
-		if (currentName.empty()) {
-			pinHandler->resize(pins);
+		// If there is not ID or is loading, process a changed device due to Load or new selected device for Add.
+		if (currentName.empty() or mode == Modes::LOAD) {
 			clearFormOthers();
 		}
-		else if (mode == Modes::LOAD) {
-			pinHandler->resize(pins);
-			clearFormOthers();
-		}
+		// If there is a device already, clean the form and change to the new device, warn the user about losing data.
 		else if (name != currentName) {
-			// Note, instead of wipping the elements, can a prompt been displayed to remap the elements to the new device?
+			// Note, instead of wiping the elements, can a prompt been displayed to re-map the elements to the new device?
 			if (Message::ask("Are you sure you want to change the device? all settings will be loss") == Gtk::RESPONSE_YES) {
-				// destroy device but keep the pointer.
+				// Destroy device but keep the pointer.
 				currentData->destroy();
-				// Remove device elements and pin mappings but do not touch current data.
-				pinHandler->resize(pins);
 				clearFormOthers();
 			}
 			else {
+				// If the user decide to keep the data, move the selection to the previous selected device.
 				comboBoxDevices->set_active_id(previousName);
 				return;
 			}
@@ -157,9 +143,10 @@ DialogDevice::DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 		if (Defaults::isVariable(name)) {
 			spinnerLeds->get_parent()->show();
 			spinnerLeds->get_adjustment()->set_upper(pins);
-			pinHandler->reset();
 		}
+		DataDialogs::DialogElement::getInstance()->changeNumberOfPins(pins);
 		btnAddElement->set_sensitive(true);
+		breaf->set_text(Defaults::devicesInfo.at(name).breaf);
 		btnApply->set_sensitive(true);
 	});
 }
@@ -187,6 +174,8 @@ void DialogDevice::clearFormOthers() {
 	changePoint->set_value(DEFAULT_CHANGE_VALUE);
 	spinnerLeds->get_parent()->hide();
 	spinnerLeds->set_text("");
+	breaf->set_text("");
+	DataDialogs::DialogElement::getInstance()->changeNumberOfPins(0);
 }
 
 void DialogDevice::isValid() const {
@@ -270,6 +259,7 @@ void DialogDevice::storeData() {
 	if (Defaults::isMonocrome(name)) {
 		currentData->setValue(CHANGE_POINT, std::to_string(static_cast<uint8_t>(changePoint->get_value())));
 	}
+	DataDialogs::DialogElement::getInstance()->reindex();
 }
 
 void DialogDevice::retrieveData() {

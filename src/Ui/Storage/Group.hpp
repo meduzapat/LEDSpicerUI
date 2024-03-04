@@ -37,6 +37,8 @@ class Group: public Data {
 
 public:
 
+	using Data::Data;
+
 	Group(unordered_map<string, string>& data);
 
 	virtual ~Group();

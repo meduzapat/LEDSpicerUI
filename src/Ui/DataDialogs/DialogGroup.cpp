@@ -140,6 +140,7 @@ void DialogGroup::storeData() {
 	if (not btnGroupDefaultColor->get_tooltip_text().empty()) {
 		currentData->setValue(DEFAULT_COLOR, btnGroupDefaultColor->get_tooltip_text());
 	}
+	DataDialogs::DialogSelect::getInstance()->reindex();
 }
 
 void DialogGroup::retrieveData() {

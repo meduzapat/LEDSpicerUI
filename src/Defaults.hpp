@@ -88,11 +88,12 @@ using std::string;
 #define DEFAULT_COLOR  "defaultColor"
 #define DEFAULT_SOLENOID 50
 
-#define PIN_COLOR      "pin_white"
-#define SOLENOID_COLOR "pin_solenoid"
-#define RED_COLOR      "pin_red"
-#define GREEN_COLOR    "pin_green"
-#define BLUE_COLOR     "pin_blue"
+#define COLOR_PIN      "pin_white"
+#define COLOR_SOLENOID "pin_solenoid"
+#define COLOR_RED      "pin_red"
+#define COLOR_GREEN    "pin_green"
+#define COLOR_BLUE     "pin_blue"
+#define COLOR_MULTIPLE "pin_multi"
 #define NO_COLOR       ""
 
 #define PARAM_MILLISECONDS "runEvery"
@@ -164,12 +165,16 @@ public:
 		const string     name;
 		/// Max number of devices that can be connected at the same time.
 		const uint8_t    maxIds;
+		/// Some devices only support ON/OFF
 		const bool       monochrome;
 		/// The number of pins should be defined.
 		const bool       variable;
 		/// Max number of pins.
 		const uint8_t    pins;
+		/// What connection uses.
 		const Connection connection;
+		/// A breaf description of the device.
+		const string     breaf;
 	};
 
 	/**
@@ -179,10 +184,14 @@ public:
 		const string       name;
 		/// Max number of devices that can be connected at the same time.
 		const uint8_t      maxIds;
+		/// What connection uses.
 		const Connection   connection;
-		/// The number of interfaces that this controller handles.
+		/// The number of individual interfaces that this controller handles.
 		const uint8_t      interfaces;
+		/// Supported restrictions.
 		const vector<Ways> ways;
+		/// A breaf description of the restrictor.
+		const string       breaf;
 	};
 
 	Defaults() = delete;

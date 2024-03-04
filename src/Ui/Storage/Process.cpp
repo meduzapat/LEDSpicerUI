@@ -43,10 +43,10 @@ const string Process::getCssClass() const {
 }
 
 const string Process::toXML() const {
-	string r("<map\n");
+	string r(Defaults::tab() + "<map\n");
 	Defaults::increaseTab();
 	r += Data::toXML();
 	Defaults::reduceTab();
-	r += ">\n";
+	r += Defaults::tab() + "/>\n";
 	return r;
 }

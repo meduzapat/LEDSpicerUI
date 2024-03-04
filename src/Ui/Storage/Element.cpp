@@ -25,7 +25,6 @@
 using namespace LEDSpicerUI::Ui::Storage;
 
 Element::~Element() {
-	destroy();
 	if (not getValue(NAME).empty()) {
 		CollectionHandler::getInstance(COLLECTION_ELEMENT)->remove(createUniqueId());
 	}
@@ -43,29 +42,26 @@ const string Element::getCssClass() const {
 	return "ElementBoxButton";
 }
 
-void Element::activate() {
-	PinHandler::getInstance()->reset();
-}
-
-void Element::destroy() {
-	PinHandler* pinHandler = PinHandler::getInstance();
-	if (not getValue(PIN).empty())
-		pinHandler->unmarkPin(getValue(PIN));
-	if (not getValue(SOLENOID).empty())
-		pinHandler->unmarkPin(getValue(SOLENOID));
-	if (not getValue(RED_PIN).empty())
-		pinHandler->unmarkPin(getValue(RED_PIN));
-	if (not getValue(GREEN_PIN).empty())
-		pinHandler->unmarkPin(getValue(GREEN_PIN));
-	if (not getValue(BLUE_PIN).empty())
-		pinHandler->unmarkPin(getValue(BLUE_PIN));
-}
-
 const string Element::toXML() const {
 	string r(Defaults::tab() + "<element\n");
 	Defaults::increaseTab();
 	r += Data::toXML();
 	Defaults::reduceTab();
-	r += Defaults::tab() + " />\n";
+	r += Defaults::tab() + "/>\n";
 	return r;
+}
+
+string Element::getPinCssByData(uint8_t pin, Data* data) {
+	string pinS(std::to_string(pin));
+	if (not data->getValue(PIN).empty()       and data->getValue(PIN)       == pinS)
+		return COLOR_PIN;
+	if (not data->getValue(SOLENOID).empty()  and data->getValue(SOLENOID)  == pinS)
+		return COLOR_SOLENOID;
+	if (not data->getValue(RED_PIN).empty()   and data->getValue(RED_PIN)   == pinS)
+		return COLOR_RED;
+	if (not data->getValue(GREEN_PIN).empty() and data->getValue(GREEN_PIN) == pinS)
+		return COLOR_GREEN;
+	if (not data->getValue(BLUE_PIN).empty()  and data->getValue(BLUE_PIN)  == pinS)
+		return COLOR_BLUE;
+	return NO_COLOR;
 }

@@ -65,7 +65,7 @@ const string Restrictor::toXML() const {
 	Defaults::increaseTab();
 	r += Data::toXML();
 	Defaults::reduceTab();
-	r += ">\n";
+	r += Defaults::tab() + ">\n";
 	Defaults::increaseTab();
 	for (const auto& e : playerMapping) {
 		r += e->getData()->toXML();

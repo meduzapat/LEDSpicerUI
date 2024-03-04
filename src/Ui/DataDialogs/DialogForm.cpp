@@ -58,6 +58,8 @@ void DialogForm::createItems(vector<unordered_map<string, string>>& rawCollectio
 		createSubItems(values);
 		currentData->deActivate();
 	}
+	// force a refresh to clean any box handle by main process.
+	refreshBox();
 	currentData = nullptr;
 	if (not errors.empty()) {
 		Message::displayError("Errors in " + getType() + ":\n" + errors);
@@ -135,6 +137,15 @@ void DialogForm::createEditButton(Storage::BoxButton* boxButton) {
 	});
 }
 
+void DialogForm::createCloneButton(Storage::BoxButton* boxButton) {
+	auto button(Gtk::make_managed<Gtk::Button>());
+	boxButton->pack_start(*button, Gtk::PACK_SHRINK);
+	button->set_image_from_icon_name("edit-copy", Gtk::ICON_SIZE_BUTTON);
+	button->signal_clicked().connect([&, boxButton]() {
+		onCloneClicked(boxButton);
+	});
+}
+
 void DialogForm::addButtons(Storage::BoxButton* boxButton) {
 	createEditButton(boxButton);
 	createDeleteButton(boxButton);
@@ -163,7 +174,7 @@ void DialogForm::onAddClicked() {
 		afterCreate(bPtr);
 		currentData->deActivate();
 	}
-	// Create voided, destroy From.
+	// Create voided, destroy form.
 	else {
 		currentData->deActivate();
 		delete currentData;
@@ -202,5 +213,31 @@ void DialogForm::onDelClicked(Storage::BoxButton* boxButton) {
 	box->remove(*boxButton);
 	// This will also delete the object, the destructor must call deActivate if necessary.
 	items->remove(boxButton);
+	currentData = nullptr;
+}
+
+void DialogForm::onCloneClicked(Storage::BoxButton* boxButton) {
+	mode = Modes::ADD;
+	clearForm();
+	auto values = unordered_map<string, string>(boxButton->getData()->getValues()->begin(), boxButton->getData()->getValues()->end());
+	// Check for other copies.
+	auto name = values.at(NAME) + " copy";
+	uint8_t count = 0;
+	while (items->isset(name + (count ? std::to_string(count) : ""))) {
+		++count;
+	}
+	name += count ? std::to_string(count) : "";
+	values.at(NAME) = std::move(name);
+	currentData = getData(values);
+	// Add item and the box and set buttons.
+	auto bPtr = items->add(currentData);
+	addButtons(bPtr);
+	box->add(*bPtr);
+	currentData->activate();
+	retrieveData();
+	storeData();
+	Defaults::markDirty();
+	bPtr->updateLabel();
+	currentData->deActivate();
 	currentData = nullptr;
 }

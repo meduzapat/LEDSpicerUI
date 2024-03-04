@@ -110,6 +110,14 @@ public:
 	 */
 	vector<unordered_map<string, string>>& getData(const string& dataName);
 
+	/**
+	 * Convert a XML error into human readable text.
+	 *
+	 * @param error A raw error message from XML.
+	 * @return A text in a more human way to be displayed.
+	 */
+	static string cleanError(const string& error);
+
 protected:
 
 	/// Pointer to the root element.

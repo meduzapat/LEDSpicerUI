@@ -85,7 +85,7 @@ protected:
 	DialogRestrictorMap(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
 
 	/**
-	 * Checks if the owner restrictor still have available interfaces.
+	 * Checks if the owner restrictor still have available interfaces spaces.
 	 * @return true if there still room.
 	 */
 	const bool checkAvailableInterfaces() const;
@@ -101,7 +101,13 @@ protected:
 	void populateInterfacesCombobox();
 
 	/**
-	 * Refresh some fields aftected by delete.
+	 * After add check if more can be added.
+	 * @param boxButton
+	 */
+	void afterCreate(Storage::BoxButton* boxButton) override;
+
+	/**
+	 * Refresh some fields affected by delete.
 	 * @param boxButton
 	 */
 	virtual void afterDeleteConfirmation(Storage::BoxButton* boxButton);

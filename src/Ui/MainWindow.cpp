@@ -148,7 +148,7 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 			}
 
 			// Add layout.
-			xmlData += Defaults::tab() + "<layout defaultProfile=\"" + inputDefaultProfile->get_active_id() + "\">\n";
+			xmlData += Defaults::tab() + "<layout defaultProfile=\"" + inputDefaultProfile->get_active_text() + "\">\n";
 			Defaults::increaseTab();
 			for (auto g : groups) {
 				xmlData += g->getData()->toXML();
@@ -190,13 +190,13 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 	Defaults::registerWidget(inputCraftProfiles);
 	// When the input profiles is active, and the arcade profile is missing, ask for creating an empty arcade profile
 	inputCraftProfiles->signal_toggled().connect([&]() {
-			if (inputCraftProfiles->get_active()) {
-				// check if the arcade profile exist.
-				if (Message::ask("The foundation profile for arcades is missing\nDo you want to create an empty arcade profile?") == Gtk::RESPONSE_YES) {
-					Message::displayInfo("The profile was created");
-				}
+		if (inputCraftProfiles->get_active()) {
+			// check if the arcade profile exist.
+			if (Message::ask("You are using craft profiles option, but the foundation profile for arcades is missing\nDo you want to create an empty arcade profile?") == Gtk::RESPONSE_YES) {
+				Message::displayInfo("The profile was created");
 			}
-		});
+		}
+	});
 	builder->get_widget_derived("ListBoxDatasource", listBoxDataSource, "BtnDatasourceUp", "BtnDatasourceDown");
 	inputColors->signal_changed().connect([&]() {
 		DialogColors::getInstance()->setColorsFromFile(dataDirectory + inputColors->get_active_id() + ".xml");
@@ -217,9 +217,9 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 	// Check for unsaved project.
 	signal_delete_event().connect([](GdkEventAny* event) {
 		if (Defaults::isDirty())
-			if (Message::ask("Are you sure you want to exit without saving your changes?") == Gtk::RESPONSE_YES)
-				return false;
-		return true;
+			if (Message::ask("Are you sure you want to exit without saving your changes?") != Gtk::RESPONSE_YES)
+				return true;
+		return false;
 	});
 }
 
@@ -295,7 +295,12 @@ void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {
 	btnImportConfig->signal_clicked().connect([&]() {
 		if (dialogImportConfig.run() == Gtk::ResponseType::RESPONSE_OK) {
 			string newPath = dialogImportConfig.get_file()->get_path();
-			import(newPath, false, dialogImportConfig.getConfigParameters());
+			try {
+				import(newPath, false, dialogImportConfig.getConfigParameters());
+			}
+			catch (Message& e) {
+				Message::displayError(XMLHelper::cleanError(e.getMessage()));
+			}
 			Defaults::markDirty();
 		}
 		dialogImportConfig.hide();
@@ -310,7 +315,12 @@ void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {
 			vector<string> selectedFiles(dialogImportInput.get_filenames());
 			// Process each selected file or directory
 			for (const auto& selectedFile : selectedFiles) {
-				import(selectedFile, false, IMPORT_INPUTS);
+				try {
+					import(selectedFile, false, IMPORT_INPUTS);
+				}
+				catch (Message& e) {
+					Message::displayError(XMLHelper::cleanError(e.getMessage()));
+				}
 			}
 		}
 		dialogImportInput.hide();
@@ -359,20 +369,29 @@ void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {
 
 		// wipe random colors and any other color
 		setColorFile("");
-
+		bool exists = Glib::file_test(workingDirectory + CONFIG_FILE, Glib::FileTest::FILE_TEST_EXISTS);
 		// Old data.
 		try {
 			import(workingDirectory + CONFIG_FILE, true, IMPORT_ALL);
 		}
 		// New data.
 		catch (Message& e) {
-			// wipe all data.
+			if (exists)
+				Message::displayError(XMLHelper::cleanError("The config file raised an error:\n" + e.getMessage()));
+			// Wipe all data.
 			profiles.wipe();
 			devices.wipe();
 			restrictors.wipe();
 			processes.wipe();
 			groups.wipe();
 			inputs.wipe();
+			// This is necessary because the refresh is done at dialog open.
+			DataDialogs::DialogProfile::getInstance()->refreshBox();
+			DataDialogs::DialogDevice::getInstance()->refreshBox();
+			DataDialogs::DialogRestrictor::getInstance()->refreshBox();
+			DataDialogs::DialogProcess::getInstance()->refreshBox();
+			DataDialogs::DialogGroup::getInstance()->refreshBox();
+			DataDialogs::DialogInput::getInstance()->refreshBox();
 			unordered_map<string, string> values;
 			setConfiguration(values);
 		}
@@ -433,6 +452,7 @@ void MainWindow::import(const string& dataFilePath, bool wipe, uint8_t importFla
 		InputFile datafile(dataFilePath);
 		if (wipe) {
 			inputs.wipe();
+			DataDialogs::DialogInput::getInstance()->refreshBox();
 		}
 		DataDialogs::DialogInput::getInstance()->load(&datafile);
 		return;
@@ -449,19 +469,22 @@ void MainWindow::import(const string& dataFilePath, bool wipe, uint8_t importFla
 			Message::displayInfo("Warning\nColors definition file changed, element color changed");
 		setConfiguration(c);
 	}
+
 	if (importFlags & IMPORT_DEVICES) {
 		if (wipe) {
 			devices.wipe();
 			groups.wipe();
+			DataDialogs::DialogDevice::getInstance()->refreshBox();
+			DataDialogs::DialogGroup::getInstance()->refreshBox();
 		}
 		DataDialogs::DialogDevice::getInstance()->load(&datafile);
 		DataDialogs::DialogGroup::getInstance()->load(&datafile);
 		// TODO: set default profile
-
 	}
 	if (importFlags & IMPORT_RESTRICTORS) {
 		if (wipe) {
 			restrictors.wipe();
+			DataDialogs::DialogRestrictor::getInstance()->refreshBox();
 		}
 		DataDialogs::DialogRestrictor::getInstance()->load(&datafile);
 	}
@@ -469,6 +492,7 @@ void MainWindow::import(const string& dataFilePath, bool wipe, uint8_t importFla
 	if (importFlags & IMPORT_MAPPINGS) {
 		if (wipe) {
 			processes.wipe();
+			DataDialogs::DialogProcess::getInstance()->refreshBox();
 		}
 		DataDialogs::DialogProcess::getInstance()->load(&datafile);
 		inputRunEvery->set_text(datafile.getProcessLookupRunEvery());
@@ -482,6 +506,7 @@ void MainWindow::import(const string& dataFilePath, bool wipe, uint8_t importFla
 	// todo: using default profile load inputs and animations.
 	/*	if (wipe) {
 		inputs.wipe();
+		DataDialogs::DialogProfile::getInstance()->refreshBox();
 	}*/
 }
 

@@ -61,7 +61,7 @@ public:
 	void RunDialog();
 
 	/**
-	 * Instanciate an object of its class.
+	 * Instantiate an object of its class.
 	 * @param builder
 	 * @param gladeID
 	 */
@@ -101,7 +101,7 @@ public:
 	const size_t getNumberOfSelections() const;
 
 	/**
-	 * @return The numbner of available boxes to select from.
+	 * @return The number of available boxes to select from.
 	 */
 	const size_t getNumberOfSelectables() const;
 

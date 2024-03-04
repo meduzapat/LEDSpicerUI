@@ -51,6 +51,6 @@ const string RestrictorMap::toXML() const {
 	Defaults::increaseTab();
 	r += Data::toXML();
 	Defaults::reduceTab();
-	r += Defaults::tab() + ">\n";
+	r += Defaults::tab() + "/>\n";
 	return r;
 }
