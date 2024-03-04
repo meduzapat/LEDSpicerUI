@@ -23,7 +23,6 @@ ledspicerui_SOURCES =   \
 	src/Ui/DialogColors.cpp \
 	src/Ui/OrdenableFlowBox.cpp   \
 	src/Ui/OrdenableListBox.cpp   \
-	src/Ui/Storage/PinHandler.cpp \
 	src/Ui/Storage/CollectionHandler.cpp \
 	src/Ui/Storage/Data.cpp          \
 	src/Ui/Storage/NameOnly.cpp      \
@@ -100,7 +99,6 @@ EXTRA_DIST =            \
 	src/Ui/DialogColors.hpp \
 	src/Ui/OrdenableFlowBox.hpp \
 	src/Ui/OrdenableListBox.hpp \
-	src/Ui/Storage/PinHandler.hpp \
 	src/Ui/Storage/CollectionHandler.hpp \
 	src/Ui/Storage/Data.hpp        \
 	src/Ui/Storage/NameOnly.hpp      \

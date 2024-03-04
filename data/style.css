@@ -68,6 +68,11 @@ combobox.noRoundRight button.combo,
 	color: #fff;
 }
 
+.pin_multi {
+	background: #e5a50a;
+	color: #fff;
+}
+
 .BoxButton {
 	border: 2px outset rgba(61,56,70,1);
 	background-position: center center;

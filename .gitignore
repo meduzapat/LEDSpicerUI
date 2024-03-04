@@ -9,6 +9,7 @@
 *.cache
 *.log
 Debug/
+*/#main.glade.in#
 
 # Autotools
 /stamp-h1

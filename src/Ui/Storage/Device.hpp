@@ -22,7 +22,6 @@
 
 #include "DataDialogs/DialogElement.hpp"
 #include "Data.hpp"
-#include "PinHandler.hpp"
 
 #ifndef DEVICE_HPP_
 #define DEVICE_HPP_ 1
@@ -33,7 +32,7 @@ namespace LEDSpicerUI::Ui::Storage {
  * LEDSpicerUI::Ui::Storage::Device
  * A class that adds functionality for Devices form.
  * A device is driven by device name combobox.
- * Then it needs either a hardware ID, a port number or noghing else.
+ * Then it needs either a hardware ID, a port number or nothing else.
  * A device will provide a number of pins where the LEDS are connected, but this are handled by elements.
  * A device will store the elements attached to the pins.
  */
@@ -55,17 +54,12 @@ public:
 
 	void activate() override;
 
-	void deActivate() override;
-
 	const string toXML() const override;
 
 protected:
 
 	/// Store a copy of elements from the elements dialog.
 	BoxButtonCollection elements;
-
-	/// Device's pin usage, stores the pin and the class used, handled by elements.
-	std::map<uint8_t, string> pinClasses;
 
 };
 

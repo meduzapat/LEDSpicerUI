@@ -21,7 +21,6 @@
  */
 
 #include "Data.hpp"
-#include "Storage/PinHandler.hpp"
 #include "Storage/CollectionHandler.hpp"
 
 #ifndef ELEMENT_HPP_
@@ -46,12 +45,9 @@ public:
 
 	const string getCssClass() const override;
 
-	void activate() override;
-
-	void destroy() override;
-
 	const string toXML() const override;
 
+	static string getPinCssByData(uint8_t pin, Data* data);
 };
 
 } /* namespace */

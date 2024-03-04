@@ -47,7 +47,10 @@ DialogElement::DialogElement(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 	setSignalAdd();
 	setSignalApply();
 
-	// Fields
+	// Pins layout.
+	builder->get_widget("FlowBoxPinLayout", pinsBox);
+
+	// Fields.
 	builder->get_widget("pin",  pin);
 	builder->get_widget("pinR", pinR);
 	builder->get_widget("pinG", pinG);
@@ -146,6 +149,7 @@ void DialogElement::clearForm() {
 	inputElementName->grab_focus();
 	inputElementType->set_active_id("0");
 	DialogColors::getInstance()->colorizeButton(inputDefaultColor, NO_COLOR);
+	drawPins();
 }
 
 void DialogElement::isValid() const {
@@ -193,17 +197,10 @@ void DialogElement::isValid() const {
 		}
 
 		// Numeric check and range.
-		if (not Defaults::isBetween(p, 1, pinHandler->getSize())) {
+		if (not Defaults::isBetween(p, 1, numberOfPins)) {
 			if (mode != Modes::LOAD)
 				pin->grab_focus();
-			throw Message("The " + name + " must be a number from 1 and " + std::to_string(pinHandler->getSize()));
-		}
-
-		// Check others elements for used pins.
-		if (pinHandler->isUsed(p)) {
-			if (mode != Modes::LOAD)
-				pin->grab_focus();
-			throw Message("Pin " + p + " Is already in use");
+			throw Message("The " + name + " must be a number from 1 and " + std::to_string(numberOfPins));
 		}
 	};
 
@@ -269,7 +266,6 @@ void DialogElement::storeData() {
 	else
 		elementHandler->add(name);
 
-	unmarkMyPins();
 	// This will clean any anomaly.
 	currentData->wipe();
 
@@ -299,7 +295,6 @@ void DialogElement::storeData() {
 		currentData->setValue(DEFAULT_COLOR, inputDefaultColor->get_tooltip_text());
 	}
 	currentData->setValue(TYPE, inputElementType->get_active_id() == "0" ? DEFAULT_ELEMENT_TYPE : inputElementType->get_active_id());
-	markMyPins();
 }
 
 void DialogElement::retrieveData() {
@@ -332,6 +327,69 @@ string const DialogElement::createUniqueId() const {
 	return Defaults::createCommonUniqueId({inputElementName->get_text()});
 }
 
+void DialogElement::changeNumberOfPins(const uint8_t newSize) {
+
+	if (not newSize)
+		numberOfPins = 0;
+
+	if (numberOfPins == newSize)
+		return;
+
+	// resize.
+	if (newSize < numberOfPins) {
+		uint8_t pinsToSearch(numberOfPins - newSize);
+		vector<Storage::BoxButton*> elementsToDelete;
+		for (uint8_t c = 1; c <= pinsToSearch; ++c)
+			findElementsByPin(std::to_string(c), elementsToDelete);
+		// delete elements
+		string deleted;
+		for(auto boxButton : elementsToDelete) {
+			deleted += boxButton->getData()->getValue(NAME) + " ";
+			// elements doesn't need activation.
+			box->remove(*boxButton);
+			items->remove(boxButton);
+		}
+		if (not deleted.empty())
+			Message::displayInfo("Element(s) " + deleted + "have been deleted due to resizing.");
+	}
+	pinsBox->set_max_children_per_line(findLargestDivisor(newSize));
+	numberOfPins = newSize;
+	drawPins();
+}
+
+void DialogElement::drawPins() {
+
+	for (auto& child : pinsBox->get_children())
+		pinsBox->remove(*child);
+
+	// Fill pins.
+	for (auto c = 1; c <= numberOfPins; ++c) {
+		auto label = Gtk::make_managed<Gtk::Label>(std::to_string(c));
+		vector<Storage::BoxButton*> elementsUse;
+		findElementsByPin(std::to_string(c), elementsUse);
+		string labelTxt("Pin " + std::to_string(c) + " is used by element ");
+		vector<string> elementsTxt;
+		for (auto bb : elementsUse)
+			elementsTxt.push_back(bb->getData()->getValue(NAME));
+		if (elementsUse.size() > 1) {
+			label->get_style_context()->add_class(COLOR_MULTIPLE);
+			std::string lastElement = std::move(elementsTxt.back());
+			elementsTxt.pop_back();
+			label->set_tooltip_text(labelTxt + Defaults::implode(elementsTxt, ", ") + " and " + lastElement);
+		}
+		else if (elementsUse.size()) {
+			label->get_style_context()->add_class(Storage::Element::getPinCssByData(c, elementsUse[0]->getData()));
+			label->set_tooltip_text(labelTxt + elementsTxt[0]);
+		}
+		else {
+			label->get_style_context()->add_class(NO_COLOR);
+			label->set_tooltip_text("Pin " + std::to_string(c) + " is not used");
+		}
+		pinsBox->add(*label);
+	}
+	pinsBox->show_all();
+}
+
 const string DialogElement::getType() const {
 	return "element";
 }
@@ -340,35 +398,32 @@ LEDSpicerUI::Ui::Storage::Data* DialogElement::getData(unordered_map<string, str
 	return new Storage::Element(rawData);
 }
 
-void DialogElement::unmarkMyPins() {
-	currentData->destroy();
+void DialogElement::addButtons(Storage::BoxButton* boxButton) {
+	createEditButton(boxButton);
+	createCloneButton(boxButton);
+	createDeleteButton(boxButton);
+	boxButton->show_all();
 }
 
-void DialogElement::markMyPins() {
-	if (not currentData->getValue(PIN).empty()) {
-		pinHandler->markPin(currentData->getValue(PIN), PIN_COLOR);
-	}
-	else if (not currentData->getValue(SOLENOID).empty()) {
-		pinHandler->markPin(currentData->getValue(SOLENOID), SOLENOID_COLOR);
-	}
-	else {
-		pinHandler->markPin(currentData->getValue(RED_PIN),   RED_COLOR);
-		pinHandler->markPin(currentData->getValue(GREEN_PIN), GREEN_COLOR);
-		pinHandler->markPin(currentData->getValue(BLUE_PIN),  BLUE_COLOR);
-	}
-}
-
-void DialogElement::deleteElementByPin(const string& pin) {
+void DialogElement::findElementsByPin(const string& pin, vector<Storage::BoxButton*>& elements) {
 	for (auto boxButton : *items) {
 		for (auto v : {PIN, SOLENOID, RED_PIN, GREEN_PIN, BLUE_PIN}) {
 			if (boxButton->getData()->getValue(v) == pin) {
-				// elements doesn't need activation.
-				box->remove(*boxButton);
-				items->remove(boxButton);
-				Message::displayInfo("Some Elements got deleted due to the resize");
-				return;
+				// already in the list?
+				if (std::find(elements.begin(), elements.end(), boxButton) != elements.end())
+					break;
+				elements.push_back(boxButton);
+				break;
 			}
 		}
 	}
 }
 
+const uint8_t DialogElement::findLargestDivisor(uint8_t size) {
+	for (uint8_t c = MAX_COLUMNS; c > MIN_COLUMNS; --c) {
+		if (size % c == 0) {
+			return c;
+		}
+	}
+	return MAX_COLUMNS;
+}

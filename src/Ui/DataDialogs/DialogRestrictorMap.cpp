@@ -53,12 +53,8 @@ DialogRestrictorMap::DialogRestrictorMap(BaseObjectType* obj, const Glib::RefPtr
 	// For checking.
 	builder->get_widget("ComboBoxRestrictors", comboBoxRestrictors);
 
+	// list of map ids to pick from.
 	liststoreRestrictorMapId = dynamic_cast<Gtk::ListStore*>(builder->get_object("liststoreRestrictorMapId").get());
-
-	// When closing the add map dialog, calculate if there are interfaces left.
-/*	signal_hide().connect([&]() {
-		btnAdd->set_sensitive(box->getSize() < Def.size());
-	});*/
 }
 
 void DialogRestrictorMap::load(XMLHelper* values) {
@@ -68,9 +64,12 @@ void DialogRestrictorMap::load(XMLHelper* values) {
 void DialogRestrictorMap::clearForm() {
 	player->set_active(0);
 	joystick->set_active(0);
-	interface->get_parent()->hide();
+	populateInterfacesCombobox();
 	// Check if the hardware have interfaces left.
-	btnAdd->set_sensitive(checkAvailableInterfaces());
+	if (Defaults::isMulti(comboBoxRestrictors->get_active_id()))
+		interface->get_parent()->show();
+	else
+		interface->get_parent()->hide();
 }
 
 void DialogRestrictorMap::isValid() const {
@@ -110,14 +109,9 @@ void DialogRestrictorMap::storeData() {
 	if (Defaults::isMulti(comboBoxRestrictors->get_active_id())) {
 		currentData->setValue(RESTRICTOR_INTERFACE, interface->get_active_id());
 	}
-	btnAdd->set_sensitive(checkAvailableInterfaces());
 }
 
 void DialogRestrictorMap::retrieveData() {
-	if (Defaults::isMulti(comboBoxRestrictors->get_active_id())) {
-		populateInterfacesCombobox();
-		interface->get_parent()->show();
-	}
 	player->set_active_id(currentData->getValue(PLAYER));
 	joystick->set_active_id(currentData->getValue(JOYSTICK));
 	if (Defaults::isMulti(comboBoxRestrictors->get_active_id())) {
@@ -161,6 +155,11 @@ void DialogRestrictorMap::populateInterfacesCombobox() {
 		"Interface #"
 	);
 	interface->set_active(0);
+}
+
+void DialogRestrictorMap::afterCreate(Storage::BoxButton* boxButton) {
+	// This is necessary to disable the add if needed.
+	btnAdd->set_sensitive(checkAvailableInterfaces());
 }
 
 void DialogRestrictorMap::afterDeleteConfirmation(Storage::BoxButton* boxButton) {

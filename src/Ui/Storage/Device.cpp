@@ -28,8 +28,6 @@ Device::~Device() {
 	if (not fieldsData.empty()) {
 		CollectionHandler::getInstance(COLLECTION_DEVICES)->remove(createUniqueId());
 	}
-	// When device is destroyed, its elements will need pin-handler to also unregister their pins.
-	PinHandler::getInstance()->setCurrentDevicePins(&pinClasses);
 }
 
 const string Device::createPrettyName() const {
@@ -53,7 +51,6 @@ const string Device::createUniqueId() const {
 
 void Device::destroy() {
 	elements.wipe();
-	pinClasses.clear();
 	if (not fieldsData.empty()) {
 		CollectionHandler::getInstance(COLLECTION_DEVICES)->remove(createUniqueId());
 	}
@@ -61,19 +58,14 @@ void Device::destroy() {
 
 void Device::activate() {
 	DataDialogs::DialogElement::getInstance()->setOwner(&elements, this);
-	PinHandler::getInstance()->setCurrentDevicePins(&pinClasses);
-}
-
-void Device::deActivate() {
-	PinHandler::getInstance()->setCurrentDevicePins(nullptr);
 }
 
 const string Device::toXML() const {
 	string r(Defaults::tab() + "<device\n");
 	Defaults::increaseTab();
-	Data::toXML();
+	r += Data::toXML();
 	Defaults::reduceTab();
-	r += ">\n";
+	r += Defaults::tab() + ">\n";
 	Defaults::increaseTab();
 	for (const auto& e : elements) {
 		r += e->getData()->toXML();

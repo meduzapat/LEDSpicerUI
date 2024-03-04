@@ -82,7 +82,9 @@ protected:
 	Gtk::Scale*      changePoint     = nullptr;
 	Gtk::SpinButton* spinnerLeds     = nullptr;
 	Gtk::Entry*      inputDevicePort = nullptr;
+	Gtk::Label*      breaf           = nullptr;
 
+	/// Stores the previous selected device, to be used when the user cancels a change action.
 	string previousName;
 
 	DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);

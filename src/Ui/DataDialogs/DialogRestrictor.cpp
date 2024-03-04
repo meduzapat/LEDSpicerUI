@@ -56,6 +56,7 @@ DialogRestrictor::DialogRestrictor(BaseObjectType* obj, const Glib::RefPtr<Gtk::
 	builder->get_widget("InputRestrictorWilliamsMode",  williamsMode);
 	builder->get_widget("InputRestrictorSpeedOn",       speedOn);
 	builder->get_widget("InputRestrictorSpeedOff",      speedOff);
+	builder->get_widget("BreafRestrictor",              breafRestrictor);
 
 	restrictorsListstore = dynamic_cast<Gtk::ListStore*>(builder->get_object("liststoreRestrictors").get());
 	idListstore          = dynamic_cast<Gtk::ListStore*>(builder->get_object("liststoreRestrictorsId").get());
@@ -147,6 +148,7 @@ DialogRestrictor::DialogRestrictor(BaseObjectType* obj, const Glib::RefPtr<Gtk::
 			waysIcons.at(w)->show();
 		}
 
+		breafRestrictor->set_label(Defaults::restrictorsInfo.at(name).breaf);
 		btnAddRestrictorMap->set_sensitive(true);
 		btnApply->set_sensitive(true);
 	});
@@ -189,6 +191,7 @@ void DialogRestrictor::clearFormOthers() {
 	for (auto& w : Defaults::allWays) {
 		waysIcons.at(w)->hide();
 	}
+	breafRestrictor->set_label("");
 }
 
 void DialogRestrictor::isValid() const {
@@ -218,7 +221,7 @@ void DialogRestrictor::isValid() const {
 		throw Message(hardwareName + " ID " + id + " already exists.");
 	}
 	if (Defaults::isSerial(name, false) and checkDupe and restrictorsHandler->isUsed(newName)) {
-		throw Message(hardwareName + " that connects to " + port + " already exists.");
+		throw Message(hardwareName + " that connects to " + (port.empty() ? "<autodetect>" : port) + " already exists.");
 	}
 	if (checkDupe and restrictorsHandler->isUsed(newName)) {
 		throw Message(hardwareName + " already exists.");

@@ -92,6 +92,8 @@ protected:
 		* restrictorsListstore = nullptr,
 		* idListstore          = nullptr;
 
+	Gtk::Label* breafRestrictor = nullptr;
+
 	string previousName;
 
 	DialogRestrictor(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);

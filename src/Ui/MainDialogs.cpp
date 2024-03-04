@@ -39,9 +39,6 @@ MainDialogs::MainDialogs(Glib::RefPtr<Gtk::Builder> const &builder, Gtk::Applica
 
 	DialogColors::initialize(builder);
 
-	// Initialize Pin Handler.
-	Storage::PinHandler::initialize(builder);
-
 	// Initialize secondary dialogs.
 	DataDialogs::DialogElement::initialize(builder);
 	DataDialogs::DialogSelect::initialize(builder);
@@ -91,7 +88,6 @@ MainDialogs::~MainDialogs() {
 
 	// dialogs.
 	delete DialogColors::getInstance();
-	delete Storage::PinHandler::getInstance();
 
 	// the order is important.
 	profiles.wipe();

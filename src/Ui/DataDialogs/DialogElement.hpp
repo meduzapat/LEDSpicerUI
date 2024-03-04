@@ -26,8 +26,10 @@
 #ifndef UI_DIALOGELEMENT_HPP_
 #define UI_DIALOGELEMENT_HPP_ 1
 
+const int MAX_COLUMNS = 20;
+const int MIN_COLUMNS = 10;
+
 #define elementHandler Storage::CollectionHandler::getInstance(COLLECTION_ELEMENT)
-#define pinHandler Storage::PinHandler::getInstance()
 
 namespace LEDSpicerUI::Ui::DataDialogs {
 
@@ -45,7 +47,7 @@ public:
 	virtual ~DialogElement() = default;
 
 	/**
-	 * Instanciate an object of its class.
+	 * Instantiate an object of its class.
 	 * @param builder
 	 * @param gladeID
 	 */
@@ -69,7 +71,16 @@ public:
 
 	const string createUniqueId() const override;
 
-	void deleteElementByPin(const string& pin);
+	/**
+	 * Sets the current number of pins.
+	 * @param newSize
+	 */
+	void changeNumberOfPins(const uint8_t newSize);
+
+	/**
+	 * Redraw the pin box.
+	 */
+	void drawPins();
 
 protected:
 
@@ -87,10 +98,14 @@ protected:
 	// onTime
 		* timeOn = nullptr;
 
+	/// Number of pins provided by the current hardware.
+	uint8_t numberOfPins = 0;
+
 	Gtk::Notebook* notebookDevice;
 
 	Gtk::ToggleButton* solenoid    = nullptr;
 	Gtk::Button* inputDefaultColor = nullptr;
+	Gtk::FlowBox* pinsBox          = nullptr;
 
 	// Only used by the UI
 	Gtk::ComboBoxText* inputElementType = nullptr;
@@ -101,11 +116,22 @@ protected:
 
 	Storage::Data* getData(unordered_map<string, string>& rawData) override;
 
-	/// Clean up used pins.
-	void unmarkMyPins();
+	void addButtons(Storage::BoxButton* boxButton) override;
 
-	/// Set used pins.
-	void markMyPins();
+	/**
+	 * finds all elements that uses a pin.
+	 *
+	 * @param pin
+	 * @param elements found elements will be stored here.
+	 */
+	void findElementsByPin(const string& pin, vector<Storage::BoxButton*>& elements);
+
+	/**
+	 * Calculates the number of columns.
+	 * @param size
+	 * @return
+	 */
+	const uint8_t findLargestDivisor(uint8_t size);
 };
 
 } /* namespace */

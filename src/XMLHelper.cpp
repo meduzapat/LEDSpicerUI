@@ -95,3 +95,34 @@ vector<unordered_map<string, string>>& XMLHelper::getData(const string& dataName
 	return extractedData[dataName];
 }
 
+string XMLHelper::cleanError(const string& error) {
+	// ex: Unable to read the file /xxx/yyy/zzzz.xml Error=XML_ERROR_MISMATCHED_ELEMENT ErrorID=14 (0xe) Line number=369: XMLElement name=map
+	string result;
+	size_t pos = error.find("Error=");
+	if (pos == std::string::npos)
+		return error;
+
+	result = error.substr(0, pos);
+	size_t endPos  = pos + 6;
+	pos = error.find("ErrorID=", endPos);
+	if (pos == std::string::npos)
+		return result;
+
+	result += "\nError: " + error.substr(endPos, pos - endPos);
+	pos = error.find("Line number=", pos);
+	if (pos == std::string::npos)
+		return result;
+
+	pos += 12;
+	endPos = error.find(':', pos);
+	if (endPos == std::string::npos)
+		return result;
+
+	result += "\nLine: " + error.substr(pos, endPos - pos);
+	pos = error.find("XMLElement name=", pos);
+	if (pos == std::string::npos)
+		return result;
+
+	result += "\nNode: " + error.substr(pos + 16);
+	return result;
+}
