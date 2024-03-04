@@ -45,10 +45,5 @@ const string NameOnly::getCssClass() const {
 }
 
 const string NameOnly::toXML() const {
-	string r(Defaults::tab() + "<" + node + "\n");
-	Defaults::increaseTab();
-	r += Data::toXML();
-	Defaults::reduceTab();
-	r += Defaults::tab() + "/>\n";
-	return r;
+	return createOpeningXML(node, fieldsData, ignored, true);
 }

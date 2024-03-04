@@ -65,10 +65,46 @@ void Data::wipe() {
 }
 
 const string Data::toXML() const {
-	string r;
-	for (const auto& v : fieldsData) {
-		if (std::find(ignored.begin(), ignored.end(), v.first) == ignored.end())
-			r += Defaults::tab() + v.first + "=\"" + v.second + "\"\n";
+	return valuesXML(ignored, fieldsData);
+}
+
+string Data::valuesXML(const vector<string>& ignored, const unordered_map<string, string>& data) {
+	string r, el, tab(" ");
+	if (data.size() > 2) {
+		el  = "\n";
+		tab = Defaults::tab();
 	}
+	for (const auto& v : data) {
+		if (std::find(ignored.begin(), ignored.end(), v.first) == ignored.end())
+			r += tab + v.first + "=\"" + v.second + "\"" + el;
+	}
+	return r;
+}
+
+string Data::createOpeningXML(const string& node, const unordered_map<string, string>& data, const vector<string>& ignored, bool empty) {
+	string r(Defaults::tab() + "<" + node);
+	if (data.size() > 2) {
+		r += "\n";
+		Defaults::increaseTab();
+		r += valuesXML(ignored, data);
+		Defaults::reduceTab();
+		r += Defaults::tab();
+	}
+	else {
+		r += valuesXML(ignored, data);
+	}
+	if (empty) {
+		r += "/>\n";
+	}
+	else {
+		r += ">\n";
+		Defaults::increaseTab();
+	}
+	return r;
+}
+
+string Data::createClosingXML(const string& node) {
+	Defaults::reduceTab();
+	string r(Defaults::tab() + "</" + node + ">\n");
 	return r;
 }

@@ -133,6 +133,32 @@ protected:
 
 	/// List of ignored data fields.
 	vector<string> ignored;
+
+	/**
+	 *
+	 * @param ignored
+	 * @param data
+	 * @return
+	 */
+	static string valuesXML(const vector<string>& ignored, const unordered_map<string, string>& data);
+
+	/**
+	 *
+	 * @param node
+	 * @param data
+	 * @param ignored
+	 * @param empty
+	 * @return
+	 */
+	static string createOpeningXML(const string& node, const unordered_map<string, string>& data, const vector<string>& ignored, bool empty);
+
+	/**
+	 *
+	 * @param node
+	 * @return
+	 */
+	static string createClosingXML(const string& node);
+
 };
 
 } /* namespace */

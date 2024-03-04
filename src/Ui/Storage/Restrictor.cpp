@@ -61,16 +61,11 @@ void Restrictor::activate() {
 }
 
 const string Restrictor::toXML() const {
-	string r(Defaults::tab() + "<restrictor\n");
-	Defaults::increaseTab();
-	r += Data::toXML();
-	Defaults::reduceTab();
-	r += Defaults::tab() + ">\n";
-	Defaults::increaseTab();
+	string r(createOpeningXML("restrictor", fieldsData, ignored, false));
 	for (const auto& e : playerMapping) {
 		r += e->getData()->toXML();
 	}
-	Defaults::reduceTab();
-	return r + Defaults::tab() + "</restrictor>\n";
+	r += createClosingXML("restrictor");
+	return r;
 }
 

@@ -53,16 +53,10 @@ void Group::activate() {
 }
 
 const string Group::toXML() const {
-	string r(Defaults::tab() + "<group\n");
-	Defaults::increaseTab();
-	r += Data::toXML();
-	Defaults::reduceTab();
-	r += Defaults::tab() + ">\n";
-	Defaults::increaseTab();
+	string r(createOpeningXML("group", fieldsData, ignored, false));
 	for (const auto& e : elements) {
 		r += e->getData()->toXML();
 	}
-	Defaults::reduceTab();
-	r += Defaults::tab() + "</group>\n";
+	r += createClosingXML("group");
 	return r;
 }

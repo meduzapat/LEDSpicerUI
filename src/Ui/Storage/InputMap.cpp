@@ -48,10 +48,5 @@ const string InputMap::getCssClass() const {
 }
 
 const string InputMap::toXML() const {
-	string r(Defaults::tab() + "<map\n");
-	Defaults::increaseTab();
-	r += Data::toXML();
-	Defaults::reduceTab();
-	r += Defaults::tab() + ">\n";
-	return r;
+	return createOpeningXML("map", fieldsData, ignored, true);
 }
