@@ -43,12 +43,7 @@ const string Element::getCssClass() const {
 }
 
 const string Element::toXML() const {
-	string r(Defaults::tab() + "<element\n");
-	Defaults::increaseTab();
-	r += Data::toXML();
-	Defaults::reduceTab();
-	r += Defaults::tab() + "/>\n";
-	return r;
+	return createOpeningXML("element", fieldsData, ignored, true);
 }
 
 string Element::getPinCssByData(uint8_t pin, Data* data) {

@@ -61,17 +61,12 @@ void Device::activate() {
 }
 
 const string Device::toXML() const {
-	string r(Defaults::tab() + "<device\n");
-	Defaults::increaseTab();
-	r += Data::toXML();
-	Defaults::reduceTab();
-	r += Defaults::tab() + ">\n";
-	Defaults::increaseTab();
+	string r(createOpeningXML("device", fieldsData, ignored, false));
 	for (const auto& e : elements) {
 		r += e->getData()->toXML();
 	}
-	Defaults::reduceTab();
-	return r + Defaults::tab() + "</device>\n";
+	r += createClosingXML("device");
+	return r;
 }
 
 
