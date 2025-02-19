@@ -4,7 +4,7 @@
  * @since     Sep 30, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 - 2024 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2023 - 2025 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -50,7 +50,7 @@ public:
 	virtual ~DialogInputMap() = default;
 
 	/**
-	 * Instanciate an object of its class.
+	 * Instantiate an object of its class.
 	 * @param builder
 	 * @param gladeID
 	 */

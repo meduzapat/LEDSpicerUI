@@ -4,7 +4,7 @@
  * @since     Feb 15, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 - 2024 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2023 - 2025 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -78,7 +78,12 @@ public:
 	virtual void setOwner(Storage::BoxButtonCollection* collection, Storage::Data* owner = nullptr);
 
 	/**
-	 * Reset form.
+	 * Does extra changes that are not done in clearform() and calls clearForm() if needed (default).
+	 */
+	virtual void resetForm();
+
+	/**
+	 * Clear the From leaving it empty for data entry.
 	 */
 	virtual void clearForm() = 0;
 
@@ -112,7 +117,7 @@ public:
 
 protected:
 
-	/// If true the form is in Edit mode.
+	/// form action mode.
 	Modes mode = Modes::ADD;
 
 	Gtk::Button
@@ -176,7 +181,7 @@ protected:
 	void setSignalAdd();
 
 	/**
-	 * Utility to create and add a button that allows deletion of the BoxButtons.
+	 * Utility that decorates with a button that allows deletion of itself.
 	 *
 	 * @param boxButton the boxButton that will receive this delete button to delete itself.
 	 * @param askConfirmation if set will ask, default yes.
@@ -184,21 +189,21 @@ protected:
 	virtual void createDeleteButton(Storage::BoxButton* boxButton, bool askConfirmation = true);
 
 	/**
-	 * Utility to create and add a button that allows to edit the BoxButtons.
+	 * Utility that decorates with a button that allows to edit itself.
 	 *
 	 * @param boxButton the BoxButton that will receive this edit button to been able to get edited.
 	 */
 	virtual void createEditButton(Storage::BoxButton* boxButton);
 
 	/**
-	 * Utility to create and add a button that allows to clone the BoxButtons.
+	 * Utility that decorates with a button that allows to clone itself.
 	 *
 	 * @param boxButton the BoxButton that will receive this clone button to been able to get cloned.
 	 */
 	void createCloneButton(Storage::BoxButton* boxButton);
 
 	/**
-	 * Function to create the necesary buttons in the boxButton.
+	 * Function to decorate the boxButton with the necessary buttons.
 	 *
 	 * @param boxButton The BoxButton that will get buttons.
 	 */

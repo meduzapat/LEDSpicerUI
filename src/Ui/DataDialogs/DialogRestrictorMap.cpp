@@ -4,7 +4,7 @@
  * @since     Oct 14, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 - 2024 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2023 - 2025 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -124,6 +124,10 @@ string const DialogRestrictorMap::createUniqueId() const {
 }
 
 const bool DialogRestrictorMap::checkAvailableInterfaces() const {
+	// unknown amount due to unknown restrictor.
+	if (not Defaults::restrictorsInfo.count(comboBoxRestrictors->get_active_id())) {
+		return true;
+	}
 	// Allowed interfaces.
 	auto total = Defaults::restrictorsInfo.at(comboBoxRestrictors->get_active_id()).interfaces;
 	// Size of the map box.

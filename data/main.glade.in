@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.38.2 
+<!-- Generated with glade 3.40.0 
 
 Copyright (C) @COPYRIGHT@
 
@@ -148,6 +148,7 @@ Author: Patricio A Rossi
     <property name="page-size">51</property>
   </object>
   <object class="GtkAdjustment" id="adjustmentElementBrightness">
+    <property name="lower">1</property>
     <property name="upper">100</property>
     <property name="value">100</property>
     <property name="step-increment">1</property>
@@ -172,6 +173,18 @@ Author: Patricio A Rossi
             <property name="height-request">500</property>
             <property name="visible">True</property>
             <property name="can-focus">False</property>
+            <child>
+              <object class="GtkImage">
+                <property name="width-request">100</property>
+                <property name="height-request">80</property>
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+              </object>
+              <packing>
+                <property name="x">409</property>
+                <property name="y">198</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="expand">True</property>
@@ -1280,6 +1293,20 @@ If nothing is set, the default is 1000ms.</property>
                       </packing>
                     </child>
                     <child>
+                      <object class="GtkButton" id="BtnAutodetectGroups">
+                        <property name="label">Autodetect</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">True</property>
+                        <property name="tooltip-text" translatable="yes">Attempts to autodetect Players and other standard groups</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
                       <placeholder/>
                     </child>
                   </object>
@@ -1752,7 +1779,8 @@ normally is inside /usr/shared/ledspicer/</property>
     <property name="program-name">@PACKAGE_NAME@</property>
     <property name="version">@PACKAGE_VERSION@</property>
     <property name="copyright">@COPYRIGHT@</property>
-    <property name="comments">@DESCRIPTION@</property>
+    <property name="comments">LEDSpicer UI is a user-friendly interface designed for configuring the LEDSpicer daemon.
+Compatible with version @MINIMUM_COMPATIBILITY@</property>
     <property name="website">@PACKAGE_URL@</property>
     <property name="website-label">Project Page</property>
     <property name="authors">Patricio A Rossi</property>
@@ -1798,44 +1826,13 @@ normally is inside /usr/shared/ledspicer/</property>
             <property name="can-focus">False</property>
             <property name="layout-style">end</property>
             <child>
-              <object class="GtkBox">
+              <object class="GtkSearchEntry" id="InputFilterColor">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="halign">start</property>
-                <child>
-                  <object class="GtkSearchEntry" id="InputFilterColor">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="tooltip-text">Filter</property>
-                    <property name="primary-icon-name">edit-find-symbolic</property>
-                    <property name="primary-icon-activatable">False</property>
-                    <property name="primary-icon-sensitive">False</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkButton" id="BntRemoveColorFilter">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">True</property>
-                    <child>
-                      <object class="GtkImage">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="icon-name">list-remove</property>
-                      </object>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
+                <property name="can-focus">True</property>
+                <property name="tooltip-text">Filter</property>
+                <property name="primary-icon-name">edit-find-symbolic</property>
+                <property name="primary-icon-activatable">False</property>
+                <property name="primary-icon-sensitive">False</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -3479,6 +3476,23 @@ normally is inside /usr/shared/ledspicer/</property>
             <property name="can-focus">False</property>
             <property name="layout-style">end</property>
             <child>
+              <object class="GtkSearchEntry" id="entryFilterSelects">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="tooltip-text">Filter</property>
+                <property name="primary-icon-name">edit-find-symbolic</property>
+                <property name="primary-icon-activatable">False</property>
+                <property name="primary-icon-sensitive">False</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+                <property name="secondary">True</property>
+                <property name="non-homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
               <object class="GtkButton" id="BtnSelectAll">
                 <property name="label">Select All</property>
                 <property name="visible">True</property>
@@ -3488,7 +3502,7 @@ normally is inside /usr/shared/ledspicer/</property>
               <packing>
                 <property name="expand">True</property>
                 <property name="fill">True</property>
-                <property name="position">0</property>
+                <property name="position">1</property>
               </packing>
             </child>
             <child>
@@ -3501,7 +3515,7 @@ normally is inside /usr/shared/ledspicer/</property>
               <packing>
                 <property name="expand">True</property>
                 <property name="fill">True</property>
-                <property name="position">1</property>
+                <property name="position">2</property>
               </packing>
             </child>
             <child>
@@ -3514,7 +3528,7 @@ normally is inside /usr/shared/ledspicer/</property>
               <packing>
                 <property name="expand">True</property>
                 <property name="fill">True</property>
-                <property name="position">2</property>
+                <property name="position">3</property>
               </packing>
             </child>
           </object>
@@ -4564,9 +4578,49 @@ you can set the same trigger multiple time on different maps but only the last o
     </child>
   </object>
   <object class="GtkAdjustment" id="adjustmentNumberLeds">
-    <property name="upper">255</property>
+    <property name="upper">1000</property>
     <property name="step-increment">1</property>
     <property name="page-increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="adjustmentScrolledWindows">
+    <property name="upper">100</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="adjustmentStartPosition">
+    <property name="lower">1</property>
+    <property name="upper">100</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="adjustmentStripSize">
+    <property name="lower">1</property>
+    <property name="upper">100</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">10</property>
+  </object>
+  <object class="GtkListStore" id="liststoreColorFormat">
+    <columns>
+      <!-- column-name values -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0">RGB</col>
+      </row>
+      <row>
+        <col id="0">GRB</col>
+      </row>
+      <row>
+        <col id="0">BGR</col>
+      </row>
+      <row>
+        <col id="0">GBR</col>
+      </row>
+      <row>
+        <col id="0">RBG</col>
+      </row>
+    </data>
   </object>
   <object class="GtkListStore" id="liststoreDeviceId">
     <columns>
@@ -4598,7 +4652,7 @@ you can set the same trigger multiple time on different maps but only the last o
             <property name="can-focus">False</property>
             <property name="layout-style">end</property>
             <child>
-              <object class="GtkLabel" id="BreafDevice">
+              <object class="GtkLabel" id="BriefDevice">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="halign">start</property>
@@ -5082,7 +5136,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="InputElementName">
+              <object class="GtkEntry" id="EntryElementName">
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="tooltip-text">Ex: P1_BUTTON1, P2_JOYSTICT1, LIGHT1</property>
@@ -5119,7 +5173,13 @@ If you have multiple serial devices, avoid using autodetect.</property>
           <object class="GtkLabel">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="label">Set Device Pin(s)</property>
+            <property name="margin-top">2</property>
+            <property name="margin-bottom">2</property>
+            <property name="label">Connection Setup</property>
+            <attributes>
+              <attribute name="weight" value="bold"/>
+              <attribute name="size" value="12288"/>
+            </attributes>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -5128,55 +5188,90 @@ If you have multiple serial devices, avoid using autodetect.</property>
           </packing>
         </child>
         <child>
-          <object class="GtkNotebook" id="NotebookDevice">
+          <object class="GtkNotebook" id="NotebookDeviceConnections">
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <child>
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="homogeneous">True</property>
+                <property name="spacing">5</property>
                 <child>
-                  <object class="GtkEntry" id="pinR">
-                    <property name="name">red</property>
+                  <object class="GtkBox">
                     <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="max-length">2</property>
-                    <property name="width-chars">2</property>
-                    <property name="placeholder-text">Red Pin</property>
-                    <property name="input-purpose">number</property>
+                    <property name="can-focus">False</property>
+                    <property name="spacing">5</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="halign">end</property>
+                        <property name="label">Position</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="EntryPositionRGB">
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="editable">False</property>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
                   </object>
                   <packing>
-                    <property name="expand">False</property>
+                    <property name="expand">True</property>
                     <property name="fill">True</property>
                     <property name="position">0</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkEntry" id="pinG">
-                    <property name="name">green</property>
+                  <object class="GtkBox">
                     <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="max-length">2</property>
-                    <property name="width-chars">2</property>
-                    <property name="placeholder-text">Green Pin</property>
-                    <property name="input-purpose">number</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkEntry" id="pinB">
-                    <property name="name">blue</property>
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="max-length">2</property>
-                    <property name="width-chars">2</property>
-                    <property name="placeholder-text">Blue Pin</property>
-                    <property name="input-purpose">number</property>
+                    <property name="can-focus">False</property>
+                    <property name="spacing">5</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="halign">end</property>
+                        <property name="margin-start">4</property>
+                        <property name="label">Color Format</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkComboBox" id="ComboBoxRGBRGB">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="model">liststoreColorFormat</property>
+                        <property name="id-column">0</property>
+                        <property name="active-id">RGB</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="formatValuesRGB"/>
+                          <attributes>
+                            <attribute name="text">0</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -5190,7 +5285,8 @@ If you have multiple serial devices, avoid using autodetect.</property>
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label">RGB</property>
+                <property name="tooltip-text" translatable="yes">For Contiguous setups like RGB LEDS</property>
+                <property name="label" translatable="yes">RGB</property>
               </object>
               <packing>
                 <property name="tab-fill">False</property>
@@ -5200,44 +5296,133 @@ If you have multiple serial devices, avoid using autodetect.</property>
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="homogeneous">True</property>
                 <child>
-                  <object class="GtkEntry" id="pin">
-                    <property name="name">led</property>
+                  <object class="GtkBox">
                     <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="max-length">2</property>
-                    <property name="width-chars">2</property>
-                    <property name="placeholder-text">Pin</property>
-                    <property name="input-purpose">number</property>
+                    <property name="can-focus">False</property>
+                    <property name="spacing">5</property>
+                    <property name="homogeneous">True</property>
+                    <child>
+                      <object class="GtkBox">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="spacing">5</property>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="halign">end</property>
+                            <property name="margin-start">4</property>
+                            <property name="label">Position</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="EntryPositionStrip">
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="editable">False</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkBox">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="spacing">5</property>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="halign">end</property>
+                            <property name="margin-start">4</property>
+                            <property name="label">Size</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="EntrySizeStrip">
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="editable">False</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
                   </object>
                   <packing>
-                    <property name="expand">False</property>
+                    <property name="expand">True</property>
                     <property name="fill">True</property>
                     <property name="position">0</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkToggleButton" id="InputElementAutoOff">
-                    <property name="label">Solenoid</property>
+                  <object class="GtkBox">
                     <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">True</property>
-                    <property name="tooltip-text">Solenoids, Motors, Recoils, any other time-sensitive hardware must have their power cut off after being powered on. This checkbox indicates when this is necessary for this pin.</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkEntry" id="InputElementOnTime">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="tooltip-text">After receiving the power, wait for these milliseconds and then power off the pin.
-Default is 50ms</property>
-                    <property name="placeholder-text">Off Timer ms</property>
+                    <property name="can-focus">False</property>
+                    <property name="spacing">5</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="halign">end</property>
+                        <property name="label">Color Format</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkComboBox" id="ComboBoxRGBStrip">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="model">liststoreColorFormat</property>
+                        <property name="id-column">0</property>
+                        <property name="active-id">RGB</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="formatValuesStrip"/>
+                          <attributes>
+                            <attribute name="text">0</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -5254,10 +5439,341 @@ Default is 50ms</property>
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label">Single Color</property>
+                <property name="label" translatable="yes">RGB Strip</property>
               </object>
               <packing>
                 <property name="position">1</property>
+                <property name="tab-fill">False</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="spacing">5</property>
+                <property name="homogeneous">True</property>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="halign">end</property>
+                    <property name="margin-start">4</property>
+                    <property name="label">Red</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEntry" id="EntryPinR">
+                    <property name="name">red</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="max-length">4</property>
+                    <property name="width-chars">2</property>
+                    <property name="placeholder-text">Red</property>
+                    <property name="input-purpose">number</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="halign">end</property>
+                    <property name="margin-start">4</property>
+                    <property name="label">Green</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEntry" id="EntryPinG">
+                    <property name="name">green</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="max-length">4</property>
+                    <property name="width-chars">2</property>
+                    <property name="placeholder-text">Green</property>
+                    <property name="input-purpose">number</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">3</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="halign">end</property>
+                    <property name="margin-start">4</property>
+                    <property name="label">Blue</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">4</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEntry" id="EntryPinB">
+                    <property name="name">blue</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="max-length">4</property>
+                    <property name="width-chars">2</property>
+                    <property name="placeholder-text">Blue</property>
+                    <property name="input-purpose">number</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">5</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="position">2</property>
+              </packing>
+            </child>
+            <child type="tab">
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="tooltip-text" translatable="yes">For Fragmented setups, where the RGB LED's pins are separated.</property>
+                <property name="label">Scattered RGB</property>
+              </object>
+              <packing>
+                <property name="position">2</property>
+                <property name="tab-fill">False</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <child>
+                  <object class="GtkBox">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="spacing">5</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="halign">end</property>
+                        <property name="label">Connector</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="EntryPin">
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="max-length">4</property>
+                        <property name="input-purpose">number</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkToggleButton" id="ToggleElementSolenoid">
+                    <property name="label">Solenoid</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
+                    <property name="tooltip-text">Solenoids, Motors, Recoils, any other time-sensitive hardware must have their power cut off after being powered on. This checkbox indicates when this is necessary for this pin.</property>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="halign">end</property>
+                    <property name="spacing">5</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="halign">end</property>
+                        <property name="label">Off Timer</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="EntryElementOnTime">
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="tooltip-text" translatable="yes">After receiving the power, wait for these milliseconds and then power off the pin.
+Default is 50ms</property>
+                        <property name="max-length">4</property>
+                        <property name="placeholder-text" translatable="yes">Millisecons</property>
+                        <property name="input-purpose">number</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="position">3</property>
+              </packing>
+            </child>
+            <child type="tab">
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="label">Single Color / Solenoid</property>
+              </object>
+              <packing>
+                <property name="position">3</property>
+                <property name="tab-fill">False</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="spacing">5</property>
+                <child>
+                  <object class="GtkBox">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="spacing">5</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="halign">end</property>
+                        <property name="label">Positions</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="EntryPositionsMRGB">
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="editable">False</property>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="spacing">5</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="halign">end</property>
+                        <property name="margin-start">4</property>
+                        <property name="label">Color Format</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkComboBox" id="ComboBoxRGBMRGB">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="model">liststoreColorFormat</property>
+                        <property name="id-column">0</property>
+                        <property name="active-id">RBG</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="formatValuesMRGB"/>
+                          <attributes>
+                            <attribute name="text">0</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="position">4</property>
+              </packing>
+            </child>
+            <child type="tab">
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="label" translatable="yes">Multiple RGB</property>
+              </object>
+              <packing>
+                <property name="position">4</property>
                 <property name="tab-fill">False</property>
               </packing>
             </child>
@@ -5272,7 +5788,13 @@ Default is 50ms</property>
           <object class="GtkLabel">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="label">Device Pin Layout</property>
+            <property name="margin-top">2</property>
+            <property name="margin-bottom">2</property>
+            <property name="label">Device Connector Layout</property>
+            <attributes>
+              <attribute name="weight" value="bold"/>
+              <attribute name="size" value="12288"/>
+            </attributes>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -5281,15 +5803,35 @@ Default is 50ms</property>
           </packing>
         </child>
         <child>
-          <object class="GtkFlowBox" id="FlowBoxPinLayout">
+          <object class="GtkScrolledWindow" id="ScrolledWindowConnections">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="homogeneous">True</property>
-            <property name="column-spacing">1</property>
-            <property name="row-spacing">1</property>
-            <property name="max-children-per-line">16</property>
-            <property name="selection-mode">none</property>
-            <property name="activate-on-single-click">False</property>
+            <property name="can-focus">True</property>
+            <property name="valign">start</property>
+            <property name="vadjustment">adjustmentScrolledWindows</property>
+            <property name="hscrollbar-policy">never</property>
+            <property name="shadow-type">in</property>
+            <property name="min-content-height">90</property>
+            <property name="propagate-natural-height">True</property>
+            <child>
+              <object class="GtkViewport">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="valign">start</property>
+                <property name="vexpand">True</property>
+                <child>
+                  <object class="GtkFlowBox" id="FlowBoxPinLayout">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="valign">start</property>
+                    <property name="vexpand">True</property>
+                    <property name="homogeneous">True</property>
+                    <property name="max-children-per-line">20</property>
+                    <property name="selection-mode">none</property>
+                    <property name="activate-on-single-click">False</property>
+                  </object>
+                </child>
+              </object>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -5317,7 +5859,7 @@ Default is 50ms</property>
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="InputDefaultColor">
+              <object class="GtkButton" id="BtnDefaultColor">
                 <property name="label">Default Color</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
@@ -5360,7 +5902,7 @@ Default is 50ms</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkComboBoxText" id="InputElementType">
+                  <object class="GtkComboBoxText" id="ComboBoxElementType">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="active-id">0</property>
@@ -5408,14 +5950,16 @@ Default is 50ms</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkScale" id="ScaleDeviceChangePoint1">
+                  <object class="GtkScale" id="ScaleElementBrightness">
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="tooltip-text">In black and white systems this handles the "change point" when OFF became ON</property>
                     <property name="valign">center</property>
                     <property name="adjustment">adjustmentElementBrightness</property>
+                    <property name="show-fill-level">True</property>
                     <property name="round-digits">0</property>
                     <property name="digits">0</property>
+                    <property name="value-pos">left</property>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -5507,6 +6051,10 @@ Default is 50ms</property>
                       <item id="BAR">Bar</item>
                       <item id="PUSHER">Pusher</item>
                       <item id="PINBALL">Pinball</item>
+                      <item id="MENU" translatable="yes">Menu</item>
+                      <item id="BACK" translatable="yes">Back</item>
+                      <item id="PAUSE" translatable="yes">Pause</item>
+                      <item id="CONTROL" translatable="yes">Control</item>
                     </items>
                   </object>
                   <packing>
@@ -5683,7 +6231,7 @@ Default is 50ms</property>
             <property name="can-focus">False</property>
             <property name="layout-style">end</property>
             <child>
-              <object class="GtkLabel" id="BreafRestrictor">
+              <object class="GtkLabel" id="BriefRestrictor">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="halign">start</property>

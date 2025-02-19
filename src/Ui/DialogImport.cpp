@@ -4,7 +4,7 @@
  * @since     May 7, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 - 2024 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2023 - 2025 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -83,16 +83,16 @@ void DialogImport::setConfigBox(Gtk::Box* box) {
 		* importMappings    = Gtk::make_managed<Gtk::ToggleButton>("Import Process Mappings");
 
 	importConfig->signal_toggled().connect([&, importConfig]() {
-		setFlags(IMPORT_CONFIG, importConfig->get_active());
+		setFlags(Defaults::ImportFlags::CONFIG, importConfig->get_active());
 	});
 	importDevices->signal_toggled().connect([&, importDevices]() {
-		setFlags(IMPORT_DEVICES, importDevices->get_active());
+		setFlags(Defaults::ImportFlags::DEVICES, importDevices->get_active());
 	});
 	importRestrictors->signal_toggled().connect([&, importRestrictors]() {
-		setFlags(IMPORT_RESTRICTORS, importRestrictors->get_active());
+		setFlags(Defaults::ImportFlags::RESTRICTORS, importRestrictors->get_active());
 	});
 	importMappings->signal_toggled().connect([&, importMappings]() {
-		setFlags(IMPORT_MAPPINGS, importMappings->get_active());
+		setFlags(Defaults::ImportFlags::MAPPINGS, importMappings->get_active());
 	});
 	signal_show().connect([=]() {
 		importConfig->set_active(true);

@@ -4,7 +4,7 @@
  * @since     Feb 22, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 - 2024 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2023 - 2025 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -40,8 +40,7 @@ void DialogColors::initialize(Glib::RefPtr<Gtk::Builder> const &builder) {
 DialogColors::DialogColors(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &builder) :
 	Gtk::Dialog(obj)
 {
-	Gtk::Entry* filterEntry;
-	Gtk::Button* removefilter;
+	Gtk::SearchEntry* filterEntry;
 	builder->get_widget("BtnColorOn",           BtnColorOn);
 	builder->get_widget("BtnColorOff",          BtnColorOff);
 	builder->get_widget("BtnColorRandom",       BtnColorRandom);
@@ -49,7 +48,6 @@ DialogColors::DialogColors(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const
 	builder->get_widget("ContainerColorPicker", ContainerColorPicker);
 	// Filter.
 	builder->get_widget("InputFilterColor",     filterEntry);
-	builder->get_widget("BntRemoveColorFilter", removefilter);
 
 	// Signals
 	BtnColorOn->signal_clicked().connect(sigc::bind(
@@ -71,25 +69,11 @@ DialogColors::DialogColors(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const
 	signal_show().connect([&, filterEntry]() {
 		filterEntry->set_text("");
 		if (not ContainerColorPicker->get_children().size()) {
-			Message::displayInfo("Only default colors are available.\nSelect a color file in configuration to get more colores", this);
+			Message::displayInfo("Only default colors are available.\nSelect a color file in configuration to get more colors", this);
 		}
 	});
 
-	removefilter->signal_clicked().connect([filterEntry]() {
-		filterEntry->set_text("");
-	});
-	filterEntry->signal_changed().connect([&, filterEntry]() {
-		auto filterText = filterEntry->get_text().lowercase();
-		for (auto child : ContainerColorPicker->get_children()) {
-			auto c = dynamic_cast<Gtk::FlowBoxChild*>(child);
-			auto b = dynamic_cast<Gtk::Button*>(c->get_child());
-			auto t = b->get_tooltip_text().lowercase();
-			if (t.find(filterText) != string::npos)
-				child->show();
-			else
-				child->hide();
-		}
-	});
+	Defaults::setFilter(filterEntry, ContainerColorPicker);
 }
 
 void DialogColors::setColorsFromFile(const string& path) {
@@ -141,7 +125,7 @@ void DialogColors::colorizeButton(Gtk::Button* button, const string& colorName) 
 	string
 		oldClassName = button->get_tooltip_text(),
 		newClassName = isValidColor(colorName) ? colorName : "";
-	button->set_tooltip_text(newClassName);
+//	button->set_tooltip_text(newClassName);
 	button->set_label(newClassName);
 	auto sc = button->get_style_context();
 	if (not oldClassName.empty() and sc->has_class(oldClassName))
@@ -156,7 +140,7 @@ bool DialogColors::isValidColor(const string& colorName) {
 	for (auto child : ContainerColorPicker->get_children()) {
 		auto c = dynamic_cast<Gtk::FlowBoxChild*>(child);
 		auto b = dynamic_cast<Gtk::Button*>(c->get_child());
-		string t(b->get_tooltip_text());
+		string t(b->get_label());
 		if (colorName == t)
 			return true;
 	}
@@ -214,7 +198,7 @@ vector<string> DialogColors::getColorBoxValues(Gtk::FlowBox* destination) {
 }
 
 void DialogColors::onColorSelected(Gtk::Button* button) {
-	selectedColor = button->get_tooltip_text();
+	selectedColor = button->get_label();
 	response(Gtk::RESPONSE_OK);
 }
 
@@ -234,7 +218,7 @@ string DialogColors::setColors(unordered_map<string, string>& colors) {
 		cssData += '}';
 		// Create Button.
 		Gtk::Button* b = Gtk::make_managed<Gtk::Button>(c.first);
-		b->set_tooltip_text(c.first);
+//		b->set_tooltip_text(c.first);
 		b->set_label(c.first);
 		b->get_style_context()->add_class(c.first);
 		ContainerColorPicker->add(*b);

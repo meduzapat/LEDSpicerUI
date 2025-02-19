@@ -4,7 +4,7 @@
  * @since     Mar 16, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 - 2024 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2023 - 2025 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -43,20 +43,49 @@ const string Element::getCssClass() const {
 }
 
 const string Element::toXML() const {
+	if (fieldsData.at(BRIGHTNESS) == "100")
+		ignored.insert(BRIGHTNESS);
 	return createOpeningXML("element", fieldsData, ignored, true);
 }
 
-string Element::getPinCssByData(uint8_t pin, Data* data) {
-	string pinS(std::to_string(pin));
-	if (not data->getValue(PIN).empty()       and data->getValue(PIN)       == pinS)
-		return COLOR_PIN;
-	if (not data->getValue(SOLENOID).empty()  and data->getValue(SOLENOID)  == pinS)
-		return COLOR_SOLENOID;
-	if (not data->getValue(RED_PIN).empty()   and data->getValue(RED_PIN)   == pinS)
-		return COLOR_RED;
-	if (not data->getValue(GREEN_PIN).empty() and data->getValue(GREEN_PIN) == pinS)
-		return COLOR_GREEN;
-	if (not data->getValue(BLUE_PIN).empty()  and data->getValue(BLUE_PIN)  == pinS)
-		return COLOR_BLUE;
-	return NO_COLOR;
+void Element::splitRGB(Data* data) {
+	if (not data->getValue(POSITIONS).empty()) {
+		// Always assume good data.
+		const string position(Defaults::explode(data->getValue(POSITIONS), ',')[0]);
+		convertPositionToRGB(data, position, data->getValue(COLORFORMAT));
+		return;
+	}
+	// LED strip.
+	if (not data->getValue(STRIPSIZE).empty()) {
+		convertPositionToRGB(data, data->getValue(POSITION), data->getValue(COLORFORMAT));
+		return;
+	}
+	// RGB.
+	if (not data->getValue(POSITION).empty()) {
+		convertPositionToRGB(data, data->getValue(POSITION), data->getValue(COLORFORMAT));
+		return;
+	}
 }
+
+void Element::convertPositionToRGB(Data* data, const string& position, const string& colorFormat) {
+	auto pin(findFirstConnectorIndexByPosition(position));
+	for (const auto& c : colorFormat) {
+		switch (c) {
+		case 'R':
+			data->setValue(RED_PIN, std::to_string(pin++));
+			break;
+		case 'G':
+			data->setValue(GREEN_PIN, std::to_string(pin++));
+
+			break;
+		case 'B':
+			data->setValue(GREEN_PIN, std::to_string(pin++));
+			break;
+		}
+	}
+}
+
+const uint16_t Element::findFirstConnectorIndexByPosition(const string& position) {
+	return (((std::stod(position) -1) * 3) + 1) - 1;
+}
+

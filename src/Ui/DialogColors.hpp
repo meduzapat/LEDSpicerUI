@@ -4,7 +4,7 @@
  * @since     Feb 22, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 - 2024 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2023 - 2025 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -44,7 +44,7 @@ public:
 
 	static DialogColors* getInstance();
 
-	static void initialize(Glib::RefPtr<Gtk::Builder> const &builder);
+	static void initialize(const Glib::RefPtr<Gtk::Builder> &builder);
 
 	/**
 	 * Process a file with colors information and store the colors to be used.
@@ -99,7 +99,8 @@ public:
 
 protected:
 
-	DialogColors(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &builder);
+	DialogColors(BaseObjectType *obj,
+	        const Glib::RefPtr<Gtk::Builder> &builder);
 
 	static DialogColors* dc;
 

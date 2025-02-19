@@ -2,9 +2,7 @@ dnl Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.69)
 
-COPYRIGHT="Copyright © 2023 - 2024 Patricio A. Rossi (MeduZa)"
-DESCRIPTION="This is the UI for the LEDSpicer daemon. The program will allow to setup LEDSpicer daemon, generate layouts, elements and animations."
-
+COPYRIGHT="Copyright © 2023 - 2025 Patricio A. Rossi (MeduZa)"
 AC_INIT([LEDSpicerUI],[0.0.1],[https://github.com/meduzapat/LEDSpicerUI/issues],[ledspicerui],[https://github.com/meduzapat/LEDSpicerUI], [src/Message.cpp])
 
 AC_DEFINE_UNQUOTED([PACKAGE_DATA_VERSION], ["1.0"], [Data files version])
@@ -13,6 +11,7 @@ AC_DEFINE_UNQUOTED([PACKAGE_DATA_NAME], ["LEDSpicer"], [Data files name])
 AC_COPYRIGHT($COPYRIGHT)
 AC_SUBST([COPYRIGHT], ["$COPYRIGHT"])
 AC_SUBST([DESCRIPTION], ["$DESCRIPTION"])
+AC_SUBST([MINIMUM_COMPATIBILITY], ["0.6.3 - 0.6.4"])
 
 AC_CONFIG_SRCDIR([src/LEDSpicerUI.cpp])
 AC_CONFIG_HEADERS([config.h])
@@ -54,9 +53,10 @@ AC_OUTPUT
 dnl Dump the build configuration for the developer
 AC_MSG_NOTICE([
 --------- build environment -----------
-Program : $PACKAGE_NAME
-Version : $PACKAGE_VERSION
-WebSite : $PACKAGE_URL
+Program       : $PACKAGE_NAME
+Version       : $PACKAGE_VERSION
+Compatibility : $MINIMUM_COMPATIBILITY
+WebSite       : $PACKAGE_URL
 --------- build settings -----------
 C++ Compiler : $CXX $CPPFLAGS $CXXFLAGS
 Includes  : $GTKMM30_CFLAGS

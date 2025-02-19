@@ -4,7 +4,7 @@
  * @since	 Feb 13, 2023
  * @author	Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 - 2024 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2023 - 2025 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -29,7 +29,8 @@ namespace LEDSpicerUI::Ui::Storage {
 
 /**
  * LEDSpicerUI::Ui::Storage::GroupBoxButton
- * @brief A class that contains a form with data, is used to handle and display that information.
+ *
+ * A class that contains a form with data, is used to handle and display that information.
  */
 class BoxButton : public Gtk::HBox {
 

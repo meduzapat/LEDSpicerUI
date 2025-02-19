@@ -4,7 +4,7 @@
  * @since     Feb 14, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 - 2024 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2023 - 2025 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -58,13 +58,13 @@ DialogInput::DialogInput(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& 
 	builder->get_widget_derived("BoxInputLinkedMaps", boxInputLinkedMaps);
 
 	// Blinker
-	builder->get_widget("SpinInputTimes",           spinInputTimes);
+	builder->get_widget("SpinInputTimes",      spinInputTimes);
 
 	// Actions and Blinker
-	builder->get_widget("ComboBoxInputSpeed",       comboBoxInputSpeed);
+	builder->get_widget("ComboBoxInputSpeed",  comboBoxInputSpeed);
 
 	// Actions, Blinker and Impulse
-	builder->get_widget("InputInputDevicesID",      inputInputDevicesID);
+	builder->get_widget("InputInputDevicesID", inputInputDevicesID);
 
 	// Others
 	builder->get_widget("LinkedElementsAndGroupsBox", linkedElementsAndGroupsBox);
@@ -86,7 +86,7 @@ DialogInput::DialogInput(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& 
 			btnAddInputMap->set_sensitive(false);
 			return;
 		}
-		clearFormOthers();
+		clearForm();
 		btnApply->set_sensitive(true);
 		btnAddInputMap->set_sensitive(true);
 		if (name == "Actions") {
@@ -119,12 +119,12 @@ void DialogInput::createSubItems(XMLHelper* values) {
 	DialogInputLinkMaps::getInstance()->load(values);
 }
 
-void DialogInput::clearForm() {
+void DialogInput::resetForm() {
 	comboBoxInputSelectInput->set_active_text("Select Plugin");
-	clearFormOthers();
+	clearForm();
 }
 
-void DialogInput::clearFormOthers() {
+void DialogInput::clearForm() {
 
 	boxInputMap->set_selection_mode(Gtk::SelectionMode::SELECTION_NONE);
 

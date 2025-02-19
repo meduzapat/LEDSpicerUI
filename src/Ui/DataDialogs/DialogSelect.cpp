@@ -4,7 +4,7 @@
  * @since     Feb 22, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 - 2024 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2023 - 2025 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -42,12 +42,13 @@ DialogForm(obj, builder)
 	Gtk::Button
 		* btnSelectAll,
 		* btnSelectNone;
-
+	Gtk::SearchEntry* filterEntry;
 	// Box and btnAdd will be set on destination.
 	builder->get_widget("BntProcessSelection", btnApply);
 	builder->get_widget("BoxAll",              boxAll);
 	builder->get_widget("BtnSelectAll",        btnSelectAll);
 	builder->get_widget("BtnSelectNone",       btnSelectNone);
+	builder->get_widget("entryFilterSelects",  filterEntry);
 
 	btnSelectAll->signal_clicked().connect([&]() {
 		boxAll->select_all();
@@ -57,17 +58,19 @@ DialogForm(obj, builder)
 		boxAll->unselect_all();
 	});
 
-	signal_show().connect([&]() {
+	signal_show().connect([&, filterEntry]() {
+		filterEntry->set_text("");
 		populateSelectables();
 	});
 
+	Defaults::setFilter(filterEntry, boxAll);
 	setSignalApply();
 }
 
 void DialogSelect::RunDialog() {
 	// Run Dialog.
 	if (run() == Gtk::ResponseType::RESPONSE_APPLY) {
-		clearFormOthers();
+		clearForm();
 		for (auto child : boxAll->get_selected_children()) {
 			auto b = dynamic_cast<Gtk::Button*>(child->get_child());
 			auto l = b->get_label();
@@ -84,9 +87,6 @@ void DialogSelect::RunDialog() {
 }
 
 void DialogSelect::load(XMLHelper* values) {
-	// to avoid an error about empty selection, add 1 element and select it.
-	populateSelectables();
-	boxAll->select_all();
 	createItems(values->getData(Defaults::createCommonUniqueId({owner->createUniqueId(), collection})), values);
 }
 
@@ -104,13 +104,10 @@ void DialogSelect::setDestinationSettings(
 	this->buttons    = buttons;
 }
 
-void DialogSelect::clearFormOthers() {
-	box->wipe();
-	items->wipe();
-}
-
 void DialogSelect::isValid() const {
-	if (not getNumberOfSelections())
+	if (not Storage::CollectionHandler::getInstance(type)->isUsed(currentData->getValue(NAME)))
+		throw Message("Ignored invalid " + node + " " + currentData->getValue(NAME) + " in " + collection);
+	if (mode != Modes::LOAD and not getNumberOfSelections())
 		throw Message("Please Select at least one");
 };
 
@@ -150,7 +147,7 @@ void DialogSelect::populateSelectables() {
 	for (auto child : boxAll->get_children()) {
 		boxAll->remove(*child);
 	}
-	for (auto& e : *Storage::CollectionHandler::getInstance(type)) {
+	for (const auto& e : *Storage::CollectionHandler::getInstance(type)) {
 		auto b = Gtk::make_managed<Gtk::Button>(e);
 		b->get_child()->set_halign(Gtk::Align::ALIGN_START);
 		auto c = Gtk::make_managed<Gtk::FlowBoxChild>();
@@ -165,16 +162,9 @@ void DialogSelect::populateSelectables() {
 		c->add(*b);
 		boxAll->add(*c);
 		// activate selected.
-		if (exist(e))
+		if (items->isset(e))
 			boxAll->select_child(*c);
 
 	}
 	boxAll->show_all();
-}
-
-bool DialogSelect::exist(const string& name) {
-	for (auto b : *items)
-		if (b->getData()->getValue(NAME) == name)
-			return true;
-	return false;
 }

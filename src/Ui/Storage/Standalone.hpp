@@ -1,10 +1,10 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      OrdenableFlowBox.hpp
- * @since     Apr 10, 2023
+ * @file      Standalone.hpp
+ * @since     Feb 9, 2025
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -20,34 +20,34 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Message.hpp"
+#include "Data.hpp"
 
-#ifndef UI_ORDENABLEFLOWBOX_HPP_
-#define UI_ORDENABLEFLOWBOX_HPP_ 1
+#ifndef STANDALONE_HPP_
+#define STANDALONE_HPP_ 1
 
-namespace LEDSpicerUI::Ui {
+namespace LEDSpicerUI::Ui::Storage {
 
 /**
- * LEDSpicerUI::Ui::OrdenableFlowBox
+ * LEDSpicerUI::Ui::Storage::Standalone
  */
-class OrdenableFlowBox: public Gtk::FlowBox {
+class Standalone: public Data {
 
 public:
 
-	OrdenableFlowBox() = delete;
+	Standalone() = delete;
 
-	OrdenableFlowBox(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) : Gtk::FlowBox(obj) {}
+	Standalone(const string& fileName, unordered_map<string, string>& data) : Data(data), filename(fileName) {}
 
-	OrdenableFlowBox(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder, const string& up, const string& dn);
+	virtual ~Standalone() = default;
 
-	virtual ~OrdenableFlowBox() = default;
+protected:
 
-	size_t getSize();
-
-	void wipe();
+	/// Stores the filename with any sub-directory, relative to the parent dir.
+	string filename;
 
 };
 
 } /* namespace */
 
-#endif /* UI_ORDENABLEFLOWBOX_HPP_ */
+
+#endif /* STANDALONE_HPP_ */

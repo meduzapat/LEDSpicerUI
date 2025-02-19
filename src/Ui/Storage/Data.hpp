@@ -4,7 +4,7 @@
  * @since     Feb 28, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 - 2024 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2023 - 2025 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -21,6 +21,8 @@
  */
 
 #include "Message.hpp"
+#include <unordered_set>
+using std::unordered_set;
 
 #ifndef FORM_HPP_
 #define FORM_HPP_ 1
@@ -70,6 +72,12 @@ public:
 	virtual const string createUniqueId() const = 0;
 
 	/**
+	 * Removes a value by key name.
+	 * @param key
+	 */
+	virtual void unSet(const string& key);
+
+	/**
 	 * Returns a value using the key name.
 	 *
 	 * @param key
@@ -107,6 +115,8 @@ public:
 
 	/**
 	 * Removes any internal property, similar to the destructor but keeps the ownership.
+	 * To be used in complex data objects where the pointer cannot be deleted,
+	 * but it need the same effect, leaving the object fresh like new.
 	 */
 	virtual void destroy() {};
 
@@ -132,28 +142,35 @@ protected:
 	unordered_map<string, string> fieldsData;
 
 	/// List of ignored data fields.
-	vector<string> ignored;
+	mutable unordered_set<string> ignored;
 
 	/**
-	 *
+	 * Organizes data vertically or horizontally based on the number of elements.
 	 * @param ignored
 	 * @param data
 	 * @return
 	 */
-	static string valuesXML(const vector<string>& ignored, const unordered_map<string, string>& data);
+	static string valuesXML(
+		const unordered_set<string>& ignored,
+		const unordered_map<string, string>& data
+	);
 
 	/**
-	 *
+	 * Based on data it creates a single or multiple node.
 	 * @param node
 	 * @param data
 	 * @param ignored
 	 * @param empty
 	 * @return
 	 */
-	static string createOpeningXML(const string& node, const unordered_map<string, string>& data, const vector<string>& ignored, bool empty);
+	static string createOpeningXML(
+		const string& node,
+		const unordered_map<string, string>& data,
+		const unordered_set<string>& ignored,
+		bool empty
+	);
 
 	/**
-	 *
 	 * @param node
 	 * @return
 	 */

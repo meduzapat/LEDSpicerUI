@@ -4,7 +4,7 @@
  * @since     Mar 16, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 - 2024 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2023 - 2025 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -47,7 +47,24 @@ public:
 
 	const string toXML() const override;
 
-	static string getPinCssByData(uint8_t pin, Data* data);
+	/**
+	 * Attempts to convert any RGB setup into scattered RGB.
+	 * @param data
+	 */
+	static void splitRGB(Data* data);
+
+	/**
+	 * Using the position, stores the split RGB connectors.
+	 * @param data
+	 * @param position
+	 */
+	static void convertPositionToRGB(Data* data, const string& position, const string& colorFormat);
+
+	/**
+	 * @param position
+	 * @return the position of the first connector on the position.
+	 */
+	static const uint16_t findFirstConnectorIndexByPosition(const string& position);
 };
 
 } /* namespace */

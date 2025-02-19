@@ -1,4 +1,4 @@
-combobox.noRoundLeft button.combo,
+  combobox.noRoundLeft button.combo,
 .noRoundLeft {
 	border-top-left-radius: 0;
 	border-bottom-left-radius: 0;
@@ -44,33 +44,47 @@ combobox.noRoundRight button.combo,
 	color: #000;
 }
 
-.pin_white {
+.pinLabel {
+	font-size: 8pt;
+	border: 1px solid #333;
+  background: #1a1a1a;
+	color: #fff;
+}
+
+.connectorBox {
+  margin: 0;
+  padding: 0;
+  font-size: 10pt;
+  border: 1px solid #aaa;
+}
+
+.pinSingle {
 	background: #f6f5f4;
 	color: #000;
 }
 
-.pin_solenoid {
+.pinSolenoid {
 	background: #813d9c;
 }
 
-.pin_red {
+.pinRed {
 	background: #e01b24;
 	color: #fff;
 }
 
-.pin_green {
+.pinGreen {
 	background: #3da81b;
 	color: #fff;
 }
 
-.pin_blue {
+.pinBlue {
 	background: #1c71d8;
 	color: #fff;
 }
 
-.pin_multi {
-	background: #e5a50a;
-	color: #fff;
+.pinMulti {
+	background: linear-gradient(90deg, rgba(246,245,244,1) 0%, rgba(255,0,0,1) 25%, rgba(0,255,0,1) 50%, rgba(0,0,255,1) 75%, rgba(129,61,156,1) 100%);
+	color: #000;
 }
 
 .BoxButton {

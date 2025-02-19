@@ -4,7 +4,7 @@
  * @since     May 6, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 - 2024 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2023 - 2025 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -30,24 +30,137 @@ Gtk::HeaderBar* Defaults::header = nullptr;
 Gtk::Button* Defaults::btnSave   = nullptr;
 
 const unordered_map<string, Defaults::DeviceInfo> Defaults::devicesInfo = {
-//  ID                   NAME                            MaxI B/W    varia MaxPin Connection        Description
-	{"UltimarcUltimate", {"Ultimarc Ipac Ultimate IO",     4, false, false, 96, Connection::USB,    ""}},
-	{"UltimarcPacLed64", {"Ultimarc PacLed 64",            4, false, false, 64, Connection::USB,    ""}},
-	{"UltimarcPacDrive", {"Ultimarc Pac Drive",            4, true,  false, 16, Connection::USB,    ""}},
-	{"UltimarcNanoLed",  {"Ultimarc NanoLed",              4, false, true,  60, Connection::USB,    ""}},
-	{"LedWiz32",         {"Groovy Game Gear Led-Wiz 32",  16, false, false, 32, Connection::USB,    ""}},
-	{"Howler",           {"Wolfware Howler",               4, false, false, 96, Connection::USB,    ""}},
-	{"Adalight",         {"Adalight Compatible",         127, false, true,  60, Connection::SERIAL, ""}},
-	{"RaspberryPi",      {"Raspberry Pi GPIO",             1, false, false, 28, Connection::NONE,   ""}},
+	{"UltimarcUltimate", {
+		"Ultimarc Ipac Ultimate IO",
+		4,                    // Max Interfaces
+		false,                // Monochrome
+		false,                // Variable number of pins
+		true,                 // Layout RGB
+		false,                // Supports RGB strip
+		96,                   // Maximum number of Pins
+		Connection::USB,      // Connection type
+		""                    // Description
+	}},
+	{"UltimarcPacLed64", {
+		"Ultimarc PacLed 64",
+		4,                    // Max Interfaces
+		false,                // Monochrome
+		false,                // Variable number of pins
+		true,                 // Layout RGB
+		false,                // Supports RGB strip
+		64,                   // Maximum number of Pins
+		Connection::USB,      // Connection type
+		""                    // Description
+	}},
+	{"UltimarcPacDrive", {
+		"Ultimarc Pac Drive",
+		4,                    // Max Interfaces
+		true,                 // Monochrome
+		false,                // Variable number of pins
+		false,                // Layout RGB
+		false,                // Supports RGB strip
+		16,                   // Maximum number of Pins
+		Connection::USB,      // Connection type
+		""                    // Description
+	}},
+	{"UltimarcNanoLed", {
+		"Ultimarc NanoLed",
+		4,                    // Max Interfaces
+		false,                // Monochrome
+		true,                 // Variable number of pins
+		true,                 // Layout RGB
+		true,                 // Supports RGB strip
+		60,                   // Maximum number of Pins
+		Connection::USB,      // Connection type
+		""                    // Description
+	}},
+	{"LedWiz32", {
+		"Groovy Game Gear Led-Wiz 32",
+		16,                   // Max Interfaces
+		false,                // Monochrome
+		false,                // Variable number of pins
+		false,                // Layout RGB
+		false,                // Supports RGB strip
+		32,                   // Maximum number of Pins
+		Connection::USB,      // Connection type
+		""                    // Description
+	}},
+	{"Howler", {
+		"Wolfware Howler",
+		4,                    // Max Interfaces
+		false,                // Monochrome
+		false,                // Variable number of pins
+		true,                 // Layout RGB
+		false,                // Supports RGB strip
+		96,                   // Maximum number of Pins
+		Connection::USB,      // Connection type
+		""                    // Description
+	}},
+	{"Adalight", {
+		"Adalight Compatible",
+		127,                  // Max Interfaces
+		false,                // Monochrome
+		true,                 // Variable number of pins
+		true,                 // Layout RGB
+		true,                 // Supports RGB strip
+		1000,                 // Maximum number of Pins
+		Connection::SERIAL,   // Connection type
+		""                    // Description
+	}},
+	{"RaspberryPi", {
+		"Raspberry Pi GPIO",
+		1,                    // Max Interfaces
+		false,                // Monochrome
+		false,                // Variable number of pins
+		false,                // Layout RGB
+		false,                // Supports RGB strip
+		28,                   // Maximum number of Pins
+		Connection::NONE,     // Connection type
+		""                    // Description
+	}},
 };
 
 const unordered_map<string, Defaults::RestrictorInfo> Defaults::restrictorsInfo = {
-//  ID               NAME                              MaxId Connection         Is  ways
-	{"UltraStik360", {"Ultimarc UltraStik360",            4, Connection::USB,    1, {Ways::w2, Ways::w2v, Ways::w4, Ways::w4x, Ways::w8, Ways::w16, Ways::w49, Ways::analog, Ways::mouse},    "Logical restrictor, it allows mechanical attachments"}},
-	{"ServoStik",    {"Ultimarc ServoStik",               4, Connection::USB,    2, {Ways::w4, Ways::w8},                                                                                     "Mechanical restrictor, it supports two non independent mechanism"}},
-	{"GPWiz40RotoX", {"Groovy Game Gear GPWiz40 RotoX",   4, Connection::USB,    2, {Ways::rotary8, Ways::rotary12},                                                                          "Mechanical rotator"}},
-	{"GPWiz49",      {"Groovy Game Gear GPWiz49",         4, Connection::USB,    1, {Ways::w2, Ways::w2v, Ways::w4, Ways::w4x, Ways::w8, Ways::w16, Ways::w49, Ways::analog, Ways::mouse},    "Logical restrictor"}},
-	{"TOS428",       {"TOS GRS Gate Restrictor",        127, Connection::SERIAL, 4, {Ways::w4, Ways::w8},                                                                                     "Mechanical rotator, supports up to four independent mechanisms"}}
+	{"UltraStik360", {
+			"Ultimarc UltraStik360", // Name
+			4,                       // Maximum Ids
+			Connection::USB,         // Connection type
+			1,                       // Interfaces
+			{Ways::w2, Ways::w2v, Ways::w4, Ways::w4x, Ways::w8, Ways::w16, Ways::w49, Ways::analog, Ways::mouse}, // Ways
+			"Logical restrictor, supports multiple digital modes; allows mechanical attachments like ServoStik" // Description (clarified)
+	}},
+	{"ServoStik", {
+			"Ultimarc ServoStik", // Name
+			4,                    // Maximum Ids
+			Connection::USB,      // Connection type
+			2,                    // Interfaces
+			{Ways::w4, Ways::w8}, // Ways
+			"Mechanical restrictor, switches between 4-way and 8-way control" // Description (clarified)
+	}},
+	{"GPWiz40RotoX", {
+			"Groovy Game Gear GPWiz40 RotoX", // Name
+			4,                                // Maximum Ids
+			Connection::USB,                  // Connection type
+			2,                                // Interfaces
+			{Ways::rotary8, Ways::rotary12},  // Ways
+			"Mechanical rotator, supports two independent rotary switches (8-way and 12-way)" // Description (clarified)
+	}},
+	{"GPWiz49", {
+			"Groovy Game Gear GPWiz49", // Name
+			4,                          // Maximum Ids
+			Connection::USB,            // Connection type
+			1,                          // Interfaces
+			{Ways::w2, Ways::w2v, Ways::w4, Ways::w4x, Ways::w8, Ways::w16, Ways::w49, Ways::analog, Ways::mouse}, // Ways
+			"Logical restrictor, supports multiple digital and analog joystick modes" // Description (clarified)
+	}},
+	{"TOS428", {
+			"TOS GRS Gate Restrictor", // Name
+			127,                       // Maximum Ids
+			Connection::SERIAL,        // Connection type
+			4,                         // Interfaces
+			{Ways::w4, Ways::w8},      // Ways
+			"Mechanical restrictor, supports up to four independent gate mechanisms" // Description (clarified)
+	}}
 };
 
 const vector<Defaults::Ways> Defaults::allWays{Ways::w2, Ways::w2v, Ways::w4, Ways::w4x, Ways::w8, Ways::w16, Ways::w49, Ways::analog, Ways::mouse, Ways::rotary8, Ways::rotary12};
@@ -333,4 +446,19 @@ void Defaults::populateComboBoxWithIds(
 		row.set_value(1, label + id);
 		row.set_value(2, not isUsedFn(id));
 	}
+}
+
+void Defaults::setFilter(Gtk::SearchEntry* filterEntry, Gtk::FlowBox* box) {
+	filterEntry->signal_changed().connect([filterEntry, box]() {
+		const auto filterText(filterEntry->get_text().lowercase());
+		for (auto child : box->get_children()) {
+			auto c = dynamic_cast<Gtk::FlowBoxChild*>(child);
+			auto b = dynamic_cast<Gtk::Button*>(c->get_child());
+			auto t = b->get_label().lowercase();
+			if (t.find(filterText) != std::string::npos)
+				child->show();
+			else
+				child->hide();
+		}
+	});
 }

@@ -4,7 +4,7 @@
  * @since     Mar 30, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 - 2024 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2023 - 2025 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -144,7 +144,7 @@ public:
 protected:
 
 	CollectionHandler(const string& collectionName);
-
+//TODO cambiar esto por sets
 	/// List of collection names.
 	vector<string> collection;
 

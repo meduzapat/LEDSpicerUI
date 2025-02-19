@@ -4,7 +4,7 @@
  * @since     Apr 30, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 - 2024 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2023 - 2025 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -47,7 +47,7 @@ DialogRestrictor::DialogRestrictor(BaseObjectType* obj, const Glib::RefPtr<Gtk::
 	setSignalAdd();
 	setSignalApply();
 
-	// Restrictor fields and models..
+	// Restrictor fields.
 	builder->get_widget("ComboBoxRestrictors",          comboBoxRestrictors);
 	builder->get_widget("ComboBoxRestrictorId",         comboBoxId);
 	builder->get_widget("InputRestrictorPort",          serialPort);
@@ -56,8 +56,9 @@ DialogRestrictor::DialogRestrictor(BaseObjectType* obj, const Glib::RefPtr<Gtk::
 	builder->get_widget("InputRestrictorWilliamsMode",  williamsMode);
 	builder->get_widget("InputRestrictorSpeedOn",       speedOn);
 	builder->get_widget("InputRestrictorSpeedOff",      speedOff);
-	builder->get_widget("BreafRestrictor",              breafRestrictor);
+	builder->get_widget("BriefRestrictor",              briefRestrictor);
 
+	// Models.
 	restrictorsListstore = dynamic_cast<Gtk::ListStore*>(builder->get_object("liststoreRestrictors").get());
 	idListstore          = dynamic_cast<Gtk::ListStore*>(builder->get_object("liststoreRestrictorsId").get());
 
@@ -88,7 +89,7 @@ DialogRestrictor::DialogRestrictor(BaseObjectType* obj, const Glib::RefPtr<Gtk::
 	comboBoxRestrictors->signal_changed().connect([&, btnAddRestrictorMap]() {
 		const string name = comboBoxRestrictors->get_active_id();
 		if (name.empty()) {
-			clearFormOthers();
+			clearForm();
 			btnAddRestrictorMap->set_sensitive(false);
 			btnApply->set_sensitive(false);
 			previousName = "";
@@ -102,12 +103,12 @@ DialogRestrictor::DialogRestrictor(BaseObjectType* obj, const Glib::RefPtr<Gtk::
 		const string currentName(currentData->getValue(NAME));
 		// Changed Restriction option.
 		if (currentName.empty()) {
-			clearFormOthers();
+			clearForm();
 		}
 		else if (mode != Modes::LOAD and name != currentName) {
 			if (Message::ask("Are you sure you want to change the restrictor? all settings will be loss") == Gtk::RESPONSE_YES) {
 				currentData->destroy();
-				clearFormOthers();
+				clearForm();
 			}
 			else {
 				comboBoxRestrictors->set_active_id(previousName);
@@ -148,9 +149,10 @@ DialogRestrictor::DialogRestrictor(BaseObjectType* obj, const Glib::RefPtr<Gtk::
 			waysIcons.at(w)->show();
 		}
 
-		breafRestrictor->set_label(Defaults::restrictorsInfo.at(name).breaf);
-		btnAddRestrictorMap->set_sensitive(true);
+		briefRestrictor->set_label(Defaults::restrictorsInfo.at(name).brief);
 		btnApply->set_sensitive(true);
+		// Disable add interface button if there no more interfaces left.
+		btnAddRestrictorMap->set_sensitive(DataDialogs::DialogRestrictorMap::getInstance()->getValues().size() < Defaults::restrictorsInfo.at(comboBoxRestrictors->get_active_id()).interfaces);
 	});
 }
 
@@ -162,12 +164,12 @@ void DialogRestrictor::createSubItems(XMLHelper* values) {
 	DialogRestrictorMap::getInstance()->load(values);
 }
 
-void DialogRestrictor::clearForm() {
+void DialogRestrictor::resetForm() {
 	comboBoxRestrictors->set_active_id("");
-	clearFormOthers();
+	clearForm();
 }
 
-void DialogRestrictor::clearFormOthers() {
+void DialogRestrictor::clearForm() {
 
 	comboBoxId->get_parent()->hide();
 	comboBoxId->set_active_id("");
@@ -191,7 +193,7 @@ void DialogRestrictor::clearFormOthers() {
 	for (auto& w : Defaults::allWays) {
 		waysIcons.at(w)->hide();
 	}
-	breafRestrictor->set_label("");
+	briefRestrictor->set_label("");
 }
 
 void DialogRestrictor::isValid() const {

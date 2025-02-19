@@ -4,7 +4,7 @@
  * @since     Apr 30, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 - 2024 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2023 - 2025 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -43,7 +43,7 @@ public:
 	virtual ~DialogRestrictor() = default;
 
 	/**
-	 * Instanciate an object of its class.
+	 * Instantiate an object of its class.
 	 * @param builder
 	 * @param gladeID
 	 */
@@ -57,7 +57,7 @@ public:
 
 	void load(XMLHelper* values) override;
 
-	void clearForm() override;
+	void resetForm() override;
 
 	void isValid() const override;
 
@@ -92,7 +92,7 @@ protected:
 		* restrictorsListstore = nullptr,
 		* idListstore          = nullptr;
 
-	Gtk::Label* breafRestrictor = nullptr;
+	Gtk::Label* briefRestrictor = nullptr;
 
 	string previousName;
 
@@ -107,7 +107,7 @@ protected:
 	/**
 	 * Reset all fields except devices id.
 	 */
-	void clearFormOthers();
+	void clearForm();
 
 	void markRestrictorUsed();
 };

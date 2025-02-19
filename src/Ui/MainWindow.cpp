@@ -4,7 +4,7 @@
  * @since     Feb 13, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 - 2024 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2023 - 2025 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -93,27 +93,22 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 			if (boxRandomColors->get_children().size() == 1) {
 				throw Message("The number of random colors need to be more than one or zero.");
 			}
+
 			// Prepare directories
-			for (string d : {"/animations", "/inputs", "/profiles"}) {
-				string path(workingDirectory + d);
-				struct stat info;
-				if (stat(path.c_str(), &info) != 0) {
-					// Create new directory
-					if (mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0)
-						throw Message("Unable to save, failed to create directory " + d);
-				}
-				else if (not S_ISDIR(info.st_mode)) {
-					// name exist but is not a directory.
-					throw Message("Unable to save, a file with the name " + d + " already exist.");
-				}
+/*			for (string& d : {"/animations", "/inputs", "/profiles"}) {
+ * 			auto file = Gio::File::create_for_path(" ");
+			auto parent = file->get_parent();
+			if (parent) {
+				parent->make_directory_with_parents();
 			}
+			}*/
 			// Create config section.
 			string xmlData("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!-- " DEFAULT_MESSAGE "-->\n<LEDSpicer\n");
 			Defaults::increaseTab();
 			xmlData += readConfiguration();
 			Defaults::reduceTab();
 			xmlData += ">\n";
-			// Create devices, restrictors and process
+			// Create devices, restrictors and process lookup.
 			Defaults::increaseTab();
 			if (processes.getSize()) {
 				xmlData += Defaults::tab() + "<processLookup";
@@ -296,7 +291,7 @@ void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {
 		if (dialogImportConfig.run() == Gtk::ResponseType::RESPONSE_OK) {
 			string newPath = dialogImportConfig.get_file()->get_path();
 			try {
-				import(newPath, false, dialogImportConfig.getConfigParameters());
+				readConfigFile(newPath, false, dialogImportConfig.getConfigParameters());
 			}
 			catch (Message& e) {
 				Message::displayError(XMLHelper::cleanError(e.getMessage()));
@@ -316,7 +311,7 @@ void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {
 			// Process each selected file or directory
 			for (const auto& selectedFile : selectedFiles) {
 				try {
-					import(selectedFile, false, IMPORT_INPUTS);
+					readConfigFile(selectedFile, false, Defaults::ImportFlags::INPUTS);
 				}
 				catch (Message& e) {
 					Message::displayError(XMLHelper::cleanError(e.getMessage()));
@@ -354,7 +349,7 @@ void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {
 		}
 		string newPath = dialogSelectWorkingDirectory.get_file()->get_path();
 		if (newPath == workingDirectory) {
-			// TODO add revert option
+			// TODO add revert option, instead of warning, ask to reload without saving.
 			Message::displayInfo("Already working on that project", &dialogSelectWorkingDirectory);
 			dialogSelectWorkingDirectory.hide();
 			return;
@@ -372,7 +367,7 @@ void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {
 		bool exists = Glib::file_test(workingDirectory + CONFIG_FILE, Glib::FileTest::FILE_TEST_EXISTS);
 		// Old data.
 		try {
-			import(workingDirectory + CONFIG_FILE, true, IMPORT_ALL);
+			readConfigFile(workingDirectory + CONFIG_FILE, true, IMPORT_ALL);
 		}
 		// New data.
 		catch (Message& e) {
@@ -423,7 +418,7 @@ void MainWindow::setConfiguration(unordered_map<string, string>& values) {
 
 string MainWindow::readConfiguration() {
 	unordered_map<string, string> r {
-		// ledspicerd
+		// ledspicerd.
 		{"version", "1.0"},
 		{"type",    "Configuration"},
 		{"userId",  inputUserId->get_text()},
@@ -436,7 +431,7 @@ string MainWindow::readConfiguration() {
 		{"dataSource",   Defaults::implode(listBoxDataSource->getCheckedValues(), ',')},
 		{"randomColors", Defaults::implode(DialogColors::getInstance()->getColorBoxValues(boxRandomColors), ',')},
 	};
-	// emitter
+	// Emitter.
 	if (inputColorsFile->get_active()) {
 		r.emplace("colorsFile", "true");
 	}
@@ -447,8 +442,8 @@ string MainWindow::readConfiguration() {
 	return XMLHelper::toXML(r);
 }
 
-void MainWindow::import(const string& dataFilePath, bool wipe, uint8_t importFlags) {
-	if (importFlags & IMPORT_INPUTS) {
+void MainWindow::readConfigFile(const string& dataFilePath, bool wipe, uint8_t importFlags) {
+	if (importFlags & Defaults::ImportFlags::INPUTS) {
 		InputFile datafile(dataFilePath);
 		if (wipe) {
 			inputs.wipe();
@@ -459,7 +454,7 @@ void MainWindow::import(const string& dataFilePath, bool wipe, uint8_t importFla
 	}
 
 	ConfigFile datafile(dataFilePath);
-	if (importFlags & IMPORT_CONFIG) {
+	if (importFlags & Defaults::ImportFlags::CONFIG) {
 		auto c(datafile.getSettings());
 		// check if color are different.
 		const string
@@ -470,7 +465,7 @@ void MainWindow::import(const string& dataFilePath, bool wipe, uint8_t importFla
 		setConfiguration(c);
 	}
 
-	if (importFlags & IMPORT_DEVICES) {
+	if (importFlags & Defaults::ImportFlags::DEVICES) {
 		if (wipe) {
 			devices.wipe();
 			groups.wipe();
@@ -481,7 +476,7 @@ void MainWindow::import(const string& dataFilePath, bool wipe, uint8_t importFla
 		DataDialogs::DialogGroup::getInstance()->load(&datafile);
 		// TODO: set default profile
 	}
-	if (importFlags & IMPORT_RESTRICTORS) {
+	if (importFlags & Defaults::ImportFlags::RESTRICTORS) {
 		if (wipe) {
 			restrictors.wipe();
 			DataDialogs::DialogRestrictor::getInstance()->refreshBox();
@@ -489,7 +484,7 @@ void MainWindow::import(const string& dataFilePath, bool wipe, uint8_t importFla
 		DataDialogs::DialogRestrictor::getInstance()->load(&datafile);
 	}
 
-	if (importFlags & IMPORT_MAPPINGS) {
+	if (importFlags & Defaults::ImportFlags::MAPPINGS) {
 		if (wipe) {
 			processes.wipe();
 			DataDialogs::DialogProcess::getInstance()->refreshBox();

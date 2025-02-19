@@ -4,7 +4,7 @@
  * @since     Feb 15, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 - 2024 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2023 - 2025 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -37,7 +37,7 @@ void DialogForm::createItems(vector<unordered_map<string, string>>& rawCollectio
 	mode = Modes::LOAD;
 	string errors;
 	for (auto& rawItem : rawCollection) {
-		clearForm();
+		resetForm();
 		currentData = getData(rawItem);
 		// Sanity check by load and unload, this will sanitize (or error out) the data.
 		currentData->activate();
@@ -81,6 +81,10 @@ void DialogForm::setOwner(Storage::BoxButtonCollection* collection, Storage::Dat
 	DialogForm::owner = owner;
 	items = collection;
 	items->populateBox(box);
+}
+
+void DialogForm::resetForm() {
+	clearForm();
 }
 
 vector<const unordered_map<string, string>*> DialogForm::getValues() {
@@ -155,7 +159,7 @@ void DialogForm::addButtons(Storage::BoxButton* boxButton) {
 void DialogForm::onAddClicked() {
 	// set dialog to add.
 	mode = Modes::ADD;
-	clearForm();
+	resetForm();
 	// Set label and title.
 	set_title("Add New " + getType());
 	btnApply->set_label("Create");
@@ -185,7 +189,7 @@ void DialogForm::onAddClicked() {
 
 void DialogForm::onEditClicked(Storage::BoxButton* boxButton) {
 	mode = Modes::EDIT;
-	clearForm();
+	resetForm();
 	currentData = boxButton->getData();
 	currentData->activate();
 	// Set label and title.
@@ -218,7 +222,7 @@ void DialogForm::onDelClicked(Storage::BoxButton* boxButton) {
 
 void DialogForm::onCloneClicked(Storage::BoxButton* boxButton) {
 	mode = Modes::ADD;
-	clearForm();
+	resetForm();
 	auto values = unordered_map<string, string>(boxButton->getData()->getValues()->begin(), boxButton->getData()->getValues()->end());
 	// Check for other copies.
 	auto name = values.at(NAME) + " copy";

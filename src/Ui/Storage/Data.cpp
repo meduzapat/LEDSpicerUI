@@ -4,7 +4,7 @@
  * @since     Feb 28, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 - 2024 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2023 - 2025 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -24,11 +24,7 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-
-Data::Data(unordered_map<string, string>& data) :
-	VBox(false, 2),
-	fieldsData(std::move(data))
-{
+Data::Data(unordered_map<string, string>& data) : VBox(false, 2), fieldsData(std::move(data)) {
 	set_valign(Gtk::ALIGN_START);
 }
 
@@ -46,6 +42,10 @@ const string Data::createTooltip() const {
 
 string Data::getValue(const string& key, const string& defaultValue) const {
 	return (fieldsData.count(key) ? fieldsData.at(key) : defaultValue);
+}
+
+void Data::unSet(const string& key) {
+	fieldsData.erase(key);
 }
 
 void Data::setValue(const string& key, const string& value) {
@@ -68,20 +68,28 @@ const string Data::toXML() const {
 	return valuesXML(ignored, fieldsData);
 }
 
-string Data::valuesXML(const vector<string>& ignored, const unordered_map<string, string>& data) {
+string Data::valuesXML(
+	const unordered_set<string>& ignored,
+	const unordered_map<string, string>& data
+) {
 	string r, el, tab(" ");
 	if (data.size() > 2) {
 		el  = "\n";
 		tab = Defaults::tab();
 	}
 	for (const auto& v : data) {
-		if (std::find(ignored.begin(), ignored.end(), v.first) == ignored.end())
+		if (not ignored.count(v.first))
 			r += tab + v.first + "=\"" + v.second + "\"" + el;
 	}
 	return r;
 }
 
-string Data::createOpeningXML(const string& node, const unordered_map<string, string>& data, const vector<string>& ignored, bool empty) {
+string Data::createOpeningXML(
+	const string& node,
+	const unordered_map<string, string>& data,
+	const unordered_set<string>& ignored,
+	bool empty
+) {
 	string r(Defaults::tab() + "<" + node);
 	if (data.size() > 2) {
 		r += "\n";

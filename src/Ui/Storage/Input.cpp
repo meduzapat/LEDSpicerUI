@@ -4,7 +4,7 @@
  * @since     Sep 27, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 - 2024 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2023 - 2025 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -39,7 +39,7 @@ Input::Input(unordered_map<string, string>& data) :
 	// link linked maps to maps using the trigger.
 	CollectionHandler::getInstance(COLLECTION_INPUT_LINKED_MAPS)->registerDestination(&linkedMaps);
 	// this value is not used as data, only for filename.
-	ignored.push_back(FILENAME);
+	ignored.insert(FILENAME);
 }
 
 Input::~Input() {

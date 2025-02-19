@@ -4,7 +4,7 @@
  * @since     May 6, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 - 2024 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2023 - 2025 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -75,12 +75,16 @@ using std::string;
 #define PORT     "port"
 #define PINS     "leds"
 
-#define PIN       "led"
-#define RED_PIN   "red"
-#define GREEN_PIN "green"
-#define BLUE_PIN  "blue"
-#define SOLENOID  "solenoid"
-#define TIME_ON   "timeOn"
+#define PIN         "led"
+#define RED_PIN     "red"
+#define GREEN_PIN   "green"
+#define BLUE_PIN    "blue"
+#define SOLENOID    "solenoid"
+#define POSITION    "position"
+#define POSITIONS   "positions"
+#define STRIPSIZE   "stripSize"
+#define TIME_ON     "timeOn"
+#define COLORFORMAT "colorFormat"
 
 #define CHANGE_POINT "changePoint"
 #define DEFAULT_CHANGE_VALUE 64.00
@@ -88,12 +92,15 @@ using std::string;
 #define DEFAULT_COLOR  "defaultColor"
 #define DEFAULT_SOLENOID 50
 
-#define COLOR_PIN      "pin_white"
-#define COLOR_SOLENOID "pin_solenoid"
-#define COLOR_RED      "pin_red"
-#define COLOR_GREEN    "pin_green"
-#define COLOR_BLUE     "pin_blue"
-#define COLOR_MULTIPLE "pin_multi"
+// CSS
+#define COLOR_PIN      "pinSingle"
+#define COLOR_SOLENOID "pinSolenoid"
+#define COLOR_RED      "pinRed"
+#define COLOR_GREEN    "pinGreen"
+#define COLOR_BLUE     "pinBlue"
+#define COLOR_MULTIPLE "pinMulti"
+#define CONNECTOR_BOX  "connectorBox"
+#define PIN_LABEL      "pinLabel"
 #define NO_COLOR       ""
 
 #define PARAM_MILLISECONDS "runEvery"
@@ -102,6 +109,7 @@ using std::string;
 #define PARAM_SYSTEM       "system"
 
 #define DEFAULT_ELEMENT_TYPE "9"
+#define DEFAULT_BRIGHTNESS   "100"
 
 #define US360_HAS_RESTRICTOR "hasRestrictor"
 #define US360_USE_MOUSE      "handleMouse"
@@ -122,12 +130,8 @@ using std::string;
 #define FILTER               "filter"
 #define ELEMENT              "Element"
 #define GROUP                "Group"
+#define BRIGHTNESS           "brightness"
 
-#define IMPORT_CONFIG      1
-#define IMPORT_DEVICES     2
-#define IMPORT_RESTRICTORS 4
-#define IMPORT_MAPPINGS    8
-#define IMPORT_INPUTS      16
 #define IMPORT_ALL         15
 
 // Collections
@@ -158,6 +162,15 @@ public:
 
 	enum class Connection : uint8_t {NONE, USB, SERIAL};
 
+	/// Import flags, use IMPORT_ALL for all configurations (excludes single files like inputs, etc)
+	enum ImportFlags : uint8_t {
+		CONFIG      = 1,
+		DEVICES     = 2,
+		RESTRICTORS = 4,
+		MAPPINGS    = 8,
+		INPUTS      = 16
+	};
+
 	/**
 	 * Structure with LED devices information.
 	 */
@@ -167,14 +180,18 @@ public:
 		const uint8_t    maxIds;
 		/// Some devices only support ON/OFF
 		const bool       monochrome;
-		/// The number of pins should be defined.
+		/// If the hardware supports a variable number of pins.
 		const bool       variable;
+		/// If the hardware have the pins in groups of 3.
+		const bool       layoutRGB;
+		/// If the hardware supports addressable RGB strips.
+		const bool       supportStrip;
 		/// Max number of pins.
-		const uint8_t    pins;
+		const uint16_t   pins;
 		/// What connection uses.
 		const Connection connection;
-		/// A breaf description of the device.
-		const string     breaf;
+		/// A brief description of the device.
+		const string     brief;
 	};
 
 	/**
@@ -190,8 +207,8 @@ public:
 		const uint8_t      interfaces;
 		/// Supported restrictions.
 		const vector<Ways> ways;
-		/// A breaf description of the restrictor.
-		const string       breaf;
+		/// A brief description of the restrictor.
+		const string       brief;
 	};
 
 	Defaults() = delete;
@@ -288,13 +305,19 @@ public:
 	);
 
 	/**
-	 * Merge an array into a string using a delimiter.
+	 * Merge an array into a string using a string delimiter.
 	 * @param values
 	 * @param delimiter
 	 * @return
 	 */
 	static string implode(const vector<string>& values, const string& delimiter);
 
+	/**
+	 * Merge an array into a string using a char delimiter.
+	 * @param values
+	 * @param delimiter
+	 * @return
+	 */
 	static string implode(const vector<string>& values, const char& delimiter);
 
 	/**
@@ -440,6 +463,13 @@ public:
 		const string& emptyLabel,
 		const string& label
 	);
+
+	/**
+	 * Handles the filter for a flowbox.
+	 * @param filterEntry
+	 * @param box
+	 */
+	static void setFilter(Gtk::SearchEntry* filterEntry, Gtk::FlowBox* box);
 
 protected:
 

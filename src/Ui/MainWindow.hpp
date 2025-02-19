@@ -4,7 +4,7 @@
  * @since     Feb 13, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 - 2024 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2023 - 2025 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -112,11 +112,11 @@ protected:
 	 * @return the conf data.
 	 * @throws LEDSpicerUI::Message
 	 */
-	void import(const string& ledspicerconf, bool wipe, uint8_t importFlags);
+	void readConfigFile(const string& ledspicerconf, bool wipe, uint8_t importFlags);
 
 	/**
 	 * Sets the color file.
-	 * @param colorFile
+	 * @param colorFile if empty will remove all colors.
 	 * @throws Message
 	 */
 	void setColorFile(const string& colorFile);

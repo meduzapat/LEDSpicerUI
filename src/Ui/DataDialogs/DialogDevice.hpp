@@ -4,7 +4,7 @@
  * @since     Feb 26, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 - 2024 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2023 - 2025 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -44,7 +44,7 @@ public:
 	virtual ~DialogDevice() = default;
 
 	/**
-	 * Instanciate an object of its class.
+	 * Instantiate an object of its class.
 	 * @param builder
 	 * @param gladeID
 	 */
@@ -58,6 +58,11 @@ public:
 
 	void load(XMLHelper* values) override;
 
+	void resetForm() override;
+
+	/**
+	 * Reset all fields except devices id.
+	 */
 	void clearForm() override;
 
 	void isValid() const override;
@@ -82,7 +87,7 @@ protected:
 	Gtk::Scale*      changePoint     = nullptr;
 	Gtk::SpinButton* spinnerLeds     = nullptr;
 	Gtk::Entry*      inputDevicePort = nullptr;
-	Gtk::Label*      breaf           = nullptr;
+	Gtk::Label*      brief           = nullptr;
 
 	/// Stores the previous selected device, to be used when the user cancels a change action.
 	string previousName;
@@ -94,11 +99,6 @@ protected:
 	const string getType() const override;
 
 	Storage::Data* getData(unordered_map<string, string>& rawData) override;
-
-	/**
-	 * Reset all fields except devices id.
-	 */
-	void clearFormOthers();
 
 	/**
 	 * Marks a device disabled if it depleted all its IDs.

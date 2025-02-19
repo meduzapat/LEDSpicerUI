@@ -4,7 +4,7 @@
  * @since     Feb 22, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 - 2024 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2023 - 2025 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -85,8 +85,6 @@ public:
 
 	void clearForm() override {};
 
-	void clearFormOthers();
-
 	void isValid() const override;
 
 	void storeData() override {}
@@ -138,15 +136,10 @@ protected:
 
 	void addButtons(Storage::BoxButton* boxButton) override;
 
-	void populateSelectables();
-
 	/**
-	 * Checks if name exist in the items.
-	 * @param name
-	 * @return true if  found.
+	 * Popullates all the items and selects the ones in the group.
 	 */
-	bool exist(const string& name);
-
+	void populateSelectables();
 };
 
 } /* namespace */

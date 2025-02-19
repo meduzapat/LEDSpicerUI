@@ -4,7 +4,7 @@
  * @since     Apr 15, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 - 2024 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2023 - 2025 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -177,12 +177,6 @@ const string ConfigFile::processElements(tinyxml2::XMLElement* deviceNode, const
 			errors += "Ignored element, Missing element name in " + deviceName + '\n';
 			continue;
 		}
-		if (not elementAttr.count(PIN) and not elementAttr.count(SOLENOID))
-			if (not elementAttr.count(RED_PIN) or not elementAttr.count(GREEN_PIN) or not elementAttr.count(BLUE_PIN)) {
-				errors += "Ignored element, Missing pin data in element (" + elementAttr[NAME] + ") in " + deviceName + '\n';
-				continue;
-			}
-
 		// Detect type
 		elementAttr["type"] = Defaults::detectElementType(elementAttr[NAME]);
 		elements.push_back(elementAttr);
@@ -251,6 +245,7 @@ const string ConfigFile::processGroups() {
 				errors += "Missing element name in group " + group[NAME] + '\n';
 				continue;
 			}
+
 			elements.push_back(elementAttr);
 		}
 		extractedData.emplace(Defaults::createCommonUniqueId({group[NAME], COLLECTION_GROUP}), std::move(elements));

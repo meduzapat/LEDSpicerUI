@@ -4,7 +4,7 @@
  * @since     Feb 26, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 - 2024 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2023 - 2025 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -57,7 +57,10 @@ DialogDevice::DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 	builder->get_widget("ScaleDeviceChangePoint", changePoint);
 	builder->get_widget("SpinnerDeviceLeds",      spinnerLeds);
 	builder->get_widget("InputDevicePort",        inputDevicePort);
-	builder->get_widget("BreafDevice",            breaf);
+	builder->get_widget("BriefDevice",            brief);
+
+	Gtk::Notebook* notebookDeviceConnections;
+	builder->get_widget("NotebookDeviceConnections", notebookDeviceConnections);
 
 	devicesListstore = dynamic_cast<Gtk::ListStore*>(builder->get_object("ListstoreDevices").get());
 	idListstore      = dynamic_cast<Gtk::ListStore*>(builder->get_object("liststoreDeviceId").get());
@@ -74,18 +77,33 @@ DialogDevice::DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 		row.set_value(2, true);
 	}
 
-	spinnerLeds->signal_changed().connect([&]() {
-		const string pins(spinnerLeds->get_text());
-		if (comboBoxDevices->get_active_id().empty() or pins.empty())
+	/*
+	 * On Number of LEDs is SET apply the changes to the Elements.
+	 */
+	spinnerLeds->signal_value_changed().connect([&, btnAddElement]() {
+		const string name(comboBoxDevices->get_active_id());
+		if (not name.empty() and not Defaults::isVariable(name)) {
 			return;
-		DataDialogs::DialogElement::getInstance()->changeNumberOfPins(std::stoi(pins));
+		}
+		btnAddElement->set_sensitive(spinnerLeds->get_value_as_int() > 1);
+		const uint16_t pinsCount(spinnerLeds->get_value_as_int() * 3);
+		if (comboBoxDevices->get_active_id().empty() or not pinsCount)
+			return;
+		DataDialogs::DialogElement::getInstance()->changeNumberOfPins(pinsCount);
 	});
 
-	comboBoxDevices->signal_changed().connect([&, btnAddElement]() {
+	/*
+	 * On Number of LEDs is changed, update the add button.
+	 */
+	spinnerLeds->signal_changed().connect([&, btnAddElement]() {
+		btnAddElement->set_sensitive(spinnerLeds->get_value_as_int() > 1);
+	});
+
+	comboBoxDevices->signal_changed().connect([&, btnAddElement, notebookDeviceConnections]() {
 		const string name(comboBoxDevices->get_active_id());
 		// If current ID is empty just reset the form for Add task.
 		if (name.empty()) {
-			clearFormOthers();
+			clearForm();
 			btnAddElement->set_sensitive(false);
 			btnApply->set_sensitive(false);
 			previousName = "";
@@ -97,19 +115,20 @@ DialogDevice::DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 			return;
 		}
 
-		const uint8_t pins(Defaults::devicesInfo.at(name).pins);
+		const uint16_t totalPins(Defaults::devicesInfo.at(name).pins);
 		const string currentName(currentData->getValue(NAME));
-		// If there is not ID or is loading, process a changed device due to Load or new selected device for Add.
-		if (currentName.empty() or mode == Modes::LOAD) {
-			clearFormOthers();
+		// For loading or non stored data, do a change device without asking for losing the data.
+		if (mode == Modes::LOAD or currentName.empty()) {
+			// Destroy device but keep the pointer.
+			currentData->destroy();
+			clearForm();
 		}
 		// If there is a device already, clean the form and change to the new device, warn the user about losing data.
 		else if (name != currentName) {
-			// Note, instead of wiping the elements, can a prompt been displayed to re-map the elements to the new device?
 			if (Message::ask("Are you sure you want to change the device? all settings will be loss") == Gtk::RESPONSE_YES) {
 				// Destroy device but keep the pointer.
 				currentData->destroy();
-				clearFormOthers();
+				clearForm();
 			}
 			else {
 				// If the user decide to keep the data, move the selection to the previous selected device.
@@ -142,11 +161,24 @@ DialogDevice::DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 
 		if (Defaults::isVariable(name)) {
 			spinnerLeds->get_parent()->show();
-			spinnerLeds->get_adjustment()->set_upper(pins);
+			spinnerLeds->get_adjustment()->set_upper(totalPins);
+			// assume all variable hardware only supports RGB leds, for now.
+
+			// if there are elements and is not
+			btnAddElement->set_sensitive(not currentData->getValue(PINS).empty());
 		}
-		DataDialogs::DialogElement::getInstance()->changeNumberOfPins(pins);
-		btnAddElement->set_sensitive(true);
-		breaf->set_text(Defaults::devicesInfo.at(name).breaf);
+		else {
+			btnAddElement->set_sensitive(true);
+			DataDialogs::DialogElement::getInstance()->changeNumberOfPins(totalPins);
+		}
+
+		// Special Features.
+		DataDialogs::DialogElement::getInstance()->setRules(
+			Defaults::isMonocrome(name),
+			Defaults::devicesInfo.at(name).layoutRGB,
+			Defaults::devicesInfo.at(name).supportStrip
+		);
+		brief->set_text(Defaults::devicesInfo.at(name).brief);
 		btnApply->set_sensitive(true);
 	});
 }
@@ -159,13 +191,13 @@ void DialogDevice::createSubItems(XMLHelper* values) {
 	DialogElement::getInstance()->load(values);
 }
 
-void DialogDevice::clearForm() {
+void DialogDevice::resetForm() {
 	// reset to nothing.
 	comboBoxDevices->set_active_id("");
-	clearFormOthers();
+	clearForm();
 }
 
-void DialogDevice::clearFormOthers() {
+void DialogDevice::clearForm() {
 	comboBoxId->get_parent()->hide();
 	comboBoxId->set_active_id("");
 	inputDevicePort->get_parent()->hide();
@@ -173,9 +205,11 @@ void DialogDevice::clearFormOthers() {
 	changePoint->get_parent()->hide();
 	changePoint->set_value(DEFAULT_CHANGE_VALUE);
 	spinnerLeds->get_parent()->hide();
-	spinnerLeds->set_text("");
-	breaf->set_text("");
+	spinnerLeds->set_value(0.00);
+	spinnerLeds->update();
+	brief->set_text("");
 	DataDialogs::DialogElement::getInstance()->changeNumberOfPins(0);
+	refreshBox();
 }
 
 void DialogDevice::isValid() const {
@@ -191,7 +225,8 @@ void DialogDevice::isValid() const {
 		throw Message("Invalid device");
 	}
 
-	/*if (Defaults::isSerial(name)) {
+	/* TODO: In some cases it is needed to check how many serial devices are set.
+	 * if (Defaults::isSerial(name)) {
 		// Serial can be empty only once per device.
 		if (port.empty()) {
 			inputDevicePort->grab_focus();
