@@ -64,7 +64,7 @@ public:
 	 * @param position
 	 * @return the position of the first connector on the position.
 	 */
-	static const uint16_t findFirstConnectorIndexByPosition(const string& position);
+	static uint16_t findFirstConnectorIndexByPosition(const string& position);
 };
 
 } /* namespace */

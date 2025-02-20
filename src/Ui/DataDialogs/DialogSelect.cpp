@@ -111,11 +111,11 @@ void DialogSelect::isValid() const {
 		throw Message("Please Select at least one");
 };
 
-const size_t DialogSelect::getNumberOfSelections() const {
+size_t DialogSelect::getNumberOfSelections() const {
 	return boxAll->get_selected_children().size();
 }
 
-const size_t DialogSelect::getNumberOfSelectables() const {
+size_t DialogSelect::getNumberOfSelectables() const {
 	return box->get_children().size();
 }
 

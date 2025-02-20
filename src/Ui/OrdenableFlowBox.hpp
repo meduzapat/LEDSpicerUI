@@ -36,7 +36,7 @@ public:
 
 	OrdenableFlowBox() = delete;
 
-	OrdenableFlowBox(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) : Gtk::FlowBox(obj) {}
+	OrdenableFlowBox(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>&) : Gtk::FlowBox(obj) {}
 
 	OrdenableFlowBox(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder, const string& up, const string& dn);
 

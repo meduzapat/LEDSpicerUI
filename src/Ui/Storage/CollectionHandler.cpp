@@ -41,7 +41,7 @@ CollectionHandler* CollectionHandler::getInstance(const string& collectionName) 
 	return collections.at(collectionName);
 }
 
-const size_t CollectionHandler::getSize() const {
+size_t CollectionHandler::getSize() const {
 	return collection.size();
 }
 
@@ -56,11 +56,11 @@ void CollectionHandler::refreshComboBox(Gtk::ComboBoxText* comboBox, const vecto
 			comboBox->append(item);
 }
 
-const bool CollectionHandler::isUsed(const string& item) const {
+bool CollectionHandler::isUsed(const string& item) const {
 	return std::find(collection.begin(), collection.end(), item) != collection.end();
 }
 
-const size_t CollectionHandler::count(const string& search) const {
+size_t CollectionHandler::count(const string& search) const {
 	int count = 0;
 	for (auto& i : collection)
 		if (i.find(search) != i.npos)

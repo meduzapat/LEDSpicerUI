@@ -213,7 +213,7 @@ string DialogColors::setColors(unordered_map<string, string>& colors) {
 			// Discard any special color.
 			continue;
 		cssData += '.' + c.first + "{background:#" + c.second + ';';
-		if (Defaults::getLiminance(c.second) > 0.5)
+		if (Defaults::getLuminance(c.second) > 0.5)
 			cssData += "color:black;";
 		cssData += '}';
 		// Create Button.

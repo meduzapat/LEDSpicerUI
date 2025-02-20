@@ -28,7 +28,7 @@ BoxButtonCollection::~BoxButtonCollection() {
 	wipe();
 }
 
-const size_t BoxButtonCollection::getSize() const {
+size_t BoxButtonCollection::getSize() const {
 	return items.size();
 }
 
@@ -48,93 +48,61 @@ bool BoxButtonCollection::isset(const string& name) const {
 
 BoxButton* BoxButtonCollection::add(Data* form) {
 	// Create the button.
-	BoxButton* b = new BoxButton(form);
+	BoxButton* b(new BoxButton(form));
 	items.push_back(b);
-	itemsOrder.push_back(b);
 	return b;
 }
 
 void BoxButtonCollection::remove(BoxButton* item) {
-	items.erase(std::remove(items.begin(), items.end(), item), items.end());
-	itemsOrder.erase(std::remove(itemsOrder.begin(), itemsOrder.end(), item), itemsOrder.end());
+	items.remove(item);
 	delete item;
 }
 
 void BoxButtonCollection::remove(const string& name) {
-	vector<BoxButton*> itemsToRemove;
-	for (auto b : items) {
+	items.remove_if([this, &name](const auto& b) {
 		if (searchType.absolute) {
-			if (b->getData()->getValue(key) == name) {
-				itemsToRemove.push_back(b);
-				// Only one occurrence.
-				if (searchType.unique)
-					break;
-			}
+			return b->getData()->getValue(key) == name;
 		}
-		else {
-			if (b->getData()->getValue(key).find(Defaults::addUnitSeparator(name)) != string::npos) {
-				itemsToRemove.push_back(b);
-				// Only one occurrence.
-				if (searchType.unique)
-					break;
-			}
-		}
-	}
-	// Remove the items after.
-	for (auto item : itemsToRemove) {
-		remove(item);
-	}
+		return b->getData()->getValue(key).find(Defaults::addUnitSeparator(name)) != string::npos;
+	});
 }
 
 void BoxButtonCollection::rename(const string& name, const string& newName) {
-	for (auto b : items) {
-		auto data(b->getData());
+	for (auto& b : items) {
+		auto data = b->getData();
 		if (searchType.absolute) {
-			if (data->getValue(key) == name) {
+			string currentValue = data->getValue(key);
+			if (currentValue == name) {
 				data->setValue(key, newName);
 				b->updateLabel();
-				// Only one occurrence.
-				if (searchType.unique)
-					break;
+				if (searchType.unique) break;
 			}
-		}
-		else {
-			// Can be many occurrences.
-			string
-				enclosedName(Defaults::addUnitSeparator(name)),
-				replaced(data->getValue(key));
-
-			// find and replace all occurrences
-			size_t pos = replaced.find(enclosedName);
-			while (pos != string::npos) {
-				replaced.replace(pos, enclosedName.length(), newName);
-				// Update pos to the position immediately after the replaced substring
-				pos = replaced.find(enclosedName, pos + newName.length());
+		} else {
+			string currentValue = data->getValue(key);
+			size_t pos = 0;
+			string search = Defaults::addUnitSeparator(name);
+			while ((pos = currentValue.find(search, pos)) != string::npos) {
+				currentValue.replace(pos, search.length(), newName);
+				pos += newName.length();
+				if (searchType.unique) break;
 			}
-			data->setValue(key, replaced);
-			if (searchType.unique)
-				break;
+			data->setValue(key, currentValue);
 		}
 	}
 }
 
 void BoxButtonCollection::populateBox(OrdenableFlowBox* box) {
-	for (auto i : itemsOrder)
+	for (auto i : items)
 		box->add(*i);
 	box->show_all();
 }
 
 void BoxButtonCollection::reindex(OrdenableFlowBox* box) {
-	itemsOrder.clear();
+	items.clear();
 	for (auto child : box->get_children()) {
 		auto c = dynamic_cast<Gtk::FlowBoxChild*>(child);
 		auto b = dynamic_cast<Storage::BoxButton*>(c->get_child());
-		for (auto i : items) {
-			if (i == b) {
-				itemsOrder.push_back(b);
-				break;
-			}
-		}
+		items.push_back(b);
 	}
 }
 
@@ -142,25 +110,27 @@ void BoxButtonCollection::wipe() {
 	for (auto i : items)
 		delete i;
 	items.clear();
-	itemsOrder.clear();
 }
 
 BoxButton* BoxButtonCollection::at(uint position) {
-	return itemsOrder.at(position);
+	if (position >= items.size()) return nullptr;
+	auto it = items.begin();
+	std::advance(it, position);
+	return *it;
 }
 
-vector<BoxButton*>::iterator BoxButtonCollection::begin() {
-	return itemsOrder.begin();
+std::list<BoxButton*>::iterator BoxButtonCollection::begin() {
+	return items.begin();
 }
 
-vector<BoxButton*>::iterator BoxButtonCollection::end() {
-	return itemsOrder.end();
+std::list<BoxButton*>::iterator BoxButtonCollection::end() {
+	return items.end();
 }
 
-vector<BoxButton*>::const_iterator BoxButtonCollection::begin() const {
-	return itemsOrder.begin();
+std::list<BoxButton*>::const_iterator BoxButtonCollection::begin() const {
+	return items.begin();
 }
 
-vector<BoxButton*>::const_iterator BoxButtonCollection::end() const {
-	return itemsOrder.end();
+std::list<BoxButton*>::const_iterator BoxButtonCollection::end() const {
+	return items.end();
 }

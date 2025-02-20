@@ -228,7 +228,7 @@ public:
 	 * @param name
 	 * @return true if the device is multiple and monochrome.
 	 */
-	static bool isMonocrome(const string& name);
+	static bool isMonochrome(const string& name);
 
 	/**
 	 * Devices only.
@@ -343,16 +343,16 @@ public:
 	 * @param color
 	 * @return
 	 */
-	static double getLiminance(const string& color);
+	static double getLuminance(const string& color);
 
 	/**
 	 * Detects the element type from a string.
 	 * @param name
-	 * @return Returns misc if not found.
+	 * @return Returns default if not found.
 	 */
 	static string detectElementType(const Glib::ustring& name);
 
-	/// A list of all posible restrictors and rotators Ways (positions).
+	/// A list of all possible restrictors and rotators Ways (positions).
 	static const vector<Ways> allWays;
 
 	/// A list of device to their information.
@@ -374,7 +374,7 @@ public:
 	static void setSubtitle(const string& text);
 
 	/**
-	 * Init stuff here
+	 * Initialize stuff here
 	 * @param header to update the * when dirty.
 	 */
 	static void initialize(Gtk::HeaderBar* header, Gtk::Button* btnSave);
@@ -451,7 +451,7 @@ public:
 	/**
 	 * Cleans and populates a combobox with IDs and mark used elements.
 	 * @param store the ListStore with to fill
-	 * @param max the maximun ID
+	 * @param max the maximum ID
 	 * @param isUsedFn a function that returns true if the ID is used.
 	 * @param emptyLabel The label for the first option for the empty value, if left empty, will be ignored.
 	 * @param label the label to use for every ID, the ID number will be added at the end.
@@ -471,12 +471,20 @@ public:
 	 */
 	static void setFilter(Gtk::SearchEntry* filterEntry, Gtk::FlowBox* box);
 
+	/**
+	 * Sets the state to ignore Changes.
+	 * @param state True to ignore changes, false otherwise.
+	 */
+	static void setIgnoreChanges(bool state);
+
 protected:
 
 	static string tabs;
 
 	/// Dirty Flag
-	static bool dirty;
+	static bool
+		dirty,
+		ignoreChanges;
 
 	/// Pointer to the header.
 	static Gtk::HeaderBar* header;

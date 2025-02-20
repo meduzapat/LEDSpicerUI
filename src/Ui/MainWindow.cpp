@@ -1,4 +1,4 @@
-/* -/*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
+/* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
  * @file      MainWindow.cpp
  * @since     Feb 13, 2023
@@ -210,7 +210,7 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 	Defaults::registerWidget(inputDefaultProfile);
 
 	// Check for unsaved project.
-	signal_delete_event().connect([](GdkEventAny* event) {
+	signal_delete_event().connect([](GdkEventAny*) {
 		if (Defaults::isDirty())
 			if (Message::ask("Are you sure you want to exit without saving your changes?") != Gtk::RESPONSE_YES)
 				return true;
@@ -331,7 +331,7 @@ void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {
 	Gtk::Notebook* MainTabs = nullptr;
 	builder->get_widget("MainTabs", MainTabs);
 
-	MainTabs->signal_switch_page().connect([=](Gtk::Widget* page, guint pageNum) {
+	MainTabs->signal_switch_page().connect([=](Gtk::Widget*, guint pageNum) {
 		// Inputs
 		if (pageNum == 4) {
 			bool sensitive(

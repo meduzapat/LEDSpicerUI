@@ -118,12 +118,6 @@ void DialogGroup::isValid() const {
 			throw Message("Group with name " + name + " already exist.");
 		}
 	}
-
-	// Check no selected elements.
-	/*if (not dialogSelectElements->getNumberElements()) {
-		if (editMode or (not editMode and not fieldsData.count(NAME)))
-			throw Message("You need to add at least one element.");
-	}*/
 }
 
 void DialogGroup::storeData() {

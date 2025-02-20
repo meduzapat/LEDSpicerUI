@@ -153,8 +153,9 @@ protected:
 
 	/**
 	 * Creates any sub items, called from created items, per item.
+	 * @param values (not used here)
 	 */
-	virtual void createSubItems(XMLHelper* values) {}
+	virtual void createSubItems(XMLHelper*) {}
 
 	/**
 	 * Provides a nice name for the type of data this dialog will create for the dialog.
@@ -223,7 +224,7 @@ protected:
 	 * Called after Add, when the data is stored and the button created.
 	 * @param boxButton the newly created box button.
 	 */
-	virtual void afterCreate(Storage::BoxButton* boxButton) {}
+	virtual void afterCreate(Storage::BoxButton*) {}
 
 	/**
 	 * When the edit button is clicked.
@@ -235,7 +236,7 @@ protected:
 	 * Called After Edit before the data is stored.
 	 * @param boxButton the button that called edit.
 	 */
-	virtual void afterEdit(Storage::BoxButton* boxButton) {}
+	virtual void afterEdit(Storage::BoxButton*) {}
 
 	/**
 	 * When the delete button is clicked.
@@ -247,7 +248,7 @@ protected:
 	 * Called after delete confirmation is accented.
 	 * @param boxButton the button that called delete.
 	 */
-	virtual void afterDeleteConfirmation(Storage::BoxButton* boxButton) {}
+	virtual void afterDeleteConfirmation(Storage::BoxButton*) {}
 
 	/**
 	 * When the clone button is clicked.

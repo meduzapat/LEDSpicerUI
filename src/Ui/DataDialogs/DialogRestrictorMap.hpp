@@ -88,7 +88,7 @@ protected:
 	 * Checks if the owner restrictor still have available interfaces spaces.
 	 * @return true if there still room.
 	 */
-	const bool checkAvailableInterfaces() const;
+	bool checkAvailableInterfaces() const;
 
 	const string getType() const override;
 

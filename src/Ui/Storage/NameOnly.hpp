@@ -69,8 +69,8 @@ public:
 protected:
 
 	const string
-		cssClass,
-		node;
+		node,
+		cssClass;
 
 	textGeneratorFunction prettyNamedFunction;
 

@@ -122,6 +122,7 @@ DialogElement::DialogElement(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 				positionsMRGB->set_text(Defaults::implode(csvs, ','));
 				break;
 			}
+			default: break;
 		}
 	});
 
@@ -442,7 +443,7 @@ void DialogElement::retrieveData() {
 	// Multi RGB.
 	if (not currentData->getValue(POSITIONS).empty()) {
 		notebookDeviceConnections->set_current_page(static_cast<uint8_t>(tabIndex::mRGB));
-		for (const auto position : Defaults::explode(currentData->getValue(POSITIONS), ',')) {
+		for (const auto& position : Defaults::explode(currentData->getValue(POSITIONS), ',')) {
 			setSelectedConnectors(position);
 		}
 		comboBoxRGBMRGB->set_active_id(currentData->getValue(COLORFORMAT));
@@ -733,34 +734,37 @@ void DialogElement::findConnectorTypes(vector<std::pair<string, string>>& pinsUs
 }
 
 void DialogElement::findLargestDivisor(uint16_t size) {
-	int best_divisor = MAX_COLUMNS;
-	int best_rows = 1;
 
-	// Look for the best divisor
+	int bestDivisor = MAX_COLUMNS;
+	// Track smallest remainder for non-perfect division
+	int bestRemainder = size;
+
+	// Find the largest divisor that evenly divides size or minimizes remainder
 	for (int c = MAX_COLUMNS; c >= MIN_COLUMNS; --c) {
-		if (size % c == 0) { // Perfect division
-			best_divisor = c;
-			best_rows = size / c;
-			break; // We've found a perfect divisor, no need to continue
-		} else if (size > c && size % c < best_divisor % c) { // Not perfect but better than previous
-			best_divisor = c;
-			best_rows = (size + c - 1) / c; // Ceiling division to ensure we have enough rows
+		int remainder = size % c;
+		if (remainder == 0) {
+			// Perfect division found
+			bestDivisor = c;
+			break;
+		}
+		else if (remainder < bestRemainder) {
+			// Better fit than previous
+			bestRemainder = remainder;
+			bestDivisor = c;
 		}
 	}
 
-	// If no good divisor was found, use MAX_COLUMNS, but adjust min
-	if (best_divisor == MAX_COLUMNS) {
-		pinsBox->set_max_children_per_line(MAX_COLUMNS);
-		pinsBox->set_min_children_per_line(MIN_COLUMNS);
-	} else {
-		// Ensure min_children_per_line is at least MIN_COLUMNS but not more than half of best_divisor
-		int min_per_line = std::max(MIN_COLUMNS, best_divisor / 2);
-		pinsBox->set_max_children_per_line(best_divisor);
-		pinsBox->set_min_children_per_line(min_per_line);
+	if (size < bestDivisor) {
+		// Handle small sizes: cap bestDivisor at size if smaller
+		bestDivisor = std::max(MIN_COLUMNS, static_cast<int>(size));
 	}
+
+	int minPerLine = std::max(MIN_COLUMNS, bestDivisor / 2);
+	pinsBox->set_max_children_per_line(bestDivisor);
+	pinsBox->set_min_children_per_line(minPerLine);
 }
 
-void DialogElement::onSwitchPage(Gtk::Widget* page, guint pageNum) {
+void DialogElement::onSwitchPage(Gtk::Widget*, guint pageNum) {
 	switch (static_cast<tabIndex>(pageNum)) {
 	case tabIndex::RGB:
 	case tabIndex::sRGB:

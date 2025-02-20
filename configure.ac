@@ -10,26 +10,21 @@ AC_DEFINE_UNQUOTED([PACKAGE_DATA_NAME], ["LEDSpicer"], [Data files name])
 
 AC_COPYRIGHT($COPYRIGHT)
 AC_SUBST([COPYRIGHT], ["$COPYRIGHT"])
-AC_SUBST([DESCRIPTION], ["$DESCRIPTION"])
 AC_SUBST([MINIMUM_COMPATIBILITY], ["0.6.3 - 0.6.4"])
 
 AC_CONFIG_SRCDIR([src/LEDSpicerUI.cpp])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([subdir-objects])
+AM_INIT_AUTOMAKE([subdir-objects -Wall -Werror])
 
-dnl *******************
-dnl * Needed Programs *
-dnl *******************
-AC_MSG_CHECKING([Programs])
-
+dnl Needed Programs
+AC_MSG_CHECKING([for required programs])
 AC_PROG_CXX
 AC_PROG_INSTALL
+AC_PROG_MAKE_SET
 
-dnl ********************
-dnl * Needed Libraries *
-dnl ********************
-AC_MSG_CHECKING([dependencies])
+dnl Needed Libraries
+AC_MSG_CHECKING([for dependencies])
 
 PKG_CHECK_MODULES(
 	[GTKMM30], [gtkmm-3.0 >= 3.20],
@@ -42,26 +37,51 @@ PKG_CHECK_MODULES([TINYXML2], [tinyxml2 >= 6.0],
 	AC_MSG_ERROR([tinyxml2 not found.])
 )
 
-dnl expand bindir on configuration files.
+dnl Collect image files dynamically
+IMAGES_FILES=`find data/images -maxdepth 1 -type f \( -name "*.png" -o -name "*.svg" \) | tr '\n' ' '`
+AC_SUBST([IMAGES_FILES])
+
+dnl Optional Tests
+AC_ARG_ENABLE([tests],
+	[AS_HELP_STRING([--enable-tests], [Enable unit tests with Google Test (disabled by default)])],
+	[enable_tests=$enableval],
+	[enable_tests=no])
+
+AS_IF([test "x$enable_tests" = "xyes"], [
+	AC_MSG_CHECKING([for Google Test])
+	PKG_CHECK_MODULES([GTEST], [gtest >= 1.8],
+		[AC_MSG_RESULT([yes])],
+		[AC_MSG_ERROR([Google Test >= 1.8 not found; install libgtest-dev or disable tests with --disable-tests])])
+	AC_SUBST([GTEST_CFLAGS])
+	AC_SUBST([GTEST_LIBS])
+])
+
+AM_CONDITIONAL([ENABLE_TESTS], [test "x$enable_tests" = "xyes"])
+
+dnl Expand bindir for use in config files if needed.
 AS_AC_EXPAND(BINDIR, $bindir)
+
+dnl Output files.
 AC_CONFIG_FILES([
 	Makefile
 	data/main.glade
 ])
+
 AC_OUTPUT
 
-dnl Dump the build configuration for the developer
+dnl Dump the build configuration.
 AC_MSG_NOTICE([
---------- build environment -----------
+--------- Build Environment -----------
 Program       : $PACKAGE_NAME
 Version       : $PACKAGE_VERSION
 Compatibility : $MINIMUM_COMPATIBILITY
 WebSite       : $PACKAGE_URL
---------- build settings -----------
+--------- Build Settings -----------
 C++ Compiler : $CXX $CPPFLAGS $CXXFLAGS
-Includes  : $GTKMM30_CFLAGS
-Libraries : $GTKMM30_LIBS
-Prefix    : $prefix
-bin dir   : $bindir
-Data dir  : $datadir
+Includes     : $GTKMM30_CFLAGS $GTEST_CFLAGS
+Libraries    : $GTKMM30_LIBS $GTEST_LIBS
+Prefix       : $prefix
+Bin Dir      : $bindir
+Data Dir     : $datadir
+Tests Enabled: $enable_tests
 ])

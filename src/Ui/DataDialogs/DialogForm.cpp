@@ -24,7 +24,7 @@
 
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
-DialogForm::DialogForm(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) : Gtk::Dialog(obj) {
+DialogForm::DialogForm(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>&) : Gtk::Dialog(obj) {
 	// this needs to be run last
 	signal_show().connect(sigc::mem_fun(*this, &DialogForm::refreshBox), true);
 }
@@ -48,6 +48,7 @@ void DialogForm::createItems(vector<unordered_map<string, string>>& rawCollectio
 		catch (Message& e) {
 			delete currentData;
 			errors += e.getMessage() + '\n';
+			Defaults::markDirty();
 			continue;
 		}
 		storeData();

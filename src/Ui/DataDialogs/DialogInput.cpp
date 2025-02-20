@@ -72,7 +72,7 @@ DialogInput::DialogInput(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& 
 
 	// Signals.
 	// When the Blink switch is off disable speed.
-	switchInputBlink->signal_state_changed().connect([&](bool state) {
+	switchInputBlink->signal_state_changed().connect([&](bool) {
 		comboBoxInputSpeed->set_sensitive(switchInputBlink->get_state_flags() & Gtk::StateFlags::STATE_FLAG_CHECKED);
 	});
 

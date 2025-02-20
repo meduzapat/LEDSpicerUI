@@ -25,9 +25,9 @@
 using namespace LEDSpicerUI::Ui::Storage;
 
 BoxButton::BoxButton(Data* form) :
+	Gtk::HBox(false, 2),
 	data(form),
-	label(Gtk::make_managed<Gtk::Label>()),
-	Gtk::HBox(false, 2)
+	label(Gtk::make_managed<Gtk::Label>())
 {
 	set_valign(Gtk::ALIGN_START);
 	set_vexpand(false);

@@ -123,7 +123,7 @@ string const DialogRestrictorMap::createUniqueId() const {
 	return Defaults::createCommonUniqueId({player->get_active_id(), joystick->get_active_id()});
 }
 
-const bool DialogRestrictorMap::checkAvailableInterfaces() const {
+bool DialogRestrictorMap::checkAvailableInterfaces() const {
 	// unknown amount due to unknown restrictor.
 	if (not Defaults::restrictorsInfo.count(comboBoxRestrictors->get_active_id())) {
 		return true;
@@ -161,7 +161,7 @@ void DialogRestrictorMap::populateInterfacesCombobox() {
 	interface->set_active(0);
 }
 
-void DialogRestrictorMap::afterCreate(Storage::BoxButton* boxButton) {
+void DialogRestrictorMap::afterCreate(Storage::BoxButton*) {
 	// This is necessary to disable the add if needed.
 	btnAdd->set_sensitive(checkAvailableInterfaces());
 }

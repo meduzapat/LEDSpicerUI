@@ -94,15 +94,6 @@ public:
 	void setValue(const string& key, const string& value);
 
 	/**
-	 * Similar to set but to be used to replace an old pre-existing value.
-	 * @param key
-	 * @param oldValue
-	 * @param newValue
-	 * @throw std::out_of_range if the value is not existing.
-	 */
-	void replaceValue(const string& key, const string& newValue);
-
-	/**
 	 * Returns a list of stored values.
 	 * @return
 	 */

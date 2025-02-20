@@ -96,12 +96,12 @@ public:
 	/**
 	 * @return The number of selected boxes.
 	 */
-	const size_t getNumberOfSelections() const;
+	size_t getNumberOfSelections() const;
 
 	/**
 	 * @return The number of available boxes to select from.
 	 */
-	const size_t getNumberOfSelectables() const;
+	size_t getNumberOfSelectables() const;
 
 protected:
 

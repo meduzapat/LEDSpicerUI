@@ -36,7 +36,7 @@ public:
 
 	OrdenableListBox() = delete;
 
-	OrdenableListBox(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) : Gtk::ListBox(obj) {}
+	OrdenableListBox(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>&) : Gtk::ListBox(obj) {}
 
 	OrdenableListBox(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder, const string& up, const string& dn);
 

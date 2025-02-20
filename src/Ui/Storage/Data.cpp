@@ -52,10 +52,6 @@ void Data::setValue(const string& key, const string& value) {
 	fieldsData[key] = value;
 }
 
-void Data::replaceValue(const string& key, const string& newValue) {
-	fieldsData.at(key) = newValue;
-}
-
 const unordered_map<string, string>* Data::getValues() const {
 	return &fieldsData;
 }

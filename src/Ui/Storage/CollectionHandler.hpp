@@ -55,7 +55,7 @@ public:
 	 * Get the number of registered items.
 	 * @return
 	 */
-	const size_t getSize() const;
+	size_t getSize() const;
 
 	/**
 	 * Refresh a single combobox contents with the collection values.
@@ -75,14 +75,14 @@ public:
 	 * @param item
 	 * @return
 	 */
-	const bool isUsed(const string& item) const;
+	bool isUsed(const string& item) const;
 
 	/**
 	 * Search the collection and count the number of occurrences.
 	 * @param search a text to search on every value inside the collection.
 	 * @return
 	 */
-	const size_t count(const string& search) const;
+	size_t count(const string& search) const;
 
 	/**
 	 * Returns the list of registered items.

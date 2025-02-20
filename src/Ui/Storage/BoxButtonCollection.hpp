@@ -85,8 +85,7 @@ public:
 	BoxButtonCollection(BoxButtonCollection&& other) noexcept :
 		key(std::move(other.key)),
 		searchType(std::move(other.searchType)),
-		items(std::move(other.items)),
-		itemsOrder(std::move(other.itemsOrder)) {}
+		items(std::move(other.items)) {}
 
 	/**
 	 * Move assignment operator.
@@ -98,7 +97,6 @@ public:
 			key        = std::move(other.key);
 			searchType = std::move(other.searchType);
 			items      = std::move(other.items);
-			itemsOrder = std::move(other.itemsOrder);
 		}
 		return *this;
 	}
@@ -112,7 +110,7 @@ public:
 	 * Get the size of the collection.
 	 * @return The number of items in the collection.
 	 */
-	const size_t getSize() const;
+	size_t getSize() const;
 
 	/**
 	 * Check if an item with the specified name exists in the collection.
@@ -176,25 +174,25 @@ public:
 	 * Get an iterator pointing to the beginning of the collection.
 	 * @return Iterator pointing to the beginning of the collection.
 	 */
-	vector<BoxButton*>::iterator begin();
+	std::list<BoxButton*>::iterator begin();
 
 	/**
 	 * Get an iterator pointing to the end of the collection.
 	 * @return Iterator pointing to the end of the collection.
 	 */
-	vector<BoxButton*>::iterator end();
+	std::list<BoxButton*>::iterator end();
 
 	/**
 	 * Get a const iterator pointing to the beginning of the collection.
 	 * @return Const iterator pointing to the beginning of the collection.
 	 */
-	vector<BoxButton*>::const_iterator begin() const;
+	std::list<BoxButton*>::const_iterator begin() const;
 
 	/**
 	 * Get a const iterator pointing to the end of the collection.
 	 * @return Const iterator pointing to the end of the collection.
 	 */
-	vector<BoxButton*>::const_iterator end() const;
+	std::list<BoxButton*>::const_iterator end() const;
 
 protected:
 
@@ -204,11 +202,8 @@ protected:
 	/// The type of search to do over the key.
 	SearchTypes searchType{true, true};
 
-	vector<BoxButton*>
-		/// Created items in the dialog.
-		items,
-		/// Array to be used when ordering items is needed.
-		itemsOrder;
+	/// Created items in the dialog.
+	std::list<BoxButton*> items;
 };
 
 } /* namespace */

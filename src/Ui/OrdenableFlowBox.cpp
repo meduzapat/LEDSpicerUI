@@ -45,7 +45,7 @@ OrdenableFlowBox::OrdenableFlowBox(
 			btnDn->set_sensitive(false);
 			return;
 		}
-		int index = get_selected_children().at(0)->get_index();
+		size_t index = get_selected_children().at(0)->get_index();
 		btnUp->set_sensitive(index);
 		btnDn->set_sensitive(index != getSize() - 1);
 	});

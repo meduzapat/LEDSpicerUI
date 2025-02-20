@@ -25,6 +25,7 @@
 using namespace LEDSpicerUI;
 
 bool Defaults::dirty = false;
+bool Defaults::ignoreChanges = false;
 string Defaults::tabs;
 Gtk::HeaderBar* Defaults::header = nullptr;
 Gtk::Button* Defaults::btnSave   = nullptr;
@@ -200,7 +201,7 @@ bool Defaults::isIdUser(const string& name, bool isDevice) {
 		return (restrictorsInfo.at(name).connection == Connection::USB);
 }
 
-bool Defaults::isMonocrome(const string& name) {
+bool Defaults::isMonochrome(const string& name) {
 	return (devicesInfo.at(name).monochrome);
 }
 
@@ -257,12 +258,16 @@ string Defaults::addUnitSeparator(const string& unit) {
 	return UNIT_SEPARATOR + unit + UNIT_SEPARATOR;
 }
 
-double Defaults::getLiminance(const string& color) {
-	Gdk::Color c("#" + color);
-	double r = c.get_red_p()   * 255;
-	double g = c.get_green_p() * 255;
-	double b = c.get_blue_p()  * 255;
-	return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+double Defaults::getLuminance(const string& color) {
+	Gdk::RGBA rgba;
+	if (not rgba.set("#" + color)) {
+		return 0.0;
+	}
+	double
+		r = rgba.get_red(),
+		g = rgba.get_green(),
+		b = rgba.get_blue();
+	return 0.299 * r + 0.587 * g + 0.114 * b;
 }
 
 vector<string> Defaults::explode(const string& text, const char delimiter, const size_t limit) {
@@ -339,7 +344,7 @@ void Defaults::trim(string& text) {
 }
 
 string Defaults::detectElementType(const Glib::ustring& name) {
-	for (int c = 1; c < Defaults::elementTypes.size(); ++c)
+	for (size_t c = 1; c < Defaults::elementTypes.size(); ++c)
 		if (name.lowercase().find(Defaults::elementTypes[c]) != name.npos)
 			return std::to_string(c);
 	return DEFAULT_ELEMENT_TYPE;
@@ -367,10 +372,10 @@ void Defaults::registerWidget(Gtk::ToggleButton* widget) {
 }
 
 void Defaults::markDirty() {
+	if (ignoreChanges) return;
 	dirty = true;
 	auto t(header->get_title());
-	if (t.size() and t[0] == '*')
-		return;
+	if (t.size() and t[0] == '*') return;
 	header->set_title('*' + t);
 	btnSave->set_sensitive(true);
 }
@@ -439,7 +444,7 @@ void Defaults::populateComboBoxWithIds(
 		row.set_value(2, false);
 	}
 
-	for (int c = 0; c < max; ++c) {
+	for (size_t c = 0; c < max; ++c) {
 		auto row = *(store->append());
 		const auto& id(std::to_string(c + 1));
 		row.set_value(0, id);
@@ -461,4 +466,8 @@ void Defaults::setFilter(Gtk::SearchEntry* filterEntry, Gtk::FlowBox* box) {
 				child->hide();
 		}
 	});
+}
+
+void Defaults::setIgnoreChanges(bool state) {
+	ignoreChanges = state;
 }

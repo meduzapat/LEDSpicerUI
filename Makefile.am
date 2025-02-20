@@ -5,12 +5,14 @@
 ACLOCAL_AMFLAGS = -I m4
 
 AM_CPPFLAGS =                             \
-	-I$(srcdir)/src                       \
-	-I$(srcdir)/src/Ui                    \
+	-I$(top_srcdir)/src                   \
+	-I$(top_srcdir)/src/Ui                \
 	-DPACKAGE_CONF_DIR=\"$(sysconfdir)/\" \
 	-DPACKAGE_DATA_DIR=\"$(pkgdatadir)/\" \
 	-Wl,--no-as-needed                    \
 	-fexceptions
+
+AM_CXXFLAGS = -Wall -Wextra -std=c++17
 
 bin_PROGRAMS = ledspicerui
 
@@ -70,9 +72,7 @@ ledspiceruidata_DATA = \
 	data/style.css
 
 imagesdir=$(pkgdatadir)/images
-images_DATA = \
-	$(wildcard data/images/*.png) \
-	$(wildcard data/images/*.svg)
+images_DATA = $(IMAGES_FILES)
 
 #############################
 # documentation and samples #
@@ -80,14 +80,14 @@ images_DATA = \
 
 dist_doc_DATA = \
 	README      \
-	COPYING
+	COPYING     \
+	AUTHORS     \
+	ChangeLog   \
+	NEWS
 
 ######################
 # extra distribution #
 ######################
-
-DISTCLEANFILES = \
-	$(ledspicer_pc_DATA)
 
 EXTRA_DIST =            \
 	autogen.sh          \
@@ -101,10 +101,10 @@ EXTRA_DIST =            \
 	src/Ui/OrdenableListBox.hpp \
 	src/Ui/Storage/CollectionHandler.hpp \
 	src/Ui/Storage/Data.hpp        \
-	src/Ui/Storage/NameOnly.hpp      \
-	src/Ui/Storage/Element.hpp       \
-	src/Ui/Storage/Group.hpp         \
-	src/Ui/Storage/Device.hpp        \
+	src/Ui/Storage/NameOnly.hpp    \
+	src/Ui/Storage/Element.hpp     \
+	src/Ui/Storage/Group.hpp       \
+	src/Ui/Storage/Device.hpp      \
 	src/Ui/Storage/RestrictorMap.hpp \
 	src/Ui/Storage/Restrictor.hpp    \
 	src/Ui/Storage/Process.hpp       \
@@ -117,19 +117,41 @@ EXTRA_DIST =            \
 	src/Ui/DataDialogs/DialogForm.hpp       \
 	src/Ui/DataDialogs/DialogElement.hpp    \
 	src/Ui/DataDialogs/DialogSelect.hpp     \
-	src/Ui/DataDialogs/DialogGroup.hpp  \
-	src/Ui/DataDialogs/DialogDevice.hpp \
+	src/Ui/DataDialogs/DialogGroup.hpp      \
+	src/Ui/DataDialogs/DialogDevice.hpp     \
 	src/Ui/DataDialogs/DialogRestrictorMap.hpp \
 	src/Ui/DataDialogs/DialogRestrictor.hpp    \
 	src/Ui/DataDialogs/DialogInputLinkMaps.hpp \
-	src/Ui/DataDialogs/DialogInputMap.hpp      \
-	src/Ui/DataDialogs/DialogInput.hpp   \
-	src/Ui/DataDialogs/DialogProcess.hpp \
-	src/Ui/DataDialogs/DialogProfile.hpp \
+	src/Ui/DataDialogs/DialogInputMap.hpp   \
+	src/Ui/DataDialogs/DialogInput.hpp      \
+	src/Ui/DataDialogs/DialogProcess.hpp    \
+	src/Ui/DataDialogs/DialogProfile.hpp    \
 	src/Ui/DialogImport.hpp  \
 	src/Ui/MainDialogs.hpp   \
 	src/Ui/MainWindow.hpp    \
-	src/LEDSpicerUI.hpp      \
-	AUTHORS             \
-	ChangeLog           \
-	NEWS
+	src/LEDSpicerUI.hpp
+
+#########
+# Tests #
+#########
+
+if ENABLE_TESTS
+check_PROGRAMS = DefaultsTest
+DefaultsTest_SOURCES =     \
+	tests/DefaultsTest.cpp \
+	src/Defaults.cpp
+DefaultsTest_CPPFLAGS = \
+	$(AM_CPPFLAGS)      \
+	$(GTKMM30_CFLAGS)   \
+	$(TINYXML2_CFLAGS)  \
+	$(GTEST_CFLAGS)
+DefaultsTest_LDADD = \
+	$(GTKMM30_LIBS)  \
+	$(TINYXML2_LIBS) \
+	$(GTEST_LIBS)
+TESTS = DefaultsTest
+endif
+
+# Clean up
+DISTCLEANFILES = \
+	*~

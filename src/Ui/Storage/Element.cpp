@@ -85,7 +85,7 @@ void Element::convertPositionToRGB(Data* data, const string& position, const str
 	}
 }
 
-const uint16_t Element::findFirstConnectorIndexByPosition(const string& position) {
+uint16_t Element::findFirstConnectorIndexByPosition(const string& position) {
 	return (((std::stod(position) -1) * 3) + 1) - 1;
 }
 

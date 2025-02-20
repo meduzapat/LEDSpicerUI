@@ -155,7 +155,7 @@ DialogDevice::DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 			inputDevicePort->get_parent()->show();
 		}
 
-		if (Defaults::isMonocrome(name)) {
+		if (Defaults::isMonochrome(name)) {
 			changePoint->get_parent()->show();
 		}
 
@@ -174,7 +174,7 @@ DialogDevice::DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 
 		// Special Features.
 		DataDialogs::DialogElement::getInstance()->setRules(
-			Defaults::isMonocrome(name),
+			Defaults::isMonochrome(name),
 			Defaults::devicesInfo.at(name).layoutRGB,
 			Defaults::devicesInfo.at(name).supportStrip
 		);
@@ -291,7 +291,7 @@ void DialogDevice::storeData() {
 		currentData->setValue(PINS, spinnerLeds->get_text());
 	}
 
-	if (Defaults::isMonocrome(name)) {
+	if (Defaults::isMonochrome(name)) {
 		currentData->setValue(CHANGE_POINT, std::to_string(static_cast<uint8_t>(changePoint->get_value())));
 	}
 	DataDialogs::DialogElement::getInstance()->reindex();
@@ -312,7 +312,7 @@ void DialogDevice::retrieveData() {
 	if (Defaults::isVariable(name)) {
 		spinnerLeds->set_text(currentData->getValue(PINS));
 	}
-	if (Defaults::isMonocrome(name)) {
+	if (Defaults::isMonochrome(name)) {
 		changePoint->set_value(std::stod(currentData->getValue(CHANGE_POINT, std::to_string(DEFAULT_CHANGE_VALUE))));
 	}
 	markDevicesUsed();
