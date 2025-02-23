@@ -26,15 +26,7 @@
 using namespace LEDSpicerUI;
 
 // Test fixture for Defaults class (optional, used if setup/teardown is needed)
-class DefaultsTest : public ::testing::Test {
-protected:
-	void SetUp() override {
-		// Reset static state if necessary
-		Defaults::cleanDirty();
-		Defaults::setIgnoreChanges(false);
-		Defaults::tabs.clear();
-	}
-};
+class DefaultsTest : public ::testing::Test {};
 
 // Test isNumber
 TEST_F(DefaultsTest, IsNumber) {
@@ -62,9 +54,9 @@ TEST_F(DefaultsTest, IsBetween) {
 
 // Test addUnitSeparator
 TEST_F(DefaultsTest, AddUnitSeparator) {
-	EXPECT_EQ(Defaults::addUnitSeparator("test"), "\x20test\x20");
-	EXPECT_EQ(Defaults::addUnitSeparator(""), "\x20\x20");
-	EXPECT_EQ(Defaults::addUnitSeparator("a b"), "\x20a b\x20");
+	EXPECT_EQ(Defaults::addUnitSeparator("test"), Defaults::UNIT_SEPARATOR + string("test") + Defaults::UNIT_SEPARATOR);
+	EXPECT_EQ(Defaults::addUnitSeparator(""), Defaults::UNIT_SEPARATOR + string() + Defaults::UNIT_SEPARATOR);
+	EXPECT_EQ(Defaults::addUnitSeparator("a b"), Defaults::UNIT_SEPARATOR + string("a b") + Defaults::UNIT_SEPARATOR);
 }
 
 // Test explode
@@ -97,6 +89,12 @@ TEST_F(DefaultsTest, Explode) {
 	EXPECT_EQ(result5[0], "a");
 	EXPECT_EQ(result5[1], "b");
 	EXPECT_EQ(result5[2], "c");
+
+	// Spaces trimmed limit
+	auto result6 = Defaults::explode("  a  , b ,  c  ", ',', 2);
+	EXPECT_EQ(result6.size(), 2);
+	EXPECT_EQ(result6[0], "a");
+	EXPECT_EQ(result6[1], "b ,  c");
 }
 
 // Test implode (char delimiter)
@@ -162,6 +160,14 @@ TEST_F(DefaultsTest, RTrim) {
 	std::string s4 = "";
 	Defaults::rtrim(s4);
 	EXPECT_EQ(s4, "");
+
+	std::string s5 = " 1";
+	Defaults::rtrim(s5);
+	EXPECT_EQ(s5, " 1");
+
+	std::string s6 = "  1 ";
+	Defaults::rtrim(s6);
+	EXPECT_EQ(s6, "  1");
 }
 
 // Test trim
@@ -185,14 +191,15 @@ TEST_F(DefaultsTest, Trim) {
 
 // Test createCommonUniqueId
 TEST_F(DefaultsTest, CreateCommonUniqueId) {
-	std::vector<std::string> fields{"field1", "field2", "field3"};
-	EXPECT_EQ(Defaults::createCommonUniqueId(fields), "field1\x1Efield2\x1Efield3");
+    std::vector<std::string> fields{"field1", "field2", "field3"};
+    std::string expected = string("field1") + Defaults::FIELD_SEPARATOR + "field2" + Defaults::FIELD_SEPARATOR + "field3";
+    EXPECT_EQ(Defaults::createCommonUniqueId(fields), expected);
 
-	std::vector<std::string> single{"single"};
-	EXPECT_EQ(Defaults::createCommonUniqueId(single), "single");
+    std::vector<std::string> single{"single"};
+    EXPECT_EQ(Defaults::createCommonUniqueId(single), "single");
 
-	std::vector<std::string> empty;
-	EXPECT_EQ(Defaults::createCommonUniqueId(empty), "");
+    std::vector<std::string> empty;
+    EXPECT_EQ(Defaults::createCommonUniqueId(empty), "");
 }
 
 // Main function for running tests

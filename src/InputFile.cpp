@@ -76,7 +76,7 @@ const string InputFile::processLinkedMaps(const string& inputLinkedMaps, const s
 		return "";
 	}
 	// Chunk sections.
-	auto chunks(Defaults::explode(inputLinkedMaps, ID_GROUP_SEPARATOR));
+	auto chunks(Defaults::explode(inputLinkedMaps, Defaults::ID_GROUP_SEPARATOR));
 	string errors;
 	vector<unordered_map<string, string>> linkedMaps;
 	for (auto& chunk : chunks) {
@@ -86,7 +86,7 @@ const string InputFile::processLinkedMaps(const string& inputLinkedMaps, const s
 		}
 		vector<string> linkedMapTrigger;
 		// Find the details using the trigger in the extracted input maps.
-		for (auto& trigger : Defaults::explode(chunk, ID_SEPARATOR)) {
+		for (auto& trigger : Defaults::explode(chunk, Defaults::ID_SEPARATOR)) {
 			Defaults::trim(trigger);
 			if (trigger.empty()) {
 				errors += "Empty item name in linked map for " + inputName;
@@ -106,7 +106,7 @@ const string InputFile::processLinkedMaps(const string& inputLinkedMaps, const s
 		}
 		if (linkedMapTrigger.size()) {
 			// this should be trigger30type30name31trigger30type30name31trigger30type30name31etc
-			linkedMaps.emplace_back(unordered_map<string, string>{{NAME, Defaults::implode(linkedMapTrigger, RECORD_SEPARATOR)}});
+			linkedMaps.emplace_back(unordered_map<string, string>{{NAME, Defaults::implode(linkedMapTrigger, Defaults::RECORD_SEPARATOR)}});
 		}
 	}
 	extractedData.emplace(Defaults::createCommonUniqueId({inputName, COLLECTION_INPUT_LINKED_MAPS}), std::move(linkedMaps));

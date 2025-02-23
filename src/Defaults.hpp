@@ -45,13 +45,6 @@ using std::string;
 
 #define DEFAULT_MESSAGE "This is an auto-generated file by " PACKAGE_STRING "."
 
-// Separators.
-#define FIELD_SEPARATOR  static_cast<char>(30)
-#define RECORD_SEPARATOR static_cast<char>(31)
-#define UNIT_SEPARATOR   static_cast<char>(32)
-#define ID_SEPARATOR       ','
-#define ID_GROUP_SEPARATOR '|'
-
 #define DEFAULT_USERID   "1000"
 #define DEFAULT_GROUPID  "1000"
 #define DEFAULT_PORT     "16161"
@@ -156,6 +149,13 @@ namespace LEDSpicerUI {
 class Defaults {
 
 public:
+
+	// Separators.
+	static constexpr char FIELD_SEPARATOR    = 30;    // Record Separator (RS)
+	static constexpr char RECORD_SEPARATOR   = 31;    // Unit Separator (US)
+	static constexpr char UNIT_SEPARATOR     = 32;    // Space
+	static constexpr char ID_SEPARATOR       = ',';   // Comma
+	static constexpr char ID_GROUP_SEPARATOR = '|';   // Pipe
 
 	/// Taken from Restrictors in ledspicer.
 	enum class Ways : uint8_t {invalid, w2, w2v, w4, w4x, w8, w16, w49, analog, mouse, rotary8, rotary12};

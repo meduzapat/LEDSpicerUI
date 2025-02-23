@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This is an auto-generated file by LEDSpicerUI 0.0.1.-->
+<LEDSpicer
+	craftProfile="true"
+	colorsFile="true"
+	colors="basicColors"
+	groupId="1000"
+	logLevel="Info"
+	userId="1000"
+	randomColors=""
+	dataSource="file,mame"
+	port="16161"
+	type="Configuration"
+	fps="10"
+	version="1.0"
+>
+	<devices>
+		<device
+			changePoint="121"
+			boardId="1"
+			name="UltimarcPacDrive"
+		>
+			<element
+				solenoid="1"
+				type="9"
+				name="P1_KICKER"
+			/>
+			<element
+				led="2"
+				type="1"
+				name="P1_BUTTON1"
+			/>
+			<element
+				led="3"
+				type="1"
+				name="P1_BUTTON2"
+			/>
+			<element
+				led="4"
+				type="1"
+				name="P1_BUTTON3"
+			/>
+			<element
+				led="5"
+				type="1"
+				name="P1_BUTTON4"
+			/>
+			<element
+				led="6"
+				type="9"
+				name="P1_START"
+			/>
+			<element
+				led="7"
+				type="5"
+				name="P1_CREDIT"
+			/>
+			<element
+				led="8"
+				type="5"
+				name="P3_CREDIT"
+			/>
+			<element
+				led="9"
+				type="9"
+				name="P3_START"
+			/>
+			<element
+				led="10"
+				type="1"
+				name="P3_BUTTON1"
+			/>
+			<element
+				led="11"
+				type="1"
+				name="P3_BUTTON2"
+			/>
+			<element
+				led="12"
+				type="1"
+				name="P3_BUTTON3"
+			/>
+			<element
+				led="13"
+				type="1"
+				name="P3_BUTTON4"
+			/>
+			<element
+				led="14"
+				type="1"
+				name="P1_BUTTON5"
+			/>
+			<element
+				led="15"
+				type="1"
+				name="P3_BUTTON5"
+			/>
+			<element
+				solenoid="16"
+				type="9"
+				name="EXIT"
+			/>
+		</device>
+		<device
+			changePoint="64"
+			boardId="2"
+			name="UltimarcPacDrive"
+		>
+			<element
+				led="1"
+				type="9"
+				name="P4_START"
+			/>
+			<element
+				led="2"
+				type="1"
+				name="P4_BUTTON1"
+			/>
+			<element
+				led="3"
+				type="1"
+				name="P4_BUTTON2"
+			/>
+			<element
+				led="4"
+				type="1"
+				name="P4_BUTTON3"
+			/>
+			<element
+				led="5"
+				type="1"
+				name="P4_BUTTON4"
+			/>
+			<element
+				led="9"
+				type="9"
+				name="P2_START"
+			/>
+			<element
+				led="10"
+				type="1"
+				name="P2_BUTTON1"
+			/>
+			<element
+				led="11"
+				type="1"
+				name="P2_BUTTON2"
+			/>
+			<element
+				led="12"
+				type="1"
+				name="P2_BUTTON3"
+			/>
+			<element
+				led="13"
+				type="1"
+				name="P2_BUTTON4"
+			/>
+			<element
+				led="14"
+				type="5"
+				name="P2_CREDIT"
+			/>
+		</device>
+		<device boardId="1" name="UltimarcUltimate">
+			<element
+				position="1"
+				type="9"
+				colorFormat="RGB"
+				name="Test1"
+			/>
+			<element
+				position="2"
+				type="9"
+				colorFormat="RGB"
+				name="Test2"
+			/>
+			<element
+				positions="3,4,5"
+				type="9"
+				colorFormat="RBG"
+				name="Test3"
+			/>
+			<element
+				solenoid="19"
+				type="9"
+				name="test4"
+			/>
+		</device>
+	</devices>
+	<layout defaultProfile="default">
+		<group name="All">
+			<element name="P1_BUTTON1"/>
+			<element name="P1_BUTTON2"/>
+			<element name="P1_BUTTON3"/>
+			<element name="P1_BUTTON4"/>
+			<element name="P1_BUTTON5"/>
+			<element name="P1_CREDIT"/>
+			<element name="P1_KICKER"/>
+			<element name="P1_START"/>
+			<element name="P2_BUTTON1"/>
+			<element name="P2_BUTTON2"/>
+			<element name="P2_BUTTON3"/>
+			<element name="P2_BUTTON4"/>
+			<element name="P2_CREDIT"/>
+			<element name="P2_START"/>
+			<element name="P3_BUTTON1"/>
+			<element name="P3_BUTTON2"/>
+			<element name="P3_BUTTON3"/>
+			<element name="P3_BUTTON4"/>
+			<element name="P3_BUTTON5"/>
+			<element name="P3_CREDIT"/>
+			<element name="P3_START"/>
+			<element name="P4_BUTTON1"/>
+			<element name="P4_BUTTON2"/>
+			<element name="P4_BUTTON3"/>
+			<element name="P4_BUTTON4"/>
+			<element name="P4_START"/>
+			<element name="Test1"/>
+			<element name="Test2"/>
+			<element name="Test3"/>
+			<element name="test4"/>
+			<element name="EXIT"/>
+		</group>
+		<group name="CREDITS">
+			<element name="P1_CREDIT"/>
+			<element name="P2_CREDIT"/>
+			<element name="P3_CREDIT"/>
+		</group>
+		<group name="STARTS">
+			<element name="P1_START"/>
+			<element name="P2_START"/>
+			<element name="P3_START"/>
+			<element name="P4_START"/>
+		</group>
+		<group name="PLAYER1">
+			<element name="P1_BUTTON5"/>
+			<element name="P1_BUTTONdsdsadsadsad"/>
+		</group>
+	</layout>
+</LEDSpicer>

@@ -30,6 +30,15 @@ install-sh
 config.h
 compile
 missing
+test-driver
+
+# Tests directory - Binaries and test artifacts
+tests/*.trs
+tests/test-suite.log
+tests/DefaultsTest
+tests/DataTest
+tests/MessageTest
+tests/XMLHelperTest
 
 # Compiled and others
 ledspicerui

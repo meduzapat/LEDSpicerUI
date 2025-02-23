@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with Glade (simplified for testing) -->
+<interface>
+  <!-- Error Dialog -->
+  <object class="GtkMessageDialog" id="DialogErrorMessage">
+    <property name="message-type">error</property>
+    <property name="buttons">close</property>
+    <property name="visible">False</property>
+  </object>
+
+  <!-- Info Dialog -->
+  <object class="GtkMessageDialog" id="DialogInfoMessage">
+    <property name="message-type">info</property>
+    <property name="buttons">close</property>
+    <property name="visible">False</property>
+  </object>
+
+  <!-- Question Dialog -->
+  <object class="GtkMessageDialog" id="DialogQuestionMessage">
+    <property name="message-type">question</property>
+    <property name="buttons">yes-no</property>
+    <property name="visible">False</property>
+  </object>
+</interface>

@@ -28,7 +28,7 @@
 
 namespace LEDSpicerUI {
 
-using Ui::Message;
+using LEDSpicerUI::Ui::Message;
 
 /**
  * LEDSpicerUI::Ui::XMLHelper
@@ -40,27 +40,27 @@ public:
 	/**
 	 * Creates a new XMLHelper object and open the XML file.
 	 *
-	 * @param fileName
-	 * @throws Error if the file is missing, the body is missing or the version is different.
+	 * @param fileName The path to the XML file to load.
+	 * @param fileType The expected type attribute of the root node (e.g., "Configuration").
+	 * @throws Message if the file is missing, the body is missing or the version is different.
 	 */
 	XMLHelper(const string& fileName, const string& fileType);
 
 	/**
 	 * Reads the attributes from a XML node.
 	 *
-	 * @param parentElement
-	 * @param nodeName
+	 * @param node
 	 * @return A map with the key pairs.
-	 * @throws Error if an error happen.
+	 * @throws Message if an error happen.
 	 */
-	static unordered_map<string, string> processNode(tinyxml2::XMLElement* nodeElement);
+	static unordered_map<string, string> processNode(const tinyxml2::XMLElement* node);
 
 	/**
 	 * Reads the attributes from a node by its name on the root.
 	 *
 	 * @param nodeName The name of the node, note that only the first occurrence will be read.
 	 * @return A map with the parameters in that node.
-	 * @throws Error if node does not exist or an error happen.
+	 * @throws Message if node does not exist or an error happen.
 	 */
 	unordered_map<string, string> processNode(const string& nodeName);
 
@@ -68,7 +68,7 @@ public:
 	 * Returns a pointer to the root node.
 	 * @return
 	 */
-	tinyxml2::XMLElement* getRoot();
+	tinyxml2::XMLElement* getRoot() const;
 
 	/**
 	 * Checks if the map subject have the attributeList elements.
@@ -76,8 +76,8 @@ public:
 	 *
 	 * @param attributeList A list of attributes to check.
 	 * @param subjects A map to check.
-	 * @param node where will check.
-	 * @throws Error if an attribute is missing.
+	 * @param place where will check.
+	 * @throws Message if an attribute is missing.
 	 */
 	static void checkAttributes(
 		const vector<string>& attributeList,
@@ -86,10 +86,12 @@ public:
 	);
 
 	/**
-	 * Return the value from the map or empty string.
-	 * @param values
-	 * @param value
-	 * @return
+	 * Returns the value from the map or a default string.
+	 *
+	 * @param values The map to query.
+	 * @param value The key to look up.
+	 * @param def The default value to return if key is missing (defaults to empty string).
+	 * @return The value or default.
 	 */
 	static string valueOf(
 		const unordered_map<string, string>& values,
@@ -123,7 +125,7 @@ protected:
 	/// Pointer to the root element.
 	tinyxml2::XMLElement* root = nullptr;
 
-	/// Stores the procceded file information by section.
+	/// Populated by derived classes to store extracted XML data by section.
 	unordered_map<string, vector<unordered_map<string, string>>> extractedData;
 
 };

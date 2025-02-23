@@ -1,6 +1,9 @@
-#################
-# Automake file #
-#################
+if HAVE_GTEST
+SUBDIRS = tests
+else
+check-local:
+	@echo "Error: Google Test not found. Tests cannot be run. Install libgtest-dev and re-run configure."
+endif
 
 ACLOCAL_AMFLAGS = -I m4
 
@@ -130,27 +133,6 @@ EXTRA_DIST =            \
 	src/Ui/MainDialogs.hpp   \
 	src/Ui/MainWindow.hpp    \
 	src/LEDSpicerUI.hpp
-
-#########
-# Tests #
-#########
-
-if ENABLE_TESTS
-check_PROGRAMS = DefaultsTest
-DefaultsTest_SOURCES =     \
-	tests/DefaultsTest.cpp \
-	src/Defaults.cpp
-DefaultsTest_CPPFLAGS = \
-	$(AM_CPPFLAGS)      \
-	$(GTKMM30_CFLAGS)   \
-	$(TINYXML2_CFLAGS)  \
-	$(GTEST_CFLAGS)
-DefaultsTest_LDADD = \
-	$(GTKMM30_LIBS)  \
-	$(TINYXML2_LIBS) \
-	$(GTEST_LIBS)
-TESTS = DefaultsTest
-endif
 
 # Clean up
 DISTCLEANFILES = \

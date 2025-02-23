@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LEDSpicer version="1.0" type="Input" name="TestInput">
+  <listenEvents>
+    <listenEvent name="usb-test-device"/>
+  </listenEvents>
+  <maps source="usb-test-device">
+    <map type="Element" target="TEST_BUTTON" trigger="100"/>
+  </maps>
+</LEDSpicer>

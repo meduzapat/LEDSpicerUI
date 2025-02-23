@@ -42,14 +42,14 @@ XMLHelper::XMLHelper(const string& fileName, const string& fileType) {
 	}
 }
 
-unordered_map<string, string> XMLHelper::processNode(tinyxml2::XMLElement* nodeElement) {
+unordered_map<string, string> XMLHelper::processNode(const tinyxml2::XMLElement* node) {
 
 	unordered_map<string, string> groupValues;
 
-	const tinyxml2::XMLAttribute* pAttrib = nodeElement->FirstAttribute();
+	const tinyxml2::XMLAttribute* pAttrib = node->FirstAttribute();
 
 	while (pAttrib) {
-		string value = pAttrib->Value();
+		const string value = pAttrib->Value();
 		groupValues.emplace(pAttrib->Name(), value);
 		pAttrib = pAttrib->Next();
 	}
@@ -66,7 +66,7 @@ unordered_map<string, string> XMLHelper::processNode(const string& nodeElement) 
 	return processNode(node);
 }
 
-tinyxml2::XMLElement* XMLHelper::getRoot() {
+tinyxml2::XMLElement* XMLHelper::getRoot() const {
 	return root;
 }
 
@@ -75,7 +75,7 @@ void XMLHelper::checkAttributes(
 	const unordered_map<string, string>& subjects,
 	const string& place)
 {
-	for (string attribute : attributeList)
+	for (const string& attribute : attributeList)
 		if (not subjects.count(attribute))
 			throw Message("Missing attribute '" + attribute + "' inside " + place);
 }
@@ -103,12 +103,14 @@ string XMLHelper::cleanError(const string& error) {
 		return error;
 
 	result = error.substr(0, pos);
+	Defaults::trim(result);
 	size_t endPos  = pos + 6;
 	pos = error.find("ErrorID=", endPos);
 	if (pos == std::string::npos)
 		return result;
 
 	result += "\nError: " + error.substr(endPos, pos - endPos);
+	Defaults::trim(result);
 	pos = error.find("Line number=", pos);
 	if (pos == std::string::npos)
 		return result;
@@ -119,10 +121,12 @@ string XMLHelper::cleanError(const string& error) {
 		return result;
 
 	result += "\nLine: " + error.substr(pos, endPos - pos);
+	Defaults::trim(result);
 	pos = error.find("XMLElement name=", pos);
 	if (pos == std::string::npos)
 		return result;
 
 	result += "\nNode: " + error.substr(pos + 16);
+	Defaults::trim(result);
 	return result;
 }

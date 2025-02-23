@@ -86,7 +86,7 @@ DialogInputLinkMaps::DialogInputLinkMaps(BaseObjectType* obj, const Glib::RefPtr
 		}
 		boxInputMap->unselect_all();
 		// ids: (32)4(32)|(32)5(32)|(32)6(32)
-		string idsTxt(Defaults::implode(ids, ID_GROUP_SEPARATOR));
+		string idsTxt(Defaults::implode(ids, Defaults::ID_GROUP_SEPARATOR));
 		// Check if the link exists.
 		if (isUsed(idsTxt)) {
 			Message::displayError("This linked mapping already exists");
@@ -95,7 +95,7 @@ DialogInputLinkMaps::DialogInputLinkMaps(BaseObjectType* obj, const Glib::RefPtr
 		localCollection.push_back(idsTxt);
 		// Create linked item.
 		unordered_map<string, string> rawData{
-			{NAME, Defaults::implode(linkData, RECORD_SEPARATOR)},
+			{NAME, Defaults::implode(linkData, Defaults::RECORD_SEPARATOR)},
 			{ID, idsTxt}
 		};
 		auto map  = getData(rawData);
@@ -142,44 +142,44 @@ void DialogInputLinkMaps::storeData() {
 		auto boxChild = dynamic_cast<Gtk::FlowBoxChild*>(child);
 		auto bb = dynamic_cast<Storage::BoxButton*>(boxChild->get_child());
 		// looks like this trigger(30)type target
-		auto newValues(Defaults::explode(bb->getData()->getValue(NAME), FIELD_SEPARATOR));
+		auto newValues(Defaults::explode(bb->getData()->getValue(NAME), Defaults::FIELD_SEPARATOR));
 		ids.push_back(Defaults::addUnitSeparator(newValues[0]));
 		linkData.push_back(bb->getData()->getValue(NAME));
 	}
-	newIds = Defaults::implode(ids, ID_GROUP_SEPARATOR);
+	newIds = Defaults::implode(ids, Defaults::ID_GROUP_SEPARATOR);
 	ids.clear();
 	// data is trigger(30)type target(31)trigger(30)type target(31)trigger(30)type target
-	for (const auto& group : Defaults::explode(currentData->getValue(NAME), RECORD_SEPARATOR)) {
+	for (const auto& group : Defaults::explode(currentData->getValue(NAME), Defaults::RECORD_SEPARATOR)) {
 		// group is trigger(30)type target
-		const auto parts(Defaults::explode(group, FIELD_SEPARATOR));
+		const auto parts(Defaults::explode(group, Defaults::FIELD_SEPARATOR));
 		ids.push_back(Defaults::addUnitSeparator(parts.at(0)));
 	}
-	oldIds = Defaults::implode(ids, ID_GROUP_SEPARATOR);
+	oldIds = Defaults::implode(ids, Defaults::ID_GROUP_SEPARATOR);
 
 	// Is always edit
 	std::replace(localCollection.begin(), localCollection.end(), oldIds, newIds);
 
 	currentData->wipe();
-	currentData->setValue(NAME, Defaults::implode(linkData, RECORD_SEPARATOR));
+	currentData->setValue(NAME, Defaults::implode(linkData, Defaults::RECORD_SEPARATOR));
 	currentData->setValue(ID, newIds);
 }
 
 void DialogInputLinkMaps::retrieveData() {
 	// populates the sorting form with a linked map.
 	// data is trigger(30)type target(31)trigger(30)type target(31)trigger(30)type target
-	for (const auto& group : Defaults::explode(currentData->getValue(NAME), RECORD_SEPARATOR)) {
+	for (const auto& group : Defaults::explode(currentData->getValue(NAME), Defaults::RECORD_SEPARATOR)) {
 		unordered_map<string, string> rawData{{NAME, group}};
 		auto form = new Storage::NameOnly(
 			rawData,
 			"",
 			"LinkBoxButton",
 			[](const unordered_map<string, string>& data) {
-				const auto parts(Defaults::explode(data.at(NAME), FIELD_SEPARATOR));
+				const auto parts(Defaults::explode(data.at(NAME), Defaults::FIELD_SEPARATOR));
 				return parts.at(1);
 			},
 			// Tool-tip
 			[](const unordered_map<string, string>& data) {
-				const auto parts(Defaults::explode(data.at(NAME), FIELD_SEPARATOR));
+				const auto parts(Defaults::explode(data.at(NAME), Defaults::FIELD_SEPARATOR));
 				return string("Linked map for " + parts.at(1));
 			}
 		);
@@ -196,11 +196,11 @@ const string DialogInputLinkMaps::createUniqueId() const {
 		auto boxChild = dynamic_cast<Gtk::FlowBoxChild*>(child);
 		auto bb = dynamic_cast<Storage::BoxButton*>(boxChild->get_child());
 		// data is trigger(30)type target
-		auto newValues(Defaults::explode(bb->getData()->getValue(NAME), FIELD_SEPARATOR));
+		auto newValues(Defaults::explode(bb->getData()->getValue(NAME), Defaults::FIELD_SEPARATOR));
 		ids.push_back(Defaults::addUnitSeparator(newValues[0]));
 	}
 	// ids: (32)4(32)|(32)5(32)|(32)6(32)
-	return Defaults::implode(ids, ID_GROUP_SEPARATOR);
+	return Defaults::implode(ids, Defaults::ID_GROUP_SEPARATOR);
 }
 
 void DialogInputLinkMaps::setOwner(Storage::BoxButtonCollection* collection, Storage::Data* owner) {
@@ -231,11 +231,11 @@ bool DialogInputLinkMaps::isUsed(const string& ids) const {
 string DialogInputLinkMaps::extractIds(Storage::Data* data) const {
 	vector<string> ids;
 	// data is trigger(30)type target(31)trigger(30)type target(31)trigger(30)type target
-	for (const auto& group : Defaults::explode(data->getValue(NAME), RECORD_SEPARATOR)) {
+	for (const auto& group : Defaults::explode(data->getValue(NAME), Defaults::RECORD_SEPARATOR)) {
 		// group is trigger(30)type target
-		const auto parts(Defaults::explode(group, FIELD_SEPARATOR));
+		const auto parts(Defaults::explode(group, Defaults::FIELD_SEPARATOR));
 		ids.push_back(Defaults::addUnitSeparator(parts.at(0)));
 	}
 	// ids: (32)4(32)|(32)5(32)|(32)6(32)
-	return Defaults::implode(ids, ID_GROUP_SEPARATOR);
+	return Defaults::implode(ids, Defaults::ID_GROUP_SEPARATOR);
 }

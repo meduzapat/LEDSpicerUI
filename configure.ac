@@ -3,7 +3,7 @@ dnl Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.69)
 
 COPYRIGHT="Copyright © 2023 - 2025 Patricio A. Rossi (MeduZa)"
-AC_INIT([LEDSpicerUI],[0.0.1],[https://github.com/meduzapat/LEDSpicerUI/issues],[ledspicerui],[https://github.com/meduzapat/LEDSpicerUI], [src/Message.cpp])
+AC_INIT([LEDSpicerUI],[0.0.2],[https://github.com/meduzapat/LEDSpicerUI/issues],[ledspicerui],[https://github.com/meduzapat/LEDSpicerUI], [src/Message.cpp])
 
 AC_DEFINE_UNQUOTED([PACKAGE_DATA_VERSION], ["1.0"], [Data files version])
 AC_DEFINE_UNQUOTED([PACKAGE_DATA_NAME], ["LEDSpicer"], [Data files name])
@@ -41,22 +41,22 @@ dnl Collect image files dynamically
 IMAGES_FILES=`find data/images -maxdepth 1 -type f \( -name "*.png" -o -name "*.svg" \) | tr '\n' ' '`
 AC_SUBST([IMAGES_FILES])
 
-dnl Optional Tests
-AC_ARG_ENABLE([tests],
-	[AS_HELP_STRING([--enable-tests], [Enable unit tests with Google Test (disabled by default)])],
-	[enable_tests=$enableval],
-	[enable_tests=no])
+dnl Optional Google Test check
+AC_MSG_CHECKING([for Google Test])
+PKG_CHECK_MODULES([GTEST], [gtest >= 1.8],
+	[
+		AC_SUBST([GTEST_CFLAGS])
+		AC_SUBST([GTEST_LIBS])
+		AC_MSG_RESULT([yes])
+		have_gtest=yes
+	],
+	[
+		AC_MSG_RESULT([no])
+		AC_MSG_WARN([Google Test >= 1.8 not found; developer tests unavailable. Program functionality unaffected.])
+		have_gtest=no
+	])
 
-AS_IF([test "x$enable_tests" = "xyes"], [
-	AC_MSG_CHECKING([for Google Test])
-	PKG_CHECK_MODULES([GTEST], [gtest >= 1.8],
-		[AC_MSG_RESULT([yes])],
-		[AC_MSG_ERROR([Google Test >= 1.8 not found; install libgtest-dev or disable tests with --disable-tests])])
-	AC_SUBST([GTEST_CFLAGS])
-	AC_SUBST([GTEST_LIBS])
-])
-
-AM_CONDITIONAL([ENABLE_TESTS], [test "x$enable_tests" = "xyes"])
+AM_CONDITIONAL([HAVE_GTEST], [test "x$have_gtest" = "xyes"])
 
 dnl Expand bindir for use in config files if needed.
 AS_AC_EXPAND(BINDIR, $bindir)
@@ -64,6 +64,7 @@ AS_AC_EXPAND(BINDIR, $bindir)
 dnl Output files.
 AC_CONFIG_FILES([
 	Makefile
+	tests/Makefile
 	data/main.glade
 ])
 
@@ -83,5 +84,5 @@ Libraries    : $GTKMM30_LIBS $GTEST_LIBS
 Prefix       : $prefix
 Bin Dir      : $bindir
 Data Dir     : $datadir
-Tests Enabled: $enable_tests
+Tests Enabled: $have_gtest
 ])

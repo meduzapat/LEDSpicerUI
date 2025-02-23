@@ -28,9 +28,9 @@ const string InputMapLink::createTooltip() const {
 	string tooltip("This action will start with the ");
 	vector<string> txts;
 	// data is trigger(30)type target(31)trigger(30)type target(31)trigger(30)type target
-	for (const auto& group : Defaults::explode(fieldsData.at(NAME), RECORD_SEPARATOR)) {
+	for (const auto& group : Defaults::explode(fieldsData.at(NAME), Defaults::RECORD_SEPARATOR)) {
 		// group is trigger(30)type target
-		const auto parts(Defaults::explode(group, FIELD_SEPARATOR));
+		const auto parts(Defaults::explode(group, Defaults::FIELD_SEPARATOR));
 		const auto item(Defaults::explode(parts.at(1), ' '));
 		txts.push_back(item[0] + " " + item[1] + ", when the trigger \"" + parts.at(0) + "\"");
 	}
@@ -40,9 +40,9 @@ const string InputMapLink::createTooltip() const {
 const string InputMapLink::createPrettyName() const {
 	vector<string> prettyName;
 	// data is trigger(30)type target(31)trigger(30)type target(31)trigger(30)type target
-	for (const auto& group : Defaults::explode(fieldsData.at(NAME), RECORD_SEPARATOR)) {
+	for (const auto& group : Defaults::explode(fieldsData.at(NAME), Defaults::RECORD_SEPARATOR)) {
 		// group is trigger(30)type target
-		const auto parts(Defaults::explode(group, FIELD_SEPARATOR));
+		const auto parts(Defaults::explode(group, Defaults::FIELD_SEPARATOR));
 		prettyName.push_back(parts.at(1));
 	}
 	return Defaults::implode(prettyName, " ➡️ ") + " 🔙";

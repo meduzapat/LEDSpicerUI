@@ -223,19 +223,20 @@ bool Defaults::isMulti(const string& name) {
 string Defaults::createHardwareUniqueId(const unordered_map<string, string>& data, bool isDevice) {
 	string name(data.at(NAME));
 	if (Defaults::isIdUser(name, isDevice)) {
-		return (name + FIELD_SEPARATOR + data.at(ID));
+		return (name + Defaults::FIELD_SEPARATOR + data.at(ID));
 	}
 	if (Defaults::isSerial(name, isDevice)) {
-		return (name + FIELD_SEPARATOR + data.at(PORT));
+		return (name + Defaults::FIELD_SEPARATOR + data.at(PORT));
 	}
 	return name;
 }
 
 string Defaults::createCommonUniqueId(const vector<string>& fieldsData) {
-	return implode(fieldsData, FIELD_SEPARATOR);
+	return implode(fieldsData, Defaults::FIELD_SEPARATOR);
 }
 
 bool Defaults::isNumber(const string& number) {
+	if (number.empty()) return false;
 	for (char const &ch : number) {
 		if (not std::isdigit(ch))
 			return false;
@@ -255,7 +256,7 @@ bool Defaults::isBetween(const string& number, int low, int high) {
 }
 
 string Defaults::addUnitSeparator(const string& unit) {
-	return UNIT_SEPARATOR + unit + UNIT_SEPARATOR;
+	return Defaults::UNIT_SEPARATOR + unit + Defaults::UNIT_SEPARATOR;
 }
 
 double Defaults::getLuminance(const string& color) {
@@ -271,29 +272,41 @@ double Defaults::getLuminance(const string& color) {
 }
 
 vector<string> Defaults::explode(const string& text, const char delimiter, const size_t limit) {
-
-	vector<string> temp;
-
-	if (text.empty())
-		return temp;
-
-	size_t start = 0, end = 0;
-
-	for (size_t c = 0; limit ? c < limit : true; c++) {
-		end = text.find(delimiter, start);
-		if (end == string::npos) {
-			string t(text.substr(start));
-			trim(t);
-			temp.push_back(t);
-			break;
-		}
-		string t(text.substr(start, end - start));
-		trim(t);
-		temp.push_back(t);
-		start = end + 1;
+	std::vector<std::string> result;
+	if (text.empty()) {
+		return result;
 	}
 
-	return temp;
+	std::stringstream ss(text);
+	std::string chunk;
+
+	// If delimiter is not found in string, return whole string as single element
+	if (text.find(delimiter) == std::string::npos) {
+		trim(chunk);
+		result.push_back(text);
+		return result;
+	}
+
+	size_t count = 0;
+	while (std::getline(ss, chunk, delimiter)) {
+		// If limit is 0 (no limit) or we haven't reached the limit yet
+		if (not limit or count < limit - 1) {
+			trim(chunk);
+			result.push_back(chunk);
+			count++;
+		}
+		else {
+			// For the last chunk when limit is reached, take the rest of the string
+			std::string remaining;
+			std::getline(ss, remaining);
+			chunk = chunk + (remaining.empty() ? "" : delimiter + remaining);
+			trim(chunk);
+			result.push_back(chunk);
+			break;
+		}
+	}
+
+	return result;
 }
 
 string Defaults::implode(const vector<string>& values, const char& delimiter) {
@@ -309,6 +322,8 @@ string Defaults::implode(const vector<string>& values, const char& delimiter) {
 
 string Defaults::implode(const vector<string>& values, const string& delimiter) {
 	string r;
+	if (values.empty())
+		return r;
 	for (const string& s : values) {
 		r += s + delimiter;
 	}
@@ -317,6 +332,7 @@ string Defaults::implode(const vector<string>& values, const string& delimiter) 
 }
 
 void Defaults::ltrim(string& text) {
+	if (text.empty()) return;
 	size_t chars = 0;
 	for (size_t c = 0; c < text.size(); c++) {
 		if (text[c] > 32)
@@ -327,15 +343,14 @@ void Defaults::ltrim(string& text) {
 		text.erase(0, chars);
 }
 
-void Defaults::rtrim(string& text) {
-	size_t chars = 0;
-	for (size_t c = text.size(); c > 0; c--) {
-		if (text[c] > 32)
-			break;
-		chars ++;
-	}
-	if (chars)
-		text.resize(text.size() - chars + 1);
+void Defaults::rtrim(std::string& text) {
+	text.erase(
+		std::find_if(text.rbegin(), text.rend(),
+		[](unsigned char c) {
+			return c > 32;
+		}).base(),
+		text.end()
+	);
 }
 
 void Defaults::trim(string& text) {
