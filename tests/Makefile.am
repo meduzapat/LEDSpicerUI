@@ -4,8 +4,7 @@ ACLOCAL_AMFLAGS = -I m4
 AM_CPPFLAGS =                \
 	-I$(top_srcdir)/src      \
 	-I$(top_srcdir)/src/Ui   \
-	-I$(top_srcdir)/tests    \
-	-I$(top_srcdir)/tests/Ui \
+	-I$(srcdir)/Ui \
 	-DPACKAGE_SAMPLES_DIR=\"$(abs_top_srcdir)/tests/\" \
 	-fexceptions
 
@@ -67,6 +66,17 @@ XMLHelperTest_LDADD =  \
 
 TESTS = DefaultsTest DataTest MessageTest XMLHelperTest
 TESTS_ENVIRONMENT = GTEST_COLOR=1
+
+EXTRA_DIST =           \
+	data/animation.xml \
+	data/config.xml    \
+	data/input.xml     \
+	data/invalidDataVersion.xml   \
+	data/invalidLedspicerNode.xml \
+	data/invalid.xml   \
+	data/malformed.xml \
+	data/profile.xml   \
+	data/test.ui
 
 # Clean up
 DISTCLEANFILES = \

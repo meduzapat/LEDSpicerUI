@@ -453,7 +453,7 @@ void DialogElement::retrieveData() {
 		notebookDeviceConnections->set_current_page(static_cast<uint8_t>(tabIndex::Strip));
 		int
 			idx(setSelectedConnectors(currentData->getValue(POSITION))),
-			siz;
+			siz(0);
 		if (idx != -1) {
 			try {
 				siz = std::stoi(currentData->getValue(STRIPSIZE));

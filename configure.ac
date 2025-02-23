@@ -27,7 +27,7 @@ dnl Needed Libraries
 AC_MSG_CHECKING([for dependencies])
 
 PKG_CHECK_MODULES(
-	[GTKMM30], [gtkmm-3.0 >= 3.20],
+	[GTKMM30], [gtkmm-3.0 >= 3.24],
 	[],
 	[AC_MSG_ERROR([gtkmm-3.0 development library not found.])]
 )

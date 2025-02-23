@@ -132,7 +132,9 @@ EXTRA_DIST =            \
 	src/Ui/DialogImport.hpp  \
 	src/Ui/MainDialogs.hpp   \
 	src/Ui/MainWindow.hpp    \
-	src/LEDSpicerUI.hpp
+	src/LEDSpicerUI.hpp      \
+	$(ledspiceruidata_DATA)  \
+	$(IMAGES_FILES)
 
 # Clean up
 DISTCLEANFILES = \

@@ -1,0 +1,46 @@
+name: Run Tests
+
+# Trigger on pull requests to master or development
+on:
+  pull_request:
+    branches:
+      - master
+      - development
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout the PR code
+      - uses: actions/checkout@v4
+
+      # Install dependencies
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            xvfb                  \
+            build-essential       \
+            autoconf              \
+            automake              \
+            libtool               \
+            libgtkmm-3.0-dev      \
+            libtinyxml2-dev       \
+            libgtest-dev
+
+      # Configure and build
+      - name: Configure
+        run: |
+          ./autogen.sh
+          ./configure CXXFLAGS='-g3 -O0'
+
+      # Run build
+      - name: Build
+        if: github.base_ref == 'master'
+        run: make
+
+      # Run tests
+      - name: Run Tests
+        run: |
+          export DISPLAY=:99
+          xvfb-run --auto-servernum make -C tests check
