@@ -33,9 +33,6 @@ using std::string;
 
 #include <functional>
 
-// Compiler settings.
-#include "config.h"
-
 #ifndef DEFAULTS_HPP_
 #define DEFAULTS_HPP_ 1
 

@@ -105,10 +105,10 @@ void DialogSelect::setDestinationSettings(
 }
 
 void DialogSelect::isValid() const {
-	if (not Storage::CollectionHandler::getInstance(type)->isUsed(currentData->getValue(NAME)))
-		throw Message("Ignored invalid " + node + " " + currentData->getValue(NAME) + " in " + collection);
+/*	if (not Storage::CollectionHandler::getInstance(type)->isUsed(currentData->getValue(NAME)))
+		throw Message("Ignored invalid " + node + " " + currentData->getValue(NAME) + " in " + collection);*/
 	if (mode != Modes::LOAD and not getNumberOfSelections())
-		throw Message("Please Select at least one");
+		throw Message("Please Select at least one or cancel");
 };
 
 size_t DialogSelect::getNumberOfSelections() const {

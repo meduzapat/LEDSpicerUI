@@ -9,60 +9,34 @@
 *.cache
 *.log
 Debug/
-*/#main.glade.in#
 
-# Autotools
-/stamp-h1
-/ltmain.sh
-/libtool
-/depcomp
-/config.sub
-/config.guess
-.autotools
-**/Makefile.in
-config.h.in
-#*.m4
-Makefile
-*.status
-configure
-configure.scan
-install-sh
-config.h
-compile
-missing
-test-driver
+# CMake build dir
+target/
 
-# Tests directory - Binaries and test artifacts
-tests/*.trs
-tests/test-suite.log
+# CMake generated files
+CMakeCache.txt
+CMakeFiles/
+*.cmake
+
+# Binaries and build artifacts
+ledspicerui
 tests/DefaultsTest
 tests/DataTest
 tests/MessageTest
 tests/XMLHelperTest
 
-# Compiled and others
-ledspicerui
-.dirstamp
-.libs/
-*.slo
-*.lo
-*.Plo
+# Compiled objects and libs
 *.o
-*.Tpo
-data/main.glade
-doc/
-*.Po
-po/
-
-# Compiled Dynamic libraries
 *.so
 *.so.*
 *.dylib
-
-# Compiled Static libraries
-*.lai
-*.la
 *.a
+*.la
+*.lo
+
+# Test artifacts
+tests/*.trs
+tests/test-suite.log
 
 # Packages
 *.deb

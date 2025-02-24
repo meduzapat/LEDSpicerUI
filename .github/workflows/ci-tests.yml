@@ -19,28 +19,27 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            xvfb                  \
-            build-essential       \
-            autoconf              \
-            automake              \
-            libtool               \
-            libgtkmm-3.0-dev      \
-            libtinyxml2-dev       \
-            libgtest-dev
+          xvfb                    \
+          build-essential         \
+          cmake                   \
+          libgtkmm-3.0-dev        \
+          libtinyxml2-dev         \
+          libgtest-dev
 
       # Configure and build
       - name: Configure
         run: |
-          ./autogen.sh
-          ./configure CXXFLAGS='-g3 -O0'
+          mkdir target
+          cd target
+          cmake .. -DCMAKE_CXX_FLAGS="-g3 -O0"
 
       # Run build
       - name: Build
-        if: github.base_ref == 'master'
-        run: make
+        run: cmake --build target --target DefaultsTest --target DataTest --target MessageTest --target XMLHelperTest --parallel
 
       # Run tests
       - name: Run Tests
         run: |
+          cd target
           export DISPLAY=:99
-          xvfb-run --auto-servernum make -C tests check
+          xvfb-run --auto-servernum ctest --output-on-failure

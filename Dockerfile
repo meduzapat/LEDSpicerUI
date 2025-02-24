@@ -4,23 +4,22 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
-    build-essential \
-    autoconf \
-    automake \
-    pkg-config \
-    libgtkmm-3.0-dev \
-    libtinyxml2-dev \
-    libgtest-dev \
-    git \
-    xvfb \
-    && rm -rf /var/lib/apt/lists/*
+  build-essential  \
+  cmake            \
+  libgtkmm-3.0-dev \
+  libtinyxml2-dev  \
+  libgtest-dev     \
+  git              \
+  xvfb             \
+  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 COPY . /app
 
 # Prepare the build environment
-RUN ./autogen.sh && \
-    ./configure CXXFLAGS='-g3 -O0'
+RUN mkdir target \
+  cmake .. -DCMAKE_CXX_FLAGS="-g3 -O0" \
+  cmake --build target --target DefaultsTest --target DataTest --target MessageTest --target XMLHelperTest
 
 # Default command: run tests
-CMD export DISPLAY=:99 && xvfb-run --auto-servernum make -C tests check
+CMD cd target && export DISPLAY=:99 && xvfb-run --auto-servernum ctest --output-on-failure
