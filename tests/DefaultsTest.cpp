@@ -25,11 +25,7 @@
 
 using namespace LEDSpicerUI;
 
-// Test fixture for Defaults class (optional, used if setup/teardown is needed)
-class DefaultsTest : public ::testing::Test {};
-
-// Test isNumber
-TEST_F(DefaultsTest, IsNumber) {
+TEST(DefaultsTest, IsNumber) {
 	EXPECT_TRUE(Defaults::isNumber("123"));
 	EXPECT_TRUE(Defaults::isNumber("0"));
 	EXPECT_FALSE(Defaults::isNumber("12a3"));
@@ -38,8 +34,7 @@ TEST_F(DefaultsTest, IsNumber) {
 	EXPECT_FALSE(Defaults::isNumber("abc"));
 }
 
-// Test isBetween
-TEST_F(DefaultsTest, IsBetween) {
+TEST(DefaultsTest, IsBetween) {
 	EXPECT_TRUE(Defaults::isBetween("5", 1, 10));
 	EXPECT_TRUE(Defaults::isBetween("1", 1, 10));
 	EXPECT_TRUE(Defaults::isBetween("10", 1, 10));
@@ -52,15 +47,13 @@ TEST_F(DefaultsTest, IsBetween) {
 	EXPECT_FALSE(Defaults::isBetween("0", 1, -1));
 }
 
-// Test addUnitSeparator
-TEST_F(DefaultsTest, AddUnitSeparator) {
+TEST(DefaultsTest, AddUnitSeparator) {
 	EXPECT_EQ(Defaults::addUnitSeparator("test"), Defaults::UNIT_SEPARATOR + string("test") + Defaults::UNIT_SEPARATOR);
 	EXPECT_EQ(Defaults::addUnitSeparator(""), Defaults::UNIT_SEPARATOR + string() + Defaults::UNIT_SEPARATOR);
 	EXPECT_EQ(Defaults::addUnitSeparator("a b"), Defaults::UNIT_SEPARATOR + string("a b") + Defaults::UNIT_SEPARATOR);
 }
 
-// Test explode
-TEST_F(DefaultsTest, Explode) {
+TEST(DefaultsTest, Explode) {
 	// Basic delimiter
 	auto result1 = Defaults::explode("a,b,c", ',');
 	EXPECT_EQ(result1.size(), 3);
@@ -97,109 +90,139 @@ TEST_F(DefaultsTest, Explode) {
 	EXPECT_EQ(result6[1], "b ,  c");
 }
 
-// Test implode (char delimiter)
-TEST_F(DefaultsTest, ImplodeChar) {
-	std::vector<std::string> values{"a", "b", "c"};
+TEST(DefaultsTest, ImplodeChar) {
+	vector<string> values{"a", "b", "c"};
 	EXPECT_EQ(Defaults::implode(values, ','), "a,b,c");
 
-	std::vector<std::string> single{"item"};
+	vector<string> single{"item"};
 	EXPECT_EQ(Defaults::implode(single, ','), "item");
 
-	std::vector<std::string> empty;
+	vector<string> empty;
 	EXPECT_EQ(Defaults::implode(empty, ','), "");
 
-	std::vector<std::string> spaced{" a ", " b ", " c "};
+	vector<string> spaced{" a ", " b ", " c "};
 	EXPECT_EQ(Defaults::implode(spaced, ','), " a , b , c ");
 }
 
-// Test implode (string delimiter)
-TEST_F(DefaultsTest, ImplodeString) {
-	std::vector<std::string> values{"x", "y", "z"};
+TEST(DefaultsTest, ImplodeString) {
+	vector<string> values{"x", "y", "z"};
 	EXPECT_EQ(Defaults::implode(values, "---"), "x---y---z");
 
-	std::vector<std::string> single{"test"};
+	vector<string> single{"test"};
 	EXPECT_EQ(Defaults::implode(single, "---"), "test");
 
-	std::vector<std::string> empty;
+	vector<string> empty;
 	EXPECT_EQ(Defaults::implode(empty, "---"), "");
 }
 
-// Test ltrim
-TEST_F(DefaultsTest, LTrim) {
-	std::string s1 = "   text";
+TEST(DefaultsTest, ImplodeUnorderedSet) {
+	unordered_set<string> values{"one", "two", "three"};
+	string result = Defaults::implode(values, ',');
+
+	// Use explode to split result back into a vector
+	vector<string> exploded(Defaults::explode(result, ','));
+	unordered_set<string> resultSet(exploded.begin(), exploded.end());
+
+	EXPECT_EQ(resultSet, values);
+
+	unordered_set<string> single{"only"};
+	EXPECT_EQ(Defaults::implode(single, ','), "only");
+
+	unordered_set<string> empty;
+	EXPECT_EQ(Defaults::implode(empty, ','), "");
+}
+
+TEST(DefaultsTest, LTrim) {
+	string s1 = "   text";
 	Defaults::ltrim(s1);
 	EXPECT_EQ(s1, "text");
 
-	std::string s2 = "text";
+	string s2 = "text";
 	Defaults::ltrim(s2);
 	EXPECT_EQ(s2, "text");
 
-	std::string s3 = "   ";
+	string s3 = "   ";
 	Defaults::ltrim(s3);
 	EXPECT_EQ(s3, "");
 
-	std::string s4 = "";
+	string s4 = "";
 	Defaults::ltrim(s4);
 	EXPECT_EQ(s4, "");
 }
 
-// Test rtrim
-TEST_F(DefaultsTest, RTrim) {
-	std::string s1 = "text   ";
+TEST(DefaultsTest, RTrim) {
+	string s1 = "text   ";
 	Defaults::rtrim(s1);
 	EXPECT_EQ(s1, "text");
 
-	std::string s2 = "text";
+	string s2 = "text";
 	Defaults::rtrim(s2);
 	EXPECT_EQ(s2, "text");
 
-	std::string s3 = "   ";
+	string s3 = "   ";
 	Defaults::rtrim(s3);
 	EXPECT_EQ(s3, "");
 
-	std::string s4 = "";
+	string s4 = "";
 	Defaults::rtrim(s4);
 	EXPECT_EQ(s4, "");
 
-	std::string s5 = " 1";
+	string s5 = " 1";
 	Defaults::rtrim(s5);
 	EXPECT_EQ(s5, " 1");
 
-	std::string s6 = "  1 ";
+	string s6 = "  1 ";
 	Defaults::rtrim(s6);
 	EXPECT_EQ(s6, "  1");
 }
 
-// Test trim
-TEST_F(DefaultsTest, Trim) {
-	std::string s1 = "   text   ";
+TEST(DefaultsTest, Trim) {
+	string s1 = "   text   ";
 	Defaults::trim(s1);
 	EXPECT_EQ(s1, "text");
 
-	std::string s2 = "text";
+	string s2 = "text";
 	Defaults::trim(s2);
 	EXPECT_EQ(s2, "text");
 
-	std::string s3 = "   ";
+	string s3 = "   ";
 	Defaults::trim(s3);
 	EXPECT_EQ(s3, "");
 
-	std::string s4 = "";
+	string s4 = "";
 	Defaults::trim(s4);
 	EXPECT_EQ(s4, "");
 }
 
-// Test createCommonUniqueId
-TEST_F(DefaultsTest, CreateCommonUniqueId) {
-    std::vector<std::string> fields{"field1", "field2", "field3"};
-    std::string expected = string("field1") + Defaults::FIELD_SEPARATOR + "field2" + Defaults::FIELD_SEPARATOR + "field3";
-    EXPECT_EQ(Defaults::createCommonUniqueId(fields), expected);
+TEST(DefaultsTest, CreateCommonUniqueId) {
+	vector<string> fields{"field1", "field2", "field3"};
+	string expected = string("field1") + Defaults::FIELD_SEPARATOR + "field2" + Defaults::FIELD_SEPARATOR + "field3";
+	EXPECT_EQ(Defaults::createCommonUniqueId(fields), expected);
 
-    std::vector<std::string> single{"single"};
-    EXPECT_EQ(Defaults::createCommonUniqueId(single), "single");
+	vector<string> single{"single"};
+	EXPECT_EQ(Defaults::createCommonUniqueId(single), "single");
 
-    std::vector<std::string> empty;
-    EXPECT_EQ(Defaults::createCommonUniqueId(empty), "");
+	vector<string> empty;
+	EXPECT_EQ(Defaults::createCommonUniqueId(empty), "");
+}
+
+TEST(DefaultsTest, ExtractName) {
+
+	// Common Test cases.
+	EXPECT_EQ("file",   Defaults::extractName("file",              "/a/b/c"));
+	EXPECT_EQ("file",   Defaults::extractName("file.xml",          "/a/b/c"));
+	EXPECT_EQ("file",   Defaults::extractName("/a/b/c/file.xml",   "/a/b/c"));
+	EXPECT_EQ("d/file", Defaults::extractName("/a/b/c/d/file.xml", "/a/b/c"));
+	EXPECT_EQ("file",   Defaults::extractName("/a1/b1/file.xml",   "/a/b/c"));
+	// Test with deeper directory structures.
+	EXPECT_EQ("d/e/f/file", Defaults::extractName("/a/b/c/d/e/f/file.xml", "/a/b/c"));
+	EXPECT_EQ("file",       Defaults::extractName("/a/b/c/file",           "/a/b/c"));
+	// Nasty corner cases.
+	EXPECT_EQ("a/file",  Defaults::extractName("/a/file.xml",        ""));
+	EXPECT_EQ("",        Defaults::extractName("",                   "/a/b/c"));
+	EXPECT_EQ("file",    Defaults::extractName("/a/b/c/file.xml",    "/a/b/c/d/e/f"));
+	EXPECT_EQ("file.v1", Defaults::extractName("/a/b/c/file.v1.xml", "/a/b/c"));
+	EXPECT_EQ("file",    Defaults::extractName("/a/b/c/file.xml",    "/a/b/c/file.xml"));
 }
 
 // Main function for running tests

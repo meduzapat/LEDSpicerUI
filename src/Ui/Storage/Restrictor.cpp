@@ -63,7 +63,7 @@ void Restrictor::activate() {
 const string Restrictor::toXML() const {
 	string r(createOpeningXML("restrictor", fieldsData, ignored, false));
 	for (const auto& e : playerMapping) {
-		r += e->getData()->toXML();
+		r += e.getData()->toXML();
 	}
 	r += createClosingXML("restrictor");
 	return r;

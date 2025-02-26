@@ -103,7 +103,7 @@ protected:
 	 * To remove used linked maps.
 	 * @param boxButton
 	 */
-	void afterDeleteConfirmation(Storage::BoxButton* boxButton) override;
+	void afterDeleteConfirmation(Storage::BoxButton& boxButton) override;
 
 	/**
 	 * Checks if a group of IDs is used on the local collection.

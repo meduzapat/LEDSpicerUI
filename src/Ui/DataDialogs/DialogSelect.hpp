@@ -132,12 +132,12 @@ protected:
 	 * Creates a color picket button.
 	 * @param boxButton
 	 */
-	void createColorButton(Storage::BoxButton* boxButton);
+	void createColorButton(Storage::BoxButton& boxButton);
 
-	void addButtons(Storage::BoxButton* boxButton) override;
+	void addButtons(Storage::BoxButton& boxButton) override;
 
 	/**
-	 * Popullates all the items and selects the ones in the group.
+	 * Populates all the items and selects the ones in the group.
 	 */
 	void populateSelectables();
 };

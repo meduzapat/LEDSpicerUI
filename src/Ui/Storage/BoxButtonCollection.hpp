@@ -124,13 +124,13 @@ public:
 	 * @param form The Data object to create a BoxButton.
 	 * @return Pointer to the added BoxButton item.
 	 */
-	BoxButton* add(Data* form);
+	BoxButton& add(Data* form);
 
 	/**
 	 * Remove a BoxButton item from the collection.
 	 * @param item Pointer to the BoxButton item to be removed.
 	 */
-	void remove(BoxButton* item);
+	void remove(BoxButton& item);
 
 	/**
 	 * Remove a BoxButton item with the specified name from the collection.
@@ -158,8 +158,7 @@ public:
 	void reindex(OrdenableFlowBox* box);
 
 	/**
-	 * Clear all items from the collection.
-	 * It doesn't delete the contents, it just wipe the box.
+	 * Destroys all items from the collection.
 	 */
 	void wipe();
 
@@ -168,31 +167,31 @@ public:
 	 * @param position The position of the item.
 	 * @return Pointer to the BoxButton item.
 	 */
-	BoxButton* at(uint position);
+	BoxButton& at(uint position);
 
 	/**
 	 * Get an iterator pointing to the beginning of the collection.
 	 * @return Iterator pointing to the beginning of the collection.
 	 */
-	std::list<BoxButton*>::iterator begin();
+	std::list<BoxButton>::iterator begin();
 
 	/**
 	 * Get an iterator pointing to the end of the collection.
 	 * @return Iterator pointing to the end of the collection.
 	 */
-	std::list<BoxButton*>::iterator end();
+	std::list<BoxButton>::iterator end();
 
 	/**
 	 * Get a const iterator pointing to the beginning of the collection.
 	 * @return Const iterator pointing to the beginning of the collection.
 	 */
-	std::list<BoxButton*>::const_iterator begin() const;
+	std::list<BoxButton>::const_iterator begin() const;
 
 	/**
 	 * Get a const iterator pointing to the end of the collection.
 	 * @return Const iterator pointing to the end of the collection.
 	 */
-	std::list<BoxButton*>::const_iterator end() const;
+	std::list<BoxButton>::const_iterator end() const;
 
 protected:
 
@@ -203,7 +202,7 @@ protected:
 	SearchTypes searchType{true, true};
 
 	/// Created items in the dialog.
-	std::list<BoxButton*> items;
+	std::list<BoxButton> items;
 };
 
 } /* namespace */

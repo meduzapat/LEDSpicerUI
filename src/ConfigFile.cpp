@@ -30,7 +30,7 @@ ConfigFile::ConfigFile(const string& ledspicerconf) : XMLHelper(ledspicerconf, "
 	string errors(processDevices());
 	errors += processProcessLookup();
 	if (not errors.empty())
-		Message::displayError("Errors:\n" + errors);
+		throw Message("Errors:\n" + errors);
 }
 
 unordered_map<string, string> ConfigFile::getSettings() {

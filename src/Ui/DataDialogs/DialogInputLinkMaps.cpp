@@ -99,10 +99,10 @@ DialogInputLinkMaps::DialogInputLinkMaps(BaseObjectType* obj, const Glib::RefPtr
 			{ID, idsTxt}
 		};
 		auto map  = getData(rawData);
-		auto bPtr = items->add(map);
+		Storage::BoxButton& bBox(items->add(map));
 		// Set signals and store.
-		addButtons(bPtr);
-		box->add(*bPtr);
+		addButtons(bBox);
+		box->add(bBox);
 	});
 
 	setSignalApply();
@@ -113,7 +113,7 @@ DialogInputLinkMaps::~DialogInputLinkMaps() {
 }
 
 void DialogInputLinkMaps::load(XMLHelper* values) {
-	createItems(values->getData(Defaults::createCommonUniqueId({owner->createUniqueId(), COLLECTION_INPUT_LINKED_MAPS})), values);
+	//createItems(values->getData(Defaults::createCommonUniqueId({owner->createUniqueId(), COLLECTION_INPUT_LINKED_MAPS})), values);
 }
 
 void DialogInputLinkMaps::clearForm() {
@@ -183,8 +183,8 @@ void DialogInputLinkMaps::retrieveData() {
 				return string("Linked map for " + parts.at(1));
 			}
 		);
-		auto button = indivitualMaps.add(form);
-		boxInputLinkedMappings->add(*button);
+		auto& button = indivitualMaps.add(form);
+		boxInputLinkedMappings->add(button);
 	}
 	boxInputLinkedMappings->show_all();
 }
@@ -207,8 +207,8 @@ void DialogInputLinkMaps::setOwner(Storage::BoxButtonCollection* collection, Sto
 	DialogForm::setOwner(collection, owner);
 	// When the dialog opens, generate the local collection.
 	localCollection.clear();
-	for(auto bb : *collection)
-		localCollection.push_back(extractIds(bb->getData()));
+	for(auto& bb : *collection)
+		localCollection.push_back(extractIds(bb.getData()));
 }
 
 const string DialogInputLinkMaps::getType() const {
@@ -219,8 +219,8 @@ LEDSpicerUI::Ui::Storage::Data* DialogInputLinkMaps::getData(unordered_map<strin
 	return new Storage::InputMapLink(rawData);
 }
 
-void DialogInputLinkMaps::afterDeleteConfirmation(Storage::BoxButton* boxButton) {
-	string idsTxt(extractIds(boxButton->getData()));
+void DialogInputLinkMaps::afterDeleteConfirmation(Storage::BoxButton& boxButton) {
+	string idsTxt(extractIds(boxButton.getData()));
 	localCollection.erase(std::remove(localCollection.begin(), localCollection.end(), idsTxt), localCollection.end());
 }
 

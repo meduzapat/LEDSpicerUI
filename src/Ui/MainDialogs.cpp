@@ -88,14 +88,5 @@ MainDialogs::~MainDialogs() {
 
 	// dialogs.
 	delete DialogColors::getInstance();
-
-	// the order is important.
-	profiles.wipe();
-	processes.wipe();
-	inputs.wipe();
-	groups.wipe();
-	devices.wipe();
-	restrictors.wipe();
-	Storage::CollectionHandler::wipe();
-
+	Storage::CollectionHandler::purgeAll();
 }

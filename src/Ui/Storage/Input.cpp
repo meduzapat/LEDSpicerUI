@@ -37,7 +37,7 @@ Input::Input(unordered_map<string, string>& data) :
 	// to avoid duplicated triggers.
 	CollectionHandler::getInstance(COLLECTION_INPUT_MAPS)->registerDestination(&maps);
 	// link linked maps to maps using the trigger.
-	CollectionHandler::getInstance(COLLECTION_INPUT_LINKED_MAPS)->registerDestination(&linkedMaps);
+	//CollectionHandler::getInstance(COLLECTION_INPUT_EVENTS)->registerDestination(&linkedMaps);
 	// this value is not used as data, only for filename.
 	ignored.insert(FILENAME);
 }
@@ -50,7 +50,7 @@ Input::~Input() {
 	CollectionHandler::getInstance(COLLECTION_ELEMENT)->release(&maps);
 	CollectionHandler::getInstance(COLLECTION_GROUP)->release(&maps);
 	CollectionHandler::getInstance(COLLECTION_INPUT_MAPS)->release(&maps);
-	CollectionHandler::getInstance(COLLECTION_INPUT_LINKED_MAPS)->release(&linkedMaps);
+	//CollectionHandler::getInstance(COLLECTION_INPUT_LINKED_MAPS)->release(&linkedMaps);
 }
 
 string const Input::createPrettyName() const {
@@ -87,7 +87,7 @@ const string Input::toXML() const {
 	r += ">\n";
 	Defaults::increaseTab();
 	for (const auto& e : maps) {
-		r += e->getData()->toXML();
+		r += e.getData()->toXML();
 	}
 	Defaults::reduceTab();
 	r += "</LEDSpicer>\n";

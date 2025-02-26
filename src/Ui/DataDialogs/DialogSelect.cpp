@@ -77,9 +77,9 @@ void DialogSelect::RunDialog() {
 			unordered_map<string, string> rawData{{NAME, l}};
 			auto selected = getData(rawData);
 			// Store.
-			auto bPtr = items->add(selected);
-			addButtons(bPtr);
-			box->add(*bPtr);
+			Storage::BoxButton& bBox(items->add(selected));
+			addButtons(bBox);
+			box->add(bBox);
 		}
 		box->show_all();
 	}
@@ -127,20 +127,20 @@ LEDSpicerUI::Ui::Storage::Data* DialogSelect::getData(unordered_map<string, stri
 	return new Storage::NameOnly(rawData, node, type + "BoxButton");
 }
 
-void DialogSelect::createColorButton(Storage::BoxButton* boxButton) {
+void DialogSelect::createColorButton(Storage::BoxButton& boxButton) {
 	auto button(Gtk::make_managed<Gtk::Button>());
-	boxButton->pack_start(*button, Gtk::PACK_SHRINK);
+	boxButton.pack_start(*button, Gtk::PACK_SHRINK);
 	DialogColors::getInstance()->activateColorButton(button);
 }
 
-void DialogSelect::addButtons(Storage::BoxButton* boxButton) {
+void DialogSelect::addButtons(Storage::BoxButton& boxButton) {
 	if (buttons & DialogSelect::EDITER)
 		createEditButton(boxButton);
 	if (buttons & DialogSelect::COLORER)
 		createColorButton(boxButton);
 	if (buttons & DialogSelect::DELETER)
 		createDeleteButton(boxButton, false);
-	boxButton->show_all();
+	boxButton.show_all();
 }
 
 void DialogSelect::populateSelectables() {

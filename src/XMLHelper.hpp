@@ -42,7 +42,7 @@ public:
 	 *
 	 * @param fileName The path to the XML file to load.
 	 * @param fileType The expected type attribute of the root node (e.g., "Configuration").
-	 * @throws Message if the file is missing, the body is missing or the version is different.
+	 * @throws Message if the file is missing or corrupted, the body is missing or the version is different.
 	 */
 	XMLHelper(const string& fileName, const string& fileType);
 

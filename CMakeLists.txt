@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 project(LEDSpicerUI VERSION 0.0.2 LANGUAGES CXX)
 
-# Enable testing at root level for ctest from build/
-enable_testing()
-
 # Metadata (for glade file substitution and compile definitions)
 set(PACKAGE "ledspicerui")
 set(PACKAGE_NAME "${PROJECT_NAME}")  # LEDSpicerUI

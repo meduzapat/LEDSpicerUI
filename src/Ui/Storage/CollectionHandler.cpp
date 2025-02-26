@@ -26,19 +26,15 @@ using namespace LEDSpicerUI::Ui::Storage;
 
 unordered_map<string, CollectionHandler*> CollectionHandler::collections;
 
-CollectionHandler::CollectionHandler(const string& collectionName) {
-	collections.emplace(collectionName, this);
-}
-
-void CollectionHandler::wipe() {
+void CollectionHandler::purgeAll() {
 	for (auto& c : collections)
 		delete c.second;
+	collections.clear();
 }
 
 CollectionHandler* CollectionHandler::getInstance(const string& collectionName) {
-	if (not collections.count(collectionName))
-		new CollectionHandler(collectionName);
-	return collections.at(collectionName);
+	auto [it, inserted] = collections.try_emplace(collectionName, new CollectionHandler());
+	return it->second;
 }
 
 size_t CollectionHandler::getSize() const {
@@ -46,7 +42,9 @@ size_t CollectionHandler::getSize() const {
 }
 
 void CollectionHandler::refreshComboBox(Gtk::ComboBoxText* comboBox) {
-	Defaults::populateComboBoxText(comboBox, collection);
+	comboBox->remove_all();
+	for (const auto& item : collection)
+		comboBox->append(item);
 }
 
 void CollectionHandler::refreshComboBox(Gtk::ComboBoxText* comboBox, const vector<string>& ignoreList) {
@@ -57,85 +55,75 @@ void CollectionHandler::refreshComboBox(Gtk::ComboBoxText* comboBox, const vecto
 }
 
 bool CollectionHandler::isUsed(const string& item) const {
-	return std::find(collection.begin(), collection.end(), item) != collection.end();
+	return collection.count(item);
 }
 
 size_t CollectionHandler::count(const string& search) const {
-	int count = 0;
-	for (auto& i : collection)
-		if (i.find(search) != i.npos)
-			++count;
-	return count;
+	return std::count_if(
+		collection.begin(),
+		collection.end(),
+		[search](const auto& item) {
+			return item.find(search) != string::npos;
+		}
+	);
 }
 
-std::vector<string> const& CollectionHandler::get() const {
+std::set<string> const& CollectionHandler::get() const {
 	return collection;
 }
 
 void CollectionHandler::add(const string& item) {
-	if (not item.empty() and not isUsed(item)) {
-		collection.push_back(item);
-		std::sort(collection.begin(), collection.end());
-		populateComboboxesSorted();
-	}
+	if (item.empty()) return;
+	collection.emplace(item);
+	populateComboboxesSorted();
 }
 
 void CollectionHandler::remove(const string& item) {
-	if (item.empty() or not isUsed(item))
-		return;
-	collection.erase(std::remove(collection.begin(), collection.end(), item), collection.end());
+	if (item.empty()) return;
+	collection.erase(item);
 	for (auto destination : destinationGroups)
 		destination->remove(item);
 	populateComboboxesSorted();
 }
 
 void CollectionHandler::replace(const string& oldItem, const string& newItem) {
-	if (oldItem.empty() or not isUsed(oldItem))
-		return;
-	if (oldItem != newItem) {
-		std::replace(collection.begin(), collection.end(), oldItem, newItem);
-		for (auto destination : destinationGroups)
-			destination->rename(oldItem, newItem);
-		std::sort(collection.begin(), collection.end());
-		populateComboboxesSorted();
-	}
+	if (oldItem.empty() or not isUsed(oldItem) or oldItem == newItem) return;
+	collection.erase(oldItem);
+	collection.emplace(newItem);
+	for (auto destination : destinationGroups)
+		destination->rename(oldItem, newItem);
+	populateComboboxesSorted();
 }
 
 void CollectionHandler::registerDestination(BoxButtonCollection* destination) {
-	destinationGroups.push_back(destination);
+	destinationGroups.emplace(destination);
 }
 
 void CollectionHandler::registerDestination(Gtk::ComboBoxText* destination) {
-	destinationComboBoxes.push_back(destination);
+	destinationComboBoxes.emplace(destination);
 }
 
 void CollectionHandler::release(BoxButtonCollection* destination) {
-	destinationGroups.erase(
-		std::remove(destinationGroups.begin(), destinationGroups.end(), destination),
-		destinationGroups.end()
-	);
+	destinationGroups.erase(destination);
 }
 
 void CollectionHandler::release(Gtk::ComboBoxText* destination) {
-	destinationComboBoxes.erase(
-		std::remove(destinationComboBoxes.begin(), destinationComboBoxes.end(), destination),
-		destinationComboBoxes.end()
-	);
+	destinationComboBoxes.erase(destination);
 }
 
-vector<string>::iterator CollectionHandler::begin() {
+std::set<string>::iterator CollectionHandler::begin() {
 	return collection.begin();
 }
 
-vector<string>::iterator CollectionHandler::end() {
+std::set<string>::iterator CollectionHandler::end() {
 	return collection.end();
 }
 
-vector<string>::const_iterator CollectionHandler::begin() const {
+std::set<string>::const_iterator CollectionHandler::begin() const {
 	return collection.begin();
 }
 
-vector<string>::const_iterator CollectionHandler::end() const {
+std::set<string>::const_iterator CollectionHandler::end() const {
 	return collection.end();
 }
 

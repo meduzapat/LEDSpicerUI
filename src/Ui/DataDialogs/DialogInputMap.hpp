@@ -28,7 +28,7 @@
 #define UI_DIALOGINPUTMAP_HPP_ 1
 
 #define inputMapCollectionHandler Storage::CollectionHandler::getInstance(COLLECTION_INPUT_MAPS)
-#define inputLinkMapCollectionHandler Storage::CollectionHandler::getInstance(COLLECTION_INPUT_LINKED_MAPS)
+//#define inputLinkMapCollectionHandler Storage::CollectionHandler::getInstance(COLLECTION_INPUT_LINKED_MAPS)
 #define mapElementCollectionHandler Storage::CollectionHandler::getInstance(COLLECTION_ELEMENT)
 #define mapGroupCollectionHandler Storage::CollectionHandler::getInstance(COLLECTION_GROUP)
 

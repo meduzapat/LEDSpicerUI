@@ -524,7 +524,7 @@ void DialogElement::changeNumberOfPins(const uint16_t newSize) {
 			deleted += boxButton->getData()->getValue(NAME) + "\n";
 			// elements doesn't need activation.
 			box->remove(*boxButton);
-			items->remove(boxButton);
+			items->remove(*boxButton);
 		}
 		if (not deleted.empty())
 			Message::displayInfo("Elements being deleted due to resizing:\n" +deleted);
@@ -554,7 +554,7 @@ void DialogElement::drawPins() {
 	// Create pin labels.
 	vector<Gtk::Label *> labels;
 	labels.reserve(numberOfPins);
-	for (auto c = 1; c <= numberOfPins; ++c) {
+	for (uint16_t c = 1; c <= numberOfPins; ++c) {
 		Gtk::Label* label(Gtk::make_managed<Gtk::Label>(std::to_string(c)));
 		label->get_style_context()->add_class(PIN_LABEL);
 		auto& pinUsage(pinsUsage[c - 1]);
@@ -638,11 +638,11 @@ LEDSpicerUI::Ui::Storage::Data* DialogElement::getData(unordered_map<string, str
 	return new Storage::Element(rawData);
 }
 
-void DialogElement::addButtons(Storage::BoxButton* boxButton) {
+void DialogElement::addButtons(Storage::BoxButton& boxButton) {
 	createEditButton(boxButton);
 	createCloneButton(boxButton);
 	createDeleteButton(boxButton);
-	boxButton->show_all();
+	boxButton.show_all();
 }
 
 void DialogElement::findConnectorTypes(vector<std::pair<string, string>>& pinsUsage) {
@@ -683,52 +683,52 @@ void DialogElement::findConnectorTypes(vector<std::pair<string, string>>& pinsUs
 		}
 	};
 
-	for (const auto boxButton : *items) {
+	for (const auto& boxButton : *items) {
 		// Multiple RGB.
-		if (not boxButton->getData()->getValue(POSITIONS).empty()) {
-			for (const auto& position : Defaults::explode(boxButton->getData()->getValue(POSITIONS), ',')) {
-				storePinsRGB(pinsUsage, position, boxButton->getData());
+		if (not boxButton.getData()->getValue(POSITIONS).empty()) {
+			for (const auto& position : Defaults::explode(boxButton.getData()->getValue(POSITIONS), ',')) {
+				storePinsRGB(pinsUsage, position, boxButton.getData());
 			}
 		}
 		// LED strip.
-		else if (not boxButton->getData()->getValue(STRIPSIZE).empty()) {
+		else if (not boxButton.getData()->getValue(STRIPSIZE).empty()) {
 			const uint16_t
-				s(std::stoi(boxButton->getData()->getValue(POSITION))),
-				t(s + std::stoi(boxButton->getData()->getValue(STRIPSIZE)));
+				s(std::stoi(boxButton.getData()->getValue(POSITION))),
+				t(s + std::stoi(boxButton.getData()->getValue(STRIPSIZE)));
 			for (uint16_t c(s); c < t; ++c) {
-				storePinsRGB(pinsUsage, std::to_string(c), boxButton->getData());
+				storePinsRGB(pinsUsage, std::to_string(c), boxButton.getData());
 			}
 		}
 		// RGB.
-		else if (not boxButton->getData()->getValue(POSITION).empty()) {
-			storePinsRGB(pinsUsage, boxButton->getData()->getValue(POSITION), boxButton->getData());
+		else if (not boxButton.getData()->getValue(POSITION).empty()) {
+			storePinsRGB(pinsUsage, boxButton.getData()->getValue(POSITION), boxButton.getData());
 		}
 		// Single.
-		else if (not boxButton->getData()->getValue(PIN).empty()) {
-			const uint16_t index(std::stoi(boxButton->getData()->getValue(PIN)) - 1);
+		else if (not boxButton.getData()->getValue(PIN).empty()) {
+			const uint16_t index(std::stoi(boxButton.getData()->getValue(PIN)) - 1);
 			storePins(pinsUsage[index], COLOR_PIN);
-			pinsUsage[index].second = boxButton->getData()->getValue(NAME);
+			pinsUsage[index].second = boxButton.getData()->getValue(NAME);
 		}
 		// Solenoid.
-		else if (not boxButton->getData()->getValue(SOLENOID).empty()) {
-			const uint16_t index(std::stoi(boxButton->getData()->getValue(SOLENOID)) - 1);
+		else if (not boxButton.getData()->getValue(SOLENOID).empty()) {
+			const uint16_t index(std::stoi(boxButton.getData()->getValue(SOLENOID)) - 1);
 			storePins(pinsUsage[index], COLOR_SOLENOID);
-			pinsUsage[index].second = boxButton->getData()->getValue(NAME);
+			pinsUsage[index].second = boxButton.getData()->getValue(NAME);
 		}
 		// Scattered RGB
 		else {
 			// Red.
-			uint16_t index(std::stoi(boxButton->getData()->getValue(RED_PIN)) - 1);
+			uint16_t index(std::stoi(boxButton.getData()->getValue(RED_PIN)) - 1);
 			storePins(pinsUsage[index], COLOR_RED);
-			pinsUsage[index].second = boxButton->getData()->getValue(NAME);
+			pinsUsage[index].second = boxButton.getData()->getValue(NAME);
 			// Green.
-			index = std::stoi(boxButton->getData()->getValue(GREEN_PIN)) - 1;
+			index = std::stoi(boxButton.getData()->getValue(GREEN_PIN)) - 1;
 			storePins(pinsUsage[index], COLOR_GREEN);
-			pinsUsage[index].second = boxButton->getData()->getValue(NAME);
+			pinsUsage[index].second = boxButton.getData()->getValue(NAME);
 			// Blue.
-			index = std::stoi(boxButton->getData()->getValue(BLUE_PIN)) - 1;
+			index = std::stoi(boxButton.getData()->getValue(BLUE_PIN)) - 1;
 			storePins(pinsUsage[index], COLOR_BLUE);
-			pinsUsage[index].second = boxButton->getData()->getValue(NAME);
+			pinsUsage[index].second = boxButton.getData()->getValue(NAME);
 		}
 	}
 }
@@ -783,17 +783,17 @@ void DialogElement::onSwitchPage(Gtk::Widget*, guint pageNum) {
 
 void DialogElement::findElementByPin(uint16_t finder, unordered_set<Storage::BoxButton*>& elementsFound) {
 	const string connector(std::to_string(finder));
-	for (const auto boxButton : *items) {
+	for (auto& boxButton : *items) {
 
 		// Single LED.
-		string subject(boxButton->getData()->getValue(PIN, boxButton->getData()->getValue(SOLENOID)));
+		string subject(boxButton.getData()->getValue(PIN, boxButton.getData()->getValue(SOLENOID)));
 		if (not subject.empty()) {
 			if (connector == subject)
-				elementsFound.insert(boxButton);
+				elementsFound.insert(&boxButton);
 			continue;
 		}
 		// Multi LED.
-		subject = boxButton->getData()->getValue(POSITIONS);
+		subject = boxButton.getData()->getValue(POSITIONS);
 		if (not subject.empty()) {
 			bool found = false;
 			for (const auto& position : Defaults::explode(subject, ',')) {
@@ -804,19 +804,19 @@ void DialogElement::findElementByPin(uint16_t finder, unordered_set<Storage::Box
 				}
 			}
 			if (found) {
-				elementsFound.insert(boxButton);
+				elementsFound.insert(&boxButton);
 				continue;
 			}
 		}
 		// RGB Strip.
-		subject = boxButton->getData()->getValue(POSITION);
-		if (not boxButton->getData()->getValue(STRIPSIZE).empty()) {
+		subject = boxButton.getData()->getValue(POSITION);
+		if (not boxButton.getData()->getValue(STRIPSIZE).empty()) {
 			uint16_t
-				lastPin(Storage::Element::findFirstConnectorIndexByPosition(boxButton->getData()->getValue(STRIPSIZE)) + 2),
+				lastPin(Storage::Element::findFirstConnectorIndexByPosition(boxButton.getData()->getValue(STRIPSIZE)) + 2),
 				firstPin(Storage::Element::findFirstConnectorIndexByPosition(subject));
 
 			if (firstPin >= finder and firstPin <= lastPin) {
-				elementsFound.insert(boxButton);
+				elementsFound.insert(&boxButton);
 				continue;
 			}
 		}
@@ -824,26 +824,26 @@ void DialogElement::findElementByPin(uint16_t finder, unordered_set<Storage::Box
 		if (not subject.empty()) {
 			auto pinNum(Storage::Element::findFirstConnectorIndexByPosition(subject));
 			if (finder >= pinNum and finder <= pinNum +2) {
-				elementsFound.insert(boxButton);
+				elementsFound.insert(&boxButton);
 				continue;
 			}
 		}
 		// Scattered RGB.
-		subject = boxButton->getData()->getValue(RED_PIN);
+		subject = boxButton.getData()->getValue(RED_PIN);
 		if (not subject.empty()) {
 			uint16_t pinNum(std::stoi(subject));
 			if (finder == pinNum) {
-				elementsFound.insert(boxButton);
+				elementsFound.insert(&boxButton);
 				continue;
 			}
-			pinNum = std::stoi(boxButton->getData()->getValue(GREEN_PIN));
+			pinNum = std::stoi(boxButton.getData()->getValue(GREEN_PIN));
 			if (finder == pinNum) {
-				elementsFound.insert(boxButton);
+				elementsFound.insert(&boxButton);
 				continue;
 			}
-			pinNum = std::stoi(boxButton->getData()->getValue(BLUE_PIN));
+			pinNum = std::stoi(boxButton.getData()->getValue(BLUE_PIN));
 			if (finder == pinNum) {
-				elementsFound.insert(boxButton);
+				elementsFound.insert(&boxButton);
 				continue;
 			}
 		}

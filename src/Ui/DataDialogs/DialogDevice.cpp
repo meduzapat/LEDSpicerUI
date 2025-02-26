@@ -70,7 +70,7 @@ DialogDevice::DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 	row.set_value(0, string());
 	row.set_value(1, string("Select Device"));
 	row.set_value(2, false);
-	for (auto& d : Defaults::devicesInfo) {
+	for (const auto& d : Defaults::devicesInfo) {
 		row = *(devicesListstore->append());
 		row.set_value(0, d.first);
 		row.set_value(1, d.second.name);

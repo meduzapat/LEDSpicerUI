@@ -162,7 +162,7 @@ protected:
 
 	Storage::Data* getData(unordered_map<string, string>& rawData) override;
 
-	void addButtons(Storage::BoxButton* boxButton) override;
+	void addButtons(Storage::BoxButton& boxButton) override;
 
 	/**
 	 * Refresh the list of connectors.

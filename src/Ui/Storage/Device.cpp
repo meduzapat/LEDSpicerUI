@@ -63,7 +63,7 @@ void Device::activate() {
 const string Device::toXML() const {
 	string r(createOpeningXML("device", fieldsData, ignored, false));
 	for (const auto& e : elements) {
-		r += e->getData()->toXML();
+		r += e.getData()->toXML();
 	}
 	r += createClosingXML("device");
 	return r;

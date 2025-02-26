@@ -51,7 +51,7 @@ DialogInput::DialogInput(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& 
 	builder->get_widget("InputInputName",           inputInputName);
 
 	// Actions.
-	builder->get_widget("SwitchInputBlink",         switchInputBlink);
+	builder->get_widget("SwitchInputBlink", switchInputBlink);
 
 	// Necessary to select mappings.
 	builder->get_widget_derived("BoxInputMap",        boxInputMap);
@@ -64,7 +64,7 @@ DialogInput::DialogInput(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& 
 	builder->get_widget("ComboBoxInputSpeed",  comboBoxInputSpeed);
 
 	// Actions, Blinker and Impulse
-	builder->get_widget("InputInputDevicesID", inputInputDevicesID);
+	builder->get_widget("InputInputListenEvents", inputInputDevicesID);
 
 	// Others
 	builder->get_widget("LinkedElementsAndGroupsBox", linkedElementsAndGroupsBox);

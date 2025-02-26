@@ -149,8 +149,8 @@ void DialogRestrictorMap::populateInterfacesCombobox() {
 		liststoreRestrictorMapId,
 		Defaults::restrictorsInfo.at(name).interfaces,
 		[&](const string& id) {
-			for (auto i : *items) {
-				if (i->getData()->getValue(RESTRICTOR_INTERFACE) == id)
+			for (const auto& i : *items) {
+				if (i.getData()->getValue(RESTRICTOR_INTERFACE) == id)
 					return true;
 			}
 			return false;
@@ -161,12 +161,12 @@ void DialogRestrictorMap::populateInterfacesCombobox() {
 	interface->set_active(0);
 }
 
-void DialogRestrictorMap::afterCreate(Storage::BoxButton*) {
+void DialogRestrictorMap::afterCreate(Storage::BoxButton&) {
 	// This is necessary to disable the add if needed.
 	btnAdd->set_sensitive(checkAvailableInterfaces());
 }
 
-void DialogRestrictorMap::afterDeleteConfirmation(Storage::BoxButton* boxButton) {
+void DialogRestrictorMap::afterDeleteConfirmation(Storage::BoxButton& boxButton) {
 	DialogForm::afterDeleteConfirmation(boxButton);
 	// Assume that after deleting we can add a new map
 	btnAdd->set_sensitive(true);

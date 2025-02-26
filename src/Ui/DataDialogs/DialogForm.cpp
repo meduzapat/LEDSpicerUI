@@ -53,9 +53,9 @@ void DialogForm::createItems(vector<unordered_map<string, string>>& rawCollectio
 		}
 		storeData();
 		// BoxButton will take care for data.
-		auto b = items->add(currentData);
+		Storage::BoxButton& b(items->add(currentData));
 		addButtons(b);
-		box->add(*b);
+		box->add(b);
 		createSubItems(values);
 		currentData->deActivate();
 	}
@@ -90,8 +90,8 @@ void DialogForm::resetForm() {
 
 vector<const unordered_map<string, string>*> DialogForm::getValues() {
 	vector<const unordered_map<string, string>*> values;
-	for (auto b : *items)
-		values.push_back(b->getData()->getValues());
+	for (const auto& b : *items)
+		values.push_back(b.getData()->getValues());
 	return values;
 }
 
@@ -117,13 +117,13 @@ void DialogForm::setSignalApply() {
 	});
 }
 
-void DialogForm::createDeleteButton(Storage::BoxButton* boxButton, bool askConfirmation) {
+void DialogForm::createDeleteButton(Storage::BoxButton& boxButton, bool askConfirmation) {
 	auto button(Gtk::make_managed<Gtk::Button>());
-	boxButton->pack_start(*button, Gtk::PACK_SHRINK);
+	boxButton.pack_start(*button, Gtk::PACK_SHRINK);
 	button->set_image_from_icon_name("edit-delete", Gtk::ICON_SIZE_BUTTON);
-	button->signal_clicked().connect([&, boxButton, askConfirmation]() {
+	button->signal_clicked().connect([&, askConfirmation]() {
 		if (askConfirmation) {
-			if (Message::ask("Are you sure you want to remove " + boxButton->getData()->createPrettyName() + "?") == Gtk::ResponseType::RESPONSE_YES) {
+			if (Message::ask("Are you sure you want to remove " + boxButton.getData()->createPrettyName() + "?") == Gtk::ResponseType::RESPONSE_YES) {
 				onDelClicked(boxButton);
 			}
 		}
@@ -133,28 +133,28 @@ void DialogForm::createDeleteButton(Storage::BoxButton* boxButton, bool askConfi
 	});
 }
 
-void DialogForm::createEditButton(Storage::BoxButton* boxButton) {
+void DialogForm::createEditButton(Storage::BoxButton& boxButton) {
 	auto button(Gtk::make_managed<Gtk::Button>());
-	boxButton->pack_start(*button, Gtk::PACK_SHRINK);
+	boxButton.pack_start(*button, Gtk::PACK_SHRINK);
 	button->set_image_from_icon_name("applications-engineering", Gtk::ICON_SIZE_BUTTON);
-	button->signal_clicked().connect([&, boxButton]() {
+	button->signal_clicked().connect([&]() {
 		onEditClicked(boxButton);
 	});
 }
 
-void DialogForm::createCloneButton(Storage::BoxButton* boxButton) {
+void DialogForm::createCloneButton(Storage::BoxButton& boxButton) {
 	auto button(Gtk::make_managed<Gtk::Button>());
-	boxButton->pack_start(*button, Gtk::PACK_SHRINK);
+	boxButton.pack_start(*button, Gtk::PACK_SHRINK);
 	button->set_image_from_icon_name("edit-copy", Gtk::ICON_SIZE_BUTTON);
-	button->signal_clicked().connect([&, boxButton]() {
+	button->signal_clicked().connect([&]() {
 		onCloneClicked(boxButton);
 	});
 }
 
-void DialogForm::addButtons(Storage::BoxButton* boxButton) {
+void DialogForm::addButtons(Storage::BoxButton& boxButton) {
 	createEditButton(boxButton);
 	createDeleteButton(boxButton);
-	boxButton->show_all();
+	boxButton.show_all();
 }
 
 void DialogForm::onAddClicked() {
@@ -171,12 +171,12 @@ void DialogForm::onAddClicked() {
 		storeData();
 		Defaults::markDirty();
 		// store.
-		auto bPtr = items->add(currentData);
-		addButtons(bPtr);
+		Storage::BoxButton& bBox(items->add(currentData));
+		addButtons(bBox);
 		// Add into the box.
-		box->add(*bPtr);
+		box->add(bBox);
 		// Custom stuff.
-		afterCreate(bPtr);
+		afterCreate(bBox);
 		currentData->deActivate();
 	}
 	// Create voided, destroy form.
@@ -188,10 +188,10 @@ void DialogForm::onAddClicked() {
 	hide();
 }
 
-void DialogForm::onEditClicked(Storage::BoxButton* boxButton) {
+void DialogForm::onEditClicked(Storage::BoxButton& boxButton) {
 	mode = Modes::EDIT;
 	resetForm();
-	currentData = boxButton->getData();
+	currentData = boxButton.getData();
 	currentData->activate();
 	// Set label and title.
 	set_title("Edit " + getType());
@@ -203,28 +203,28 @@ void DialogForm::onEditClicked(Storage::BoxButton* boxButton) {
 		Defaults::markDirty();
 		// Store data.
 		storeData();
-		boxButton->updateLabel();
+		boxButton.updateLabel();
 	}
 	currentData->deActivate();
 	currentData = nullptr;
 	hide();
 }
 
-void DialogForm::onDelClicked(Storage::BoxButton* boxButton) {
-	currentData = boxButton->getData();
+void DialogForm::onDelClicked(Storage::BoxButton& boxButton) {
+	currentData = boxButton.getData();
 	currentData->activate();
 	afterDeleteConfirmation(boxButton);
 	Defaults::markDirty();
-	box->remove(*boxButton);
+	box->remove(boxButton);
 	// This will also delete the object, the destructor must call deActivate if necessary.
 	items->remove(boxButton);
 	currentData = nullptr;
 }
 
-void DialogForm::onCloneClicked(Storage::BoxButton* boxButton) {
+void DialogForm::onCloneClicked(Storage::BoxButton& boxButton) {
 	mode = Modes::ADD;
 	resetForm();
-	auto values = unordered_map<string, string>(boxButton->getData()->getValues()->begin(), boxButton->getData()->getValues()->end());
+	auto values = unordered_map<string, string>(boxButton.getData()->getValues()->begin(), boxButton.getData()->getValues()->end());
 	// Check for other copies.
 	auto name = values.at(NAME) + " copy";
 	uint8_t count = 0;
@@ -235,14 +235,14 @@ void DialogForm::onCloneClicked(Storage::BoxButton* boxButton) {
 	values.at(NAME) = std::move(name);
 	currentData = getData(values);
 	// Add item and the box and set buttons.
-	auto bPtr = items->add(currentData);
-	addButtons(bPtr);
-	box->add(*bPtr);
+	Storage::BoxButton& bBox(items->add(currentData));
+	addButtons(bBox);
+	box->add(bBox);
 	currentData->activate();
 	retrieveData();
 	storeData();
 	Defaults::markDirty();
-	bPtr->updateLabel();
+	bBox.updateLabel();
 	currentData->deActivate();
 	currentData = nullptr;
 }

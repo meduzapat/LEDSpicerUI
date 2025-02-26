@@ -7,13 +7,17 @@
 	groupId="1000"
 	logLevel="Info"
 	userId="1000"
-	randomColors=""
+	randomColors="Red, Blue, Green, Yellow, White, Black"
 	dataSource="file,mame"
 	port="16161"
 	type="Configuration"
 	fps="10"
 	version="1.0"
 >
+	<processLookup runEvery="500">
+		<map processName="test" system="arcade" position="3"/>
+		<map processName="gedit" system="arcade"/>
+	</processLookup>
 	<devices>
 		<device
 			changePoint="121"

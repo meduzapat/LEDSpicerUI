@@ -208,7 +208,7 @@ string DialogColors::setColors(unordered_map<string, string>& colors) {
 		ContainerColorPicker->remove(*c);
 
 	string cssData;
-	for (auto c : colors) {
+	for (auto& c : colors) {
 		if (c.first == "On" or c.first == "Off" or c.first == "Random")
 			// Discard any special color.
 			continue;

@@ -38,6 +38,10 @@ public:
 
 	BoxButton() = delete;
 
+	/**
+	 * Creates a new BoxButton object.
+	 * @param form The data to store, once assigned the BoxButton owns the pointer.
+	 */
 	BoxButton(Data* form);
 
 	/**

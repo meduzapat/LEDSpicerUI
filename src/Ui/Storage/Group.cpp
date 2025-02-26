@@ -55,7 +55,7 @@ void Group::activate() {
 const string Group::toXML() const {
 	string r(createOpeningXML("group", fieldsData, ignored, false));
 	for (const auto& e : elements) {
-		r += e->getData()->toXML();
+		r += e.getData()->toXML();
 	}
 	r += createClosingXML("group");
 	return r;

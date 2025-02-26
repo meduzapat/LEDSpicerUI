@@ -70,7 +70,7 @@ const string Profile::toXML() const {
 	r += ">\n";
 	Defaults::increaseTab();
 	for (const auto& e : alwaysOnElements) {
-		r += e->getData()->toXML();
+		r += e.getData()->toXML();
 	}
 	Defaults::reduceTab();
 	r += "</LEDSpicer>\n";

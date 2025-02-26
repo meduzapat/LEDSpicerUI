@@ -35,8 +35,6 @@ class CollectionHandler {
 
 public:
 
-	CollectionHandler() = delete;
-
 	virtual ~CollectionHandler() = default;
 
 	/**
@@ -47,9 +45,9 @@ public:
 	static CollectionHandler* getInstance(const string& collectionName);
 
 	/**
-	 * Removes all stored collections.
+	 * Removes and deletes all stored collections.
 	 */
-	static void wipe();
+	static void purgeAll();
 
 	/**
 	 * Get the number of registered items.
@@ -88,7 +86,7 @@ public:
 	 * Returns the list of registered items.
 	 * @return
 	 */
-	std::vector<string> const& get() const;
+	std::set<string> const& get() const;
 
 	/**
 	 * Adds an item to the collection.
@@ -133,26 +131,26 @@ public:
 	 */
 	void release(Gtk::ComboBoxText* destination);
 
-	vector<string>::iterator begin();
+	std::set<string>::iterator begin();
 
-	vector<string>::iterator end();
+	std::set<string>::iterator end();
 
-	vector<string>::const_iterator begin() const;
+	std::set<string>::const_iterator begin() const;
 
-	vector<string>::const_iterator end() const;
+	std::set<string>::const_iterator end() const;
 
 protected:
 
-	CollectionHandler(const string& collectionName);
-//TODO cambiar esto por sets
+	CollectionHandler() = default;
+
 	/// List of collection names.
-	vector<string> collection;
+	std::set<string> collection;
 
 	/// List of containers.
-	vector<BoxButtonCollection*> destinationGroups;
+	unordered_set<BoxButtonCollection*> destinationGroups;
 
 	/// List of selectors.
-	vector<Gtk::ComboBoxText*> destinationComboBoxes;
+	unordered_set<Gtk::ComboBoxText*> destinationComboBoxes;
 
 	/// Keeps collections instances.
 	static unordered_map<string, CollectionHandler*> collections;

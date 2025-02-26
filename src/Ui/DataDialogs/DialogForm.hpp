@@ -187,28 +187,28 @@ protected:
 	 * @param boxButton the boxButton that will receive this delete button to delete itself.
 	 * @param askConfirmation if set will ask, default yes.
 	 */
-	virtual void createDeleteButton(Storage::BoxButton* boxButton, bool askConfirmation = true);
+	virtual void createDeleteButton(Storage::BoxButton& boxButton, bool askConfirmation = true);
 
 	/**
 	 * Utility that decorates with a button that allows to edit itself.
 	 *
 	 * @param boxButton the BoxButton that will receive this edit button to been able to get edited.
 	 */
-	virtual void createEditButton(Storage::BoxButton* boxButton);
+	virtual void createEditButton(Storage::BoxButton& boxButton);
 
 	/**
 	 * Utility that decorates with a button that allows to clone itself.
 	 *
 	 * @param boxButton the BoxButton that will receive this clone button to been able to get cloned.
 	 */
-	void createCloneButton(Storage::BoxButton* boxButton);
+	void createCloneButton(Storage::BoxButton& boxButton);
 
 	/**
 	 * Function to decorate the boxButton with the necessary buttons.
 	 *
 	 * @param boxButton The BoxButton that will get buttons.
 	 */
-	virtual void addButtons(Storage::BoxButton* boxButton);
+	virtual void addButtons(Storage::BoxButton& boxButton);
 
 	/**
 	 * Method to add generic Apply functionality.
@@ -224,37 +224,37 @@ protected:
 	 * Called after Add, when the data is stored and the button created.
 	 * @param boxButton the newly created box button.
 	 */
-	virtual void afterCreate(Storage::BoxButton*) {}
+	virtual void afterCreate(Storage::BoxButton&) {}
 
 	/**
 	 * When the edit button is clicked.
 	 * @param boxButton the button that called delete.
 	 */
-	virtual void onEditClicked(Storage::BoxButton* boxButton);
+	virtual void onEditClicked(Storage::BoxButton& boxButton);
 
 	/**
 	 * Called After Edit before the data is stored.
 	 * @param boxButton the button that called edit.
 	 */
-	virtual void afterEdit(Storage::BoxButton*) {}
+	virtual void afterEdit(Storage::BoxButton&) {}
 
 	/**
 	 * When the delete button is clicked.
 	 * @param boxButton the button that called delete.
 	 */
-	virtual void onDelClicked(Storage::BoxButton* boxButton);
+	virtual void onDelClicked(Storage::BoxButton& boxButton);
 
 	/**
 	 * Called after delete confirmation is accented.
 	 * @param boxButton the button that called delete.
 	 */
-	virtual void afterDeleteConfirmation(Storage::BoxButton*) {}
+	virtual void afterDeleteConfirmation(Storage::BoxButton&) {}
 
 	/**
 	 * When the clone button is clicked.
 	 * @param boxButton the button that called clone.
 	 */
-	virtual void onCloneClicked(Storage::BoxButton* boxButton);
+	virtual void onCloneClicked(Storage::BoxButton& boxButton);
 };
 
 } /* namespace */

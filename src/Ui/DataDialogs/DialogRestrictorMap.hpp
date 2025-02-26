@@ -104,13 +104,13 @@ protected:
 	 * After add check if more can be added.
 	 * @param boxButton
 	 */
-	void afterCreate(Storage::BoxButton* boxButton) override;
+	void afterCreate(Storage::BoxButton& boxButton) override;
 
 	/**
 	 * Refresh some fields affected by delete.
 	 * @param boxButton
 	 */
-	virtual void afterDeleteConfirmation(Storage::BoxButton* boxButton);
+	virtual void afterDeleteConfirmation(Storage::BoxButton& boxButton);
 };
 
 } /* namespace */

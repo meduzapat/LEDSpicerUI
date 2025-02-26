@@ -57,7 +57,7 @@ OrdenableListBox::OrdenableListBox(
 
 	btnUp->signal_clicked().connect([=]() {
 		auto selectedRow = get_selected_row();
-		auto index = selectedRow->get_index();
+		auto index       = selectedRow->get_index();
 		remove(*selectedRow);
 		insert(*selectedRow, index - 1);
 		unselect_all();
@@ -67,7 +67,7 @@ OrdenableListBox::OrdenableListBox(
 
 	btnDn->signal_clicked().connect([=]() {
 		auto selectedRow = get_selected_row();
-		auto index = selectedRow->get_index();
+		auto index       = selectedRow->get_index();
 		remove(*selectedRow);
 		insert(*selectedRow, index + 1);
 		unselect_all();
@@ -97,13 +97,13 @@ void OrdenableListBox::sortAndMark(vector<string> values) {
 		remove(*boxChild);
 	}
 	// Add items selected.
-	for (auto& name : values) {
+	for (const auto& name : values) {
 		dynamic_cast<Gtk::CheckButton*>(rows[name]->get_child())->set_active(true);
 		add(*rows[name]);
 		rows.erase(name);
 	}
 	// Add items non selected.
-	for (auto row : rows) {
+	for (const auto& row : rows) {
 		dynamic_cast<Gtk::CheckButton*>(row.second->get_child())->set_active(false);
 		add(*row.second);
 	}

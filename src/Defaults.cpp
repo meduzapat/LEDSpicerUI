@@ -272,16 +272,16 @@ double Defaults::getLuminance(const string& color) {
 }
 
 vector<string> Defaults::explode(const string& text, const char delimiter, const size_t limit) {
-	std::vector<std::string> result;
+	std::vector<string> result;
 	if (text.empty()) {
 		return result;
 	}
 
-	std::stringstream ss(text);
-	std::string chunk;
+	stringstream ss(text);
+	string chunk;
 
 	// If delimiter is not found in string, return whole string as single element
-	if (text.find(delimiter) == std::string::npos) {
+	if (text.find(delimiter) == string::npos) {
 		trim(chunk);
 		result.push_back(text);
 		return result;
@@ -297,7 +297,7 @@ vector<string> Defaults::explode(const string& text, const char delimiter, const
 		}
 		else {
 			// For the last chunk when limit is reached, take the rest of the string
-			std::string remaining;
+			string remaining;
 			std::getline(ss, remaining);
 			chunk = chunk + (remaining.empty() ? "" : delimiter + remaining);
 			trim(chunk);
@@ -331,6 +331,17 @@ string Defaults::implode(const vector<string>& values, const string& delimiter) 
 	return r;
 }
 
+string Defaults::implode(const unordered_set<string>& values, const char& delimiter) {
+	string r;
+	if (values.empty())
+		return r;
+	for (const string& s : values) {
+		r += s + delimiter;
+	}
+	r.resize(r.size() - 1);
+	return r;
+}
+
 void Defaults::ltrim(string& text) {
 	if (text.empty()) return;
 	size_t chars = 0;
@@ -343,7 +354,7 @@ void Defaults::ltrim(string& text) {
 		text.erase(0, chars);
 }
 
-void Defaults::rtrim(std::string& text) {
+void Defaults::rtrim(string& text) {
 	text.erase(
 		std::find_if(text.rbegin(), text.rend(),
 		[](unsigned char c) {
@@ -421,12 +432,6 @@ string Defaults::tab() {
 	return tabs;
 }
 
-void Defaults::populateComboBoxText(Gtk::ComboBoxText* comboBox, const vector<string>& values) {
-	comboBox->remove_all();
-	for (const auto& item : values)
-		comboBox->append(item);
-}
-
 void Defaults::populateComboBoxTextWithNumbers(Gtk::ComboBoxText* comboBox, int from, int to, const vector<string>& ignoreList) {
 	comboBox->remove_all();
 	for (int c = from; c <= to; c++) {
@@ -475,7 +480,7 @@ void Defaults::setFilter(Gtk::SearchEntry* filterEntry, Gtk::FlowBox* box) {
 			auto c = dynamic_cast<Gtk::FlowBoxChild*>(child);
 			auto b = dynamic_cast<Gtk::Button*>(c->get_child());
 			auto t = b->get_label().lowercase();
-			if (t.find(filterText) != std::string::npos)
+			if (t.find(filterText) != string::npos)
 				child->show();
 			else
 				child->hide();
@@ -485,4 +490,29 @@ void Defaults::setFilter(Gtk::SearchEntry* filterEntry, Gtk::FlowBox* box) {
 
 void Defaults::setIgnoreChanges(bool state) {
 	ignoreChanges = state;
+}
+
+string Defaults::extractName(const string& fullFileName, const string& rootPath) {
+
+	// Get fullFileName without extension.
+	string
+		filename(Glib::path_get_basename(fullFileName)),
+		dir(Glib::path_get_dirname(fullFileName));
+	if (filename.find('.') != string::npos) {
+		filename = filename.substr(0, filename.find_last_of('.'));
+	}
+
+	if (dir == rootPath or rootPath.size() > dir.size()) {
+		return filename;
+	}
+
+	// Check if file is within root.
+	auto pos = dir.find(rootPath);
+	if (pos == string::npos) {
+		return filename;
+	}
+
+	// Get the relative path portion.
+	dir = dir.substr(rootPath.length() + 1);
+	return dir + "/" + filename;
 }

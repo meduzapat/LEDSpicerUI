@@ -21,15 +21,21 @@
  */
 
 #include <gtkmm.h>
+#include <glibmm.h>
+#include <giomm.h>
 
 #include <unordered_map>
 using std::unordered_map;
+
+#include <unordered_set>
+using std::unordered_set;
 
 #include <vector>
 using std::vector;
 
 #include <string>
 using std::string;
+using std::stringstream;
 
 #include <functional>
 
@@ -132,8 +138,8 @@ using std::string;
 #define COLLECTION_PROCESS           "processes"
 #define COLLECTION_RESTRICTOR_MAP    "playerCombinations"
 #define COLLECTION_INPUT             "inputNames"
-#define COLLECTION_INPUT_MAPS        "triggers"
-#define COLLECTION_INPUT_LINKED_MAPS "linkedMaps"
+#define COLLECTION_INPUT_EVENTS      "inputEvents"
+#define COLLECTION_INPUT_MAPS        "linkedMaps"
 #define COLLECTION_ANIMATIONS        "animations"
 #define COLLECTION_PROFILES          "profiles"
 
@@ -318,6 +324,14 @@ public:
 	static string implode(const vector<string>& values, const char& delimiter);
 
 	/**
+	 * Merge a set into a string using a char delimiter.
+	 * @param values Set of strings to merge.
+	 * @param delimiter Character used to separate elements.
+	 * @return Merged string with elements separated by the delimiter.
+	 */
+	static string implode(const unordered_set<string>& values, const char& delimiter);
+
+	/**
 	 * Removes spaces from the left
 	 * @param text
 	 */
@@ -426,13 +440,6 @@ public:
 	static string tab();
 
 	/**
-	 * Populates a combobox with values from array of text.
-	 * @param combobox
-	 * @param values
-	 */
-	static void populateComboBoxText(Gtk::ComboBoxText* comboBox, const vector<string>& values);
-
-	/**
 	 * Populates a combobox with numerical entries.
 	 * @param combobox
 	 * @param from
@@ -473,6 +480,14 @@ public:
 	 * @param state True to ignore changes, false otherwise.
 	 */
 	static void setIgnoreChanges(bool state);
+
+	/**
+	 * Extracts the name from a file and a root.
+	 * @param inputFile
+	 * @param root
+	 * @return the plain file name with the root extracted.
+	 */
+	static std::string extractName(const std::string& filename, const std::string& root);
 
 protected:
 

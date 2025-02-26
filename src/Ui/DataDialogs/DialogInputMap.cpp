@@ -131,14 +131,14 @@ void DialogInputMap::storeData() {
 	if (mode == Modes::EDIT) {
 		// the problem with this is that will only update values if the trigger is replaced.
 		inputMapCollectionHandler->replace(currentData->createUniqueId(), trigger);
-		inputLinkMapCollectionHandler->replace(Defaults::createCommonUniqueId({
+/*		inputLinkMapCollectionHandler->replace(Defaults::createCommonUniqueId({
 			currentData->createUniqueId(),
 			currentData->getValue(TYPE) + " " + currentData->getValue(TARGET)}
-		), newLinkedMapId);
+		), newLinkedMapId);*/
 	}
 	else {
 		inputMapCollectionHandler->add(trigger);
-		inputLinkMapCollectionHandler->add(newLinkedMapId);
+		//inputLinkMapCollectionHandler->add(newLinkedMapId);
 	}
 
 	currentData->wipe();

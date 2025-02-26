@@ -36,15 +36,15 @@ public:
 
 	InputFile() = delete;
 
-	InputFile(const string& ledspicerconf);
+	InputFile(const string& inputFile, const string& projectRoot);
 
 	virtual ~InputFile() = default;
 
 protected:
 
-const string processMaps(const string& inputName);
+const string processMaps(tinyxml2::XMLElement* mapsNode, const string& inputName);
 
-const string processLinkedMaps(const string& inputLinkedMaps, const string& inputName);
+const string processInputSources(const string& inputName, tinyxml2::XMLElement* inputNode, unordered_set<string>& listenEvents);
 
 };
 

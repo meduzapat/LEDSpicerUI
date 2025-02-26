@@ -117,8 +117,8 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 				}
 				xmlData += ">\n";
 				Defaults::increaseTab();
-				for (auto p : processes) {
-					xmlData += p->getData()->toXML();
+				for (const auto& p : processes) {
+					xmlData += p.getData()->toXML();
 				}
 				Defaults::reduceTab();
 				xmlData += Defaults::tab() + "</processLookup>\n";
@@ -126,8 +126,8 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 
 			xmlData += Defaults::tab() + "<devices>\n";
 			Defaults::increaseTab();
-			for (auto d : devices) {
-				xmlData += d->getData()->toXML();
+			for (const auto& d : devices) {
+				xmlData += d.getData()->toXML();
 			}
 			Defaults::reduceTab();
 			xmlData += Defaults::tab() + "</devices>\n";
@@ -135,8 +135,8 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 			if (restrictors.getSize()) {
 				xmlData += Defaults::tab() + "<restrictors>\n";
 				Defaults::increaseTab();
-				for (auto r : restrictors) {
-					xmlData += r->getData()->toXML();
+				for (const auto& r : restrictors) {
+					xmlData += r.getData()->toXML();
 				}
 				Defaults::reduceTab();
 				xmlData += Defaults::tab() + "</restrictors>\n";
@@ -145,8 +145,8 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 			// Add layout.
 			xmlData += Defaults::tab() + "<layout defaultProfile=\"" + inputDefaultProfile->get_active_text() + "\">\n";
 			Defaults::increaseTab();
-			for (auto g : groups) {
-				xmlData += g->getData()->toXML();
+			for (const auto& g : groups) {
+				xmlData += g.getData()->toXML();
 			}
 			Defaults::reduceTab();
 			xmlData += Defaults::tab() + "</layout>\n";
@@ -444,7 +444,7 @@ string MainWindow::readConfiguration() {
 
 void MainWindow::readConfigFile(const string& dataFilePath, bool wipe, uint8_t importFlags) {
 	if (importFlags & Defaults::ImportFlags::INPUTS) {
-		InputFile datafile(dataFilePath);
+		InputFile datafile(dataFilePath, workingDirectory);
 		if (wipe) {
 			inputs.wipe();
 			DataDialogs::DialogInput::getInstance()->refreshBox();
@@ -493,8 +493,11 @@ void MainWindow::readConfigFile(const string& dataFilePath, bool wipe, uint8_t i
 		inputRunEvery->set_text(datafile.getProcessLookupRunEvery());
 	}
 
-	// Detect files in directory
-	Defaults::populateComboBoxText(inputDefaultProfile, {datafile.getDefaultProfile()});
+	// TODO: use registered profiles.
+	inputDefaultProfile->remove_all();
+	for (const auto& item : {datafile.getDefaultProfile()})
+		inputDefaultProfile->append(item);
+
 	// this will trigger load.
 	inputDefaultProfile->set_active_text(datafile.getDefaultProfile());
 

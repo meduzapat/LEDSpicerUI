@@ -24,91 +24,95 @@
 
 using namespace LEDSpicerUI;
 
-InputFile::InputFile(const string& inputFile) : XMLHelper(inputFile, "Input") {
-	// process filename.
-	auto file(Defaults::explode(Glib::path_get_basename(inputFile), '.'));
-	// This will work fine if the file have extension :P
-	file.pop_back();
-	string
-		// Extract name.
-		name(Defaults::implode(file, '.')),
-		// Extract maps.
-		errors(processMaps(name));
-	// Extract input data.
-	unordered_map<string, string> input(processNode(getRoot()));
-	// Add filename (name)
-	input.emplace(FILENAME, name);
-	extractedData.emplace(COLLECTION_INPUT, std::move(vector<unordered_map<string, string>>{input}));
+InputFile::InputFile(const string& inputFile, const string& projectRoot) : XMLHelper(inputFile, "Input") {
 
-	// Extract linked maps, if any.
-	if (input.count(LINKED_ITEMS) and not input.at(LINKED_ITEMS).empty()) {
-		errors += processLinkedMaps(input.at(LINKED_ITEMS), name);
+	string
+		name(Defaults::extractName(inputFile, projectRoot)),
+		errors;
+	// Extract input settings.
+	unordered_map<string, string> input(processNode(getRoot()));
+	// Add filename (name of the plugin)
+	input.emplace(FILENAME, name);
+	string pluginType(input[NAME]);
+	extractedData.emplace(COLLECTION_INPUT, std::move(vector<unordered_map<string, string>>{input}));
+	vector<unordered_map<string, string>> inputMaps;
+	// This plugin types can have multiple sources.
+	if (pluginType == "Credits" or pluginType == "Actions" or pluginType == "Impulse" or pluginType == "Blinker") {
+
+		// Extract listenEvents.
+		unordered_set<string> listenEvents;
+		errors += processInputSources(pluginType, getRoot(), listenEvents);
+
+		// Extract maps.
+		tinyxml2::XMLElement* mapsNode = getRoot()->FirstChildElement("maps");
+		if (not mapsNode) {
+			errors += "Missing maps section for input plugin " + name + '\n';
+		}
+		else {
+			// Check for listenEvents, at this point everything is sanitized.
+			vector<unordered_map<string, string>> maps;
+			for (; mapsNode; mapsNode = mapsNode->NextSiblingElement("maps")) {
+				unordered_map<string, string> mapsNodeAttr(processNode(mapsNode));
+				if (not mapsNodeAttr.count("source")) {
+					errors += "Missing source attribute in maps for input plugin " + name + '\n';
+					continue;
+				}
+				const string mapName(mapsNodeAttr["source"]);
+				if (not listenEvents.count(mapName)) {
+					errors += "Maps does not match any listenEvent for input plugin " + name + '\n';
+					continue;
+				}
+				maps.emplace_back(std::move(mapsNodeAttr));
+				errors += processMaps(mapsNode, Defaults::createCommonUniqueId({name, mapName, COLLECTION_INPUT_MAPS}));
+			}
+			extractedData.emplace(Defaults::createCommonUniqueId({name, COLLECTION_INPUT_EVENTS}), std::move(maps));
+		}
 	}
+	else {
+		// Single source or malformed.
+		errors += processMaps(getRoot(), Defaults::createCommonUniqueId({name, COLLECTION_INPUT_MAPS}));
+	}
+
 	if (not errors.empty())
-		Message::displayError("Errors:\n" + errors);
+		throw Message("Errors:\n" + errors);
 }
 
-const string InputFile::processMaps(const string& inputName) {
+const string InputFile::processMaps(tinyxml2::XMLElement* mapsNode, const string& inputName) {
 
-	tinyxml2::XMLElement* mapNode = root->FirstChildElement("map");
-	if (not mapNode)
-		return "Missing input map section\n";
+	tinyxml2::XMLElement* mapNode = mapsNode->FirstChildElement("map");
+	if (not mapNode) return "Missing input map section\n";
 
 	string errors;
 	vector<unordered_map<string, string>> maps;
 	for (; mapNode; mapNode = mapNode->NextSiblingElement("map")) {
 		unordered_map<string, string> mapAttr = processNode(mapNode);
 		try {
-			checkAttributes({TYPE, TARGET, TRIGGER, COLOR, FILTER}, mapAttr, "input map");
+			checkAttributes({TYPE, TARGET, TRIGGER, COLOR, FILTER}, mapAttr, "input map for " + inputName);
 		}
 		catch (Message& e) {
 			errors += e.getMessage() + '\n';
 			continue;
 		}
-		maps.push_back(mapAttr);
+		maps.push_back(std::move(mapAttr));
 	}
-	extractedData.emplace(Defaults::createCommonUniqueId({inputName, COLLECTION_INPUT_MAPS}), maps);
+	extractedData.emplace(inputName, maps);
 	return errors;
 }
 
-const string InputFile::processLinkedMaps(const string& inputLinkedMaps, const string& inputName) {
-	if (!extractedData.count(inputName + COLLECTION_INPUT_MAPS)) {
-		return "";
-	}
-	// Chunk sections.
-	auto chunks(Defaults::explode(inputLinkedMaps, Defaults::ID_GROUP_SEPARATOR));
+const string InputFile::processInputSources(const string& inputName, tinyxml2::XMLElement* inputNode, unordered_set<string>& listenEvents) {
+	// Check for listenEvents.
+	tinyxml2::XMLElement* listenEventsNode(inputNode->FirstChildElement("listenEvents"));
+	if (not listenEventsNode) return "Missing listenEvents for input plugin " + inputName + '\n';
 	string errors;
-	vector<unordered_map<string, string>> linkedMaps;
-	for (auto& chunk : chunks) {
-		if (chunk.empty()) {
-			errors += "Empty linked map for " + inputName;
+	listenEventsNode = listenEventsNode->FirstChildElement("listenEvent");
+	for (; listenEventsNode; listenEventsNode = listenEventsNode->NextSiblingElement("listenEvent")) {
+		unordered_map<string, string> listenEventsAttr(processNode(listenEventsNode));
+		if (not listenEventsAttr.count(NAME)) {
+			errors += "Missing name attribute in listenEvents for input plugin " + inputName + '\n';
 			continue;
 		}
-		vector<string> linkedMapTrigger;
-		// Find the details using the trigger in the extracted input maps.
-		for (auto& trigger : Defaults::explode(chunk, Defaults::ID_SEPARATOR)) {
-			Defaults::trim(trigger);
-			if (trigger.empty()) {
-				errors += "Empty item name in linked map for " + inputName;
-				continue;
-			}
-			// Loop the input maps array until the trigger is sought.
-			for (const auto& im : extractedData.at(inputName + COLLECTION_INPUT_MAPS)) {
-				if (im.count(TYPE) and im.count(TARGET) and im.count(TRIGGER) and im.at(TRIGGER) == trigger) {
-					// this should be trigger30type30name
-					linkedMapTrigger.emplace_back(Defaults::createCommonUniqueId({
-						trigger,
-						im.at(TYPE) + " " + im.at(TARGET)
-					}));
-					break;
-				}
-			}
-		}
-		if (linkedMapTrigger.size()) {
-			// this should be trigger30type30name31trigger30type30name31trigger30type30name31etc
-			linkedMaps.emplace_back(unordered_map<string, string>{{NAME, Defaults::implode(linkedMapTrigger, Defaults::RECORD_SEPARATOR)}});
-		}
+		listenEvents.insert(std::move(listenEventsAttr[NAME]));
 	}
-	extractedData.emplace(Defaults::createCommonUniqueId({inputName, COLLECTION_INPUT_LINKED_MAPS}), std::move(linkedMaps));
+	if (listenEvents.empty()) return "Empty listenEvents section for input plugin " + inputName + '\n';
 	return errors;
 }
