@@ -44,16 +44,11 @@ public:
 
 	virtual ~Device();
 
+	void reset() override;
 	const string createPrettyName() const override;
-
 	const string createUniqueId() const override;
-
 	const string getCssClass() const override;
-
-	void destroy() override;
-
 	void activate() override;
-
 	const string toXML() const override;
 
 protected:

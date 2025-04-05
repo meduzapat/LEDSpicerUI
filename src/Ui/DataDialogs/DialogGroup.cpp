@@ -39,6 +39,7 @@ DialogGroup* DialogGroup::getInstance() {
 DialogGroup::DialogGroup(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
 	DialogForm(obj, builder)
 {
+
 	// Connect Groups Box and button.
 	builder->get_widget_derived("BoxGroups", box);
 	builder->get_widget("BtnAddGroup",       btnAdd);
@@ -67,7 +68,9 @@ DialogGroup::DialogGroup(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& 
 	Gtk::Button* btnAddElements = nullptr;
 	builder->get_widget("BtnAddGroupElements", btnAddElements);
 	btnAddElements->signal_clicked().connect([&]() {
-		DialogSelect::getInstance()->RunDialog();
+		DialogSelect::getInstance()->setSettings(groupElementsSetting);
+		DialogSelect::getInstance()->refresh();
+		DialogSelect::getInstance()->runSelection();
 	});
 
 	btnGenerateGroupName->signal_clicked().connect([=]() {
@@ -82,38 +85,35 @@ DialogGroup::DialogGroup(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& 
 }
 
 void DialogGroup::load(XMLHelper* values) {
+	DialogSelect::getInstance()->setSettings(groupElementsSetting);
 	createItems(values->getData(COLLECTION_GROUP), values);
 }
 
 void DialogGroup::createSubItems(XMLHelper* values) {
-	DataDialogs::DialogSelect::getInstance()->load(values);
+	DialogSelect::getInstance()->load(values, COLLECTION_GROUP);
+}
+
+LEDSpicerUI::Ui::Storage::CollectionHandler* DialogGroup::getCollectionHandler() const {
+	return LEDSpicerUI::Ui::Storage::CollectionHandler::getInstance(COLLECTION_GROUP);
 }
 
 void DialogGroup::clearForm() {
 	inputGroupName->set_text("");
 	DialogColors::getInstance()->colorizeButton(btnGroupDefaultColor, NO_COLOR);
-	// This need to be run before activate.
-	DataDialogs::DialogSelect::getInstance()->setDestinationSettings(
-		boxElements,
-		COLLECTION_ELEMENT,
-		"element",
-		COLLECTION_GROUP,
-		DialogSelect::DELETER
-	);
 }
 
 void DialogGroup::isValid() const {
 	string name(createUniqueId());
 	if (name.empty()) {
-		if (mode != Modes::LOAD)
+		if (action != Actions::LOAD)
 			inputGroupName->grab_focus();
 		throw Message("Invalid group name.");
 	}
 
 	// If is not edit, or data is not the same, check for dupes.
-	if (groupCollectionHandler->isUsed(name)) {
-		if (mode != Modes::EDIT or currentData->createUniqueId() != name) {
-			if (mode != Modes::LOAD)
+	if (getCollectionHandler()->isIdSet(name)) {
+		if (action != Actions::EDIT or currentData->createUniqueId() != name) {
+			if (action != Actions::LOAD)
 				inputGroupName->grab_focus();
 			throw Message("Group with name " + name + " already exist.");
 		}
@@ -121,15 +121,6 @@ void DialogGroup::isValid() const {
 }
 
 void DialogGroup::storeData() {
-
-	if (mode == Modes::EDIT)
-		groupCollectionHandler->replace(currentData->createUniqueId(), createUniqueId());
-	else
-		groupCollectionHandler->add(createUniqueId());
-
-	// This will clean any anomaly.
-	currentData->wipe();
-
 	currentData->setValue(NAME, inputGroupName->get_text());
 	if (not btnGroupDefaultColor->get_tooltip_text().empty()) {
 		currentData->setValue(DEFAULT_COLOR, btnGroupDefaultColor->get_tooltip_text());
@@ -143,6 +134,8 @@ void DialogGroup::retrieveData() {
 		btnGroupDefaultColor,
 		currentData->getValue(DEFAULT_COLOR).empty() ? NO_COLOR : currentData->getValue(DEFAULT_COLOR)
 	);
+	// Populate the items.
+	DataDialogs::DialogSelect::getInstance()->refresh();
 }
 
 string const DialogGroup::createUniqueId() const {
@@ -153,6 +146,6 @@ const string DialogGroup::getType() const {
 	return "group";
 }
 
-LEDSpicerUI::Ui::Storage::Data* DialogGroup::getData(unordered_map<string, string>& rawData) {
+LEDSpicerUI::Ui::Storage::Data* DialogGroup::createData(StringUMap& rawData) {
 	return new Storage::Group(rawData);
 }

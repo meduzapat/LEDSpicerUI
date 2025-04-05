@@ -30,17 +30,17 @@ InputFile::InputFile(const string& inputFile, const string& projectRoot) : XMLHe
 		name(Defaults::extractName(inputFile, projectRoot)),
 		errors;
 	// Extract input settings.
-	unordered_map<string, string> input(processNode(getRoot()));
+	StringUMap input(processNode(getRoot()));
 	// Add filename (name of the plugin)
 	input.emplace(FILENAME, name);
 	string pluginType(input[NAME]);
-	extractedData.emplace(COLLECTION_INPUT, std::move(vector<unordered_map<string, string>>{input}));
-	vector<unordered_map<string, string>> inputMaps;
+	extractedData.emplace(COLLECTION_INPUT, std::move(StringUMapVector{input}));
+	StringUMapVector inputMaps;
 	// This plugin types can have multiple sources.
 	if (pluginType == "Credits" or pluginType == "Actions" or pluginType == "Impulse" or pluginType == "Blinker") {
 
 		// Extract listenEvents.
-		unordered_set<string> listenEvents;
+		StringUSet listenEvents;
 		errors += processInputSources(pluginType, getRoot(), listenEvents);
 
 		// Extract maps.
@@ -50,15 +50,15 @@ InputFile::InputFile(const string& inputFile, const string& projectRoot) : XMLHe
 		}
 		else {
 			// Check for listenEvents, at this point everything is sanitized.
-			vector<unordered_map<string, string>> maps;
+			StringUMapVector maps;
 			for (; mapsNode; mapsNode = mapsNode->NextSiblingElement("maps")) {
-				unordered_map<string, string> mapsNodeAttr(processNode(mapsNode));
-				if (not mapsNodeAttr.count("source")) {
+				StringUMap mapsNodeAttr(processNode(mapsNode));
+				if (mapsNodeAttr.find("source") == mapsNodeAttr.end()) {
 					errors += "Missing source attribute in maps for input plugin " + name + '\n';
 					continue;
 				}
 				const string mapName(mapsNodeAttr["source"]);
-				if (not listenEvents.count(mapName)) {
+				if (listenEvents.find(mapName) == listenEvents.end()) {
 					errors += "Maps does not match any listenEvent for input plugin " + name + '\n';
 					continue;
 				}
@@ -83,9 +83,9 @@ const string InputFile::processMaps(tinyxml2::XMLElement* mapsNode, const string
 	if (not mapNode) return "Missing input map section\n";
 
 	string errors;
-	vector<unordered_map<string, string>> maps;
+	StringUMapVector maps;
 	for (; mapNode; mapNode = mapNode->NextSiblingElement("map")) {
-		unordered_map<string, string> mapAttr = processNode(mapNode);
+		StringUMap mapAttr = processNode(mapNode);
 		try {
 			checkAttributes({TYPE, TARGET, TRIGGER, COLOR, FILTER}, mapAttr, "input map for " + inputName);
 		}
@@ -99,15 +99,15 @@ const string InputFile::processMaps(tinyxml2::XMLElement* mapsNode, const string
 	return errors;
 }
 
-const string InputFile::processInputSources(const string& inputName, tinyxml2::XMLElement* inputNode, unordered_set<string>& listenEvents) {
+const string InputFile::processInputSources(const string& inputName, tinyxml2::XMLElement* inputNode, StringUSet& listenEvents) {
 	// Check for listenEvents.
 	tinyxml2::XMLElement* listenEventsNode(inputNode->FirstChildElement("listenEvents"));
 	if (not listenEventsNode) return "Missing listenEvents for input plugin " + inputName + '\n';
 	string errors;
 	listenEventsNode = listenEventsNode->FirstChildElement("listenEvent");
 	for (; listenEventsNode; listenEventsNode = listenEventsNode->NextSiblingElement("listenEvent")) {
-		unordered_map<string, string> listenEventsAttr(processNode(listenEventsNode));
-		if (not listenEventsAttr.count(NAME)) {
+		StringUMap listenEventsAttr(processNode(listenEventsNode));
+		if (listenEventsAttr.find(NAME) == listenEventsAttr.end()) {
 			errors += "Missing name attribute in listenEvents for input plugin " + inputName + '\n';
 			continue;
 		}

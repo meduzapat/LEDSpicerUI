@@ -30,10 +30,10 @@ TEST(XMLHelperTest, ProcessNodeReturnsCorrectMap) {
 TEST(XMLHelperTest, ProcessNodeByName) {
 	// Success case - test 'layout' node under root
 	XMLHelper helper(PACKAGE_SAMPLES_DIR "data/config.xml", "Configuration");
-	unordered_map<string, string> expected = {
+	StringUMap expected = {
 		{"defaultProfile", "default"}
 	};
-	unordered_map<string, string> nodeParam;
+	StringUMap nodeParam;
 	EXPECT_NO_THROW(nodeParam = helper.processNode("layout"));
 	EXPECT_EQ(nodeParam.size(), expected.size()) << "Layout node attribute count mismatch";
 	EXPECT_EQ(nodeParam["defaultProfile"], "default") << "defaultProfile value mismatch";
@@ -51,8 +51,8 @@ TEST(XMLHelperTest, GetRoot) {
 
 TEST(XMLHelperTest, CheckAttributes) {
 	// Success case - all attributes present
-	vector<string> attributeList = {"name", "type", "id"};
-	unordered_map<string, string> subjects = {
+	StringVector attributeList = {"name", "type", "id"};
+	StringUMap subjects = {
 		{"name",  "Test"},
 		{"type",  "Button"},
 		{"id",    "1"},
@@ -61,15 +61,15 @@ TEST(XMLHelperTest, CheckAttributes) {
 	EXPECT_NO_THROW(XMLHelper::checkAttributes(attributeList, subjects, "testNode"));
 
 	// Failure case - missing 'type'
-	unordered_map<string, string> incompleteSubjects = {
+	StringUMap incompleteSubjects = {
 		{"name", "Test"},
-		{"id", "1"}
+		{"id",   "1"}
 	};
 	EXPECT_THROW(XMLHelper::checkAttributes(attributeList, incompleteSubjects, "testNode"), Message);
 }
 
 TEST(XMLHelperTest, ValueOf) {
-	unordered_map<string, string> values = {
+	StringUMap values = {
 		{"name", "Test"},
 		{"type", "Button"}
 	};
@@ -86,7 +86,7 @@ TEST(XMLHelperTest, ValueOf) {
 
 TEST(XMLHelperTest, ToXML) {
 	// Basic case - map with attributes
-	unordered_map<string, string> values = {
+	StringUMap values = {
 		{"name", "Test"},
 		{"type", "Button"},
 		{"id", "1"}
@@ -96,7 +96,7 @@ TEST(XMLHelperTest, ToXML) {
 	EXPECT_EQ(result, expected) << "XML string should match expected format";
 
 	// Empty map
-	unordered_map<string, string> emptyValues;
+	StringUMap emptyValues;
 	EXPECT_EQ(XMLHelper::toXML(emptyValues), "") << "Empty map should return empty string";
 }
 
@@ -104,7 +104,7 @@ TEST(XMLHelperTest, GetData) {
 	XMLHelper helper(PACKAGE_SAMPLES_DIR "data/config.xml", "Configuration");
 
 	// Empty case - unpopulated data
-	vector<unordered_map<string, string>>& data = helper.getData("devices");
+	StringUMapVector& data = helper.getData("devices");
 	EXPECT_TRUE(data.empty()) << "Unpopulated data should return empty vector";
 }
 

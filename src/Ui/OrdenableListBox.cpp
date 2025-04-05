@@ -88,7 +88,7 @@ void OrdenableListBox::wipe() {
 	}
 }
 
-void OrdenableListBox::sortAndMark(vector<string> values) {
+void OrdenableListBox::sortAndMark(StringVector values) {
 	unordered_map<string, Gtk::ListBoxRow*> rows;
 	// move items into temp container
 	for (auto child : get_children()) {
@@ -109,8 +109,8 @@ void OrdenableListBox::sortAndMark(vector<string> values) {
 	}
 }
 
-vector<string> OrdenableListBox::getCheckedValues() {
-	vector<string> values;
+StringVector OrdenableListBox::getCheckedValues() {
+	StringVector values;
 	for (auto child : get_children()) {
 		auto boxChild(dynamic_cast<Gtk::ListBoxRow*>(child));
 		if (dynamic_cast<Gtk::CheckButton*>(boxChild->get_child())->get_active())

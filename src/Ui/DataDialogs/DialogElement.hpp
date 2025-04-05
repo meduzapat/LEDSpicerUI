@@ -26,11 +26,6 @@
 #ifndef UI_DIALOGELEMENT_HPP_
 #define UI_DIALOGELEMENT_HPP_ 1
 
-	const int MAX_COLUMNS = 20;
-	const int MIN_COLUMNS = 10;
-
-#define elementHandler Storage::CollectionHandler::getInstance(COLLECTION_ELEMENT)
-
 namespace LEDSpicerUI::Ui::DataDialogs {
 
 /**
@@ -43,35 +38,23 @@ class DialogElement: public DialogForm {
 public:
 
 	/// Tab numbers for elements LED modes.
-	enum class tabIndex : uint8_t {RGB, Strip, sRGB, Single, mRGB};
+	enum tabIndex : uint8_t {RGB, Strip, sRGB, Single, mRGB};
+
+	static constexpr const int MAX_COLUMNS = 20;
+	static constexpr const int MIN_COLUMNS = 10;
 
 	DialogElement() = delete;
 
 	virtual ~DialogElement() = default;
 
-	/**
-	 * Instantiate an object of its class.
-	 * @param builder
-	 * @param gladeID
-	 */
 	static void initialize(Glib::RefPtr<Gtk::Builder> const &builder);
-
-	/**
-	 * Return an instance of this class.
-	 * @return
-	 */
 	static DialogElement* getInstance();
-
 	void load(XMLHelper* values) override;
-
+	Storage::CollectionHandler* getCollectionHandler() const override;
 	void clearForm() override;
-
 	void isValid() const override;
-
 	void storeData() override;
-
 	void retrieveData() override;
-
 	const string createUniqueId() const override;
 
 	/**
@@ -81,27 +64,11 @@ public:
 	void changeNumberOfPins(const uint16_t newSize);
 
 	/**
-	 * Set special elements rules based on device.
-	 * @param isMono
-	 * @param canRGB
-	 * @param canStrip
-	 */
-	void setRules(bool isMono, bool canRGB, bool canStrip);
-
-	/**
 	 * Redraw the pin box.
 	 */
 	void drawPins();
 
 protected:
-
-	enum tabBit : uint8_t {
-		RGB    = 1 << static_cast<uint8_t>(tabIndex::RGB),
-		Strip  = 1 << static_cast<uint8_t>(tabIndex::Strip),
-		sRGB   = 1 << static_cast<uint8_t>(tabIndex::sRGB),
-		Single = 1 << static_cast<uint8_t>(tabIndex::Single),
-		mRGB   = 1 << static_cast<uint8_t>(tabIndex::mRGB)
-	};
 
 	/// Self instance.
 	static DialogElement* instance;
@@ -142,6 +109,8 @@ protected:
 	Gtk::Scale* brightness = nullptr;
 
 	Gtk::ComboBox
+		// Device name.
+		* comboBoxDevices  = nullptr,
 		// Continuous RGB.
 		* comboBoxRGBRGB   = nullptr,
 		// LED Strip.
@@ -149,18 +118,13 @@ protected:
 		// Multi RGB
 		* comboBoxRGBMRGB  = nullptr;
 
-	bool
-		isMono   = false,
-		canRGB   = false,
-		canStrip = false;
-
 	DialogElement(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
 
 	void clearFormConditinal(uint8_t flags);
 
 	const string getType() const override;
 
-	Storage::Data* getData(unordered_map<string, string>& rawData) override;
+	Storage::Data* createData(StringUMap& rawData) override;
 
 	void addButtons(Storage::BoxButton& boxButton) override;
 
@@ -181,9 +145,9 @@ protected:
 
 	void drawPins(vector<Gtk::Label*>& labels);
 
-	void onSwitchPage(Gtk::Widget* page, guint page_num);
-
 	void findElementByPin(uint16_t finder, unordered_set<Storage::BoxButton*>& elementsFound);
+
+	void onSwitchPage(Gtk::Widget*, uint pageNum);
 };
 
 } /* namespace */

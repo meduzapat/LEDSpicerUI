@@ -25,8 +25,8 @@
 using namespace LEDSpicerUI::Ui::Storage;
 
 InputMap::~InputMap() {
-	if (not getValue(TRIGGER).empty()) {
-		CollectionHandler::getInstance(COLLECTION_INPUT_MAPS)->remove(createUniqueId());
+	if (not getValue(getPrimaryKey()).empty()) {
+		CollectionHandler::getInstance(COLLECTION_INPUT_MAPS)->remove(this);
 		// Redraw the box, because the collection maybe deleted elements from linked maps.
 		auto i(DataDialogs::DialogInputLinkMaps::getInstance());
 		// When shutting down this will be null.
@@ -36,11 +36,7 @@ InputMap::~InputMap() {
 }
 
 const string InputMap::createPrettyName() const {
-	return "[" + fieldsData.at(TRIGGER) + "] " + fieldsData.at(TYPE) + " " + fieldsData.at(TARGET);
-}
-
-const string InputMap::createUniqueId() const {
-	return Defaults::createCommonUniqueId({getValue(TRIGGER)});
+	return "[" + fieldsData.at(getPrimaryKey()) + "] " + fieldsData.at(TYPE) + " " + fieldsData.at(TARGET);
 }
 
 const string InputMap::getCssClass() const {
@@ -50,3 +46,8 @@ const string InputMap::getCssClass() const {
 const string InputMap::toXML() const {
 	return createOpeningXML("map", fieldsData, ignored, true);
 }
+
+const string InputMap::getPrimaryKey() const {
+	return TRIGGER;
+}
+

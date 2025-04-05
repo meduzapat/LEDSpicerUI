@@ -43,7 +43,7 @@ DialogRestrictorMap::DialogRestrictorMap(BaseObjectType* obj, const Glib::RefPtr
 	builder->get_widget_derived("BoxRestrictorMappings", box);
 	builder->get_widget("BtnAddRestrictorMap",           btnAdd);
 	builder->get_widget("BtnApplyRestrictorMap",         btnApply);
-	btnAdd->signal_clicked().connect(sigc::mem_fun(*this, &DialogRestrictorMap::onAddClicked));
+	setSignalAdd();
 	setSignalApply();
 
 	builder->get_widget("ComboboxRestrictorPlayer",    player);
@@ -58,7 +58,11 @@ DialogRestrictorMap::DialogRestrictorMap(BaseObjectType* obj, const Glib::RefPtr
 }
 
 void DialogRestrictorMap::load(XMLHelper* values) {
-	createItems(values->getData(Defaults::createCommonUniqueId({owner->createUniqueId(), COLLECTION_RESTRICTOR_MAP})), values);
+	createItems(values->getData(Defaults::createCommonUniqueId({ownerData->createUniqueId(), COLLECTION_RESTRICTOR_MAP})), values);
+}
+
+LEDSpicerUI::Ui::Storage::CollectionHandler* DialogRestrictorMap::getCollectionHandler() const {
+	return LEDSpicerUI::Ui::Storage::CollectionHandler::getInstance(COLLECTION_RESTRICTOR_MAP);
 }
 
 void DialogRestrictorMap::clearForm() {
@@ -85,23 +89,14 @@ void DialogRestrictorMap::isValid() const {
 	if (Defaults::isMulti(comboBoxRestrictors->get_active_id()) and interface->get_active_id().empty()) {
 		throw Message("Select a hardware interface.");
 	}
-	if (mode != Modes::EDIT or newPlayer != currentData->createUniqueId()) {
-		if (playerCombinations->isUsed(newPlayer)) {
+	if (action != Actions::EDIT or newPlayer != currentData->createUniqueId()) {
+		if (getCollectionHandler()->isIdSet(newPlayer)) {
 			throw Message("That player - joystick combination is already in use.");
 		}
 	}
 }
 
 void DialogRestrictorMap::storeData() {
-
-	if (mode == Modes::EDIT) {
-		playerCombinations->replace(currentData->createUniqueId(), createUniqueId());
-	}
-	else {
-		playerCombinations->add(createUniqueId());
-	}
-
-	currentData->wipe();
 
 	currentData->setValue(PLAYER,   player->get_active_id());
 	currentData->setValue(JOYSTICK, joystick->get_active_id());
@@ -124,8 +119,8 @@ string const DialogRestrictorMap::createUniqueId() const {
 }
 
 bool DialogRestrictorMap::checkAvailableInterfaces() const {
-	// unknown amount due to unknown restrictor.
-	if (not Defaults::restrictorsInfo.count(comboBoxRestrictors->get_active_id())) {
+	// Unknown amount due to unknown restrictor.
+	if (Defaults::restrictorsInfo.find(comboBoxRestrictors->get_active_id()) == Defaults::restrictorsInfo.end()) {
 		return true;
 	}
 	// Allowed interfaces.
@@ -139,7 +134,7 @@ const string DialogRestrictorMap::getType() const {
 	return "Player Mapping";
 }
 
-LEDSpicerUI::Ui::Storage::Data* DialogRestrictorMap::getData(unordered_map<string, string>& rawData) {
+LEDSpicerUI::Ui::Storage::Data* DialogRestrictorMap::createData(StringUMap& rawData) {
 	return new Storage::RestrictorMap(rawData);
 }
 
@@ -150,7 +145,7 @@ void DialogRestrictorMap::populateInterfacesCombobox() {
 		Defaults::restrictorsInfo.at(name).interfaces,
 		[&](const string& id) {
 			for (const auto& i : *items) {
-				if (i.getData()->getValue(RESTRICTOR_INTERFACE) == id)
+				if (i->getData()->getValue(RESTRICTOR_INTERFACE) == id)
 					return true;
 			}
 			return false;

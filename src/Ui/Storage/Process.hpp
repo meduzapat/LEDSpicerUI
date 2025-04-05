@@ -43,10 +43,11 @@ public:
 
 	const string createPrettyName() const override;
 
-	const string createUniqueId() const override;
-
 	const string toXML() const override;
 
+protected:
+
+	const string getPrimaryKey() const override;
 };
 
 } /* namespace */

@@ -26,16 +26,8 @@ using namespace LEDSpicerUI::Ui::Storage;
 
 Element::~Element() {
 	if (not getValue(NAME).empty()) {
-		CollectionHandler::getInstance(COLLECTION_ELEMENT)->remove(createUniqueId());
+		CollectionHandler::getInstance(COLLECTION_ELEMENT)->remove(this);
 	}
-}
-
-const string Element::createPrettyName() const {
-	return fieldsData.at(NAME);
-}
-
-const string Element::createUniqueId() const {
-	return Defaults::createCommonUniqueId({getValue(NAME)});
 }
 
 const string Element::getCssClass() const {

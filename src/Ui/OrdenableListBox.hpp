@@ -50,13 +50,13 @@ public:
 	 * for listbox with checkboxes, will sort and mark the checkboxes based on the array.
 	 * @param values the list of values with the order to set.
 	 */
-	void sortAndMark(vector<string> values);
+	void sortAndMark(StringVector values);
 
 	/**
 	 * for listbox with checkboxes.
 	 * @return Returns a list of selected checkbox.
 	 */
-	vector<string> getCheckedValues();
+	StringVector getCheckedValues();
 
 };
 

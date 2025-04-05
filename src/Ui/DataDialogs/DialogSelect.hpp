@@ -20,9 +20,11 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DialogForm.hpp"
+#include "DialogColors.hpp"
 #include "Storage/CollectionHandler.hpp"
-#include "Storage/NameOnly.hpp"
+#include "Storage/Selection.hpp"
+#include "Storage/Link.hpp"
+
 
 #ifndef DIALOGSELECT_HPP_
 #define DIALOGSELECT_HPP_ 1
@@ -32,109 +34,135 @@ namespace LEDSpicerUI::Ui::DataDialogs {
 /**
  * LEDSpicerUI::Ui::DialogSelect
  * Handles the selection of already created items by other dialogs.
+ * Will allow to select and populate a box with selections from other collections.
+ * This dialog differs from the rest because it does not store any data itself,
+ * but only allows to move data from one place to another using links.
+ * It also allows owners with multiple sources to be used.
  */
-class DialogSelect: public DialogForm {
+class DialogSelect: public Gtk::Dialog {
 
 	friend class Gtk::Builder;
 
 public:
 
+	using StringBoxButtonCollectionUMap = unordered_map<string, Storage::BoxButtonCollection*>;
+	using CollectionHandler = LEDSpicerUI::Ui::Storage::CollectionHandler;
+
+	/// Flag indicating a delete button.
+	static constexpr const uint8_t BUTTON_DELETER = 0b00000001;
+	/// Flag indicating a default color picker button.
+	static constexpr const uint8_t BUTTON_COLORER = 0b00000010;
+	/// Flag indicating an edit button.
+	static constexpr const uint8_t BUTTON_EDITER  = 0b00000100;
+
 	/**
-	 * ButtonFlags Button Flags
-	 *
-	 * Constants representing flags for different button types.
-	 * @{
+	 * Holds the rules for the selector.
 	 */
-	static const uint8_t
-		/// Flag indicating a delete button.
-		DELETER = 1,
-		/// Flag indicating a default color picker button.
-		COLORER = 2,
-		/// Flag indicating an edit button.
-		EDITER  = 4;
-	/** @} */
+	struct SettingRequest {
+		/// The box where the selectables are handled.
+		OrdenableFlowBox*& workingBox;
+		const string
+			/// The key that will contain the selection inside link (ex: name).
+			parameter,
+			/// The type of selection, used later to create the node that will be used in the XML (ex: element).
+			type,
+			/// The Collection to do lookups for already existing items (ex: elements).
+			sourceCollection;
+		/// The buttons to add to the selectable items.
+		const uint8_t buttons;
+	};
 
 	DialogSelect() = delete;
 
 	virtual ~DialogSelect() = default;
 
-	void RunDialog();
+	/**
+	 * Sets the item destinations to be used by the running setting.
+	 * @param itemCollections
+	 * @param caller
+	 */
+	void setDestinations(const StringBoxButtonCollectionUMap& itemCollections, const Storage::Data* caller);
 
 	/**
-	 * Instantiate an object of its class.
-	 * @param builder
-	 * @param gladeID
+	 * Prepares the dialog to be used.
+	 * @param setting
 	 */
+	void setSettings(const SettingRequest& setting);
+
+	/**
+	 * Refresh the destination box.
+	 */
+	void refresh();
+
+	/**
+	 * Sort the items by the box.
+	 */
+	void reindex();
+
+	/**
+	 * Executes the dialog with a set of rules.
+	 * @param setting
+	 */
+	void runSelection();
+
 	static void initialize(Glib::RefPtr<Gtk::Builder> const &builder);
-
-	/**
-	 * Return an instance of this class.
-	 * @return
-	 */
 	static DialogSelect* getInstance();
-
-	void load(XMLHelper* values) override;
-
-	void setDestinationSettings(
-		OrdenableFlowBox* box,
-		const string& type,
-		const string& node,
-		const string& collection,
-		uint8_t buttons
-	);
-
-	void clearForm() override {};
-
-	void isValid() const override;
-
-	void storeData() override {}
-
-	void retrieveData() override {}
-
-	const string createUniqueId() const override {return "";}
+	void load(XMLHelper* values, const string& identifier);
 
 	/**
-	 * @return The number of selected boxes.
+	 * @return The number of selected items.
 	 */
 	size_t getNumberOfSelections() const;
 
 	/**
-	 * @return The number of available boxes to select from.
+	 * @return The number of available items to select from.
 	 */
 	size_t getNumberOfSelectables() const;
+
+	/**
+	 * @return The current setting's collection.
+	 */
+	Storage::CollectionHandler* getCollection() const;
+
+	/**
+	 * @return The current item collection based on the settings.
+	 */
+	Storage::BoxButtonCollection* getItemCollection() const;
 
 protected:
 
 	/// Self instance.
 	static DialogSelect* instance;
 
+	Gtk::Button
+		/// Open this form to create new Data (item), its located in the calling dialog.
+		* btnAdd = nullptr,
+		/// Store changes.
+		* btnApply = nullptr;
+
 	/// Box where the selectables are displayed.
 	Gtk::FlowBox* boxAll = nullptr;
 
-	string
-		/// The current form type.
-		type,
-		/// The node for XML.
-		node,
-		/// The current Collection name.
-		collection;
+	/// Pointer to the current settings.
+	const SettingRequest* setting = nullptr;
 
-	/// List of buttons to assign to the selected buttons.
-	uint8_t buttons = 0;
+	/// The data record that called this Dialog.
+	const Storage::Data* caller = nullptr;
+
+	/// For storage with multiple items.
+	StringBoxButtonCollectionUMap itemCollections;
 
 	DialogSelect(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
 
-	const string getType() const override;
+	const string getType() const;
 
-	Storage::Data* getData(unordered_map<string, string>& rawData) override;
+	Storage::Data* createData(StringUMap& rawData) ;
 
 	/**
-	 * Creates a color picket button.
-	 * @param boxButton
+	 * Decorates the boxButton with the necessary buttons.
+	 * Replaces the default buttons with the ones for this specialized dialog.
 	 */
-	void createColorButton(Storage::BoxButton& boxButton);
-
-	void addButtons(Storage::BoxButton& boxButton) override;
+	void addButtons(Storage::BoxButton& boxButton);
 
 	/**
 	 * Populates all the items and selects the ones in the group.

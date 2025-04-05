@@ -40,6 +40,8 @@ DialogRestrictor::DialogRestrictor(BaseObjectType* obj, const Glib::RefPtr<Gtk::
 	DialogForm(obj, builder)
 {
 
+	childDialog = DialogRestrictorMap::getInstance();
+
 	// Connect Restrictor Box and buttons.
 	builder->get_widget_derived("BoxRestrictors", box);
 	builder->get_widget("BtnAddRestrictor",       btnAdd);
@@ -103,12 +105,11 @@ DialogRestrictor::DialogRestrictor(BaseObjectType* obj, const Glib::RefPtr<Gtk::
 		const string currentName(currentData->getValue(NAME));
 		// Changed Restriction option.
 		if (currentName.empty()) {
-			clearForm();
+			recreateData();
 		}
-		else if (mode != Modes::LOAD and name != currentName) {
+		else if (name != currentName) {
 			if (Message::ask("Are you sure you want to change the restrictor? all settings will be loss") == Gtk::RESPONSE_YES) {
-				currentData->destroy();
-				clearForm();
+				recreateData();
 			}
 			else {
 				comboBoxRestrictors->set_active_id(previousName);
@@ -133,7 +134,7 @@ DialogRestrictor::DialogRestrictor(BaseObjectType* obj, const Glib::RefPtr<Gtk::
 				idListstore,
 				Defaults::restrictorsInfo.at(name).maxIds,
 				[=](const string& id) {
-					return restrictorsHandler->isUsed(Defaults::createHardwareUniqueId({{NAME, name}, {ID, id}}, false));
+					return getCollectionHandler()->isIdSet(Defaults::createHardwareUniqueId({{NAME, name}, {ID, id}}, false));
 				},
 				"Restrictor Number",
 				"Hardware #"
@@ -152,7 +153,7 @@ DialogRestrictor::DialogRestrictor(BaseObjectType* obj, const Glib::RefPtr<Gtk::
 		briefRestrictor->set_label(Defaults::restrictorsInfo.at(name).brief);
 		btnApply->set_sensitive(true);
 		// Disable add interface button if there no more interfaces left.
-		btnAddRestrictorMap->set_sensitive(DataDialogs::DialogRestrictorMap::getInstance()->getValues().size() < Defaults::restrictorsInfo.at(comboBoxRestrictors->get_active_id()).interfaces);
+		btnAddRestrictorMap->set_sensitive(childDialog->getValues().size() < Defaults::restrictorsInfo.at(comboBoxRestrictors->get_active_id()).interfaces);
 	});
 }
 
@@ -161,7 +162,11 @@ void DialogRestrictor::load(XMLHelper* values) {
 }
 
 void DialogRestrictor::createSubItems(XMLHelper* values) {
-	DialogRestrictorMap::getInstance()->load(values);
+	childDialog->load(values);
+}
+
+LEDSpicerUI::Ui::Storage::CollectionHandler* DialogRestrictor::getCollectionHandler() const {
+	return LEDSpicerUI::Ui::Storage::CollectionHandler::getInstance(COLLECTION_RESTRICTORS);
 }
 
 void DialogRestrictor::resetForm() {
@@ -215,32 +220,22 @@ void DialogRestrictor::isValid() const {
 	string
 		newName(createUniqueId()),
 		hardwareName("Hardware " + Defaults::restrictorsInfo.at(name).name );
-	if (mode == Modes::EDIT) {
+	if (action == Actions::EDIT) {
 		checkDupe = (currentData->createUniqueId() != newName);
 	}
 
-	if (Defaults::isIdUser(name, false) and checkDupe and restrictorsHandler->isUsed(newName)) {
+	if (Defaults::isIdUser(name, false) and checkDupe and getCollectionHandler()->isIdSet(newName)) {
 		throw Message(hardwareName + " ID " + id + " already exists.");
 	}
-	if (Defaults::isSerial(name, false) and checkDupe and restrictorsHandler->isUsed(newName)) {
+	if (Defaults::isSerial(name, false) and checkDupe and getCollectionHandler()->isIdSet(newName)) {
 		throw Message(hardwareName + " that connects to " + (port.empty() ? "<autodetect>" : port) + " already exists.");
 	}
-	if (checkDupe and restrictorsHandler->isUsed(newName)) {
+	if (checkDupe and getCollectionHandler()->isIdSet(newName)) {
 		throw Message(hardwareName + " already exists.");
 	}
 }
 
 void DialogRestrictor::storeData() {
-
-	if (mode == Modes::EDIT) {
-		restrictorsHandler->replace(currentData->createUniqueId(), createUniqueId());
-	}
-	else {
-		restrictorsHandler->add(createUniqueId());
-	}
-
-	// This will clean any anomaly.
-	currentData->wipe();
 
 	const string name(comboBoxRestrictors->get_active_id());
 
@@ -305,14 +300,20 @@ const string DialogRestrictor::getType() const {
 	return "restrictor";
 }
 
-LEDSpicerUI::Ui::Storage::Data* DialogRestrictor::getData(unordered_map<string, string>& rawData) {
+LEDSpicerUI::Ui::Storage::Data* DialogRestrictor::createData(StringUMap& rawData) {
 	return new Storage::Restrictor(rawData);
+}
+
+void DialogRestrictor::recreateData() {
+	currentData->reset();
+	clearForm();
+	refreshBox();
 }
 
 void DialogRestrictor::markRestrictorUsed() {
 	for (auto& ri : Defaults::restrictorsInfo) {
 		// count used devices.
-		const uint total    = restrictorsHandler->count(ri.first);
+		const uint  total    = getCollectionHandler()->countByKey(NAME, ri.first);
 		const auto& children = restrictorsListstore->children();
 
 		for (auto iter = children.begin(); iter != children.end(); ++iter) {

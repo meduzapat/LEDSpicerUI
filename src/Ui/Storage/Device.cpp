@@ -26,8 +26,16 @@ using namespace LEDSpicerUI::Ui::Storage;
 
 Device::~Device() {
 	if (not fieldsData.empty()) {
-		CollectionHandler::getInstance(COLLECTION_DEVICES)->remove(createUniqueId());
+		CollectionHandler::getInstance(COLLECTION_DEVICES)->remove(this);
 	}
+}
+
+void Device::reset() {
+	elements.wipe();
+	if (not fieldsData.empty()) {
+		CollectionHandler::getInstance(COLLECTION_DEVICES)->remove(this);
+	}
+	Data::reset();
 }
 
 const string Device::createPrettyName() const {
@@ -46,14 +54,8 @@ const string Device::getCssClass() const {
 }
 
 const string Device::createUniqueId() const {
+	if (getValues()->empty()) return "";
 	return Defaults::createHardwareUniqueId(*getValues());
-}
-
-void Device::destroy() {
-	elements.wipe();
-	if (not fieldsData.empty()) {
-		CollectionHandler::getInstance(COLLECTION_DEVICES)->remove(createUniqueId());
-	}
 }
 
 void Device::activate() {
@@ -63,7 +65,7 @@ void Device::activate() {
 const string Device::toXML() const {
 	string r(createOpeningXML("device", fieldsData, ignored, false));
 	for (const auto& e : elements) {
-		r += e.getData()->toXML();
+		r += e->getData()->toXML();
 	}
 	r += createClosingXML("device");
 	return r;

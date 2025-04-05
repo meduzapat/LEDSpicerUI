@@ -2,7 +2,7 @@
 [![GitHub](https://img.shields.io/github/v/release/meduzapat/LEDSpicerUI?color=blueviolet)](https://github.com/meduzapat/LEDSpicerUI/releases/latest)
 ![GitHub Release Date](https://img.shields.io/github/release-date/meduzapat/LEDSpicerUI)
 ![GitHub](https://img.shields.io/github/license/meduzapat/LEDSpicerUI?color=blue)
-[![Donations are welcome](https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=LVNVCXN4NKWP8)
+[![Static Badge](https://img.shields.io/badge/Donations_are_welcome-gray?logo=paypal&labelColor=rgb(255%2C%20209%2C%2064))](https://www.paypal.com/donate/?hosted_button_id=LVNVCXN4NKWP8)
 
 # LEDSpicer UI part of the LEDSpicer, the LED Manager for linux.
 

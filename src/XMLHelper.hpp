@@ -53,7 +53,7 @@ public:
 	 * @return A map with the key pairs.
 	 * @throws Message if an error happen.
 	 */
-	static unordered_map<string, string> processNode(const tinyxml2::XMLElement* node);
+	static StringUMap processNode(const tinyxml2::XMLElement* node);
 
 	/**
 	 * Reads the attributes from a node by its name on the root.
@@ -62,7 +62,7 @@ public:
 	 * @return A map with the parameters in that node.
 	 * @throws Message if node does not exist or an error happen.
 	 */
-	unordered_map<string, string> processNode(const string& nodeName);
+	StringUMap processNode(const string& nodeName);
 
 	/**
 	 * Returns a pointer to the root node.
@@ -80,8 +80,8 @@ public:
 	 * @throws Message if an attribute is missing.
 	 */
 	static void checkAttributes(
-		const vector<string>& attributeList,
-		const unordered_map<string, string>& subjects,
+		const StringVector& attributeList,
+		const StringUMap& subjects,
 		const string& place
 	);
 
@@ -94,7 +94,7 @@ public:
 	 * @return The value or default.
 	 */
 	static string valueOf(
-		const unordered_map<string, string>& values,
+		const StringUMap& values,
 		const string& value,
 		string def = ""
 	);
@@ -104,13 +104,13 @@ public:
 	 * @param values
 	 * @return
 	 */
-	static string toXML(const unordered_map<string, string>& values);
+	static string toXML(const StringUMap& values);
 
 	/**
 	 * @param dataName
 	 * @return The stored values for that collection.
 	 */
-	vector<unordered_map<string, string>>& getData(const string& dataName);
+	StringUMapVector& getData(const string& dataName);
 
 	/**
 	 * Convert a XML error into human readable text.
@@ -126,7 +126,7 @@ protected:
 	tinyxml2::XMLElement* root = nullptr;
 
 	/// Populated by derived classes to store extracted XML data by section.
-	unordered_map<string, vector<unordered_map<string, string>>> extractedData;
+	unordered_map<string, StringUMapVector> extractedData;
 
 };
 

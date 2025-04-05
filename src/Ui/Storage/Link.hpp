@@ -1,10 +1,10 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      NameOnly.hpp
- * @since     Apr 6, 2023
+ * @file      Link.hpp
+ * @since     Mar 23, 2025
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -22,63 +22,48 @@
 
 #include "Data.hpp"
 
-#ifndef NAMEONLY_HPP_
-#define NAMEONLY_HPP_ 1
+#ifndef SRC_UI_STORAGE_LINK_HPP_
+#define SRC_UI_STORAGE_LINK_HPP_ 1
 
 namespace LEDSpicerUI::Ui::Storage {
 
 /**
- * LEDSpicerUI::Ui::Storage::NameOnly
- *
- * A very generic container for data that allows some customization
- * to avoid creating specialized classes for very common data types.
+ * LEDSpicerUI::Ui::Storage::Link
+ * Class that links other Data classes as values.
  */
-class NameOnly: public Data {
+class Link: public Data {
 
 public:
 
-	using textGeneratorFunction = std::function<const string(const unordered_map<string, string>&)>;
+	using Data::Data;
 
-	NameOnly() = default;
+	Link(StringUMap& data, const string& type, const string &key, Data *link) : Data(data), type(type), key(key), link(link) {}
 
-	NameOnly(
-		unordered_map<string, string>& data,
-		const string& node     = "",
-		const string& cssClass = "",
-		textGeneratorFunction prettyNamedFunction = nullptr,
-		textGeneratorFunction tooltipFunction     = nullptr
-	) :
-		Data(data),
-		node(node),
-		cssClass(cssClass),
-		prettyNamedFunction(prettyNamedFunction),
-		tooltipFunction(tooltipFunction) {}
-
-	virtual ~NameOnly() = default;
+	virtual ~Link() = default;
 
 	const string getCssClass() const override;
 
-	const string createTooltip() const override;
-
 	const string createPrettyName() const override;
 
+	const string createTooltip() const override;
+
 	const string createUniqueId() const override;
+
+	string getValue(const string& key, const string& defaultValue = "") const override;
 
 	const string toXML() const override;
 
 protected:
 
 	const string
-		node,
-		cssClass;
+		type,
+		key;
 
-	textGeneratorFunction prettyNamedFunction;
-
-	textGeneratorFunction tooltipFunction;
+	/// Links a parameter name with a Data object.
+	Data* link;
 
 };
 
 } /* namespace */
 
-
-#endif /* NAMEONLY_HPP_ */
+#endif /* SRC_UI_STORAGE_LINK_HPP_ */

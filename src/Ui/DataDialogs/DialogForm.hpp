@@ -22,7 +22,7 @@
 
 #include "DialogColors.hpp"
 #include "OrdenableFlowBox.hpp"
-#include "Storage/BoxButtonCollection.hpp"
+#include "Storage/CollectionHandler.hpp"
 
 #ifndef UI_FORMDIALOG_HPP_
 #define UI_FORMDIALOG_HPP_ 1
@@ -44,7 +44,7 @@ public:
 	/**
 	 * Possible states of the form,
 	 */
-	enum class Modes : uint8_t {
+	enum class Actions : uint8_t {
 		ADD,  /// Adding new
 		LOAD, /// Loading new
 		EDIT  /// Editing existing
@@ -60,11 +60,6 @@ public:
 	virtual void load(XMLHelper* values) = 0;
 
 	/**
-	 * Reindex the items.
-	 */
-	void reindex();
-
-	/**
 	 * Refresh the box contents, intended to be used when an item is deleted directly without using the delete button.
 	 */
 	virtual void refreshBox();
@@ -76,6 +71,11 @@ public:
 	 * @param owner
 	 */
 	virtual void setOwner(Storage::BoxButtonCollection* collection, Storage::Data* owner = nullptr);
+
+	/**
+	 * @return The collection handler that keeps track of this form items.
+	 */
+	virtual Storage::CollectionHandler* getCollectionHandler() const = 0;
 
 	/**
 	 * Does extra changes that are not done in clearform() and calls clearForm() if needed (default).
@@ -107,7 +107,7 @@ public:
 	 * Returns an array with a list of stored key values values.
 	 * @return
 	 */
-	vector<const unordered_map<string, string>*> getValues();
+	vector<const StringUMap*> getValues();
 
 	/**
 	 * Create an unique using the dialog fields.
@@ -115,28 +115,36 @@ public:
 	 */
 	virtual const string createUniqueId() const = 0;
 
+	/**
+	 * Using the box and the items it arrange the items based on the OrdenableFlowBox order.
+	 */
+	void reindex();
+
 protected:
 
 	/// form action mode.
-	Modes mode = Modes::ADD;
+	Actions action = Actions::ADD;
 
 	Gtk::Button
-		/// Add mew Button.
+		/// Open this form to create new Data (item), its located in the calling dialog.
 		* btnAdd = nullptr,
-		/// Data save button.
+		/// Store changes.
 		* btnApply = nullptr;
 
-	/// The box that display the buttons.
+	/// The box that display the item handled by this dialog, its located in the calling dialog.
 	OrdenableFlowBox* box = nullptr;
 
 	/// Created items in the dialog.
 	Storage::BoxButtonCollection* items = nullptr;
 
-	/// Current storage form, been created, edited or loaded.
+	/// Current item's data, been created, edited or loaded.
 	Storage::Data* currentData = nullptr;
 
-	/// Owner access, only set if this Dialog is part of other storage, also may not been save yet, query the dialog instead for values.
-	Storage::Data* owner = nullptr;
+	/// The data record that handles this Dialog.
+	Storage::Data* ownerData = nullptr;
+
+	/// Child dialog, if any.
+	DataDialogs::DialogForm* childDialog = nullptr;
 
 	/**
 	 * Constructor.
@@ -149,7 +157,7 @@ protected:
 	 * Creates items from raw data.
 	 * @param rawCollection
 	 */
-	void createItems(vector<unordered_map<string, string>>& rawCollection, XMLHelper* values);
+	void createItems(StringUMapVector& rawCollection, XMLHelper* values);
 
 	/**
 	 * Creates any sub items, called from created items, per item.
@@ -168,13 +176,13 @@ protected:
 	 * @param rawData this values will be moved into the class.
 	 * @return
 	 */
-	virtual Storage::Data* getData(unordered_map<string, string>& rawData) = 0;
+	virtual Storage::Data* createData(StringUMap& rawData) = 0;
 
 	/**
 	 * Creates an empty object.
 	 * @return
 	 */
-	virtual Storage::Data* getData();
+	virtual Storage::Data* createData();
 
 	/**
 	 * Method to add generic Add functionality.
@@ -213,7 +221,7 @@ protected:
 	/**
 	 * Method to add generic Apply functionality.
 	 */
-	virtual void setSignalApply();
+	void setSignalApply();
 
 	/**
 	 * When the add button is clicked.
@@ -231,12 +239,6 @@ protected:
 	 * @param boxButton the button that called delete.
 	 */
 	virtual void onEditClicked(Storage::BoxButton& boxButton);
-
-	/**
-	 * Called After Edit before the data is stored.
-	 * @param boxButton the button that called edit.
-	 */
-	virtual void afterEdit(Storage::BoxButton&) {}
 
 	/**
 	 * When the delete button is clicked.

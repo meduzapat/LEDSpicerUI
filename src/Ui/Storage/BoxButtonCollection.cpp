@@ -24,124 +24,96 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-BoxButtonCollection::~BoxButtonCollection() {
-	wipe();
-}
-
 size_t BoxButtonCollection::getSize() const {
 	return items.size();
 }
 
-bool BoxButtonCollection::isset(const string& name) const {
-	for (const auto& i : items) {
-		if (searchType.absolute) {
-			if (i.getData()->getValue(key) == name)
-				return true;
-		}
-		else {
-			if (i.getData()->getValue(key).find(Defaults::addUnitSeparator(name)) != string::npos)
-				return true;
+bool BoxButtonCollection::isSet(Data *form) const {
+	return isIdSet(form->createUniqueId());
+}
+
+bool BoxButtonCollection::isIdSet(const string& id) const {
+	for (const auto& item : items) {
+		if (item->getData()->createUniqueId() == id) {
+			return true;
 		}
 	}
 	return false;
 }
 
-BoxButton& BoxButtonCollection::add(Data* form) {
-	items.emplace_back(BoxButton(form));
-	return items.back();
+BoxButton& BoxButtonCollection::create(Data* form) {
+	items.emplace_back(std::make_unique<BoxButton>(form));
+	return *items.back();
 }
 
 void BoxButtonCollection::remove(BoxButton& item) {
-	items.remove_if([&item](const BoxButton& b) {
-		return &b == &item;
-	});
+	items.erase(
+		std::remove_if(
+			items.begin(),
+			items.end(),
+			[&item](const std::unique_ptr<BoxButton>& ptr) {
+				return ptr.get() == &item;
+			}
+		),
+		items.end()
+	);
 }
 
-void BoxButtonCollection::remove(const string& name) {
-	items.remove_if([this, &name](const auto& b) {
-		if (searchType.absolute) {
-			return b.getData()->getValue(key) == name;
-		}
-		return b.getData()->getValue(key).find(Defaults::addUnitSeparator(name)) != string::npos;
-	});
-}
-
-void BoxButtonCollection::rename(const string& name, const string& newName) {
-	if (name == newName) return;
-	for (auto& b : items) {
-		auto data = b.getData();
-		if (searchType.absolute) {
-			const string currentValue(data->getValue(key));
-			if (currentValue == name) {
-				data->setValue(key, newName);
-				b.updateLabel();
-				if (searchType.unique) break;
+void BoxButtonCollection::remove(Data* form) {
+	items.erase(
+		std::remove_if(
+			items.begin(),
+			items.end(),
+			[form](const std::unique_ptr<BoxButton>& button) {
+				// Cannot check on pointers because some items maybe are links.
+				return button->getData()->createUniqueId() == form->createUniqueId();
 			}
-		}
-		else {
-			string currentValue = data->getValue(key);
-			size_t pos = 0;
-			string search = Defaults::addUnitSeparator(name);
-			while ((pos = currentValue.find(search, pos)) != string::npos) {
-				currentValue.replace(pos, search.length(), newName);
-				pos += newName.length();
-				if (searchType.unique) break;
-			}
-			data->setValue(key, currentValue);
-		}
-	}
+		),
+		items.end()
+	);
 }
 
 void BoxButtonCollection::populateBox(OrdenableFlowBox* box) {
-	for (auto& i : items)
-		box->add(i);
+	for (auto& item : items) {
+		box->add(*item);
+	}
 	box->show_all();
 }
 
 void BoxButtonCollection::reindex(OrdenableFlowBox* box) {
-	std::list<BoxButton> sortedItems;
+	if (items.empty()) return;
+	BoxButtonVector reorderedItems;
+	reorderedItems.reserve(items.size());
+
 	for (auto* child : box->get_children()) {
 		auto flowChild = dynamic_cast<Gtk::FlowBoxChild*>(child);
 		auto boxButton = dynamic_cast<BoxButton*>(flowChild->get_child());
-		auto it = std::find_if(
-			items.begin(),
-			items.end(),
-			[boxButton](BoxButton& b) {
-				return &b == boxButton;
-			}
-		);
-		if (it != items.end()) {
-			sortedItems.splice(sortedItems.end(), items, it);
-		}
+		// Find the matching BoxButton in the original collection
+		auto it = std::find_if(items.begin(), items.end(), [boxButton](const std::unique_ptr<BoxButton>& item) {
+			if (item.get()) return (item->getData()->createUniqueId() == boxButton->getData()->createUniqueId());
+			return false;
+		});
+		reorderedItems.push_back(std::move(*it));
 	}
-	items.swap(sortedItems);
+	items.swap(reorderedItems);
 }
 
 void BoxButtonCollection::wipe() {
 	items.clear();
 }
 
-BoxButton& BoxButtonCollection::at(uint position) {
-	if (position >= items.size()) {
-		throw std::out_of_range("BoxButtonCollection::at: index out of range");
-	}
-	auto it = items.begin();
-	std::advance(it, position);
-	return *it;
-}
-
-std::list<BoxButton>::iterator BoxButtonCollection::begin() {
+BoxButtonVector::iterator BoxButtonCollection::begin() {
 	return items.begin();
 }
 
-std::list<BoxButton>::iterator BoxButtonCollection::end() {
+BoxButtonVector::iterator BoxButtonCollection::end() {
 	return items.end();
 }
 
-std::list<BoxButton>::const_iterator BoxButtonCollection::begin() const {
+BoxButtonVector::const_iterator BoxButtonCollection::begin() const {
 	return items.begin();
 }
 
-std::list<BoxButton>::const_iterator BoxButtonCollection::end() const {
+BoxButtonVector::const_iterator BoxButtonCollection::end() const {
 	return items.end();
 }

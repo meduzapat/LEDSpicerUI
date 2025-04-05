@@ -72,7 +72,11 @@ DialogForm(obj, builder)
 }
 
 void DialogInputMap::load(XMLHelper* values) {
-	createItems(values->getData(Defaults::createCommonUniqueId({owner->createUniqueId(), COLLECTION_INPUT_MAPS})), values);
+	createItems(values->getData(Defaults::createCommonUniqueId({ownerData->createUniqueId(), COLLECTION_INPUT_MAPS})), values);
+}
+
+LEDSpicerUI::Ui::Storage::CollectionHandler* DialogInputMap::getCollectionHandler() const {
+	return LEDSpicerUI::Ui::Storage::CollectionHandler::getInstance(COLLECTION_INPUT_MAPS);
 }
 
 void DialogInputMap::clearForm() {
@@ -97,14 +101,14 @@ void DialogInputMap::isValid() const {
 
 	string trigger(inputInputMapTrigger->get_text());
 	if (trigger.empty()) {
-		if (mode != Modes::LOAD)
+		if (action != Actions::LOAD)
 			inputInputMapTrigger->grab_focus();
 		throw Message("Enter a trigger.");
 	}
 	// Check if is used.
-	if (inputMapCollectionHandler->isUsed(trigger)) {
+	if (action != Actions::EDIT or trigger != currentData->createUniqueId()) {
+		if (getCollectionHandler()->isIdSet(trigger)) {
 		// If editing and they are the same is OK.
-		if (mode != Modes::EDIT or trigger != currentData->createUniqueId()) {
 			throw Message("Trigger already in use.");
 		}
 	}
@@ -128,20 +132,18 @@ void DialogInputMap::storeData() {
 	}
 	newLinkedMapId = Defaults::createCommonUniqueId({trigger, type + " " + target});
 
-	if (mode == Modes::EDIT) {
+//	if (action == Actions::EDIT) {
 		// the problem with this is that will only update values if the trigger is replaced.
-		inputMapCollectionHandler->replace(currentData->createUniqueId(), trigger);
+//		getCollectionHandler()->replace(currentData, trigger);
 /*		inputLinkMapCollectionHandler->replace(Defaults::createCommonUniqueId({
 			currentData->createUniqueId(),
-			currentData->getValue(TYPE) + " " + currentData->getValue(TARGET)}
+			currentData->getValue(TYPE) + " " + currentData->getValue(Defaults::TARGET)}
 		), newLinkedMapId);*/
-	}
-	else {
-		inputMapCollectionHandler->add(trigger);
+//	}
+//	else {
+//		inputMapCollectionHandler->add(trigger);
 		//inputLinkMapCollectionHandler->add(newLinkedMapId);
-	}
-
-	currentData->wipe();
+//	}
 
 	currentData->setValue(TYPE, type);
 	currentData->setValue(TARGET, target);
@@ -169,7 +171,7 @@ string const DialogInputMap::createUniqueId() const {
 	return inputInputMapTrigger->get_text();
 }
 
-LEDSpicerUI::Ui::Storage::Data* DialogInputMap::getData(unordered_map<string, string>& rawData) {
+LEDSpicerUI::Ui::Storage::Data* DialogInputMap::createData(StringUMap& rawData) {
 	return new Storage::InputMap(rawData);
 }
 

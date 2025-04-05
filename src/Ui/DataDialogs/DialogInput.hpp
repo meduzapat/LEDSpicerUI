@@ -26,8 +26,6 @@
 #ifndef UI_DIALOGINPUT_HPP_
 #define UI_DIALOGINPUT_HPP_ 1
 
-#define inputHandler LEDSpicerUI::Ui::Storage::CollectionHandler::getInstance(COLLECTION_INPUT)
-
 namespace LEDSpicerUI::Ui::DataDialogs {
 
 /**
@@ -44,31 +42,15 @@ public:
 
 	virtual ~DialogInput() = default;
 
-	/**
-	 * Instantiate an object of its class.
-	 * @param builder
-	 * @param gladeID
-	 */
 	static void initialize(Glib::RefPtr<Gtk::Builder> const &builder);
-
-	/**
-	 * Return an instance of this class.
-	 * @return
-	 */
 	static DialogInput* getInstance();
-
 	void load(XMLHelper* values) override;
-
+	Storage::CollectionHandler* getCollectionHandler() const override;
 	void resetForm() override;
-
 	void clearForm() override;
-
 	void isValid() const override;
-
 	void storeData() override;
-
 	void retrieveData() override;
-
 	const string createUniqueId() const override;
 
 protected:
@@ -77,11 +59,11 @@ protected:
 	static DialogInput* instance;
 
 	Gtk::ComboBoxText* comboBoxInputSelectInput   = nullptr;
-	Gtk::Entry*        inputInputName             = nullptr;
+	Gtk::Entry*        entryInputName             = nullptr;
 	Gtk::ComboBoxText* comboBoxInputSpeed         = nullptr;
 	Gtk::Switch*       switchInputBlink           = nullptr;
 	Gtk::SpinButton*   spinInputTimes             = nullptr;
-	Gtk::Entry*        inputInputDevicesID        = nullptr;
+	Gtk::Entry*        entryInputDevicesID        = nullptr;
 	Gtk::Box*          linkedElementsAndGroupsBox = nullptr;
 	Gtk::Button*       btnAddInputMap             = nullptr;
 
@@ -96,7 +78,7 @@ protected:
 
 	const string getType() const override;
 
-	Storage::Data* getData(unordered_map<string, string>& rawData) override;
+	Storage::Data* createData(StringUMap& rawData) override;
 
 };
 

@@ -40,12 +40,8 @@ public:
 	virtual ~InputMapLink() = default;
 
 	const string createPrettyName() const override;
-
-	const string createUniqueId() const override;
-
-	const string getCssClass() const override;
-
 	const string createTooltip() const override;
+	const string getCssClass() const override;
 };
 
 } /* namespace */

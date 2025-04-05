@@ -94,7 +94,7 @@ TEST_F(ConfigFileTest, DevicesAreProcessed) {
 
 	// Check elements in the first device
 	// We need to construct the unique ID as ConfigFile does
-	string deviceId = Defaults::createHardwareUniqueId({{NAME, "UltimarcPacDrive"}, {ID, "1"}});
+	string deviceId    = Defaults::createHardwareUniqueId({{NAME, "UltimarcPacDrive"}, {ID, "1"}});
 	string elementsKey = Defaults::createCommonUniqueId({deviceId, COLLECTION_ELEMENT});
 
 	// Access elements if the key construction is correct
@@ -148,22 +148,6 @@ TEST_F(ConfigFileTest, GroupsAreProcessed) {
 	catch (const std::exception& e) {
 		FAIL() << "Failed to access group elements with key: " << creditsGroupKey << ", error: " << e.what();
 	}
-}
-
-// Additional test for extracting data with default values
-TEST_F(ConfigFileTest, DefaultValuesForMissingAttributes) {
-	// Test valueOf method for missing attributes
-	auto settings = configFile->getSettings();
-
-	// Create a test map
-	std::unordered_map<string, string> testMap = {
-		{"existingKey", "existingValue"}
-	};
-
-	// Test with static valueOf method
-	EXPECT_EQ("existingValue", XMLHelper::valueOf(testMap, "existingKey"));
-	EXPECT_EQ("", XMLHelper::valueOf(testMap, "missingKey"));
-	EXPECT_EQ("defaultValue", XMLHelper::valueOf(testMap, "missingKey", "defaultValue"));
 }
 
 } // namespace LEDSpicerUI

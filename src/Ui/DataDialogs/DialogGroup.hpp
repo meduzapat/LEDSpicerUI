@@ -20,12 +20,11 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "DialogForm.hpp"
 #include "Storage/Group.hpp"
 
 #ifndef GROUPDIALOG_HPP_
 #define GROUPDIALOG_HPP_ 1
-
-#define groupCollectionHandler Storage::CollectionHandler::getInstance(COLLECTION_GROUP)
 
 namespace LEDSpicerUI::Ui::DataDialogs {
 
@@ -43,34 +42,18 @@ public:
 
 	virtual ~DialogGroup() = default;
 
-	/**
-	 * Instantiate an object of its class.
-	 * @param builder
-	 * @param gladeID
-	 */
 	static void initialize(Glib::RefPtr<Gtk::Builder> const &builder);
-
-	/**
-	 * Return an instance of this class.
-	 * @return
-	 */
 	static DialogGroup* getInstance();
-
 	void load(XMLHelper* values) override;
-
+	Storage::CollectionHandler* getCollectionHandler() const override;
 	void isValid() const override;
-
 	void clearForm() override;
-
 	void storeData() override;
-
 	void retrieveData() override;
-
 	const string createUniqueId() const override;
 
 protected:
 
-	/// Self instance.
 	static DialogGroup* instance;
 
 	Gtk::Entry*  inputGroupName       = nullptr;
@@ -79,13 +62,21 @@ protected:
 	/// The box where group elements are displayed.
 	OrdenableFlowBox* boxElements = nullptr;
 
+	const DialogSelect::SettingRequest groupElementsSetting {
+		boxElements,
+		NAME,
+		TYPE_ELEMENT,
+		COLLECTION_ELEMENT,
+		DialogSelect::BUTTON_DELETER,
+	};
+
 	DialogGroup(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
 
 	void createSubItems(XMLHelper* values) override;
 
 	const string getType() const override;
 
-	Storage::Data* getData(unordered_map<string, string>& rawData) override;
+	Storage::Data* createData(StringUMap& rawData) override;
 };
 
 } /* namespace */

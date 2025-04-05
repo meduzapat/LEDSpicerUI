@@ -26,8 +26,16 @@ using namespace LEDSpicerUI::Ui::Storage;
 
 Restrictor::~Restrictor() {
 	if (not fieldsData.empty()) {
-		CollectionHandler::getInstance(COLLECTION_RESTRICTORS)->remove(createUniqueId());
+		CollectionHandler::getInstance(COLLECTION_RESTRICTORS)->remove(this);
 	}
+}
+
+void Restrictor::reset() {
+	playerMapping.wipe();
+	if (not fieldsData.empty()) {
+		CollectionHandler::getInstance(COLLECTION_RESTRICTORS)->remove(this);
+	}
+	Data::reset();
 }
 
 const string Restrictor::createPrettyName() const {
@@ -42,18 +50,12 @@ const string Restrictor::createPrettyName() const {
 }
 
 const string Restrictor::createUniqueId() const {
+	if (getValues()->empty()) return "";
 	return Defaults::createHardwareUniqueId(*getValues(), false);
 }
 
 const string Restrictor::getCssClass() const {
 	return "RestrictorBoxButton";
-}
-
-void Restrictor::destroy() {
-	playerMapping.wipe();
-	if (not fieldsData.empty()) {
-		CollectionHandler::getInstance(COLLECTION_RESTRICTORS)->remove(createUniqueId());
-	}
 }
 
 void Restrictor::activate() {
@@ -63,7 +65,7 @@ void Restrictor::activate() {
 const string Restrictor::toXML() const {
 	string r(createOpeningXML("restrictor", fieldsData, ignored, false));
 	for (const auto& e : playerMapping) {
-		r += e.getData()->toXML();
+		r += e->getData()->toXML();
 	}
 	r += createClosingXML("restrictor");
 	return r;

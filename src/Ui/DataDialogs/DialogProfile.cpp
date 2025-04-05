@@ -51,71 +51,76 @@ DialogProfile::DialogProfile(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 	DialogColors::getInstance()->activateColorButton(btnProfileBackgroundColor);
 
 	// Always on elements selector.
-	builder->get_widget("BtnProfilesAddElements", btnProfilesAddElements);
-	btnProfilesAddElements->signal_clicked().connect([&]() {
-		prepareSelect(Selectors::AlwaysOnElements);
-		DialogSelect::getInstance()->RunDialog();
-	});
+	builder->get_widget("BtnProfilesAddElements",             btnProfilesAddElements);
 	builder->get_widget_derived("BoxProfileAlwaysOnElements", boxProfileAlwaysOnElements);
+	btnProfilesAddElements->signal_clicked().connect([&]() {
+		DialogSelect::getInstance()->setSettings(alwaysOnElementsSelectSetting);
+		DialogSelect::getInstance()->runSelection();
+	});
 
 	// Always on group selector.
-	builder->get_widget("BtnProfilesAddGroups", btnProfilesAddGroups);
-	btnProfilesAddGroups->signal_clicked().connect([&]() {
-		prepareSelect(Selectors::AlwaysOnGroups);
-		DialogSelect::getInstance()->RunDialog();
-	});
+	builder->get_widget("BtnProfilesAddGroups",             btnProfilesAddGroups);
 	builder->get_widget_derived("BoxProfileAlwaysOnGroups", boxProfileAlwaysOnGroups);
+	btnProfilesAddGroups->signal_clicked().connect([&]() {
+		DialogSelect::getInstance()->setSettings(alwaysOnGroupsSelectSetting);
+		DialogSelect::getInstance()->runSelection();
+	});
 
 	// Animations selector.
-	builder->get_widget("BtnProfileAddAnimations", btnProfilesAddAnimations);
-	btnProfilesAddAnimations->signal_clicked().connect([&]() {
-		prepareSelect(Selectors::Animationss);
-		DialogSelect::getInstance()->RunDialog();
-	});
+	builder->get_widget("BtnProfileAddAnimations",      btnProfilesAddAnimations);
 	builder->get_widget_derived("BoxProfileAnimations", boxProfileAnimations);
+	btnProfilesAddAnimations->signal_clicked().connect([&]() {
+		DialogSelect::getInstance()->setSettings(animationsSelectSetting);
+		DialogSelect::getInstance()->runSelection();
+	});
 
 	// Inputs selector.
-	builder->get_widget("BtnProfileAddInputs", btnProfilesAddInputs);
-	btnProfilesAddInputs->signal_clicked().connect([&]() {
-		prepareSelect(Selectors::Inputs);
-		DialogSelect::getInstance()->RunDialog();
-	});
+	builder->get_widget("BtnProfileAddInputs",      btnProfilesAddInputs);
 	builder->get_widget_derived("BoxProfileInputs", boxProfileInputs);
+	btnProfilesAddInputs->signal_clicked().connect([&]() {
+		DialogSelect::getInstance()->setSettings(inputsSelectSetting);
+		DialogSelect::getInstance()->runSelection();
+	});
 
 	// Start transition selector.
-	builder->get_widget("BtnAddStartTransitions", btnProfilesAddStartTransitions);
-	btnProfilesAddStartTransitions->signal_clicked().connect([&]() {
-		prepareSelect(Selectors::StartTransitions);
-		DialogSelect::getInstance()->RunDialog();
-	});
+	builder->get_widget("BtnAddStartTransitions",             btnProfilesAddStartTransitions);
 	builder->get_widget_derived("BoxProfileStartTransitions", boxProfileStartTransitions, "BtnStartTransitionsUp", "BtnStartTransitionsDn");
+	btnProfilesAddStartTransitions->signal_clicked().connect([&]() {
+		DialogSelect::getInstance()->setSettings(startTransitionsSelectSetting);
+		DialogSelect::getInstance()->runSelection();
+	});
 
 	// End transition selector.
-	builder->get_widget("BtnAddEndTransitions", btnProfilesAddEndTransitions);
-	btnProfilesAddEndTransitions->signal_clicked().connect([&]() {
-		prepareSelect(Selectors::EndTransitions);
-		DialogSelect::getInstance()->RunDialog();
-	});
+	builder->get_widget("BtnAddEndTransitions",             btnProfilesAddEndTransitions);
 	builder->get_widget_derived("BoxProfileEndTransitions", boxProfileEndTransitions, "BtnEndTransitionsUp", "BtnEndTransitionsDn");
+	btnProfilesAddEndTransitions->signal_clicked().connect([&]() {
+		DialogSelect::getInstance()->setSettings(endTransitionsSelectSetting);
+		DialogSelect::getInstance()->runSelection();
+	});
 }
 
 void DialogProfile::load(XMLHelper* values) {
 	createItems(values->getData(COLLECTION_PROFILES), values);
 }
 
+LEDSpicerUI::Ui::Storage::CollectionHandler* DialogProfile::getCollectionHandler() const {
+	return LEDSpicerUI::Ui::Storage::CollectionHandler::getInstance(COLLECTION_PROFILES);
+}
+
 void DialogProfile::createSubItems(XMLHelper* values) {
-	prepareSelect(Selectors::AlwaysOnElements);
-	DataDialogs::DialogSelect::getInstance()->load(values);
-	prepareSelect(Selectors::AlwaysOnGroups);
-	DataDialogs::DialogSelect::getInstance()->load(values);
-	prepareSelect(Selectors::Animationss);
-	DataDialogs::DialogSelect::getInstance()->load(values);
-	prepareSelect(Selectors::Inputs);
-	DataDialogs::DialogSelect::getInstance()->load(values);
-	prepareSelect(Selectors::StartTransitions);
-	DataDialogs::DialogSelect::getInstance()->load(values);
-	prepareSelect(Selectors::EndTransitions);
-	DataDialogs::DialogSelect::getInstance()->load(values);
+	auto dialogSelect = DialogSelect::getInstance();
+	dialogSelect->setSettings(alwaysOnElementsSelectSetting);
+	dialogSelect->load(values, COLLECTION_PROFILES);
+	dialogSelect->setSettings(alwaysOnGroupsSelectSetting);
+	dialogSelect->load(values, COLLECTION_PROFILES);
+	dialogSelect->setSettings(animationsSelectSetting);
+	dialogSelect->load(values, COLLECTION_PROFILES);
+	dialogSelect->setSettings(inputsSelectSetting);
+	dialogSelect->load(values, COLLECTION_PROFILES);
+	dialogSelect->setSettings(startTransitionsSelectSetting);
+	dialogSelect->load(values, COLLECTION_PROFILES);
+	dialogSelect->setSettings(endTransitionsSelectSetting);
+	dialogSelect->load(values, COLLECTION_PROFILES);
 }
 
 void DialogProfile::clearForm() {
@@ -135,15 +140,15 @@ void DialogProfile::clearForm() {
 void DialogProfile::isValid() const {
 	string name(createUniqueId());
 	if (name.empty()) {
-		if (mode != Modes::LOAD)
+		if (action != Actions::LOAD)
 			inputProfileName->grab_focus();
 		throw Message("Invalid profile name.");
 	}
 
 	// If is not edit, or data is not the same, check for dupes.
-	if (profileCollectionHandler->isUsed(name)) {
-		if (mode != Modes::EDIT or currentData->createUniqueId() != name) {
-			if (mode != Modes::LOAD)
+	if (getCollectionHandler()->isIdSet(name)) {
+		if (action != Actions::EDIT or currentData->createUniqueId() != name) {
+			if (action != Actions::LOAD)
 				inputProfileName->grab_focus();
 			throw Message("Profile with name " + name + " already exist.");
 		}
@@ -154,14 +159,6 @@ void DialogProfile::isValid() const {
 }
 
 void DialogProfile::storeData() {
-	if (mode == Modes::EDIT)
-		profileCollectionHandler->replace(currentData->createUniqueId(), createUniqueId());
-	else
-		profileCollectionHandler->add(createUniqueId());
-
-	// This will clean any anomaly.
-	currentData->wipe();
-
 	currentData->setValue(FILENAME, inputProfileName->get_text());
 	currentData->setValue(BACKGROUND_COLOR, btnProfileBackgroundColor->get_tooltip_text());
 }
@@ -182,67 +179,7 @@ const string DialogProfile::getType() const {
 	return "profile";
 }
 
-LEDSpicerUI::Ui::Storage::Data* DialogProfile::getData(unordered_map<string, string>& rawData) {
+LEDSpicerUI::Ui::Storage::Data* DialogProfile::createData(StringUMap& rawData) {
 	return new Storage::Profile(rawData);
 }
 
-void DialogProfile::prepareSelect(Selectors selector) const {
-	switch (selector) {
-	case Selectors::AlwaysOnElements:
-		DataDialogs::DialogSelect::getInstance()->setDestinationSettings(
-			boxProfileAlwaysOnElements,
-			COLLECTION_ELEMENT,
-			"element",
-			COLLECTION_PROFILES,
-			DialogSelect::COLORER | DialogSelect::DELETER
-		);
-	break;
-	case Selectors::AlwaysOnGroups:
-		DataDialogs::DialogSelect::getInstance()->setDestinationSettings(
-			boxProfileAlwaysOnGroups,
-			COLLECTION_GROUP,
-			"group",
-			COLLECTION_PROFILES,
-			DialogSelect::COLORER | DialogSelect::DELETER
-		);
-	break;
-	case Selectors::Inputs:
-		DataDialogs::DialogSelect::getInstance()->setDestinationSettings(
-			boxProfileInputs,
-			COLLECTION_INPUT,
-			"input",
-			COLLECTION_PROFILES,
-			DialogSelect::DELETER
-		);
-	break;
-	case Selectors::Animationss:
-		DataDialogs::DialogSelect::getInstance()->setDestinationSettings(
-			boxProfileAnimations,
-			COLLECTION_ANIMATIONS,
-			"animation",
-			COLLECTION_PROFILES,
-			DialogSelect::DELETER
-		);
-	break;
-	case Selectors::StartTransitions:
-		DataDialogs::DialogSelect::getInstance()->setDestinationSettings(
-			boxProfileStartTransitions,
-			COLLECTION_ANIMATIONS,
-			"startTransitions",
-			COLLECTION_PROFILES,
-			DialogSelect::DELETER
-		);
-	break;
-	case Selectors::EndTransitions:
-		DataDialogs::DialogSelect::getInstance()->setDestinationSettings(
-			boxProfileEndTransitions,
-			COLLECTION_ANIMATIONS,
-			"endTransitions",
-			COLLECTION_GROUP,
-			DialogSelect::DELETER
-		);
-	break;
-	}
-	auto profile(dynamic_cast<Storage::Profile*>(currentData));
-	profile->lateActivate(selector);
-}

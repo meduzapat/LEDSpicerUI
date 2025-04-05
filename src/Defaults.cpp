@@ -24,12 +24,6 @@
 
 using namespace LEDSpicerUI;
 
-bool Defaults::dirty = false;
-bool Defaults::ignoreChanges = false;
-string Defaults::tabs;
-Gtk::HeaderBar* Defaults::header = nullptr;
-Gtk::Button* Defaults::btnSave   = nullptr;
-
 const unordered_map<string, Defaults::DeviceInfo> Defaults::devicesInfo = {
 	{"UltimarcUltimate", {
 		"Ultimarc Ipac Ultimate IO",
@@ -164,8 +158,6 @@ const unordered_map<string, Defaults::RestrictorInfo> Defaults::restrictorsInfo 
 	}}
 };
 
-const vector<Defaults::Ways> Defaults::allWays{Ways::w2, Ways::w2v, Ways::w4, Ways::w4x, Ways::w8, Ways::w16, Ways::w49, Ways::analog, Ways::mouse, Ways::rotary8, Ways::rotary12};
-
 const unordered_map<string, Defaults::Ways> Defaults::wayIds {
 	{"w2",       Ways::w2},
 	{"w2v",      Ways::w2v},
@@ -180,7 +172,7 @@ const unordered_map<string, Defaults::Ways> Defaults::wayIds {
 	{"rotary12", Ways::rotary12},
 };
 
-const vector<string> Defaults::elementTypes{
+const StringVector Defaults::elementTypes{
 	"",
 	"button",
 	"joystick",
@@ -220,19 +212,19 @@ bool Defaults::isMulti(const string& name) {
 	return (restrictorsInfo.at(name).interfaces > 1);
 }
 
-string Defaults::createHardwareUniqueId(const unordered_map<string, string>& data, bool isDevice) {
+string Defaults::createHardwareUniqueId(const StringUMap& data, bool isDevice) {
 	string name(data.at(NAME));
 	if (Defaults::isIdUser(name, isDevice)) {
-		return (name + Defaults::FIELD_SEPARATOR + data.at(ID));
+		return (name + FIELD_SEPARATOR + data.at(ID));
 	}
 	if (Defaults::isSerial(name, isDevice)) {
-		return (name + Defaults::FIELD_SEPARATOR + data.at(PORT));
+		return (name + FIELD_SEPARATOR + data.at(PORT));
 	}
 	return name;
 }
 
-string Defaults::createCommonUniqueId(const vector<string>& fieldsData) {
-	return implode(fieldsData, Defaults::FIELD_SEPARATOR);
+string Defaults::createCommonUniqueId(const StringVector& fieldsData) {
+	return implode(fieldsData, FIELD_SEPARATOR);
 }
 
 bool Defaults::isNumber(const string& number) {
@@ -256,7 +248,7 @@ bool Defaults::isBetween(const string& number, int low, int high) {
 }
 
 string Defaults::addUnitSeparator(const string& unit) {
-	return Defaults::UNIT_SEPARATOR + unit + Defaults::UNIT_SEPARATOR;
+	return UNIT_SEPARATOR + unit + UNIT_SEPARATOR;
 }
 
 double Defaults::getLuminance(const string& color) {
@@ -271,8 +263,8 @@ double Defaults::getLuminance(const string& color) {
 	return 0.299 * r + 0.587 * g + 0.114 * b;
 }
 
-vector<string> Defaults::explode(const string& text, const char delimiter, const size_t limit) {
-	std::vector<string> result;
+StringVector Defaults::explode(const string& text, const char delimiter, const size_t limit) {
+	StringVector result;
 	if (text.empty()) {
 		return result;
 	}
@@ -309,7 +301,7 @@ vector<string> Defaults::explode(const string& text, const char delimiter, const
 	return result;
 }
 
-string Defaults::implode(const vector<string>& values, const char& delimiter) {
+string Defaults::implode(const StringVector& values, const char& delimiter) {
 	string r;
 	if (values.empty())
 		return r;
@@ -320,7 +312,7 @@ string Defaults::implode(const vector<string>& values, const char& delimiter) {
 	return r;
 }
 
-string Defaults::implode(const vector<string>& values, const string& delimiter) {
+string Defaults::implode(const StringVector& values, const string& delimiter) {
 	string r;
 	if (values.empty())
 		return r;
@@ -331,7 +323,7 @@ string Defaults::implode(const vector<string>& values, const string& delimiter) 
 	return r;
 }
 
-string Defaults::implode(const unordered_set<string>& values, const char& delimiter) {
+string Defaults::implode(const StringUSet& values, const char& delimiter) {
 	string r;
 	if (values.empty())
 		return r;
@@ -432,7 +424,7 @@ string Defaults::tab() {
 	return tabs;
 }
 
-void Defaults::populateComboBoxTextWithNumbers(Gtk::ComboBoxText* comboBox, int from, int to, const vector<string>& ignoreList) {
+void Defaults::populateComboBoxTextWithNumbers(Gtk::ComboBoxText* comboBox, int from, int to, const StringVector& ignoreList) {
 	comboBox->remove_all();
 	for (int c = from; c <= to; c++) {
 		string v(std::to_string(c));
@@ -474,6 +466,9 @@ void Defaults::populateComboBoxWithIds(
 }
 
 void Defaults::setFilter(Gtk::SearchEntry* filterEntry, Gtk::FlowBox* box) {
+	filterEntry->signal_show().connect([filterEntry]() {
+		filterEntry->set_text("");
+	});
 	filterEntry->signal_changed().connect([filterEntry, box]() {
 		const auto filterText(filterEntry->get_text().lowercase());
 		for (auto child : box->get_children()) {

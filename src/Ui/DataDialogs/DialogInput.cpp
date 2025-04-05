@@ -48,7 +48,7 @@ DialogInput::DialogInput(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& 
 
 	// Generic.
 	builder->get_widget("ComboBoxInputSelectInput", comboBoxInputSelectInput);
-	builder->get_widget("InputInputName",           inputInputName);
+	builder->get_widget("EntryInputName",           entryInputName);
 
 	// Actions.
 	builder->get_widget("SwitchInputBlink", switchInputBlink);
@@ -57,23 +57,22 @@ DialogInput::DialogInput(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& 
 	builder->get_widget_derived("BoxInputMap",        boxInputMap);
 	builder->get_widget_derived("BoxInputLinkedMaps", boxInputLinkedMaps);
 
-	// Blinker
-	builder->get_widget("SpinInputTimes",      spinInputTimes);
+	// Blinker needs this.
+	builder->get_widget("SpinInputTimes", spinInputTimes);
 
-	// Actions and Blinker
-	builder->get_widget("ComboBoxInputSpeed",  comboBoxInputSpeed);
+	// Actions and Blinker needs this.
+	builder->get_widget("ComboBoxInputSpeed", comboBoxInputSpeed);
 
-	// Actions, Blinker and Impulse
-	builder->get_widget("InputInputListenEvents", inputInputDevicesID);
+	// Actions, Blinker and Impulse needs this.
+	builder->get_widget("EntryInputListenEvents", entryInputDevicesID);
 
 	// Others
 	builder->get_widget("LinkedElementsAndGroupsBox", linkedElementsAndGroupsBox);
 	builder->get_widget("BtnAddInputMap",             btnAddInputMap);
 
-	// Signals.
 	// When the Blink switch is off disable speed.
 	switchInputBlink->signal_state_changed().connect([&](bool) {
-		comboBoxInputSpeed->set_sensitive(switchInputBlink->get_state_flags() & Gtk::StateFlags::STATE_FLAG_CHECKED);
+		comboBoxInputSpeed->set_sensitive(switchInputBlink->get_state());
 	});
 
 	// When a plugin is selected, set fields rules.
@@ -105,7 +104,7 @@ DialogInput::DialogInput(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& 
 			name == "Blinker" or
 			name == "Impulse"
 		) {
-			inputInputDevicesID->get_parent()->show();
+			entryInputDevicesID->get_parent()->show();
 		}
 	});
 }
@@ -119,8 +118,12 @@ void DialogInput::createSubItems(XMLHelper* values) {
 	DialogInputLinkMaps::getInstance()->load(values);
 }
 
+LEDSpicerUI::Ui::Storage::CollectionHandler* DialogInput::getCollectionHandler() const {
+	return LEDSpicerUI::Ui::Storage::CollectionHandler::getInstance(COLLECTION_INPUT);
+}
+
 void DialogInput::resetForm() {
-	comboBoxInputSelectInput->set_active_text("Select Plugin");
+	comboBoxInputSelectInput->set_active(0);
 	clearForm();
 }
 
@@ -129,7 +132,7 @@ void DialogInput::clearForm() {
 	boxInputMap->set_selection_mode(Gtk::SelectionMode::SELECTION_NONE);
 
 	linkedElementsAndGroupsBox->hide();
-	inputInputName->set_text("");
+	entryInputName->set_text("");
 
 	comboBoxInputSpeed->get_parent()->hide();
 	comboBoxInputSpeed->set_active_text("Normal");
@@ -137,39 +140,37 @@ void DialogInput::clearForm() {
 	spinInputTimes->get_parent()->hide();
 	spinInputTimes->set_text("");
 
-	inputInputDevicesID->get_parent()->hide();
-	inputInputDevicesID->set_text("");
+	entryInputDevicesID->get_parent()->hide();
+	entryInputDevicesID->set_text("");
 
 	switchInputBlink->get_parent()->hide();
-	switchInputBlink->set_state_flags(Gtk::StateFlags::STATE_FLAG_CHECKED, false);
+//	switchInputBlink->set_state_flags(Gtk::StateFlags::STATE_FLAG_CHECKED, false);
+	switchInputBlink->set_active(false);
 }
 
 void DialogInput::isValid() const {
 
 	string filename(createUniqueId());
 	if (filename.empty()) {
-		if (mode != Modes::LOAD)
-			inputInputName->grab_focus();
+		if (action != Actions::LOAD)
+			entryInputName->grab_focus();
 		throw Message("Invalid name.");
 	}
 	// Check if is used.
-	if (inputHandler->isUsed(filename)) {
+	if (getCollectionHandler()->isIdSet(filename)) {
 		// If editing and they are the same is OK.
-		if (mode != Modes::EDIT or filename != currentData->createUniqueId()) {
-			if (mode != Modes::LOAD)
-				inputInputName->grab_focus();
+		if (action != Actions::EDIT or filename != currentData->createUniqueId()) {
+			if (action != Actions::LOAD)
+				entryInputName->grab_focus();
 			throw Message("Name already in use.");
 		}
 	}
 
 	if (comboBoxInputSelectInput->get_active_text() == "Blinker") {
 		// Check if times is numeric?
-		string blinks(spinInputTimes->get_text());
-		if (not blinks.empty() and not Defaults::isNumber(blinks)) {
-			if (mode != Modes::LOAD)
-				spinInputTimes->grab_focus();
-			throw Message("Enter a valid number for blink times.");
-		}
+		auto blinks(spinInputTimes->get_value_as_int());
+		if (blinks < 0 or blinks > 255)
+			spinInputTimes->set_value(0);
 	}
 	if (
 		comboBoxInputSelectInput->get_active_text() == "Actions" or
@@ -177,9 +178,9 @@ void DialogInput::isValid() const {
 		comboBoxInputSelectInput->get_active_text() == "Impulse"
 	) {
 		// Check if input device id is not empty.
-		if (inputInputDevicesID->get_text().empty()) {
-			if (mode != Modes::LOAD)
-				inputInputDevicesID->grab_focus();
+		if (entryInputDevicesID->get_text().empty()) {
+			if (action != Actions::LOAD)
+				entryInputDevicesID->grab_focus();
 			throw Message("At least one device ID need to be specified.");
 		}
 	}
@@ -188,18 +189,10 @@ void DialogInput::isValid() const {
 void DialogInput::storeData() {
 
 	string name(comboBoxInputSelectInput->get_active_text());
-	if (mode == Modes::EDIT)
-		inputHandler->replace(currentData->createUniqueId(), createUniqueId());
-	else
-		inputHandler->add(createUniqueId());
-
-	// This will clean any anomaly.
-	currentData->wipe();
-	currentData->setValue(FILENAME, inputInputName->get_text());
+	currentData->setValue(FILENAME, entryInputName->get_text());
 	currentData->setValue(NAME, name);
 
 	if (name == "Actions") {
-		//fieldsData["blink"] = switchInputBlink->get_state_flags() & Gtk::StateFlags::STATE_FLAG_CHECKED ? "true" : "false";
 		currentData->setValue("blink", switchInputBlink->get_state() ? "true" : "false");
 	}
 
@@ -212,17 +205,17 @@ void DialogInput::storeData() {
 	}
 
 	if (name == "Actions" or name == "Blinker" or name == "Impulse") {
-		currentData->setValue("listenEvents", inputInputDevicesID->get_text());
+		currentData->setValue("listenEvents", entryInputDevicesID->get_text());
 	}
 }
 
 void DialogInput::retrieveData() {
+	// name is the plugin  type, and file name is the name for the resulting file.
 	string name(currentData->getValue(NAME));
 	comboBoxInputSelectInput->set_active_text(name);
-	inputInputName->set_text(currentData->getValue(FILENAME));
+	entryInputName->set_text(currentData->getValue(FILENAME));
 
 	if (name == "Actions") {
-//		switchInputBlink->set_state_flags(Gtk::StateFlags::STATE_FLAG_CHECKED, fieldsData["blink"] != "true");
 		switchInputBlink->set_active(currentData->getValue("blink") == "true");
 	}
 
@@ -235,19 +228,19 @@ void DialogInput::retrieveData() {
 	}
 
 	if (name == "Actions" or name == "Blinker" or name == "Impulse") {
-		inputInputDevicesID->set_text(currentData->getValue("listenEvents"));
+		entryInputDevicesID->set_text(currentData->getValue("listenEvents"));
 	}
 }
 
 string const DialogInput::createUniqueId() const {
-	return Defaults::createCommonUniqueId({inputInputName->get_text()});
+	return Defaults::createCommonUniqueId({entryInputName->get_text()});
 }
 
 const string DialogInput::getType() const {
 	return "input";
 }
 
-LEDSpicerUI::Ui::Storage::Data* DialogInput::getData(unordered_map<string, string>& rawData) {
+LEDSpicerUI::Ui::Storage::Data* DialogInput::createData(StringUMap& rawData) {
 	return new Storage::Input(rawData);
 }
 

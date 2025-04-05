@@ -26,15 +26,15 @@ using namespace LEDSpicerUI::Ui;
 
 vector<Gtk::Button*> DialogColors::colorButtons;
 vector<Gtk::FlowBox*> DialogColors::colorBoxes;
-DialogColors* DialogColors::dc = nullptr;
+DialogColors* DialogColors::instance = nullptr;
 
 DialogColors* DialogColors::getInstance() {
-	return dc;
+	return instance;
 }
 
 void DialogColors::initialize(Glib::RefPtr<Gtk::Builder> const &builder) {
-	if (not dc)
-		builder->get_widget_derived("DialogColors", dc);
+	if (not instance)
+		builder->get_widget_derived("DialogColors", instance);
 }
 
 DialogColors::DialogColors(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &builder) :
@@ -81,7 +81,7 @@ void DialogColors::setColorsFromFile(const string& path) {
 	resetColorButtons();
 
 	// Gather colors from file.
-	unordered_map<string, string> colors;
+	StringUMap colors;
 	try {
 		XMLHelper colorsXML(path, "Colors");
 		tinyxml2::XMLElement* xmlElement = colorsXML.getRoot()->FirstChildElement("color");
@@ -91,7 +91,7 @@ void DialogColors::setColorsFromFile(const string& path) {
 			for (; xmlElement; xmlElement = xmlElement->NextSiblingElement()) {
 				auto colorAttr = colorsXML.processNode(xmlElement);
 				XMLHelper::checkAttributes({NAME, "color"}, colorAttr, "color");
-				if (colorAttr[NAME] == "Random" || colors.count(colorAttr[NAME]))
+				if (colorAttr[NAME] == "Random" || colors.find(colorAttr[NAME]) != colors.end())
 					continue;
 				colors[colorAttr[NAME]] = colorAttr["color"];
 			}
@@ -183,13 +183,13 @@ void DialogColors::resetColorButtons() {
 			box->remove(*c);
 }
 
-void DialogColors::populateColorBox(Gtk::FlowBox* destination, const vector<string>& colors) {
+void DialogColors::populateColorBox(Gtk::FlowBox* destination, const StringVector& colors) {
 	for (auto& c : colors)
 		createColorButton(destination, c);
 }
 
-vector<string> DialogColors::getColorBoxValues(Gtk::FlowBox* destination) {
-	vector<string> r;
+StringVector DialogColors::getColorBoxValues(Gtk::FlowBox* destination) {
+	StringVector r;
 	for (auto child : destination->get_children()) {
 		auto c = dynamic_cast<Gtk::FlowBoxChild*>(child);
 		r.push_back(c->get_child()->get_tooltip_text());
@@ -202,7 +202,7 @@ void DialogColors::onColorSelected(Gtk::Button* button) {
 	response(Gtk::RESPONSE_OK);
 }
 
-string DialogColors::setColors(unordered_map<string, string>& colors) {
+string DialogColors::setColors(StringUMap& colors) {
 	// Remove previous buttons.
 	for (auto c : ContainerColorPicker->get_children())
 		ContainerColorPicker->remove(*c);

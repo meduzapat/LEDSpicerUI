@@ -44,7 +44,7 @@ DialogProcess::DialogProcess(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 	builder->get_widget_derived("BoxProcess", box);
 	builder->get_widget("BtnAddProcess",      btnAdd);
 	builder->get_widget("BtnApplyProcess",    btnApply);
-	btnAdd->signal_clicked().connect(sigc::mem_fun(*this, &DialogProcess::onAddClicked));
+	setSignalAdd();
 	setSignalApply();
 
 	// Process fields.
@@ -57,6 +57,10 @@ void DialogProcess::load(XMLHelper* values) {
 	createItems(values->getData(COLLECTION_PROCESS), values);
 }
 
+LEDSpicerUI::Ui::Storage::CollectionHandler* DialogProcess::getCollectionHandler() const {
+	return LEDSpicerUI::Ui::Storage::CollectionHandler::getInstance(COLLECTION_PROCESS);
+}
+
 void DialogProcess::clearForm() {
 	inputProcessName->set_text("");
 	inputSystemType->set_text("");
@@ -66,45 +70,37 @@ void DialogProcess::clearForm() {
 void DialogProcess::isValid() const {
 	string name(inputProcessName->get_text());
 	if (name.empty()) {
-		if (mode != Modes::LOAD)
+		if (action != Actions::LOAD)
 			inputProcessName->grab_focus();
 		throw Message("Invalid process name.");
 	}
 
 	if (inputSystemType->get_text().empty()) {
-		if (mode != Modes::LOAD)
+		if (action != Actions::LOAD)
 			inputSystemType->grab_focus();
 		throw Message("Invalid system type.");
 	}
 
 	string pos(inputRomPosition->get_text());
 	if (not pos.empty() and not Defaults::isNumber(pos)) {
-		if (mode != Modes::LOAD)
+		if (action != Actions::LOAD)
 			inputRomPosition->grab_focus();
 		throw Message("Position needs to be a number.");
 	}
 
 	// If data is the same, just continue.
-	if (mode == Modes::EDIT and currentData->createUniqueId() == name)
+	if (action == Actions::EDIT and currentData->createUniqueId() == name)
 		return;
 
 	// Check new name for existence.
-	if (processHandler->isUsed(name)) {
-		if (mode != Modes::LOAD)
+	if (getCollectionHandler()->isIdSet(name)) {
+		if (action != Actions::LOAD)
 			inputProcessName->grab_focus();
 		throw Message("Process " + name + " already registered.");
 	}
 }
 
 void DialogProcess::storeData() {
-	if (mode == Modes::EDIT)
-		processHandler->replace(currentData->createUniqueId(), createUniqueId());
-	else
-		processHandler->add(createUniqueId());
-
-	// This will clean any anomaly.
-	currentData->wipe();
-
 	currentData->setValue(PARAM_PROCESS_NAME, inputProcessName->get_text());
 	currentData->setValue(PARAM_SYSTEM, inputSystemType->get_text());
 	// Not mandatory.
@@ -127,6 +123,6 @@ const string DialogProcess::getType() const {
 	return "map";
 }
 
-LEDSpicerUI::Ui::Storage::Data* DialogProcess::getData(unordered_map<string, string>& rawData) {
+LEDSpicerUI::Ui::Storage::Data* DialogProcess::createData(StringUMap& rawData) {
 	return new Storage::Process(rawData);
 }

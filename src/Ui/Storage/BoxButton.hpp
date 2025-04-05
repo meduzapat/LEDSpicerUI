@@ -39,13 +39,13 @@ public:
 	BoxButton() = delete;
 
 	/**
-	 * Creates a new BoxButton object.
-	 * @param form The data to store, once assigned the BoxButton owns the pointer.
-	 */
+	* Creates a new BoxButton object.
+	* @param form The data to store.
+	*/
 	BoxButton(Data* form);
 
 	/**
-	 * @brief Move constructor for BoxButton.
+	 * Move constructor for BoxButton.
 	 * @param other The BoxButton instance to move from.
 	 */
 	BoxButton(BoxButton&& other) :
@@ -56,8 +56,8 @@ public:
 	BoxButton& operator=(BoxButton&& other) {
 		if (this != &other) {
 			Gtk::HBox::operator=(std::move(other));
-			data  = std::exchange(other.data, nullptr);
-			label = std::move(other.label);
+			data     = std::exchange(other.data, nullptr);
+			label    = std::move(other.label);
 		}
 		return *this;
 	}
@@ -98,7 +98,6 @@ protected:
 
 	/// Label to display.
 	Gtk::Label* label;
-
 };
 
 } /* namespace */

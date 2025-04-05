@@ -27,7 +27,6 @@
 #ifndef UI_DIALOGINPUTMAP_HPP_
 #define UI_DIALOGINPUTMAP_HPP_ 1
 
-#define inputMapCollectionHandler Storage::CollectionHandler::getInstance(COLLECTION_INPUT_MAPS)
 //#define inputLinkMapCollectionHandler Storage::CollectionHandler::getInstance(COLLECTION_INPUT_LINKED_MAPS)
 #define mapElementCollectionHandler Storage::CollectionHandler::getInstance(COLLECTION_ELEMENT)
 #define mapGroupCollectionHandler Storage::CollectionHandler::getInstance(COLLECTION_GROUP)
@@ -49,29 +48,14 @@ public:
 
 	virtual ~DialogInputMap() = default;
 
-	/**
-	 * Instantiate an object of its class.
-	 * @param builder
-	 * @param gladeID
-	 */
 	static void initialize(Glib::RefPtr<Gtk::Builder> const &builder);
-
-	/**
-	 * Return an instance of this class.
-	 * @return
-	 */
 	static DialogInputMap* getInstance();
-
 	void load(XMLHelper* values) override;
-
+	Storage::CollectionHandler* getCollectionHandler() const override;
 	void clearForm() override;
-
 	void isValid() const override;
-
 	void storeData() override;
-
 	void retrieveData() override;
-
 	const string createUniqueId() const override;
 
 protected:
@@ -91,7 +75,7 @@ protected:
 
 	const string getType() const override;
 
-	Storage::Data* getData(unordered_map<string, string>& rawData) override;
+	Storage::Data* createData(StringUMap& rawData) override;
 
 };
 

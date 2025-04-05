@@ -47,6 +47,9 @@ DialogElement::DialogElement(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 	setSignalAdd();
 	setSignalApply();
 
+	// Parent device.
+	builder->get_widget("ComboBoxDevices", comboBoxDevices);
+
 	// Connections layout.
 	builder->get_widget("FlowBoxPinLayout", pinsBox);
 
@@ -115,7 +118,7 @@ DialogElement::DialogElement(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 				break;
 			}
 			case tabIndex::mRGB: {
-				vector<string> csvs;
+				StringVector csvs;
 				for (auto s : selected) {
 					csvs.push_back(getPosition(s));
 				}
@@ -130,7 +133,7 @@ DialogElement::DialogElement(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 		bool active(solenoid->get_active());
 		timeOn->set_sensitive(active);
 		timeOn->set_text("");
-		brightness->set_sensitive(active and not isMono);
+		brightness->set_sensitive(active and not Defaults::isMonochrome(comboBoxDevices->get_active_id()));
 		brightness->set_value(100);
 	});
 
@@ -185,7 +188,11 @@ DialogElement::DialogElement(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 }
 
 void DialogElement::load(XMLHelper* values) {
-	createItems(values->getData(Defaults::createCommonUniqueId({owner->createUniqueId(), COLLECTION_ELEMENT})), values);
+	createItems(values->getData(Defaults::createCommonUniqueId({ownerData->createUniqueId(), COLLECTION_ELEMENT})), values);
+}
+
+LEDSpicerUI::Ui::Storage::CollectionHandler* DialogElement::getCollectionHandler() const {
+	return LEDSpicerUI::Ui::Storage::CollectionHandler::getInstance(COLLECTION_ELEMENT);
 }
 
 void DialogElement::clearForm() {
@@ -197,7 +204,7 @@ void DialogElement::clearFormConditinal(uint8_t flags) {
 	pinsBox->unselect_all();
 
 	// Single pin.
-	if (not flags or (flags & tabBit::RGB)) {
+	if (not flags or (flags & (1 << tabIndex::RGB))) {
 		pin->set_text("");
 		solenoid->set_active(false);
 		timeOn->set_text("");
@@ -205,49 +212,49 @@ void DialogElement::clearFormConditinal(uint8_t flags) {
 	}
 
 	// Scattered RGB.
-	if (not flags or (flags & tabBit::sRGB)) {
+	if (not flags or (flags & (1 << tabIndex::sRGB))) {
 		pinR->set_text("");
 		pinG->set_text("");
 		pinB->set_text("");
 	}
 
 	// RGB.
-	if (not flags or (flags & tabBit::Strip)) {
+	if (not flags or (flags & (1 << tabIndex::Strip))) {
 		positionRGB->set_text("");
 		comboBoxRGBRGB->set_active_id(defaultRGBFormat);
 	}
 
 	// RGB Strip.
-	if (not flags or (flags & tabBit::Single)) {
+	if (not flags or (flags & (1 << tabIndex::Single))) {
 		positionStrip->set_text("");
 		sizeStrip->set_text("");
 		comboBoxRGBStrip->set_active_id(defaultRGBFormat);
 	}
 
 	// Multi RGB.
-	if (not flags or (flags & tabBit::mRGB)) {
+	if (not flags or (flags & (1 << tabIndex::mRGB))) {
 		positionsMRGB->set_text("");
 		comboBoxRGBMRGB->set_active_id(defaultRGBFormat);
 	}
 
 	if (not flags) {
+		auto dev(Defaults::devicesInfo.at(comboBoxDevices->get_active_id()));
 		// Common fields to always reset.
 		elementName->set_text("");
 		elementName->grab_focus();
 		elementType->set_active_id("0");
 		brightness->set_value(100);
-		brightness->set_sensitive(not isMono);
+		brightness->set_sensitive(not dev.monochrome);
 		DialogColors::getInstance()->colorizeButton(btnDefaultColor, NO_COLOR);
-		// refresh page.
-
 		Gtk::Widget* page_widget = nullptr;
-		page_widget = notebookDeviceConnections->get_nth_page(static_cast<uint8_t>(tabIndex::RGB));
-		page_widget->set_visible(canRGB);
-		page_widget = notebookDeviceConnections->get_nth_page(static_cast<uint8_t>(tabIndex::Strip));
-		page_widget->set_visible(canStrip);
-		page_widget = notebookDeviceConnections->get_nth_page(static_cast<uint8_t>(tabIndex::mRGB));
-		page_widget->set_visible(canRGB);
-		int idx(notebookDeviceConnections->get_current_page());
+		page_widget = notebookDeviceConnections->get_nth_page(tabIndex::RGB);
+		page_widget->set_visible(dev.layoutRGB);
+		page_widget = notebookDeviceConnections->get_nth_page(tabIndex::Strip);
+		page_widget->set_visible(dev.supportStrip);
+		page_widget = notebookDeviceConnections->get_nth_page(tabIndex::mRGB);
+		page_widget->set_visible(dev.layoutRGB);
+		int idx(dev.monochrome ? tabIndex::Single : (dev.layoutRGB ? tabIndex::RGB : tabIndex::sRGB));
+		notebookDeviceConnections->set_current_page(idx);
 		Gtk::Widget* page = notebookDeviceConnections->get_nth_page(idx);
 		onSwitchPage(page, idx);
 		drawPins();
@@ -258,15 +265,15 @@ void DialogElement::isValid() const {
 	// Check invalid name
 	string name(createUniqueId());
 	if (name.empty()) {
-		if (mode != Modes::LOAD)
+		if (action != Actions::LOAD)
 			elementName->grab_focus();
 		throw Message("Missing element name");
 	}
 
 	// If is not edit, or data is not the same, check for dupes.
-	if (elementHandler->isUsed(name)) {
-		if (mode != Modes::EDIT or currentData->createUniqueId() != name) {
-			if (mode != Modes::LOAD)
+	if (getCollectionHandler()->isIdSet(name)) {
+		if (action != Actions::EDIT or currentData->createUniqueId() != name) {
+			if (action != Actions::LOAD)
 				elementName->grab_focus();
 			throw Message("Element with name " + name + " already exist");
 		}
@@ -280,14 +287,14 @@ void DialogElement::isValid() const {
 
 		// Check empty.
 		if (conn.empty()) {
-			if (mode != Modes::LOAD)
+			if (action != Actions::LOAD)
 				connector->grab_focus();
 			throw Message("Enter a valid connector number for " + name);
 		}
 
 		// Numeric check and range.
 		if (not Defaults::isBetween(conn, 1, numberOfPins)) {
-			if (mode != Modes::LOAD)
+			if (action != Actions::LOAD)
 				connector->grab_focus();
 			throw Message("The connector for " + name + " must be a number from 1 and " + std::to_string(numberOfPins));
 		}
@@ -297,7 +304,7 @@ void DialogElement::isValid() const {
 	case tabIndex::Single:
 
 		// Check for changes, solenoid or pin.
-		if (mode != Modes::EDIT or pin->get_text() != currentData->getValue(PIN) + currentData->getValue(SOLENOID)) {
+		if (action != Actions::EDIT or pin->get_text() != currentData->getValue(PIN) + currentData->getValue(SOLENOID)) {
 			checkPin(pin);
 		}
 
@@ -307,9 +314,9 @@ void DialogElement::isValid() const {
 			not timeOn->get_text().empty() and
 			not Defaults::isNumber(timeOn->get_text())
 		) {
-			if (mode != Modes::LOAD)
+			if (action != Actions::LOAD)
 				timeOn->grab_focus();
-			throw Message("Enter a valid number of milliseconds for the timer.");
+			throw Message("Enter a valid number of milliseconds for the timer for element " + name + ".");
 		}
 		break;
 
@@ -321,7 +328,7 @@ void DialogElement::isValid() const {
 			pinG->get_text().empty() or
 			pinB->get_text().empty()
 		) {
-			throw Message("Missing connection information for scattered RGB Element");
+			throw Message("Missing connection information for scattered RGB Element " + name + ".");
 		}
 		// RGB checks
 		bool found = false;
@@ -332,9 +339,9 @@ void DialogElement::isValid() const {
 					continue;
 				if (e->get_text() == p->get_text()) {
 					if (found) {
-						if (mode != Modes::LOAD)
+						if (action != Actions::LOAD)
 							pin->grab_focus();
-						throw Message("Connector " + p->get_text() + " is set more than once in " + p->get_name());
+						throw Message("In element " + name + ", the connector " + p->get_text() + " is set more than once in " + p->get_name());
 					}
 					found = true;
 				}
@@ -350,34 +357,24 @@ void DialogElement::isValid() const {
 	case tabIndex::RGB:
 		// Check empty.
 		if (positionRGB->get_text().empty()) {
-			throw Message("Missing element position, select an connector.");
+			throw Message("Missing element position for element " + name + ", select an connector.");
 		}
 		break;
 	case tabIndex::Strip:
 		if (positionStrip->get_text().empty()) {
-			throw Message("Missing element position and size, select one or more connectors.");
+			throw Message("Missing element position and size for element " + name + ", select one or more connectors.");
 		}
 		break;
 	case tabIndex::mRGB:
 		if (std::count(positionsMRGB->get_text().begin(), positionsMRGB->get_text().end(), ',') < 2) {
-			throw Message("Missing element positions, select at least two connectors.");
+			throw Message("Missing element positions for element " + name + ", select at least two connectors.");
 		}
 	}
 }
 
 void DialogElement::storeData() {
 
-	const string name(createUniqueId());
-
-	if (mode == Modes::EDIT)
-		elementHandler->replace(currentData->createUniqueId(), name);
-	else
-		elementHandler->add(name);
-
-	// This will clean any anomaly.
-	currentData->wipe();
-
-	currentData->setValue(NAME, name);
+	currentData->setValue(NAME, elementName->get_text());
 
 	switch (static_cast<tabIndex>(notebookDeviceConnections->get_current_page())) {
 	case tabIndex::Single:
@@ -394,21 +391,21 @@ void DialogElement::storeData() {
 		}
 		break;
 	case tabIndex::sRGB:
-		currentData->setValue(RED_PIN, pinR->get_text());
+		currentData->setValue(RED_PIN,   pinR->get_text());
 		currentData->setValue(GREEN_PIN, pinG->get_text());
-		currentData->setValue(BLUE_PIN, pinB->get_text());
+		currentData->setValue(BLUE_PIN,  pinB->get_text());
 		break;
 	case tabIndex::RGB:
-		currentData->setValue(POSITION, positionRGB->get_text());
+		currentData->setValue(POSITION,    positionRGB->get_text());
 		currentData->setValue(COLORFORMAT, comboBoxRGBRGB->get_active_id());
 		break;
 	case tabIndex::Strip:
-		currentData->setValue(POSITION, positionStrip->get_text());
-		currentData->setValue(STRIPSIZE, sizeStrip->get_text());
+		currentData->setValue(POSITION,    positionStrip->get_text());
+		currentData->setValue(STRIPSIZE,   sizeStrip->get_text());
 		currentData->setValue(COLORFORMAT, comboBoxRGBStrip->get_active_id());
 		break;
 	case tabIndex::mRGB:
-		currentData->setValue(POSITIONS, positionsMRGB->get_text());
+		currentData->setValue(POSITIONS,   positionsMRGB->get_text());
 		currentData->setValue(COLORFORMAT, comboBoxRGBMRGB->get_active_id());
 		break;
 	}
@@ -442,7 +439,7 @@ void DialogElement::retrieveData() {
 
 	// Multi RGB.
 	if (not currentData->getValue(POSITIONS).empty()) {
-		notebookDeviceConnections->set_current_page(static_cast<uint8_t>(tabIndex::mRGB));
+		notebookDeviceConnections->set_current_page(tabIndex::mRGB);
 		for (const auto& position : Defaults::explode(currentData->getValue(POSITIONS), ',')) {
 			setSelectedConnectors(position);
 		}
@@ -450,7 +447,7 @@ void DialogElement::retrieveData() {
 	}
 	// LED strip.
 	else if (not currentData->getValue(STRIPSIZE).empty()) {
-		notebookDeviceConnections->set_current_page(static_cast<uint8_t>(tabIndex::Strip));
+		notebookDeviceConnections->set_current_page(tabIndex::Strip);
 		int
 			idx(setSelectedConnectors(currentData->getValue(POSITION))),
 			siz(0);
@@ -465,19 +462,19 @@ void DialogElement::retrieveData() {
 	}
 	// RGB.
 	else if (not currentData->getValue(POSITION).empty()) {
-		notebookDeviceConnections->set_current_page(static_cast<uint8_t>(tabIndex::RGB));
+		notebookDeviceConnections->set_current_page(tabIndex::RGB);
 		setSelectedConnectors(currentData->getValue(POSITION));
 		comboBoxRGBRGB->set_active_id(currentData->getValue(COLORFORMAT));
 	}
 	// Single.
 	else if (not currentData->getValue(PIN).empty()) {
-		notebookDeviceConnections->set_current_page(static_cast<uint8_t>(tabIndex::Single));
+		notebookDeviceConnections->set_current_page(tabIndex::Single);
 		pin->set_text(currentData->getValue(PIN));
 		solenoid->set_active(false);
 	}
 	// Solenoid.
 	else if (not currentData->getValue(SOLENOID).empty()) {
-		notebookDeviceConnections->set_current_page(static_cast<uint8_t>(tabIndex::Single));
+		notebookDeviceConnections->set_current_page(tabIndex::Single);
 		pin->set_text(currentData->getValue(SOLENOID));
 		solenoid->set_active(true);
 		if (not currentData->getValue(TIME_ON).empty())
@@ -485,7 +482,7 @@ void DialogElement::retrieveData() {
 	}
 	// Scattered RGB
 	else {
-		notebookDeviceConnections->set_current_page(static_cast<uint8_t>(tabIndex::sRGB));
+		notebookDeviceConnections->set_current_page(tabIndex::sRGB);
 		pinR->set_text(currentData->getValue(RED_PIN));
 		pinG->set_text(currentData->getValue(GREEN_PIN));
 		pinB->set_text(currentData->getValue(BLUE_PIN));
@@ -509,8 +506,13 @@ void DialogElement::changeNumberOfPins(const uint16_t newSize) {
 		drawPins();
 	}
 
-	if (numberOfPins == newSize)
+	if (numberOfPins == newSize) return;
+
+	if (not numberOfPins) {
+		numberOfPins = newSize;
+		drawPins();
 		return;
+	}
 
 	// resize.
 	if (newSize < numberOfPins) {
@@ -532,12 +534,6 @@ void DialogElement::changeNumberOfPins(const uint16_t newSize) {
 
 	numberOfPins = newSize;
 	drawPins();
-}
-
-void DialogElement::setRules(bool isMono, bool canRGB, bool canStrip) {
-	this->isMono   = isMono;
-	this->canRGB   = canRGB;
-	this->canStrip = canStrip;
 }
 
 void DialogElement::drawPins() {
@@ -570,7 +566,7 @@ void DialogElement::drawPins() {
 		labels.push_back(label);
 	}
 	// call hardware function
-	if (canRGB) {
+	if (Defaults::devicesInfo.at(comboBoxDevices->get_active_id()).layoutRGB) {
 		drawPinsRGB(labels);
 	}
 	else {
@@ -631,10 +627,10 @@ void DialogElement::drawPins(vector<Gtk::Label *>& labels) {
 }
 
 const string DialogElement::getType() const {
-	return "element";
+	return TYPE_ELEMENT;
 }
 
-LEDSpicerUI::Ui::Storage::Data* DialogElement::getData(unordered_map<string, string>& rawData) {
+LEDSpicerUI::Ui::Storage::Data* DialogElement::createData(StringUMap& rawData) {
 	return new Storage::Element(rawData);
 }
 
@@ -657,11 +653,11 @@ void DialogElement::findConnectorTypes(vector<std::pair<string, string>>& pinsUs
 	std::function<void(
 		vector<std::pair<string, string>>&,
 		const string&,
-		const Storage::Element::Data*
+		const Storage::Data*
 	)> storePinsRGB = [&](
 		vector<std::pair<string, string>>& pinsList,
 		const string& position,
-		const Storage::Element::Data* data
+		const Storage::Data* data
 	) {
 		uint16_t index(Storage::Element::findFirstConnectorIndexByPosition(position));
 		for (const auto& c : data->getValue(COLORFORMAT)) {
@@ -684,51 +680,52 @@ void DialogElement::findConnectorTypes(vector<std::pair<string, string>>& pinsUs
 	};
 
 	for (const auto& boxButton : *items) {
+		const auto data(boxButton->getData());
 		// Multiple RGB.
-		if (not boxButton.getData()->getValue(POSITIONS).empty()) {
-			for (const auto& position : Defaults::explode(boxButton.getData()->getValue(POSITIONS), ',')) {
-				storePinsRGB(pinsUsage, position, boxButton.getData());
+		if (not data->getValue(POSITIONS).empty()) {
+			for (const auto& position : Defaults::explode(data->getValue(POSITIONS), ',')) {
+				storePinsRGB(pinsUsage, position, data);
 			}
 		}
 		// LED strip.
-		else if (not boxButton.getData()->getValue(STRIPSIZE).empty()) {
+		else if (not data->getValue(STRIPSIZE).empty()) {
 			const uint16_t
-				s(std::stoi(boxButton.getData()->getValue(POSITION))),
-				t(s + std::stoi(boxButton.getData()->getValue(STRIPSIZE)));
+				s(std::stoi(data->getValue(POSITION))),
+				t(s + std::stoi(data->getValue(STRIPSIZE)));
 			for (uint16_t c(s); c < t; ++c) {
-				storePinsRGB(pinsUsage, std::to_string(c), boxButton.getData());
+				storePinsRGB(pinsUsage, std::to_string(c), data);
 			}
 		}
 		// RGB.
-		else if (not boxButton.getData()->getValue(POSITION).empty()) {
-			storePinsRGB(pinsUsage, boxButton.getData()->getValue(POSITION), boxButton.getData());
+		else if (not data->getValue(POSITION).empty()) {
+			storePinsRGB(pinsUsage, data->getValue(POSITION), data);
 		}
 		// Single.
-		else if (not boxButton.getData()->getValue(PIN).empty()) {
-			const uint16_t index(std::stoi(boxButton.getData()->getValue(PIN)) - 1);
+		else if (not data->getValue(PIN).empty()) {
+			const uint16_t index(std::stoi(data->getValue(PIN)) - 1);
 			storePins(pinsUsage[index], COLOR_PIN);
-			pinsUsage[index].second = boxButton.getData()->getValue(NAME);
+			pinsUsage[index].second = data->getValue(NAME);
 		}
 		// Solenoid.
-		else if (not boxButton.getData()->getValue(SOLENOID).empty()) {
-			const uint16_t index(std::stoi(boxButton.getData()->getValue(SOLENOID)) - 1);
+		else if (not data->getValue(SOLENOID).empty()) {
+			const uint16_t index(std::stoi(data->getValue(SOLENOID)) - 1);
 			storePins(pinsUsage[index], COLOR_SOLENOID);
-			pinsUsage[index].second = boxButton.getData()->getValue(NAME);
+			pinsUsage[index].second = data->getValue(NAME);
 		}
 		// Scattered RGB
 		else {
 			// Red.
-			uint16_t index(std::stoi(boxButton.getData()->getValue(RED_PIN)) - 1);
+			uint16_t index(std::stoi(data->getValue(RED_PIN)) - 1);
 			storePins(pinsUsage[index], COLOR_RED);
-			pinsUsage[index].second = boxButton.getData()->getValue(NAME);
+			pinsUsage[index].second = data->getValue(NAME);
 			// Green.
-			index = std::stoi(boxButton.getData()->getValue(GREEN_PIN)) - 1;
+			index = std::stoi(data->getValue(GREEN_PIN)) - 1;
 			storePins(pinsUsage[index], COLOR_GREEN);
-			pinsUsage[index].second = boxButton.getData()->getValue(NAME);
+			pinsUsage[index].second = data->getValue(NAME);
 			// Blue.
-			index = std::stoi(boxButton.getData()->getValue(BLUE_PIN)) - 1;
+			index = std::stoi(data->getValue(BLUE_PIN)) - 1;
 			storePins(pinsUsage[index], COLOR_BLUE);
-			pinsUsage[index].second = boxButton.getData()->getValue(NAME);
+			pinsUsage[index].second = data->getValue(NAME);
 		}
 	}
 }
@@ -764,7 +761,76 @@ void DialogElement::findLargestDivisor(uint16_t size) {
 	pinsBox->set_min_children_per_line(minPerLine);
 }
 
-void DialogElement::onSwitchPage(Gtk::Widget*, guint pageNum) {
+void DialogElement::findElementByPin(uint16_t finder, unordered_set<Storage::BoxButton*>& elementsFound) {
+	const string connector(std::to_string(finder));
+	for (auto& boxButton : *items) {
+		auto data(boxButton->getData());
+		// Single LED.
+		string subject(data->getValue(PIN, data->getValue(SOLENOID)));
+		if (not subject.empty()) {
+			if (connector == subject)
+				elementsFound.insert(boxButton.get());
+			continue;
+		}
+		// Multi LED.
+		subject = data->getValue(POSITIONS);
+		if (not subject.empty()) {
+			bool found = false;
+			for (const auto& position : Defaults::explode(subject, ',')) {
+				auto pinNum(Storage::Element::findFirstConnectorIndexByPosition(position));
+				if (finder >= pinNum and finder <= pinNum +2) {
+					found = true;
+					break;
+				}
+			}
+			if (found) {
+				elementsFound.insert(boxButton.get());
+				continue;
+			}
+		}
+		// RGB Strip.
+		subject = data->getValue(POSITION);
+		if (not data->getValue(STRIPSIZE).empty()) {
+			uint16_t
+				lastPin(Storage::Element::findFirstConnectorIndexByPosition(data->getValue(STRIPSIZE)) + 2),
+				firstPin(Storage::Element::findFirstConnectorIndexByPosition(subject));
+
+			if (firstPin >= finder and firstPin <= lastPin) {
+				elementsFound.insert(boxButton.get());
+				continue;
+			}
+		}
+		// RGB.
+		if (not subject.empty()) {
+			auto pinNum(Storage::Element::findFirstConnectorIndexByPosition(subject));
+			if (finder >= pinNum and finder <= pinNum +2) {
+				elementsFound.insert(boxButton.get());
+				continue;
+			}
+		}
+		// Scattered RGB.
+		subject = data->getValue(RED_PIN);
+		if (not subject.empty()) {
+			uint16_t pinNum(std::stoi(subject));
+			if (finder == pinNum) {
+				elementsFound.insert(boxButton.get());
+				continue;
+			}
+			pinNum = std::stoi(data->getValue(GREEN_PIN));
+			if (finder == pinNum) {
+				elementsFound.insert(boxButton.get());
+				continue;
+			}
+			pinNum = std::stoi(data->getValue(BLUE_PIN));
+			if (finder == pinNum) {
+				elementsFound.insert(boxButton.get());
+				continue;
+			}
+		}
+	}
+}
+
+void DialogElement::onSwitchPage(Gtk::Widget*, uint pageNum) {
 	switch (static_cast<tabIndex>(pageNum)) {
 	case tabIndex::RGB:
 	case tabIndex::sRGB:
@@ -779,73 +845,4 @@ void DialogElement::onSwitchPage(Gtk::Widget*, guint pageNum) {
 	}
 	uint8_t exclude = 1 << pageNum;
 	clearFormConditinal(0b11111 & ~exclude);
-}
-
-void DialogElement::findElementByPin(uint16_t finder, unordered_set<Storage::BoxButton*>& elementsFound) {
-	const string connector(std::to_string(finder));
-	for (auto& boxButton : *items) {
-
-		// Single LED.
-		string subject(boxButton.getData()->getValue(PIN, boxButton.getData()->getValue(SOLENOID)));
-		if (not subject.empty()) {
-			if (connector == subject)
-				elementsFound.insert(&boxButton);
-			continue;
-		}
-		// Multi LED.
-		subject = boxButton.getData()->getValue(POSITIONS);
-		if (not subject.empty()) {
-			bool found = false;
-			for (const auto& position : Defaults::explode(subject, ',')) {
-				auto pinNum(Storage::Element::findFirstConnectorIndexByPosition(position));
-				if (finder >= pinNum and finder <= pinNum +2) {
-					found = true;
-					break;
-				}
-			}
-			if (found) {
-				elementsFound.insert(&boxButton);
-				continue;
-			}
-		}
-		// RGB Strip.
-		subject = boxButton.getData()->getValue(POSITION);
-		if (not boxButton.getData()->getValue(STRIPSIZE).empty()) {
-			uint16_t
-				lastPin(Storage::Element::findFirstConnectorIndexByPosition(boxButton.getData()->getValue(STRIPSIZE)) + 2),
-				firstPin(Storage::Element::findFirstConnectorIndexByPosition(subject));
-
-			if (firstPin >= finder and firstPin <= lastPin) {
-				elementsFound.insert(&boxButton);
-				continue;
-			}
-		}
-		// RGB.
-		if (not subject.empty()) {
-			auto pinNum(Storage::Element::findFirstConnectorIndexByPosition(subject));
-			if (finder >= pinNum and finder <= pinNum +2) {
-				elementsFound.insert(&boxButton);
-				continue;
-			}
-		}
-		// Scattered RGB.
-		subject = boxButton.getData()->getValue(RED_PIN);
-		if (not subject.empty()) {
-			uint16_t pinNum(std::stoi(subject));
-			if (finder == pinNum) {
-				elementsFound.insert(&boxButton);
-				continue;
-			}
-			pinNum = std::stoi(boxButton.getData()->getValue(GREEN_PIN));
-			if (finder == pinNum) {
-				elementsFound.insert(&boxButton);
-				continue;
-			}
-			pinNum = std::stoi(boxButton.getData()->getValue(BLUE_PIN));
-			if (finder == pinNum) {
-				elementsFound.insert(&boxButton);
-				continue;
-			}
-		}
-	}
-}
+};

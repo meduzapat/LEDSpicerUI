@@ -24,27 +24,27 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-Input::Input(unordered_map<string, string>& data) :
-	Data(data),
+Input::Input(StringUMap& data) :
+	Data(data)
 	// maps can have multiple targets.
-	maps(TARGET, {true, false}),
+//	maps(TARGET),
 	// linked maps are not absolute and can have multiple entries.
-	linkedMaps(ID, {false, false})
+//	linkedMaps(ID)
 {
 	// link maps to elements and groups using the name.
-	CollectionHandler::getInstance(COLLECTION_ELEMENT)->registerDestination(&maps);
-	CollectionHandler::getInstance(COLLECTION_GROUP)->registerDestination(&maps);
+	CollectionHandler::getInstance(COLLECTION_ELEMENT)->registerDependency(&maps);
+	CollectionHandler::getInstance(COLLECTION_GROUP)->registerDependency(&maps);
 	// to avoid duplicated triggers.
-	CollectionHandler::getInstance(COLLECTION_INPUT_MAPS)->registerDestination(&maps);
+	CollectionHandler::getInstance(COLLECTION_INPUT_MAPS)->registerDependency(&maps);
 	// link linked maps to maps using the trigger.
-	//CollectionHandler::getInstance(COLLECTION_INPUT_EVENTS)->registerDestination(&linkedMaps);
+	//CollectionHandler::getInstance(COLLECTION_INPUT_EVENTS)->registerEndpoint(&linkedMaps);
 	// this value is not used as data, only for filename.
 	ignored.insert(FILENAME);
 }
 
 Input::~Input() {
-	if (not getValue(FILENAME).empty()) {
-		CollectionHandler::getInstance(COLLECTION_INPUT)->remove(createUniqueId());
+	if (not getValue(getPrimaryKey()).empty()) {
+		CollectionHandler::getInstance(COLLECTION_INPUT)->remove(this);
 	}
 	// unlink.
 	CollectionHandler::getInstance(COLLECTION_ELEMENT)->release(&maps);
@@ -54,17 +54,13 @@ Input::~Input() {
 }
 
 string const Input::createPrettyName() const {
-	return fieldsData.at(NAME) + " " + fieldsData.at(FILENAME);
+	return fieldsData.at(NAME) + " " + fieldsData.at(getPrimaryKey());
 }
 
 const string Input::createTooltip() const {
 	return "Plugin " + getValue(NAME) + " with " +
 			std::to_string(maps.getSize()) + " maps" +
 			(getValue(NAME) == "Actions" ? " and " + std::to_string(linkedMaps.getSize()) + " linked maps" : "");
-}
-
-const string Input::createUniqueId() const {
-	return Defaults::createCommonUniqueId({getValue(FILENAME)});
 }
 
 const string Input::getCssClass() const {
@@ -87,9 +83,13 @@ const string Input::toXML() const {
 	r += ">\n";
 	Defaults::increaseTab();
 	for (const auto& e : maps) {
-		r += e.getData()->toXML();
+		r += e->getData()->toXML();
 	}
 	Defaults::reduceTab();
 	r += "</LEDSpicer>\n";
 	return r;
+}
+
+const string Input::getPrimaryKey() const {
+	return FILENAME;
 }

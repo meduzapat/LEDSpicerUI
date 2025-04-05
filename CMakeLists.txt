@@ -56,7 +56,8 @@ add_executable(ledspicerui
 	src/Ui/OrdenableListBox.cpp
 	src/Ui/Storage/CollectionHandler.cpp
 	src/Ui/Storage/Data.cpp
-	src/Ui/Storage/NameOnly.cpp
+	src/Ui/Storage/Selection.cpp
+	src/Ui/Storage/Link.cpp
 	src/Ui/Storage/Element.cpp
 	src/Ui/Storage/Group.cpp
 	src/Ui/Storage/Device.cpp

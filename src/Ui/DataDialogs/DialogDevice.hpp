@@ -26,12 +26,13 @@
 #ifndef UI_DIALOGDEVICE_HPP_
 #define UI_DIALOGDEVICE_HPP_ 1
 
-#define devicesHandler Storage::CollectionHandler::getInstance(COLLECTION_DEVICES)
-
 namespace LEDSpicerUI::Ui::DataDialogs {
 
 /**
  * LEDSpicerUI::Ui::DialogDevice
+ *
+ * Data Owner: MainDialog
+ *
  */
 class DialogDevice: public DialogForm {
 
@@ -43,32 +44,14 @@ public:
 
 	virtual ~DialogDevice() = default;
 
-	/**
-	 * Instantiate an object of its class.
-	 * @param builder
-	 * @param gladeID
-	 */
 	static void initialize(Glib::RefPtr<Gtk::Builder> const &builder);
-
-	/**
-	 * Return an instance of this class.
-	 * @return
-	 */
 	static DialogDevice* getInstance();
-
 	void load(XMLHelper* values) override;
-
+	Storage::CollectionHandler* getCollectionHandler() const override;
 	void resetForm() override;
-
-	/**
-	 * Reset all fields except devices id.
-	 */
 	void clearForm() override;
-
 	void isValid() const override;
-
 	void storeData() override;
-
 	void retrieveData() override;
 
 	const string createUniqueId() const override;
@@ -98,7 +81,12 @@ protected:
 
 	const string getType() const override;
 
-	Storage::Data* getData(unordered_map<string, string>& rawData) override;
+	Storage::Data* createData(StringUMap& rawData) override;
+
+	/**
+	 * Destroys and creates the data again.
+	 */
+	void recreateData();
 
 	/**
 	 * Marks a device disabled if it depleted all its IDs.

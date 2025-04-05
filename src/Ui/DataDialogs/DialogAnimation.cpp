@@ -24,15 +24,3 @@
 
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
-
-void DialogAnimation::resetFields() {
-
-}
-
-void DialogAnimation::setFields(unordered_map<string, string> parameters) {
-
-}
-
-unordered_map<string, string> DialogAnimation::readFields() {
-
-}

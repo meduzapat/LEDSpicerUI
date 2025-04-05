@@ -26,6 +26,8 @@
 #ifndef BOXBUTTONCOLLECTION_HPP_
 #define BOXBUTTONCOLLECTION_HPP_ 1
 
+using BoxButtonVector = vector<std::unique_ptr<LEDSpicerUI::Ui::Storage::BoxButton>>;
+
 namespace LEDSpicerUI::Ui::Storage {
 
 /**
@@ -33,7 +35,7 @@ namespace LEDSpicerUI::Ui::Storage {
  * Represents a collection of BoxButton items.
  *
  * This class manages a collection of BoxButton items, providing functionality
- * for adding, removing, renaming, and retrieving items. It also supports ordering
+ * for adding, removing, renaming, and retrieving items. It also keeps ordering
  * of items.
  */
 class BoxButtonCollection {
@@ -41,50 +43,15 @@ class BoxButtonCollection {
 public:
 
 	/**
-	 * SearchTypes
-	 * Defines the types of searches for BoxButton items.
-	 */
-	struct SearchTypes {
-		bool
-			/// true to search for the whole name, false to search for one or more occurrences of the name.
-			absolute = true,
-			/// true when the list allows only one occurrence of each value (no duplicates), false otherwise.
-			unique   = true;
-	};
-
-	/**
 	 * Default constructor.
 	 */
 	BoxButtonCollection() = default;
-
-	/**
-	 * Parameterized constructor with a key.
-	 * @param key The name of the field representing the unique key.
-	 */
-	BoxButtonCollection(const string& key) : key(key) {}
-
-	/**
-	 * Parameterized constructor with a search type.
-	 * @param searchType The type of search to perform over the key.
-	 */
-	BoxButtonCollection(const SearchTypes searchType) : searchType(searchType) {}
-
-	/**
-	 * Parameterized constructor with a key and search type.
-	 * @param key The name of the field representing the unique key.
-	 * @param searchType The type of search to perform over the key.
-	 */
-	BoxButtonCollection(const string& key, const SearchTypes searchType) :
-		key(key),
-		searchType(searchType) {}
 
 	/**
 	 * Move constructor.
 	 * @param other The BoxButtonCollection to be moved.
 	 */
 	BoxButtonCollection(BoxButtonCollection&& other) noexcept :
-		key(std::move(other.key)),
-		searchType(std::move(other.searchType)),
 		items(std::move(other.items)) {}
 
 	/**
@@ -94,17 +61,12 @@ public:
 	 */
 	BoxButtonCollection& operator=(BoxButtonCollection&& other) noexcept {
 		if (this != &other) {
-			key        = std::move(other.key);
-			searchType = std::move(other.searchType);
-			items      = std::move(other.items);
+			items = std::move(other.items);
 		}
 		return *this;
 	}
 
-	/**
-	 * Destructor.
-	 */
-	~BoxButtonCollection();
+	~BoxButtonCollection() = default;
 
 	/**
 	 * Get the size of the collection.
@@ -113,18 +75,25 @@ public:
 	size_t getSize() const;
 
 	/**
+	 * Check if an item with the Data is set in the collection.
+	 * @param form The Data object to check.
+	 * @return True if the item is set, false otherwise.
+	 */
+	bool isSet(Data* form) const;
+
+	/**
 	 * Check if an item with the specified name exists in the collection.
 	 * @param name The name to check.
 	 * @return True if an item with the given name exists, false otherwise.
 	 */
-	bool isset(const string& name) const;
+	bool isIdSet(const string& name) const;
 
 	/**
-	 * Add a BoxButton item to the collection.
+	 * Creates a new BoxButton item and adds it to the collection.
 	 * @param form The Data object to create a BoxButton.
-	 * @return Pointer to the added BoxButton item.
+	 * @return Reference to the added BoxButton item.
 	 */
-	BoxButton& add(Data* form);
+	BoxButton& create(Data* form);
 
 	/**
 	 * Remove a BoxButton item from the collection.
@@ -133,17 +102,10 @@ public:
 	void remove(BoxButton& item);
 
 	/**
-	 * Remove a BoxButton item with the specified name from the collection.
-	 * @param name The name of the item to be removed.
+	 * Remove a BoxButton item from the collection by its data.
+	 * @param form Pointer to the Data object to delete.
 	 */
-	void remove(const string& name);
-
-	/**
-	 * Rename a BoxButton item.
-	 * @param name The current name of the item.
-	 * @param newName The new name for the item.
-	 */
-	void rename(const string& name, const string& newName);
+	void remove(Data* form);
 
 	/**
 	 * Populate an OrdenableFlowBox with the BoxButton items.
@@ -163,46 +125,34 @@ public:
 	void wipe();
 
 	/**
-	 * Get the BoxButton item at the specified position.
-	 * @param position The position of the item.
-	 * @return Pointer to the BoxButton item.
-	 */
-	BoxButton& at(uint position);
-
-	/**
 	 * Get an iterator pointing to the beginning of the collection.
 	 * @return Iterator pointing to the beginning of the collection.
 	 */
-	std::list<BoxButton>::iterator begin();
+	BoxButtonVector::iterator begin();
 
 	/**
 	 * Get an iterator pointing to the end of the collection.
 	 * @return Iterator pointing to the end of the collection.
 	 */
-	std::list<BoxButton>::iterator end();
+	BoxButtonVector::iterator end();
 
 	/**
 	 * Get a const iterator pointing to the beginning of the collection.
 	 * @return Const iterator pointing to the beginning of the collection.
 	 */
-	std::list<BoxButton>::const_iterator begin() const;
+	BoxButtonVector::const_iterator begin() const;
 
 	/**
 	 * Get a const iterator pointing to the end of the collection.
 	 * @return Const iterator pointing to the end of the collection.
 	 */
-	std::list<BoxButton>::const_iterator end() const;
+	BoxButtonVector::const_iterator end() const;
 
 protected:
 
-	/// The name of the field that represent the unique key.
-	string key = NAME;
-
-	/// The type of search to do over the key.
-	SearchTypes searchType{true, true};
-
 	/// Created items in the dialog.
-	std::list<BoxButton> items;
+	BoxButtonVector items;
+
 };
 
 } /* namespace */

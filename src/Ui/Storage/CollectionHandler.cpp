@@ -41,97 +41,87 @@ size_t CollectionHandler::getSize() const {
 	return collection.size();
 }
 
+Data* CollectionHandler::get(const string &id) const {
+	return (isIdSet(id) ? collection.at(id) : nullptr);
+}
+
+bool CollectionHandler::isSet(const Data* item) const {
+	return isIdSet(item->createUniqueId());
+}
+
+bool CollectionHandler::isIdSet(const string& id) const {
+	return collection.find(id) != collection.end();
+}
+
+size_t CollectionHandler::countByKey(const string& key, const string& value) const {
+	size_t count = 0;
+	for (const auto& item : collection)
+		if (item.second->getValue(key) == value) ++count;
+	return count;
+}
+
+void CollectionHandler::add(Data* item) {
+	collection.emplace(item->createUniqueId(), item);
+	refreshComboBoxes();
+}
+
+void CollectionHandler::remove(Data* item) {
+	collection.erase(item->createUniqueId());
+	for (auto destination : dependencies)
+		destination->remove(item);
+	refreshComboBoxes();
+}
+
+void CollectionHandler::replace(Data* item, const string& oldId) {
+	if (item->createUniqueId() == oldId) return;
+	collection.erase(oldId);
+	add(item);
+}
+
+void CollectionHandler::registerDependency(BoxButtonCollection* destination) {
+	dependencies.push_back(destination);
+}
+
+void CollectionHandler::registerComboBox(Gtk::ComboBoxText* destination) {
+	comboBoxes.push_back(destination);
+}
+
 void CollectionHandler::refreshComboBox(Gtk::ComboBoxText* comboBox) {
 	comboBox->remove_all();
 	for (const auto& item : collection)
-		comboBox->append(item);
-}
-
-void CollectionHandler::refreshComboBox(Gtk::ComboBoxText* comboBox, const vector<string>& ignoreList) {
-	comboBox->remove_all();
-	for (const auto& item : collection)
-		if (std::find(ignoreList.begin(), ignoreList.end(), item) == ignoreList.end())
-			comboBox->append(item);
-}
-
-bool CollectionHandler::isUsed(const string& item) const {
-	return collection.count(item);
-}
-
-size_t CollectionHandler::count(const string& search) const {
-	return std::count_if(
-		collection.begin(),
-		collection.end(),
-		[search](const auto& item) {
-			return item.find(search) != string::npos;
-		}
-	);
-}
-
-std::set<string> const& CollectionHandler::get() const {
-	return collection;
-}
-
-void CollectionHandler::add(const string& item) {
-	if (item.empty()) return;
-	collection.emplace(item);
-	populateComboboxesSorted();
-}
-
-void CollectionHandler::remove(const string& item) {
-	if (item.empty()) return;
-	collection.erase(item);
-	for (auto destination : destinationGroups)
-		destination->remove(item);
-	populateComboboxesSorted();
-}
-
-void CollectionHandler::replace(const string& oldItem, const string& newItem) {
-	if (oldItem.empty() or not isUsed(oldItem) or oldItem == newItem) return;
-	collection.erase(oldItem);
-	collection.emplace(newItem);
-	for (auto destination : destinationGroups)
-		destination->rename(oldItem, newItem);
-	populateComboboxesSorted();
-}
-
-void CollectionHandler::registerDestination(BoxButtonCollection* destination) {
-	destinationGroups.emplace(destination);
-}
-
-void CollectionHandler::registerDestination(Gtk::ComboBoxText* destination) {
-	destinationComboBoxes.emplace(destination);
+		comboBox->append(item.second->createPrettyName());
 }
 
 void CollectionHandler::release(BoxButtonCollection* destination) {
-	destinationGroups.erase(destination);
+	auto it = std::find(dependencies.begin(), dependencies.end(), destination);
+	if (it != dependencies.end()) {
+		dependencies.erase(it);
+		return;
+	}
 }
 
 void CollectionHandler::release(Gtk::ComboBoxText* destination) {
-	destinationComboBoxes.erase(destination);
+	comboBoxes.erase(std::find(comboBoxes.begin(), comboBoxes.end(), destination));
 }
 
-std::set<string>::iterator CollectionHandler::begin() {
+StringDataMap::iterator CollectionHandler::begin() {
 	return collection.begin();
 }
 
-std::set<string>::iterator CollectionHandler::end() {
+StringDataMap::iterator CollectionHandler::end() {
 	return collection.end();
 }
 
-std::set<string>::const_iterator CollectionHandler::begin() const {
+StringDataMap::const_iterator CollectionHandler::begin() const {
 	return collection.begin();
 }
 
-std::set<string>::const_iterator CollectionHandler::end() const {
+StringDataMap::const_iterator CollectionHandler::end() const {
 	return collection.end();
 }
-
-void CollectionHandler::populateComboboxesSorted() {
-	for (auto comboBox : destinationComboBoxes) {
-		comboBox->remove_all();
-		for (const auto& item : collection) {
-			comboBox->append(item);
-		}
+void CollectionHandler::refreshComboBoxes() {
+	for (auto comboBox : comboBoxes) {
+		refreshComboBox(comboBox);
 	}
 }
+

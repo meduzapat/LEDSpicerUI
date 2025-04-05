@@ -48,9 +48,9 @@ TEST(DefaultsTest, IsBetween) {
 }
 
 TEST(DefaultsTest, AddUnitSeparator) {
-	EXPECT_EQ(Defaults::addUnitSeparator("test"), Defaults::UNIT_SEPARATOR + string("test") + Defaults::UNIT_SEPARATOR);
-	EXPECT_EQ(Defaults::addUnitSeparator(""), Defaults::UNIT_SEPARATOR + string() + Defaults::UNIT_SEPARATOR);
-	EXPECT_EQ(Defaults::addUnitSeparator("a b"), Defaults::UNIT_SEPARATOR + string("a b") + Defaults::UNIT_SEPARATOR);
+	EXPECT_EQ(Defaults::addUnitSeparator("test"), UNIT_SEPARATOR + string("test") + UNIT_SEPARATOR);
+	EXPECT_EQ(Defaults::addUnitSeparator(""), UNIT_SEPARATOR + string() + UNIT_SEPARATOR);
+	EXPECT_EQ(Defaults::addUnitSeparator("a b"), UNIT_SEPARATOR + string("a b") + UNIT_SEPARATOR);
 }
 
 TEST(DefaultsTest, Explode) {
@@ -91,44 +91,44 @@ TEST(DefaultsTest, Explode) {
 }
 
 TEST(DefaultsTest, ImplodeChar) {
-	vector<string> values{"a", "b", "c"};
+	StringVector values{"a", "b", "c"};
 	EXPECT_EQ(Defaults::implode(values, ','), "a,b,c");
 
-	vector<string> single{"item"};
+	StringVector single{"item"};
 	EXPECT_EQ(Defaults::implode(single, ','), "item");
 
-	vector<string> empty;
+	StringVector empty;
 	EXPECT_EQ(Defaults::implode(empty, ','), "");
 
-	vector<string> spaced{" a ", " b ", " c "};
+	StringVector spaced{" a ", " b ", " c "};
 	EXPECT_EQ(Defaults::implode(spaced, ','), " a , b , c ");
 }
 
 TEST(DefaultsTest, ImplodeString) {
-	vector<string> values{"x", "y", "z"};
+	StringVector values{"x", "y", "z"};
 	EXPECT_EQ(Defaults::implode(values, "---"), "x---y---z");
 
-	vector<string> single{"test"};
+	StringVector single{"test"};
 	EXPECT_EQ(Defaults::implode(single, "---"), "test");
 
-	vector<string> empty;
+	StringVector empty;
 	EXPECT_EQ(Defaults::implode(empty, "---"), "");
 }
 
 TEST(DefaultsTest, ImplodeUnorderedSet) {
-	unordered_set<string> values{"one", "two", "three"};
+	StringUSet values{"one", "two", "three"};
 	string result = Defaults::implode(values, ',');
 
 	// Use explode to split result back into a vector
-	vector<string> exploded(Defaults::explode(result, ','));
-	unordered_set<string> resultSet(exploded.begin(), exploded.end());
+	StringVector exploded(Defaults::explode(result, ','));
+	StringUSet resultSet(exploded.begin(), exploded.end());
 
 	EXPECT_EQ(resultSet, values);
 
-	unordered_set<string> single{"only"};
+	StringUSet single{"only"};
 	EXPECT_EQ(Defaults::implode(single, ','), "only");
 
-	unordered_set<string> empty;
+	StringUSet empty;
 	EXPECT_EQ(Defaults::implode(empty, ','), "");
 }
 
@@ -195,14 +195,14 @@ TEST(DefaultsTest, Trim) {
 }
 
 TEST(DefaultsTest, CreateCommonUniqueId) {
-	vector<string> fields{"field1", "field2", "field3"};
-	string expected = string("field1") + Defaults::FIELD_SEPARATOR + "field2" + Defaults::FIELD_SEPARATOR + "field3";
+	StringVector fields{"field1", "field2", "field3"};
+	string expected = string("field1") + FIELD_SEPARATOR + "field2" + FIELD_SEPARATOR + "field3";
 	EXPECT_EQ(Defaults::createCommonUniqueId(fields), expected);
 
-	vector<string> single{"single"};
+	StringVector single{"single"};
 	EXPECT_EQ(Defaults::createCommonUniqueId(single), "single");
 
-	vector<string> empty;
+	StringVector empty;
 	EXPECT_EQ(Defaults::createCommonUniqueId(empty), "");
 }
 

@@ -40,11 +40,8 @@ public:
 	virtual ~RestrictorMap();
 
 	const string createPrettyName() const override;
-
 	const string createUniqueId() const override;
-
 	const string getCssClass() const override;
-
 	const string toXML() const override;
 
 };

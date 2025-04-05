@@ -94,14 +94,6 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 				throw Message("The number of random colors need to be more than one or zero.");
 			}
 
-			// Prepare directories
-/*			for (string& d : {"/animations", "/inputs", "/profiles"}) {
- * 			auto file = Gio::File::create_for_path(" ");
-			auto parent = file->get_parent();
-			if (parent) {
-				parent->make_directory_with_parents();
-			}
-			}*/
 			// Create config section.
 			string xmlData("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!-- " DEFAULT_MESSAGE "-->\n<LEDSpicer\n");
 			Defaults::increaseTab();
@@ -118,7 +110,7 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 				xmlData += ">\n";
 				Defaults::increaseTab();
 				for (const auto& p : processes) {
-					xmlData += p.getData()->toXML();
+					xmlData += p->getData()->toXML();
 				}
 				Defaults::reduceTab();
 				xmlData += Defaults::tab() + "</processLookup>\n";
@@ -127,7 +119,7 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 			xmlData += Defaults::tab() + "<devices>\n";
 			Defaults::increaseTab();
 			for (const auto& d : devices) {
-				xmlData += d.getData()->toXML();
+				xmlData += d->getData()->toXML();
 			}
 			Defaults::reduceTab();
 			xmlData += Defaults::tab() + "</devices>\n";
@@ -136,7 +128,7 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 				xmlData += Defaults::tab() + "<restrictors>\n";
 				Defaults::increaseTab();
 				for (const auto& r : restrictors) {
-					xmlData += r.getData()->toXML();
+					xmlData += r->getData()->toXML();
 				}
 				Defaults::reduceTab();
 				xmlData += Defaults::tab() + "</restrictors>\n";
@@ -146,7 +138,7 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 			xmlData += Defaults::tab() + "<layout defaultProfile=\"" + inputDefaultProfile->get_active_text() + "\">\n";
 			Defaults::increaseTab();
 			for (const auto& g : groups) {
-				xmlData += g.getData()->toXML();
+				xmlData += g->getData()->toXML();
 			}
 			Defaults::reduceTab();
 			xmlData += Defaults::tab() + "</layout>\n";
@@ -307,7 +299,7 @@ void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {
 	btnImportInput->signal_clicked().connect([&]() {
 		if (dialogImportInput.run() == Gtk::ResponseType::RESPONSE_OK) {
 			// Retrieve the selected files or directories
-			vector<string> selectedFiles(dialogImportInput.get_filenames());
+			StringVector selectedFiles(dialogImportInput.get_filenames());
 			// Process each selected file or directory
 			for (const auto& selectedFile : selectedFiles) {
 				try {
@@ -331,12 +323,13 @@ void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {
 	Gtk::Notebook* MainTabs = nullptr;
 	builder->get_widget("MainTabs", MainTabs);
 
-	MainTabs->signal_switch_page().connect([=](Gtk::Widget*, guint pageNum) {
+	MainTabs->signal_switch_page().connect([btnImportInput, btnAddInput](Gtk::Widget*, guint pageNum) {
 		// Inputs
 		if (pageNum == 4) {
 			bool sensitive(
-				Storage::CollectionHandler::getInstance(COLLECTION_ELEMENT)->getSize() and
-				Storage::CollectionHandler::getInstance(COLLECTION_GROUP)->getSize());
+				DataDialogs::DialogElement::getInstance()->getCollectionHandler()->getSize() and
+				DataDialogs::DialogGroup::getInstance()->getCollectionHandler()->getSize()
+			);
 			btnImportInput->set_sensitive(sensitive);
 			btnAddInput->set_sensitive(sensitive);
 		}
@@ -387,7 +380,7 @@ void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {
 			DataDialogs::DialogProcess::getInstance()->refreshBox();
 			DataDialogs::DialogGroup::getInstance()->refreshBox();
 			DataDialogs::DialogInput::getInstance()->refreshBox();
-			unordered_map<string, string> values;
+			StringUMap values;
 			setConfiguration(values);
 		}
 		Defaults::cleanDirty();
@@ -396,7 +389,7 @@ void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {
 	});
 }
 
-void MainWindow::setConfiguration(unordered_map<string, string>& values) {
+void MainWindow::setConfiguration(StringUMap& values) {
 	// ledspicerd
 	inputUserId->set_text(XMLHelper::valueOf(values,        "userId",   DEFAULT_USERID));
 	inputGroupId->set_text(XMLHelper::valueOf(values,       "groupId",  DEFAULT_GROUPID));
@@ -417,9 +410,9 @@ void MainWindow::setConfiguration(unordered_map<string, string>& values) {
 }
 
 string MainWindow::readConfiguration() {
-	unordered_map<string, string> r {
+	StringUMap r {
 		// ledspicerd.
-		{"version", "1.0"},
+		{"version", PACKAGE_DATA_VERSION},
 		{"type",    "Configuration"},
 		{"userId",  inputUserId->get_text()},
 		{"userId",  inputUserId->get_text()},
@@ -447,9 +440,9 @@ void MainWindow::readConfigFile(const string& dataFilePath, bool wipe, uint8_t i
 		InputFile datafile(dataFilePath, workingDirectory);
 		if (wipe) {
 			inputs.wipe();
-			DataDialogs::DialogInput::getInstance()->refreshBox();
 		}
 		DataDialogs::DialogInput::getInstance()->load(&datafile);
+		DataDialogs::DialogInput::getInstance()->refreshBox();
 		return;
 	}
 
@@ -458,38 +451,42 @@ void MainWindow::readConfigFile(const string& dataFilePath, bool wipe, uint8_t i
 		auto c(datafile.getSettings());
 		// check if color are different.
 		const string
-			colors(c.count("colors") ? c.at("colors") : ""),
+			colors(c.find("colors") != c.end() ? c.at("colors") : ""),
 			previous(inputColors->get_active_id());
 		if (not previous.empty() and previous != colors)
 			Message::displayInfo("Warning\nColors definition file changed, element color changed");
 		setConfiguration(c);
 	}
 
+	// Load Devices, elements and groups from config file.
 	if (importFlags & Defaults::ImportFlags::DEVICES) {
 		if (wipe) {
 			devices.wipe();
 			groups.wipe();
-			DataDialogs::DialogDevice::getInstance()->refreshBox();
-			DataDialogs::DialogGroup::getInstance()->refreshBox();
 		}
 		DataDialogs::DialogDevice::getInstance()->load(&datafile);
+		DataDialogs::DialogDevice::getInstance()->refreshBox();
 		DataDialogs::DialogGroup::getInstance()->load(&datafile);
+		DataDialogs::DialogGroup::getInstance()->refreshBox();
 		// TODO: set default profile
 	}
+
+	// Load restrictors from config file.
 	if (importFlags & Defaults::ImportFlags::RESTRICTORS) {
 		if (wipe) {
 			restrictors.wipe();
-			DataDialogs::DialogRestrictor::getInstance()->refreshBox();
 		}
 		DataDialogs::DialogRestrictor::getInstance()->load(&datafile);
+		DataDialogs::DialogRestrictor::getInstance()->refreshBox();
 	}
 
+	// Load process mappings from config file.
 	if (importFlags & Defaults::ImportFlags::MAPPINGS) {
 		if (wipe) {
 			processes.wipe();
-			DataDialogs::DialogProcess::getInstance()->refreshBox();
 		}
 		DataDialogs::DialogProcess::getInstance()->load(&datafile);
+		DataDialogs::DialogProcess::getInstance()->refreshBox();
 		inputRunEvery->set_text(datafile.getProcessLookupRunEvery());
 	}
 
@@ -504,7 +501,7 @@ void MainWindow::readConfigFile(const string& dataFilePath, bool wipe, uint8_t i
 	// todo: using default profile load inputs and animations.
 	/*	if (wipe) {
 		inputs.wipe();
-		DataDialogs::DialogProfile::getInstance()->refreshBox();
+		//DataDialogs::DialogProfile::getInstance()->refreshBox();
 	}*/
 }
 

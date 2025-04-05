@@ -25,8 +25,6 @@
 #ifndef UI_DIALOGRESTRICTOR_HPP_
 #define UI_DIALOGRESTRICTOR_HPP_ 1
 
-#define restrictorsHandler Storage::CollectionHandler::getInstance(COLLECTION_RESTRICTORS)
-
 namespace LEDSpicerUI::Ui::DataDialogs {
 
 /**
@@ -41,30 +39,14 @@ public:
 	DialogRestrictor() = delete;
 
 	virtual ~DialogRestrictor() = default;
-
-	/**
-	 * Instantiate an object of its class.
-	 * @param builder
-	 * @param gladeID
-	 */
 	static void initialize(Glib::RefPtr<Gtk::Builder> const &builder);
-
-	/**
-	 * Return an instance of this class.
-	 * @return
-	 */
 	static DialogRestrictor* getInstance();
-
 	void load(XMLHelper* values) override;
-
+	Storage::CollectionHandler* getCollectionHandler() const override;
 	void resetForm() override;
-
 	void isValid() const override;
-
 	void storeData() override;
-
 	void retrieveData() override;
-
 	const string createUniqueId() const override;
 
 protected:
@@ -85,7 +67,7 @@ protected:
 	Gtk::Entry
 		* serialPort = nullptr;
 
-	// icons.
+	// Stores the restrictors Ways icons.
 	unordered_map<Defaults::Ways, Gtk::FlowBoxChild*> waysIcons;
 
 	Gtk::ListStore
@@ -97,12 +79,14 @@ protected:
 	string previousName;
 
 	DialogRestrictor(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
-
 	void createSubItems(XMLHelper* values) override;
-
 	const string getType() const override;
+	Storage::Data* createData(StringUMap& rawData) override;
 
-	Storage::Data* getData(unordered_map<string, string>& rawData) override;
+	/**
+	 * Destroys and creates the data again.
+	 */
+	void recreateData();
 
 	/**
 	 * Reset all fields except devices id.

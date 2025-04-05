@@ -25,17 +25,13 @@
 using namespace LEDSpicerUI::Ui::Storage;
 
 Process::~Process() {
-	if (not getValue(PARAM_PROCESS_NAME).empty()) {
-		CollectionHandler::getInstance(COLLECTION_PROCESS)->remove(createUniqueId());
+	if (not getValue(getPrimaryKey()).empty()) {
+		CollectionHandler::getInstance(COLLECTION_PROCESS)->remove(this);
 	}
 }
 
 const string Process::createPrettyName() const {
-	return string("Process: " + fieldsData.at(PARAM_PROCESS_NAME) + " System: " + fieldsData.at(PARAM_SYSTEM));
-}
-
-const string Process::createUniqueId() const {
-	return getValue(PARAM_PROCESS_NAME);
+	return string("Process: " + fieldsData.at(getPrimaryKey()) + " System: " + fieldsData.at(PARAM_SYSTEM));
 }
 
 const string Process::getCssClass() const {
@@ -49,4 +45,8 @@ const string Process::toXML() const {
 	Defaults::reduceTab();
 	r += Defaults::tab() + "/>\n";
 	return r;
+}
+
+const string Process::getPrimaryKey() const {
+	return PARAM_PROCESS_NAME;
 }

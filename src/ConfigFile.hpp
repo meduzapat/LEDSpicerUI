@@ -40,7 +40,7 @@ public:
 
 	virtual ~ConfigFile() = default;
 
-	unordered_map<string, string> getSettings();
+	StringUMap getSettings();
 
 	const string getDefaultProfile() const;
 
@@ -52,7 +52,7 @@ protected:
 
 	string processLookupRunEvery;
 
-	unordered_map<string, string> nodeSettings;
+	StringUMap nodeSettings;
 
 	const string processDevices();
 

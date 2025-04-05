@@ -89,20 +89,17 @@ public:
 	 * @param destination
 	 * @param colors
 	 */
-	void populateColorBox(Gtk::FlowBox* destination, const vector<string>& colors);
+	void populateColorBox(Gtk::FlowBox* destination, const StringVector& colors);
 
 	/**
 	 * @param destination
 	 * @return A list of colors from inside a flowbox.
 	 */
-	vector<string> getColorBoxValues(Gtk::FlowBox* destination);
+	StringVector getColorBoxValues(Gtk::FlowBox* destination);
 
 protected:
 
-	DialogColors(BaseObjectType *obj,
-	        const Glib::RefPtr<Gtk::Builder> &builder);
-
-	static DialogColors* dc;
+	static DialogColors* instance;
 
 	/// Last Selected color.
 	string selectedColor;
@@ -126,6 +123,8 @@ protected:
 	/// Keep track of color pickers to clean when file is changed.
 	static vector<Gtk::FlowBox*> colorBoxes;
 
+	DialogColors(BaseObjectType *obj, const Glib::RefPtr<Gtk::Builder> &builder);
+
 	/**
 	 * Callback when a color is selected from the color picker.
 	 * @param button
@@ -137,7 +136,7 @@ protected:
 	 * @param colors
 	 * @return a CCS string representing the new color set.
 	 */
-	string setColors(unordered_map<string, string>& colors);
+	string setColors(StringUMap& colors);
 
 	/**
 	 * Creates a deletiable button with the desired color.

@@ -29,11 +29,10 @@ ConfigFile::ConfigFile(const string& ledspicerconf) : XMLHelper(ledspicerconf, "
 	nodeSettings = processNode(getRoot());
 	string errors(processDevices());
 	errors += processProcessLookup();
-	if (not errors.empty())
-		throw Message("Errors:\n" + errors);
+	if (not errors.empty()) throw Message("Errors:\n" + errors);
 }
 
-unordered_map<string, string> ConfigFile::getSettings() {
+StringUMap ConfigFile::getSettings() {
 	return nodeSettings;
 }
 
@@ -51,33 +50,33 @@ const string ConfigFile::processDevices() {
 	if (not deviceNode)
 		return "Missing Devices section\n";
 
-	deviceNode = deviceNode->FirstChildElement("device");
+	deviceNode = deviceNode->FirstChildElement(TYPE_DEVICE);
 	if (not deviceNode )
 		return "Empty device section\n";
 
 	string errors, name;
-	vector<unordered_map<string, string>> devices;
-	for (; deviceNode; deviceNode = deviceNode->NextSiblingElement("device")) {
-		unordered_map<string, string> deviceAttr = processNode(deviceNode);
+	StringUMapVector devices;
+	for (; deviceNode; deviceNode = deviceNode->NextSiblingElement(TYPE_DEVICE)) {
+		StringUMap deviceAttr = processNode(deviceNode);
 		try {
-			checkAttributes({NAME}, deviceAttr, "device");
+			checkAttributes({NAME}, deviceAttr, TYPE_DEVICE);
 		}
 		catch (Message& e) {
 			errors += e.getMessage() + '\n';
 			continue;
 		}
 		name = deviceAttr[NAME];
-		if (not Defaults::devicesInfo.count(name)) {
+		if (Defaults::devicesInfo.find(name) == Defaults::devicesInfo.end()) {
 			errors += "Ignored device, unknown type " + name + '\n';
 			continue;
 		}
 		// Create Unique ID.
-		unordered_map<string, string> data{
+		StringUMap data{
 			{NAME, name},
 			// Device ID is no mandatory, and if is missing on a ID device, is assumed 1
-			{ID,   deviceAttr.count(ID)   ? deviceAttr[ID] : "1"},
+			{ID,   deviceAttr.find(ID)   != deviceAttr.end() ? deviceAttr.at(ID) : "1"},
 			// Serial Devices allows empty device serial PORT, that defaults to /dev/ttyUSB0or auto-detects.
-			{PORT, deviceAttr.count(PORT) ? deviceAttr[PORT] : ""}
+			{PORT, deviceAttr.find(PORT) != deviceAttr.end() ? deviceAttr.at(PORT) : ""}
 		};
 
 		devices.push_back(deviceAttr);
@@ -103,28 +102,28 @@ const string ConfigFile::processRestrictors() {
 		return "";
 
 	string errors, name;
-	vector<unordered_map<string, string>> restrictors;
+	StringUMapVector restrictors;
 	for (; restrictorNode; restrictorNode = restrictorNode->NextSiblingElement("restrictor")) {
-		unordered_map<string, string> restrictorAttr = processNode(restrictorNode);
+		StringUMap restrictorAttr = processNode(restrictorNode);
 		try {
-			checkAttributes({NAME}, restrictorAttr, "device");
+			checkAttributes({NAME}, restrictorAttr, TYPE_DEVICE);
 		}
 		catch (Message& e) {
 			errors += '\n' + e.getMessage();
 			continue;
 		}
 		name = restrictorAttr[NAME];
-		if (not Defaults::restrictorsInfo.count(name)) {
+		if (Defaults::restrictorsInfo.find(name) == Defaults::restrictorsInfo.end()) {
 			errors += "Ignored restrictor, unknown type " + name + '\n';
 			continue;
 		}
 		// Create Unique ID.
-		unordered_map<string, string> data{
+		StringUMap data{
 			{NAME, name},
 			// Restrictor ID is no mandatory, and if is missing on a ID restrictor, is assumed 1
-			{ID,   not restrictorAttr.count(ID)   ? "1" : restrictorAttr[ID]},
+			{ID,   restrictorAttr.find(ID)   == restrictorAttr.end() ? "1" : restrictorAttr.at(ID)},
 			// Serial restrictors allows empty port, that defaults to /dev/ttyUSB0 or auto-detects.
-			{PORT, not restrictorAttr.count(PORT) ? ""  : restrictorAttr[PORT]}
+			{PORT, restrictorAttr.find(PORT) == restrictorAttr.end() ? ""  : restrictorAttr.at(PORT)}
 		};
 
 		restrictors.push_back(restrictorAttr);
@@ -140,15 +139,15 @@ const string ConfigFile::processProcessLookup() {
 	if (not plNode)
 		return "";
 
-	unordered_map<string, string> plAttr = processNode(plNode);
-	processLookupRunEvery = plAttr.count(PARAM_MILLISECONDS) ? plAttr.at(PARAM_MILLISECONDS) : "";
+	StringUMap plAttr = processNode(plNode);
+	processLookupRunEvery = plAttr.find(PARAM_MILLISECONDS) != plAttr.end() ? plAttr.at(PARAM_MILLISECONDS) : "";
 
 	plNode = plNode->FirstChildElement("map");
 	if (not plNode )
 		return "";
 
 	string errors;
-	vector<unordered_map<string, string>> process;
+	StringUMapVector process;
 	for (; plNode; plNode = plNode->NextSiblingElement("map")) {
 		plAttr = processNode(plNode);
 		try {
@@ -166,14 +165,14 @@ const string ConfigFile::processProcessLookup() {
 
 const string ConfigFile::processElements(tinyxml2::XMLElement* deviceNode, const string& deviceName) {
 
-	tinyxml2::XMLElement* elementNode = deviceNode->FirstChildElement("element");
+	tinyxml2::XMLElement* elementNode = deviceNode->FirstChildElement(TYPE_ELEMENT);
 	if (not elementNode)
 		return "Missing elements node for " + deviceName + '\n';
-	vector<unordered_map<string, string>> elements;
+	StringUMapVector elements;
 	string errors;
-	for (; elementNode; elementNode = elementNode->NextSiblingElement("element")) {
-		unordered_map<string, string> elementAttr = processNode(elementNode);
-		if (not elementAttr.count(NAME)) {
+	for (; elementNode; elementNode = elementNode->NextSiblingElement(TYPE_ELEMENT)) {
+		StringUMap elementAttr = processNode(elementNode);
+		if (elementAttr.find(NAME) == elementAttr.end()) {
 			errors += "Ignored element, Missing element name in " + deviceName + '\n';
 			continue;
 		}
@@ -189,11 +188,11 @@ const string ConfigFile::processRestrictorMaps(tinyxml2::XMLElement* restrictorN
 	tinyxml2::XMLElement* mapNode = restrictorNode->FirstChildElement("map");
 	if (not mapNode)
 		return "Missing player map node for " + restrictorName + '\n';
-	vector<unordered_map<string, string>> maps;
+	StringUMapVector maps;
 	string errors;
 	for (; mapNode; mapNode = mapNode->NextSiblingElement("map")) {
 
-		unordered_map<string, string> mapAttr = processNode(mapNode);
+		StringUMap mapAttr = processNode(mapNode);
 		try {
 			checkAttributes({PLAYER, JOYSTICK, RESTRICTOR_INTERFACE}, mapAttr, "restrictor map");
 		}
@@ -208,7 +207,7 @@ const string ConfigFile::processRestrictorMaps(tinyxml2::XMLElement* restrictorN
 }
 
 const string ConfigFile::processGroups() {
-	unordered_map<string, string> group;
+	StringUMap group;
 	tinyxml2::XMLElement* layoutNode = root->FirstChildElement("layout");
 	if (not layoutNode)
 		throw Message("Missing layout section, no groups\n");
@@ -220,28 +219,28 @@ const string ConfigFile::processGroups() {
 	group.clear();
 
 	tinyxml2::XMLElement* groupNode = layoutNode->FirstChildElement("group");
-	vector<unordered_map<string, string>> groups;
+	StringUMapVector groups;
 	if (groupNode)
 	for (; groupNode; groupNode = groupNode->NextSiblingElement("group")) {
 		group = processNode(groupNode);
-		if (not group.count(NAME)) {
+		if (group.find(NAME) == group.end()) {
 			errors += "Missing group name\n";
 			continue;
 		}
 
 		groups.push_back(group);
 
-		tinyxml2::XMLElement* elementNode = groupNode->FirstChildElement("element");
+		tinyxml2::XMLElement* elementNode = groupNode->FirstChildElement(TYPE_ELEMENT);
 
 		if (not elementNode) {
 			errors += "Group " + group[NAME] + " is empty\n";
 			continue;
 		}
 
-		vector<unordered_map<string, string>> elements;
-		for (; elementNode; elementNode = elementNode->NextSiblingElement("element")) {
-			unordered_map<string, string> elementAttr = processNode(elementNode);
-			if (not group.count(NAME)) {
+		StringUMapVector elements;
+		for (; elementNode; elementNode = elementNode->NextSiblingElement(TYPE_ELEMENT)) {
+			StringUMap elementAttr = processNode(elementNode);
+			if (group.find(NAME) == group.end()) {
 				errors += "Missing element name in group " + group[NAME] + '\n';
 				continue;
 			}

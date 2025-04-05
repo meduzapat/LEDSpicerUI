@@ -39,13 +39,15 @@ public:
 
 	virtual ~DialogAnimation() = default;
 
-	void resetFields();
-
-	void readFields();
-
-	void setFields(unordered_map<string, string> parameters);
-
-	unordered_map<string, string> readFields();
+	static void initialize(Glib::RefPtr<Gtk::Builder> const &builder);
+	static DialogAnimation* getInstance();
+	void load(XMLHelper* values) override;
+	Storage::CollectionHandler* getCollectionHandler() const override;
+	void clearForm() override;
+	void isValid() const override;
+	void storeData() override;
+	void retrieveData() override;
+	const string createUniqueId() const override;
 
 };
 

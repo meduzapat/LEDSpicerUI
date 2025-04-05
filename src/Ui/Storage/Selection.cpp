@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      Standalone.cpp
- * @since     Feb 9, 2025
+ * @file      Selection.cpp
+ * @since     Mar 24, 2025
  * @author    Patricio A. Rossi (MeduZa)
  *
  * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
@@ -20,6 +20,18 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Standalone.hpp"
+#include "Selection.hpp"
 
 using namespace LEDSpicerUI::Ui::Storage;
+
+Selection::Selection(Data* data) : Gtk::Button(data->createPrettyName()), data(data) {
+	set_halign(Gtk::Align::ALIGN_FILL);
+	set_margin_top(2);
+	set_margin_bottom(2);
+	set_margin_start(2);
+	set_margin_end(2);
+}
+
+Data* Selection::getData() const {
+	return data;
+}

@@ -17,6 +17,8 @@ target/
 CMakeCache.txt
 CMakeFiles/
 *.cmake
+*.mk
+makefile
 
 # Binaries and build artifacts
 ledspicerui

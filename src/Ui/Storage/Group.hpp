@@ -39,23 +39,19 @@ public:
 
 	using Data::Data;
 
-	Group(unordered_map<string, string>& data);
+	Group(StringUMap& data);
 
 	virtual ~Group();
 
-	const string createPrettyName() const override;
-
-	const string createUniqueId() const override;
-
 	const string getCssClass() const override;
+
+	void activate() override;
 
 	const string toXML() const override;
 
 protected:
 
 	BoxButtonCollection elements;
-
-	virtual void activate();
 
 };
 

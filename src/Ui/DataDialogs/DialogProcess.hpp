@@ -26,8 +26,6 @@
 #ifndef UI_DIALGOPROCESS_HPP_
 #define UI_DIALGOPROCESS_HPP_ 1
 
-#define processHandler Storage::CollectionHandler::getInstance(COLLECTION_PROCESS)
-
 namespace LEDSpicerUI::Ui::DataDialogs {
 
 /**
@@ -43,29 +41,14 @@ public:
 
 	virtual ~DialogProcess() = default;
 
-	/**
-	 * Instantiate an object of its class.
-	 * @param builder
-	 * @param gladeID
-	 */
 	static void initialize(Glib::RefPtr<Gtk::Builder> const &builder);
-
-	/**
-	 * Return an instance of this class.
-	 * @return
-	 */
 	static DialogProcess* getInstance();
-
 	void load(XMLHelper* values) override;
-
+	Storage::CollectionHandler* getCollectionHandler() const override;
 	void clearForm() override;
-
 	void isValid() const override;
-
 	void storeData() override;
-
 	void retrieveData() override;
-
 	const string createUniqueId() const override;
 
 protected:
@@ -82,7 +65,7 @@ protected:
 
 	const string getType() const override;
 
-	Storage::Data* getData(unordered_map<string, string>& rawData) override;
+	Storage::Data* createData(StringUMap& rawData) override;
 };
 
 } /* namespace */

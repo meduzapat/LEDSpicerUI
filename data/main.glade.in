@@ -3570,6 +3570,9 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
         </child>
       </object>
     </child>
+    <action-widgets>
+      <action-widget response="-10">BntProcessSelection</action-widget>
+    </action-widgets>
   </object>
   <object class="GtkAdjustment" id="adjustmentGP40SpeedOff">
     <property name="upper">255</property>
@@ -3660,7 +3663,7 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkEntry" id="InputInputName">
+                      <object class="GtkEntry" id="EntryInputName">
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="tooltip-text" translatable="yes">The name for this input</property>
@@ -3704,12 +3707,12 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
                         <property name="can-focus">False</property>
                         <property name="tooltip-text" translatable="yes">Select input plugin</property>
                         <items>
-                          <item>Select Plugin</item>
-                          <item>Actions</item>
-                          <item>Blinker</item>
-                          <item>Impulse</item>
-                          <item>Mame</item>
-                          <item>Network</item>
+                          <item id="0">Select Plugin</item>
+                          <item id="1">Actions</item>
+                          <item id="2">Blinker</item>
+                          <item id="3">Impulse</item>
+                          <item id="4">Mame</item>
+                          <item id="5">Network</item>
                         </items>
                       </object>
                       <packing>
@@ -3730,44 +3733,6 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
                 <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkBox">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="spacing">5</property>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="halign">end</property>
-                    <property name="label">Listeners</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkEntry" id="InputInputListenEvents">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="tooltip-text">One ore more device IDs, comma separated, used in the action.
-You can find the devices ID using inputseeker from the terminal, or by listing the input ls /dev/input/by-id</property>
-                  </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
               </packing>
             </child>
             <child>
@@ -3852,6 +3817,44 @@ You can find the devices ID using inputseeker from the terminal, or by listing t
               <packing>
                 <property name="expand">True</property>
                 <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="spacing">5</property>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="halign">end</property>
+                    <property name="label">Listeners</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEntry" id="EntryInputListenEvents">
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="tooltip-text">One ore more device IDs, comma separated, used in the action.
+You can find the devices ID using inputseeker from the terminal, or by listing the input ls /dev/input/by-id</property>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
                 <property name="position">2</property>
               </packing>
             </child>
@@ -3925,7 +3928,7 @@ You can find the devices ID using inputseeker from the terminal, or by listing t
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">0</property>
+                    <property name="position">1</property>
                   </packing>
                 </child>
                 <child>
@@ -3955,7 +3958,7 @@ You can find the devices ID using inputseeker from the terminal, or by listing t
                   <packing>
                     <property name="expand">True</property>
                     <property name="fill">True</property>
-                    <property name="position">1</property>
+                    <property name="position">2</property>
                   </packing>
                 </child>
               </object>
@@ -4033,7 +4036,8 @@ False: the element or group will stay ON.</property>
                       <object class="GtkSpinButton" id="SpinInputTimes">
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
-                        <property name="tooltip-text" translatable="yes">The number of times to blink after the trigger.</property>
+                        <property name="tooltip-text" translatable="yes">The number of times to blink after the trigger.
+Use 0 for never stop</property>
                         <property name="input-purpose">number</property>
                         <property name="adjustment">adjustmentInputBlinkTimes</property>
                         <property name="climb-rate">1</property>

@@ -42,9 +42,9 @@ XMLHelper::XMLHelper(const string& fileName, const string& fileType) {
 	}
 }
 
-unordered_map<string, string> XMLHelper::processNode(const tinyxml2::XMLElement* node) {
+StringUMap XMLHelper::processNode(const tinyxml2::XMLElement* node) {
 
-	unordered_map<string, string> groupValues;
+	StringUMap groupValues;
 
 	const tinyxml2::XMLAttribute* pAttrib = node->FirstAttribute();
 
@@ -57,7 +57,7 @@ unordered_map<string, string> XMLHelper::processNode(const tinyxml2::XMLElement*
 	return groupValues;
 }
 
-unordered_map<string, string> XMLHelper::processNode(const string& nodeElement) {
+StringUMap XMLHelper::processNode(const string& nodeElement) {
 
 	tinyxml2::XMLElement* node = root->FirstChildElement(nodeElement.c_str());
 	if (not node)
@@ -71,27 +71,27 @@ tinyxml2::XMLElement* XMLHelper::getRoot() const {
 }
 
 void XMLHelper::checkAttributes(
-	const vector<string>& attributeList,
-	const unordered_map<string, string>& subjects,
+	const StringVector& attributeList,
+	const StringUMap& subjects,
 	const string& place)
 {
 	for (const string& attribute : attributeList)
-		if (not subjects.count(attribute))
+		if (subjects.find(attribute) == subjects.end())
 			throw Message("Missing attribute '" + attribute + "' inside " + place);
 }
 
-string XMLHelper::valueOf(const unordered_map<string, string>& values, const string& value, string def) {
-	return (values.count(value) ? values.at(value) : def);
+string XMLHelper::valueOf(const StringUMap& values, const string& value, string def) {
+	return (values.find(value) != values.end() ? values.at(value) : def);
 }
 
-string XMLHelper::toXML(const unordered_map<string, string>& values) {
+string XMLHelper::toXML(const StringUMap& values) {
 	string r;
 	for (const auto& v : values)
 		r += Defaults::tab() + v.first + "=\"" + v.second + "\"\n";
 	return r;
 }
 
-vector<unordered_map<string, string>>& XMLHelper::getData(const string& dataName) {
+StringUMapVector& XMLHelper::getData(const string& dataName) {
 	return extractedData[dataName];
 }
 

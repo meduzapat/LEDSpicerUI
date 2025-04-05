@@ -21,7 +21,6 @@
  */
 
 #include "DialogForm.hpp"
-#include "Storage/NameOnly.hpp"
 #include "Storage/InputMapLink.hpp"
 #include "Storage/CollectionHandler.hpp"
 
@@ -47,34 +46,15 @@ public:
 
 	virtual ~DialogInputLinkMaps();
 
-	/**
-	 * Instantiate an object of its class.
-	 * @param builder
-	 * @param gladeID
-	 */
 	static void initialize(const Glib::RefPtr<Gtk::Builder> &builder);
-
-	void load(XMLHelper* values) override;
-
-	/**
-	 * Return an instance of this class.
-	 * @return
-	 */
 	static DialogInputLinkMaps* getInstance();
-
+	void load(XMLHelper* values) override;
+	Storage::CollectionHandler* getCollectionHandler() const override;
 	void clearForm() override;
-
 	void isValid() const override;
-
-	/**
-	 * Will convert the internal fake form data into real data.
-	 */
 	void storeData() override;
-
 	void retrieveData() override;
-
 	const string createUniqueId() const override;
-
 	void setOwner(Storage::BoxButtonCollection* collection, Storage::Data* owner = nullptr) override;
 
 protected:
@@ -83,10 +63,10 @@ protected:
 	static DialogInputLinkMaps* instance;
 
 	/// Linked maps are per input.
-	static vector<string> localCollection;
+	static StringVector localCollection;
 
 	OrdenableFlowBox
-		/// Where the temporaty input mappings will be displayed and sorted.
+		/// Where the temporary input mappings will be displayed and sorted.
 		* boxInputLinkedMappings = nullptr,
 		/// pointer to where the maps are been stored on the input map dialog.
 		* boxInputMap = nullptr;
@@ -97,7 +77,7 @@ protected:
 
 	const string getType() const override;
 
-	Storage::Data* getData(unordered_map<string, string>& rawData) override;
+	Storage::Data* createData(StringUMap& rawData) override;
 
 	/**
 	 * To remove used linked maps.

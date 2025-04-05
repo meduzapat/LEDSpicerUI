@@ -24,24 +24,16 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-Group::Group(unordered_map<string, string>& data) : Data(data) {
+Group::Group(StringUMap& data) : Data(data) {
 	// Any change on elements needs to be reflected here.
-	CollectionHandler::getInstance(COLLECTION_ELEMENT)->registerDestination(&elements);
+	CollectionHandler::getInstance(COLLECTION_ELEMENT)->registerDependency(&elements);
 }
 
 Group::~Group() {
-	if (not getValue(NAME).empty()) {
-		CollectionHandler::getInstance(COLLECTION_GROUP)->remove(createUniqueId());
+	if (not getValue(getPrimaryKey()).empty()) {
+		CollectionHandler::getInstance(COLLECTION_GROUP)->remove(this);
 	}
 	CollectionHandler::getInstance(COLLECTION_ELEMENT)->release(&elements);
-}
-
-string const Group::createPrettyName() const {
-	return fieldsData.at(NAME);
-}
-
-const string Group::createUniqueId() const {
-	return Defaults::createCommonUniqueId({getValue(NAME)});
 }
 
 const string Group::getCssClass() const {
@@ -49,13 +41,16 @@ const string Group::getCssClass() const {
 }
 
 void Group::activate() {
-	DataDialogs::DialogSelect::getInstance()->setOwner(&elements, this);
+	DataDialogs::DialogSelect::getInstance()->setDestinations({{TYPE_ELEMENT, &elements}}, this);
+	DataDialogs::DialogSelect::getInstance()->refresh();
 }
 
 const string Group::toXML() const {
+	if (fieldsData.at(DEFAULT_COLOR).empty())
+		ignored.insert(DEFAULT_COLOR);
 	string r(createOpeningXML("group", fieldsData, ignored, false));
 	for (const auto& e : elements) {
-		r += e.getData()->toXML();
+		r += e->getData()->toXML();
 	}
 	r += createClosingXML("group");
 	return r;

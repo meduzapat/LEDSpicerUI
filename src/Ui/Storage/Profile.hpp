@@ -37,28 +37,15 @@ class Profile: public Data {
 
 public:
 
-	enum class Selectors : uint8_t {
-		AlwaysOnElements,
-		AlwaysOnGroups,
-		Inputs,
-		Animationss,
-		StartTransitions,
-		EndTransitions
-	};
+	using Data::Data;
 
-	Profile(unordered_map<string, string>& data);
+	Profile(StringUMap& data);
 
 	virtual ~Profile();
 
-	const string createPrettyName() const override;
-
-	const string createUniqueId() const override;
-
 	const string getCssClass() const override;
-
+	void activate() override;
 	const string toXML() const override;
-
-	void lateActivate(Selectors selector);
 
 protected:
 
@@ -66,9 +53,20 @@ protected:
 		alwaysOnElements,
 		alwaysOnGroups,
 		inputs,
-		animationss,
+		animations,
 		startTransitions,
 		endTransitions;
+
+	unordered_map<string, BoxButtonCollection*> itemCollections {
+		{TYPE_ELEMENT,          &alwaysOnElements},
+		{"group",            &alwaysOnGroups},
+		{"input",            &inputs},
+		{"animation",        &animations},
+		{"startTransitions", &startTransitions},
+		{"endTransitions",   &endTransitions}
+	};
+
+	const string getPrimaryKey() const override;
 
 };
 

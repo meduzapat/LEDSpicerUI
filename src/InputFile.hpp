@@ -44,7 +44,7 @@ protected:
 
 const string processMaps(tinyxml2::XMLElement* mapsNode, const string& inputName);
 
-const string processInputSources(const string& inputName, tinyxml2::XMLElement* inputNode, unordered_set<string>& listenEvents);
+const string processInputSources(const string& inputName, tinyxml2::XMLElement* inputNode, StringUSet& listenEvents);
 
 };
 

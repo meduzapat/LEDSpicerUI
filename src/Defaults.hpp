@@ -29,6 +29,7 @@ using std::unordered_map;
 
 #include <unordered_set>
 using std::unordered_set;
+using std::set;
 
 #include <vector>
 using std::vector;
@@ -48,102 +49,140 @@ using std::stringstream;
 
 #define DEFAULT_MESSAGE "This is an auto-generated file by " PACKAGE_STRING "."
 
-#define DEFAULT_USERID   "1000"
-#define DEFAULT_GROUPID  "1000"
-#define DEFAULT_PORT     "16161"
-#define DEFAULT_FPS      "30"
-#define DEFAULT_COLORS   "basicColors"
-#define DEFAULT_LOGLEVEL "Info"
-
-#define DEFAULT_COLORSINFO   "true"
-#define DEFAULT_CRAFTPROFILE "true"
-#define DEFAULT_DATASOURCE   "file,mame"
-
-#define DEFAULT_RUNEVERY ""
-#define DEFAULT_PROFILE  "default"
-
-#define BACKGROUND_COLOR "backgroundColor"
-#define DEFAULT_PROFILE_BACKGROUND_COLOR "Off"
-
-#define NAME     "name"
-#define ID       "boardId"
-#define FILENAME "filename"
-#define PORT     "port"
-#define PINS     "leds"
-
-#define PIN         "led"
-#define RED_PIN     "red"
-#define GREEN_PIN   "green"
-#define BLUE_PIN    "blue"
-#define SOLENOID    "solenoid"
-#define POSITION    "position"
-#define POSITIONS   "positions"
-#define STRIPSIZE   "stripSize"
-#define TIME_ON     "timeOn"
-#define COLORFORMAT "colorFormat"
-
-#define CHANGE_POINT "changePoint"
-#define DEFAULT_CHANGE_VALUE 64.00
-
-#define DEFAULT_COLOR  "defaultColor"
-#define DEFAULT_SOLENOID 50
-
-// CSS
-#define COLOR_PIN      "pinSingle"
-#define COLOR_SOLENOID "pinSolenoid"
-#define COLOR_RED      "pinRed"
-#define COLOR_GREEN    "pinGreen"
-#define COLOR_BLUE     "pinBlue"
-#define COLOR_MULTIPLE "pinMulti"
-#define CONNECTOR_BOX  "connectorBox"
-#define PIN_LABEL      "pinLabel"
-#define NO_COLOR       ""
-
-#define PARAM_MILLISECONDS "runEvery"
-#define PARAM_PROCESS_NAME "processName"
-#define PARAM_PROCESS_POS  "position"
-#define PARAM_SYSTEM       "system"
-
-#define DEFAULT_ELEMENT_TYPE "9"
-#define DEFAULT_BRIGHTNESS   "100"
-
-#define US360_HAS_RESTRICTOR "hasRestrictor"
-#define US360_USE_MOUSE      "handleMouse"
-#define GZ49_WILLIAMS        "williams"
-#define GZ40_SPEED_ON        "speedOn"
-#define GZ40_SPEED_OFF       "speedOff"
-#define GZ40_DEFAULT_SPEED   12
-#define RESTRICTOR_INTERFACE "id"
-
-#define PLAYER               "player"
-#define JOYSTICK             "joystick"
-
-#define LINKED_ITEMS         "linkedTriggers"
-#define TRIGGER              "trigger"
-#define TARGET               "target"
-#define TYPE                 "type"
-#define COLOR                "color"
-#define FILTER               "filter"
-#define ELEMENT              "Element"
-#define GROUP                "Group"
-#define BRIGHTNESS           "brightness"
-
-#define IMPORT_ALL         15
-
-// Collections
-#define COLLECTION_DEVICES           "devices"
-#define COLLECTION_RESTRICTORS       "restrictors"
-#define COLLECTION_ELEMENT           "elements"
-#define COLLECTION_GROUP             "groups"
-#define COLLECTION_PROCESS           "processes"
-#define COLLECTION_RESTRICTOR_MAP    "playerCombinations"
-#define COLLECTION_INPUT             "inputNames"
-#define COLLECTION_INPUT_EVENTS      "inputEvents"
-#define COLLECTION_INPUT_MAPS        "linkedMaps"
-#define COLLECTION_ANIMATIONS        "animations"
-#define COLLECTION_PROFILES          "profiles"
+using StringUMap       = unordered_map<string, string>;
+using StringUMapVector = vector<StringUMap>;
+using StringUSet       = unordered_set<string>;
+using StringSet        = set<string>;
+using StringVector     = vector<string>;
 
 namespace LEDSpicerUI {
+
+namespace Constants {
+
+/// Separators.
+constexpr char FIELD_SEPARATOR    = 30;  // Record Separator (RS)
+constexpr char RECORD_SEPARATOR   = 31;  // Unit Separator (US)
+constexpr char UNIT_SEPARATOR     = 32;  // Space
+constexpr char ID_SEPARATOR       = ','; // Comma
+constexpr char ID_GROUP_SEPARATOR = '|'; // Pipe
+
+/// LEDSpicer configuration file keys.
+constexpr const char* DEFAULT_USERID   = "1000";
+constexpr const char* DEFAULT_GROUPID  = "1000";
+constexpr const char* DEFAULT_PORT     = "16161";
+constexpr const char* DEFAULT_FPS      = "30";
+constexpr const char* DEFAULT_COLORS   = "basicColors";
+constexpr const char* DEFAULT_LOGLEVEL = "Info";
+
+/// Emitter configuration file keys.
+constexpr const char* DEFAULT_COLORSINFO   = "true";
+constexpr const char* DEFAULT_CRAFTPROFILE = "true";
+constexpr const char* DEFAULT_DATASOURCE   = "file,mame";
+
+/// ProcessLookup configuration file keys.
+constexpr const char* PARAM_MILLISECONDS = "runEvery";
+constexpr const char* PARAM_PROCESS_NAME = "processName";
+constexpr const char* PARAM_PROCESS_POS  = "position";
+constexpr const char* PARAM_SYSTEM       = "system";
+constexpr const char* DEFAULT_RUNEVERY   = "";
+
+/// Profile configuration keys.
+constexpr const char* DEFAULT_PROFILE                  = "default";
+constexpr const char* BACKGROUND_COLOR                 = "backgroundColor";
+constexpr const char* DEFAULT_PROFILE_BACKGROUND_COLOR = "Off";
+
+/// Hardware configuration keys.
+constexpr const char* NAME     = "name";
+constexpr const char* ID       = "boardId";
+constexpr const char* FILENAME = "filename";
+constexpr const char* PORT     = "port";
+constexpr const char* PINS     = "leds";
+
+constexpr float DEFAULT_CHANGE_VALUE    = 64.00f;
+
+/// Element configuration keys.
+constexpr const char* PIN           = "led";
+constexpr const char* RED_PIN       = "red";
+constexpr const char* GREEN_PIN     = "green";
+constexpr const char* BLUE_PIN      = "blue";
+constexpr const char* SOLENOID      = "solenoid";
+constexpr const char* POSITION      = "position";
+constexpr const char* POSITIONS     = "positions";
+constexpr const char* STRIPSIZE     = "stripSize";
+constexpr const char* TIME_ON       = "timeOn";
+constexpr const char* COLORFORMAT   = "colorFormat";
+constexpr const char* CHANGE_POINT  = "changePoint";
+constexpr const char* DEFAULT_COLOR = "defaultColor";
+constexpr const char* BRIGHTNESS    = "brightness";
+
+constexpr const char* DEFAULT_BRIGHTNESS = "100";
+constexpr unsigned int DEFAULT_SOLENOID  = 50;
+
+/// CSS-related constants
+constexpr const char* COLOR_PIN      = "pinSingle";
+constexpr const char* COLOR_SOLENOID = "pinSolenoid";
+constexpr const char* COLOR_RED      = "pinRed";
+constexpr const char* COLOR_GREEN    = "pinGreen";
+constexpr const char* COLOR_BLUE     = "pinBlue";
+constexpr const char* COLOR_MULTIPLE = "pinMulti";
+constexpr const char* PIN_LABEL      = "pinLabel";
+constexpr const char* CONNECTOR_BOX  = "connectorBox";
+constexpr const char* NO_COLOR       = "";
+
+/// Restrictor configuration keys.
+constexpr const char* US360_HAS_RESTRICTOR = "hasRestrictor";
+constexpr const char* US360_USE_MOUSE      = "handleMouse";
+constexpr const char* GZ49_WILLIAMS        = "williams";
+constexpr const char* GZ40_SPEED_ON        = "speedOn";
+constexpr const char* GZ40_SPEED_OFF       = "speedOff";
+constexpr int GZ40_DEFAULT_SPEED           = 12;  // Integer
+constexpr const char* RESTRICTOR_INTERFACE = "id";
+
+/// Input mapping configuration keys.
+constexpr const char* LINKED_ITEMS = "linkedTriggers";
+constexpr const char* TRIGGER      = "trigger";
+constexpr const char* TARGET       = "target";
+constexpr const char* TYPE         = "type";
+constexpr const char* COLOR        = "color";
+constexpr const char* FILTER       = "filter";
+constexpr const char* ELEMENT      = "Element";
+constexpr const char* GROUP        = "Group";
+
+/// UI-related constants.
+constexpr const char* DEFAULT_ELEMENT_TYPE = "9";
+constexpr const char* PLAYER               = "player";
+constexpr const char* JOYSTICK             = "joystick";
+
+/// Collection names.
+constexpr const char* COLLECTION_DEVICES        = "devices";
+constexpr const char* COLLECTION_RESTRICTORS    = "restrictors";
+constexpr const char* COLLECTION_ELEMENT        = "elements";
+constexpr const char* COLLECTION_GROUP          = "groups";
+constexpr const char* COLLECTION_PROCESS        = "processes";
+constexpr const char* COLLECTION_RESTRICTOR_MAP = "playerCombinations";
+constexpr const char* COLLECTION_INPUT          = "inputs";
+constexpr const char* COLLECTION_INPUT_EVENTS   = "listenEvents";
+constexpr const char* COLLECTION_INPUT_MAPS     = "linkedMaps";
+constexpr const char* COLLECTION_ANIMATIONS     = "animations";
+constexpr const char* COLLECTION_PROFILES       = "profiles";
+
+/// Types
+constexpr const char* TYPE_DEVICE         = "device";
+constexpr const char* TYPE_RESTRICTOR     = "restrictor";
+constexpr const char* TYPE_ELEMENT        = "element";
+constexpr const char* TYPE_GROUP          = "group";
+constexpr const char* TYPE_PROCESS        = "process";
+constexpr const char* TYPE_RESTRICTOR_MAP = "playerCombination";
+constexpr const char* TYPE_INPUT          = "input";
+constexpr const char* TYPE_INPUT_EVENT    = "listenEvent";
+constexpr const char* TYPE_INPUT_MAP      = "linkedMap";
+constexpr const char* TYPE_ANIMATION      = "animation";
+constexpr const char* TYPE_PROFILE        = "profile";
+
+
+} /* namespace */
+
+using namespace Constants;
 
 /**
  * LEDSpicerUI::Defaults
@@ -152,13 +191,6 @@ namespace LEDSpicerUI {
 class Defaults {
 
 public:
-
-	// Separators.
-	static constexpr char FIELD_SEPARATOR    = 30;    // Record Separator (RS)
-	static constexpr char RECORD_SEPARATOR   = 31;    // Unit Separator (US)
-	static constexpr char UNIT_SEPARATOR     = 32;    // Space
-	static constexpr char ID_SEPARATOR       = ',';   // Comma
-	static constexpr char ID_GROUP_SEPARATOR = '|';   // Pipe
 
 	/// Taken from Restrictors in ledspicer.
 	enum class Ways : uint8_t {invalid, w2, w2v, w4, w4x, w8, w16, w49, analog, mouse, rotary8, rotary12};
@@ -260,7 +292,7 @@ public:
 	 * @param fieldsData
 	 * @return
 	 */
-	static string createHardwareUniqueId(const unordered_map<string, string>& fieldsData, bool isDevice = true);
+	static string createHardwareUniqueId(const StringUMap& fieldsData, bool isDevice = true);
 
 	/**
 	 * For most data fields that uses one or more strings this will just work.
@@ -268,7 +300,7 @@ public:
 	 * @param fieldsData
 	 * @return
 	 */
-	static string createCommonUniqueId(const vector<string>& fieldsData);
+	static string createCommonUniqueId(const StringVector& fieldsData);
 
 	/**
 	 * Check if a string stores a numeric value
@@ -301,7 +333,7 @@ public:
 	 * @param limit
 	 * @return an array with the string chunks.
 	 */
-	static vector<string> explode(
+	static StringVector explode(
 		const string& text,
 		const char delimiter,
 		const size_t limit = 0
@@ -313,7 +345,7 @@ public:
 	 * @param delimiter
 	 * @return
 	 */
-	static string implode(const vector<string>& values, const string& delimiter);
+	static string implode(const StringVector& values, const string& delimiter);
 
 	/**
 	 * Merge an array into a string using a char delimiter.
@@ -321,7 +353,7 @@ public:
 	 * @param delimiter
 	 * @return
 	 */
-	static string implode(const vector<string>& values, const char& delimiter);
+	static string implode(const StringVector& values, const char& delimiter);
 
 	/**
 	 * Merge a set into a string using a char delimiter.
@@ -329,7 +361,7 @@ public:
 	 * @param delimiter Character used to separate elements.
 	 * @return Merged string with elements separated by the delimiter.
 	 */
-	static string implode(const unordered_set<string>& values, const char& delimiter);
+	static string implode(const StringUSet& values, const char& delimiter);
 
 	/**
 	 * Removes spaces from the left
@@ -364,7 +396,7 @@ public:
 	static string detectElementType(const Glib::ustring& name);
 
 	/// A list of all possible restrictors and rotators Ways (positions).
-	static const vector<Ways> allWays;
+	static constexpr std::array<Ways, 11> allWays{Ways::w2, Ways::w2v, Ways::w4, Ways::w4x, Ways::w8, Ways::w16, Ways::w49, Ways::analog, Ways::mouse, Ways::rotary8, Ways::rotary12};
 
 	/// A list of device to their information.
 	static const unordered_map<string, DeviceInfo> devicesInfo;
@@ -376,7 +408,7 @@ public:
 	static const unordered_map<string, Ways> wayIds;
 
 	/// A list of different element types.
-	static const vector<string> elementTypes;
+	static const StringVector elementTypes;
 
 	/**
 	 * Set a new subtitle.
@@ -449,7 +481,7 @@ public:
 		Gtk::ComboBoxText* comboBox,
 		int from,
 		int to,
-		const vector<string>& ignoreList = {}
+		const StringVector& ignoreList = {}
 	);
 
 	/**
@@ -491,17 +523,17 @@ public:
 
 protected:
 
-	static string tabs;
+	/// Keeps track of the number of tabulations for XML files.
+	inline static string tabs;
 
 	/// Dirty Flag
-	static bool
-		dirty,
-		ignoreChanges;
+	inline static bool dirty = false;
+	inline static bool ignoreChanges = false;
 
 	/// Pointer to the header.
-	static Gtk::HeaderBar* header;
+	inline static Gtk::HeaderBar* header = nullptr;
 
-	static Gtk::Button* btnSave;
+	inline static Gtk::Button* btnSave = nullptr;
 };
 
 } /* namespace */

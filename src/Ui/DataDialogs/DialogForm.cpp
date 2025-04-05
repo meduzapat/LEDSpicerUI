@@ -25,7 +25,7 @@
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
 DialogForm::DialogForm(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>&) : Gtk::Dialog(obj) {
-	// this needs to be run last
+	// this needs to be run last,
 	signal_show().connect(sigc::mem_fun(*this, &DialogForm::refreshBox), true);
 }
 
@@ -33,14 +33,16 @@ DialogForm::~DialogForm() {
 	delete box;
 }
 
-void DialogForm::createItems(vector<unordered_map<string, string>>& rawCollection, XMLHelper* values) {
-	mode = Modes::LOAD;
+void DialogForm::createItems(StringUMapVector& rawCollection, XMLHelper* values) {
+	// Very similar to ADD but it only uses the form to validate data,
+	// also items are not added to the box.
+	action = Actions::LOAD;
 	string errors;
 	for (auto& rawItem : rawCollection) {
 		resetForm();
-		currentData = getData(rawItem);
-		// Sanity check by load and unload, this will sanitize (or error out) the data.
+		currentData = createData(rawItem);
 		currentData->activate();
+		// Sanity check by load and unload, this will sanitize (or error out) the data.
 		retrieveData();
 		try {
 			isValid();
@@ -51,53 +53,56 @@ void DialogForm::createItems(vector<unordered_map<string, string>>& rawCollectio
 			Defaults::markDirty();
 			continue;
 		}
+		// This will clean any anomaly.
+		currentData->wipe();
 		storeData();
 		// BoxButton will take care for data.
-		Storage::BoxButton& b(items->add(currentData));
+		Storage::BoxButton& b(items->create(currentData));
+		getCollectionHandler()->add(currentData);
 		addButtons(b);
-		box->add(b);
 		createSubItems(values);
 		currentData->deActivate();
 	}
-	// force a refresh to clean any box handle by main process.
-	refreshBox();
+	// Force a refresh to clean any box handle by main process and display the loaded items.
 	currentData = nullptr;
 	if (not errors.empty()) {
 		Message::displayError("Errors in " + getType() + ":\n" + errors);
 	}
 }
 
-void DialogForm::reindex() {
-	items->reindex(box);
-}
-
 void DialogForm::refreshBox() {
+	if (childDialog) {
+		childDialog->refreshBox();
+	}
 	box->wipe();
+	if (not items) return;
 	items->populateBox(box);
 	box->show_all();
 }
 
 void DialogForm::setOwner(Storage::BoxButtonCollection* collection, Storage::Data* owner) {
-	box->wipe();
-	DialogForm::owner = owner;
+	this->ownerData = owner;
 	items = collection;
-	items->populateBox(box);
 }
 
 void DialogForm::resetForm() {
 	clearForm();
 }
 
-vector<const unordered_map<string, string>*> DialogForm::getValues() {
-	vector<const unordered_map<string, string>*> values;
+vector<const StringUMap*> DialogForm::getValues() {
+	vector<const StringUMap*> values;
 	for (const auto& b : *items)
-		values.push_back(b.getData()->getValues());
+		values.push_back(b->getData()->getValues());
 	return values;
 }
 
-LEDSpicerUI::Ui::Storage::Data* DialogForm::getData() {
-	unordered_map<string, string> rawData;
-	return getData(rawData);
+void DialogForm::reindex() {
+	items->reindex(box);
+}
+
+LEDSpicerUI::Ui::Storage::Data* DialogForm::createData() {
+	StringUMap rawData;
+	return createData(rawData);
 }
 
 void DialogForm::setSignalAdd() {
@@ -123,13 +128,11 @@ void DialogForm::createDeleteButton(Storage::BoxButton& boxButton, bool askConfi
 	button->set_image_from_icon_name("edit-delete", Gtk::ICON_SIZE_BUTTON);
 	button->signal_clicked().connect([&, askConfirmation]() {
 		if (askConfirmation) {
-			if (Message::ask("Are you sure you want to remove " + boxButton.getData()->createPrettyName() + "?") == Gtk::ResponseType::RESPONSE_YES) {
-				onDelClicked(boxButton);
+			if (Message::ask("Are you sure you want to remove " + boxButton.getData()->createPrettyName() + "?") != Gtk::ResponseType::RESPONSE_YES) {
+				return;
 			}
 		}
-		else {
-			onDelClicked(boxButton);
-		}
+		onDelClicked(boxButton);
 	});
 }
 
@@ -159,19 +162,33 @@ void DialogForm::addButtons(Storage::BoxButton& boxButton) {
 
 void DialogForm::onAddClicked() {
 	// set dialog to add.
-	mode = Modes::ADD;
+	action = Actions::ADD;
 	resetForm();
 	// Set label and title.
 	set_title("Add New " + getType());
 	btnApply->set_label("Create");
-	currentData = getData();
+	currentData = createData();
 	currentData->activate();
 	// Run Dialog.
 	if (run() == Gtk::ResponseType::RESPONSE_APPLY) {
+		try {
+			isValid();
+		}
+		catch (Message& e) {
+			delete currentData;
+			e.displayError(this);
+			Defaults::markDirty();
+			currentData = nullptr;
+			hide();
+			return;
+		}
+		// This will clean any anomaly.
+		currentData->wipe();
 		storeData();
 		Defaults::markDirty();
 		// store.
-		Storage::BoxButton& bBox(items->add(currentData));
+		Storage::BoxButton& bBox(items->create(currentData));
+		getCollectionHandler()->add(currentData);
 		addButtons(bBox);
 		// Add into the box.
 		box->add(bBox);
@@ -189,21 +206,33 @@ void DialogForm::onAddClicked() {
 }
 
 void DialogForm::onEditClicked(Storage::BoxButton& boxButton) {
-	mode = Modes::EDIT;
+	/*
+	 * Steps:
+	 * 1 Set the action to edit and reset the form
+	 * 2 extract payload from the boxbutton and activate any children.
+	 * 3 store the current unique id and set the dialog texts and fields.
+	 * 4 run the dialog and wait for the apply signal (4a) or cancel (5).
+	 * 4a clean previous data and store new values, update collection and label.
+	 * 5 deactivate and hide.
+	 */
+	action = Actions::EDIT;
 	resetForm();
 	currentData = boxButton.getData();
 	currentData->activate();
+	string oldName(currentData->createUniqueId());
 	// Set label and title.
-	set_title("Edit " + getType());
+	set_title("Edit " + getType() + " " + currentData->createPrettyName());
 	btnApply->set_label("Save");
 	// Populate form.
 	retrieveData();
 	if (run() == Gtk::RESPONSE_APPLY) {
-		afterEdit(boxButton);
 		Defaults::markDirty();
-		// Store data.
+		currentData->wipe();
 		storeData();
+		getCollectionHandler()->replace(currentData, oldName);
 		boxButton.updateLabel();
+		// This will reindex the box located on this dialog but that is handled by its children dialog.
+		if (childDialog) childDialog->reindex();
 	}
 	currentData->deActivate();
 	currentData = nullptr;
@@ -214,6 +243,7 @@ void DialogForm::onDelClicked(Storage::BoxButton& boxButton) {
 	currentData = boxButton.getData();
 	currentData->activate();
 	afterDeleteConfirmation(boxButton);
+	getCollectionHandler()->remove(currentData);
 	Defaults::markDirty();
 	box->remove(boxButton);
 	// This will also delete the object, the destructor must call deActivate if necessary.
@@ -222,25 +252,25 @@ void DialogForm::onDelClicked(Storage::BoxButton& boxButton) {
 }
 
 void DialogForm::onCloneClicked(Storage::BoxButton& boxButton) {
-	mode = Modes::ADD;
+	action = Actions::ADD;
 	resetForm();
-	auto values = unordered_map<string, string>(boxButton.getData()->getValues()->begin(), boxButton.getData()->getValues()->end());
-	// Check for other copies.
-	auto name = values.at(NAME) + " copy";
-	uint8_t count = 0;
-	while (items->isset(name + (count ? std::to_string(count) : ""))) {
-		++count;
+	// clone the data.
+	uint8_t count = 1;
+	Storage::Data* tempData = nullptr;
+	// Create copies until one that doesn't exist is created.
+	do {
+		if (tempData) delete tempData;
+		StringUMap values(boxButton.getData()->copyValues(count++));
+		tempData = createData(values);
 	}
-	name += count ? std::to_string(count) : "";
-	values.at(NAME) = std::move(name);
-	currentData = getData(values);
+	while (getCollectionHandler()->isSet(tempData));
+
+	currentData = tempData;
 	// Add item and the box and set buttons.
-	Storage::BoxButton& bBox(items->add(currentData));
+	Storage::BoxButton& bBox(items->create(currentData));
 	addButtons(bBox);
 	box->add(bBox);
-	currentData->activate();
-	retrieveData();
-	storeData();
+	getCollectionHandler()->add(currentData);
 	Defaults::markDirty();
 	bBox.updateLabel();
 	currentData->deActivate();

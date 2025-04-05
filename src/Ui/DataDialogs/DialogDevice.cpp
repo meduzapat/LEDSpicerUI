@@ -39,6 +39,8 @@ DialogDevice* DialogDevice::getInstance() {
 DialogDevice::DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
 	DialogForm(obj, builder)
 {
+	// This dialog is parent of the Element dialog.
+	childDialog = DialogElement::getInstance();
 
 	// Connect Device Box and buttons.
 	builder->get_widget_derived("BoxDevices", box);
@@ -89,7 +91,7 @@ DialogDevice::DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 		const uint16_t pinsCount(spinnerLeds->get_value_as_int() * 3);
 		if (comboBoxDevices->get_active_id().empty() or not pinsCount)
 			return;
-		DataDialogs::DialogElement::getInstance()->changeNumberOfPins(pinsCount);
+		DialogElement::getInstance()->changeNumberOfPins(pinsCount);
 	});
 
 	/*
@@ -117,18 +119,14 @@ DialogDevice::DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 
 		const uint16_t totalPins(Defaults::devicesInfo.at(name).pins);
 		const string currentName(currentData->getValue(NAME));
-		// For loading or non stored data, do a change device without asking for losing the data.
-		if (mode == Modes::LOAD or currentName.empty()) {
-			// Destroy device but keep the pointer.
-			currentData->destroy();
-			clearForm();
+		// For non stored data, do a change device without asking for losing the data.
+		if (currentName.empty()) {
+			recreateData();
 		}
 		// If there is a device already, clean the form and change to the new device, warn the user about losing data.
 		else if (name != currentName) {
 			if (Message::ask("Are you sure you want to change the device? all settings will be loss") == Gtk::RESPONSE_YES) {
-				// Destroy device but keep the pointer.
-				currentData->destroy();
-				clearForm();
+				recreateData();
 			}
 			else {
 				// If the user decide to keep the data, move the selection to the previous selected device.
@@ -144,13 +142,14 @@ DialogDevice::DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 				idListstore,
 				Defaults::devicesInfo.at(name).maxIds,
 				[=](const string& id) {
-					return devicesHandler->isUsed(Defaults::createHardwareUniqueId({{NAME, name}, {ID, id}}));
+					return getCollectionHandler()->isIdSet(Defaults::createHardwareUniqueId({{NAME, name}, {ID, id}}));
 				},
 				"Device Hardware Number",
 				"Hardware #"
 			);
 			comboBoxId->get_parent()->show();
 		}
+
 		if (Defaults::isSerial(name)) {
 			inputDevicePort->get_parent()->show();
 		}
@@ -169,15 +168,9 @@ DialogDevice::DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 		}
 		else {
 			btnAddElement->set_sensitive(true);
-			DataDialogs::DialogElement::getInstance()->changeNumberOfPins(totalPins);
+			DialogElement::getInstance()->changeNumberOfPins(totalPins);
 		}
 
-		// Special Features.
-		DataDialogs::DialogElement::getInstance()->setRules(
-			Defaults::isMonochrome(name),
-			Defaults::devicesInfo.at(name).layoutRGB,
-			Defaults::devicesInfo.at(name).supportStrip
-		);
 		brief->set_text(Defaults::devicesInfo.at(name).brief);
 		btnApply->set_sensitive(true);
 	});
@@ -188,11 +181,14 @@ void DialogDevice::load(XMLHelper* values) {
 }
 
 void DialogDevice::createSubItems(XMLHelper* values) {
-	DialogElement::getInstance()->load(values);
+	childDialog->load(values);
+}
+
+LEDSpicerUI::Ui::Storage::CollectionHandler* DialogDevice::getCollectionHandler() const {
+	return LEDSpicerUI::Ui::Storage::CollectionHandler::getInstance(COLLECTION_DEVICES);
 }
 
 void DialogDevice::resetForm() {
-	// reset to nothing.
 	comboBoxDevices->set_active_id("");
 	clearForm();
 }
@@ -208,8 +204,6 @@ void DialogDevice::clearForm() {
 	spinnerLeds->set_value(0.00);
 	spinnerLeds->update();
 	brief->set_text("");
-	DataDialogs::DialogElement::getInstance()->changeNumberOfPins(0);
-	refreshBox();
 }
 
 void DialogDevice::isValid() const {
@@ -225,15 +219,6 @@ void DialogDevice::isValid() const {
 		throw Message("Invalid device");
 	}
 
-	/* TODO: In some cases it is needed to check how many serial devices are set.
-	 * if (Defaults::isSerial(name)) {
-		// Serial can be empty only once per device.
-		if (port.empty()) {
-			inputDevicePort->grab_focus();
-			throw Message("You need to enter a serial port\n");
-		}
-	}*/
-
 	if (Defaults::isIdUser(name) and id.empty()) {
 		throw Message("Invalid device number");
 	}
@@ -241,7 +226,7 @@ void DialogDevice::isValid() const {
 	if (Defaults::isVariable(name)) {
 		string pins(spinnerLeds->get_text());
 		if (not Defaults::isBetween(pins, 1, Defaults::devicesInfo.at(name).pins)) {
-			if (mode != Modes::LOAD)
+			if (action != Actions::LOAD)
 				spinnerLeds->grab_focus();
 			throw Message("The number of pins need to be between one and the number of pins the device allows (" + std::to_string(Defaults::devicesInfo.at(name).pins) + ")");
 		}
@@ -250,31 +235,22 @@ void DialogDevice::isValid() const {
 	string
 		newName(createUniqueId()),
 		deviceName("Device " + Defaults::devicesInfo.at(name).name);
-	if (mode == Modes::EDIT) {
+	if (action == Actions::EDIT) {
 		checkDupe = (currentData->createUniqueId() != newName);
 	}
 
-	if (Defaults::isIdUser(name) and checkDupe and devicesHandler->isUsed(newName)) {
-		throw Message(deviceName + " ID " + id + " already exists");
-	}
-	if (Defaults::isSerial(name) and checkDupe and devicesHandler->isUsed(newName)) {
-		throw Message(deviceName + " that connects to " + (port.empty() ? "<autodetect>" : port) + " already exists");
-	}
-	if (checkDupe and devicesHandler->isUsed(newName)) {
+	if (checkDupe and getCollectionHandler()->isIdSet(newName)) {
+		if (Defaults::isIdUser(name)) {
+			throw Message(deviceName + " ID " + id + " already exists");
+		}
+		if (Defaults::isSerial(name)) {
+			throw Message(deviceName + " that connects to " + (port.empty() ? "<autodetect>" : port) + " already exists");
+		}
 		throw Message(deviceName + " already exists");
 	}
 }
 
 void DialogDevice::storeData() {
-	if (mode == Modes::EDIT) {
-		devicesHandler->replace(currentData->createUniqueId(), createUniqueId());
-	}
-	else {
-		devicesHandler->add(createUniqueId());
-	}
-
-	// This will clean any anomaly.
-	currentData->wipe();
 
 	const string name(comboBoxDevices->get_active_id());
 
@@ -294,7 +270,6 @@ void DialogDevice::storeData() {
 	if (Defaults::isMonochrome(name)) {
 		currentData->setValue(CHANGE_POINT, std::to_string(static_cast<uint8_t>(changePoint->get_value())));
 	}
-	DataDialogs::DialogElement::getInstance()->reindex();
 }
 
 void DialogDevice::retrieveData() {
@@ -310,7 +285,7 @@ void DialogDevice::retrieveData() {
 		inputDevicePort->set_text(currentData->getValue(PORT));
 	}
 	if (Defaults::isVariable(name)) {
-		spinnerLeds->set_text(currentData->getValue(PINS));
+		spinnerLeds->set_value(std::stod(currentData->getValue(PINS)));
 	}
 	if (Defaults::isMonochrome(name)) {
 		changePoint->set_value(std::stod(currentData->getValue(CHANGE_POINT, std::to_string(DEFAULT_CHANGE_VALUE))));
@@ -327,16 +302,22 @@ string const DialogDevice::createUniqueId() const {
 }
 
 const string DialogDevice::getType() const {
-	return "device";
+	return TYPE_DEVICE;
 }
 
-LEDSpicerUI::Ui::Storage::Data* DialogDevice::getData(unordered_map<string, string>& rawData) {
+LEDSpicerUI::Ui::Storage::Data* DialogDevice::createData(StringUMap& rawData) {
 	return new Storage::Device(rawData);
+}
+
+void DialogDevice::recreateData() {
+	currentData->reset();
+	clearForm();
+	refreshBox();
 }
 
 void DialogDevice::markDevicesUsed() {
 	for (auto& di : Defaults::devicesInfo) {
-		const uint total    = devicesHandler->count(di.first);
+		const uint total     = getCollectionHandler()->countByKey(NAME, di.first);
 		const auto& children = devicesListstore->children();
 
 		for (auto iter = children.begin(); iter != children.end(); ++iter) {

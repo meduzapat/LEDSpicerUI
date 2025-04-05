@@ -33,8 +33,7 @@ MainDialogs::MainDialogs(Glib::RefPtr<Gtk::Builder> const &builder, Gtk::Applica
 		"Select Project Directory",
 		Gtk::FileChooserAction::FILE_CHOOSER_ACTION_SELECT_FOLDER,
 		Gtk::DialogFlags::DIALOG_MODAL | Gtk::DialogFlags::DIALOG_DESTROY_WITH_PARENT | Gtk::DialogFlags::DIALOG_USE_HEADER_BAR
-	),
-	inputs(FILENAME)
+	)
 {
 
 	DialogColors::initialize(builder);
@@ -73,7 +72,7 @@ MainDialogs::MainDialogs(Glib::RefPtr<Gtk::Builder> const &builder, Gtk::Applica
 
 MainDialogs::~MainDialogs() {
 
-	// data dialogs.
+	// Data dialogs.
 	delete DataDialogs::DialogSelect::getInstance();
 	delete DataDialogs::DialogProfile::getInstance();
 	delete DataDialogs::DialogElement::getInstance();
@@ -86,7 +85,7 @@ MainDialogs::~MainDialogs() {
 	delete DataDialogs::DialogGroup::getInstance();
 	delete DataDialogs::DialogDevice::getInstance();
 
-	// dialogs.
+	// Miscellaneous dialogs.
 	delete DialogColors::getInstance();
 	Storage::CollectionHandler::purgeAll();
 }

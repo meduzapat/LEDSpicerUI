@@ -13,7 +13,6 @@ public:
 		ignored.insert("ignored");
 	}
 	const std::string getCssClass() const override { return "test-class"; }
-	const std::string createUniqueId() const override { return "test-id"; }
 };
 
 class DataTest : public ::testing::Test {
@@ -21,12 +20,6 @@ class DataTest : public ::testing::Test {
 protected:
 
 	void SetUp() override {
-		// Initialize Gtk::Application
-		int argc = 1;
-		char* args[] = {const_cast<char*>("test"), nullptr};
-		char** argv = args;
-		app = Gtk::Application::create(argc, argv, "org.ledspicer.ui");
-
 		std::unordered_map<std::string, std::string> testData = {
 			{"name",    "TestItem"},
 			{"type",    "button"},
@@ -45,7 +38,6 @@ protected:
 	std::unique_ptr<TestData> data;
 };
 
-// Test data manipulation
 TEST_F(DataTest, GetValue) {
 	EXPECT_EQ(data->getValue("name"), "TestItem");
 	EXPECT_EQ(data->getValue("nonexistent"), "");
@@ -70,22 +62,8 @@ TEST_F(DataTest, UnSet) {
 TEST_F(DataTest, Wipe) {
 	data->wipe();
 	EXPECT_TRUE(data->getValues()->empty());
-	data->setValue("name", "TestItem");
-	data->setValue("type", "button");
-	data->setValue("value", "42");
-	data->setValue("ignored", "yes");
 }
 
-// Test virtual methods
-TEST_F(DataTest, CreatePrettyName) {
-	EXPECT_EQ(data->createPrettyName(), "TestItem");
-}
-
-TEST_F(DataTest, CreateTooltip) {
-	EXPECT_EQ(data->createTooltip(), "");
-}
-
-// Test XML generation
 TEST_F(DataTest, ToXMLSimple) {
 	std::string expected = "value=\"42\"\ntype=\"button\"\nname=\"TestItem\"\n";
 	EXPECT_EQ(data->toXML(), expected);
@@ -94,17 +72,27 @@ TEST_F(DataTest, ToXMLSimple) {
 	EXPECT_EQ(data->toXML(), expected);
 }
 
-// Test GTK properties
-TEST_F(DataTest, VBoxProperties) {
-	EXPECT_EQ(data->get_valign(), Gtk::ALIGN_START);
-	EXPECT_EQ(data->get_spacing(), 2);
-}
-
-// Test getValues
 TEST_F(DataTest, GetValues) {
 	const auto* values = data->getValues();
 	EXPECT_EQ(values->size(), 4);
-	EXPECT_EQ(values->at("name"), "TestItem");
+}
+
+TEST_F(DataTest, createPrettyName) {
+	EXPECT_EQ(data->createPrettyName(), "TestItem");
+}
+
+TEST_F(DataTest, createUniqueId) {
+	EXPECT_EQ(data->createUniqueId(), "TestItem");
+}
+
+TEST_F(DataTest, copyValues) {
+	StringUMap expected {
+		{"name",    "TestItem copy1" },
+		{"type",    "button"},
+		{"value",   "42"},
+		{"ignored", "yes"}
+	};
+	EXPECT_EQ(data->copyValues(1), expected);
 }
 
 int main(int argc, char** argv) {

@@ -24,16 +24,16 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-Data::Data(unordered_map<string, string>& data) : VBox(false, 2), fieldsData(std::move(data)) {
-	set_valign(Gtk::ALIGN_START);
-}
-
 Data::~Data() {
 	deActivate();
 }
 
 const string Data::createPrettyName() const {
-	return fieldsData.at(NAME);
+	return fieldsData.at(getPrimaryKey());
+}
+
+const string Data::createUniqueId() const {
+	return Defaults::createCommonUniqueId({getValue(getPrimaryKey())});
 }
 
 const string Data::createTooltip() const {
@@ -41,7 +41,7 @@ const string Data::createTooltip() const {
 }
 
 string Data::getValue(const string& key, const string& defaultValue) const {
-	return (fieldsData.count(key) ? fieldsData.at(key) : defaultValue);
+	return (fieldsData.find(key) != fieldsData.end() ? fieldsData.at(key) : defaultValue);
 }
 
 void Data::unSet(const string& key) {
@@ -52,12 +52,34 @@ void Data::setValue(const string& key, const string& value) {
 	fieldsData[key] = value;
 }
 
-const unordered_map<string, string>* Data::getValues() const {
+StringUMap Data::copyValues(uint8_t number) const {
+	StringUMap r;
+	for (const auto &v : fieldsData) {
+		if (v.first == getPrimaryKey()) {
+			r[v.first] = v.second  + " copy" + std::to_string(number);
+			continue;
+		}
+		r[v.first] = v.second;
+	}
+	return r;
+}
+
+const StringUMap* Data::getValues() const {
 	return &fieldsData;
+}
+
+void Data::setValues(const StringUMap& values) {
+	for (auto& valPair : values) {
+		fieldsData[valPair.first] = std::move(fieldsData[valPair.second]);
+	}
 }
 
 void Data::wipe() {
 	fieldsData.clear();
+}
+
+void Data::reset() {
+	wipe();
 }
 
 const string Data::toXML() const {
@@ -65,8 +87,8 @@ const string Data::toXML() const {
 }
 
 string Data::valuesXML(
-	const unordered_set<string>& ignored,
-	const unordered_map<string, string>& data
+	const StringUSet& ignored,
+	const StringUMap& data
 ) {
 	string r, el, tab(" ");
 	if (data.size() > 2) {
@@ -74,16 +96,20 @@ string Data::valuesXML(
 		tab = Defaults::tab();
 	}
 	for (const auto& v : data) {
-		if (not ignored.count(v.first))
+		if (ignored.find(v.first) == ignored.end())
 			r += tab + v.first + "=\"" + v.second + "\"" + el;
 	}
 	return r;
 }
 
+const string Data::getPrimaryKey() const {
+	return NAME;
+}
+
 string Data::createOpeningXML(
 	const string& node,
-	const unordered_map<string, string>& data,
-	const unordered_set<string>& ignored,
+	const StringUMap& data,
+	const StringUSet& ignored,
 	bool empty
 ) {
 	string r(Defaults::tab() + "<" + node);

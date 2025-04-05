@@ -35,22 +35,20 @@ OrdenableFlowBox::OrdenableFlowBox(
 		* btnDn = nullptr;
 	builder->get_widget(up, btnUp);
 	builder->get_widget(dn, btnDn);
-	signal_show().connect([=]() {
-		btnUp->set_sensitive(false);
-		btnDn->set_sensitive(false);
-	});
-	signal_selected_children_changed().connect([=]() {
+
+	signal_selected_children_changed().connect([this, btnUp, btnDn]() {
 		if (not get_selected_children().size()) {
 			btnUp->set_sensitive(false);
 			btnDn->set_sensitive(false);
 			return;
 		}
+
 		size_t index = get_selected_children().at(0)->get_index();
 		btnUp->set_sensitive(index);
 		btnDn->set_sensitive(index != getSize() - 1);
 	});
 
-	btnUp->signal_clicked().connect([=]() {
+	btnUp->signal_clicked().connect([this]() {
 		auto selectedChild = get_selected_children().at(0);
 		auto index = selectedChild->get_index();
 		remove(*selectedChild);
@@ -60,7 +58,7 @@ OrdenableFlowBox::OrdenableFlowBox(
 		Defaults::markDirty();
 	});
 
-	btnDn->signal_clicked().connect([=]() {
+	btnDn->signal_clicked().connect([this]() {
 		auto selectedChild = get_selected_children().at(0);
 		auto index = selectedChild->get_index();
 		remove(*selectedChild);
@@ -81,9 +79,4 @@ void OrdenableFlowBox::wipe() {
 		boxChild->remove();
 		remove(*boxChild);
 	});
-//	for (auto child : get_children()) {
-//		auto boxChild = dynamic_cast<Gtk::FlowBoxChild*>(child);
-//		boxChild->remove();
-//		remove(*dynamic_cast<Gtk::FlowBoxChild*>(child)->get_child());
-//	}
 }

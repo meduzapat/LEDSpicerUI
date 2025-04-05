@@ -21,12 +21,14 @@
  */
 
 #include "Message.hpp"
-#include "DataDialogs/DialogForm.hpp"
+#include "Storage/BoxButtonCollection.hpp"
 
-#ifndef ELEMENTHANDLER_HPP_
-#define ELEMENTHANDLER_HPP_ 1
+#ifndef COLLECTIONHANDLER_HPP_
+#define COLLECTIONHANDLER_HPP_ 1
 
 namespace LEDSpicerUI::Ui::Storage {
+
+using BoxButtonCollections = vector<BoxButtonCollection*>;
 
 /**
  * LEDSpicerUI::Ui::Storage::CollectionHandler
@@ -50,10 +52,59 @@ public:
 	static void purgeAll();
 
 	/**
-	 * Get the number of registered items.
-	 * @return
+	 * @return the number of registered items.
 	 */
 	size_t getSize() const;
+
+	/**
+	 * @param id
+	 * @return an item by its ID.
+	 */
+	Data* get(const string& id) const;
+
+	/**
+	 * @param item
+	 * @return true if the item is registered.
+	 */
+	bool isSet(const Data* item) const;
+
+	/**
+	 * @param id
+	 * @return true if the ID is registered.
+	 */
+	bool isIdSet(const string& id) const;
+
+	/**
+	 * Search the collection for a value, and count the number of occurrences.
+	 * @param value the value to search on every BoxButton inside the collection.
+	 * @return the number of occurrences.
+	 */
+	size_t countByKey(const string& key, const string& value) const;
+
+	/**
+	 * Adds an item to the collection.
+	 * @param item
+	 */
+	void add(Data* item);
+
+	/**
+	 * Removes an item from the collection and removing consumers that uses that item.
+	 * @param item
+	 */
+	void remove(Data* item);
+
+	/**
+	 * Replace an item in the collection.
+	 * @param oldItem
+	 * @param newItem
+	 */
+	void replace(Data* item, const string& oldId);
+
+	/**
+	 * Register a collection dependency to be tracked.
+	 * @param destination
+	 */
+	void registerDependency(BoxButtonCollection* destination);
 
 	/**
 	 * Refresh a single combobox contents with the collection values.
@@ -62,62 +113,10 @@ public:
 	void refreshComboBox(Gtk::ComboBoxText* comboBox);
 
 	/**
-	 * Refresh a single combobox contents with the collection values.
-	 * @param comboBox the combobox to refresh.
-	 * @param ignoreList if set will ignore any elements in this list.
-	 */
-	void refreshComboBox(Gtk::ComboBoxText* comboBox, const vector<string>& ignoreList);
-
-	/**
-	 * Returns true if the item is registered.
-	 * @param item
-	 * @return
-	 */
-	bool isUsed(const string& item) const;
-
-	/**
-	 * Search the collection and count the number of occurrences.
-	 * @param search a text to search on every value inside the collection.
-	 * @return
-	 */
-	size_t count(const string& search) const;
-
-	/**
-	 * Returns the list of registered items.
-	 * @return
-	 */
-	std::set<string> const& get() const;
-
-	/**
-	 * Adds an item to the collection.
-	 * @param item
-	 */
-	void add(const string& item);
-
-	/**
-	 * Removes an item from the collection.
-	 * @param item
-	 */
-	void remove(const string& item);
-
-	/**
-	 * Replace an item in the collection.
-	 * @param oldItem
-	 * @param newItem
-	 */
-	void replace(const string& oldItem, const string& newItem);
-
-	/**
 	 * Register a collection consumer.
 	 * @param destination
 	 */
-	void registerDestination(BoxButtonCollection* destination);
-
-	/**
-	 * Register a collection consumer.
-	 * @param destination
-	 */
-	void registerDestination(Gtk::ComboBoxText* destination);
+	void registerComboBox(Gtk::ComboBoxText* destination);
 
 	/**
 	 * Removes a collection consumer.
@@ -126,42 +125,41 @@ public:
 	void release(BoxButtonCollection* destination);
 
 	/**
-	 * Removes a collection consumer.
+	 * Removes a tracked dependency or selection binding.
 	 * @param destination
 	 */
 	void release(Gtk::ComboBoxText* destination);
 
-	std::set<string>::iterator begin();
-
-	std::set<string>::iterator end();
-
-	std::set<string>::const_iterator begin() const;
-
-	std::set<string>::const_iterator end() const;
+	StringDataMap::iterator begin();
+	StringDataMap::iterator end();
+	StringDataMap::const_iterator begin() const;
+	StringDataMap::const_iterator end() const;
 
 protected:
 
-	CollectionHandler() = default;
+	/// Stores the collection of items indexed by their unique identifier.
+	StringDataMap collection;
 
-	/// List of collection names.
-	std::set<string> collection;
-
-	/// List of containers.
-	unordered_set<BoxButtonCollection*> destinationGroups;
+	/// List of collections that keeps references to items in the collection.
+	BoxButtonCollections dependencies;
 
 	/// List of selectors.
-	unordered_set<Gtk::ComboBoxText*> destinationComboBoxes;
+	vector<Gtk::ComboBoxText*> comboBoxes;
 
 	/// Keeps collections instances.
 	static unordered_map<string, CollectionHandler*> collections;
 
 	/**
-	 * Sort and populates comboboxes.
+	 * Avoids instantiation.
 	 */
-	void populateComboboxesSorted();
+	CollectionHandler() = default;
 
+	/**
+	 * Populates comboboxes.
+	 */
+	void refreshComboBoxes();
 };
 
 } /* namespace */
 
-#endif /* ELEMENTHANDLER_HPP_ */
+#endif /* COLLECTIONHANDLER_HPP_ */

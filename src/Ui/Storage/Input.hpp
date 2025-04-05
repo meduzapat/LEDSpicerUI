@@ -38,27 +38,25 @@ class Input: public Data {
 
 public:
 
-	Input(unordered_map<string, string>& data);
+	Input(StringUMap& data);
 
 	virtual ~Input();
 
-	const string createTooltip() const override;
-
 	const string createPrettyName() const override;
-
-	const string createUniqueId() const override;
-
+	const string createTooltip() const override;
 	const string getCssClass() const override;
-
+	void activate() override;
 	const string toXML() const override;
 
 protected:
 
+	/// Collection with the input trigger maps.
 	BoxButtonCollection maps;
-
+	/// Collection with the linked maps.
 	BoxButtonCollection linkedMaps;
 
-	void activate() override;
+	const string getPrimaryKey() const override;
+
 };
 
 } /* namespace */

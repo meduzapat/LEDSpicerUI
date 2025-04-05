@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      Standalone.hpp
- * @since     Feb 9, 2025
+ * @file      Selection.hpp
+ * @since     Mar 2, 2025
  * @author    Patricio A. Rossi (MeduZa)
  *
  * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
@@ -22,32 +22,39 @@
 
 #include "Data.hpp"
 
-#ifndef STANDALONE_HPP_
-#define STANDALONE_HPP_ 1
+#ifndef SRC_UI_STORAGE_SELECTION_HPP_
+#define SRC_UI_STORAGE_SELECTION_HPP_ 1
 
 namespace LEDSpicerUI::Ui::Storage {
 
 /**
- * LEDSpicerUI::Ui::Storage::Standalone
+ * LEDSpicerUI::Ui::Storage::Selection
  */
-class Standalone: public Data {
+class Selection : public Gtk::Button {
 
 public:
 
-	Standalone() = delete;
+	Selection() = delete;
 
-	Standalone(const string& fileName, unordered_map<string, string>& data) : Data(data), filename(fileName) {}
+	/**
+	 * Create a new selection button.
+	 * @param data values to be used.
+	 */
+	Selection(Data* data);
 
-	virtual ~Standalone() = default;
+	~Selection() = default;
+
+	/**
+	 * @return The data object.
+	 */
+	Data* getData() const;
 
 protected:
 
-	/// Stores the filename with any sub-directory, relative to the parent dir.
-	string filename;
-
+	/// Pointer to the moving data object.
+	Data* data;
 };
 
 } /* namespace */
 
-
-#endif /* STANDALONE_HPP_ */
+#endif /* SRC_UI_STORAGE_SELECTION_HPP_ */

@@ -45,6 +45,9 @@ class MainWindow: public Gtk::ApplicationWindow, public MainDialogs {
 
 public:
 
+	// Configuration import flags.
+	static constexpr int IMPORT_ALL = 15; // CONFIG | DEVICES | RESTRICTORS | MAPPINGS
+
 	MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &builder);
 
 	virtual ~MainWindow();
@@ -92,7 +95,7 @@ protected:
 	 * Populates the configuration.
 	 * @param values if empty will use default values.
 	 */
-	void setConfiguration(unordered_map<string, string>& values);
+	void setConfiguration(StringUMap& values);
 
 	/**
 	 * @return a XML string with the configuration.

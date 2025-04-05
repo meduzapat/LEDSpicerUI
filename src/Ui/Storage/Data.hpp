@@ -21,8 +21,6 @@
  */
 
 #include "Message.hpp"
-#include <unordered_set>
-using std::unordered_set;
 
 #ifndef FORM_HPP_
 #define FORM_HPP_ 1
@@ -32,9 +30,9 @@ namespace LEDSpicerUI::Ui::Storage {
 /**
  * LEDSpicerUI::Ui::Storage::Data
  *
- * Data will store information and create a small box with a label and to optional buttons, edit and close.
+ * Data will store information to be moved around.
  */
-class Data: public Gtk::VBox {
+class Data {
 
 public:
 
@@ -42,34 +40,34 @@ public:
 
 	/**
 	 * Creates an object pre-populated.
-	 * @param data
+	 * @param data Iten's data.
 	 */
-	Data(unordered_map<string, string>& data);
+	Data(StringUMap& data) : fieldsData(std::move(data)) {}
 
 	virtual ~Data();
 
 	/**
-	 * Provides a CSS class that identifies the object and the data.
+	 * @returns a CSS class that identifies the object and the data.
 	 */
 	virtual const string getCssClass() const = 0;
 
 	/**
-	 * Creates a pretty name for the form.
-	 * @return
+	 * Creates a human readable name for the form.
+	 * @return pretty name for the form.
 	 */
 	virtual const string createPrettyName() const;
 
 	/**
 	 * Creates a tooltip.
-	 * @return
+	 * @return the tooltip text.
 	 */
 	virtual const string createTooltip() const;
 
 	/**
-	 * Returns a unique ID out of current data.
-	 * @return
+	 * Creates a unique ID for the form.
+	 * @return unique ID out of current data.
 	 */
-	virtual const string createUniqueId() const = 0;
+	virtual const string createUniqueId() const;
 
 	/**
 	 * Removes a value by key name.
@@ -81,10 +79,10 @@ public:
 	 * Returns a value using the key name.
 	 *
 	 * @param key
-	 * @param defaultValue
+	 * @param defaultValue the default value if the key is not found.
 	 * @return
 	 */
-	string getValue(const string& key, const string& defaultValue = "") const;
+	virtual string getValue(const string& key, const string& defaultValue = "") const;
 
 	/**
 	 * Allows the change of an internal value.
@@ -94,10 +92,22 @@ public:
 	void setValue(const string& key, const string& value);
 
 	/**
+	 * @param number the copy number.
+	 * @return a copy of the values with a new primary key.
+	 */
+	StringUMap copyValues(uint8_t number) const;
+
+	/**
 	 * Returns a list of stored values.
 	 * @return
 	 */
-	const unordered_map<string, string>* getValues() const;
+	const StringUMap* getValues() const;
+
+	/**
+	 * Replace values from a map.
+	 * @param values
+	 */
+	void setValues(const StringUMap& values);
 
 	/**
 	 * Removes all data.
@@ -105,14 +115,12 @@ public:
 	virtual void wipe();
 
 	/**
-	 * Removes any internal property, similar to the destructor but keeps the ownership.
-	 * To be used in complex data objects where the pointer cannot be deleted,
-	 * but it need the same effect, leaving the object fresh like new.
+	 * Cleans other dependent data.
 	 */
-	virtual void destroy() {};
+	virtual void reset();
 
 	/**
-	 * Do any preparation when the dialog starts data handling.
+	 * If the data owns dialogs, do any data handling setup.
 	 */
 	virtual void activate() {}
 
@@ -130,10 +138,15 @@ public:
 protected:
 
 	/// Data pairs.
-	unordered_map<string, string> fieldsData;
+	StringUMap fieldsData;
 
 	/// List of ignored data fields.
-	mutable unordered_set<string> ignored;
+	mutable StringUSet ignored;
+
+	/**
+	 * @return the primary key for the data.
+	 */
+	virtual const string getPrimaryKey() const;
 
 	/**
 	 * Organizes data vertically or horizontally based on the number of elements.
@@ -142,8 +155,8 @@ protected:
 	 * @return
 	 */
 	static string valuesXML(
-		const unordered_set<string>& ignored,
-		const unordered_map<string, string>& data
+		const StringUSet& ignored,
+		const StringUMap& data
 	);
 
 	/**
@@ -156,8 +169,8 @@ protected:
 	 */
 	static string createOpeningXML(
 		const string& node,
-		const unordered_map<string, string>& data,
-		const unordered_set<string>& ignored,
+		const StringUMap& data,
+		const StringUSet& ignored,
 		bool empty
 	);
 
@@ -168,6 +181,8 @@ protected:
 	static string createClosingXML(const string& node);
 
 };
+
+using StringDataMap = std::map<string, Data*>;
 
 } /* namespace */
 
