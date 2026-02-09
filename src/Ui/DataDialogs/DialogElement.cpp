@@ -42,9 +42,10 @@ DialogElement::DialogElement(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 
 	// Connect Element Box and buttons.
 	builder->get_widget_derived("BoxElements", box, "BtnDeviceElementUp", "BtnDeviceElementDn");
-	builder->get_widget("BtnAddElement",       btnAdd);
 	builder->get_widget("BtnApplyElement",     btnApply);
-	setSignalAdd();
+	Gtk::Button* btnAdd = nullptr;
+	builder->get_widget("BtnAddElement", btnAdd);
+	setSignalAdd(btnAdd);
 	setSignalApply();
 
 	// Parent device.
@@ -763,13 +764,13 @@ void DialogElement::findLargestDivisor(uint16_t size) {
 
 void DialogElement::findElementByPin(uint16_t finder, unordered_set<Storage::BoxButton*>& elementsFound) {
 	const string connector(std::to_string(finder));
-	for (auto& boxButton : *items) {
+	for (auto boxButton : *items) {
 		auto data(boxButton->getData());
 		// Single LED.
 		string subject(data->getValue(PIN, data->getValue(SOLENOID)));
 		if (not subject.empty()) {
 			if (connector == subject)
-				elementsFound.insert(boxButton.get());
+				elementsFound.insert(boxButton);
 			continue;
 		}
 		// Multi LED.
@@ -784,7 +785,7 @@ void DialogElement::findElementByPin(uint16_t finder, unordered_set<Storage::Box
 				}
 			}
 			if (found) {
-				elementsFound.insert(boxButton.get());
+				elementsFound.insert(boxButton);
 				continue;
 			}
 		}
@@ -796,7 +797,7 @@ void DialogElement::findElementByPin(uint16_t finder, unordered_set<Storage::Box
 				firstPin(Storage::Element::findFirstConnectorIndexByPosition(subject));
 
 			if (firstPin >= finder and firstPin <= lastPin) {
-				elementsFound.insert(boxButton.get());
+				elementsFound.insert(boxButton);
 				continue;
 			}
 		}
@@ -804,7 +805,7 @@ void DialogElement::findElementByPin(uint16_t finder, unordered_set<Storage::Box
 		if (not subject.empty()) {
 			auto pinNum(Storage::Element::findFirstConnectorIndexByPosition(subject));
 			if (finder >= pinNum and finder <= pinNum +2) {
-				elementsFound.insert(boxButton.get());
+				elementsFound.insert(boxButton);
 				continue;
 			}
 		}
@@ -813,17 +814,17 @@ void DialogElement::findElementByPin(uint16_t finder, unordered_set<Storage::Box
 		if (not subject.empty()) {
 			uint16_t pinNum(std::stoi(subject));
 			if (finder == pinNum) {
-				elementsFound.insert(boxButton.get());
+				elementsFound.insert(boxButton);
 				continue;
 			}
 			pinNum = std::stoi(data->getValue(GREEN_PIN));
 			if (finder == pinNum) {
-				elementsFound.insert(boxButton.get());
+				elementsFound.insert(boxButton);
 				continue;
 			}
 			pinNum = std::stoi(data->getValue(BLUE_PIN));
 			if (finder == pinNum) {
-				elementsFound.insert(boxButton.get());
+				elementsFound.insert(boxButton);
 				continue;
 			}
 		}

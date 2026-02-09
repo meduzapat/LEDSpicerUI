@@ -22,8 +22,7 @@
 
 #include "Data.hpp"
 
-#ifndef UI_BOXBUTTON_HPP_
-#define UI_BOXBUTTON_HPP_ 1
+#pragma once
 
 namespace LEDSpicerUI::Ui::Storage {
 
@@ -101,5 +100,3 @@ protected:
 };
 
 } /* namespace */
-
-#endif /* UI_BOXBUTTON_HPP_ */

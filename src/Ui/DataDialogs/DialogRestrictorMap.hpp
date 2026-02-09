@@ -23,8 +23,7 @@
 #include "DialogForm.hpp"
 #include "Storage/RestrictorMap.hpp"
 
-#ifndef UI_DIALOGRESTRICTORMAP_HPP_
-#define UI_DIALOGRESTRICTORMAP_HPP_ 1
+#pragma once
 
 namespace LEDSpicerUI::Ui::DataDialogs {
 
@@ -55,6 +54,8 @@ protected:
 
 	/// Self instance.
 	static DialogRestrictorMap* instance;
+
+	Gtk::Button* btnAdd = nullptr;
 
 	Gtk::ComboBoxText
 		* player    = nullptr,
@@ -97,5 +98,3 @@ protected:
 };
 
 } /* namespace */
-
-#endif /* UI_DIALOGRESTRICTORMAP_HPP_ */

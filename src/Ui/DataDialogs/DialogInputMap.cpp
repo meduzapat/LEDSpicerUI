@@ -41,9 +41,16 @@ DialogForm(obj, builder)
 {
 	// Connect Input map
 	builder->get_widget_derived("BoxInputMap", box);
-	builder->get_widget("BtnAddInputMap",      btnAdd);
 	builder->get_widget("BtnApplyInputMap",    btnApply);
-	setSignalAdd();
+	Gtk::Button
+		// located in Dialog Input
+		* btnAdd  = nullptr,
+		// located in Dialog Listener
+		* btnAdd2 = nullptr;
+	builder->get_widget("BtnAddInputMap",         btnAdd);
+	builder->get_widget("BtnAddInputListenerMap", btnAdd2);
+	setSignalAdd(btnAdd);
+	setSignalAdd(btnAdd2);
 	setSignalApply();
 
 	// Color and Filter.

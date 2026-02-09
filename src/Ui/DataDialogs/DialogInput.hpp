@@ -23,8 +23,7 @@
 #include "DialogForm.hpp"
 #include "Storage/Input.hpp"
 
-#ifndef UI_DIALOGINPUT_HPP_
-#define UI_DIALOGINPUT_HPP_ 1
+#pragma once
 
 namespace LEDSpicerUI::Ui::DataDialogs {
 
@@ -55,22 +54,26 @@ public:
 
 protected:
 
-	/// Self instance.
 	static DialogInput* instance;
 
-	Gtk::ComboBoxText* comboBoxInputSelectInput   = nullptr;
-	Gtk::Entry*        entryInputName             = nullptr;
-	Gtk::ComboBoxText* comboBoxInputSpeed         = nullptr;
-	Gtk::Switch*       switchInputBlink           = nullptr;
-	Gtk::SpinButton*   spinInputTimes             = nullptr;
-	Gtk::Entry*        entryInputDevicesID        = nullptr;
-	Gtk::Box*          linkedElementsAndGroupsBox = nullptr;
-	Gtk::Button*       btnAddInputMap             = nullptr;
+	Gtk::ComboBoxText
+		* comboBoxInputSelectInput = nullptr,
+		* comboBoxInputSpeed       = nullptr;
+	Gtk::Entry*        entryInputName   = nullptr;
+	Gtk::Switch*       switchInputBlink = nullptr;
+	Gtk::SpinButton*   spinInputTimes   = nullptr;
+	Gtk::Button*       btnAddInputMap   = nullptr;
+	Gtk::Box
+		* boxLinkedElementsAndGroupsBox = nullptr,
+		* boxEventListeners             = nullptr,
+		* boxInputCreditsSettings       = nullptr;
 
 	/// The box to select mappings.
 	OrdenableFlowBox
 		* boxInputMap = nullptr,
 		* boxInputLinkedMaps = nullptr;
+
+	Gtk::FileChooserButton* fileInputNamePath = nullptr;
 
 	DialogInput(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
 
@@ -83,5 +86,3 @@ protected:
 };
 
 } /* namespace */
-
-#endif /* UI_DIALOGINPUT_HPP_ */

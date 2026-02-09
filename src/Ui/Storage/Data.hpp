@@ -22,8 +22,7 @@
 
 #include "Message.hpp"
 
-#ifndef FORM_HPP_
-#define FORM_HPP_ 1
+#pragma once
 
 namespace LEDSpicerUI::Ui::Storage {
 
@@ -135,16 +134,48 @@ public:
 	 */
 	virtual const string toXML() const;
 
+	/**
+	 * Sets a parameter value.
+	 * @param key Parameter name.
+	 * @param value Parameter value.
+	 */
+	void setParameter(const string& key, const string& value);
+
+	/**
+	 * Gets a parameter value.
+	 * @param key Parameter name.
+	 * @param def Default value if not found.
+	 * @return Parameter value or default.
+	 */
+	string getParameter(const string& key, const string& def = "") const;
+
+	/**
+	 * Checks if a parameter exists.
+	 * @param key Parameter name.
+	 * @return True if parameter exists.
+	 */
+	bool hasParameter(const string& key) const;
+
+	/**
+	 * @return All parameters.
+	 */
+	const StringUMap& getParameters() const;
+
 protected:
 
 	/// Data pairs.
 	StringUMap fieldsData;
 
+	/// Extra parameters with important information.
+	StringUMap parameters;
+
 	/// List of ignored data fields.
 	mutable StringUSet ignored;
 
 	/**
-	 * @return the primary key for the data.
+	 * Returns the field name used as the primary identifier for this data type.
+	 *
+	 * @return Field name to use as primary key (default: NAME).
 	 */
 	virtual const string getPrimaryKey() const;
 
@@ -185,5 +216,3 @@ protected:
 using StringDataMap = std::map<string, Data*>;
 
 } /* namespace */
-
-#endif /* FORM_HPP_ */

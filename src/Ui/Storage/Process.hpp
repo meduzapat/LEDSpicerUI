@@ -23,8 +23,7 @@
 #include "Data.hpp"
 #include "Storage/CollectionHandler.hpp"
 
-#ifndef PROCESS_HPP_
-#define PROCESS_HPP_ 1
+#pragma once
 
 namespace LEDSpicerUI::Ui::Storage {
 
@@ -51,6 +50,3 @@ protected:
 };
 
 } /* namespace */
-
-
-#endif /* PROCESS_HPP_ */

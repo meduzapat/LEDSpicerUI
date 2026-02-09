@@ -20,8 +20,6 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MAINWINDOW_HPP_
-#define MAINWINDOW_HPP_ 1
 
 #include "ConfigFile.hpp"
 #include "InputFile.hpp"
@@ -35,6 +33,8 @@
 // for file accessing.
 #include <iostream>
 #include <fstream>
+
+#pragma once
 
 namespace LEDSpicerUI::Ui {
 
@@ -54,11 +54,8 @@ public:
 
 protected:
 
-	string
-		/// The directory, without / at the end, where the data files are located.
-		dataDirectory,
-		/// The working directory, without / at the end, is where the project will be loaded/saved
-		workingDirectory;
+	/// The name of the current project.
+	string currentProjectName;
 
 	Gtk::Entry
 		* inputUserId     = nullptr,
@@ -66,16 +63,15 @@ protected:
 		* inputPortNumber = nullptr,
 		* inputRunEvery   = nullptr;
 
-	Gtk::ToggleButton
-		* inputCraftProfiles = nullptr,
-		* inputColorsFile    = nullptr;
+	Gtk::ToggleButton * toggleCraftProfiles = nullptr;
 
 	Gtk::SpinButton* inputFPS = nullptr;
 
 	Gtk::ComboBoxText
-		* inputColors         = nullptr,
-		* inputLogLevel       = nullptr,
-		* inputDefaultProfile = nullptr;
+		* comboUseColors      = nullptr, /// colors.ini usage selector.
+		* comboColors         = nullptr,
+		* comboLogLevel       = nullptr,
+		* comboDefaultProfile = nullptr;
 
 	/// The list of data sources for ROM names.
 	OrdenableListBox* listBoxDataSource = nullptr;
@@ -84,23 +80,15 @@ protected:
 	Gtk::FlowBox* boxRandomColors = nullptr;
 
 	/**
-	 * Process the selected data directory.
-	 * This directory should contain any data file, like colors, controls, etc.
-	 * @param the dir name selected in the dialog.
-	 * @returns true if the directory satisfies the required data files.
-	 */
-	void openDataDirectory(const string& dataDirectory);
-
-	/**
 	 * Populates the configuration.
 	 * @param values if empty will use default values.
 	 */
 	void setConfiguration(StringUMap& values);
 
 	/**
-	 * @return a XML string with the configuration.
+	 * @return the generated configuration.
 	 */
-	string readConfiguration();
+	StringUMap ledspicerConfigToXml() const;
 
 	/**
 	 * Connects Dialogs with buttons.
@@ -124,8 +112,10 @@ protected:
 	 */
 	void setColorFile(const string& colorFile);
 
+	/**
+	 * Fill the colors combo box with available color profiles.
+	 */
+	void populateColorsCombo();
 };
 
-} /* namespace LEDSpicerUI */
-
-#endif /* MAINWINDOW_HPP_ */
+} // namespace

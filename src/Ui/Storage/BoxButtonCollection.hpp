@@ -23,10 +23,9 @@
 #include "OrdenableFlowBox.hpp"
 #include "BoxButton.hpp"
 
-#ifndef BOXBUTTONCOLLECTION_HPP_
-#define BOXBUTTONCOLLECTION_HPP_ 1
+#pragma once
 
-using BoxButtonVector = vector<std::unique_ptr<LEDSpicerUI::Ui::Storage::BoxButton>>;
+using BoxButtonVector = vector<LEDSpicerUI::Ui::Storage::BoxButton*>;
 
 namespace LEDSpicerUI::Ui::Storage {
 
@@ -66,7 +65,7 @@ public:
 		return *this;
 	}
 
-	~BoxButtonCollection() = default;
+	~BoxButtonCollection();
 
 	/**
 	 * Get the size of the collection.
@@ -156,5 +155,3 @@ protected:
 };
 
 } /* namespace */
-
-#endif /* BOXBUTTONCOLLECTION_HPP_ */

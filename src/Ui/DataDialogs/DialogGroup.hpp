@@ -23,8 +23,7 @@
 #include "DialogForm.hpp"
 #include "Storage/Group.hpp"
 
-#ifndef GROUPDIALOG_HPP_
-#define GROUPDIALOG_HPP_ 1
+#pragma once
 
 namespace LEDSpicerUI::Ui::DataDialogs {
 
@@ -80,5 +79,3 @@ protected:
 };
 
 } /* namespace */
-
-#endif /* GROUPDIALOG_HPP_ */

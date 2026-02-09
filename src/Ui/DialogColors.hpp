@@ -20,11 +20,9 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "XMLHelper.hpp"
-#include "Message.hpp"
+#include "GladeDialog.hpp"
 
-#ifndef UI_DIALOGCOLORS_HPP_
-#define UI_DIALOGCOLORS_HPP_ 1
+#pragma once
 
 namespace LEDSpicerUI::Ui {
 
@@ -32,19 +30,11 @@ namespace LEDSpicerUI::Ui {
  * LEDSpicerUI::Ui::DialogColors
  * Handles the color selectors and other color features.
  */
-class DialogColors: public Gtk::Dialog {
+class DialogColors: public GladeDialog<DialogColors> {
 
 	friend class Gtk::Builder;
 
 public:
-
-	DialogColors() = delete;
-
-	virtual ~DialogColors() = default;
-
-	static DialogColors* getInstance();
-
-	static void initialize(const Glib::RefPtr<Gtk::Builder> &builder);
 
 	/**
 	 * Process a file with colors information and store the colors to be used.
@@ -99,8 +89,6 @@ public:
 
 protected:
 
-	static DialogColors* instance;
-
 	/// Last Selected color.
 	string selectedColor;
 
@@ -148,5 +136,3 @@ protected:
 };
 
 } /* namespace */
-
-#endif /* UI_DIALOGCOLORS_HPP_ */

@@ -23,8 +23,7 @@
 #include "DataDialogs/DialogElement.hpp"
 #include "Data.hpp"
 
-#ifndef DEVICE_HPP_
-#define DEVICE_HPP_ 1
+#pragma once
 
 namespace LEDSpicerUI::Ui::Storage {
 
@@ -59,5 +58,3 @@ protected:
 };
 
 } /* namespace */
-
-#endif /* DEVICE_HPP_ */

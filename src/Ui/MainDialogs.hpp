@@ -20,6 +20,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "DialogSettings.hpp"
+#include "DialogProject.hpp"
 #include "DialogImport.hpp"
 #include "DataDialogs/DialogDevice.hpp"
 #include "DataDialogs/DialogRestrictor.hpp"
@@ -28,8 +30,7 @@
 #include "DataDialogs/DialogInput.hpp"
 #include "DataDialogs/DialogProfile.hpp"
 
-#ifndef UI_MAINDIALOGS_HPP_
-#define UI_MAINDIALOGS_HPP_ 1
+#pragma once
 
 namespace LEDSpicerUI::Ui {
 
@@ -50,23 +51,11 @@ public:
 
 protected:
 
-	/**
-	 * @name Dialogs
-	 * @{
-	 */
-
 	DialogImport
 		/// Import configuration dialog.
 		dialogImportConfig,
 		/// Import input dialog.
 		dialogImportInput;
-
-	/// File chooser dialog.
-	Gtk::FileChooserDialog dialogSelectWorkingDirectory;
-	/**
-	 * @}
-	 */
-
 
 	/// @name Storage Collections
 	Storage::BoxButtonCollection
@@ -86,5 +75,3 @@ protected:
 };
 
 } /* namespace */
-
-#endif /* UI_MAINDIALOGS_HPP_ */

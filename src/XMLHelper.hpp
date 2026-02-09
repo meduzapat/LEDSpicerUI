@@ -23,19 +23,26 @@
 #include <tinyxml2.h>
 #include "Message.hpp"
 
-#ifndef XMLHELPER_HPP_
-#define XMLHELPER_HPP_ 1
+#pragma once
 
 namespace LEDSpicerUI {
 
 using LEDSpicerUI::Ui::Message;
 
 /**
- * LEDSpicerUI::Ui::XMLHelper
+ * LEDSpicerUI::XMLHelper
  */
 class XMLHelper : protected tinyxml2::XMLDocument {
 
 public:
+
+	/// Root node information.
+	struct RootInfo {
+		string
+			version,  /// Data format version.
+			type;     /// File type (Configuration, Input, Profile, etc.)
+		StringUMap attributes;  /// All root attributes.
+	};
 
 	/**
 	 * Creates a new XMLHelper object and open the XML file.
@@ -65,10 +72,20 @@ public:
 	StringUMap processNode(const string& nodeName);
 
 	/**
+	 * @return Root node attributes.
+	 */
+	StringUMap getSettings() const;
+
+	/**
 	 * Returns a pointer to the root node.
 	 * @return
 	 */
 	tinyxml2::XMLElement* getRoot() const;
+
+	/**
+	 * @return Root node information.
+	 */
+	const RootInfo& getRootInfo() const;
 
 	/**
 	 * Checks if the map subject have the attributeList elements.
@@ -100,6 +117,19 @@ public:
 	);
 
 	/**
+	 * Generates XML file header.
+	 * @param type File type (Configuration, Input, Profile, etc.)
+	 * @return XML header string with root opening tag started.
+	 */
+	static string xmlHeader(const string& type);
+
+	/**
+	 * Generates XML root closing tag.
+	 * @return Closing tag string.
+	 */
+	static string xmlFooter();
+
+	/**
 	 * Converts a map into xml string.
 	 * @param values
 	 * @return
@@ -125,11 +155,19 @@ protected:
 	/// Pointer to the root element.
 	tinyxml2::XMLElement* root = nullptr;
 
+	/// Root node information (version, type, attributes).
+	RootInfo rootInfo;
+
 	/// Populated by derived classes to store extracted XML data by section.
 	unordered_map<string, StringUMapVector> extractedData;
 
+	/**
+	 * Processes root node and extracts common attributes.
+	 * Validates type and version against PACKAGE_DATA_VERSION.
+	 * @param expectedType Expected type attribute.
+	 * @throws Message if type mismatch or invalid version.
+	 */
+	void processRootNode(const string& expectedType);
 };
 
-} /* namespace LEDSpicerUI */
-
-#endif /* XMLHELPER_HPP_ */
+} // namespace

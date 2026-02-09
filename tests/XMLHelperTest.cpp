@@ -1,3 +1,25 @@
+/* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
+/**
+ * @file      XMLHelper.cpp
+ * @since     Feb 25, 2025
+ * @author    Patricio A. Rossi (MeduZa)
+ *
+ * @copyright Copyright © 2023 - 2025 Patricio A. Rossi (MeduZa)
+ *
+ * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * @copyright LEDSpicerUI is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * @copyright You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <gtest/gtest.h>
 #include <fstream>
 #include "XMLHelper.hpp"
@@ -8,28 +30,38 @@ using namespace LEDSpicerUI;
 TEST(XMLHelperTest, ConstructorErrorHandling) {
 	GTEST_LOG_(INFO) << "Loading " PACKAGE_SAMPLES_DIR << "data/config.xml";
 	EXPECT_THROW(XMLHelper helper(PACKAGE_SAMPLES_DIR "data/config.xml",    "InvalidType"), Message);
-	EXPECT_THROW(XMLHelper helper(PACKAGE_SAMPLES_DIR "data/input.xml",     "InvalidType"), Message);
-	EXPECT_THROW(XMLHelper helper(PACKAGE_SAMPLES_DIR "data/animation.xml", "InvalidType"), Message);
-	EXPECT_THROW(XMLHelper helper(PACKAGE_SAMPLES_DIR "data/profile.xml",   "InvalidType"), Message);
+	EXPECT_THROW(XMLHelper helper(PACKAGE_SAMPLES_DIR "data/inputs/input.xml",     "InvalidType"), Message);
+	EXPECT_THROW(XMLHelper helper(PACKAGE_SAMPLES_DIR "data/animations/animation.xml", "InvalidType"), Message);
+	EXPECT_THROW(XMLHelper helper(PACKAGE_SAMPLES_DIR "data/profiles/profile.xml",   "InvalidType"), Message);
 	EXPECT_THROW(XMLHelper helper(PACKAGE_SAMPLES_DIR "data/malformed.xml", "InvalidType"), Message);
 	EXPECT_THROW(XMLHelper helper(PACKAGE_SAMPLES_DIR "data/invalidLedspicerNode.xml", "InvalidType"), Message);
 	EXPECT_THROW(XMLHelper helper(PACKAGE_SAMPLES_DIR "data/invalidDataVersion.xml",   "InvalidType"), Message);
 }
 
+TEST(XMLHelperTest, ConstructorWithValidType) {
+	EXPECT_NO_THROW(XMLHelper helper(PACKAGE_SAMPLES_DIR "data/config.xml", "Configuration"));
+	EXPECT_NO_THROW(XMLHelper helper(PACKAGE_SAMPLES_DIR "data/inputs/input.xml", "Input"));
+	EXPECT_NO_THROW(XMLHelper helper(PACKAGE_SAMPLES_DIR "data/animations/animation.xml", "Animation"));
+	EXPECT_NO_THROW(XMLHelper helper(PACKAGE_SAMPLES_DIR "data/profiles/profile.xml", "Profile"));
+}
+
+TEST(XMLHelperTest, ConstructorForeignFile) {
+	// Foreign files skip validation
+	EXPECT_NO_THROW(XMLHelper helper(PACKAGE_SAMPLES_DIR "data/colors.xml", XML_FILE_PLAIN));
+}
+
 TEST(XMLHelperTest, ProcessNodeReturnsCorrectMap) {
-	// Arrange
 	XMLHelper helper(PACKAGE_SAMPLES_DIR "data/config.xml", "Configuration");
 
-	// Act
 	auto result = XMLHelper::processNode(helper.getRoot());
 
-	// Assert
 	EXPECT_EQ(result.size(), 12) << "Maps have different sizes";
 }
 
 TEST(XMLHelperTest, ProcessNodeByName) {
-	// Success case - test 'layout' node under root
 	XMLHelper helper(PACKAGE_SAMPLES_DIR "data/config.xml", "Configuration");
+
+	// Success case - test 'layout' node under root
 	StringUMap expected = {
 		{"defaultProfile", "default"}
 	};
@@ -44,9 +76,31 @@ TEST(XMLHelperTest, ProcessNodeByName) {
 
 TEST(XMLHelperTest, GetRoot) {
 	XMLHelper helper(PACKAGE_SAMPLES_DIR "data/config.xml", "Configuration");
+
 	tinyxml2::XMLElement* root = helper.getRoot();
+
 	ASSERT_NE(root, nullptr) << "Root should not be null";
-	EXPECT_STREQ(root->Name(), "LEDSpicer") << "Root node name should be LEDSpicer";
+	EXPECT_STREQ(root->Name(), PACKAGE_DATA_NAME) << "Root node name should be " PACKAGE_DATA_NAME;
+}
+
+TEST(XMLHelperTest, GetRootInfo) {
+	XMLHelper helper(PACKAGE_SAMPLES_DIR "data/config.xml", "Configuration");
+
+	const auto& rootInfo = helper.getRootInfo();
+
+	EXPECT_EQ(rootInfo.version, PACKAGE_DATA_VERSION) << "Version should match " PACKAGE_DATA_VERSION;
+	EXPECT_EQ(rootInfo.type, "Configuration") << "Type should be Configuration";
+	EXPECT_FALSE(rootInfo.attributes.empty()) << "Attributes should not be empty";
+}
+
+TEST(XMLHelperTest, GetSettings) {
+	XMLHelper helper(PACKAGE_SAMPLES_DIR "data/config.xml", "Configuration");
+
+	StringUMap settings = helper.getSettings();
+
+	EXPECT_FALSE(settings.empty()) << "Settings should not be empty";
+	EXPECT_EQ(settings["version"], PACKAGE_DATA_VERSION) << "Version should be present";
+	EXPECT_EQ(settings["type"], "Configuration") << "Type should be present";
 }
 
 TEST(XMLHelperTest, CheckAttributes) {
@@ -56,7 +110,7 @@ TEST(XMLHelperTest, CheckAttributes) {
 		{"name",  "Test"},
 		{"type",  "Button"},
 		{"id",    "1"},
-		{"extra", "ignored"} // Ignored per spec
+		{"extra", "ignored"}
 	};
 	EXPECT_NO_THROW(XMLHelper::checkAttributes(attributeList, subjects, "testNode"));
 
@@ -74,37 +128,66 @@ TEST(XMLHelperTest, ValueOf) {
 		{"type", "Button"}
 	};
 
-	// Present key
 	EXPECT_EQ(XMLHelper::valueOf(values, "name"), "Test") << "Should return existing value";
-
-	// Missing key, default empty
 	EXPECT_EQ(XMLHelper::valueOf(values, "id"), "") << "Should return empty string for missing key";
-
-	// Missing key, custom default
 	EXPECT_EQ(XMLHelper::valueOf(values, "id", "defaultId"), "defaultId") << "Should return custom default for missing key";
 }
 
 TEST(XMLHelperTest, ToXML) {
-	// Basic case - map with attributes
 	StringUMap values = {
 		{"name", "Test"},
 		{"type", "Button"},
 		{"id", "1"}
 	};
-	string expected = "id=\"1\"\ntype=\"Button\"\nname=\"Test\"\n";
-	string result   = XMLHelper::toXML(values);
-	EXPECT_EQ(result, expected) << "XML string should match expected format";
+	string result = XMLHelper::toXML(values);
+
+	// Check that all key-value pairs are present (order may vary due to unordered_map)
+	EXPECT_NE(result.find("id=\"1\""), string::npos) << "Should contain id";
+	EXPECT_NE(result.find("type=\"Button\""), string::npos) << "Should contain type";
+	EXPECT_NE(result.find("name=\"Test\""), string::npos) << "Should contain name";
 
 	// Empty map
 	StringUMap emptyValues;
 	EXPECT_EQ(XMLHelper::toXML(emptyValues), "") << "Empty map should return empty string";
 }
 
+TEST(XMLHelperTest, XmlHeader) {
+	string header = XMLHelper::xmlHeader("Configuration");
+
+	EXPECT_NE(header.find("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"), string::npos)
+		<< "Should contain XML declaration";
+	EXPECT_NE(header.find(DEFAULT_MESSAGE), string::npos)
+		<< "Should contain default message";
+	EXPECT_NE(header.find("<" PACKAGE_DATA_NAME), string::npos)
+		<< "Should contain root element";
+	EXPECT_NE(header.find("version=\"" PACKAGE_DATA_VERSION "\""), string::npos)
+		<< "Should contain version";
+	EXPECT_NE(header.find("type=\"Configuration\""), string::npos)
+		<< "Should contain type";
+}
+
+TEST(XMLHelperTest, XmlHeaderNoType) {
+	string header = XMLHelper::xmlHeader("");
+
+	EXPECT_NE(header.find("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"), string::npos)
+		<< "Should contain XML declaration";
+	EXPECT_NE(header.find("version=\"" PACKAGE_DATA_VERSION "\""), string::npos)
+		<< "Should contain version";
+	EXPECT_NE(header.find("type=\"\""), string::npos)
+		<< "Should contain type when empty";
+}
+
+TEST(XMLHelperTest, XmlFooter) {
+	string footer = XMLHelper::xmlFooter();
+
+	EXPECT_EQ(footer, "</" PACKAGE_DATA_NAME ">\n") << "Footer should be closing tag";
+}
+
 TEST(XMLHelperTest, GetData) {
 	XMLHelper helper(PACKAGE_SAMPLES_DIR "data/config.xml", "Configuration");
 
-	// Empty case - unpopulated data
 	StringUMapVector& data = helper.getData("devices");
+
 	EXPECT_TRUE(data.empty()) << "Unpopulated data should return empty vector";
 }
 

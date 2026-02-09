@@ -69,8 +69,8 @@ const StringUMap* Data::getValues() const {
 }
 
 void Data::setValues(const StringUMap& values) {
-	for (auto& valPair : values) {
-		fieldsData[valPair.first] = std::move(fieldsData[valPair.second]);
+	for (const auto& valPair : values) {
+		fieldsData[valPair.first] = valPair.second;
 	}
 }
 
@@ -84,6 +84,22 @@ void Data::reset() {
 
 const string Data::toXML() const {
 	return valuesXML(ignored, fieldsData);
+}
+
+void Data::setParameter(const string& key, const string& value) {
+	parameters[key] = value;
+}
+
+string Data::getParameter(const string& key, const string& def) const {
+	return (parameters.find(key) != parameters.end()) ? parameters.at(key) : def;
+}
+
+bool Data::hasParameter(const string& key) const {
+	return parameters.find(key) != parameters.end();
+}
+
+const StringUMap& Data::getParameters() const {
+	return parameters;
 }
 
 string Data::valuesXML(

@@ -118,7 +118,7 @@ TEST_F(MessageTest, DisplayInfo) {
 TEST_F(MessageTest, AskYes) {
 	int result = Message::ask("Do you agree?", mainWindow.get());
 	// due to close() without answer but is expected.
-	EXPECT_EQ(result, Gtk::RESPONSE_DELETE_EVENT);
+	EXPECT_EQ(result, Gtk::ResponseType::RESPONSE_DELETE_EVENT);
 	EXPECT_EQ(testQuestionDialog->property_secondary_text().get_value(), "Do you agree?");
 }
 

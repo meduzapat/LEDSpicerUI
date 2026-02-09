@@ -44,9 +44,10 @@ DialogRestrictor::DialogRestrictor(BaseObjectType* obj, const Glib::RefPtr<Gtk::
 
 	// Connect Restrictor Box and buttons.
 	builder->get_widget_derived("BoxRestrictors", box);
-	builder->get_widget("BtnAddRestrictor",       btnAdd);
 	builder->get_widget("BtnApplyRestrictors",    btnApply);
-	setSignalAdd();
+	Gtk::Button* btnAdd = nullptr;
+	builder->get_widget("BtnAddRestrictor", btnAdd);
+	setSignalAdd(btnAdd);
 	setSignalApply();
 
 	// Restrictor fields.
@@ -108,7 +109,7 @@ DialogRestrictor::DialogRestrictor(BaseObjectType* obj, const Glib::RefPtr<Gtk::
 			recreateData();
 		}
 		else if (name != currentName) {
-			if (Message::ask("Are you sure you want to change the restrictor? all settings will be loss") == Gtk::RESPONSE_YES) {
+			if (Message::ask("Are you sure you want to change the restrictor? all settings will be loss") == Gtk::ResponseType::RESPONSE_YES) {
 				recreateData();
 			}
 			else {

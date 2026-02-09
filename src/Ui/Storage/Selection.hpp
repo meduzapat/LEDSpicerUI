@@ -22,8 +22,7 @@
 
 #include "Data.hpp"
 
-#ifndef SRC_UI_STORAGE_SELECTION_HPP_
-#define SRC_UI_STORAGE_SELECTION_HPP_ 1
+#pragma once
 
 namespace LEDSpicerUI::Ui::Storage {
 
@@ -56,5 +55,3 @@ protected:
 };
 
 } /* namespace */
-
-#endif /* SRC_UI_STORAGE_SELECTION_HPP_ */

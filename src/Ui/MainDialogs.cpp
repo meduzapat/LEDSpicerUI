@@ -27,16 +27,8 @@ using namespace LEDSpicerUI::Ui;
 MainDialogs::MainDialogs(Glib::RefPtr<Gtk::Builder> const &builder, Gtk::ApplicationWindow* window) :
 	// Set import dialog
 	dialogImportConfig(DialogImport::Types::CONFIG, window),
-	dialogImportInput(DialogImport::Types::INPUT, window),
-	// Project directory opener.
-	dialogSelectWorkingDirectory(
-		"Select Project Directory",
-		Gtk::FileChooserAction::FILE_CHOOSER_ACTION_SELECT_FOLDER,
-		Gtk::DialogFlags::DIALOG_MODAL | Gtk::DialogFlags::DIALOG_DESTROY_WITH_PARENT | Gtk::DialogFlags::DIALOG_USE_HEADER_BAR
-	)
+	dialogImportInput(DialogImport::Types::INPUT, window)
 {
-
-	DialogColors::initialize(builder);
 
 	// Initialize secondary dialogs.
 	DataDialogs::DialogElement::initialize(builder);
@@ -59,15 +51,6 @@ MainDialogs::MainDialogs(Glib::RefPtr<Gtk::Builder> const &builder, Gtk::Applica
 	DataDialogs::DialogGroup::getInstance()->setOwner(&groups);
 	DataDialogs::DialogInput::getInstance()->setOwner(&inputs);
 	DataDialogs::DialogProfile::getInstance()->setOwner(&profiles);
-
-	// Create select work directory FileChooserDialog
-	dialogSelectWorkingDirectory.set_transient_for(*window);
-	dialogSelectWorkingDirectory.set_position(Gtk::WindowPosition::WIN_POS_CENTER_ON_PARENT);
-	dialogSelectWorkingDirectory.set_default_size(900, 700);
-
-	// Prepare open project dialog functionality.
-	dialogSelectWorkingDirectory.add_button("_Cancel", Gtk::ResponseType::RESPONSE_CANCEL)->get_style_context()->add_class("backgroundRed");
-	dialogSelectWorkingDirectory.add_button("_Select", Gtk::ResponseType::RESPONSE_OK)->get_style_context()->add_class("backgroundGreen");
 }
 
 MainDialogs::~MainDialogs() {

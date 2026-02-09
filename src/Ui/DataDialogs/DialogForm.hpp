@@ -24,8 +24,7 @@
 #include "OrdenableFlowBox.hpp"
 #include "Storage/CollectionHandler.hpp"
 
-#ifndef UI_FORMDIALOG_HPP_
-#define UI_FORMDIALOG_HPP_ 1
+#pragma once
 
 namespace LEDSpicerUI::Ui::DataDialogs {
 
@@ -125,11 +124,8 @@ protected:
 	/// form action mode.
 	Actions action = Actions::ADD;
 
-	Gtk::Button
-		/// Open this form to create new Data (item), its located in the calling dialog.
-		* btnAdd = nullptr,
-		/// Store changes.
-		* btnApply = nullptr;
+	/// Store changes.
+	Gtk::Button* btnApply = nullptr;
 
 	/// The box that display the item handled by this dialog, its located in the calling dialog.
 	OrdenableFlowBox* box = nullptr;
@@ -186,8 +182,9 @@ protected:
 
 	/**
 	 * Method to add generic Add functionality.
+	 * @param btnAdd Opens this form to create new Data (item), its located in the calling dialog.
 	 */
-	void setSignalAdd();
+	void setSignalAdd(Gtk::Button* btnAdd);
 
 	/**
 	 * Utility that decorates with a button that allows deletion of itself.
@@ -260,5 +257,3 @@ protected:
 };
 
 } /* namespace */
-
-#endif /* UI_FORMDIALOG_HPP_ */

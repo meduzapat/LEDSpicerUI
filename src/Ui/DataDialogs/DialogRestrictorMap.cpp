@@ -43,7 +43,7 @@ DialogRestrictorMap::DialogRestrictorMap(BaseObjectType* obj, const Glib::RefPtr
 	builder->get_widget_derived("BoxRestrictorMappings", box);
 	builder->get_widget("BtnAddRestrictorMap",           btnAdd);
 	builder->get_widget("BtnApplyRestrictorMap",         btnApply);
-	setSignalAdd();
+	setSignalAdd(btnAdd);
 	setSignalApply();
 
 	builder->get_widget("ComboboxRestrictorPlayer",    player);

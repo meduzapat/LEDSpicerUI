@@ -42,9 +42,10 @@ DialogGroup::DialogGroup(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& 
 
 	// Connect Groups Box and button.
 	builder->get_widget_derived("BoxGroups", box);
-	builder->get_widget("BtnAddGroup",       btnAdd);
 	builder->get_widget("BtnApplyGroup",     btnApply);
-	setSignalAdd();
+	Gtk::Button* btnAdd = nullptr;
+	builder->get_widget("BtnAddGroup", btnAdd);
+	setSignalAdd(btnAdd);
 	setSignalApply();
 
 	builder->get_widget("InputGroupName",       inputGroupName);
@@ -113,8 +114,7 @@ void DialogGroup::isValid() const {
 	// If is not edit, or data is not the same, check for dupes.
 	if (getCollectionHandler()->isIdSet(name)) {
 		if (action != Actions::EDIT or currentData->createUniqueId() != name) {
-			if (action != Actions::LOAD)
-				inputGroupName->grab_focus();
+			if (action != Actions::LOAD) inputGroupName->grab_focus();
 			throw Message("Group with name " + name + " already exist.");
 		}
 	}

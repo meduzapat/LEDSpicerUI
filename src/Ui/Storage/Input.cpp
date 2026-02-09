@@ -25,17 +25,21 @@
 using namespace LEDSpicerUI::Ui::Storage;
 
 Input::Input(StringUMap& data) :
+
 	Data(data)
 	// maps can have multiple targets.
 //	maps(TARGET),
 	// linked maps are not absolute and can have multiple entries.
 //	linkedMaps(ID)
 {
+	// maps can be 1 or many depending on the type of input and the number of sources.
+	for (auto& map : maps) {
 	// link maps to elements and groups using the name.
-	CollectionHandler::getInstance(COLLECTION_ELEMENT)->registerDependency(&maps);
-	CollectionHandler::getInstance(COLLECTION_GROUP)->registerDependency(&maps);
-	// to avoid duplicated triggers.
-	CollectionHandler::getInstance(COLLECTION_INPUT_MAPS)->registerDependency(&maps);
+		CollectionHandler::getInstance(COLLECTION_ELEMENT)->registerDependency(&map);
+		CollectionHandler::getInstance(COLLECTION_GROUP)->registerDependency(&map);
+		// to avoid duplicated triggers.
+		CollectionHandler::getInstance(COLLECTION_INPUT_MAPS)->registerDependency(&map);
+	}
 	// link linked maps to maps using the trigger.
 	//CollectionHandler::getInstance(COLLECTION_INPUT_EVENTS)->registerEndpoint(&linkedMaps);
 	// this value is not used as data, only for filename.
@@ -47,9 +51,11 @@ Input::~Input() {
 		CollectionHandler::getInstance(COLLECTION_INPUT)->remove(this);
 	}
 	// unlink.
-	CollectionHandler::getInstance(COLLECTION_ELEMENT)->release(&maps);
-	CollectionHandler::getInstance(COLLECTION_GROUP)->release(&maps);
-	CollectionHandler::getInstance(COLLECTION_INPUT_MAPS)->release(&maps);
+	for (auto &map : maps) {
+		CollectionHandler::getInstance(COLLECTION_ELEMENT)->release(&map);
+		CollectionHandler::getInstance(COLLECTION_GROUP)->release(&map);
+		CollectionHandler::getInstance(COLLECTION_INPUT_MAPS)->release(&map);
+	}
 	//CollectionHandler::getInstance(COLLECTION_INPUT_LINKED_MAPS)->release(&linkedMaps);
 }
 
@@ -58,8 +64,17 @@ string const Input::createPrettyName() const {
 }
 
 const string Input::createTooltip() const {
+	uint count(0);
+	if (maps.size() > 1) {
+		for (auto& map : maps) {
+			count += map.getSize();
+		}
+	}
+	else {
+		count = maps[0].getSize();
+	}
 	return "Plugin " + getValue(NAME) + " with " +
-			std::to_string(maps.getSize()) + " maps" +
+			std::to_string(count) + " maps" +
 			(getValue(NAME) == "Actions" ? " and " + std::to_string(linkedMaps.getSize()) + " linked maps" : "");
 }
 
@@ -68,7 +83,7 @@ const string Input::getCssClass() const {
 }
 
 void Input::activate() {
-	DataDialogs::DialogInputMap::getInstance()->setOwner(&maps, this);
+//	DataDialogs::DialogInputMap::getInstance()->setOwner(&maps, this);
 	DataDialogs::DialogInputLinkMaps::getInstance()->setOwner(&linkedMaps, this);
 }
 
@@ -82,8 +97,10 @@ const string Input::toXML() const {
 	Defaults::reduceTab();
 	r += ">\n";
 	Defaults::increaseTab();
-	for (const auto& e : maps) {
-		r += e->getData()->toXML();
+	for (const auto& m : maps) {
+		for (const auto e : m) {
+			r += e->getData()->toXML();
+		}
 	}
 	Defaults::reduceTab();
 	r += "</LEDSpicer>\n";

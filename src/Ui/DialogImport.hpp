@@ -22,8 +22,7 @@
 
 #include "Message.hpp"
 
-#ifndef UI_DIALOGIMPORT_HPP_
-#define UI_DIALOGIMPORT_HPP_ 1
+#pragma once
 
 namespace LEDSpicerUI::Ui {
 
@@ -57,5 +56,3 @@ protected:
 };
 
 } /* namespace */
-
-#endif /* UI_DIALOGIMPORT_HPP_ */

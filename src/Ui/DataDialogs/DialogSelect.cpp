@@ -56,22 +56,11 @@ DialogSelect::DialogSelect(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 	Defaults::setFilter(filterEntry, boxAll);
 
 	signal_show().connect(sigc::mem_fun(*this, &DialogSelect::populateSelectables), true);
-//	btnApply->signal_clicked().connect([&]() {
-//		try {
-//			// Apply changes after sanitize.
-//			isValid();
-//			response(Gtk::RESPONSE_APPLY);
-//		}
-//		catch (Message& e) {
-//			e.displayError(this);
-//		}
-//	});
-//	populateSelectables();
 }
 
 void DialogSelect::setDestinations(const StringBoxButtonCollectionUMap& itemCollections, const Storage::Data* caller) {
 	this->itemCollections = itemCollections;
-	this->caller  = caller;
+	this->caller          = caller;
 }
 
 void DialogSelect::setSettings(const SettingRequest& setting) {

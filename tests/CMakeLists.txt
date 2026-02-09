@@ -68,13 +68,13 @@ add_test_executable(XMLHelperTest
 
 add_test_executable(ConfigFileTest
 	"ConfigFileTest.cpp"
-	"${COMMON_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp;${CMAKE_SOURCE_DIR}/src/XMLHelper.cpp;${CMAKE_SOURCE_DIR}/src/ConfigFile.cpp"
+	"${COMMON_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp;${CMAKE_SOURCE_DIR}/src/XMLHelper.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/BoxButton.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/BoxButtonCollection.cpp;${CMAKE_SOURCE_DIR}/src/ConfigFile.cpp"
 	"${TINYXML2_LIBRARIES}"
 )
 
 add_test_executable(InputFileTest
 	"InputFileTest.cpp"
-	"${COMMON_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp;${CMAKE_SOURCE_DIR}/src/XMLHelper.cpp;${CMAKE_SOURCE_DIR}/src/InputFile.cpp"
+	"${COMMON_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp;${CMAKE_SOURCE_DIR}/src/XMLHelper.cpp;${CMAKE_SOURCE_DIR}/src/ProjectFile.cpp;${CMAKE_SOURCE_DIR}/src/InputFile.cpp"
 	"${TINYXML2_LIBRARIES}"
 )
 

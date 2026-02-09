@@ -26,16 +26,16 @@
 #include <csignal>
 using std::signal;
 
+#include <glibmm.h>
+
 #include "Message.hpp"
 #include "Ui/MainWindow.hpp"
 
-#include <glibmm.h>
+#include "Ui/DialogProject.hpp"
 
-#ifndef LEDSPICERUI_HPP_
-#define LEDSPICERUI_HPP_ 1
+#pragma once
 
 namespace LEDSpicerUI {
 int main(int argc, char *argv[]);
 }
 
-#endif /* LEDSPICERUI_HPP_ */

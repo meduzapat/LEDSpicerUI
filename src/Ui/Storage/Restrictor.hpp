@@ -23,8 +23,7 @@
 #include "DataDialogs/DialogRestrictorMap.hpp"
 #include "Data.hpp"
 
-#ifndef RESTRICTOR_HPP_
-#define RESTRICTOR_HPP_ 1
+#pragma once
 
 namespace LEDSpicerUI::Ui::Storage {
 
@@ -54,5 +53,3 @@ protected:
 };
 
 } /* namespace */
-
-#endif /* RESTRICTOR_HPP_ */

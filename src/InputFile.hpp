@@ -20,34 +20,25 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "XMLHelper.hpp"
+#include "ProjectFile.hpp"
 
-#ifndef INPUTFILE_HPP_
-#define INPUTFILE_HPP_ 1
+#pragma once
 
 namespace LEDSpicerUI {
 
-/**
- * LEDSpicerUI::InputFile
- */
-class InputFile: public XMLHelper {
+class InputFile : public ProjectFile {
 
 public:
 
 	InputFile() = delete;
 
-	InputFile(const string& inputFile, const string& projectRoot);
+	InputFile(const string& inputFile);
 
 	virtual ~InputFile() = default;
 
 protected:
 
-const string processMaps(tinyxml2::XMLElement* mapsNode, const string& inputName);
-
-const string processInputSources(const string& inputName, tinyxml2::XMLElement* inputNode, StringUSet& listenEvents);
-
+	const string processMaps(tinyxml2::XMLElement* mapsNode, const string& inputName);
 };
 
-} /* namespace LEDSpicerUI */
-
-#endif /* INPUTFILE_HPP_ */
+} // namespace

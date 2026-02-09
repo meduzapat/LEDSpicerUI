@@ -24,57 +24,35 @@
 
 using namespace LEDSpicerUI;
 
-InputFile::InputFile(const string& inputFile, const string& projectRoot) : XMLHelper(inputFile, "Input") {
+InputFile::InputFile(const string& inputFile) : ProjectFile(inputFile, "Input", INPUT_PATH) {
 
-	string
-		name(Defaults::extractName(inputFile, projectRoot)),
-		errors;
-	// Extract input settings.
-	StringUMap input(processNode(getRoot()));
-	// Add filename (name of the plugin)
-	input.emplace(FILENAME, name);
-	string pluginType(input[NAME]);
-	extractedData.emplace(COLLECTION_INPUT, std::move(StringUMapVector{input}));
-	StringUMapVector inputMaps;
-	// This plugin types can have multiple sources.
-	if (pluginType == "Credits" or pluginType == "Actions" or pluginType == "Impulse" or pluginType == "Blinker") {
+	string errors;
 
-		// Extract listenEvents.
-		StringUSet listenEvents;
-		errors += processInputSources(pluginType, getRoot(), listenEvents);
+	StringUMap input(rootInfo.attributes);
+	// filename available via getFilename()
 
-		// Extract maps.
-		tinyxml2::XMLElement* mapsNode = getRoot()->FirstChildElement("maps");
-		if (not mapsNode) {
-			errors += "Missing maps section for input plugin " + name + '\n';
-		}
-		else {
-			// Check for listenEvents, at this point everything is sanitized.
-			StringUMapVector maps;
-			for (; mapsNode; mapsNode = mapsNode->NextSiblingElement("maps")) {
-				StringUMap mapsNodeAttr(processNode(mapsNode));
-				if (mapsNodeAttr.find("source") == mapsNodeAttr.end()) {
-					errors += "Missing source attribute in maps for input plugin " + name + '\n';
-					continue;
-				}
-				const string mapName(mapsNodeAttr["source"]);
-				if (listenEvents.find(mapName) == listenEvents.end()) {
-					errors += "Maps does not match any listenEvent for input plugin " + name + '\n';
-					continue;
-				}
-				maps.emplace_back(std::move(mapsNodeAttr));
-				errors += processMaps(mapsNode, Defaults::createCommonUniqueId({name, mapName, COLLECTION_INPUT_MAPS}));
-			}
-			extractedData.emplace(Defaults::createCommonUniqueId({name, COLLECTION_INPUT_EVENTS}), std::move(maps));
-		}
+	tinyxml2::XMLElement* mapsNode = getRoot()->FirstChildElement("maps");
+	if (not mapsNode) {
+		errors += "Missing maps section for input " + filename + '\n';
 	}
 	else {
-		// Single source or malformed.
-		errors += processMaps(getRoot(), Defaults::createCommonUniqueId({name, COLLECTION_INPUT_MAPS}));
+		StringUMapVector mapsSources;
+
+		for (size_t idx = 0; mapsNode; mapsNode = mapsNode->NextSiblingElement("maps"), ++idx) {
+			mapsSources.push_back(processNode(mapsNode));
+			errors += processMaps(
+				mapsNode,
+				Defaults::createCommonUniqueId({filename, std::to_string(idx), COLLECTION_INPUT_MAPS})
+			);
+		}
+
+		extractedData.emplace(Defaults::createCommonUniqueId({filename, COLLECTION_INPUT_EVENTS}), std::move(mapsSources));
 	}
 
+	extractedData.emplace(COLLECTION_INPUT, StringUMapVector{input});
+
 	if (not errors.empty())
-		throw Message("Errors:\n" + errors);
+		Message::displayError("Errors:\n" + errors);
 }
 
 const string InputFile::processMaps(tinyxml2::XMLElement* mapsNode, const string& inputName) {
@@ -96,23 +74,5 @@ const string InputFile::processMaps(tinyxml2::XMLElement* mapsNode, const string
 		maps.push_back(std::move(mapAttr));
 	}
 	extractedData.emplace(inputName, maps);
-	return errors;
-}
-
-const string InputFile::processInputSources(const string& inputName, tinyxml2::XMLElement* inputNode, StringUSet& listenEvents) {
-	// Check for listenEvents.
-	tinyxml2::XMLElement* listenEventsNode(inputNode->FirstChildElement("listenEvents"));
-	if (not listenEventsNode) return "Missing listenEvents for input plugin " + inputName + '\n';
-	string errors;
-	listenEventsNode = listenEventsNode->FirstChildElement("listenEvent");
-	for (; listenEventsNode; listenEventsNode = listenEventsNode->NextSiblingElement("listenEvent")) {
-		StringUMap listenEventsAttr(processNode(listenEventsNode));
-		if (listenEventsAttr.find(NAME) == listenEventsAttr.end()) {
-			errors += "Missing name attribute in listenEvents for input plugin " + inputName + '\n';
-			continue;
-		}
-		listenEvents.insert(std::move(listenEventsAttr[NAME]));
-	}
-	if (listenEvents.empty()) return "Empty listenEvents section for input plugin " + inputName + '\n';
 	return errors;
 }

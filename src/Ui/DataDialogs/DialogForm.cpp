@@ -71,9 +71,7 @@ void DialogForm::createItems(StringUMapVector& rawCollection, XMLHelper* values)
 }
 
 void DialogForm::refreshBox() {
-	if (childDialog) {
-		childDialog->refreshBox();
-	}
+	if (childDialog) childDialog->refreshBox();
 	box->wipe();
 	if (not items) return;
 	items->populateBox(box);
@@ -105,7 +103,7 @@ LEDSpicerUI::Ui::Storage::Data* DialogForm::createData() {
 	return createData(rawData);
 }
 
-void DialogForm::setSignalAdd() {
+void DialogForm::setSignalAdd(Gtk::Button* btnAdd) {
 	btnAdd->signal_clicked().connect(sigc::mem_fun(*this, &DialogForm::onAddClicked));
 }
 
@@ -114,7 +112,7 @@ void DialogForm::setSignalApply() {
 		try {
 			// Apply changes after sanitize.
 			isValid();
-			response(Gtk::RESPONSE_APPLY);
+			response(Gtk::ResponseType::RESPONSE_APPLY);
 		}
 		catch (Message& e) {
 			e.displayError(this);
@@ -186,13 +184,11 @@ void DialogForm::onAddClicked() {
 		currentData->wipe();
 		storeData();
 		Defaults::markDirty();
-		// store.
+		// Update UI, trackers, and add buttons.
 		Storage::BoxButton& bBox(items->create(currentData));
 		getCollectionHandler()->add(currentData);
 		addButtons(bBox);
-		// Add into the box.
 		box->add(bBox);
-		// Custom stuff.
 		afterCreate(bBox);
 		currentData->deActivate();
 	}
@@ -225,7 +221,7 @@ void DialogForm::onEditClicked(Storage::BoxButton& boxButton) {
 	btnApply->set_label("Save");
 	// Populate form.
 	retrieveData();
-	if (run() == Gtk::RESPONSE_APPLY) {
+	if (run() == Gtk::ResponseType::RESPONSE_APPLY) {
 		Defaults::markDirty();
 		currentData->wipe();
 		storeData();

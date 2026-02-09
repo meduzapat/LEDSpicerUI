@@ -25,8 +25,7 @@
 #include "CollectionHandler.hpp"
 #include "DataDialogs/DialogSelect.hpp"
 
-#ifndef PROFILE_HPP_
-#define PROFILE_HPP_ 1
+#pragma once
 
 namespace LEDSpicerUI::Ui::Storage {
 
@@ -71,5 +70,3 @@ protected:
 };
 
 } /* namespace */
-
-#endif /* PROFILE_HPP_ */

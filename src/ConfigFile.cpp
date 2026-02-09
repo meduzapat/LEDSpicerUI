@@ -25,15 +25,14 @@
 using namespace LEDSpicerUI;
 
 ConfigFile::ConfigFile(const string& ledspicerconf) : XMLHelper(ledspicerconf, "Configuration") {
-	// extract settings
-	nodeSettings = processNode(getRoot());
+	// rootInfo.attributes already populated by XMLHelper constructor
 	string errors(processDevices());
 	errors += processProcessLookup();
-	if (not errors.empty()) throw Message("Errors:\n" + errors);
+	if (not errors.empty()) Message::displayError("Errors:\n" + errors);
 }
 
 StringUMap ConfigFile::getSettings() {
-	return nodeSettings;
+	return rootInfo.attributes;
 }
 
 const string ConfigFile::getDefaultProfile() const {
@@ -251,4 +250,72 @@ const string ConfigFile::processGroups() {
 	}
 	extractedData.emplace(COLLECTION_GROUP, std::move(groups));
 	return errors;
+}
+
+void ConfigFile::save(const ConfigData& data) {
+
+	// Validation
+	if (data.defaultProfile.empty())
+		throw Message("Select a default profile in the profile section");
+
+	if (data.devices.getSize() == 0)
+		throw Message("At least one device is required");
+
+	// Build XML
+	string xmlData = xmlHeader("Configuration");
+	xmlData += toXML(data.settings);
+	Defaults::reduceTab();
+	xmlData += ">\n";
+
+	Defaults::increaseTab();
+
+	// Process lookup (optional)
+	if (data.processes.getSize()) {
+		xmlData += Defaults::tab() + "<processLookup";
+		if (not data.runEvery.empty()) {
+			xmlData += " runEvery=\"" + data.runEvery + "\"";
+		}
+		xmlData += ">\n";
+		Defaults::increaseTab();
+		for (const auto& p : data.processes) {
+			xmlData += p->getData()->toXML();
+		}
+		Defaults::reduceTab();
+		xmlData += Defaults::tab() + "</processLookup>\n";
+	}
+
+	// Devices (required)
+	xmlData += Defaults::tab() + "<devices>\n";
+	Defaults::increaseTab();
+	for (const auto& d : data.devices) {
+		xmlData += d->getData()->toXML();
+	}
+	Defaults::reduceTab();
+	xmlData += Defaults::tab() + "</devices>\n";
+
+	// Restrictors (optional)
+	if (data.restrictors.getSize()) {
+		xmlData += Defaults::tab() + "<restrictors>\n";
+		Defaults::increaseTab();
+		for (const auto& r : data.restrictors) {
+			xmlData += r->getData()->toXML();
+		}
+		Defaults::reduceTab();
+		xmlData += Defaults::tab() + "</restrictors>\n";
+	}
+
+	// Layout with groups
+	xmlData += Defaults::tab() + "<layout defaultProfile=\"" + data.defaultProfile + "\">\n";
+	Defaults::increaseTab();
+	for (const auto& g : data.groups) {
+		xmlData += g->getData()->toXML();
+	}
+	Defaults::reduceTab();
+	xmlData += Defaults::tab() + "</layout>\n";
+
+	Defaults::reduceTab();
+	xmlData += xmlFooter();
+
+	// Write file
+	Glib::file_set_contents(data.configPath, xmlData);
 }

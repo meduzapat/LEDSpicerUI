@@ -45,8 +45,8 @@ DialogImport::DialogImport(const Types type, Gtk::Window* parent) :
 	filter->add_mime_type("application/xml");
 
 	// Set buttons.
-	add_button("_Cancel", Gtk::RESPONSE_CANCEL)->get_style_context()->add_class("backgroundRed");
-	btbOk = add_button("_Open",   Gtk::RESPONSE_OK);
+	add_button("_Cancel", Gtk::ResponseType::RESPONSE_CANCEL)->get_style_context()->add_class("backgroundRed");
+	btbOk = add_button("_Open",   Gtk::ResponseType::RESPONSE_OK);
 	btbOk->get_style_context()->add_class("backgroundGreen");
 	auto box = get_content_area();
 	switch (type) {

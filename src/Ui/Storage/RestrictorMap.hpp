@@ -23,8 +23,7 @@
 #include "CollectionHandler.hpp"
 #include "Data.hpp"
 
-#ifndef RESTRICTORMAP_HPP_
-#define RESTRICTORMAP_HPP_ 1
+#pragma once
 
 namespace LEDSpicerUI::Ui::Storage {
 
@@ -47,5 +46,3 @@ public:
 };
 
 } /* namespace */
-
-#endif /* RESTRICTORMAP_HPP_ */

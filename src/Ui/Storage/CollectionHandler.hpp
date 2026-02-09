@@ -23,8 +23,7 @@
 #include "Message.hpp"
 #include "Storage/BoxButtonCollection.hpp"
 
-#ifndef COLLECTIONHANDLER_HPP_
-#define COLLECTIONHANDLER_HPP_ 1
+#pragma once
 
 namespace LEDSpicerUI::Ui::Storage {
 
@@ -161,5 +160,3 @@ protected:
 };
 
 } /* namespace */
-
-#endif /* COLLECTIONHANDLER_HPP_ */

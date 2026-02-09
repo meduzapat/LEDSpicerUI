@@ -40,12 +40,12 @@ using std::stringstream;
 
 #include <functional>
 
-#ifndef DEFAULTS_HPP_
-#define DEFAULTS_HPP_ 1
+#pragma once
 
-//#define CONFIG_FILE PACKAGE_CONF_DIR "ledspicer.conf"
-#define CONFIG_FILE "/ledspicer.conf"
-#define XML_FILE_FOREIGN ""
+#define XML_FILE_PLAIN ""
+#define INPUT_PATH "inputs/"
+#define ANIMATION_PATH "animations/"
+#define PROFILE_PATH "profiles/"
 
 #define DEFAULT_MESSAGE "This is an auto-generated file by " PACKAGE_STRING "."
 
@@ -411,12 +411,6 @@ public:
 	static const StringVector elementTypes;
 
 	/**
-	 * Set a new subtitle.
-	 * @param text
-	 */
-	static void setSubtitle(const string& text);
-
-	/**
 	 * Initialize stuff here
 	 * @param header to update the * when dirty.
 	 */
@@ -519,7 +513,51 @@ public:
 	 * @param root
 	 * @return the plain file name with the root extracted.
 	 */
-	static std::string extractName(const std::string& filename, const std::string& root);
+	static string extractName(const string& filename, const string& root);
+
+	/**
+	 * Extracts relative path from a base directory, without extension.
+	 * @param fullFileName The full file path.
+	 * @param baseDir The base directory to cap to.
+	 * @return Relative path without extension.
+	 */
+	static string capToDirectory(const string& fullFileName, const string& baseDir);
+
+	/**
+	 * Extracts substring after a prefix.
+	 * @param line The source string.
+	 * @param prefix The prefix to find.
+	 * @return Trimmed string after prefix, or empty if not found.
+	 */
+	static string extractAfter(const string& line, const string& prefix);
+
+	/**
+	 * Executes a command and captures stdout.
+	 * @param command The command to run.
+	 * @param output Captured stdout.
+	 * @return true if command succeeded.
+	 */
+	static bool runCommand(const string& command, string& output);
+
+	/**
+	 * Sanitizes a string for use as a filename/directory name.
+	 * Removes invalid characters: / \ : * ? " < > |
+	 * @param text The input string.
+	 * @return Sanitized string.
+	 */
+	static string sanitizeFilename(const string& text);
+
+	/**
+	 * Sets the project directory.
+	 * @param dir
+	 */
+	static void setProjectsDir(const string& dir);
+
+	/**
+	 * Gets the project directory.
+	 * @return
+	 */
+	static string& getProjectsDir();
 
 protected:
 
@@ -534,8 +572,9 @@ protected:
 	inline static Gtk::HeaderBar* header = nullptr;
 
 	inline static Gtk::Button* btnSave = nullptr;
+
+	inline static string projectDir = "";
+
 };
 
 } /* namespace */
-
-#endif /* DEFAULTS_HPP_ */

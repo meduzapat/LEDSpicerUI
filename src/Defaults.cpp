@@ -368,13 +368,10 @@ string Defaults::detectElementType(const Glib::ustring& name) {
 	return DEFAULT_ELEMENT_TYPE;
 }
 
-void Defaults::setSubtitle(const string& text) {
-	header->set_subtitle(text);
-}
-
 void Defaults::initialize(Gtk::HeaderBar* header, Gtk::Button* btnSave) {
 	Defaults::header  = header;
 	Defaults::btnSave = btnSave;
+	btnSave->set_sensitive(false);
 }
 
 void Defaults::registerWidget(Gtk::Editable* widget) {
@@ -510,4 +507,77 @@ string Defaults::extractName(const string& fullFileName, const string& rootPath)
 	// Get the relative path portion.
 	dir = dir.substr(rootPath.length() + 1);
 	return dir + "/" + filename;
+}
+
+// Defaults.cpp
+string Defaults::capToDirectory(const string& fullFileName, const string& baseDir) {
+	string
+		filename(Glib::path_get_basename(fullFileName)),
+		dir(Glib::path_get_dirname(fullFileName));
+
+	if (filename.find('.') != string::npos) {
+		filename = filename.substr(0, filename.find_last_of('.'));
+	}
+
+	if (dir == baseDir or baseDir.size() > dir.size()) {
+		return filename;
+	}
+
+	auto pos = dir.find(baseDir);
+	if (pos == string::npos) {
+		return filename;
+	}
+
+	dir = dir.substr(baseDir.length() + 1);
+	return dir + "/" + filename;
+}
+
+string Defaults::extractAfter(const string& line, const string& prefix) {
+	auto pos = line.find(prefix);
+	if (pos == string::npos)
+		return "";
+	string result = line.substr(pos + prefix.length());
+	trim(result);
+	return result;
+}
+
+bool Defaults::runCommand(const string& command, string& output) {
+	try {
+		int exitStatus;
+		Glib::spawn_command_line_sync(command, &output, nullptr, &exitStatus);
+		return (exitStatus == 0);
+	}
+	catch (const Glib::Error&) {
+		return false;
+	}
+}
+
+string Defaults::sanitizeFilename(const string& text) {
+	string result;
+	result.reserve(text.size());
+	for (auto ch : text) {
+		switch (ch) {
+			case '/':
+			case '\\':
+			case ':':
+			case '*':
+			case '?':
+			case '"':
+			case '<':
+			case '>':
+			case '|':
+				continue;
+			default:
+				result += ch;
+		}
+	}
+	return result;
+}
+
+string& Defaults::getProjectsDir() {
+	return Defaults::projectDir;
+}
+
+void Defaults::setProjectsDir(const string& dir) {
+	projectDir = dir;
 }

@@ -41,9 +41,10 @@ DialogProfile::DialogProfile(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 {
 	// Connect Profile Box and button.
 	builder->get_widget_derived("BoxProfiles", box);
-	builder->get_widget("BtnAddProfile",       btnAdd);
 	builder->get_widget("BtnApplyProfile",     btnApply);
-	setSignalAdd();
+	Gtk::Button* btnAdd = nullptr;
+	builder->get_widget("BtnAddProfile", btnAdd);
+	setSignalAdd(btnAdd);
 	setSignalApply();
 
 	builder->get_widget("InputProfileName",          inputProfileName);

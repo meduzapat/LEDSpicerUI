@@ -44,9 +44,10 @@ DialogDevice::DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 
 	// Connect Device Box and buttons.
 	builder->get_widget_derived("BoxDevices", box);
-	builder->get_widget("BtnAddDevice",       btnAdd);
 	builder->get_widget("BtnApplyDevices",    btnApply);
-	setSignalAdd();
+	Gtk::Button* btnAdd = nullptr;
+	builder->get_widget("BtnAddDevice", btnAdd);
+	setSignalAdd(btnAdd);
 	setSignalApply();
 
 	/// Pointer to button add element to enable or disable.
@@ -125,7 +126,7 @@ DialogDevice::DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 		}
 		// If there is a device already, clean the form and change to the new device, warn the user about losing data.
 		else if (name != currentName) {
-			if (Message::ask("Are you sure you want to change the device? all settings will be loss") == Gtk::RESPONSE_YES) {
+			if (Message::ask("Are you sure you want to change the device? all settings will be loss") == Gtk::ResponseType::RESPONSE_YES) {
 				recreateData();
 			}
 			else {

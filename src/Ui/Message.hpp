@@ -22,8 +22,7 @@
 
 #include "Defaults.hpp"
 
-#ifndef MESSAGE_HPP_
-#define MESSAGE_HPP_ 1
+#pragma once
 
 namespace LEDSpicerUI::Ui {
 
@@ -102,5 +101,3 @@ protected:
 };
 
 } /* namespace LEDSpicerUI */
-
-#endif /* MESSAGE_HPP_ */

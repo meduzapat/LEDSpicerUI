@@ -30,9 +30,12 @@ class InputFileTest : public ::testing::Test {
 protected:
 
 	void SetUp() override {
+		// Set projects dir for filename extraction
+		Defaults::setProjectsDir(PACKAGE_SAMPLES_DIR "data/");
+
 		// Initialize InputFile instances with the sample files
-		inputMulti  = std::make_unique<InputFile>(PACKAGE_SAMPLES_DIR "data/inputMulti.xml", projectRoot);
-		inputSingle = std::make_unique<InputFile>(PACKAGE_SAMPLES_DIR "data/inputSingle.xml", projectRoot);
+		inputMulti  = std::make_unique<InputFile>(PACKAGE_SAMPLES_DIR "data/" INPUT_PATH "inputMulti.xml");
+		inputSingle = std::make_unique<InputFile>(PACKAGE_SAMPLES_DIR "data/" INPUT_PATH "inputSingle.xml");
 	}
 
 	void TearDown() override {
@@ -42,7 +45,6 @@ protected:
 
 	std::unique_ptr<InputFile> inputMulti;
 	std::unique_ptr<InputFile> inputSingle;
-	const std::string projectRoot = PACKAGE_SAMPLES_DIR "data/";
 };
 
 // Test that the multi-source input file (Credits) is loaded and parsed correctly
@@ -50,7 +52,6 @@ TEST_F(InputFileTest, MultiSourceInputIsLoaded) {
 	// Check basic input attributes
 	auto& inputData = inputMulti->getData(COLLECTION_INPUT);
 	ASSERT_FALSE(inputData.empty());
-
 	ASSERT_FALSE(inputData[0].empty());
 
 	EXPECT_EQ("Credits", inputData[0][NAME]);
@@ -61,30 +62,28 @@ TEST_F(InputFileTest, MultiSourceInputIsLoaded) {
 	EXPECT_EQ("False",   inputData[0]["alwaysOn"]);
 	EXPECT_EQ("1",       inputData[0]["coinsPerCredit"]);
 
-	EXPECT_EQ("inputMulti", inputData[0][FILENAME]);
+	// Filename now via getFilename()
+	EXPECT_EQ("inputMulti", inputMulti->getFilename());
 }
 
 // Test that listenEvents are correctly extracted from multi-source input
 TEST_F(InputFileTest, ListenEventsAreExtracted) {
 	const string
-		name(inputMulti->getData(COLLECTION_INPUT)[0][FILENAME]),
+		name(inputMulti->getFilename()),
 		eventName(Defaults::createCommonUniqueId({name, COLLECTION_INPUT_EVENTS})),
 		hardware1Name(inputMulti->getData(eventName)[0]["source"]),
 		hardware2Name(inputMulti->getData(eventName)[1]["source"]);
 
-	EXPECT_EQ(hardware1Name, "hardware1");
-	EXPECT_EQ(hardware2Name, "hardware2");
+	EXPECT_EQ("hardware1", hardware1Name);
+	EXPECT_EQ("hardware2", hardware2Name);
 }
 
 // Test that maps for the first source in multi-source input are correctly processed
 TEST_F(InputFileTest, FirstSourceMapsAreProcessed) {
-
-	// Construct the unique ID for the first source maps
+	// Construct the unique ID for the first source maps (now using index)
 	const string
-		name(inputMulti->getData(COLLECTION_INPUT)[0][FILENAME]),
-		eventName(Defaults::createCommonUniqueId({name, COLLECTION_INPUT_EVENTS})),
-		hardware1Name(inputMulti->getData(eventName)[0]["source"]),
-		mapName(Defaults::createCommonUniqueId({name, hardware1Name, COLLECTION_INPUT_MAPS}));
+		name(inputMulti->getFilename()),
+		mapName(Defaults::createCommonUniqueId({name, "0", COLLECTION_INPUT_MAPS}));
 
 	auto& maps = inputMulti->getData(mapName);
 	ASSERT_EQ(3, maps.size());
@@ -113,15 +112,12 @@ TEST_F(InputFileTest, FirstSourceMapsAreProcessed) {
 
 // Test that maps for the second source in multi-source input are correctly processed
 TEST_F(InputFileTest, SecondSourceMapsAreProcessed) {
-	// Construct the unique ID for the second source maps
+	// Construct the unique ID for the second source maps (now using index)
 	const string
-		name(inputMulti->getData(COLLECTION_INPUT)[0][FILENAME]),
-		eventName(Defaults::createCommonUniqueId({name, COLLECTION_INPUT_EVENTS})),
-		hardware2Name(inputMulti->getData(eventName)[1]["source"]),
-		mapName(Defaults::createCommonUniqueId({name, hardware2Name, COLLECTION_INPUT_MAPS}));
+		name(inputMulti->getFilename()),
+		mapName(Defaults::createCommonUniqueId({name, "1", COLLECTION_INPUT_MAPS}));
 
 	auto& maps = inputMulti->getData(mapName);
-
 	ASSERT_EQ(1, maps.size());
 
 	// Check the map
@@ -136,14 +132,16 @@ TEST_F(InputFileTest, SecondSourceMapsAreProcessed) {
 TEST_F(InputFileTest, SingleSourceInputIsLoaded) {
 	auto& inputData = inputSingle->getData(COLLECTION_INPUT);
 	ASSERT_FALSE(inputData.empty());
-	EXPECT_EQ("Mame",        inputData[0][NAME]);
-	EXPECT_EQ("inputSingle", inputData[0][FILENAME]);
+	EXPECT_EQ("Mame", inputData[0][NAME]);
+
+	// Filename now via getFilename()
+	EXPECT_EQ("inputSingle", inputSingle->getFilename());
 }
 
 // Test that maps for single-source input are correctly processed
 TEST_F(InputFileTest, SingleSourceMapsAreProcessed) {
-	// Construct the unique ID for the maps
-	std::string mapsId = Defaults::createCommonUniqueId({"inputSingle", COLLECTION_INPUT_MAPS});
+	// Construct the unique ID for the maps (using index 0)
+	const string mapsId = Defaults::createCommonUniqueId({inputSingle->getFilename(), "0", COLLECTION_INPUT_MAPS});
 
 	auto& maps = inputSingle->getData(mapsId);
 	ASSERT_EQ(3, maps.size());
@@ -172,7 +170,23 @@ TEST_F(InputFileTest, SingleSourceMapsAreProcessed) {
 
 // Test checking error handling for missing required attributes in maps
 TEST_F(InputFileTest, MissingAttributesHandling) {
-	EXPECT_THROW(InputFile(PACKAGE_SAMPLES_DIR "data/inputMalformed.xml", projectRoot), Message);
+	EXPECT_THROW(InputFile(PACKAGE_SAMPLES_DIR "data/" INPUT_PATH "inputMalformed.xml"), Message);
+}
+
+// Test ProjectFile getFilename functionality
+TEST_F(InputFileTest, FilenameExtraction) {
+	EXPECT_EQ("inputMulti",  inputMulti->getFilename());
+	EXPECT_EQ("inputSingle", inputSingle->getFilename());
+}
+
+// Test getRootInfo returns expected values
+TEST_F(InputFileTest, RootInfoIsPopulated) {
+	const auto& rootInfo = inputMulti->getRootInfo();
+
+	EXPECT_EQ(PACKAGE_DATA_VERSION, rootInfo.version);
+	EXPECT_EQ("Input", rootInfo.type);
+	EXPECT_FALSE(rootInfo.attributes.empty());
+	EXPECT_EQ("Credits", rootInfo.attributes.at(NAME));
 }
 
 } // namespace LEDSpicerUI

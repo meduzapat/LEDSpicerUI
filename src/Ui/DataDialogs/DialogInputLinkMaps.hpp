@@ -24,8 +24,7 @@
 #include "Storage/InputMapLink.hpp"
 #include "Storage/CollectionHandler.hpp"
 
-#ifndef UI_DIALOGINPUTLINKMAPS_HPP_
-#define UI_DIALOGINPUTLINKMAPS_HPP_ 1
+#pragma once
 
 namespace LEDSpicerUI::Ui::DataDialogs {
 
@@ -65,11 +64,8 @@ protected:
 	/// Linked maps are per input.
 	static StringVector localCollection;
 
-	OrdenableFlowBox
-		/// Where the temporary input mappings will be displayed and sorted.
-		* boxInputLinkedMappings = nullptr,
-		/// pointer to where the maps are been stored on the input map dialog.
-		* boxInputMap = nullptr;
+	/// Where the temporary input mappings will be displayed and sorted.
+	OrdenableFlowBox* boxInputLinkedMappings = nullptr;
 
 	Storage::BoxButtonCollection indivitualMaps;
 
@@ -102,5 +98,3 @@ protected:
 };
 
 } /* namespace */
-
-#endif /* UI_DIALOGINPUTLINKMAPS_HPP_ */

@@ -20,23 +20,22 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Data.hpp"
+#include "Link.hpp"
 #include "CollectionHandler.hpp"
 #include "DataDialogs/DialogInputLinkMaps.hpp"
 
-#ifndef INPUTMAP_HPP_
-#define INPUTMAP_HPP_ 1
+#pragma once
 
 namespace LEDSpicerUI::Ui::Storage {
 
 /**
  * LEDSpicerUI::Ui::InputMap
  */
-class InputMap: public Data {
+class InputMap: public Link {
 
 public:
 
-	using Data::Data;
+	using Link::Link;
 
 	/**
 	 * Cannot delete input map from handler because there is not owner.
@@ -53,5 +52,3 @@ protected:
 };
 
 } /* namespace */
-
-#endif /* INPUTMAP_HPP_ */

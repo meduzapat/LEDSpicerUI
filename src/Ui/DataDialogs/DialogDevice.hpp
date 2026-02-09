@@ -23,8 +23,7 @@
 #include "DialogForm.hpp"
 #include "Storage/Device.hpp"
 
-#ifndef UI_DIALOGDEVICE_HPP_
-#define UI_DIALOGDEVICE_HPP_ 1
+#pragma once
 
 namespace LEDSpicerUI::Ui::DataDialogs {
 
@@ -95,5 +94,3 @@ protected:
 };
 
 } /* namespace */
-
-#endif /* UI_DIALOGDEVICE_HPP_ */

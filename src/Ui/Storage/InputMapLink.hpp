@@ -23,8 +23,7 @@
 #include "Data.hpp"
 #include "CollectionHandler.hpp"
 
-#ifndef INPUTMAPLINK_HPP_
-#define INPUTMAPLINK_HPP_ 1
+#pragma once
 
 namespace LEDSpicerUI::Ui::Storage {
 
@@ -45,6 +44,3 @@ public:
 };
 
 } /* namespace */
-
-
-#endif /* INPUTMAPLINK_HPP_ */

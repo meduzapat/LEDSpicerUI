@@ -43,9 +43,11 @@ DialogInputLinkMaps::DialogInputLinkMaps(BaseObjectType* obj, const Glib::RefPtr
 {
 
 	builder->get_widget_derived("BoxInputLinkedMaps", box);
-	// Create link, will open the dialog in edit mode.
-	builder->get_widget("BtnCreateInputLinkedMap",    btnAdd);
 	builder->get_widget("BtnApplyInputLinkedMap",     btnApply);
+	// Create link, will open the dialog in edit mode.
+
+	Gtk::Button* btnAdd = nullptr;
+	builder->get_widget("BtnCreateInputLinkedMap", btnAdd);
 
 	// Temporary sorting box.
 	builder->get_widget_derived(
@@ -55,12 +57,14 @@ DialogInputLinkMaps::DialogInputLinkMaps(BaseObjectType* obj, const Glib::RefPtr
 		"BtnInputMappingDown"
 	);
 
+	// pointer to where the maps are been stored on the input map dialog.
+	OrdenableFlowBox * boxInputMap = nullptr;
 	builder->get_widget_derived("BoxInputMap", boxInputMap);
 
 	/*
 	 * If two or more selected mappings are selected activate the create link button.
 	 */
-	boxInputMap->signal_selected_children_changed().connect([&]() {
+	boxInputMap->signal_selected_children_changed().connect([btnAdd, boxInputMap]() {
 		btnAdd->set_sensitive(boxInputMap->get_selected_children().size() >= 2);
 	});
 
@@ -70,7 +74,7 @@ DialogInputLinkMaps::DialogInputLinkMaps(BaseObjectType* obj, const Glib::RefPtr
 	 * It will pick any selected element from the input map box and
 	 * create a linked map into linked mappings box.
 	 */
-	btnAdd->signal_clicked().connect([&]() {
+	btnAdd->signal_clicked().connect([&, boxInputMap]() {
 		StringVector
 			linkData,
 			ids;

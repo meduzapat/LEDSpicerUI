@@ -26,19 +26,9 @@ using namespace LEDSpicerUI::Ui;
 
 vector<Gtk::Button*> DialogColors::colorButtons;
 vector<Gtk::FlowBox*> DialogColors::colorBoxes;
-DialogColors* DialogColors::instance = nullptr;
-
-DialogColors* DialogColors::getInstance() {
-	return instance;
-}
-
-void DialogColors::initialize(Glib::RefPtr<Gtk::Builder> const &builder) {
-	if (not instance)
-		builder->get_widget_derived("DialogColors", instance);
-}
 
 DialogColors::DialogColors(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &builder) :
-	Gtk::Dialog(obj)
+	GladeDialog(obj, builder)
 {
 	Gtk::SearchEntry* filterEntry;
 	builder->get_widget("BtnColorOn",           BtnColorOn);
@@ -199,7 +189,7 @@ StringVector DialogColors::getColorBoxValues(Gtk::FlowBox* destination) {
 
 void DialogColors::onColorSelected(Gtk::Button* button) {
 	selectedColor = button->get_label();
-	response(Gtk::RESPONSE_OK);
+	response(Gtk::ResponseType::RESPONSE_OK);
 }
 
 string DialogColors::setColors(StringUMap& colors) {

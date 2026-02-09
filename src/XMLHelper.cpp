@@ -30,16 +30,29 @@ XMLHelper::XMLHelper(const string& fileName, const string& fileType) {
 		throw Message("Unable to read the file " + fileName + " " + string(ErrorStr()));
 
 	root = RootElement();
-	if (fileType != XML_FILE_FOREIGN) {
-		if (not root or std::strcmp(root->Name(), PACKAGE_DATA_NAME))
-			throw Message("Unknown or invalid data file");
 
-		if (not root->Attribute("version") or std::strcmp(root->Attribute("version"), PACKAGE_DATA_VERSION))
-			throw Message("Invalid data file version, needed " PACKAGE_DATA_VERSION);
+	// Foreign files skip validation.
+	if (fileType == XML_FILE_PLAIN) return;
 
-		if (not root->Attribute("type") or fileType != root->Attribute("type"))
-			throw Message("Invalid data file type, needed " + fileType);
-	}
+	if (not root or std::strcmp(root->Name(), PACKAGE_DATA_NAME))
+		throw Message("Unknown or invalid data file");
+
+	processRootNode(fileType);
+}
+
+void XMLHelper::processRootNode(const string& expectedType) {
+	rootInfo.attributes = processNode(root);
+
+	rootInfo.version = valueOf(rootInfo.attributes, "version", "");
+	rootInfo.type    = valueOf(rootInfo.attributes, "type",    "");
+
+	// Validate version.
+	if (rootInfo.version.empty() or rootInfo.version != PACKAGE_DATA_VERSION)
+		throw Message("Invalid data file version, needed " PACKAGE_DATA_VERSION);
+
+	// Validate type.
+	if (not expectedType.empty() and rootInfo.type != expectedType)
+		throw Message("Invalid data file type, needed " + expectedType);
 }
 
 StringUMap XMLHelper::processNode(const tinyxml2::XMLElement* node) {
@@ -66,15 +79,23 @@ StringUMap XMLHelper::processNode(const string& nodeElement) {
 	return processNode(node);
 }
 
+StringUMap XMLHelper::getSettings() const {
+	return rootInfo.attributes;
+}
+
 tinyxml2::XMLElement* XMLHelper::getRoot() const {
 	return root;
+}
+
+const XMLHelper::RootInfo& XMLHelper::getRootInfo() const {
+	return rootInfo;
 }
 
 void XMLHelper::checkAttributes(
 	const StringVector& attributeList,
 	const StringUMap& subjects,
-	const string& place)
-{
+	const string& place
+) {
 	for (const string& attribute : attributeList)
 		if (subjects.find(attribute) == subjects.end())
 			throw Message("Missing attribute '" + attribute + "' inside " + place);
@@ -82,6 +103,21 @@ void XMLHelper::checkAttributes(
 
 string XMLHelper::valueOf(const StringUMap& values, const string& value, string def) {
 	return (values.find(value) != values.end() ? values.at(value) : def);
+}
+
+string XMLHelper::xmlHeader(const string& type) {
+	string header;
+	header  = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+	header += "<!-- " DEFAULT_MESSAGE " -->\n";
+	header += "<" PACKAGE_DATA_NAME "\n";
+	Defaults::increaseTab();
+	header += Defaults::tab() + "version=\"" PACKAGE_DATA_VERSION "\"\n";
+	header += Defaults::tab() + "type=\"" + type + "\"\n";
+	return header;
+}
+
+string XMLHelper::xmlFooter() {
+	return "</" PACKAGE_DATA_NAME ">\n";
 }
 
 string XMLHelper::toXML(const StringUMap& values) {

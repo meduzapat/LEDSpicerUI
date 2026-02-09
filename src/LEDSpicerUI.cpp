@@ -53,7 +53,6 @@ int main(int argc, char *argv[]) {
 
 	Ui::MainWindow* mw = nullptr;
 	builder->get_widget_derived("MainWindow", mw);
-	Message::initialize(builder, mw);
 	int r = app->run(*mw);
 
 	delete mw;

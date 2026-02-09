@@ -22,8 +22,7 @@
 
 #include "Message.hpp"
 
-#ifndef UI_ORDENABLELISTBOX_HPP_
-#define UI_ORDENABLELISTBOX_HPP_ 1
+#pragma once
 
 namespace LEDSpicerUI::Ui {
 
@@ -61,5 +60,3 @@ public:
 };
 
 } /* namespace */
-
-#endif /* UI_ORDENABLELISTBOX_HPP_ */

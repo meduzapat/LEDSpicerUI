@@ -20,10 +20,9 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef UI_DIALOGANIMATION_HPP_
-#define UI_DIALOGANIMATION_HPP_ 1
-
 #include "DialogForm.hpp"
+
+#pragma once
 
 namespace LEDSpicerUI::Ui::DataDialogs {
 
@@ -52,5 +51,3 @@ public:
 };
 
 } /* namespace */
-
-#endif /* UI_DIALOGANIMATION_HPP_ */

@@ -25,8 +25,7 @@
 #include "CollectionHandler.hpp"
 #include "DataDialogs/DialogSelect.hpp"
 
-#ifndef GROUP_HPP_
-#define GROUP_HPP_ 1
+#pragma once
 
 namespace LEDSpicerUI::Ui::Storage {
 
@@ -56,5 +55,3 @@ protected:
 };
 
 } /* namespace */
-
-#endif /* GROUP_HPP_ */

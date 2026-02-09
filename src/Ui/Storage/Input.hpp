@@ -25,14 +25,15 @@
 #include "BoxButtonCollection.hpp"
 #include "Data.hpp"
 
-#ifndef INPUT_HPP_
-#define INPUT_HPP_ 1
+#pragma once
 
 namespace LEDSpicerUI::Ui::Storage {
 
 /**
  * LEDSpicerUI::Ui::Storage::Input
- * Class with Input dialog data.
+ *
+ * This class have maps, optional events and event maps.
+ * Normally
  */
 class Input: public Data {
 
@@ -50,9 +51,13 @@ public:
 
 protected:
 
-	/// Collection with the input trigger maps.
-	BoxButtonCollection maps;
-	/// Collection with the linked maps.
+	/// Maps, where 0 is used for single source input plugins.
+	vector<BoxButtonCollection> maps;
+
+	/// Keeps track of different input sources.
+	BoxButtonCollection listeners;
+
+	/// Linked maps, these are used to link multiple input maps together.
 	BoxButtonCollection linkedMaps;
 
 	const string getPrimaryKey() const override;
@@ -60,5 +65,3 @@ protected:
 };
 
 } /* namespace */
-
-#endif /* INPUT_HPP_ */

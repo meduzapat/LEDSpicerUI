@@ -42,9 +42,10 @@ DialogProcess::DialogProcess(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 
 	// Connect Process Box and buttons.
 	builder->get_widget_derived("BoxProcess", box);
-	builder->get_widget("BtnAddProcess",      btnAdd);
 	builder->get_widget("BtnApplyProcess",    btnApply);
-	setSignalAdd();
+	Gtk::Button* btnAdd = nullptr;
+	builder->get_widget("BtnAddProcess", btnAdd);
+	setSignalAdd(btnAdd);
 	setSignalApply();
 
 	// Process fields.

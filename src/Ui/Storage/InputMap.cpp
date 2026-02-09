@@ -27,11 +27,6 @@ using namespace LEDSpicerUI::Ui::Storage;
 InputMap::~InputMap() {
 	if (not getValue(getPrimaryKey()).empty()) {
 		CollectionHandler::getInstance(COLLECTION_INPUT_MAPS)->remove(this);
-		// Redraw the box, because the collection maybe deleted elements from linked maps.
-		auto i(DataDialogs::DialogInputLinkMaps::getInstance());
-		// When shutting down this will be null.
-		if (i)
-			i->refreshBox();
 	}
 }
 

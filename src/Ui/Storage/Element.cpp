@@ -35,6 +35,7 @@ const string Element::getCssClass() const {
 }
 
 const string Element::toXML() const {
+	StringUSet ignored;
 	if (fieldsData.at(BRIGHTNESS) == "100")
 		ignored.insert(BRIGHTNESS);
 	return createOpeningXML("element", fieldsData, ignored, true);

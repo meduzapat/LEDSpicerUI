@@ -24,6 +24,10 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
+BoxButtonCollection::~BoxButtonCollection() {
+	for (auto &item : items) delete item;
+}
+
 size_t BoxButtonCollection::getSize() const {
 	return items.size();
 }
@@ -33,7 +37,7 @@ bool BoxButtonCollection::isSet(Data *form) const {
 }
 
 bool BoxButtonCollection::isIdSet(const string& id) const {
-	for (const auto& item : items) {
+	for (const auto item : items) {
 		if (item->getData()->createUniqueId() == id) {
 			return true;
 		}
@@ -42,35 +46,35 @@ bool BoxButtonCollection::isIdSet(const string& id) const {
 }
 
 BoxButton& BoxButtonCollection::create(Data* form) {
-	items.emplace_back(std::make_unique<BoxButton>(form));
-	return *items.back();
+	BoxButton* ptr = new BoxButton(form);
+	items.push_back(ptr);
+	return *ptr;
 }
 
 void BoxButtonCollection::remove(BoxButton& item) {
-	items.erase(
-		std::remove_if(
-			items.begin(),
-			items.end(),
-			[&item](const std::unique_ptr<BoxButton>& ptr) {
-				return ptr.get() == &item;
-			}
-		),
-		items.end()
+	auto it = std::find_if(
+		items.begin(),
+		items.end(),
+		[&item](BoxButton* ptr) {
+			return ptr == &item;
+		}
 	);
+	delete *it;
+	items.erase(it);
 }
 
 void BoxButtonCollection::remove(Data* form) {
-	items.erase(
-		std::remove_if(
-			items.begin(),
-			items.end(),
-			[form](const std::unique_ptr<BoxButton>& button) {
-				// Cannot check on pointers because some items maybe are links.
-				return button->getData()->createUniqueId() == form->createUniqueId();
-			}
-		),
-		items.end()
+	auto it = std::find_if(
+		items.begin(),
+		items.end(),
+		[form](BoxButton* button) {
+			// Cannot check on pointers because some items maybe are links.
+			return button->getData()->createUniqueId() == form->createUniqueId();
+		}
 	);
+	// same as BoxButton* button = *it;
+	delete *it;
+	items.erase(it);
 }
 
 void BoxButtonCollection::populateBox(OrdenableFlowBox* box) {
@@ -88,12 +92,10 @@ void BoxButtonCollection::reindex(OrdenableFlowBox* box) {
 	for (auto* child : box->get_children()) {
 		auto flowChild = dynamic_cast<Gtk::FlowBoxChild*>(child);
 		auto boxButton = dynamic_cast<BoxButton*>(flowChild->get_child());
-		// Find the matching BoxButton in the original collection
-		auto it = std::find_if(items.begin(), items.end(), [boxButton](const std::unique_ptr<BoxButton>& item) {
-			if (item.get()) return (item->getData()->createUniqueId() == boxButton->getData()->createUniqueId());
-			return false;
+		auto it = std::find_if(items.begin(), items.end(), [boxButton](BoxButton* item) {
+			return item->getData()->createUniqueId() == boxButton->getData()->createUniqueId();
 		});
-		reorderedItems.push_back(std::move(*it));
+		reorderedItems.push_back(*it);
 	}
 	items.swap(reorderedItems);
 }

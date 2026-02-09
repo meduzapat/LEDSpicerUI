@@ -42,7 +42,6 @@ const string Group::getCssClass() const {
 
 void Group::activate() {
 	DataDialogs::DialogSelect::getInstance()->setDestinations({{TYPE_ELEMENT, &elements}}, this);
-	DataDialogs::DialogSelect::getInstance()->refresh();
 }
 
 const string Group::toXML() const {
@@ -53,5 +52,6 @@ const string Group::toXML() const {
 		r += e->getData()->toXML();
 	}
 	r += createClosingXML("group");
+	ignored.clear();
 	return r;
 }

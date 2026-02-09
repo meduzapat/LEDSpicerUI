@@ -24,8 +24,7 @@
 #include "DialogColors.hpp"
 #include "Storage/InputMap.hpp"
 
-#ifndef UI_DIALOGINPUTMAP_HPP_
-#define UI_DIALOGINPUTMAP_HPP_ 1
+#pragma once
 
 //#define inputLinkMapCollectionHandler Storage::CollectionHandler::getInstance(COLLECTION_INPUT_LINKED_MAPS)
 #define mapElementCollectionHandler Storage::CollectionHandler::getInstance(COLLECTION_ELEMENT)
@@ -80,5 +79,3 @@ protected:
 };
 
 } /* namespace */
-
-#endif /* UI_DIALOGINPUTMAP_HPP_ */

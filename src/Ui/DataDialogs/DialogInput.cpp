@@ -41,14 +41,16 @@ DialogInput::DialogInput(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& 
 {
 	// Connect Groups Box and button.
 	builder->get_widget_derived("BoxInputs", box);
-	builder->get_widget("BtnAddInput",       btnAdd);
 	builder->get_widget("BtnApplyInput",     btnApply);
-	setSignalAdd();
+	Gtk::Button* btnAdd = nullptr;
+	builder->get_widget("BtnAddInput", btnAdd);
+	setSignalAdd(btnAdd);
 	setSignalApply();
 
 	// Generic.
 	builder->get_widget("ComboBoxInputSelectInput", comboBoxInputSelectInput);
 	builder->get_widget("EntryInputName",           entryInputName);
+	builder->get_widget("FileInputNamePath",        fileInputNamePath);
 
 	// Actions.
 	builder->get_widget("SwitchInputBlink", switchInputBlink);
@@ -63,11 +65,10 @@ DialogInput::DialogInput(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& 
 	// Actions and Blinker needs this.
 	builder->get_widget("ComboBoxInputSpeed", comboBoxInputSpeed);
 
-	// Actions, Blinker and Impulse needs this.
-	builder->get_widget("EntryInputListenEvents", entryInputDevicesID);
-
 	// Others
-	builder->get_widget("LinkedElementsAndGroupsBox", linkedElementsAndGroupsBox);
+	builder->get_widget("BoxLinkedElementsAndGroups", boxLinkedElementsAndGroupsBox);
+	builder->get_widget("BoxEventListeners",          boxEventListeners);
+	builder->get_widget("BoxInputCreditsSettings",    boxInputCreditsSettings);
 	builder->get_widget("BtnAddInputMap",             btnAddInputMap);
 
 	// When the Blink switch is off disable speed.
@@ -88,23 +89,27 @@ DialogInput::DialogInput(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& 
 		clearForm();
 		btnApply->set_sensitive(true);
 		btnAddInputMap->set_sensitive(true);
-		if (name == "Actions") {
-			switchInputBlink->set_active(true);
-			linkedElementsAndGroupsBox->show();
-			switchInputBlink->get_parent()->show();
+		if (name == "Actions" or name == "Credits") {
+			boxLinkedElementsAndGroupsBox->show();
 			comboBoxInputSpeed->get_parent()->show();
+			switchInputBlink->get_parent()->show();
+			switchInputBlink->set_active(true);
 			boxInputMap->set_selection_mode(Gtk::SelectionMode::SELECTION_MULTIPLE);
 		}
 		if (name == "Blinker") {
 			spinInputTimes->get_parent()->show();
 			comboBoxInputSpeed->get_parent()->show();
 		}
+		if (name == "Credits") {
+			boxInputCreditsSettings->show();
+		}
 		if (
 			name == "Actions" or
 			name == "Blinker" or
-			name == "Impulse"
+			name == "Impulse" or
+			name == "Credits"
 		) {
-			entryInputDevicesID->get_parent()->show();
+			boxEventListeners->show();
 		}
 	});
 }
@@ -124,6 +129,7 @@ LEDSpicerUI::Ui::Storage::CollectionHandler* DialogInput::getCollectionHandler()
 
 void DialogInput::resetForm() {
 	comboBoxInputSelectInput->set_active(0);
+	fileInputNamePath->set_current_folder(Defaults::getProjectsDir() + INPUT_PATH);
 	clearForm();
 }
 
@@ -131,7 +137,10 @@ void DialogInput::clearForm() {
 
 	boxInputMap->set_selection_mode(Gtk::SelectionMode::SELECTION_NONE);
 
-	linkedElementsAndGroupsBox->hide();
+	boxLinkedElementsAndGroupsBox->hide();
+	boxEventListeners->hide();
+	boxInputLinkedMaps->hide();
+	boxInputCreditsSettings->hide();
 	entryInputName->set_text("");
 
 	comboBoxInputSpeed->get_parent()->hide();
@@ -139,9 +148,6 @@ void DialogInput::clearForm() {
 
 	spinInputTimes->get_parent()->hide();
 	spinInputTimes->set_text("");
-
-	entryInputDevicesID->get_parent()->hide();
-	entryInputDevicesID->set_text("");
 
 	switchInputBlink->get_parent()->hide();
 //	switchInputBlink->set_state_flags(Gtk::StateFlags::STATE_FLAG_CHECKED, false);
@@ -178,11 +184,11 @@ void DialogInput::isValid() const {
 		comboBoxInputSelectInput->get_active_text() == "Impulse"
 	) {
 		// Check if input device id is not empty.
-		if (entryInputDevicesID->get_text().empty()) {
-			if (action != Actions::LOAD)
-				entryInputDevicesID->grab_focus();
-			throw Message("At least one device ID need to be specified.");
-		}
+//		if (boxInputLinkedMaps->is->get_text().empty()) {
+//			if (action != Actions::LOAD)
+//				entryInputDevicesID->grab_focus();
+//			throw Message("At least one device ID need to be specified.");
+//		}
 	}
 }
 
@@ -205,7 +211,7 @@ void DialogInput::storeData() {
 	}
 
 	if (name == "Actions" or name == "Blinker" or name == "Impulse") {
-		currentData->setValue("listenEvents", entryInputDevicesID->get_text());
+		//currentData->setValue("listenEvents", entryInputDevicesID->get_text());
 	}
 }
 
@@ -228,7 +234,7 @@ void DialogInput::retrieveData() {
 	}
 
 	if (name == "Actions" or name == "Blinker" or name == "Impulse") {
-		entryInputDevicesID->set_text(currentData->getValue("listenEvents"));
+		//entryInputDevicesID->set_text(currentData->getValue("listenEvents"));
 	}
 }
 

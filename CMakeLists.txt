@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(LEDSpicerUI VERSION 0.0.2 LANGUAGES CXX)
+project(LEDSpicerUI VERSION 0.0.3 LANGUAGES CXX)
 
 # Metadata (for glade file substitution and compile definitions)
 set(PACKAGE "ledspicerui")
@@ -8,11 +8,11 @@ set(PACKAGE_VERSION "${PROJECT_VERSION}")  # 0.0.2
 set(PACKAGE_STRING "${PROJECT_NAME} ${PROJECT_VERSION}")  # LEDSpicerUI 0.0.2
 set(PACKAGE_TARNAME "ledspicerui")
 set(COPYRIGHT "Copyright © 2023 - 2025 Patricio A. Rossi (MeduZa)")
-set(MINIMUM_COMPATIBILITY "0.6.4")
+set(MINIMUM_COMPATIBILITY "0.7.0")
 set(PACKAGE_URL "https://github.com/meduzapat/LEDSpicerUI")
 set(PACKAGE_BUGREPORT "https://github.com/meduzapat/LEDSpicerUI/issues")
 set(PACKAGE_DATA_NAME "LEDSpicer")
-set(PACKAGE_DATA_VERSION "1.0")
+set(PACKAGE_DATA_VERSION "1.1")
 
 # Global compile definitions (for source code)
 add_compile_definitions(
@@ -48,10 +48,14 @@ endif()
 add_executable(ledspicerui
 	src/Defaults.cpp
 	src/XMLHelper.cpp
+	src/ProjectFile.cpp
+	src/SettingsFile.cpp
 	src/ConfigFile.cpp
 	src/InputFile.cpp
 	src/Ui/Message.cpp
 	src/Ui/DialogColors.cpp
+	src/Ui/DialogProject.cpp
+	src/Ui/DialogSettings.cpp
 	src/Ui/OrdenableFlowBox.cpp
 	src/Ui/OrdenableListBox.cpp
 	src/Ui/Storage/CollectionHandler.cpp
@@ -77,6 +81,7 @@ add_executable(ledspicerui
 	src/Ui/DataDialogs/DialogDevice.cpp
 	src/Ui/DataDialogs/DialogRestrictorMap.cpp
 	src/Ui/DataDialogs/DialogRestrictor.cpp
+	src/Ui/DataDialogs/DialogInputListener.cpp
 	src/Ui/DataDialogs/DialogInputLinkMaps.cpp
 	src/Ui/DataDialogs/DialogInputMap.cpp
 	src/Ui/DataDialogs/DialogInput.cpp

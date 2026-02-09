@@ -20,19 +20,55 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "Ui/Storage/BoxButtonCollection.hpp"
 #include "XMLHelper.hpp"
 
-#ifndef CONFIGFILE_HPP_
-#define CONFIGFILE_HPP_ 1
+#pragma once
 
 namespace LEDSpicerUI {
 
+using Ui::Storage::BoxButtonCollection;
+
 /**
- * LEDSpicerUI::Ui::ConfigFile
+ * LEDSpicerUI::ConfigFile
+ * Handles ledspicer.conf reading.
  */
 class ConfigFile : public XMLHelper {
 
 public:
+
+	struct ConfigData {
+		const string
+			& configPath,
+			& defaultProfile,
+			& runEvery;
+		const StringUMap& settings;
+		const BoxButtonCollection
+			& devices,
+			& restrictors,
+			& groups,
+			& processes;
+
+		ConfigData(
+			const string& configPath,
+			const string& defaultProfile,
+			const string& runEvery,
+			const StringUMap& settings,
+			const BoxButtonCollection& devices,
+			const BoxButtonCollection& restrictors,
+			const BoxButtonCollection& groups,
+			const BoxButtonCollection& processes
+		) :
+			configPath(configPath),
+			defaultProfile(defaultProfile),
+			runEvery(runEvery),
+			settings(settings),
+			devices(devices),
+			restrictors(restrictors),
+			groups(groups),
+			processes(processes)
+		{}
+	};
 
 	ConfigFile() = delete;
 
@@ -46,13 +82,13 @@ public:
 
 	const string getProcessLookupRunEvery() const;
 
+	static void save(const ConfigData& data);
+
 protected:
 
 	string defaultProfile;
 
 	string processLookupRunEvery;
-
-	StringUMap nodeSettings;
 
 	const string processDevices();
 
@@ -65,9 +101,6 @@ protected:
 	const string processRestrictorMaps(tinyxml2::XMLElement* restrictorNode, const string& restrictorName);
 
 	const string processGroups();
-
 };
 
 } /* namespace LEDSpicerUI */
-
-#endif /* CONFIGFILE_HPP_ */

@@ -23,8 +23,7 @@
 #include "Data.hpp"
 #include "Storage/CollectionHandler.hpp"
 
-#ifndef ELEMENT_HPP_
-#define ELEMENT_HPP_ 1
+#pragma once
 
 namespace LEDSpicerUI::Ui::Storage {
 
@@ -64,5 +63,3 @@ public:
 };
 
 } /* namespace */
-
-#endif /* ELEMENT_HPP_ */

@@ -22,8 +22,7 @@
 
 #include "Message.hpp"
 
-#ifndef UI_ORDENABLEFLOWBOX_HPP_
-#define UI_ORDENABLEFLOWBOX_HPP_ 1
+#pragma once
 
 namespace LEDSpicerUI::Ui {
 
@@ -49,5 +48,3 @@ public:
 };
 
 } /* namespace */
-
-#endif /* UI_ORDENABLEFLOWBOX_HPP_ */

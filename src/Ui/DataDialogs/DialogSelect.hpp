@@ -25,9 +25,7 @@
 #include "Storage/Selection.hpp"
 #include "Storage/Link.hpp"
 
-
-#ifndef DIALOGSELECT_HPP_
-#define DIALOGSELECT_HPP_ 1
+#pragma once
 
 namespace LEDSpicerUI::Ui::DataDialogs {
 
@@ -131,7 +129,6 @@ public:
 
 protected:
 
-	/// Self instance.
 	static DialogSelect* instance;
 
 	Gtk::Button
@@ -171,5 +168,3 @@ protected:
 };
 
 } /* namespace */
-
-#endif /* DIALOGSELECT_HPP_ */

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <LEDSpicer
-	version="1.0"
+	version="1.1"
 	type="Input"
 	name="Credits"
 	speed="Normal"
@@ -10,10 +10,6 @@
 	alwaysOn="False"
 	coinsPerCredit="1"
 >
-	<listenEvents>
-		<listenEvent name="hardware1" />
-		<listenEvent name="hardware2" />
-	</listenEvents>
 	<maps source="hardware1">
 		<map
 			type="Element"
