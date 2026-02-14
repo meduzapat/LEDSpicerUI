@@ -26,7 +26,9 @@ using namespace LEDSpicerUI::Ui;
 
 MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &builder) :
 	Gtk::ApplicationWindow(obj),
-	MainDialogs(builder, this)
+	// Set import dialog
+	dialogImportConfig(DialogImport::Types::CONFIG, this),
+	dialogImportInput(DialogImport::Types::INPUT, this)
 {
 
 	Message::initialize(builder, this);
@@ -34,6 +36,28 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 	DialogSettings::initialize(builder, "DialogSettings");
 	DialogColors::initialize(builder,   "DialogColors");
 	DialogProject::initialize(builder,  "DialogProject");
+
+	// Initialize secondary dialogs.
+	DataDialogs::DialogElement::initialize(builder);
+	DataDialogs::DialogSelect::initialize(builder);
+	DataDialogs::DialogInputLinkMaps::initialize(builder);
+	DataDialogs::DialogInputMap::initialize(builder);
+	DataDialogs::DialogRestrictorMap::initialize(builder);
+	// Initialize Primary Dialogs.
+	DataDialogs::DialogDevice::initialize(builder);
+	DataDialogs::DialogRestrictor::initialize(builder);
+	DataDialogs::DialogProcess::initialize(builder);
+	DataDialogs::DialogGroup::initialize(builder);
+	DataDialogs::DialogInput::initialize(builder);
+	DataDialogs::DialogProfile::initialize(builder);
+
+	// Connect primary dialogs with the collections.
+	DataDialogs::DialogDevice::getInstance()->setOwner(&devices);
+	DataDialogs::DialogRestrictor::getInstance()->setOwner(&restrictors);
+	DataDialogs::DialogProcess::getInstance()->setOwner(&processes);
+	DataDialogs::DialogGroup::getInstance()->setOwner(&groups);
+	DataDialogs::DialogInput::getInstance()->setOwner(&inputs);
+	DataDialogs::DialogProfile::getInstance()->setOwner(&profiles);
 
 	// Setup ledspicer fields.
 	builder->get_widget("InputUserId",     inputUserId);
@@ -249,6 +273,24 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 }
 
 MainWindow::~MainWindow() {
+
+	// Data dialogs.
+	delete DataDialogs::DialogSelect::getInstance();
+	delete DataDialogs::DialogProfile::getInstance();
+	delete DataDialogs::DialogElement::getInstance();
+	delete DataDialogs::DialogRestrictorMap::getInstance();
+	delete DataDialogs::DialogRestrictor::getInstance();
+	delete DataDialogs::DialogInputLinkMaps::getInstance();
+	delete DataDialogs::DialogInputMap::getInstance();
+	delete DataDialogs::DialogInput::getInstance();
+	delete DataDialogs::DialogProcess::getInstance();
+	delete DataDialogs::DialogGroup::getInstance();
+	delete DataDialogs::DialogDevice::getInstance();
+
+	// Miscellaneous dialogs.
+	delete DialogColors::getInstance();
+	Storage::CollectionHandler::purgeAll();
+
 	delete listBoxDataSource;
 }
 

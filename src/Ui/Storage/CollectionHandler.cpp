@@ -60,6 +60,16 @@ size_t CollectionHandler::countByKey(const string& key, const string& value) con
 	return count;
 }
 
+vector<Data*> CollectionHandler::findByProperty(const string& property, const string& value) {
+	vector<Data*> results;
+	for (auto& [id, data] : collection) {
+		if (data->getProperty(property) == value) {
+			results.push_back(data);
+		}
+	}
+	return results;
+}
+
 void CollectionHandler::add(Data* item) {
 	collection.emplace(item->createUniqueId(), item);
 	refreshComboBoxes();

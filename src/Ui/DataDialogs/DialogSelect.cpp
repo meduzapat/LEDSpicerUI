@@ -54,8 +54,6 @@ DialogSelect::DialogSelect(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 
 	// Set filter and apply signals.
 	Defaults::setFilter(filterEntry, boxAll);
-
-	signal_show().connect(sigc::mem_fun(*this, &DialogSelect::populateSelectables), true);
 }
 
 void DialogSelect::setDestinations(const StringBoxButtonCollectionUMap& itemCollections, const Storage::Data* caller) {
@@ -80,12 +78,13 @@ void DialogSelect::reindex() {
 }
 
 void DialogSelect::runSelection() {
+	populateSelectables();
 	// Run Dialog.
 	if (run() == Gtk::ResponseType::RESPONSE_APPLY) {
 		auto items(getItemCollection());
 		auto box(setting->workingBox);
-		items->wipe();
 		box->wipe();
+		items->wipe();
 		for (auto* child : boxAll->get_selected_children()) {
 			// Get the Selection object directly from the FlowBoxChild
 			auto selection = dynamic_cast<Storage::Selection*>(child->get_child());
@@ -151,7 +150,6 @@ LEDSpicerUI::Ui::Storage::BoxButtonCollection* DialogSelect::getItemCollection()
 	return itemCollections.at(setting->type);
 }
 
-
 void DialogSelect::addButtons(Storage::BoxButton& boxButton) {
 	const SettingRequest* currentSettings = setting;
 	const Storage::Data*  currentCaller   = caller;
@@ -190,31 +188,45 @@ void DialogSelect::populateSelectables() {
 	for (auto child : boxAll->get_children()) {
 		boxAll->remove(*child);
 	}
-	// Populate with new selections.
+
 	for (const auto& collection : *getCollection()) {
-
-		Storage::Selection* selection = Gtk::make_managed<Storage::Selection>(collection.second);
-		Gtk::FlowBoxChild*  flowChild = Gtk::make_managed<Gtk::FlowBoxChild>();
-
-		// Connect the button click signal.
-		selection->signal_clicked().connect([this, flowChild, selection]() {
-			if (flowChild->is_selected()) {
-				boxAll->unselect_child(*flowChild);
+		// Only expand if this is an element collection
+		if (setting->sourceCollection == COLLECTION_ELEMENT && collection.second->hasProperty("expandable")) {
+			auto elem = static_cast<Storage::Element*>(collection.second);
+			for (auto child : elem->copyStripChildren()) {
+				createSelectableItem(child);
 			}
-			else {
-				boxAll->select_child(*flowChild);
-			}
-		});
-
-		// Add the button to the flow child and flow child to the box.
-		flowChild->add(*selection);
-		boxAll->add(*flowChild);
-		// Set initial selection state.
-		if (getItemCollection()->isSet(collection.second)) {
-			boxAll->select_child(*flowChild);
+			continue;
 		}
+
+		createSelectableItem(collection.second);
 	}
 
-	// Show all children.
 	boxAll->show_all();
+}
+
+void DialogSelect::createSelectableItem(Storage::Data* data) {
+	Storage::Selection* selection = Gtk::make_managed<Storage::Selection>(data);
+	Gtk::FlowBoxChild*  flowChild = Gtk::make_managed<Gtk::FlowBoxChild>();
+
+	// Add CSS class for system items
+	if (data->hasProperty("system")) {
+		selection->get_style_context()->add_class("system");
+	}
+
+	selection->signal_clicked().connect([this, flowChild, selection]() {
+		if (flowChild->is_selected()) {
+			boxAll->unselect_child(*flowChild);
+		}
+		else {
+			boxAll->select_child(*flowChild);
+		}
+	});
+
+	flowChild->add(*selection);
+	boxAll->add(*flowChild);
+
+	if (getItemCollection()->isSet(data)) {
+		boxAll->select_child(*flowChild);
+	}
 }

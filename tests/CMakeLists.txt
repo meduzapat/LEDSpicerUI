@@ -67,18 +67,30 @@ add_test_executable(XMLHelperTest
 )
 
 add_test_executable(ConfigFileTest
-	"ConfigFileTest.cpp"
-	"${COMMON_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp;${CMAKE_SOURCE_DIR}/src/XMLHelper.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/BoxButton.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/BoxButtonCollection.cpp;${CMAKE_SOURCE_DIR}/src/ConfigFile.cpp"
+	"config/ConfigFileTest.cpp"
+	"${COMMON_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp;${CMAKE_SOURCE_DIR}/src/XMLHelper.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/BoxButton.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/BoxButtonCollection.cpp;${CMAKE_SOURCE_DIR}/src/config/ConfigFile.cpp"
+	"${TINYXML2_LIBRARIES}"
+)
+
+add_test_executable(ProjectFileTest
+	"config/ProjectFileTest.cpp"
+	"${COMMON_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp;${CMAKE_SOURCE_DIR}/src/XMLHelper.cpp;${CMAKE_SOURCE_DIR}/src/config/ProjectFile.cpp;${CMAKE_SOURCE_DIR}/src/config/InputFile.cpp"
 	"${TINYXML2_LIBRARIES}"
 )
 
 add_test_executable(InputFileTest
-	"InputFileTest.cpp"
-	"${COMMON_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp;${CMAKE_SOURCE_DIR}/src/XMLHelper.cpp;${CMAKE_SOURCE_DIR}/src/ProjectFile.cpp;${CMAKE_SOURCE_DIR}/src/InputFile.cpp"
+	"config/InputFileTest.cpp"
+	"${COMMON_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp;${CMAKE_SOURCE_DIR}/src/XMLHelper.cpp;${CMAKE_SOURCE_DIR}/src/config/ProjectFile.cpp;${CMAKE_SOURCE_DIR}/src/config/InputFile.cpp"
+	"${TINYXML2_LIBRARIES}"
+)
+
+add_test_executable(SettingsFileTest
+	"config/SettingsFileTest.cpp"
+	"${COMMON_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp;${CMAKE_SOURCE_DIR}/src/XMLHelper.cpp;${CMAKE_SOURCE_DIR}/src/config/SettingsFile.cpp"
 	"${TINYXML2_LIBRARIES}"
 )
 
 # Set colored output for all tests
-set_tests_properties(DefaultsTest DataTest MessageTest XMLHelperTest ConfigFileTest InputFileTest
+set_tests_properties(DefaultsTest DataTest MessageTest XMLHelperTest ConfigFileTest InputFileTest ProjectFileTest SettingsFileTest
 	PROPERTIES ENVIRONMENT "GTEST_COLOR=1"
 )

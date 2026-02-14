@@ -86,20 +86,24 @@ const string Data::toXML() const {
 	return valuesXML(ignored, fieldsData);
 }
 
-void Data::setParameter(const string& key, const string& value) {
-	parameters[key] = value;
+void Data::setProperty(const string& key, const string& value) {
+	properties[key] = value;
 }
 
-string Data::getParameter(const string& key, const string& def) const {
-	return (parameters.find(key) != parameters.end()) ? parameters.at(key) : def;
+string Data::getProperty(const string& key, const string& def) const {
+	return (properties.find(key) != properties.end()) ? properties.at(key) : def;
 }
 
-bool Data::hasParameter(const string& key) const {
-	return parameters.find(key) != parameters.end();
+bool Data::hasProperty(const string& key) const {
+	return properties.find(key) != properties.end();
 }
 
-const StringUMap& Data::getParameters() const {
-	return parameters;
+void Data::removeProperty(const string& key) {
+	properties.erase(key);
+}
+
+const StringUMap& Data::getProperties() const {
+	return properties;
 }
 
 string Data::valuesXML(

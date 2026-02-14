@@ -50,6 +50,7 @@ public:
 
 protected:
 
+	/// This need to be links to elements.
 	BoxButtonCollection elements;
 
 };

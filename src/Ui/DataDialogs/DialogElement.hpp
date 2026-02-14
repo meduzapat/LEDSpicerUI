@@ -22,6 +22,7 @@
 
 #include "DialogForm.hpp"
 #include "Storage/Element.hpp"
+#include "Storage/Group.hpp"
 
 #pragma once
 

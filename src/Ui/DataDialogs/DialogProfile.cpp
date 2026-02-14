@@ -154,14 +154,14 @@ void DialogProfile::isValid() const {
 			throw Message("Profile with name " + name + " already exist.");
 		}
 	}
-	if (btnProfileBackgroundColor->get_tooltip_text().empty()) {
+	if (btnProfileBackgroundColor->get_label().empty()) {
 		throw Message("Select a valid background color.");
 	}
 }
 
 void DialogProfile::storeData() {
 	currentData->setValue(FILENAME, inputProfileName->get_text());
-	currentData->setValue(BACKGROUND_COLOR, btnProfileBackgroundColor->get_tooltip_text());
+	currentData->setValue(BACKGROUND_COLOR, btnProfileBackgroundColor->get_label());
 }
 
 void DialogProfile::retrieveData() {

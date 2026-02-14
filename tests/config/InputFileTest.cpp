@@ -20,8 +20,9 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "config/InputFile.hpp"
+
 #include <gtest/gtest.h>
-#include "InputFile.hpp"
 
 namespace LEDSpicerUI {
 

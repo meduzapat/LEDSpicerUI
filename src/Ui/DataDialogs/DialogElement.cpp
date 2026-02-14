@@ -91,11 +91,9 @@ DialogElement::DialogElement(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 
 		auto selected(pinsBox->get_selected_children());
 		// unselect.
-		if (selected.empty()) {
-			return;
-		}
+		if (selected.empty()) return;
 
-		// Extracts the position number.
+		// Extracts the position number from the flowbox child using the name.
 		std::function<string(const Gtk::FlowBoxChild*)> getPosition([&](const Gtk::FlowBoxChild* sel) {
 			return Defaults::explode(sel->get_child()->get_name(), '_')[1];
 		});
@@ -280,6 +278,12 @@ void DialogElement::isValid() const {
 		}
 	}
 
+	auto groupHandler = LEDSpicerUI::Ui::Storage::CollectionHandler::getInstance(COLLECTION_GROUP);
+	auto existingGroup = groupHandler->get(name);
+	if (existingGroup && not existingGroup->hasProperty("system")) {
+		throw Message("Element name '" + name + "' conflicts with existing group.\nNote: Strip elements auto-create groups with the same name.");
+	}
+
 	// Check for connectors errors.
 	std::function<void(Gtk::Entry*)> checkPin = [&](Gtk::Entry* connector) {
 		string
@@ -375,7 +379,16 @@ void DialogElement::isValid() const {
 
 void DialogElement::storeData() {
 
-	currentData->setValue(NAME, elementName->get_text());
+	string
+		name(elementName->get_text()),
+		oldName(currentData->getValue(NAME));
+
+	vector<Storage::Data*> toDelete;
+	bool
+		isStrip  = false,
+		wasStrip = not currentData->getValue(STRIPSIZE).empty();
+
+	auto groupCollectionHandler(LEDSpicerUI::Ui::Storage::CollectionHandler::getInstance(COLLECTION_GROUP));
 
 	switch (static_cast<tabIndex>(notebookDeviceConnections->get_current_page())) {
 	case tabIndex::Single:
@@ -400,28 +413,113 @@ void DialogElement::storeData() {
 		currentData->setValue(POSITION,    positionRGB->get_text());
 		currentData->setValue(COLORFORMAT, comboBoxRGBRGB->get_active_id());
 		break;
-	case tabIndex::Strip:
+	case tabIndex::Strip: {
+		isStrip = true;
+
+		static uint16_t lastStripCode = 0;
+		size_t
+			position = std::stoi(positionStrip->get_text()),
+			size     = std::stoi(sizeStrip->get_text());
+
+		string code = currentData->getProperty("stripDescriptor");
+		if (code.empty()) {
+			code = std::to_string(++lastStripCode);
+			currentData->setProperty("stripDescriptor", code);
+		}
+		currentData->setProperty("expandable", "true");
+		currentData->setProperty("system",     "true");
+		auto children = dynamic_cast<Storage::Element*>(currentData)->copyStripChildren();
+
+		// Update/reuse existing children, create missing ones
+		for (size_t i = 0; i < size; ++i) {
+			//string childName = name + "_" + std::to_string(i + 1);
+			string childName = name + std::to_string(i + 1);
+
+			if (i < children.size()) {
+				// Reuse existing child - update name and position
+				string oldChildId = children[i]->createUniqueId();
+				children[i]->setValue(NAME, childName);
+				children[i]->setValue(POSITION, std::to_string(position + i));
+				getCollectionHandler()->replace(children[i], oldChildId);
+			}
+			else {
+				// Create new child
+				StringUMap childData;
+				childData[NAME] = childName;
+				childData[POSITION] = std::to_string(position + i);
+				auto child = new Storage::Element(childData);
+				child->setProperty("strip", code);
+				dynamic_cast<Storage::Element*>(currentData)->addStripChild(child);
+				getCollectionHandler()->add(child);
+			}
+		}
+
+		// Mark excess children for deletion
+		for (size_t i = size; i < children.size(); ++i) {
+			toDelete.push_back(children[i]);
+		}
+
 		currentData->setValue(POSITION,    positionStrip->get_text());
 		currentData->setValue(STRIPSIZE,   sizeStrip->get_text());
 		currentData->setValue(COLORFORMAT, comboBoxRGBStrip->get_active_id());
+
+		// System group management
+		if (not wasStrip) {
+			// Create new group
+			StringUMap groupData{{"name", name}};
+			auto group = new Storage::Group(groupData);
+			group->setProperty("system",   "true");
+			group->setProperty("readOnly", "true");
+			groupCollectionHandler->add(group);
+		}
+		else if (oldName != name) {
+			// Rename existing group
+			auto group = groupCollectionHandler->get(oldName);
+			if (group && group->hasProperty("system")) {
+				group->setValue(NAME, name);
+				groupCollectionHandler->replace(group, oldName);
+			}
+		}
 		break;
+	}
 	case tabIndex::mRGB:
 		currentData->setValue(POSITIONS,   positionsMRGB->get_text());
 		currentData->setValue(COLORFORMAT, comboBoxRGBMRGB->get_active_id());
 		break;
 	}
 
-	if (not btnDefaultColor->get_tooltip_text().empty()) {
-		currentData->setValue(DEFAULT_COLOR, btnDefaultColor->get_tooltip_text());
+	if (not btnDefaultColor->get_label().empty()) {
+		currentData->setValue(DEFAULT_COLOR, btnDefaultColor->get_label());
 	}
+	currentData->setValue(NAME, name);
 	currentData->setValue(TYPE, elementType->get_active_id() == "0" ? DEFAULT_ELEMENT_TYPE : elementType->get_active_id());
 	currentData->setValue(BRIGHTNESS, std::to_string(static_cast<uint>(brightness->get_value())));
+
+	// Cleanup if changed from strip to non-strip
+	if (wasStrip && not isStrip) {
+		string code = currentData->getProperty("stripDescriptor");
+		auto children = getCollectionHandler()->findByProperty("strip", code);
+		toDelete.insert(toDelete.end(), children.begin(), children.end());
+		currentData->removeProperty("stripDescriptor");
+		currentData->removeProperty("expandable");
+		currentData->removeProperty("system");
+
+		auto group = groupCollectionHandler->get(oldName);
+		if (group && group->hasProperty("system")) {
+			groupCollectionHandler->remove(group);
+		}
+	}
+
+	// Delete marked elements
+	for (auto data : toDelete) {
+		delete data;
+	}
 }
 
 void DialogElement::retrieveData() {
 
 	// Gets the string position and selects the connection, returns the index.
-	std::function<const int(const string&)> setSelectedConnectors = [&](const string& connector) {
+	std::function<const int(const string&)> setConnectorSelected = [&](const string& connector) {
 		int idx;
 		try {
 			idx = std::stoi(connector) -1;
@@ -430,8 +528,7 @@ void DialogElement::retrieveData() {
 			return -1;
 		}
 		Gtk::FlowBoxChild* child(pinsBox->get_child_at_index(idx));
-		if (not child)
-			return -1;
+		if (not child) return -1;
 		pinsBox->select_child(*child);
 		return idx;
 	};
@@ -442,29 +539,36 @@ void DialogElement::retrieveData() {
 	if (not currentData->getValue(POSITIONS).empty()) {
 		notebookDeviceConnections->set_current_page(tabIndex::mRGB);
 		for (const auto& position : Defaults::explode(currentData->getValue(POSITIONS), ',')) {
-			setSelectedConnectors(position);
+			setConnectorSelected(position);
 		}
 		comboBoxRGBMRGB->set_active_id(currentData->getValue(COLORFORMAT));
 	}
 	// LED strip.
 	else if (not currentData->getValue(STRIPSIZE).empty()) {
 		notebookDeviceConnections->set_current_page(tabIndex::Strip);
-		int
-			idx(setSelectedConnectors(currentData->getValue(POSITION))),
-			siz(0);
-		if (idx != -1) {
-			try {
-				siz = std::stoi(currentData->getValue(STRIPSIZE));
-			}
-			catch (...) {}
-			setSelectedConnectors(std::to_string(idx + siz));
+		positionStrip->set_text(currentData->getValue(POSITION));
+		sizeStrip->set_text(currentData->getValue(STRIPSIZE));
+
+		int idx, tot;
+		try {
+			idx = std::stoi(currentData->getValue(POSITION)) -1;
+			tot = std::stoi(currentData->getValue(STRIPSIZE));
+		}
+		catch (...) {
+			// impossible invalid data, skip.
+			return;
+		}
+		for (int c = idx; c < idx + tot; ++c) {
+			Gtk::FlowBoxChild* child(pinsBox->get_child_at_index(c));
+			if (not child) continue;
+			pinsBox->select_child(*child);
 		}
 		comboBoxRGBStrip->set_active_id(currentData->getValue(COLORFORMAT));
 	}
 	// RGB.
 	else if (not currentData->getValue(POSITION).empty()) {
 		notebookDeviceConnections->set_current_page(tabIndex::RGB);
-		setSelectedConnectors(currentData->getValue(POSITION));
+		setConnectorSelected(currentData->getValue(POSITION));
 		comboBoxRGBRGB->set_active_id(currentData->getValue(COLORFORMAT));
 	}
 	// Single.

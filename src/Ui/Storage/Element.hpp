@@ -40,7 +40,25 @@ public:
 
 	const string getCssClass() const override;
 
+	const string createPrettyName() const override;
+
 	const string toXML() const override;
+
+	/**
+	 * Adds a child to the element, this is used for RGB strips.
+	 * @param child
+	 */
+	void addStripChild(Element* child);
+
+	/**
+	 * @return the list of strip children.
+	 */
+	vector<Element*> copyStripChildren();
+
+	/**
+	 * Clears all strip children.
+	 */
+	void clearStripChildren();
 
 	/**
 	 * Attempts to convert any RGB setup into scattered RGB.
@@ -60,6 +78,12 @@ public:
 	 * @return the position of the first connector on the position.
 	 */
 	static uint16_t findFirstConnectorIndexByPosition(const string& position);
+
+protected:
+
+	// Owns pseudo children.
+	vector<Element*> stripChildren;
 };
 
 } /* namespace */
+

@@ -20,8 +20,9 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "config/ConfigFile.hpp"
+
 #include <gtest/gtest.h>
-#include "ConfigFile.hpp"
 
 namespace LEDSpicerUI {
 
@@ -62,7 +63,7 @@ TEST_F(ConfigFileTest, SettingsAreExtracted) {
 	EXPECT_EQ("Info", settings["logLevel"]);
 	EXPECT_EQ("1000", settings["userId"]);
 	EXPECT_EQ("10",   settings["fps"]);
-	EXPECT_EQ("1.0",  settings["version"]);
+	EXPECT_EQ("1.1",  settings["version"]);
 	EXPECT_EQ("basicColors",   settings["colors"]);
 	EXPECT_EQ("Configuration", settings["type"]);
 	EXPECT_EQ("Red, Blue, Green, Yellow, White, Black", settings["randomColors"]);

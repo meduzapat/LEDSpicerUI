@@ -48,8 +48,7 @@ OrdenableListBox::OrdenableListBox(
 	});
 
 	signal_row_selected().connect([=](Gtk::ListBoxRow* row) {
-		if (!row)
-			return;
+		if (not row) return;
 		size_t index = row->get_index();
 		btnUp->set_sensitive(index);
 		btnDn->set_sensitive(index != getSize() - 1);

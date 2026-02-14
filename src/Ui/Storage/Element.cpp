@@ -25,6 +25,11 @@
 using namespace LEDSpicerUI::Ui::Storage;
 
 Element::~Element() {
+
+	for (auto child : stripChildren) {
+		delete child;
+	}
+
 	if (not getValue(NAME).empty()) {
 		CollectionHandler::getInstance(COLLECTION_ELEMENT)->remove(this);
 	}
@@ -34,11 +39,31 @@ const string Element::getCssClass() const {
 	return "ElementBoxButton";
 }
 
+const string Element::createPrettyName() const {
+	string pname(Data::createPrettyName());
+	if (hasProperty("stripDescriptor")) {
+		pname += " [" + getValue(STRIPSIZE) + "]";
+	}
+	return pname;
+}
+
 const string Element::toXML() const {
 	StringUSet ignored;
 	if (fieldsData.at(BRIGHTNESS) == "100")
 		ignored.insert(BRIGHTNESS);
 	return createOpeningXML("element", fieldsData, ignored, true);
+}
+
+void Element::addStripChild(Element* child) {
+	stripChildren.push_back(child);
+}
+
+vector<Element*> Element::copyStripChildren() {
+	return stripChildren;
+}
+
+void Element::clearStripChildren() {
+	stripChildren.clear();
 }
 
 void Element::splitRGB(Data* data) {

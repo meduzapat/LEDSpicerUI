@@ -20,8 +20,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "config/SettingsFile.hpp"
 #include "GladeDialog.hpp"
-#include "SettingsFile.hpp"
 
 #pragma once
 

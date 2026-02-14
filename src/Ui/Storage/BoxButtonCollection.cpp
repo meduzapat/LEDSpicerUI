@@ -72,6 +72,8 @@ void BoxButtonCollection::remove(Data* form) {
 			return button->getData()->createUniqueId() == form->createUniqueId();
 		}
 	);
+	if (it == items.end()) return;
+
 	// same as BoxButton* button = *it;
 	delete *it;
 	items.erase(it);

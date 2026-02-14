@@ -95,6 +95,44 @@ TEST_F(DataTest, copyValues) {
 	EXPECT_EQ(data->copyValues(1), expected);
 }
 
+TEST_F(DataTest, PropertyOperations) {
+	data->setProperty("key1", "value1");
+	data->setProperty("key2", "value2");
+
+	EXPECT_EQ("value1", data->getProperty("key1"));
+	EXPECT_EQ("value2", data->getProperty("key2"));
+	EXPECT_EQ("default", data->getProperty("missing", "default"));
+	EXPECT_TRUE(data->hasProperty("key1"));
+	EXPECT_FALSE(data->hasProperty("missing"));
+}
+
+TEST_F(DataTest, RemoveProperty) {
+	data->setProperty("test", "value");
+	EXPECT_TRUE(data->hasProperty("test"));
+
+	data->removeProperty("test");
+	EXPECT_FALSE(data->hasProperty("test"));
+	EXPECT_EQ("", data->getProperty("test"));
+}
+
+TEST_F(DataTest, GetAllProperties) {
+	data->setProperty("prop1", "val1");
+	data->setProperty("prop2", "val2");
+
+	const StringUMap& props = data->getProperties();
+	EXPECT_EQ(2, props.size());
+	EXPECT_EQ("val1", props.at("prop1"));
+	EXPECT_EQ("val2", props.at("prop2"));
+}
+
+TEST_F(DataTest, OverwriteProperty) {
+	data->setProperty("key", "original");
+	EXPECT_EQ("original", data->getProperty("key"));
+
+	data->setProperty("key", "updated");
+	EXPECT_EQ("updated", data->getProperty("key"));
+}
+
 int main(int argc, char** argv) {
 	::testing::InitGoogleTest(&argc, argv);
 	return RUN_ALL_TESTS();

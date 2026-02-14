@@ -135,39 +135,45 @@ public:
 	virtual const string toXML() const;
 
 	/**
-	 * Sets a parameter value.
-	 * @param key Parameter name.
-	 * @param value Parameter value.
+	 * Sets a property value.
+	 * @param key Property name.
+	 * @param value Property value.
 	 */
-	void setParameter(const string& key, const string& value);
+	void setProperty(const string& key, const string& value);
 
 	/**
-	 * Gets a parameter value.
-	 * @param key Parameter name.
+	 * Gets a property value.
+	 * @param key Property name.
 	 * @param def Default value if not found.
-	 * @return Parameter value or default.
+	 * @return Property value or default.
 	 */
-	string getParameter(const string& key, const string& def = "") const;
+	string getProperty(const string& key, const string& def = "") const;
 
 	/**
-	 * Checks if a parameter exists.
-	 * @param key Parameter name.
-	 * @return True if parameter exists.
+	 * Checks if a property exists.
+	 * @param key Property name.
+	 * @return True if property exists.
 	 */
-	bool hasParameter(const string& key) const;
+	bool hasProperty(const string& key) const;
 
 	/**
-	 * @return All parameters.
+	 * Removes a property by key name.
+	 * @param key
 	 */
-	const StringUMap& getParameters() const;
+	void removeProperty(const string& key);
+
+	/**
+	 * @return All properties.
+	 */
+	const StringUMap& getProperties() const;
 
 protected:
 
 	/// Data pairs.
 	StringUMap fieldsData;
 
-	/// Extra parameters with important information.
-	StringUMap parameters;
+	/// Extra property with important information.
+	StringUMap properties;
 
 	/// List of ignored data fields.
 	mutable StringUSet ignored;

@@ -101,6 +101,7 @@ LEDSpicerUI::Ui::Storage::CollectionHandler* DialogGroup::getCollectionHandler()
 void DialogGroup::clearForm() {
 	inputGroupName->set_text("");
 	DialogColors::getInstance()->colorizeButton(btnGroupDefaultColor, NO_COLOR);
+	boxElements->wipe();
 }
 
 void DialogGroup::isValid() const {
@@ -122,8 +123,8 @@ void DialogGroup::isValid() const {
 
 void DialogGroup::storeData() {
 	currentData->setValue(NAME, inputGroupName->get_text());
-	if (not btnGroupDefaultColor->get_tooltip_text().empty()) {
-		currentData->setValue(DEFAULT_COLOR, btnGroupDefaultColor->get_tooltip_text());
+	if (not btnGroupDefaultColor->get_label().empty()) {
+		currentData->setValue(DEFAULT_COLOR, btnGroupDefaultColor->get_label());
 	}
 	DataDialogs::DialogSelect::getInstance()->reindex();
 }

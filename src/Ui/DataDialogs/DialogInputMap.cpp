@@ -120,7 +120,7 @@ void DialogInputMap::isValid() const {
 		}
 	}
 
-	if (inputMapDefaultColor->get_tooltip_text().empty()) {
+	if (inputMapDefaultColor->get_label().empty()) {
 		throw Message("You need to set a color.");
 	}
 }
@@ -156,7 +156,7 @@ void DialogInputMap::storeData() {
 	currentData->setValue(TARGET, target);
 
 	currentData->setValue(TRIGGER, trigger);
-	currentData->setValue(COLOR, inputMapDefaultColor->get_tooltip_text());
+	currentData->setValue(COLOR, inputMapDefaultColor->get_label());
 	currentData->setValue(FILTER, comboBoxInputMapFilter->get_active_text());
 }
 

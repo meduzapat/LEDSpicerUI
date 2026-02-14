@@ -21,10 +21,6 @@
  */
 
 
-#include "ConfigFile.hpp"
-#include "InputFile.hpp"
-#include "OrdenableListBox.hpp"
-#include "MainDialogs.hpp"
 
 // for file and dir stats
 #include <sys/stat.h>
@@ -34,6 +30,20 @@
 #include <iostream>
 #include <fstream>
 
+#include "config/ConfigFile.hpp"
+#include "config/InputFile.hpp"
+
+#include "OrdenableListBox.hpp"
+#include "DialogSettings.hpp"
+#include "DialogProject.hpp"
+#include "DialogImport.hpp"
+#include "DataDialogs/DialogDevice.hpp"
+#include "DataDialogs/DialogRestrictor.hpp"
+#include "DataDialogs/DialogProcess.hpp"
+#include "DataDialogs/DialogGroup.hpp"
+#include "DataDialogs/DialogInput.hpp"
+#include "DataDialogs/DialogProfile.hpp"
+
 #pragma once
 
 namespace LEDSpicerUI::Ui {
@@ -41,7 +51,7 @@ namespace LEDSpicerUI::Ui {
 /**
  * LEDSpicerUI::MainWindow
  */
-class MainWindow: public Gtk::ApplicationWindow, public MainDialogs {
+class MainWindow: public Gtk::ApplicationWindow {
 
 public:
 
@@ -78,6 +88,27 @@ protected:
 
 	/// Contains the possible pickers for colors when selecting colors randomly.
 	Gtk::FlowBox* boxRandomColors = nullptr;
+
+	DialogImport
+		/// Import configuration dialog.
+		dialogImportConfig,
+		/// Import input dialog.
+		dialogImportInput;
+
+	/// @name Storage Collections
+	Storage::BoxButtonCollection
+		/// Created devices in the dialog devices.
+		devices,
+		/// Created restrictors in the dialog restrictors.
+		restrictors,
+		/// Created processes in the dialog processes.
+		processes,
+		/// Created groups in the dialog groups.
+		groups,
+		/// Created inputs in the dialog inputs.
+		inputs,
+		/// Created profiles in the dialog profiles.
+		profiles;
 
 	/**
 	 * Populates the configuration.

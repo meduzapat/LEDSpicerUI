@@ -81,6 +81,14 @@ public:
 	size_t countByKey(const string& key, const string& value) const;
 
 	/**
+	 * Finds all data with matching property.
+	 * @param property Property name.
+	 * @param value Property value.
+	 * @return Vector of matching Data pointers.
+	 */
+	vector<Data*> findByProperty(const string& property, const string& value);
+
+	/**
 	 * Adds an item to the collection.
 	 * @param item
 	 */

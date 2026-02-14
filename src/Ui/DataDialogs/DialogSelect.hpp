@@ -21,6 +21,7 @@
  */
 
 #include "DialogColors.hpp"
+#include "Storage/Element.hpp"
 #include "Storage/CollectionHandler.hpp"
 #include "Storage/Selection.hpp"
 #include "Storage/Link.hpp"
@@ -165,6 +166,12 @@ protected:
 	 * Populates all the items and selects the ones in the group.
 	 */
 	void populateSelectables();
+
+	/**
+	 * Creates a selectable item for the given data and adds it to the box.
+	 * @param data
+	 */
+	void createSelectableItem(Storage::Data* data);
 };
 
 } /* namespace */

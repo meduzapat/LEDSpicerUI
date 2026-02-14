@@ -48,10 +48,10 @@ endif()
 add_executable(ledspicerui
 	src/Defaults.cpp
 	src/XMLHelper.cpp
-	src/ProjectFile.cpp
-	src/SettingsFile.cpp
-	src/ConfigFile.cpp
-	src/InputFile.cpp
+	src/config/ProjectFile.cpp
+	src/config/SettingsFile.cpp
+	src/config/ConfigFile.cpp
+	src/config/InputFile.cpp
 	src/Ui/Message.cpp
 	src/Ui/DialogColors.cpp
 	src/Ui/DialogProject.cpp
@@ -88,7 +88,6 @@ add_executable(ledspicerui
 	src/Ui/DataDialogs/DialogProcess.cpp
 	src/Ui/DataDialogs/DialogProfile.cpp
 	src/Ui/DialogImport.cpp
-	src/Ui/MainDialogs.cpp
 	src/Ui/MainWindow.cpp
 	src/LEDSpicerUI.cpp
 )

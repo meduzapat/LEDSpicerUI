@@ -113,9 +113,8 @@ void DialogColors::setColorsFromFile(const string& path) {
 
 void DialogColors::colorizeButton(Gtk::Button* button, const string& colorName) {
 	string
-		oldClassName = button->get_tooltip_text(),
+		oldClassName = button->get_label(),
 		newClassName = isValidColor(colorName) ? colorName : "";
-//	button->set_tooltip_text(newClassName);
 	button->set_label(newClassName);
 	auto sc = button->get_style_context();
 	if (not oldClassName.empty() and sc->has_class(oldClassName))
@@ -139,7 +138,7 @@ bool DialogColors::isValidColor(const string& colorName) {
 
 void DialogColors::activateColorButton(Gtk::Button* button) {
 	colorButtons.push_back(button);
-	button->signal_clicked().connect([&, button]() {
+	button->signal_clicked().connect([this, button]() {
 		if (run() == Gtk::ResponseType::RESPONSE_OK) {
 			Defaults::markDirty();
 			colorizeButton(button, selectedColor);
@@ -150,7 +149,7 @@ void DialogColors::activateColorButton(Gtk::Button* button) {
 
 void DialogColors::activateColorPicker(Gtk::Button* button, Gtk::FlowBox* destination) {
 	colorBoxes.push_back(destination);
-	button->signal_clicked().connect([&, destination]() {
+	button->signal_clicked().connect([this, destination]() {
 		// Random cannot be used for list.
 		BtnColorRandom->hide();
 		BtnClearColor->hide();
@@ -166,7 +165,7 @@ void DialogColors::activateColorPicker(Gtk::Button* button, Gtk::FlowBox* destin
 
 void DialogColors::resetColorButtons() {
 	for (auto button : colorButtons)
-		if (not button->get_tooltip_text().empty())
+		if (not button->get_label().empty())
 			colorizeButton(button, "");
 	for (auto box : colorBoxes)
 		for (auto c : box->get_children())
@@ -182,7 +181,7 @@ StringVector DialogColors::getColorBoxValues(Gtk::FlowBox* destination) {
 	StringVector r;
 	for (auto child : destination->get_children()) {
 		auto c = dynamic_cast<Gtk::FlowBoxChild*>(child);
-		r.push_back(c->get_child()->get_tooltip_text());
+		r.push_back(dynamic_cast<Gtk::Label*>(c->get_child())->get_text());
 	}
 	return r;
 }
@@ -198,19 +197,17 @@ string DialogColors::setColors(StringUMap& colors) {
 		ContainerColorPicker->remove(*c);
 
 	string cssData;
-	for (auto& c : colors) {
-		if (c.first == "On" or c.first == "Off" or c.first == "Random")
-			// Discard any special color.
-			continue;
-		cssData += '.' + c.first + "{background:#" + c.second + ';';
-		if (Defaults::getLuminance(c.second) > 0.5)
-			cssData += "color:black;";
+	for (auto& [name, hex] : colors) {
+		// Discard any special color.
+		if (name == "On" or name == "Off" or name == "Random") continue;
+
+		cssData += '.' + name + "{background:#" + hex + ';';
+		if (Defaults::getLuminance(hex) > 0.5) cssData += "color:black;";
 		cssData += '}';
 		// Create Button.
-		Gtk::Button* b = Gtk::make_managed<Gtk::Button>(c.first);
-//		b->set_tooltip_text(c.first);
-		b->set_label(c.first);
-		b->get_style_context()->add_class(c.first);
+		Gtk::Button* b = Gtk::make_managed<Gtk::Button>(name);
+		b->set_label(name);
+		b->get_style_context()->add_class(name);
 		ContainerColorPicker->add(*b);
 		b->signal_clicked().connect(sigc::bind(
 			sigc::mem_fun(*this, &DialogColors::onColorSelected),
@@ -231,7 +228,6 @@ void DialogColors::createColorButton(Gtk::FlowBox* destination, const string& co
 	box->set_margin_left(2);
 	box->set_margin_right(2);
 	box->get_style_context()->add_class("ColorButton");
-	box->set_tooltip_text(color);
 
 	auto l = Gtk::make_managed<Gtk::Label>(color);
 	l->get_style_context()->add_class(color);

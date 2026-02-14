@@ -132,3 +132,12 @@ combobox.noRoundRight button.combo,
 	border-color:        #3584e4;
 }
 
+.GroupBoxButton.system {
+	opacity: 0.7;
+	border-color: #9a9996;
+}
+
+.GroupBoxButton.read-only {
+	opacity: 0.5;
+}
+

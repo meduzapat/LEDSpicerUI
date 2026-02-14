@@ -41,12 +41,13 @@ public:
 		return instance;
 	}
 
-	static void initialize(
-		const Glib::RefPtr<Gtk::Builder>& builder,
-		const string& widgetId
-	) {
-		if (not instance)
+	static void initialize(const Glib::RefPtr<Gtk::Builder>& builder, const string& widgetId) {
+		if (not instance) {
 			builder->get_widget_derived(widgetId, instance);
+			if (not instance) {
+				throw std::runtime_error("Failed to load widget: " + widgetId);
+			}
+		}
 	}
 
 protected:
