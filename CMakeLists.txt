@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.16)
-project(LEDSpicerUI VERSION 0.0.3 LANGUAGES CXX)
+project(LEDSpicerUI VERSION 0.0.4 LANGUAGES CXX)
 
 # Metadata (for glade file substitution and compile definitions)
 set(PACKAGE "ledspicerui")
 set(PACKAGE_NAME "${PROJECT_NAME}")  # LEDSpicerUI
-set(PACKAGE_VERSION "${PROJECT_VERSION}")  # 0.0.2
-set(PACKAGE_STRING "${PROJECT_NAME} ${PROJECT_VERSION}")  # LEDSpicerUI 0.0.2
+set(PACKAGE_VERSION "${PROJECT_VERSION}")  # 0.0.4
+set(PACKAGE_STRING "${PROJECT_NAME} ${PROJECT_VERSION}")  # LEDSpicerUI 0.0.4
 set(PACKAGE_TARNAME "ledspicerui")
 set(COPYRIGHT "Copyright © 2023 - 2025 Patricio A. Rossi (MeduZa)")
 set(MINIMUM_COMPATIBILITY "0.7.0")
