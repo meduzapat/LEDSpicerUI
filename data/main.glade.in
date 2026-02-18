@@ -4109,6 +4109,7 @@ Autodetected if ledspicer is installed</property>
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="spacing">5</property>
+                <property name="homogeneous">True</property>
                 <child>
                   <object class="GtkBox">
                     <property name="visible">True</property>
@@ -4193,45 +4194,6 @@ You can find the devices ID using inputseeker from the terminal, or by listing t
                     <property name="position">1</property>
                   </packing>
                 </child>
-                <child>
-                  <object class="GtkBox">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="spacing">5</property>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="halign">end</property>
-                        <property name="margin-end">2</property>
-                        <property name="label">Path</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkFileChooserButton" id="FileInputNamePath">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="action">select-folder</property>
-                        <property name="title" translatable="yes">Select Directoy</property>
-                      </object>
-                      <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="fill">True</property>
-                    <property name="position">2</property>
-                  </packing>
-                </child>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -4254,7 +4216,7 @@ You can find the devices ID using inputseeker from the terminal, or by listing t
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="halign">start</property>
-                        <property name="label">Event listeners</property>
+                        <property name="label">Source</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
