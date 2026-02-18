@@ -37,7 +37,8 @@ DialogInput* DialogInput::getInstance() {
 }
 
 DialogInput::DialogInput(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
-	DialogForm(obj, builder)
+	DialogForm(obj, builder),
+	dialogImportInput(DialogImport::Types::INPUT, this)
 {
 	// Connect Groups Box and button.
 	builder->get_widget_derived("BoxInputs", box);
@@ -111,6 +112,28 @@ DialogInput::DialogInput(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& 
 		) {
 			boxEventListeners->show();
 		}
+	});
+
+	// Dialog to import input plugin files.
+	Gtk::Button* btnImportInput;
+	builder->get_widget("BtnImportInput", btnImportInput);
+	btnImportInput->signal_clicked().connect([this]() {
+		if (dialogImportInput.run() == Gtk::ResponseType::RESPONSE_OK) {
+			// Retrieve the selected files or directories
+			StringVector selectedFiles(dialogImportInput.get_filenames());
+			// Process each selected file or directory
+			for (const auto& selectedFile : selectedFiles) {
+				try {
+					InputFile datafile(selectedFile);
+					load(&datafile);
+					//refreshBox();
+				}
+				catch (Message& e) {
+					Message::displayError(XMLHelper::cleanError(e.getMessage()));
+				}
+			}
+		}
+		dialogImportInput.hide();
 	});
 }
 
@@ -195,8 +218,11 @@ void DialogInput::isValid() const {
 void DialogInput::storeData() {
 
 	string name(comboBoxInputSelectInput->get_active_text());
-	currentData->setValue(FILENAME, entryInputName->get_text());
 	currentData->setValue(NAME, name);
+
+	currentData->setProperty(PATH, createUniqueId());
+	currentData->setProperty(FILENAME, entryInputName->get_text());
+
 
 	if (name == "Actions") {
 		currentData->setValue("blink", switchInputBlink->get_state() ? "true" : "false");
@@ -239,7 +265,11 @@ void DialogInput::retrieveData() {
 }
 
 string const DialogInput::createUniqueId() const {
-	return Defaults::createCommonUniqueId({entryInputName->get_text()});
+	return Defaults::createCommonUniqueId({currentPath, entryInputName->get_text()});
+}
+
+void DialogInput::setPath(const string& path) {
+	currentPath = path;
 }
 
 const string DialogInput::getType() const {

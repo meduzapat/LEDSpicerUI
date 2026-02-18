@@ -62,6 +62,7 @@ add_executable(ledspicerui
 	src/Ui/Storage/Data.cpp
 	src/Ui/Storage/Selection.cpp
 	src/Ui/Storage/Link.cpp
+	src/Ui/Storage/DirectoryEntry.cpp
 	src/Ui/Storage/Element.cpp
 	src/Ui/Storage/Group.cpp
 	src/Ui/Storage/Device.cpp
@@ -87,6 +88,8 @@ add_executable(ledspicerui
 	src/Ui/DataDialogs/DialogInput.cpp
 	src/Ui/DataDialogs/DialogProcess.cpp
 	src/Ui/DataDialogs/DialogProfile.cpp
+	src/Ui/DirectoryNavigator.cpp
+	src/Ui/InputDirectoryNavigator.cpp
 	src/Ui/DialogImport.cpp
 	src/Ui/MainWindow.cpp
 	src/LEDSpicerUI.cpp

@@ -41,12 +41,12 @@ public:
 	/**
 	 * @return Relative filename (without extension).
 	 */
-	const string& getFilename() const;
+	const string& getPathFilename() const;
 
 protected:
 
 	/// Relative filename from project directory.
-	string filename;
+	string pathFilename;
 
 	/**
 	 * Creates a ProjectFile and extracts filename.

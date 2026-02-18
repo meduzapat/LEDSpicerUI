@@ -48,26 +48,26 @@ protected:
 // Test filename extraction with simple filename
 TEST_F(ProjectFileTest, FilenameExtractionSimple) {
 	InputFile input(PACKAGE_SAMPLES_DIR "data/" INPUT_PATH "inputSingle.xml");
-	EXPECT_EQ("inputSingle", input.getFilename());
+	EXPECT_EQ("inputSingle", input.getPathFilename());
 }
 
 // Test filename extraction with subdirectory
 TEST_F(ProjectFileTest, FilenameExtractionWithSubdir) {
 	InputFile input(PACKAGE_SAMPLES_DIR "data/" INPUT_PATH "inputMulti.xml");
-	EXPECT_EQ("inputMulti", input.getFilename());
+	EXPECT_EQ("inputMulti", input.getPathFilename());
 }
 
 // Test filename extraction removes extension
 TEST_F(ProjectFileTest, FilenameRemovesExtension) {
 	InputFile input(PACKAGE_SAMPLES_DIR "data/" INPUT_PATH "inputSingle.xml");
-	const string& filename = input.getFilename();
+	const string& filename = input.getPathFilename();
 	EXPECT_EQ(string::npos, filename.find(".xml")) << "Extension should be removed";
 }
 
 // Test filename extraction is relative to project directory
 TEST_F(ProjectFileTest, FilenameRelativeToProjectDir) {
 	InputFile input(PACKAGE_SAMPLES_DIR "data/" INPUT_PATH "inputMulti.xml");
-	const string& filename = input.getFilename();
+	const string& filename = input.getPathFilename();
 
 	// Should not contain the projects directory path
 	EXPECT_EQ(string::npos, filename.find(PACKAGE_SAMPLES_DIR))

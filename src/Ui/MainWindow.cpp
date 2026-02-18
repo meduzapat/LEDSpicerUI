@@ -28,7 +28,7 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 	Gtk::ApplicationWindow(obj),
 	// Set import dialog
 	dialogImportConfig(DialogImport::Types::CONFIG, this),
-	dialogImportInput(DialogImport::Types::INPUT, this)
+	inputNavigator(builder)
 {
 
 	Message::initialize(builder, this);
@@ -40,15 +40,12 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 	// Initialize secondary dialogs.
 	DataDialogs::DialogElement::initialize(builder);
 	DataDialogs::DialogSelect::initialize(builder);
-	DataDialogs::DialogInputLinkMaps::initialize(builder);
-	DataDialogs::DialogInputMap::initialize(builder);
 	DataDialogs::DialogRestrictorMap::initialize(builder);
 	// Initialize Primary Dialogs.
 	DataDialogs::DialogDevice::initialize(builder);
 	DataDialogs::DialogRestrictor::initialize(builder);
 	DataDialogs::DialogProcess::initialize(builder);
 	DataDialogs::DialogGroup::initialize(builder);
-	DataDialogs::DialogInput::initialize(builder);
 	DataDialogs::DialogProfile::initialize(builder);
 
 	// Connect primary dialogs with the collections.
@@ -56,7 +53,6 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 	DataDialogs::DialogRestrictor::getInstance()->setOwner(&restrictors);
 	DataDialogs::DialogProcess::getInstance()->setOwner(&processes);
 	DataDialogs::DialogGroup::getInstance()->setOwner(&groups);
-	DataDialogs::DialogInput::getInstance()->setOwner(&inputs);
 	DataDialogs::DialogProfile::getInstance()->setOwner(&profiles);
 
 	// Setup ledspicer fields.
@@ -269,7 +265,6 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 			return;
 		}
 	});
-
 }
 
 MainWindow::~MainWindow() {
@@ -280,9 +275,6 @@ MainWindow::~MainWindow() {
 	delete DataDialogs::DialogElement::getInstance();
 	delete DataDialogs::DialogRestrictorMap::getInstance();
 	delete DataDialogs::DialogRestrictor::getInstance();
-	delete DataDialogs::DialogInputLinkMaps::getInstance();
-	delete DataDialogs::DialogInputMap::getInstance();
-	delete DataDialogs::DialogInput::getInstance();
 	delete DataDialogs::DialogProcess::getInstance();
 	delete DataDialogs::DialogGroup::getInstance();
 	delete DataDialogs::DialogDevice::getInstance();
@@ -319,43 +311,24 @@ void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {
 		dialogImportConfig.hide();
 	});
 
-	// Dialog to import input plugin files.
-	Gtk::Button* btnImportInput;
-	builder->get_widget("BtnImportInput", btnImportInput);
-	btnImportInput->signal_clicked().connect([&]() {
-		if (dialogImportInput.run() == Gtk::ResponseType::RESPONSE_OK) {
-			// Retrieve the selected files or directories
-			StringVector selectedFiles(dialogImportInput.get_filenames());
-			// Process each selected file or directory
-			for (const auto& selectedFile : selectedFiles) {
-				try {
-					readConfigFile(selectedFile, false, Defaults::ImportFlags::INPUTS);
-				}
-				catch (Message& e) {
-					Message::displayError(XMLHelper::cleanError(e.getMessage()));
-				}
-			}
-		}
-		dialogImportInput.hide();
-	});
-
 	Gtk::Button
 		* btnSelectProject,
-		* btnAddInput;
+		* btnAddInput,
+		* btnImportInput;
 	builder->get_widget("BtnSelectProject", btnSelectProject);
-	builder->get_widget("BtnAddInput",  btnAddInput);
+	builder->get_widget("BtnAddInput",      btnAddInput);
+	builder->get_widget("BtnImportInput",   btnImportInput);
 
 	// Activate configuration tabs.
 	Gtk::Notebook* MainTabs = nullptr;
 	builder->get_widget("MainTabs", MainTabs);
-
 	MainTabs->signal_switch_page().connect([btnImportInput, btnAddInput](Gtk::Widget*, guint pageNum) {
-		// Inputs
+		bool sensitive(
+			DataDialogs::DialogElement::getInstance()->getCollectionHandler()->getSize() and
+			DataDialogs::DialogGroup::getInstance()->getCollectionHandler()->getSize()
+		);
+		// Inputs: If there no elements or groups, importing or adding inputs is not possible.
 		if (pageNum == 4) {
-			bool sensitive(
-				DataDialogs::DialogElement::getInstance()->getCollectionHandler()->getSize() and
-				DataDialogs::DialogGroup::getInstance()->getCollectionHandler()->getSize()
-			);
 			btnImportInput->set_sensitive(sensitive);
 			btnAddInput->set_sensitive(sensitive);
 		}
@@ -397,7 +370,9 @@ void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {
 			restrictors.wipe();
 			processes.wipe();
 			groups.wipe();
-			inputs.wipe();
+			inputNavigator.clear();
+			// animationNavigator.clear();
+			//profileNavigator.clear();
 			StringUMap values;
 			setConfiguration(values);
 		}
@@ -450,15 +425,6 @@ StringUMap MainWindow::ledspicerConfigToXml() const {
 }
 
 void MainWindow::readConfigFile(const string& dataFilePath, bool wipe, uint8_t importFlags) {
-	if (importFlags & Defaults::ImportFlags::INPUTS) {
-		InputFile datafile(dataFilePath);
-		if (wipe) {
-			inputs.wipe();
-		}
-		DataDialogs::DialogInput::getInstance()->load(&datafile);
-		DataDialogs::DialogInput::getInstance()->refreshBox();
-		return;
-	}
 
 	ConfigFile datafile(dataFilePath);
 	if (importFlags & Defaults::ImportFlags::CONFIG) {

@@ -98,6 +98,10 @@ void DialogForm::reindex() {
 	items->reindex(box);
 }
 
+LEDSpicerUI::Ui::OrdenableFlowBox* DialogForm::getBox() {
+	return box;
+}
+
 LEDSpicerUI::Ui::Storage::Data* DialogForm::createData() {
 	StringUMap rawData;
 	return createData(rawData);

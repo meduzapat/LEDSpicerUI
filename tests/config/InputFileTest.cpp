@@ -64,13 +64,13 @@ TEST_F(InputFileTest, MultiSourceInputIsLoaded) {
 	EXPECT_EQ("1",       inputData[0]["coinsPerCredit"]);
 
 	// Filename now via getFilename()
-	EXPECT_EQ("inputMulti", inputMulti->getFilename());
+	EXPECT_EQ("inputMulti", inputMulti->getPathFilename());
 }
 
 // Test that listenEvents are correctly extracted from multi-source input
 TEST_F(InputFileTest, ListenEventsAreExtracted) {
 	const string
-		name(inputMulti->getFilename()),
+		name(inputMulti->getPathFilename()),
 		eventName(Defaults::createCommonUniqueId({name, COLLECTION_INPUT_EVENTS})),
 		hardware1Name(inputMulti->getData(eventName)[0]["source"]),
 		hardware2Name(inputMulti->getData(eventName)[1]["source"]);
@@ -83,7 +83,7 @@ TEST_F(InputFileTest, ListenEventsAreExtracted) {
 TEST_F(InputFileTest, FirstSourceMapsAreProcessed) {
 	// Construct the unique ID for the first source maps (now using index)
 	const string
-		name(inputMulti->getFilename()),
+		name(inputMulti->getPathFilename()),
 		mapName(Defaults::createCommonUniqueId({name, "0", COLLECTION_INPUT_MAPS}));
 
 	auto& maps = inputMulti->getData(mapName);
@@ -115,7 +115,7 @@ TEST_F(InputFileTest, FirstSourceMapsAreProcessed) {
 TEST_F(InputFileTest, SecondSourceMapsAreProcessed) {
 	// Construct the unique ID for the second source maps (now using index)
 	const string
-		name(inputMulti->getFilename()),
+		name(inputMulti->getPathFilename()),
 		mapName(Defaults::createCommonUniqueId({name, "1", COLLECTION_INPUT_MAPS}));
 
 	auto& maps = inputMulti->getData(mapName);
@@ -136,13 +136,13 @@ TEST_F(InputFileTest, SingleSourceInputIsLoaded) {
 	EXPECT_EQ("Mame", inputData[0][NAME]);
 
 	// Filename now via getFilename()
-	EXPECT_EQ("inputSingle", inputSingle->getFilename());
+	EXPECT_EQ("inputSingle", inputSingle->getPathFilename());
 }
 
 // Test that maps for single-source input are correctly processed
 TEST_F(InputFileTest, SingleSourceMapsAreProcessed) {
 	// Construct the unique ID for the maps (using index 0)
-	const string mapsId = Defaults::createCommonUniqueId({inputSingle->getFilename(), "0", COLLECTION_INPUT_MAPS});
+	const string mapsId = Defaults::createCommonUniqueId({inputSingle->getPathFilename(), "0", COLLECTION_INPUT_MAPS});
 
 	auto& maps = inputSingle->getData(mapsId);
 	ASSERT_EQ(3, maps.size());
@@ -176,8 +176,8 @@ TEST_F(InputFileTest, MissingAttributesHandling) {
 
 // Test ProjectFile getFilename functionality
 TEST_F(InputFileTest, FilenameExtraction) {
-	EXPECT_EQ("inputMulti",  inputMulti->getFilename());
-	EXPECT_EQ("inputSingle", inputSingle->getFilename());
+	EXPECT_EQ("inputMulti",  inputMulti->getPathFilename());
+	EXPECT_EQ("inputSingle", inputSingle->getPathFilename());
 }
 
 // Test getRootInfo returns expected values

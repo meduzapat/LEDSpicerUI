@@ -119,6 +119,12 @@ public:
 	 */
 	void reindex();
 
+	/**
+	 * Returns the display box for items.
+	 * @return OrdenableFlowBox pointer.
+	 */
+	OrdenableFlowBox* getBox();
+
 protected:
 
 	/// form action mode.

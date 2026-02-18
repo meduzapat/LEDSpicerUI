@@ -31,17 +31,16 @@
 #include <fstream>
 
 #include "config/ConfigFile.hpp"
-#include "config/InputFile.hpp"
 
 #include "OrdenableListBox.hpp"
 #include "DialogSettings.hpp"
 #include "DialogProject.hpp"
-#include "DialogImport.hpp"
+#include "InputDirectoryNavigator.hpp"
+
 #include "DataDialogs/DialogDevice.hpp"
 #include "DataDialogs/DialogRestrictor.hpp"
 #include "DataDialogs/DialogProcess.hpp"
 #include "DataDialogs/DialogGroup.hpp"
-#include "DataDialogs/DialogInput.hpp"
 #include "DataDialogs/DialogProfile.hpp"
 
 #pragma once
@@ -89,11 +88,8 @@ protected:
 	/// Contains the possible pickers for colors when selecting colors randomly.
 	Gtk::FlowBox* boxRandomColors = nullptr;
 
-	DialogImport
-		/// Import configuration dialog.
-		dialogImportConfig,
-		/// Import input dialog.
-		dialogImportInput;
+	/// Import configuration dialog.
+	DialogImport dialogImportConfig;
 
 	/// @name Storage Collections
 	Storage::BoxButtonCollection
@@ -105,10 +101,11 @@ protected:
 		processes,
 		/// Created groups in the dialog groups.
 		groups,
-		/// Created inputs in the dialog inputs.
-		inputs,
 		/// Created profiles in the dialog profiles.
 		profiles;
+
+	/// Navigator for input files.
+	InputDirectoryNavigator inputNavigator;
 
 	/**
 	 * Populates the configuration.

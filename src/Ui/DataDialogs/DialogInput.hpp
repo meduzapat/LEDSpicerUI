@@ -22,6 +22,8 @@
 
 #include "DialogForm.hpp"
 #include "Storage/Input.hpp"
+#include "DialogImport.hpp"
+#include "config/InputFile.hpp"
 
 #pragma once
 
@@ -36,6 +38,8 @@ class DialogInput: public DialogForm {
 	friend class Gtk::Builder;
 
 public:
+
+	static constexpr const char* BOX_INPUTS    = "BoxInputs";
 
 	DialogInput() = delete;
 
@@ -52,17 +56,22 @@ public:
 	void retrieveData() override;
 	const string createUniqueId() const override;
 
+	void setPath(const string& path);
+
 protected:
 
 	static DialogInput* instance;
 
+	/// Import input dialog.
+	DialogImport dialogImportInput;
+
 	Gtk::ComboBoxText
 		* comboBoxInputSelectInput = nullptr,
 		* comboBoxInputSpeed       = nullptr;
-	Gtk::Entry*        entryInputName   = nullptr;
-	Gtk::Switch*       switchInputBlink = nullptr;
-	Gtk::SpinButton*   spinInputTimes   = nullptr;
-	Gtk::Button*       btnAddInputMap   = nullptr;
+	Gtk::Entry*      entryInputName   = nullptr;
+	Gtk::Switch*     switchInputBlink = nullptr;
+	Gtk::SpinButton* spinInputTimes   = nullptr;
+	Gtk::Button*     btnAddInputMap   = nullptr;
 	Gtk::Box
 		* boxLinkedElementsAndGroupsBox = nullptr,
 		* boxEventListeners             = nullptr,
@@ -70,10 +79,12 @@ protected:
 
 	/// The box to select mappings.
 	OrdenableFlowBox
-		* boxInputMap = nullptr,
+		* boxInputMap        = nullptr,
 		* boxInputLinkedMaps = nullptr;
 
 	Gtk::FileChooserButton* fileInputNamePath = nullptr;
+
+	string currentPath;
 
 	DialogInput(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
 

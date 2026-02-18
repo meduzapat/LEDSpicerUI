@@ -74,9 +74,12 @@ size_t OrdenableFlowBox::getSize() {
 }
 
 void OrdenableFlowBox::wipe() {
-	foreach([this](Gtk::Widget& child) {
-		auto boxChild = dynamic_cast<Gtk::FlowBoxChild*>(&child);
-		boxChild->remove();
-		remove(*boxChild);
-	});
+	for (auto child : get_children()) {
+		auto flowChild = dynamic_cast<Gtk::FlowBoxChild*>(child);
+		if (flowChild && flowChild->get_child()) {
+			// Remove BoxButton from FlowBoxChild
+			flowChild->remove();
+		}
+		remove(*child);
+	}
 }

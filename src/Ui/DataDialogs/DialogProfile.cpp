@@ -84,20 +84,20 @@ DialogProfile::DialogProfile(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 	});
 
 	// Start transition selector.
-	builder->get_widget("BtnAddStartTransitions",             btnProfilesAddStartTransitions);
-	builder->get_widget_derived("BoxProfileStartTransitions", boxProfileStartTransitions, "BtnStartTransitionsUp", "BtnStartTransitionsDn");
-	btnProfilesAddStartTransitions->signal_clicked().connect([&]() {
-		DialogSelect::getInstance()->setSettings(startTransitionsSelectSetting);
-		DialogSelect::getInstance()->runSelection();
-	});
+//	builder->get_widget("BtnAddStartTransitions",             btnProfilesAddStartTransitions);
+//	builder->get_widget_derived("BoxProfileStartTransitions", boxProfileStartTransitions, "BtnStartTransitionsUp", "BtnStartTransitionsDn");
+//	btnProfilesAddStartTransitions->signal_clicked().connect([&]() {
+//		DialogSelect::getInstance()->setSettings(startTransitionsSelectSetting);
+//		DialogSelect::getInstance()->runSelection();
+//	});
 
 	// End transition selector.
-	builder->get_widget("BtnAddEndTransitions",             btnProfilesAddEndTransitions);
-	builder->get_widget_derived("BoxProfileEndTransitions", boxProfileEndTransitions, "BtnEndTransitionsUp", "BtnEndTransitionsDn");
-	btnProfilesAddEndTransitions->signal_clicked().connect([&]() {
-		DialogSelect::getInstance()->setSettings(endTransitionsSelectSetting);
-		DialogSelect::getInstance()->runSelection();
-	});
+//	builder->get_widget("BtnAddEndTransitions",             btnProfilesAddEndTransitions);
+//	builder->get_widget_derived("BoxProfileEndTransitions", boxProfileEndTransitions, "BtnEndTransitionsUp", "BtnEndTransitionsDn");
+//	btnProfilesAddEndTransitions->signal_clicked().connect([&]() {
+//		DialogSelect::getInstance()->setSettings(endTransitionsSelectSetting);
+//		DialogSelect::getInstance()->runSelection();
+//	});
 }
 
 void DialogProfile::load(XMLHelper* values) {

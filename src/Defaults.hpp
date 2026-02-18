@@ -40,6 +40,11 @@ using std::stringstream;
 
 #include <functional>
 
+#include <sys/stat.h>
+
+#include <memory>
+using std::unique_ptr;
+
 #pragma once
 
 #define XML_FILE_PLAIN ""
@@ -97,6 +102,7 @@ constexpr const char* ID       = "boardId";
 constexpr const char* FILENAME = "filename";
 constexpr const char* PORT     = "port";
 constexpr const char* PINS     = "leds";
+constexpr const char* PATH     = "path";
 
 constexpr float DEFAULT_CHANGE_VALUE    = 64.00f;
 
@@ -197,13 +203,12 @@ public:
 
 	enum class Connection : uint8_t {NONE, USB, SERIAL};
 
-	/// Import flags, use IMPORT_ALL for all configurations (excludes single files like inputs, etc)
+	/// Import flags, use IMPORT_ALL for all configurations
 	enum ImportFlags : uint8_t {
 		CONFIG      = 1,
 		DEVICES     = 2,
 		RESTRICTORS = 4,
-		MAPPINGS    = 8,
-		INPUTS      = 16
+		MAPPINGS    = 8
 	};
 
 	/**

@@ -78,6 +78,8 @@ void DialogSelect::reindex() {
 }
 
 void DialogSelect::runSelection() {
+	// This is necessary because the selectables need to be realized  before being selected.
+	show();
 	populateSelectables();
 	// Run Dialog.
 	if (run() == Gtk::ResponseType::RESPONSE_APPLY) {

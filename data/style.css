@@ -141,3 +141,59 @@ combobox.noRoundRight button.combo,
 	opacity: 0.5;
 }
 
+/* ===========================================
+ * Directory Navigator Styles
+ * Add to data/style.css
+ * =========================================== */
+
+/* Directory BoxButton - folder appearance */
+.DirectoryBoxButton {
+	background-image: url("images/directoryButtonBackground.png");
+	border-color:     #f5c211;
+}
+
+.DirectoryBoxButton > box > label {
+	font-weight: bold;
+}
+
+/* Breadcrumb container */
+.BreadcrumbBox {
+	padding: 2px 5px;
+}
+
+/* Clickable breadcrumb segments */
+.BreadcrumbButton {
+	padding:    2px 6px;
+	min-height: 0;
+	min-width:  0;
+	border:     none;
+	background: transparent;
+}
+
+.BreadcrumbButton:hover {
+	text-decoration: underline;
+	color:           #3584e4;
+}
+
+/* Current directory (not clickable) */
+.BreadcrumbCurrent {
+	font-weight: bold;
+	padding:     2px 6px;
+}
+
+/* Separator between breadcrumb segments */
+.BreadcrumbSeparator {
+	opacity: 0.6;
+	padding: 0 2px;
+}
+
+/* Navigation buttons */
+.NavigationButton {
+	min-width:  32px;
+	min-height: 32px;
+	padding:    4px;
+}
+
+.NavigationButton:disabled {
+	opacity: 0.4;
+}

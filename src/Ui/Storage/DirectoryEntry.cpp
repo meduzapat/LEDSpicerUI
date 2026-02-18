@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      ProjectFile.cpp
- * @since     Feb 8, 2026
+ * @file      DirectoryEntry.cpp
+ * @since     Feb 15, 2026
  * @author    Patricio A. Rossi (MeduZa)
  *
  * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
@@ -20,15 +20,27 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ProjectFile.hpp"
+#include "DirectoryEntry.hpp"
 
-using namespace LEDSpicerUI;
+using namespace LEDSpicerUI::Ui::Storage;
 
-ProjectFile::ProjectFile(const string& filePath, const string& fileType, const string& subPath) :
-	XMLHelper(filePath, fileType),
-	pathFilename(Defaults::extractName(filePath, Defaults::getProjectsDir() + subPath))
-{}
+const string DirectoryEntry::createPrettyName() const {
+	return "";
+}
 
-const string& ProjectFile::getPathFilename() const {
-	return pathFilename;
+const string DirectoryEntry::createTooltip() const {
+	return "Open folder " + getValue(NAME);
+}
+
+const string DirectoryEntry::getCssClass() const {
+	return "DirectoryBoxButton";
+}
+
+const string DirectoryEntry::createUniqueId() const {
+	const string parent = getValue(PATH);
+	return parent.empty() ? getValue(NAME) : parent + "/" + getValue(NAME);
+}
+
+const string DirectoryEntry::getParentPath() const {
+	return getValue(PATH);
 }

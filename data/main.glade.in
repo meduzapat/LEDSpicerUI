@@ -179,18 +179,6 @@ Author: Patricio A Rossi
             <property name="height-request">500</property>
             <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <child>
-              <object class="GtkImage">
-                <property name="width-request">100</property>
-                <property name="height-request">80</property>
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-              </object>
-              <packing>
-                <property name="x">409</property>
-                <property name="y">198</property>
-              </packing>
-            </child>
           </object>
           <packing>
             <property name="expand">True</property>
@@ -500,11 +488,20 @@ Author: Patricio A Rossi
                         <property name="spacing">2</property>
                         <child>
                           <object class="GtkButton" id="BtnImportConfig">
-                            <property name="label">Import config</property>
                             <property name="visible">True</property>
                             <property name="can-focus">True</property>
                             <property name="receives-default">True</property>
+                            <property name="tooltip-text" translatable="yes">Import LEDSpicer Config</property>
                             <property name="halign">end</property>
+                            <child>
+                              <object class="GtkImage">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="icon-name">document-open-symbolic</property>
+                                <property name="use-fallback">True</property>
+                                <property name="icon_size">3</property>
+                              </object>
+                            </child>
                             <style>
                               <class name="backgroundBlue"/>
                             </style>
@@ -540,7 +537,8 @@ Author: Patricio A Rossi
                                 <property name="tooltip-text">When the Random color is used, it picks a color ramdonly from all the colors available in the Color's file.
 You can reduce that list by adding only the colors you want to be used by Random here, you can also add colors more than once to increase the chance of that color to be selected.</property>
                                 <property name="valign">center</property>
-                                <property name="icon-name">help-contents</property>
+                                <property name="icon-name">help-contents-symbolic</property>
+                                <property name="use-fallback">True</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -550,10 +548,18 @@ You can reduce that list by adding only the colors you want to be used by Random
                             </child>
                             <child>
                               <object class="GtkButton" id="BtnAddRandomColor">
-                                <property name="label">Add Colors</property>
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
                                 <property name="receives-default">True</property>
+                                <property name="tooltip-text" translatable="yes">Add Colors</property>
+                                <child>
+                                  <object class="GtkImage">
+                                    <property name="visible">True</property>
+                                    <property name="can-focus">False</property>
+                                    <property name="icon-name">color-select-symbolic</property>
+                                    <property name="use-fallback">True</property>
+                                  </object>
+                                </child>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -739,7 +745,7 @@ Each element in the list represents a different source of data.
 The program Emitter will query each source from top to button, until it finds a match to use.
 You can change the order of the list to prioritize the source.
 Note: MAME may not be available in some systems.</property>
-                                <property name="icon-name">help-contents</property>
+                                <property name="icon-name">help-contents-symbolic</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -846,7 +852,7 @@ Very usefull when MAME does not provide game's data, or when you want to  custom
                                       <object class="GtkImage">
                                         <property name="visible">True</property>
                                         <property name="can-focus">False</property>
-                                        <property name="icon-name">go-up</property>
+                                        <property name="icon-name">go-up-symbolic</property>
                                       </object>
                                     </child>
                                   </object>
@@ -881,7 +887,7 @@ Very usefull when MAME does not provide game's data, or when you want to  custom
                                       <object class="GtkImage">
                                         <property name="visible">True</property>
                                         <property name="can-focus">False</property>
-                                        <property name="icon-name">go-down</property>
+                                        <property name="icon-name">go-down-symbolic</property>
                                       </object>
                                     </child>
                                   </object>
@@ -1006,10 +1012,17 @@ If nothing is set, the default is 1000ms.</property>
                         </child>
                         <child>
                           <object class="GtkButton" id="BtnAddProcess">
-                            <property name="label">Add Mapping</property>
                             <property name="visible">True</property>
                             <property name="can-focus">True</property>
                             <property name="receives-default">True</property>
+                            <property name="tooltip-text" translatable="yes">Add Mapping</property>
+                            <child>
+                              <object class="GtkImage">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="icon-name">list-add-symbolic</property>
+                              </object>
+                            </child>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1117,10 +1130,18 @@ If nothing is set, the default is 1000ms.</property>
                         </child>
                         <child>
                           <object class="GtkButton" id="BtnAddDevice">
-                            <property name="label">Add</property>
                             <property name="visible">True</property>
                             <property name="can-focus">True</property>
                             <property name="receives-default">True</property>
+                            <property name="tooltip-text" translatable="yes">Add new Device</property>
+                            <child>
+                              <object class="GtkImage">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="icon-name">list-add-symbolic</property>
+                                <property name="use-fallback">True</property>
+                              </object>
+                            </child>
                             <style>
                               <class name="noRoundLeft"/>
                             </style>
@@ -1197,10 +1218,18 @@ If nothing is set, the default is 1000ms.</property>
                         </child>
                         <child>
                           <object class="GtkButton" id="BtnAddRestrictor">
-                            <property name="label">Add</property>
                             <property name="visible">True</property>
                             <property name="can-focus">True</property>
                             <property name="receives-default">True</property>
+                            <child>
+                              <object class="GtkImage">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="tooltip-text" translatable="yes">Add new Restrictor/Rotator</property>
+                                <property name="icon-name">list-add-symbolic</property>
+                                <property name="use-fallback">True</property>
+                              </object>
+                            </child>
                             <style>
                               <class name="noRoundLeft"/>
                             </style>
@@ -1318,10 +1347,18 @@ If nothing is set, the default is 1000ms.</property>
                     <property name="spacing">5</property>
                     <child>
                       <object class="GtkButton" id="BtnAddGroup">
-                        <property name="label">Add</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="receives-default">True</property>
+                        <property name="tooltip-text" translatable="yes">Add new Group</property>
+                        <child>
+                          <object class="GtkImage">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="icon-name">list-add-symbolic</property>
+                            <property name="use-fallback">True</property>
+                          </object>
+                        </child>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -1331,20 +1368,24 @@ If nothing is set, the default is 1000ms.</property>
                     </child>
                     <child>
                       <object class="GtkButton" id="BtnAutodetectGroups">
-                        <property name="label">Autodetect</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="receives-default">True</property>
                         <property name="tooltip-text" translatable="yes">Attempts to autodetect Players and other standard groups</property>
+                        <child>
+                          <object class="GtkImage">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="icon-name">system-search-symbolic</property>
+                            <property name="use-fallback">True</property>
+                          </object>
+                        </child>
                       </object>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
                         <property name="position">1</property>
                       </packing>
-                    </child>
-                    <child>
-                      <placeholder/>
                     </child>
                   </object>
                   <packing>
@@ -1393,10 +1434,18 @@ If nothing is set, the default is 1000ms.</property>
                     <property name="spacing">5</property>
                     <child>
                       <object class="GtkButton">
-                        <property name="label">Add</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="receives-default">True</property>
+                        <property name="tooltip-text" translatable="yes">Add new Animation</property>
+                        <child>
+                          <object class="GtkImage">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="icon-name">list-add-symbolic</property>
+                            <property name="use-fallback">True</property>
+                          </object>
+                        </child>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -1406,19 +1455,24 @@ If nothing is set, the default is 1000ms.</property>
                     </child>
                     <child>
                       <object class="GtkButton">
-                        <property name="label">Import</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="receives-default">True</property>
+                        <property name="tooltip-text" translatable="yes">Import Animation</property>
+                        <child>
+                          <object class="GtkImage">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="icon-name">document-open-symbolic</property>
+                            <property name="use-fallback">True</property>
+                          </object>
+                        </child>
                       </object>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
                         <property name="position">1</property>
                       </packing>
-                    </child>
-                    <child>
-                      <placeholder/>
                     </child>
                   </object>
                   <packing>
@@ -1448,26 +1502,90 @@ If nothing is set, the default is 1000ms.</property>
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
+                <property name="spacing">2</property>
                 <child>
-                  <object class="GtkScrolledWindow">
+                  <object class="GtkBox">
                     <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="shadow-type">in</property>
+                    <property name="can-focus">False</property>
+                    <property name="orientation">vertical</property>
+                    <property name="spacing">2</property>
                     <child>
-                      <object class="GtkViewport">
+                      <object class="GtkBox" id="BoxInputNavigation">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
+                        <property name="spacing">5</property>
                         <child>
-                          <object class="GtkFlowBox" id="BoxInputs">
+                          <object class="GtkButton" id="BtnInputHome">
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">True</property>
+                            <property name="tooltip-text">Go to root folder</property>
+                            <child>
+                              <object class="GtkImage">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="icon-name">go-home-symbolic</property>
+                                <property name="use-fallback">True</property>
+                              </object>
+                            </child>
+                            <style>
+                              <class name="NavigationButton"/>
+                            </style>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkBox" id="BoxInputBreadcrumb">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
-                            <property name="valign">start</property>
-                            <property name="homogeneous">True</property>
-                            <property name="selection-mode">none</property>
-                            <property name="activate-on-single-click">False</property>
+                            <style>
+                              <class name="BreadcrumbBox"/>
+                            </style>
+                          </object>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkScrolledWindow">
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="shadow-type">in</property>
+                        <child>
+                          <object class="GtkViewport">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <child>
+                              <object class="GtkFlowBox" id="BoxInputs">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="valign">start</property>
+                                <property name="homogeneous">True</property>
+                                <property name="selection-mode">none</property>
+                                <property name="activate-on-single-click">False</property>
+                              </object>
+                            </child>
                           </object>
                         </child>
                       </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
                     </child>
                   </object>
                   <packing>
@@ -1484,10 +1602,18 @@ If nothing is set, the default is 1000ms.</property>
                     <property name="spacing">5</property>
                     <child>
                       <object class="GtkButton" id="BtnAddInput">
-                        <property name="label">Add</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="receives-default">True</property>
+                        <property name="tooltip-text" translatable="yes">Add new Input</property>
+                        <child>
+                          <object class="GtkImage">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="icon-name">list-add-symbolic</property>
+                            <property name="use-fallback">True</property>
+                          </object>
+                        </child>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -1496,11 +1622,19 @@ If nothing is set, the default is 1000ms.</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkButton" id="BtnImportInput">
-                        <property name="label">Import</property>
+                      <object class="GtkButton" id="BtnNewInputFolder">
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="receives-default">True</property>
+                        <property name="tooltip-text" translatable="yes">Create new Folder</property>
+                        <child>
+                          <object class="GtkImage">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="icon-name">folder-new-symbolic</property>
+                            <property name="use-fallback">True</property>
+                          </object>
+                        </child>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -1509,7 +1643,25 @@ If nothing is set, the default is 1000ms.</property>
                       </packing>
                     </child>
                     <child>
-                      <placeholder/>
+                      <object class="GtkButton" id="BtnImportInput">
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">True</property>
+                        <property name="tooltip-text" translatable="yes">Import Input</property>
+                        <child>
+                          <object class="GtkImage">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="icon-name">document-open-symbolic</property>
+                            <property name="use-fallback">True</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">2</property>
+                      </packing>
                     </child>
                   </object>
                   <packing>
@@ -1638,10 +1790,18 @@ If nothing is set, the default is 1000ms.</property>
                     <property name="spacing">5</property>
                     <child>
                       <object class="GtkButton" id="BtnAddProfile">
-                        <property name="label">Add</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="receives-default">True</property>
+                        <property name="tooltip-text" translatable="yes">Add new Profile</property>
+                        <child>
+                          <object class="GtkImage">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="icon-name">list-add-symbolic</property>
+                            <property name="use-fallback">True</property>
+                          </object>
+                        </child>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -1651,19 +1811,24 @@ If nothing is set, the default is 1000ms.</property>
                     </child>
                     <child>
                       <object class="GtkButton" id="BtnImportProfile">
-                        <property name="label">Import</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="receives-default">True</property>
+                        <property name="tooltip-text" translatable="yes">Import Profile</property>
+                        <child>
+                          <object class="GtkImage">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="icon-name">document-open-symbolic</property>
+                            <property name="use-fallback">True</property>
+                          </object>
+                        </child>
                       </object>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
                         <property name="position">1</property>
                       </packing>
-                    </child>
-                    <child>
-                      <placeholder/>
                     </child>
                   </object>
                   <packing>
@@ -1722,7 +1887,9 @@ If nothing is set, the default is 1000ms.</property>
                   <object class="GtkImage">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
-                    <property name="icon-name">document-open</property>
+                    <property name="icon-name">document-open-symbolic</property>
+                    <property name="use-fallback">True</property>
+                    <property name="icon_size">3</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -1756,7 +1923,9 @@ If nothing is set, the default is 1000ms.</property>
               <object class="GtkImage">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="icon-name">help-about</property>
+                <property name="icon-name">help-about-symbolic</property>
+                <property name="use-fallback">True</property>
+                <property name="icon_size">3</property>
               </object>
             </child>
           </object>
@@ -1775,7 +1944,9 @@ If nothing is set, the default is 1000ms.</property>
               <object class="GtkImage">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="icon-name">preferences-system</property>
+                <property name="icon-name">preferences-system-symbolic</property>
+                <property name="use-fallback">True</property>
+                <property name="icon_size">3</property>
               </object>
             </child>
           </object>
@@ -1786,11 +1957,20 @@ If nothing is set, the default is 1000ms.</property>
         </child>
         <child>
           <object class="GtkButton" id="BtnSaveProject">
-            <property name="label">Save</property>
             <property name="visible">True</property>
             <property name="sensitive">False</property>
             <property name="can-focus">True</property>
             <property name="receives-default">True</property>
+            <property name="tooltip-text" translatable="yes">Save Project</property>
+            <child>
+              <object class="GtkImage">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="icon-name">document-save-symbolic</property>
+                <property name="use-fallback">True</property>
+                <property name="icon_size">3</property>
+              </object>
+            </child>
           </object>
           <packing>
             <property name="pack-type">end</property>
@@ -2171,7 +2351,8 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
                               <object class="GtkImage">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="icon-name">go-up</property>
+                                <property name="icon-name">go-up-symbolic</property>
+                                <property name="use-fallback">True</property>
                               </object>
                             </child>
                             <style>
@@ -2194,7 +2375,8 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
                               <object class="GtkImage">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="icon-name">go-down</property>
+                                <property name="icon-name">go-down-symbolic</property>
+                                <property name="use-fallback">True</property>
                               </object>
                             </child>
                             <style>
@@ -2217,10 +2399,17 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
                     </child>
                     <child>
                       <object class="GtkButton" id="BtnAddGroupElements">
-                        <property name="label">Select Elements</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="receives-default">True</property>
+                        <child>
+                          <object class="GtkImage">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="icon-name">list-add-symbolic</property>
+                            <property name="use-fallback">True</property>
+                          </object>
+                        </child>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -2610,7 +2799,46 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="spacing">10</property>
+                <property name="spacing">5</property>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="halign">end</property>
+                    <property name="margin-start">71</property>
+                    <property name="label">Name</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEntry" id="InputProfileName">
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="tooltip-text" translatable="yes">The name for this input</property>
+                    <property name="input-purpose">number</property>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="spacing">5</property>
                 <property name="homogeneous">True</property>
                 <child>
                   <object class="GtkBox">
@@ -2619,11 +2847,12 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
                     <property name="spacing">5</property>
                     <child>
                       <object class="GtkLabel">
+                        <property name="name">0</property>
+                        <property name="width-request">110</property>
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="halign">end</property>
-                        <property name="margin-end">2</property>
-                        <property name="label">Name</property>
+                        <property name="label">Transition</property>
+                        <property name="xalign">1</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -2632,11 +2861,11 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkEntry" id="InputProfileName">
+                      <object class="GtkComboBoxText" id="ComboSelectProject1">
                         <property name="visible">True</property>
-                        <property name="can-focus">True</property>
-                        <property name="tooltip-text" translatable="yes">The name for this input</property>
-                        <property name="input-purpose">number</property>
+                        <property name="can-focus">False</property>
+                        <property name="tooltip-text">Select a Project</property>
+                        <property name="active-id">Info</property>
                       </object>
                       <packing>
                         <property name="expand">True</property>
@@ -2695,8 +2924,7 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="padding">2</property>
-                <property name="position">0</property>
+                <property name="position">1</property>
               </packing>
             </child>
             <child>
@@ -2718,225 +2946,14 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
                         <property name="can-focus">False</property>
                         <property name="orientation">vertical</property>
                         <child>
-                          <object class="GtkLabel">
-                            <property name="visible">True</property>
-                            <property name="can-focus">False</property>
-                            <property name="label" translatable="yes">Always On Elements</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
                           <object class="GtkBox">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
-                            <property name="spacing">5</property>
-                            <property name="homogeneous">True</property>
-                            <child>
-                              <object class="GtkButton" id="BtnProfilesAddElements">
-                                <property name="label">Select</property>
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                                <property name="receives-default">True</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">0</property>
-                              </packing>
-                            </child>
                             <child>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">1</property>
-                              </packing>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">False</property>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkScrolledWindow">
-                            <property name="visible">True</property>
-                            <property name="can-focus">True</property>
-                            <property name="hscrollbar-policy">never</property>
-                            <property name="shadow-type">in</property>
-                            <child>
-                              <object class="GtkViewport">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <child>
-                                  <object class="GtkFlowBox" id="BoxProfileAlwaysOnElements">
-                                    <property name="visible">True</property>
-                                    <property name="can-focus">False</property>
-                                    <property name="valign">start</property>
-                                    <property name="homogeneous">True</property>
-                                    <property name="max-children-per-line">1</property>
-                                    <property name="selection-mode">none</property>
-                                    <property name="activate-on-single-click">False</property>
-                                  </object>
-                                </child>
-                              </object>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="expand">True</property>
-                            <property name="fill">True</property>
-                            <property name="position">3</property>
-                          </packing>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkBox">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="orientation">vertical</property>
-                        <child>
-                          <object class="GtkLabel">
-                            <property name="visible">True</property>
-                            <property name="can-focus">False</property>
-                            <property name="label" translatable="yes">Always On Groups</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkBox">
-                            <property name="visible">True</property>
-                            <property name="can-focus">False</property>
-                            <property name="spacing">5</property>
-                            <property name="homogeneous">True</property>
-                            <child>
-                              <object class="GtkButton" id="BtnProfilesAddGroups">
-                                <property name="label">Select</property>
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                                <property name="receives-default">True</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">0</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">1</property>
-                              </packing>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkScrolledWindow">
-                            <property name="visible">True</property>
-                            <property name="can-focus">True</property>
-                            <property name="hscrollbar-policy">never</property>
-                            <property name="shadow-type">in</property>
-                            <child>
-                              <object class="GtkViewport">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <child>
-                                  <object class="GtkFlowBox" id="BoxProfileAlwaysOnGroups">
-                                    <property name="visible">True</property>
-                                    <property name="can-focus">False</property>
-                                    <property name="valign">start</property>
-                                    <property name="homogeneous">True</property>
-                                    <property name="max-children-per-line">1</property>
-                                    <property name="selection-mode">none</property>
-                                    <property name="activate-on-single-click">False</property>
-                                  </object>
-                                </child>
-                              </object>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="expand">True</property>
-                            <property name="fill">True</property>
-                            <property name="position">2</property>
-                          </packing>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkBox">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="orientation">vertical</property>
-                    <property name="spacing">5</property>
-                    <property name="homogeneous">True</property>
-                    <child>
-                      <object class="GtkBox">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="orientation">vertical</property>
-                        <child>
-                          <object class="GtkLabel">
-                            <property name="visible">True</property>
-                            <property name="can-focus">False</property>
-                            <property name="label" translatable="yes">Animations</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkBox">
-                            <property name="visible">True</property>
-                            <property name="can-focus">False</property>
-                            <property name="spacing">5</property>
-                            <property name="homogeneous">True</property>
-                            <child>
-                              <object class="GtkButton" id="BtnProfileAddAnimations">
-                                <property name="label">Select</property>
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                                <property name="receives-default">True</property>
+                                <property name="label" translatable="yes">Animations</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -2950,6 +2967,26 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
                                 <property name="can-focus">False</property>
                                 <property name="halign">end</property>
                                 <child>
+                                  <object class="GtkButton" id="BtnProfileAddAnimations">
+                                    <property name="visible">True</property>
+                                    <property name="can-focus">True</property>
+                                    <property name="receives-default">True</property>
+                                    <child>
+                                      <object class="GtkImage">
+                                        <property name="visible">True</property>
+                                        <property name="can-focus">False</property>
+                                        <property name="icon-name">list-add-symbolic</property>
+                                        <property name="use-fallback">True</property>
+                                      </object>
+                                    </child>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
                                   <object class="GtkButton" id="BtnAnimationsUp">
                                     <property name="visible">True</property>
                                     <property name="sensitive">False</property>
@@ -2959,7 +2996,8 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
                                       <object class="GtkImage">
                                         <property name="visible">True</property>
                                         <property name="can-focus">False</property>
-                                        <property name="icon-name">go-up</property>
+                                        <property name="icon-name">go-up-symbolic</property>
+                                        <property name="use-fallback">True</property>
                                       </object>
                                     </child>
                                     <style>
@@ -2982,7 +3020,8 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
                                       <object class="GtkImage">
                                         <property name="visible">True</property>
                                         <property name="can-focus">False</property>
-                                        <property name="icon-name">go-down</property>
+                                        <property name="icon-name">go-down-symbolic</property>
+                                        <property name="use-fallback">True</property>
                                       </object>
                                     </child>
                                     <style>
@@ -3000,14 +3039,14 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
                                 <property name="expand">False</property>
                                 <property name="fill">True</property>
                                 <property name="pack-type">end</property>
-                                <property name="position">1</property>
+                                <property name="position">2</property>
                               </packing>
                             </child>
                           </object>
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">1</property>
+                            <property name="position">0</property>
                           </packing>
                         </child>
                         <child>
@@ -3053,29 +3092,14 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
                         <property name="can-focus">False</property>
                         <property name="orientation">vertical</property>
                         <child>
-                          <object class="GtkLabel">
-                            <property name="visible">True</property>
-                            <property name="can-focus">False</property>
-                            <property name="label" translatable="yes">Inputs</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
                           <object class="GtkBox">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
-                            <property name="spacing">5</property>
-                            <property name="homogeneous">True</property>
                             <child>
-                              <object class="GtkButton" id="BtnProfileAddInputs">
-                                <property name="label">Select</property>
+                              <object class="GtkLabel">
                                 <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                                <property name="receives-default">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Inputs</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -3084,13 +3108,23 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkLabel">
+                              <object class="GtkButton" id="BtnProfileAddInputs">
                                 <property name="visible">True</property>
-                                <property name="can-focus">False</property>
+                                <property name="can-focus">True</property>
+                                <property name="receives-default">True</property>
+                                <child>
+                                  <object class="GtkImage">
+                                    <property name="visible">True</property>
+                                    <property name="can-focus">False</property>
+                                    <property name="icon-name">list-add-symbolic</property>
+                                    <property name="use-fallback">True</property>
+                                  </object>
+                                </child>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
                                 <property name="fill">True</property>
+                                <property name="pack-type">end</property>
                                 <property name="position">1</property>
                               </packing>
                             </child>
@@ -3098,7 +3132,7 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">1</property>
+                            <property name="position">0</property>
                           </packing>
                         </child>
                         <child>
@@ -3142,7 +3176,7 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">1</property>
+                    <property name="position">0</property>
                   </packing>
                 </child>
                 <child>
@@ -3158,29 +3192,14 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
                         <property name="can-focus">False</property>
                         <property name="orientation">vertical</property>
                         <child>
-                          <object class="GtkLabel">
-                            <property name="visible">True</property>
-                            <property name="can-focus">False</property>
-                            <property name="label" translatable="yes">Start Transitions</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
                           <object class="GtkBox">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
-                            <property name="spacing">5</property>
-                            <property name="homogeneous">True</property>
                             <child>
-                              <object class="GtkButton" id="BtnAddStartTransitions">
-                                <property name="label">Select</property>
+                              <object class="GtkLabel">
                                 <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                                <property name="receives-default">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Always On Elements</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -3189,69 +3208,31 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkBox">
+                              <object class="GtkButton" id="BtnProfilesAddElements">
                                 <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="halign">end</property>
+                                <property name="can-focus">True</property>
+                                <property name="receives-default">True</property>
                                 <child>
-                                  <object class="GtkButton" id="BtnStartTransitionsUp">
+                                  <object class="GtkImage">
                                     <property name="visible">True</property>
-                                    <property name="sensitive">False</property>
-                                    <property name="can-focus">True</property>
-                                    <property name="receives-default">True</property>
-                                    <child>
-                                      <object class="GtkImage">
-                                        <property name="visible">True</property>
-                                        <property name="can-focus">False</property>
-                                        <property name="icon-name">go-up</property>
-                                      </object>
-                                    </child>
-                                    <style>
-                                      <class name="noRoundRight"/>
-                                    </style>
+                                    <property name="can-focus">False</property>
+                                    <property name="icon-name">list-add-symbolic</property>
+                                    <property name="use-fallback">True</property>
                                   </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">1</property>
-                                  </packing>
-                                </child>
-                                <child>
-                                  <object class="GtkButton" id="BtnStartTransitionsDn">
-                                    <property name="visible">True</property>
-                                    <property name="sensitive">False</property>
-                                    <property name="can-focus">True</property>
-                                    <property name="receives-default">True</property>
-                                    <child>
-                                      <object class="GtkImage">
-                                        <property name="visible">True</property>
-                                        <property name="can-focus">False</property>
-                                        <property name="icon-name">go-down</property>
-                                      </object>
-                                    </child>
-                                    <style>
-                                      <class name="noRoundLeft"/>
-                                    </style>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">2</property>
-                                  </packing>
                                 </child>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
                                 <property name="fill">True</property>
                                 <property name="pack-type">end</property>
-                                <property name="position">2</property>
+                                <property name="position">1</property>
                               </packing>
                             </child>
                           </object>
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">1</property>
+                            <property name="position">0</property>
                           </packing>
                         </child>
                         <child>
@@ -3265,7 +3246,7 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
                                 <child>
-                                  <object class="GtkFlowBox" id="BoxProfileStartTransitions">
+                                  <object class="GtkFlowBox" id="BoxProfileAlwaysOnElements">
                                     <property name="visible">True</property>
                                     <property name="can-focus">False</property>
                                     <property name="valign">start</property>
@@ -3281,7 +3262,7 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
                           <packing>
                             <property name="expand">True</property>
                             <property name="fill">True</property>
-                            <property name="position">2</property>
+                            <property name="position">3</property>
                           </packing>
                         </child>
                       </object>
@@ -3297,100 +3278,47 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
                         <property name="can-focus">False</property>
                         <property name="orientation">vertical</property>
                         <child>
-                          <object class="GtkLabel">
-                            <property name="visible">True</property>
-                            <property name="can-focus">False</property>
-                            <property name="label" translatable="yes">End Transitions</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
                           <object class="GtkBox">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
-                            <property name="spacing">5</property>
-                            <property name="homogeneous">True</property>
                             <child>
-                              <object class="GtkButton" id="BtnAddEndTransitions">
-                                <property name="label">Select</property>
+                              <object class="GtkLabel">
                                 <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                                <property name="receives-default">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Always On Groups</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
                                 <property name="fill">True</property>
-                                <property name="position">1</property>
+                                <property name="position">0</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkBox">
+                              <object class="GtkButton" id="BtnProfilesAddGroups">
                                 <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="halign">end</property>
+                                <property name="can-focus">True</property>
+                                <property name="receives-default">True</property>
                                 <child>
-                                  <object class="GtkButton" id="BtnEndTransitionsUp">
+                                  <object class="GtkImage">
                                     <property name="visible">True</property>
-                                    <property name="sensitive">False</property>
-                                    <property name="can-focus">True</property>
-                                    <property name="receives-default">True</property>
-                                    <child>
-                                      <object class="GtkImage">
-                                        <property name="visible">True</property>
-                                        <property name="can-focus">False</property>
-                                        <property name="icon-name">go-up</property>
-                                      </object>
-                                    </child>
-                                    <style>
-                                      <class name="noRoundRight"/>
-                                    </style>
+                                    <property name="can-focus">False</property>
+                                    <property name="icon-name">list-add-symbolic</property>
+                                    <property name="use-fallback">True</property>
                                   </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">1</property>
-                                  </packing>
-                                </child>
-                                <child>
-                                  <object class="GtkButton" id="BtnEndTransitionsDn">
-                                    <property name="visible">True</property>
-                                    <property name="sensitive">False</property>
-                                    <property name="can-focus">True</property>
-                                    <property name="receives-default">True</property>
-                                    <child>
-                                      <object class="GtkImage">
-                                        <property name="visible">True</property>
-                                        <property name="can-focus">False</property>
-                                        <property name="icon-name">go-down</property>
-                                      </object>
-                                    </child>
-                                    <style>
-                                      <class name="noRoundLeft"/>
-                                    </style>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">2</property>
-                                  </packing>
                                 </child>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
                                 <property name="fill">True</property>
                                 <property name="pack-type">end</property>
-                                <property name="position">2</property>
+                                <property name="position">1</property>
                               </packing>
                             </child>
                           </object>
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">1</property>
+                            <property name="position">0</property>
                           </packing>
                         </child>
                         <child>
@@ -3404,7 +3332,7 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
                                 <child>
-                                  <object class="GtkFlowBox" id="BoxProfileEndTransitions">
+                                  <object class="GtkFlowBox" id="BoxProfileAlwaysOnGroups">
                                     <property name="visible">True</property>
                                     <property name="can-focus">False</property>
                                     <property name="valign">start</property>
@@ -3434,7 +3362,7 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">2</property>
+                    <property name="position">1</property>
                   </packing>
                 </child>
               </object>
@@ -3442,7 +3370,7 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
                 <property name="expand">True</property>
                 <property name="fill">True</property>
                 <property name="padding">2</property>
-                <property name="position">1</property>
+                <property name="position">2</property>
               </packing>
             </child>
           </object>
@@ -4107,9 +4035,6 @@ Autodetected if ledspicer is installed</property>
             <property name="position">0</property>
           </packing>
         </child>
-        <child>
-          <placeholder/>
-        </child>
       </object>
     </child>
     <action-widgets>
@@ -4339,11 +4264,18 @@ You can find the devices ID using inputseeker from the terminal, or by listing t
                     </child>
                     <child>
                       <object class="GtkButton" id="BtnAddInputListener">
-                        <property name="label">Add</property>
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can-focus">True</property>
                         <property name="receives-default">True</property>
+                        <child>
+                          <object class="GtkImage">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="icon-name">list-add-symbolic</property>
+                            <property name="use-fallback">True</property>
+                          </object>
+                        </child>
                         <style>
                           <class name="noRoundLeft"/>
                         </style>
@@ -4424,11 +4356,19 @@ You can find the devices ID using inputseeker from the terminal, or by listing t
                     </child>
                     <child>
                       <object class="GtkButton" id="BtnAddInputMap">
-                        <property name="label">Add</property>
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can-focus">True</property>
                         <property name="receives-default">True</property>
+                        <property name="tooltip-text" translatable="yes">Create Mapping</property>
+                        <child>
+                          <object class="GtkImage">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="icon-name">list-add-symbolic</property>
+                            <property name="use-fallback">True</property>
+                          </object>
+                        </child>
                         <style>
                           <class name="noRoundLeft"/>
                         </style>
@@ -4514,11 +4454,19 @@ You can find the devices ID using inputseeker from the terminal, or by listing t
                         <property name="spacing">5</property>
                         <child>
                           <object class="GtkButton" id="BtnCreateInputLinkedMap">
-                            <property name="label">Create link</property>
                             <property name="visible">True</property>
                             <property name="sensitive">False</property>
                             <property name="can-focus">True</property>
                             <property name="receives-default">True</property>
+                            <property name="tooltip-text" translatable="yes">Link selected Mappings</property>
+                            <child>
+                              <object class="GtkImage">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="icon-name">edit-select-symbolic</property>
+                                <property name="use-fallback">True</property>
+                              </object>
+                            </child>
                             <style>
                               <class name="noRoundLeft"/>
                             </style>
@@ -4599,12 +4547,12 @@ You can find the devices ID using inputseeker from the terminal, or by listing t
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="spacing">5</property>
+                <property name="homogeneous">True</property>
                 <child>
                   <object class="GtkBox">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="spacing">5</property>
-                    <property name="homogeneous">True</property>
                     <child>
                       <object class="GtkLabel">
                         <property name="visible">True</property>
@@ -4827,7 +4775,6 @@ Multi will blink the next start</property>
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="spacing">5</property>
-                    <property name="homogeneous">True</property>
                     <child>
                       <object class="GtkLabel">
                         <property name="visible">True</property>
@@ -4864,7 +4811,6 @@ Multi will blink the next start</property>
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="spacing">5</property>
-                    <property name="homogeneous">True</property>
                     <child>
                       <object class="GtkLabel">
                         <property name="visible">True</property>
@@ -5033,11 +4979,18 @@ You can find the devices ID using inputseeker from the terminal, or by listing t
                     </child>
                     <child>
                       <object class="GtkButton" id="BtnAddInputListenerMap">
-                        <property name="label">Add</property>
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can-focus">True</property>
                         <property name="receives-default">True</property>
+                        <child>
+                          <object class="GtkImage">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="icon-name">list-add-symbolic</property>
+                            <property name="use-fallback">True</property>
+                          </object>
+                        </child>
                         <style>
                           <class name="noRoundLeft"/>
                         </style>
@@ -5450,7 +5403,7 @@ you can set the same trigger multiple time on different maps but only the last o
                     <property name="sensitive">False</property>
                     <property name="can-focus">False</property>
                     <property name="margin-end">5</property>
-                    <property name="label">Order the mappings, top (first) -&gt; down (last)</property>
+                    <property name="label">Order mappings, top (first) -&gt; down (last)</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -5468,7 +5421,8 @@ you can set the same trigger multiple time on different maps but only the last o
                       <object class="GtkImage">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="icon-name">go-up</property>
+                        <property name="icon-name">go-up-symbolic</property>
+                        <property name="use-fallback">True</property>
                       </object>
                     </child>
                     <style>
@@ -5491,7 +5445,8 @@ you can set the same trigger multiple time on different maps but only the last o
                       <object class="GtkImage">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="icon-name">go-down</property>
+                        <property name="icon-name">go-down-symbolic</property>
+                        <property name="use-fallback">True</property>
                       </object>
                     </child>
                     <style>
@@ -5932,18 +5887,6 @@ If you have multiple serial devices, avoid using autodetect.</property>
                 <property name="can-focus">False</property>
                 <property name="spacing">5</property>
                 <child>
-                  <object class="GtkLabel">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="label">Elements</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
                   <object class="GtkBox">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
@@ -5958,7 +5901,8 @@ If you have multiple serial devices, avoid using autodetect.</property>
                           <object class="GtkImage">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
-                            <property name="icon-name">go-up</property>
+                            <property name="icon-name">go-up-symbolic</property>
+                            <property name="use-fallback">True</property>
                           </object>
                         </child>
                         <style>
@@ -5981,7 +5925,8 @@ If you have multiple serial devices, avoid using autodetect.</property>
                           <object class="GtkImage">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
-                            <property name="icon-name">go-down</property>
+                            <property name="icon-name">go-down-symbolic</property>
+                            <property name="use-fallback">True</property>
                           </object>
                         </child>
                         <style>
@@ -5999,16 +5944,24 @@ If you have multiple serial devices, avoid using autodetect.</property>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
                     <property name="pack-type">end</property>
-                    <property name="position">1</property>
+                    <property name="position">0</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="BtnAddElement">
-                    <property name="label">Add</property>
+                  <object class="GtkButton" id="BtnAddMultipleElement">
                     <property name="visible">True</property>
                     <property name="sensitive">False</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">True</property>
+                    <property name="tooltip-text" translatable="yes">Create elements from preset</property>
+                    <child>
+                      <object class="GtkImage">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="icon-name">applications-utilities-symbolic</property>
+                        <property name="use-fallback">True</property>
+                      </object>
+                    </child>
                     <style>
                       <class name="noRoundLeft"/>
                     </style>
@@ -6017,6 +5970,44 @@ If you have multiple serial devices, avoid using autodetect.</property>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
                     <property name="pack-type">end</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="BtnAddElement">
+                    <property name="visible">True</property>
+                    <property name="sensitive">False</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
+                    <property name="tooltip-text" translatable="yes">Add new Element</property>
+                    <child>
+                      <object class="GtkImage">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="icon-name">list-add-symbolic</property>
+                        <property name="use-fallback">True</property>
+                      </object>
+                    </child>
+                    <style>
+                      <class name="noRoundLeft"/>
+                    </style>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="pack-type">end</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label">Elements</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
                     <property name="position">2</property>
                   </packing>
                 </child>
@@ -6839,50 +6830,12 @@ Default is 50ms</property>
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="spacing">5</property>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="halign">end</property>
-                <property name="margin-start">4</property>
-                <property name="label">Default Color</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="BtnDefaultColor">
-                <property name="label">Default Color</property>
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">True</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">5</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkBox">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
             <property name="homogeneous">True</property>
             <child>
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="spacing">5</property>
+                <property name="spacing">2</property>
                 <child>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
@@ -6931,7 +6884,45 @@ Default is 50ms</property>
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="spacing">5</property>
+                <property name="spacing">2</property>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="halign">end</property>
+                    <property name="label">Default Color</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="BtnDefaultColor">
+                    <property name="label">Default Color</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="spacing">2</property>
                 <child>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
@@ -6967,7 +6958,7 @@ Default is 50ms</property>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">1</property>
+                <property name="position">2</property>
               </packing>
             </child>
           </object>
@@ -7825,10 +7816,18 @@ If you have multiple serial devices, avoid using autodetect.</property>
                     </child>
                     <child>
                       <object class="GtkButton" id="BtnAddRestrictorMap">
-                        <property name="label">Add</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="receives-default">True</property>
+                        <property name="tooltip-text" translatable="yes">Add new Player Mapping</property>
+                        <child>
+                          <object class="GtkImage">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="icon-name">list-add-symbolic</property>
+                            <property name="use-fallback">True</property>
+                          </object>
+                        </child>
                         <style>
                           <class name="noRoundLeft"/>
                         </style>

@@ -509,7 +509,6 @@ string Defaults::extractName(const string& fullFileName, const string& rootPath)
 	return dir + "/" + filename;
 }
 
-// Defaults.cpp
 string Defaults::capToDirectory(const string& fullFileName, const string& baseDir) {
 	string
 		filename(Glib::path_get_basename(fullFileName)),

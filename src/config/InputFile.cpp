@@ -29,11 +29,12 @@ InputFile::InputFile(const string& inputFile) : ProjectFile(inputFile, "Input", 
 	string errors;
 
 	StringUMap input(rootInfo.attributes);
-	// filename available via getFilename()
+
+	input[FILENAME] = pathFilename;
 
 	tinyxml2::XMLElement* mapsNode = getRoot()->FirstChildElement("maps");
 	if (not mapsNode) {
-		errors += "Missing maps section for input " + filename + '\n';
+		errors += "Missing maps section for input " + pathFilename + '\n';
 	}
 	else {
 		StringUMapVector mapsSources;
@@ -42,11 +43,11 @@ InputFile::InputFile(const string& inputFile) : ProjectFile(inputFile, "Input", 
 			mapsSources.push_back(processNode(mapsNode));
 			errors += processMaps(
 				mapsNode,
-				Defaults::createCommonUniqueId({filename, std::to_string(idx), COLLECTION_INPUT_MAPS})
+				Defaults::createCommonUniqueId({pathFilename, std::to_string(idx), COLLECTION_INPUT_MAPS})
 			);
 		}
 
-		extractedData.emplace(Defaults::createCommonUniqueId({filename, COLLECTION_INPUT_EVENTS}), std::move(mapsSources));
+		extractedData.emplace(Defaults::createCommonUniqueId({pathFilename, COLLECTION_INPUT_EVENTS}), std::move(mapsSources));
 	}
 
 	extractedData.emplace(COLLECTION_INPUT, StringUMapVector{input});
