@@ -43,4 +43,4 @@ public:
 	const string getCssClass() const override;
 };
 
-} /* namespace */
+} // namespace

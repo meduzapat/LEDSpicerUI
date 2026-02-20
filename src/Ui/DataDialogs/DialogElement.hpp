@@ -150,4 +150,4 @@ protected:
 	void onSwitchPage(Gtk::Widget*, uint pageNum);
 };
 
-} /* namespace */
+} // namespace

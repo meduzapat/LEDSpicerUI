@@ -95,4 +95,4 @@ protected:
 	void markRestrictorUsed();
 };
 
-} /* namespace */
+} // namespace

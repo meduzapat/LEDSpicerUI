@@ -51,4 +51,4 @@ protected:
 	const string getPrimaryKey() const override;
 };
 
-} /* namespace */
+} // namespace

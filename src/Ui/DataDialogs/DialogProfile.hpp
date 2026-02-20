@@ -150,4 +150,4 @@ protected:
 
 };
 
-} /* namespace */
+} // namespace

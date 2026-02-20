@@ -64,4 +64,4 @@ protected:
 
 };
 
-} /* namespace */
+} // namespace

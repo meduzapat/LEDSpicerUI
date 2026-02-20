@@ -85,5 +85,5 @@ protected:
 	vector<Element*> stripChildren;
 };
 
-} /* namespace */
+} // namespace
 

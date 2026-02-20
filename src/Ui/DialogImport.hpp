@@ -55,4 +55,4 @@ protected:
 	void setConfigBox(Gtk::Box* box);
 };
 
-} /* namespace */
+} // namespace

@@ -580,3 +580,11 @@ string& Defaults::getProjectsDir() {
 void Defaults::setProjectsDir(const string& dir) {
 	projectDir = dir;
 }
+
+Defaults::Mode Defaults::getMode() {
+	return currentMode;
+}
+
+void Defaults::setMode(Mode mode) {
+	currentMode = mode;
+}

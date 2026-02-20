@@ -78,4 +78,4 @@ protected:
 
 };
 
-} /* namespace */
+} // namespace

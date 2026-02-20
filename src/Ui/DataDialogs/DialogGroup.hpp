@@ -78,4 +78,4 @@ protected:
 	Storage::Data* createData(StringUMap& rawData) override;
 };
 
-} /* namespace */
+} // namespace

@@ -174,4 +174,4 @@ protected:
 	void createSelectableItem(Storage::Data* data);
 };
 
-} /* namespace */
+} // namespace

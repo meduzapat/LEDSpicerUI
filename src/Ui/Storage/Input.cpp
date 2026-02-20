@@ -43,11 +43,13 @@ Input::Input(StringUMap& data) :
 	// link linked maps to maps using the trigger.
 	//CollectionHandler::getInstance(COLLECTION_INPUT_EVENTS)->registerEndpoint(&linkedMaps);
 	// this values are not used as data, only for filename and path.
-	auto parts(Defaults::explode(data.at(FILENAME), '/'));
-	setProperty(FILENAME, parts.back());
-	parts.pop_back();
-	setProperty(PATH, Defaults::implode(parts, '/'));
-	data.erase(FILENAME);
+	if (data.count(FILENAME)) {
+		auto parts(Defaults::explode(data.at(FILENAME), '/'));
+		setProperty(FILENAME, parts.back());
+		parts.pop_back();
+		setProperty(PATH, Defaults::implode(parts, '/'));
+		data.erase(FILENAME);
+	}
 }
 
 Input::~Input() {

@@ -221,4 +221,4 @@ protected:
 
 using StringDataMap = std::map<string, Data*>;
 
-} /* namespace */
+} // namespace

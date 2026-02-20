@@ -262,4 +262,4 @@ protected:
 	virtual void onCloneClicked(Storage::BoxButton& boxButton);
 };
 
-} /* namespace */
+} // namespace

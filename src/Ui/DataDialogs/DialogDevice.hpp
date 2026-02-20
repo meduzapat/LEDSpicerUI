@@ -93,4 +93,4 @@ protected:
 	void markDevicesUsed();
 };
 
-} /* namespace */
+} // namespace

@@ -97,4 +97,4 @@ protected:
 	virtual void afterDeleteConfirmation(Storage::BoxButton& boxButton);
 };
 
-} /* namespace */
+} // namespace

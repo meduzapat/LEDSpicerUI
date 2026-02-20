@@ -100,4 +100,4 @@ protected:
 	static int handleDialog(const string& message, Gtk::MessageDialog* dialog, Gtk::Window* transient);
 };
 
-} /* namespace LEDSpicerUI */
+} // namespace

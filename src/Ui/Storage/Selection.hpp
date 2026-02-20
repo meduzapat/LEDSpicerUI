@@ -54,4 +54,4 @@ protected:
 	Data* data;
 };
 
-} /* namespace */
+} // namespace

@@ -47,8 +47,8 @@ DialogForm(obj, builder)
 		* btnAdd  = nullptr,
 		// located in Dialog Listener
 		* btnAdd2 = nullptr;
-	builder->get_widget("BtnAddInputMap",         btnAdd);
-	builder->get_widget("BtnAddInputListenerMap", btnAdd2);
+	builder->get_widget("BtnAddInputMap",       btnAdd);
+	builder->get_widget("BtnAddInputSourceMap", btnAdd2);
 	setSignalAdd(btnAdd);
 	setSignalAdd(btnAdd2);
 	setSignalApply();

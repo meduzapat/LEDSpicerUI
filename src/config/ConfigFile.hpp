@@ -103,4 +103,4 @@ protected:
 	const string processGroups();
 };
 
-} /* namespace LEDSpicerUI */
+} // namespace

@@ -99,4 +99,4 @@ protected:
 	Gtk::Label* label;
 };
 
-} /* namespace */
+} // namespace

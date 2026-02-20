@@ -55,4 +55,4 @@ protected:
 
 };
 
-} /* namespace */
+} // namespace

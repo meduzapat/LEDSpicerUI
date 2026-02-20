@@ -20,32 +20,33 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DialogForm.hpp"
-#include "Storage/Input.hpp"
-#include "DialogImport.hpp"
 #include "config/InputFile.hpp"
+#include "Storage/Input.hpp"
+#include "DialogForm.hpp"
+#include "DialogImport.hpp"
+#include "DialogInputSource.hpp"
 
 #pragma once
 
 namespace LEDSpicerUI::Ui::DataDialogs {
 
 /**
- * LEDSpicerUI::Ui::DialogInput
- * Dialog to create and edit Inputs.
+ * LEDSpicerUI::Ui::DataDialogs::DialogInput
+ * Dialog to create and edit Input plugins.
  */
-class DialogInput: public DialogForm {
+class DialogInput : public DialogForm {
 
 	friend class Gtk::Builder;
 
 public:
 
-	static constexpr const char* BOX_INPUTS    = "BoxInputs";
+	static constexpr const char* BOX_INPUTS = "BoxInputs";
 
 	DialogInput() = delete;
 
 	virtual ~DialogInput() = default;
 
-	static void initialize(Glib::RefPtr<Gtk::Builder> const &builder);
+	static void initialize(Glib::RefPtr<Gtk::Builder> const& builder);
 	static DialogInput* getInstance();
 	void load(XMLHelper* values) override;
 	Storage::CollectionHandler* getCollectionHandler() const override;
@@ -74,15 +75,13 @@ protected:
 	Gtk::Button*     btnAddInputMap   = nullptr;
 	Gtk::Box
 		* boxLinkedElementsAndGroupsBox = nullptr,
-		* boxEventListeners             = nullptr,
+		* boxInputSourcesBox               = nullptr,
 		* boxInputCreditsSettings       = nullptr;
 
 	/// The box to select mappings.
 	OrdenableFlowBox
-		* boxInputMap        = nullptr,
+		* boxInputMaps        = nullptr,
 		* boxInputLinkedMaps = nullptr;
-
-	Gtk::FileChooserButton* fileInputNamePath = nullptr;
 
 	string currentPath;
 
@@ -96,4 +95,4 @@ protected:
 
 };
 
-} /* namespace */
+} // namespace

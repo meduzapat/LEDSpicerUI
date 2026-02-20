@@ -82,7 +82,7 @@ add_executable(ledspicerui
 	src/Ui/DataDialogs/DialogDevice.cpp
 	src/Ui/DataDialogs/DialogRestrictorMap.cpp
 	src/Ui/DataDialogs/DialogRestrictor.cpp
-	src/Ui/DataDialogs/DialogInputListener.cpp
+	src/Ui/DataDialogs/DialogInputSource.cpp
 	src/Ui/DataDialogs/DialogInputLinkMaps.cpp
 	src/Ui/DataDialogs/DialogInputMap.cpp
 	src/Ui/DataDialogs/DialogInput.cpp

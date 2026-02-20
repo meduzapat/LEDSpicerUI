@@ -167,4 +167,4 @@ protected:
 	void refreshComboBoxes();
 };
 
-} /* namespace */
+} // namespace

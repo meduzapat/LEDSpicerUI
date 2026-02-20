@@ -47,4 +47,4 @@ public:
 
 };
 
-} /* namespace */
+} // namespace

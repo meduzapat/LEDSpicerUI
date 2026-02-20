@@ -135,4 +135,4 @@ protected:
 
 };
 
-} /* namespace */
+} // namespace

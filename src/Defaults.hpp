@@ -186,7 +186,7 @@ constexpr const char* TYPE_ANIMATION      = "animation";
 constexpr const char* TYPE_PROFILE        = "profile";
 
 
-} /* namespace */
+} // namespace
 
 using namespace Constants;
 
@@ -202,6 +202,12 @@ public:
 	enum class Ways : uint8_t {invalid, w2, w2v, w4, w4x, w8, w16, w49, analog, mouse, rotary8, rotary12};
 
 	enum class Connection : uint8_t {NONE, USB, SERIAL};
+
+	enum class Mode {
+		Local,     /// LEDSpicerd daemon detected correctly but iterations are OFF.
+		Iterative, /// LEDSpicerd daemon detected and Iterative mode is enabled.
+		Portable   /// LEDSpicerd daemon not set or not detected.
+	};
 
 	/// Import flags, use IMPORT_ALL for all configurations
 	enum ImportFlags : uint8_t {
@@ -564,6 +570,18 @@ public:
 	 */
 	static string& getProjectsDir();
 
+	/**
+	 * Gets the current application mode.
+	 * @return Current mode.
+	 */
+	static Mode getMode();
+
+	/**
+	 * Sets the current application mode.
+	 * @param mode New mode to apply.
+	 */
+	static void setMode(Mode mode);
+
 protected:
 
 	/// Keeps track of the number of tabulations for XML files.
@@ -572,6 +590,9 @@ protected:
 	/// Dirty Flag
 	inline static bool dirty = false;
 	inline static bool ignoreChanges = false;
+
+	/// Current application mode.
+	inline static Mode currentMode = Mode::Portable;
 
 	/// Pointer to the header.
 	inline static Gtk::HeaderBar* header = nullptr;
@@ -582,4 +603,4 @@ protected:
 
 };
 
-} /* namespace */
+} // namespace

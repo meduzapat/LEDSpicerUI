@@ -154,4 +154,4 @@ protected:
 
 };
 
-} /* namespace */
+} // namespace

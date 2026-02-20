@@ -181,7 +181,6 @@ void DialogSettings::setBinaryPath(const string& binaryPath, bool setFileBinaryS
 		processBinary();
 		if (setFileBinarySelector) fileBinary->set_filename(binaryPath);
 	}
-//	updateBinaryStatusLabel(binaryPath);
 }
 
 void DialogSettings::updateBinaryStatusLabel(const string& version) {
@@ -192,10 +191,12 @@ void DialogSettings::updateBinaryStatusLabel(const string& version) {
 		labelBinaryStatus->set_text("Status: ❌ Not detected");
 		labelBinaryPath->set_text("N/A");
 		labelConfigPath->set_text("Will be saved inside the project directory");
+		Defaults::setMode(Defaults::Mode::Portable);
 	}
 	else {
 		labelBinaryStatus->set_text("Status: ✅ Detected (" + version + ")");
 		labelBinaryPath->set_text(binaryPath);
+		Defaults::setMode(Defaults::Mode::Local);
 	}
 }
 
