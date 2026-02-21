@@ -4,7 +4,7 @@
  * @since     Sep 30, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -26,7 +26,7 @@ using namespace LEDSpicerUI::Ui::DataDialogs;
 
 DialogInputMap* DialogInputMap::instance = nullptr;
 
-void DialogInputMap::initialize(Glib::RefPtr<Gtk::Builder> const &builder) {
+void DialogInputMap::initialize(Glib::RefPtr<Gtk::Builder> const& builder) {
 	if (not instance) {
 		builder->get_widget_derived("DialogInputMap", instance);
 	}
@@ -37,15 +37,19 @@ DialogInputMap* DialogInputMap::getInstance() {
 }
 
 DialogInputMap::DialogInputMap(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
-DialogForm(obj, builder)
+	DialogForm(obj, builder)
 {
-	// Connect Input map
-	builder->get_widget_derived("BoxInputMap", box);
-	builder->get_widget("BtnApplyInputMap",    btnApply);
+	builder->get_widget_derived("BoxInputSourceMaps", box);
+	builder->get_widget("BtnApplyInputMap",           btnApply);
+	builder->get_widget("BtnInputMapDefaultColor",    inputMapDefaultColor);
+	builder->get_widget("ComboBoxInputMapFilter",     comboBoxInputMapFilter);
+	builder->get_widget("ComboBoxInputMapElement",    comboBoxInputMapElement);
+	builder->get_widget("ComboBoxInputMapGroup",      comboBoxInputMapGroup);
+	builder->get_widget("InputInputMapTrigger",       inputInputMapTrigger);
+	builder->get_widget("StackElementAndGroup",       stackElementAndGroup);
+
 	Gtk::Button
-		// located in Dialog Input
 		* btnAdd  = nullptr,
-		// located in Dialog Listener
 		* btnAdd2 = nullptr;
 	builder->get_widget("BtnAddInputMap",       btnAdd);
 	builder->get_widget("BtnAddInputSourceMap", btnAdd2);
@@ -53,42 +57,36 @@ DialogForm(obj, builder)
 	setSignalAdd(btnAdd2);
 	setSignalApply();
 
-	// Color and Filter.
-	builder->get_widget("BtnInputMapDefaultColor", inputMapDefaultColor);
-	builder->get_widget("ComboBoxInputMapFilter",  comboBoxInputMapFilter);
-	// Others
-	builder->get_widget("ComboBoxInputMapElement", comboBoxInputMapElement);
-	builder->get_widget("ComboBoxInputMapGroup",   comboBoxInputMapGroup);
-	builder->get_widget("InputInputMapTrigger",    inputInputMapTrigger);
-	builder->get_widget("StackElementAndGroup",    stackElementAndGroup);
-
 	// Activate color button.
 	DialogColors::getInstance()->activateColorButton(inputMapDefaultColor);
 
-	// When the page change on the stack remove other selection.
+	// When the stack page changes, refresh the relevant combo and clear the other.
 	stackElementAndGroup->connect_property_changed("visible-child", [&]() {
 		if (stackElementAndGroup->get_visible_child_name() == "InputTypeElement") {
-			mapElementCollectionHandler->refreshComboBox(comboBoxInputMapElement);
+			Storage::CollectionHandler::getInstance(COLLECTION_ELEMENT)->refreshComboBox(comboBoxInputMapElement);
 			comboBoxInputMapGroup->set_active(-1);
 		}
 		else {
-			mapGroupCollectionHandler->refreshComboBox(comboBoxInputMapGroup);
+			Storage::CollectionHandler::getInstance(COLLECTION_GROUP)->refreshComboBox(comboBoxInputMapGroup);
 			comboBoxInputMapElement->set_active(-1);
 		}
 	});
 }
 
 void DialogInputMap::load(XMLHelper* values) {
-	createItems(values->getData(Defaults::createCommonUniqueId({ownerData->createUniqueId(), COLLECTION_INPUT_MAPS})), values);
+	createItems(
+		values->getData(Defaults::createCommonUniqueId({ownerData->createUniqueId(), COLLECTION_INPUT_MAPS})),
+		values
+	);
 }
 
 LEDSpicerUI::Ui::Storage::CollectionHandler* DialogInputMap::getCollectionHandler() const {
-	return LEDSpicerUI::Ui::Storage::CollectionHandler::getInstance(COLLECTION_INPUT_MAPS);
+	return Storage::CollectionHandler::getInstance(COLLECTION_INPUT_MAPS);
 }
 
 void DialogInputMap::clearForm() {
-	mapElementCollectionHandler->refreshComboBox(comboBoxInputMapElement);
-	mapGroupCollectionHandler->refreshComboBox(comboBoxInputMapGroup);
+	Storage::CollectionHandler::getInstance(COLLECTION_ELEMENT)->refreshComboBox(comboBoxInputMapElement);
+	Storage::CollectionHandler::getInstance(COLLECTION_GROUP)->refreshComboBox(comboBoxInputMapGroup);
 	comboBoxInputMapElement->set_active(-1);
 	comboBoxInputMapGroup->set_active(-1);
 	inputInputMapTrigger->set_text("");
@@ -99,11 +97,11 @@ void DialogInputMap::clearForm() {
 void DialogInputMap::isValid() const {
 	if (stackElementAndGroup->get_visible_child_name() == "InputTypeElement") {
 		if (comboBoxInputMapElement->get_active_text().empty())
-			throw Message("Enter a valid element name.");
+			throw Message("Select a valid element.");
 	}
 	else {
 		if (comboBoxInputMapGroup->get_active_text().empty())
-			throw Message("Enter a valid group name.");
+			throw Message("Select a valid group.");
 	}
 
 	string trigger(inputInputMapTrigger->get_text());
@@ -112,52 +110,39 @@ void DialogInputMap::isValid() const {
 			inputInputMapTrigger->grab_focus();
 		throw Message("Enter a trigger.");
 	}
-	// Check if is used.
-	if (action != Actions::EDIT or trigger != currentData->createUniqueId()) {
-		if (getCollectionHandler()->isIdSet(trigger)) {
-		// If editing and they are the same is OK.
-			throw Message("Trigger already in use.");
-		}
-	}
 
 	if (inputMapDefaultColor->get_label().empty()) {
 		throw Message("You need to set a color.");
 	}
+
+	// Build the full candidate ID and check for duplicates.
+	string target(stackElementAndGroup->get_visible_child_name() == "InputTypeElement"
+		? comboBoxInputMapElement->get_active_text()
+		: comboBoxInputMapGroup->get_active_text());
+	string candidateId(ownerData->createUniqueId() + "_" + trigger + "_" + target);
+
+	if (action != Actions::EDIT or candidateId != currentData->createUniqueId()) {
+		if (getCollectionHandler()->isIdSet(candidateId)) {
+			throw Message("This map already exists for this source.");
+		}
+	}
 }
 
 void DialogInputMap::storeData() {
+	string
+		type(stackElementAndGroup->get_visible_child_name() == "InputTypeElement" ? ELEMENT : GROUP),
+		target(type == ELEMENT
+			? comboBoxInputMapElement->get_active_text()
+			: comboBoxInputMapGroup->get_active_text());
 
-	// New trigger, linked map id, type and target
-	string trigger(createUniqueId()), newLinkedMapId, type, target;
-	if (stackElementAndGroup->get_visible_child_name() == "InputTypeElement") {
-		type = ELEMENT;
-		target =  comboBoxInputMapElement->get_active_text();
-	}
-	else {
-		type = GROUP;
-		target = comboBoxInputMapGroup->get_active_text();
-	}
-	newLinkedMapId = Defaults::createCommonUniqueId({trigger, type + " " + target});
+	currentData->setValue(TRIGGER, createUniqueId());
+	currentData->setValue(TYPE,    type);
+	currentData->setValue(TARGET,  target);
+	currentData->setValue(COLOR,   inputMapDefaultColor->get_label());
+	currentData->setValue(FILTER,  comboBoxInputMapFilter->get_active_text());
 
-//	if (action == Actions::EDIT) {
-		// the problem with this is that will only update values if the trigger is replaced.
-//		getCollectionHandler()->replace(currentData, trigger);
-/*		inputLinkMapCollectionHandler->replace(Defaults::createCommonUniqueId({
-			currentData->createUniqueId(),
-			currentData->getValue(TYPE) + " " + currentData->getValue(Defaults::TARGET)}
-		), newLinkedMapId);*/
-//	}
-//	else {
-//		inputMapCollectionHandler->add(trigger);
-		//inputLinkMapCollectionHandler->add(newLinkedMapId);
-//	}
-
-	currentData->setValue(TYPE, type);
-	currentData->setValue(TARGET, target);
-
-	currentData->setValue(TRIGGER, trigger);
-	currentData->setValue(COLOR, inputMapDefaultColor->get_label());
-	currentData->setValue(FILTER, comboBoxInputMapFilter->get_active_text());
+	// Store source ID so InputMap::createUniqueId() can build the full key.
+	currentData->setProperty(SOURCE, ownerData->createUniqueId());
 }
 
 void DialogInputMap::retrieveData() {
@@ -174,12 +159,25 @@ void DialogInputMap::retrieveData() {
 	comboBoxInputMapFilter->set_active_text(currentData->getValue(FILTER));
 }
 
-string const DialogInputMap::createUniqueId() const {
+const string DialogInputMap::createUniqueId() const {
 	return inputInputMapTrigger->get_text();
 }
 
 LEDSpicerUI::Ui::Storage::Data* DialogInputMap::createData(StringUMap& rawData) {
-	return new Storage::InputMap(rawData);
+	string
+		type(rawData.count(TYPE)     ? rawData.at(TYPE)   : ""),
+		target(rawData.count(TARGET) ? rawData.at(TARGET) : "");
+
+	auto* handler = type == ELEMENT
+		? Storage::CollectionHandler::getInstance(COLLECTION_ELEMENT)
+		: Storage::CollectionHandler::getInstance(COLLECTION_GROUP);
+
+	Storage::Data* linkTarget = handler->get(target);
+	if (not linkTarget) {
+		throw Message("Cannot find " + type + " \"" + target + "\" for input map.");
+	}
+
+	return new Storage::InputMap(rawData, "map", TARGET, linkTarget);
 }
 
 const string DialogInputMap::getType() const {

@@ -4,7 +4,7 @@
  * @since     May 6, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -221,6 +221,14 @@ string Defaults::createHardwareUniqueId(const StringUMap& data, bool isDevice) {
 		return (name + FIELD_SEPARATOR + data.at(PORT));
 	}
 	return name;
+}
+
+bool Defaults::needSource(const string& input) {
+	return input == "Actions" or input == "Blinker" or input == "Impulse" or input == "Credits";
+}
+
+bool Defaults::isDevInputListener(const string& input) {
+	return input == "Actions" or input == "Blinker" or input == "Impulse" or input == "Credits";
 }
 
 string Defaults::createCommonUniqueId(const StringVector& fieldsData) {

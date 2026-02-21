@@ -4,7 +4,7 @@
  * @since     Sep 30, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -26,18 +26,15 @@
 
 #pragma once
 
-//#define inputLinkMapCollectionHandler Storage::CollectionHandler::getInstance(COLLECTION_INPUT_LINKED_MAPS)
-#define mapElementCollectionHandler Storage::CollectionHandler::getInstance(COLLECTION_ELEMENT)
-#define mapGroupCollectionHandler Storage::CollectionHandler::getInstance(COLLECTION_GROUP)
-
 namespace LEDSpicerUI::Ui::DataDialogs {
 
 /**
- * LEDSpicerUI::Ui::DialogInputMap
- * This dialog will control the input maps, is directly related to
- * linked maps, and changes here need to be updated there.
+ * LEDSpicerUI::Ui::DataDialogs::DialogInputMap
+ * Handles creation and editing of InputMap entries for a given InputSource.
+ * The ownerData is always an InputSource — its createUniqueId() provides
+ * the source prefix stored as a property on each InputMap.
  */
-class DialogInputMap: public DialogForm {
+class DialogInputMap : public DialogForm {
 
 	friend class Gtk::Builder;
 
@@ -47,7 +44,7 @@ public:
 
 	virtual ~DialogInputMap() = default;
 
-	static void initialize(Glib::RefPtr<Gtk::Builder> const &builder);
+	static void initialize(Glib::RefPtr<Gtk::Builder> const& builder);
 	static DialogInputMap* getInstance();
 	void load(XMLHelper* values) override;
 	Storage::CollectionHandler* getCollectionHandler() const override;
@@ -59,7 +56,6 @@ public:
 
 protected:
 
-	/// Self instance.
 	static DialogInputMap* instance;
 
 	Gtk::ComboBoxText

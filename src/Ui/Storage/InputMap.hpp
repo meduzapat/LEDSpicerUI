@@ -4,7 +4,7 @@
  * @since     Sep 30, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -22,33 +22,31 @@
 
 #include "Link.hpp"
 #include "CollectionHandler.hpp"
-#include "DataDialogs/DialogInputLinkMaps.hpp"
 
 #pragma once
 
 namespace LEDSpicerUI::Ui::Storage {
 
 /**
- * LEDSpicerUI::Ui::InputMap
+ * LEDSpicerUI::Ui::Storage::InputMap
+ * A single input map entry. Extends Link to wrap the target Element or Group
+ * so renames and deletes propagate automatically via CollectionHandler.
+ * Carries its own extra values: trigger, color, filter, type.
+ * Unique ID: sourceID + "_" + trigger + "_" + target name.
+ * Source ID is stored as a property by DialogInputMap at creation time.
  */
-class InputMap: public Link {
+class InputMap : public Link {
 
 public:
 
 	using Link::Link;
 
-	/**
-	 * Cannot delete input map from handler because there is not owner.
-	 */
 	virtual ~InputMap();
 
+	const string createUniqueId() const override;
 	const string createPrettyName() const override;
 	const string getCssClass() const override;
-	const string toXML() const override;
 
-protected:
-
-	const string getPrimaryKey() const override;
 };
 
 } // namespace

@@ -71,6 +71,7 @@ add_executable(ledspicerui
 	src/Ui/Storage/Process.cpp
 	src/Ui/Storage/InputMapLink.cpp
 	src/Ui/Storage/InputMap.cpp
+	src/Ui/Storage/InputSource.cpp
 	src/Ui/Storage/Input.cpp
 	src/Ui/Storage/Profile.cpp
 	src/Ui/Storage/BoxButton.cpp

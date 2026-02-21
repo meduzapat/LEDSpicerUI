@@ -4,7 +4,7 @@
  * @since     Sep 27, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -24,64 +24,35 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-Input::Input(StringUMap& data) :
-
-	Data(data)
-	// maps can have multiple targets.
-//	maps(TARGET),
-	// linked maps are not absolute and can have multiple entries.
-//	linkedMaps(ID)
-{
-	// maps can be 1 or many depending on the type of input and the number of sources.
-	for (auto& map : maps) {
-	// link maps to elements and groups using the name.
-		CollectionHandler::getInstance(COLLECTION_ELEMENT)->registerDependency(&map);
-		CollectionHandler::getInstance(COLLECTION_GROUP)->registerDependency(&map);
-		// to avoid duplicated triggers.
-		CollectionHandler::getInstance(COLLECTION_INPUT_MAPS)->registerDependency(&map);
-	}
-	// link linked maps to maps using the trigger.
-	//CollectionHandler::getInstance(COLLECTION_INPUT_EVENTS)->registerEndpoint(&linkedMaps);
-	// this values are not used as data, only for filename and path.
-	if (data.count(FILENAME)) {
-		auto parts(Defaults::explode(data.at(FILENAME), '/'));
-		setProperty(FILENAME, parts.back());
-		parts.pop_back();
-		setProperty(PATH, Defaults::implode(parts, '/'));
-		data.erase(FILENAME);
-	}
+Input::Input(StringUMap& data) : Data(data) {
+	// PATH and FILENAME come pre-split from InputFile or DialogInput.
+	setProperty(PATH,     data.count(PATH)     ? data.at(PATH)     : "");
+	setProperty(FILENAME, data.count(FILENAME) ? data.at(FILENAME) : "");
+	// Store as properties so they never serialize into the XML attributes.
+	data.erase(PATH);
+	data.erase(FILENAME);
 }
 
 Input::~Input() {
-	if (not getValue(getPrimaryKey()).empty()) {
+	if (not createUniqueId().empty()) {
 		CollectionHandler::getInstance(COLLECTION_INPUT)->remove(this);
 	}
-	// unlink.
-	for (auto &map : maps) {
-		CollectionHandler::getInstance(COLLECTION_ELEMENT)->release(&map);
-		CollectionHandler::getInstance(COLLECTION_GROUP)->release(&map);
-		CollectionHandler::getInstance(COLLECTION_INPUT_MAPS)->release(&map);
-	}
-	//CollectionHandler::getInstance(COLLECTION_INPUT_LINKED_MAPS)->release(&linkedMaps);
 }
 
-string const Input::createPrettyName() const {
-	return fieldsData.at(NAME) + " " + fieldsData.at(getPrimaryKey());
+const string Input::createUniqueId() const {
+	string
+		path(getProperty(PATH)),
+		filename(getProperty(FILENAME));
+	if (filename.empty()) return "";
+	return path.empty() ? filename : path + "/" + filename;
+}
+
+const string Input::createPrettyName() const {
+	return getValue(NAME) + " " + getProperty(FILENAME);
 }
 
 const string Input::createTooltip() const {
-	uint count(0);
-	if (maps.size() > 1) {
-		for (auto& map : maps) {
-			count += map.getSize();
-		}
-	}
-	else {
-		count = maps[0].getSize();
-	}
-	return "Plugin " + getValue(NAME) + " with " +
-			std::to_string(count) + " maps" +
-			(getValue(NAME) == "Actions" ? " and " + std::to_string(linkedMaps.getSize()) + " linked maps" : "");
+	return "Plugin " + getValue(NAME);
 }
 
 const string Input::getCssClass() const {
@@ -89,30 +60,26 @@ const string Input::getCssClass() const {
 }
 
 void Input::activate() {
-//	DataDialogs::DialogInputMap::getInstance()->setOwner(&maps, this);
-	DataDialogs::DialogInputLinkMaps::getInstance()->setOwner(&linkedMaps, this);
+	DataDialogs::DialogInputSource::getInstance()->setOwner(&sources, this);
+//	DataDialogs::DialogInputLinkMaps::getInstance()->setOwner(&linkedMaps, this);
 }
 
 const string Input::toXML() const {
-	string r("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\
-	<LEDSpicer\
-		version=\"1.0\"\
-		type=\"Input\"\n");
+	string r(
+		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+		"<LEDSpicer\n"
+	);
 	Defaults::increaseTab();
+	r += Defaults::tab() + "version=\"1.1\"\n";
+	r += Defaults::tab() + "type=\"Input\"\n";
 	r += Data::toXML();
 	Defaults::reduceTab();
 	r += ">\n";
 	Defaults::increaseTab();
-	for (const auto& m : maps) {
-		for (const auto e : m) {
-			r += e->getData()->toXML();
-		}
+	for (const auto& s : sources) {
+		r += s->getData()->toXML();
 	}
 	Defaults::reduceTab();
 	r += "</LEDSpicer>\n";
 	return r;
-}
-
-const string Input::getPrimaryKey() const {
-	return FILENAME;
 }

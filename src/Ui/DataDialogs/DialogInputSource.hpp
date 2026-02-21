@@ -21,6 +21,8 @@
  */
 
 #include "DialogForm.hpp"
+#include "DialogInputMap.hpp"
+#include "Storage/InputSource.hpp"
 
 #pragma once
 
@@ -38,8 +40,9 @@ class DialogInputSource : public DialogForm {
 
 public:
 
+	static constexpr const char* SOURCE_EMPTY_OPTION = "Select Source";
 	/// Sentinel combo value that activates manual entry.
-	static constexpr const char* OTHER_OPTION = "Other";
+	static constexpr const char* SOURCE_OTHER_OPTION = "Other";
 	/// Linux event device directory.
 	static constexpr const char* DEV_INPUT = "/dev/input/";
 
@@ -62,13 +65,19 @@ protected:
 
 	static DialogInputSource* instance;
 
-	/// Detected event devices combo (shown when running locally).
-	Gtk::ComboBoxText* comboBoxInputSource = nullptr;
+	Gtk::ComboBoxText
+		/// Stores the input in use.
+		* comboBoxInputSelectInput = nullptr,
+		/// Detected event devices combo (shown when running locally).
+		* comboBoxInputSource      = nullptr;
 
 	/// Manual entry (shown in portable mode or when "Other" is selected).
 	Gtk::Entry* entryInputSource = nullptr;
 
-	OrdenableFlowBox* boxInputMap = nullptr;
+	/// To manipulate the maps accessibility when the source is being entered.
+	Gtk::Button * btnAddMap = nullptr;
+
+//	OrdenableFlowBox* boxInputMap = nullptr;
 
 	DialogInputSource(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
 
@@ -82,17 +91,18 @@ private:
 
 	/**
 	 * Scans /dev/input/ for event* device files using Gio.
-	 * Does not check accessibility — that is LEDSpicerd's concern.
+	 *
 	 * @return Sorted list of event device names (e.g. "event0", "event1").
 	 */
-	static StringVector scanEventDevices();
+	StringVector scanEventDevices();
 
 	/**
-	 * Populates the combo with detected devices plus the "Other" sentinel,
+	 * Populates the combo with detected sources plus the "Other" sentinel,
 	 * then shows/hides combo and entry according to the result.
-	 * @param devices List returned by scanEventDevices().
+	 *
+	 * @param sources List.
 	 */
-	void applyDeviceList(const StringVector& devices);
+	void populateSourcesList(const StringVector& devices);
 
 };
 

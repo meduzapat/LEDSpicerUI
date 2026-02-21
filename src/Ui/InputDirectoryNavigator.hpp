@@ -22,6 +22,7 @@
 
 #include "DirectoryNavigator.hpp"
 #include "DataDialogs/DialogInput.hpp"
+#include "DataDialogs/DialogInputMap.hpp"
 
 #pragma once
 

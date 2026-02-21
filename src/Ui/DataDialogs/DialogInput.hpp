@@ -4,7 +4,7 @@
  * @since     Feb 14, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -20,11 +20,10 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "config/InputFile.hpp"
-#include "Storage/Input.hpp"
 #include "DialogForm.hpp"
+#include "Storage/Input.hpp"
 #include "DialogImport.hpp"
-#include "DialogInputSource.hpp"
+#include "config/InputFile.hpp"
 
 #pragma once
 
@@ -57,6 +56,7 @@ public:
 	void retrieveData() override;
 	const string createUniqueId() const override;
 
+	/// Sets the working directory path for new input files.
 	void setPath(const string& path);
 
 protected:
@@ -72,25 +72,23 @@ protected:
 	Gtk::Entry*      entryInputName   = nullptr;
 	Gtk::Switch*     switchInputBlink = nullptr;
 	Gtk::SpinButton* spinInputTimes   = nullptr;
-	Gtk::Button*     btnAddInputMap   = nullptr;
 	Gtk::Box
-		* boxLinkedElementsAndGroupsBox = nullptr,
-		* boxInputSourcesBox               = nullptr,
-		* boxInputCreditsSettings       = nullptr;
+		* boxInputSourcesBox        = nullptr, ///< Sources section, hidden for single-source plugins.
+		* boxInputCreditsSettings   = nullptr;
 
-	/// The box to select mappings.
-	OrdenableFlowBox
-		* boxInputMaps        = nullptr,
-		* boxInputLinkedMaps = nullptr;
+	/// Only to hide/show when source is selected.
+	Gtk::Button* btnAddInputMap = nullptr;
 
+	/// The box to display linked maps.
+	OrdenableFlowBox* boxInputLinkedMaps = nullptr;
+
+	/// Current working path for new input files.
 	string currentPath;
 
 	DialogInput(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
 
 	void createSubItems(XMLHelper* values) override;
-
 	const string getType() const override;
-
 	Storage::Data* createData(StringUMap& rawData) override;
 
 };

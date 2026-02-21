@@ -4,7 +4,7 @@
  * @since     Feb 15, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -139,11 +139,11 @@ protected:
 	/// Created items in the dialog.
 	Storage::BoxButtonCollection* items = nullptr;
 
-	/// Current item's data, been created, edited or loaded.
-	Storage::Data* currentData = nullptr;
-
-	/// The data record that handles this Dialog.
-	Storage::Data* ownerData = nullptr;
+	Storage::Data
+		/// Current item's data, been created, edited or loaded.
+		* currentData = nullptr,
+		/// The data record that handles this Dialog.
+		* ownerData = nullptr;
 
 	/// Child dialog, if any.
 	DataDialogs::DialogForm* childDialog = nullptr;

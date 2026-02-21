@@ -36,7 +36,12 @@ public:
 
 	using Data::Data;
 
-	Link(StringUMap& data, const string& type, const string &key, Data *link) : Data(data), type(type), key(key), link(link) {}
+	Link(
+		StringUMap& data,
+		const string& type,
+		const string &key,
+		Data *link
+	) : Data(data), type(type), key(key), link(link) {}
 
 	virtual ~Link() = default;
 

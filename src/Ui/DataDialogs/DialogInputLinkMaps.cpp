@@ -4,7 +4,7 @@
  * @since     Oct 1, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -57,15 +57,15 @@ DialogInputLinkMaps::DialogInputLinkMaps(BaseObjectType* obj, const Glib::RefPtr
 		"BtnInputMappingDown"
 	);
 
-	// pointer to where the maps are been stored on the input map dialog.
-	OrdenableFlowBox * boxInputMap = nullptr;
-	builder->get_widget_derived("BoxInputMap", boxInputMap);
+	// Pointer to where the maps are been stored on the input map dialog.
+	OrdenableFlowBox * boxInputMaps = nullptr;
+	builder->get_widget_derived("BoxInputMaps", boxInputMaps);
 
 	/*
 	 * If two or more selected mappings are selected activate the create link button.
 	 */
-	boxInputMap->signal_selected_children_changed().connect([btnAdd, boxInputMap]() {
-		btnAdd->set_sensitive(boxInputMap->get_selected_children().size() >= 2);
+	boxInputMaps->signal_selected_children_changed().connect([btnAdd, boxInputMaps]() {
+		btnAdd->set_sensitive(boxInputMaps->get_selected_children().size() >= 2);
 	});
 
 	/*
@@ -74,12 +74,12 @@ DialogInputLinkMaps::DialogInputLinkMaps(BaseObjectType* obj, const Glib::RefPtr
 	 * It will pick any selected element from the input map box and
 	 * create a linked map into linked mappings box.
 	 */
-	btnAdd->signal_clicked().connect([&, boxInputMap]() {
+	btnAdd->signal_clicked().connect([&, boxInputMaps]() {
 		StringVector
 			linkData,
 			ids;
 		// Extract selected maps.
-		for (auto child : boxInputMap->get_selected_children()) {
+		for (auto child : boxInputMaps->get_selected_children()) {
 			// Extract internal data to get ids and linkdata.
 			auto data(dynamic_cast<Storage::BoxButton*>(child->get_child())->getData());
 			ids.push_back(Defaults::addUnitSeparator(data->getValue(TRIGGER)));
@@ -88,7 +88,7 @@ DialogInputLinkMaps::DialogInputLinkMaps(BaseObjectType* obj, const Glib::RefPtr
 				data->getValue(TYPE) + " " + data->getValue(TARGET)
 			}));
 		}
-		boxInputMap->unselect_all();
+		boxInputMaps->unselect_all();
 		// ids: (32)4(32)|(32)5(32)|(32)6(32)
 		string idsTxt(Defaults::implode(ids, ID_GROUP_SEPARATOR));
 		// Check if the link exists.

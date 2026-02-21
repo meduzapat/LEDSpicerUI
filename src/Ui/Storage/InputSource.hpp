@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      AnimationDialog.cpp
- * @since     Feb 14, 2023
+ * @file      InputSource.hpp
+ * @since     Feb 20, 2026
  * @author    Patricio A. Rossi (MeduZa)
  *
  * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
@@ -20,7 +20,38 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DialogAnimation.hpp"
+#include "DataDialogs/DialogInputMap.hpp"
 
-using namespace LEDSpicerUI::Ui::DataDialogs;
+#pragma once
 
+namespace LEDSpicerUI::Ui::Storage {
+
+/**
+ * LEDSpicerUI::Ui::Storage::InputSource
+ * Represents a single input source (hardware event device) inside an Input plugin.
+ * Owns the maps that belong to this source.
+ * For single-source plugins the source name is empty.
+ */
+class InputSource : public Data {
+
+public:
+
+	using Data::Data;
+
+	virtual ~InputSource();
+
+	const string createUniqueId() const override;
+	const string createPrettyName() const override;
+	const string createTooltip() const override;
+	const string getCssClass() const override;
+	void activate() override;
+	const string toXML() const override;
+
+protected:
+
+	/// Maps owned by this source.
+	BoxButtonCollection maps;
+
+};
+
+} // namespace

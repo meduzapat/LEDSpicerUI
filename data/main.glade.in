@@ -4368,7 +4368,6 @@ You can find the devices ID using inputseeker from the terminal, or by listing t
                     <child>
                       <object class="GtkButton" id="BtnAddInputMap">
                         <property name="visible">True</property>
-                        <property name="sensitive">False</property>
                         <property name="can-focus">True</property>
                         <property name="receives-default">True</property>
                         <property name="tooltip-text" translatable="yes">Create Mapping</property>
@@ -5224,6 +5223,7 @@ you can set the same trigger multiple time on different maps but only the last o
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
+                <property name="spacing">5</property>
                 <property name="homogeneous">True</property>
                 <child>
                   <object class="GtkBox">

@@ -38,6 +38,7 @@ InputDirectoryNavigator::InputDirectoryNavigator(
 {
 	DataDialogs::DialogInputLinkMaps::initialize(builder);
 	DataDialogs::DialogInputMap::initialize(builder);
+	DataDialogs::DialogInputSource::initialize(builder);
 	DataDialogs::DialogInput::initialize(builder);
 
 	// Setup DialogInput with our collection

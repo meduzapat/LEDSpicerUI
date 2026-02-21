@@ -1,10 +1,10 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      InputDialog.cpp
+ * @file      DialogInput.cpp
  * @since     Feb 14, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -40,100 +40,37 @@ DialogInput::DialogInput(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& 
 	DialogForm(obj, builder),
 	dialogImportInput(DialogImport::Types::INPUT, this)
 {
-
-	DialogInputSource::initialize(builder);
-
-	// Connect list box and buttons.
-	builder->get_widget_derived("BoxInputs", box);
-	builder->get_widget("BtnApplyInput",     btnApply);
-
-	Gtk::Button* btnAdd = nullptr;
-	builder->get_widget("BtnAddInput", btnAdd);
-	setSignalAdd(btnAdd);
-	setSignalApply();
-
-	// Generic.
-	builder->get_widget("ComboBoxInputSelectInput", comboBoxInputSelectInput);
-	builder->get_widget("EntryInputName",           entryInputName);
-
-	// Actions.
-	builder->get_widget("SwitchInputBlink", switchInputBlink);
-
-	// Necessary to select and sort mappings.
-	builder->get_widget_derived("BoxInputMaps",       boxInputMaps);
-	builder->get_widget_derived("BoxInputLinkedMaps", boxInputLinkedMaps);
-
-	// Blinker needs this.
-	builder->get_widget("SpinInputTimes", spinInputTimes);
-
-	// Actions and Blinker share speed.
-	builder->get_widget("ComboBoxInputSpeed", comboBoxInputSpeed);
-
-	// Conditional sections.
-	builder->get_widget("BoxLinkedElementsAndGroups", boxLinkedElementsAndGroupsBox);
+	Gtk::Button* btnAddInput = nullptr;
+	builder->get_widget_derived("BoxInputs",          box);
+	builder->get_widget("BtnAddInput",                btnAddInput);
+	builder->get_widget("BtnApplyInput",              btnApply);
+	builder->get_widget("BtnAddInputMap",             btnAddInputMap);
+	builder->get_widget("ComboBoxInputSelectInput",   comboBoxInputSelectInput);
+	builder->get_widget("ComboBoxInputSpeed",         comboBoxInputSpeed);
+	builder->get_widget("EntryInputName",             entryInputName);
+	builder->get_widget("SwitchInputBlink",           switchInputBlink);
+	builder->get_widget("SpinInputTimes",             spinInputTimes);
 	builder->get_widget("BoxInputSourcesBox",         boxInputSourcesBox);
 	builder->get_widget("BoxInputCreditsSettings",    boxInputCreditsSettings);
-	builder->get_widget("BtnAddInputMap",             btnAddInputMap);
+	builder->get_widget_derived("BoxInputLinkedMaps", boxInputLinkedMaps);
 
-	// When blink is off, disable speed.
-	switchInputBlink->signal_state_changed().connect([&](bool) {
-		comboBoxInputSpeed->set_sensitive(switchInputBlink->get_state());
-	});
+	setSignalAdd(btnAddInput);
+	setSignalApply();
 
-	// When a plugin is selected, set field visibility rules.
-	comboBoxInputSelectInput->signal_changed().connect([&]() {
-
+	// Show/hide plugin-specific options when plugin type changes.
+	comboBoxInputSelectInput->signal_changed().connect([this]() {
 		string name(comboBoxInputSelectInput->get_active_text());
-
-		if (name == "Select Plugin") {
-			btnApply->set_sensitive(false);
-			btnAddInputMap->set_sensitive(false);
-			return;
-		}
-
-		clearForm();
-		btnApply->set_sensitive(true);
-		btnAddInputMap->set_sensitive(true);
-
-		if (name == "Actions" or name == "Credits") {
-			boxLinkedElementsAndGroupsBox->show();
-			boxInputMaps->set_selection_mode(Gtk::SelectionMode::SELECTION_MULTIPLE);
-		}
-
-		if (name == "Actions") {
-			comboBoxInputSpeed->get_parent()->show();
-			switchInputBlink->get_parent()->show();
-			switchInputBlink->set_active(true);
-		}
-
-		if (name == "Blinker") {
-			spinInputTimes->get_parent()->show();
-			comboBoxInputSpeed->get_parent()->show();
-		}
-
-		if (name == "Credits") {
-			boxInputCreditsSettings->show();
-			comboBoxInputSpeed->get_parent()->show();
-		}
-
-		if (
-			name == "Actions" or
-			name == "Blinker" or
-			name == "Impulse" or
-			name == "Credits"
-		) {
-			boxInputSourcesBox->show();
-			btnAddInputMap->hide();
-		}
-		else {
-			// Single-source plugins: Mame, Network, etc.
-			boxInputSourcesBox->hide();
-			btnAddInputMap->show();
-		}
+		bool needSource(Defaults::needSource(name));
+		boxInputSourcesBox->set_visible(needSource);
+		btnAddInputMap->set_visible(not needSource);
+		comboBoxInputSpeed->get_parent()->set_visible(name == "Actions" or name == "Blinker");
+		spinInputTimes->get_parent()->set_visible(name == "Blinker");
+		switchInputBlink->get_parent()->set_visible(name == "Actions");
+		boxInputCreditsSettings->set_visible(name == "Credits");
 	});
 
-	// Dialog to import input plugin files.
-	Gtk::Button* btnImportInput;
+	// Import button.
+	Gtk::Button* btnImportInput = nullptr;
 	builder->get_widget("BtnImportInput", btnImportInput);
 	btnImportInput->signal_clicked().connect([this]() {
 		if (dialogImportInput.run() == Gtk::ResponseType::RESPONSE_OK) {
@@ -157,12 +94,12 @@ void DialogInput::load(XMLHelper* values) {
 }
 
 void DialogInput::createSubItems(XMLHelper* values) {
-	DialogInputMap::getInstance()->load(values);
+	DialogInputSource::getInstance()->load(values);
 	DialogInputLinkMaps::getInstance()->load(values);
 }
 
 LEDSpicerUI::Ui::Storage::CollectionHandler* DialogInput::getCollectionHandler() const {
-	return LEDSpicerUI::Ui::Storage::CollectionHandler::getInstance(COLLECTION_INPUT);
+	return Storage::CollectionHandler::getInstance(COLLECTION_INPUT);
 }
 
 void DialogInput::resetForm() {
@@ -171,36 +108,29 @@ void DialogInput::resetForm() {
 }
 
 void DialogInput::clearForm() {
-
-	boxInputMaps->set_selection_mode(Gtk::SelectionMode::SELECTION_NONE);
-
-	boxLinkedElementsAndGroupsBox->hide();
 	boxInputSourcesBox->hide();
 	boxInputLinkedMaps->hide();
 	boxInputCreditsSettings->hide();
 	entryInputName->set_text("");
-
 	comboBoxInputSpeed->get_parent()->hide();
 	comboBoxInputSpeed->set_active_text("Normal");
-
 	spinInputTimes->get_parent()->hide();
 	spinInputTimes->set_text("");
-
 	switchInputBlink->get_parent()->hide();
 	switchInputBlink->set_active(false);
 }
 
 void DialogInput::isValid() const {
-
-	string filename(createUniqueId());
+	string filename(entryInputName->get_text());
 	if (filename.empty()) {
 		if (action != Actions::LOAD)
 			entryInputName->grab_focus();
 		throw Message("Invalid name.");
 	}
 
-	if (getCollectionHandler()->isIdSet(filename)) {
-		if (action != Actions::EDIT or filename != currentData->createUniqueId()) {
+	string uid(createUniqueId());
+	if (getCollectionHandler()->isIdSet(uid)) {
+		if (action != Actions::EDIT or uid != currentData->createUniqueId()) {
 			if (action != Actions::LOAD)
 				entryInputName->grab_focus();
 			throw Message("Name already in use.");
@@ -215,51 +145,41 @@ void DialogInput::isValid() const {
 }
 
 void DialogInput::storeData() {
-
 	string name(comboBoxInputSelectInput->get_active_text());
 	currentData->setValue(NAME, name);
-
-	currentData->setProperty(PATH,     createUniqueId());
+	currentData->setProperty(PATH,     currentPath);
 	currentData->setProperty(FILENAME, entryInputName->get_text());
 
 	if (name == "Actions") {
-		currentData->setValue("blink", switchInputBlink->get_state() ? "true" : "false");
-		currentData->setValue("speed", comboBoxInputSpeed->get_active_text());
+		currentData->setValue("blink", switchInputBlink->get_active() ? "true" : "false");
 	}
-
 	if (name == "Blinker") {
 		currentData->setValue("times", spinInputTimes->get_text());
-		currentData->setValue("speed", comboBoxInputSpeed->get_active_text());
 	}
-
-	if (name == "Credits") {
+	if (name == "Actions" or name == "Blinker") {
 		currentData->setValue("speed", comboBoxInputSpeed->get_active_text());
 	}
 }
 
 void DialogInput::retrieveData() {
-
 	string name(currentData->getValue(NAME));
 	comboBoxInputSelectInput->set_active_text(name);
-	entryInputName->set_text(currentData->getValue(FILENAME));
+	entryInputName->set_text(currentData->getProperty(FILENAME));
 
 	if (name == "Actions") {
 		switchInputBlink->set_active(currentData->getValue("blink") == "true");
-		comboBoxInputSpeed->set_active_text(currentData->getValue("speed"));
 	}
-
 	if (name == "Blinker") {
 		spinInputTimes->set_text(currentData->getValue("times"));
-		comboBoxInputSpeed->set_active_text(currentData->getValue("speed"));
 	}
-
-	if (name == "Credits") {
+	if (name == "Actions" or name == "Blinker") {
 		comboBoxInputSpeed->set_active_text(currentData->getValue("speed"));
 	}
 }
 
-string const DialogInput::createUniqueId() const {
-	return Defaults::createCommonUniqueId({currentPath, entryInputName->get_text()});
+const string DialogInput::createUniqueId() const {
+	string filename(entryInputName->get_text());
+	return currentPath.empty() ? filename : currentPath + "/" + filename;
 }
 
 void DialogInput::setPath(const string& path) {
@@ -271,6 +191,9 @@ const string DialogInput::getType() const {
 }
 
 LEDSpicerUI::Ui::Storage::Data* DialogInput::createData(StringUMap& rawData) {
+	// Inject PATH and FILENAME as separate keys so Input constructor
+	// can store them as properties without parsing.
+	rawData[PATH]     = currentPath;
+	rawData[FILENAME] = rawData.count(FILENAME) ? rawData.at(FILENAME) : "";
 	return new Storage::Input(rawData);
 }
-

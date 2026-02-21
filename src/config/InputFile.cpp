@@ -4,7 +4,7 @@
  * @since     Nov 14, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -30,7 +30,16 @@ InputFile::InputFile(const string& inputFile) : ProjectFile(inputFile, "Input", 
 
 	StringUMap input(rootInfo.attributes);
 
-	input[FILENAME] = pathFilename;
+	// Split pathFilename into PATH and FILENAME so Input::constructor
+	auto pos = pathFilename.find_last_of('/');
+	if (pos == string::npos) {
+		input[PATH]     = "";
+		input[FILENAME] = pathFilename;
+	}
+	else {
+		input[PATH]     = pathFilename.substr(0, pos);
+		input[FILENAME] = pathFilename.substr(pos + 1);
+	}
 
 	tinyxml2::XMLElement* mapsNode = getRoot()->FirstChildElement("maps");
 	if (not mapsNode) {
@@ -47,7 +56,7 @@ InputFile::InputFile(const string& inputFile) : ProjectFile(inputFile, "Input", 
 			);
 		}
 
-		extractedData.emplace(Defaults::createCommonUniqueId({pathFilename, COLLECTION_INPUT_EVENTS}), std::move(mapsSources));
+		extractedData.emplace(Defaults::createCommonUniqueId({pathFilename, COLLECTION_INPUT_SOURCES}), std::move(mapsSources));
 	}
 
 	extractedData.emplace(COLLECTION_INPUT, StringUMapVector{input});

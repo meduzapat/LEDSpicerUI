@@ -4,7 +4,7 @@
  * @since     Sep 27, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -20,10 +20,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "DataDialogs/DialogInputSource.hpp"
 #include "DataDialogs/DialogInputLinkMaps.hpp"
-#include "DataDialogs/DialogInputMap.hpp"
-#include "BoxButtonCollection.hpp"
-#include "Data.hpp"
 
 #pragma once
 
@@ -31,9 +29,10 @@ namespace LEDSpicerUI::Ui::Storage {
 
 /**
  * LEDSpicerUI::Ui::Storage::Input
- *
- * This class have maps, optional events and event maps.
- * Normally
+ * Represents a single input plugin configuration file.
+ * Owns a collection of InputSource objects (one per hardware source),
+ * and a collection of InputMapLinks that cross sources.
+ * PATH and FILENAME are stored as properties and never serialized to XML.
  */
 class Input: public Data {
 
@@ -43,6 +42,7 @@ public:
 
 	virtual ~Input();
 
+	const string createUniqueId() const override;
 	const string createPrettyName() const override;
 	const string createTooltip() const override;
 	const string getCssClass() const override;
@@ -51,16 +51,11 @@ public:
 
 protected:
 
-	/// Maps, where 0 is used for single source input plugins.
-	vector<BoxButtonCollection> maps;
-
 	/// Keeps track of different input sources.
-	BoxButtonCollection listeners;
+	BoxButtonCollection sources;
 
 	/// Linked maps, these are used to link multiple input maps together.
 	BoxButtonCollection linkedMaps;
-
-	const string getPrimaryKey() const override;
 
 };
 

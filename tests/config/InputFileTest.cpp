@@ -4,7 +4,7 @@
  * @since     Feb 25, 2025
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -68,10 +68,10 @@ TEST_F(InputFileTest, MultiSourceInputIsLoaded) {
 }
 
 // Test that listenEvents are correctly extracted from multi-source input
-TEST_F(InputFileTest, ListenEventsAreExtracted) {
+TEST_F(InputFileTest, SourcesAreExtracted) {
 	const string
 		name(inputMulti->getPathFilename()),
-		eventName(Defaults::createCommonUniqueId({name, COLLECTION_INPUT_EVENTS})),
+		eventName(Defaults::createCommonUniqueId({name, COLLECTION_INPUT_SOURCES})),
 		hardware1Name(inputMulti->getData(eventName)[0]["source"]),
 		hardware2Name(inputMulti->getData(eventName)[1]["source"]);
 

@@ -4,7 +4,7 @@
  * @since     Sep 30, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -25,24 +25,23 @@
 using namespace LEDSpicerUI::Ui::Storage;
 
 InputMap::~InputMap() {
-	if (not getValue(getPrimaryKey()).empty()) {
+	if (not createUniqueId().empty())
 		CollectionHandler::getInstance(COLLECTION_INPUT_MAPS)->remove(this);
+}
+
+const string InputMap::createUniqueId() const {
+	string trigger(getValue(TRIGGER));
+	if (trigger.empty()) {
+		return "";
 	}
+	// Source ID stored as a property by DialogInputMap::createData().
+	return getProperty(SOURCE) + "_" + trigger + "_" + getValue(NAME);
 }
 
 const string InputMap::createPrettyName() const {
-	return "[" + fieldsData.at(getPrimaryKey()) + "] " + fieldsData.at(TYPE) + " " + fieldsData.at(TARGET);
+	return "[" + getValue(TRIGGER) + "] " + getValue(TYPE) + " " + getValue(NAME);
 }
 
 const string InputMap::getCssClass() const {
 	return "InputMapBoxButton";
 }
-
-const string InputMap::toXML() const {
-	return createOpeningXML("map", fieldsData, ignored, true);
-}
-
-const string InputMap::getPrimaryKey() const {
-	return TRIGGER;
-}
-

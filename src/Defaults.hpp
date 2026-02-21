@@ -4,7 +4,7 @@
  * @since     May 6, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2023 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -153,6 +153,9 @@ constexpr const char* COLOR        = "color";
 constexpr const char* FILTER       = "filter";
 constexpr const char* ELEMENT      = "Element";
 constexpr const char* GROUP        = "Group";
+constexpr const char* SOURCE       = "source";   // input attribute in XML
+constexpr const char* INPUT_PK     = "inputPk";  // property: owning Input's PK
+constexpr const char* INDEX        = "index";    // property: positional index within Input
 
 /// UI-related constants.
 constexpr const char* DEFAULT_ELEMENT_TYPE = "9";
@@ -167,7 +170,7 @@ constexpr const char* COLLECTION_GROUP          = "groups";
 constexpr const char* COLLECTION_PROCESS        = "processes";
 constexpr const char* COLLECTION_RESTRICTOR_MAP = "playerCombinations";
 constexpr const char* COLLECTION_INPUT          = "inputs";
-constexpr const char* COLLECTION_INPUT_EVENTS   = "listenEvents";
+constexpr const char* COLLECTION_INPUT_SOURCES  = "sources";
 constexpr const char* COLLECTION_INPUT_MAPS     = "linkedMaps";
 constexpr const char* COLLECTION_ANIMATIONS     = "animations";
 constexpr const char* COLLECTION_PROFILES       = "profiles";
@@ -180,7 +183,7 @@ constexpr const char* TYPE_GROUP          = "group";
 constexpr const char* TYPE_PROCESS        = "process";
 constexpr const char* TYPE_RESTRICTOR_MAP = "playerCombination";
 constexpr const char* TYPE_INPUT          = "input";
-constexpr const char* TYPE_INPUT_EVENT    = "listenEvent";
+constexpr const char* TYPE_INPUT_SOURCE   = "source";
 constexpr const char* TYPE_INPUT_MAP      = "linkedMap";
 constexpr const char* TYPE_ANIMATION      = "animation";
 constexpr const char* TYPE_PROFILE        = "profile";
@@ -297,6 +300,18 @@ public:
 	 * @return if the hardware have more than one end-point.
 	 */
 	static bool isMulti(const string& name);
+
+	/**
+	 * @param input The input name to check.
+	 * @return True if the current input needs a source.
+	 */
+	static bool needSource(const string& input);
+
+	/**
+	 * @param input The input name to check.
+	 * @return True if the current input is a dev/input listener.
+	 */
+	static bool isDevInputListener(const string& input);
 
 	/**
 	 * Common hardware unique ID generator.
