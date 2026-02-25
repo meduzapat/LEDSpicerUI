@@ -27,14 +27,19 @@
 
 namespace LEDSpicerUI::Ui::Storage {
 
-using BoxButtonCollections = vector<BoxButtonCollection*>;
-
 /**
  * LEDSpicerUI::Ui::Storage::CollectionHandler
  */
 class CollectionHandler {
 
 public:
+
+	/// Represents a dependency on a collection, with an optional guard to keep the owner alive until the collection is depleted.
+	struct Dependency {
+		BoxButtonCollection*  collection;            /// Collection to track.
+		size_t                minSize = 0;           /// Minimum number of items required to keep the owner alive. 0 = no guard.
+		std::function<void()> onDepletion = nullptr; /// Called when collection size drops below minSize.
+	};
 
 	virtual ~CollectionHandler() = default;
 
@@ -109,9 +114,9 @@ public:
 
 	/**
 	 * Register a collection dependency to be tracked.
-	 * @param destination
+	 * @param dependency Dependency struct with collection, optional min size and callback.
 	 */
-	void registerDependency(BoxButtonCollection* destination);
+	void registerDependency(const Dependency& dependency);
 
 	/**
 	 * Refresh a single combobox contents with the collection values.
@@ -148,13 +153,13 @@ protected:
 	StringDataMap collection;
 
 	/// List of collections that keeps references to items in the collection.
-	BoxButtonCollections dependencies;
+	vector<Dependency> dependencies;
 
 	/// List of selectors.
 	vector<Gtk::ComboBoxText*> comboBoxes;
 
 	/// Keeps collections instances.
-	static unordered_map<string, CollectionHandler*> collections;
+	static std::unordered_map<string, CollectionHandler*> collections;
 
 	/**
 	 * Avoids instantiation.

@@ -25,11 +25,8 @@
 #include <giomm.h>
 
 #include <unordered_map>
-using std::unordered_map;
 
 #include <unordered_set>
-using std::unordered_set;
-using std::set;
 
 #include <vector>
 using std::vector;
@@ -40,6 +37,8 @@ using std::stringstream;
 
 #include <functional>
 
+#include <filesystem>
+#include <fstream>
 #include <sys/stat.h>
 
 #include <memory>
@@ -54,10 +53,11 @@ using std::unique_ptr;
 
 #define DEFAULT_MESSAGE "This is an auto-generated file by " PACKAGE_STRING "."
 
-using StringUMap       = unordered_map<string, string>;
+using StringUMap       = std::unordered_map<string, string>;
+using StringMap        = std::map<string, string>;
 using StringUMapVector = vector<StringUMap>;
-using StringUSet       = unordered_set<string>;
-using StringSet        = set<string>;
+using StringUSet       = std::unordered_set<string>;
+using StringSet        = std::set<string>;
 using StringVector     = vector<string>;
 
 namespace LEDSpicerUI {
@@ -103,6 +103,9 @@ constexpr const char* FILENAME = "filename";
 constexpr const char* PORT     = "port";
 constexpr const char* PINS     = "leds";
 constexpr const char* PATH     = "path";
+constexpr const char* FILE_ID  = "FID"; /// To be used with file based data objects.
+constexpr const char* PID      = "PID"; /// To be used with anything that has a P in the name.
+constexpr const char* SID      = "SID"; /// To be used with anything that has a S in the name.
 
 constexpr float DEFAULT_CHANGE_VALUE    = 64.00f;
 
@@ -154,8 +157,7 @@ constexpr const char* FILTER       = "filter";
 constexpr const char* ELEMENT      = "Element";
 constexpr const char* GROUP        = "Group";
 constexpr const char* SOURCE       = "source";   // input attribute in XML
-constexpr const char* INPUT_PK     = "inputPk";  // property: owning Input's PK
-constexpr const char* INDEX        = "index";    // property: positional index within Input
+constexpr const char* INDEX        = "index";    // a property positional index.
 
 /// UI-related constants.
 constexpr const char* DEFAULT_ELEMENT_TYPE = "9";
@@ -206,6 +208,7 @@ public:
 
 	enum class Connection : uint8_t {NONE, USB, SERIAL};
 
+	/// LEDSpicerd mode.
 	enum class Mode {
 		Local,     /// LEDSpicerd daemon detected correctly but iterations are OFF.
 		Iterative, /// LEDSpicerd daemon detected and Iterative mode is enabled.
@@ -218,6 +221,17 @@ public:
 		DEVICES     = 2,
 		RESTRICTORS = 4,
 		MAPPINGS    = 8
+	};
+
+	/// Input plugin capability flags.
+	enum InputFlags : uint8_t {
+		INPUT_NEEDS_SOURCE    = 1 << 0, /// Has multiple hardware sources.
+		INPUT_DEV_LISTENER    = 1 << 1, /// Reads from /dev/input/ kernel devices.
+		INPUT_LINKED_MAPS     = 1 << 2, /// Supports linked map triggers.
+		INPUT_HAS_SPEED       = 1 << 3, /// Has speed setting.
+		INPUT_HAS_TIMES       = 1 << 4, /// Has repeat times setting.
+		INPUT_HAS_BLINK       = 1 << 5, /// Has blink switch.
+		INPUT_HAS_CREDITS     = 1 << 6, /// Has credits-specific settings.
 	};
 
 	/**
@@ -258,6 +272,15 @@ public:
 		const vector<Ways> ways;
 		/// A brief description of the restrictor.
 		const string       brief;
+	};
+
+	/**
+	 * Structure with input plugins information.
+	 */
+	struct InputInfo {
+		const char* name;    /// Human-readable display name.
+		const uint8_t flags; /// Bitwise capability flags.
+		const string brief;  /// A brief description of the input plugin.
 	};
 
 	Defaults() = delete;
@@ -303,9 +326,22 @@ public:
 
 	/**
 	 * @param input The input name to check.
+	 * @param flag The flag to check for.
+	 * @return True if the current input has the specified flag.
+	 */
+	static bool inputHasFlag(const string& input, uint8_t flag);
+
+	/**
+	 * @param input The input name to check.
 	 * @return True if the current input needs a source.
 	 */
 	static bool needSource(const string& input);
+
+	/**
+	 * Returns true if the input plugin type supports linked map triggers.
+	 * @param input Plugin name.
+	 */
+	static bool hasLinkedMaps(const string& input);
 
 	/**
 	 * @param input The input name to check.
@@ -425,13 +461,16 @@ public:
 	static constexpr std::array<Ways, 11> allWays{Ways::w2, Ways::w2v, Ways::w4, Ways::w4x, Ways::w8, Ways::w16, Ways::w49, Ways::analog, Ways::mouse, Ways::rotary8, Ways::rotary12};
 
 	/// A list of device to their information.
-	static const unordered_map<string, DeviceInfo> devicesInfo;
+	static const std::unordered_map<string, DeviceInfo> devicesInfo;
 
 	/// A list of restrictor to their information.
-	static const unordered_map<string, RestrictorInfo> restrictorsInfo;
+	static const std::unordered_map<string, RestrictorInfo> restrictorsInfo;
+
+	/// A list of input plugins to their information.
+	static const std::unordered_map<string, InputInfo> inputsInfo;
 
 	/// A List of string names to its internal enumerated type.
-	static const unordered_map<string, Ways> wayIds;
+	static const std::unordered_map<string, Ways> wayIds;
 
 	/// A list of different element types.
 	static const StringVector elementTypes;

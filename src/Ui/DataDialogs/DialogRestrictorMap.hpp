@@ -30,7 +30,7 @@ namespace LEDSpicerUI::Ui::DataDialogs {
 /**
  * LEDSpicerUI::Ui::DialogRestrictorMap
  */
-class DialogRestrictorMap: public DialogForm {
+class DialogRestrictorMap: public DialogForm, public SingletonDialog<DialogRestrictorMap> {
 
 	friend class Gtk::Builder;
 
@@ -40,8 +40,6 @@ public:
 
 	virtual ~DialogRestrictorMap() = default;
 
-	static void initialize(Glib::RefPtr<Gtk::Builder> const &builder);
-	static DialogRestrictorMap* getInstance();
 	void load(XMLHelper* values) override;
 	Storage::CollectionHandler* getCollectionHandler() const override;
 	void clearForm() override;
@@ -51,9 +49,6 @@ public:
 	const string createUniqueId() const override;
 
 protected:
-
-	/// Self instance.
-	static DialogRestrictorMap* instance;
 
 	Gtk::Button* btnAdd = nullptr;
 

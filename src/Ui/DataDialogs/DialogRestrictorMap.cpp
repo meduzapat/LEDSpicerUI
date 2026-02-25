@@ -24,18 +24,6 @@
 
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
-DialogRestrictorMap* DialogRestrictorMap::instance = nullptr;
-
-void DialogRestrictorMap::initialize(Glib::RefPtr<Gtk::Builder> const &builder) {
-	if (not instance) {
-		builder->get_widget_derived("DialogRestrictorMap", instance);
-	}
-}
-
-DialogRestrictorMap* DialogRestrictorMap::getInstance() {
-	return instance;
-}
-
 DialogRestrictorMap::DialogRestrictorMap(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
 	DialogForm(obj, builder)
 {

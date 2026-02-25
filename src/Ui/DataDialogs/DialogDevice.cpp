@@ -24,23 +24,13 @@
 
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
-DialogDevice* DialogDevice::instance = nullptr;
-
-void DialogDevice::initialize(Glib::RefPtr<Gtk::Builder> const &builder) {
-	if (not instance) {
-		builder->get_widget_derived("DialogDevice", instance);
-	}
-}
-
-DialogDevice* DialogDevice::getInstance() {
-	return instance;
-}
-
 DialogDevice::DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
 	DialogForm(obj, builder)
 {
-	// This dialog is parent of the Element dialog.
-	childDialog = DialogElement::getInstance();
+
+	// Init Elements and register for refresh.
+	DialogElement::buildInstance(builder, "DialogElement");
+	childDialogs.push_back(DialogElement::getInstance());
 
 	// Connect Device Box and buttons.
 	builder->get_widget_derived("BoxDevices", box);
@@ -177,12 +167,16 @@ DialogDevice::DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 	});
 }
 
+DialogDevice::~DialogDevice() {
+	delete DataDialogs::DialogElement::getInstance();
+}
+
 void DialogDevice::load(XMLHelper* values) {
 	createItems(values->getData(COLLECTION_DEVICES), values);
 }
 
 void DialogDevice::createSubItems(XMLHelper* values) {
-	childDialog->load(values);
+	DialogElement::getInstance()->load(values);
 }
 
 LEDSpicerUI::Ui::Storage::CollectionHandler* DialogDevice::getCollectionHandler() const {

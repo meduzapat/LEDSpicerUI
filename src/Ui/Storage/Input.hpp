@@ -20,8 +20,9 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "FileData.hpp"
 #include "DataDialogs/DialogInputSource.hpp"
-#include "DataDialogs/DialogInputLinkMaps.hpp"
+//#include "DataDialogs/DialogInputLinkMaps.hpp"
 
 #pragma once
 
@@ -34,16 +35,14 @@ namespace LEDSpicerUI::Ui::Storage {
  * and a collection of InputMapLinks that cross sources.
  * PATH and FILENAME are stored as properties and never serialized to XML.
  */
-class Input: public Data {
+class Input: public FileData {
 
 public:
 
-	Input(StringUMap& data);
+	using FileData::FileData;
 
 	virtual ~Input();
 
-	const string createUniqueId() const override;
-	const string createPrettyName() const override;
 	const string createTooltip() const override;
 	const string getCssClass() const override;
 	void activate() override;

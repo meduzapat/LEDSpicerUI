@@ -159,7 +159,7 @@ protected:
 	RootInfo rootInfo;
 
 	/// Populated by derived classes to store extracted XML data by section.
-	unordered_map<string, StringUMapVector> extractedData;
+	std::unordered_map<string, StringUMapVector> extractedData;
 
 	/**
 	 * Processes root node and extracts common attributes.

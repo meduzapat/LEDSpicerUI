@@ -24,44 +24,46 @@
 
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
-DialogInputSource* DialogInputSource::instance = nullptr;
-
-void DialogInputSource::initialize(Glib::RefPtr<Gtk::Builder> const& builder) {
-	if (not instance) {
-		builder->get_widget_derived("DialogInputSource", instance);
-	}
-}
-
-DialogInputSource* DialogInputSource::getInstance() {
-	return instance;
-}
-
 DialogInputSource::DialogInputSource(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
 	DialogForm(obj, builder)
 {
+
+	Gtk::Button
+		* btnAdd          = nullptr,
+		* btnAddMapSingle = nullptr; // From Input Dialog.
+
+	/*
+	 * Register before initializing child dialog to set fake source creation.
+	 * DialogInputMap will create add button.
+	 */
+	builder->get_widget("BtnAddInputMap", btnAddMapSingle);
+	btnAddMapSingle->signal_clicked().connect([this]() {
+		createButtonDirectly();
+	});
+
+	DataDialogs::DialogInputMap::buildInstance(builder, "DialogInputMap");
+
 	builder->get_widget_derived("BoxInputSources",  box);
 	builder->get_widget("BtnApplyInputSource",      btnApply);
+	builder->get_widget("ComboBoxInputSelectInput", comboBoxInputSelectInput); // from Input Dialog.
 	builder->get_widget("ComboBoxInputSource",      comboBoxInputSource);
-	builder->get_widget("ComboBoxInputSelectInput", comboBoxInputSelectInput);
 	builder->get_widget("EntryInputSource",         entryInputSource);
-	builder->get_widget("BtnAddInputSourceMap",     btnAddMap);
-
-	Gtk::Button * btnAdd = nullptr;
-	builder->get_widget("BtnAddInputSource", btnAdd);
+	builder->get_widget("BtnAddInputSource",        btnAdd);
+	builder->get_widget("BtnAddInputSourceMap",     btnAddMap); // From Input Map Dialog.
 
 	setSignalAdd(btnAdd);
 	setSignalApply();
 
-	childDialog = DialogInputMap::getInstance();
+	childDialogs.push_back(DialogInputMap::getInstance());
 
 	comboBoxInputSource->signal_changed().connect([this]() {
 
-		string selected(comboBoxInputSource->get_active_text());
+		string selected(comboBoxInputSource->get_active_id());
 
 		btnAddMap->set_sensitive(false);
 		entryInputSource->get_parent()->set_visible(false);
 
-		if (selected == SOURCE_EMPTY_OPTION) return;
+		if (selected.empty()) return;
 
 		if (selected == SOURCE_OTHER_OPTION) {
 			entryInputSource->get_parent()->set_visible(true);
@@ -77,6 +79,10 @@ DialogInputSource::DialogInputSource(BaseObjectType* obj, const Glib::RefPtr<Gtk
 	});
 }
 
+DialogInputSource::~DialogInputSource() {
+	delete DataDialogs::DialogInputMap::getInstance();
+}
+
 void DialogInputSource::load(XMLHelper* values) {
 	createItems(
 		values->getData(Defaults::createCommonUniqueId({ownerData->createUniqueId(), COLLECTION_INPUT_SOURCES})),
@@ -85,7 +91,10 @@ void DialogInputSource::load(XMLHelper* values) {
 }
 
 LEDSpicerUI::Ui::Storage::CollectionHandler* DialogInputSource::getCollectionHandler() const {
-	return Storage::CollectionHandler::getInstance(COLLECTION_INPUT_SOURCES);
+	return Storage::CollectionHandler::getInstance(
+		// local to it's input.
+		COLLECTION_INPUT_SOURCES + ownerData->getProperty(FILE_ID)
+	);
 }
 
 void DialogInputSource::resetForm() {
@@ -98,17 +107,18 @@ void DialogInputSource::clearForm() {
 	comboBoxInputSource->get_parent()->hide();
 	entryInputSource->get_parent()->hide();
 
-	if (Defaults::needSource(comboBoxInputSelectInput->get_active_text())) {
+	if (Defaults::needSource(comboBoxInputSelectInput->get_active_id())) {
 		populateSourcesList(scanEventDevices());
 	}
 
 	btnAddMap->set_sensitive(false);
+	btnApply->set_sensitive(false);
 	entryInputSource->set_text("");
 }
 
 void DialogInputSource::isValid() const {
 
-	if (Defaults::needSource(comboBoxInputSelectInput->get_active_text())) {
+	if (Defaults::needSource(comboBoxInputSelectInput->get_active_id())) {
 		if (createUniqueId().empty())
 			throw Message("Enter a valid event source name.");
 	}
@@ -120,7 +130,7 @@ void DialogInputSource::storeData() {
 
 void DialogInputSource::retrieveData() {
 
-	if (not Defaults::needSource(comboBoxInputSelectInput->get_active_text())) {
+	if (not Defaults::needSource(comboBoxInputSelectInput->get_active_id())) {
 		return;
 	}
 
@@ -136,14 +146,23 @@ void DialogInputSource::retrieveData() {
 }
 
 const string DialogInputSource::createUniqueId() const {
-	if (comboBoxInputSource->is_visible()) {
-		string selected(comboBoxInputSource->get_active_text());
-		if (selected == SOURCE_OTHER_OPTION or selected.empty()) {
-			return entryInputSource->get_text();
-		}
-		return selected;
+	string selected{comboBoxInputSource->get_active_id()};
+	if (selected == SOURCE_OTHER_OPTION or selected.empty()) selected = entryInputSource->get_text();
+	return Defaults::createCommonUniqueId({ownerData->getProperty(FILE_ID), selected});
+}
+
+void DialogInputSource::createButtonDirectly() {
+	if (items->getSize() > 0) {
+		(*items->begin())->getData()->activate();
+		return;
 	}
-	return entryInputSource->get_text();
+	StringUMap rawData;
+	// Injects INPUT_PK and INDEX=0.
+	auto* phantom = createData(rawData);
+	// Wires DialogInputMap to phantom's maps.
+	phantom->activate();
+	items->create(phantom);
+	getCollectionHandler()->add(phantom);
 }
 
 void DialogInputSource::createSubItems(XMLHelper* values) {
@@ -155,64 +174,92 @@ const string DialogInputSource::getType() const {
 }
 
 LEDSpicerUI::Ui::Storage::Data* DialogInputSource::createData(StringUMap& rawData) {
-	// Inject input PK and index as properties so InputSource::createUniqueId() works standalone.
-	rawData[INPUT_PK] = ownerData->createUniqueId();
-	rawData[INDEX]    = std::to_string(items->getSize());
-	return new Storage::InputSource(rawData);
+	auto is = new Storage::InputSource(rawData);
+	// pass the input file id.
+	is->setProperty(FILE_ID, ownerData->getProperty(FILE_ID));
+	return is;
 }
 
-StringVector DialogInputSource::scanEventDevices() {
+StringMap DialogInputSource::scanEventDevices() {
 
-	StringVector devices;
+	StringMap devices;
+
 	if (
-		// Portable will use other system inputs that most likely won't be compatible with this.
 		Defaults::getMode() == Defaults::Mode::Portable or
-		// Non event sources won't be listed here.
-		not Defaults::isDevInputListener(comboBoxInputSelectInput->get_active_text())
+		not Defaults::isDevInputListener(comboBoxInputSelectInput->get_active_id())
 	) {
 		return devices;
 	}
 
-	auto directory = Gio::File::create_for_path(DEV_INPUT);
-	Glib::RefPtr<Gio::FileEnumerator> enumerator;
+	// Helper lambda to add devices from a directory.
+	auto addDevices = [&](const std::filesystem::path& dirPath, bool useById) {
+//		if (not std::filesystem::exists(dirPath) and not std::filesystem::is_directory(dirPath)) return;
 
-	try {
-		enumerator = directory->enumerate_children("standard::name,standard::type");
-	}
-	catch (const Glib::Error&) {
-		// /dev/input/ not accessible.
-		return devices;
-	}
+		for (const auto& entry : std::filesystem::directory_iterator(dirPath)) {
 
-	Glib::RefPtr<Gio::FileInfo> fileInfo;
-	while ((fileInfo = enumerator->next_file())) {
-		string name(fileInfo->get_name());
-		if (name.find("event") != string::npos) {
-			devices.push_back(name);
+			if (not entry.is_regular_file() and not entry.is_symlink()) continue;
+
+			string name = entry.path().filename().string();
+			if (name.empty() or name[0] == '.' or (useById and name.find("event") == string::npos)) continue;
+
+			string humanName = readDeviceName(name);
+			if (humanName.empty()) humanName = name;
+
+			devices.emplace(name, humanName);
 		}
-	}
+	};
 
-	std::sort(devices.begin(), devices.end());
+	// Prefer /dev/input/by-id.
+	addDevices(DEV_INPUT_BY_ID, true);
+	if (!devices.empty()) return devices;
+
+	// Fallback: /dev/input/event*.
+	addDevices(DEV_INPUT, false);
+
 	return devices;
 }
 
-void DialogInputSource::populateSourcesList(const StringVector& devices) {
+void DialogInputSource::populateSourcesList(const StringMap& devices) {
 
 	comboBoxInputSource->remove_all();
 
-	// Local mode but no sources detected.
 	if (devices.empty()) {
+		// No devices detected — show manual entry directly.
 		entryInputSource->get_parent()->show();
 		entryInputSource->grab_focus();
 		return;
 	}
 
 	comboBoxInputSource->get_parent()->show();
-	comboBoxInputSource->append(SOURCE_EMPTY_OPTION);
+	comboBoxInputSource->append("", SOURCE_EMPTY_OPTION);
 
-	for (const auto& device : devices) {
-		comboBoxInputSource->append(device);
+	for (const auto& [id, display] : devices)
+		comboBoxInputSource->append(id, display);
+
+	comboBoxInputSource->append(SOURCE_OTHER_OPTION, SOURCE_OTHER_OPTION);
+	comboBoxInputSource->set_active_id("");
+}
+
+string DialogInputSource::readDeviceName(const string& byIdName) {
+	std::filesystem::path link_path{DEV_INPUT_BY_ID + byIdName};
+	if (not std::filesystem::exists(link_path) or not std::filesystem::is_symlink(link_path)) {
+		return byIdName;
 	}
-	comboBoxInputSource->append(SOURCE_OTHER_OPTION);
-	comboBoxInputSource->set_active_text(SOURCE_EMPTY_OPTION);
+
+	std::error_code ec;
+	auto target = std::filesystem::read_symlink(link_path, ec);
+	if (ec) return byIdName;
+
+	string eventName = target.filename().string();
+
+	std::filesystem::path sysPath{SYS_CLASS_INPUT + eventName + "/device/name"};
+	std::ifstream file(sysPath);
+	if (not file) return byIdName;
+
+	string name;
+	std::getline(file, name);
+
+	Defaults::rtrim(name);
+
+	return name;
 }

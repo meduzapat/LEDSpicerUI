@@ -33,7 +33,7 @@ namespace LEDSpicerUI::Ui::DataDialogs {
  * Data Owner: MainDialog
  *
  */
-class DialogDevice: public DialogForm {
+class DialogDevice: public DialogForm, public SingletonDialog<DialogDevice> {
 
 	friend class Gtk::Builder;
 
@@ -41,10 +41,8 @@ public:
 
 	DialogDevice() = delete;
 
-	virtual ~DialogDevice() = default;
+	virtual ~DialogDevice();
 
-	static void initialize(Glib::RefPtr<Gtk::Builder> const &builder);
-	static DialogDevice* getInstance();
 	void load(XMLHelper* values) override;
 	Storage::CollectionHandler* getCollectionHandler() const override;
 	void resetForm() override;
@@ -56,9 +54,6 @@ public:
 	const string createUniqueId() const override;
 
 protected:
-
-	/// Self instance.
-	static DialogDevice* instance;
 
 	Gtk::ComboBox
 		* comboBoxDevices  = nullptr,

@@ -33,7 +33,7 @@ namespace LEDSpicerUI::Ui::DataDialogs {
  * LEDSpicerUI::Ui::DataDialogs::DialogInput
  * Dialog to create and edit Input plugins.
  */
-class DialogInput : public DialogForm {
+class DialogInput : public DialogForm, public SingletonDialog<DialogInput> {
 
 	friend class Gtk::Builder;
 
@@ -43,10 +43,8 @@ public:
 
 	DialogInput() = delete;
 
-	virtual ~DialogInput() = default;
+	virtual ~DialogInput();
 
-	static void initialize(Glib::RefPtr<Gtk::Builder> const& builder);
-	static DialogInput* getInstance();
 	void load(XMLHelper* values) override;
 	Storage::CollectionHandler* getCollectionHandler() const override;
 	void resetForm() override;
@@ -61,8 +59,6 @@ public:
 
 protected:
 
-	static DialogInput* instance;
-
 	/// Import input dialog.
 	DialogImport dialogImportInput;
 
@@ -73,11 +69,8 @@ protected:
 	Gtk::Switch*     switchInputBlink = nullptr;
 	Gtk::SpinButton* spinInputTimes   = nullptr;
 	Gtk::Box
-		* boxInputSourcesBox        = nullptr, ///< Sources section, hidden for single-source plugins.
+		* boxInputSourcesBox        = nullptr,
 		* boxInputCreditsSettings   = nullptr;
-
-	/// Only to hide/show when source is selected.
-	Gtk::Button* btnAddInputMap = nullptr;
 
 	/// The box to display linked maps.
 	OrdenableFlowBox* boxInputLinkedMaps = nullptr;

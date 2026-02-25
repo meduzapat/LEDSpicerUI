@@ -24,19 +24,7 @@
 
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
-DialogSelect* DialogSelect::instance = nullptr;
-
-void DialogSelect::initialize(Glib::RefPtr<Gtk::Builder> const &builder) {
-	if (not instance) {
-		builder->get_widget_derived("DialogSelect", instance);
-	}
-}
-
-DialogSelect* DialogSelect::getInstance() {
-	return instance;
-}
-
-DialogSelect::DialogSelect(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) : Gtk::Dialog(obj) {
+DialogSelect::DialogSelect(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) : GladeDialog(obj, builder) {
 	Gtk::Button
 		* btnSelectAll,
 		* btnSelectNone;
@@ -92,7 +80,7 @@ void DialogSelect::runSelection() {
 			auto selection = dynamic_cast<Storage::Selection*>(child->get_child());
 			// Link data.
 			StringUMap data;
-			Storage::Link* link      = new Storage::Link(data, setting->type, setting->parameter, selection->getData());
+			Storage::Link* link      = new Storage::Link(data, {setting->type, setting->parameter, selection->getData()});
 			Storage::BoxButton& bBox = items->create(link);
 			addButtons(bBox);
 			box->add(bBox);
@@ -119,7 +107,7 @@ void DialogSelect::load(XMLHelper* values, const string& type) {
 				throw Message("Cannot find " + setting->type + " with " + setting->parameter + " " + rawItem[setting->parameter] + location);
 			rawItem.erase(setting->parameter);
 			// TODO: add buttons values if any.
-			link = new Storage::Link(rawItem, setting->type, setting->parameter, data);
+			link = new Storage::Link(rawItem, {setting->type, setting->parameter, data});
 		}
 		catch (Message& e) {
 			errors += e.getMessage() + '\n';

@@ -25,9 +25,8 @@
 using namespace LEDSpicerUI::Ui::Storage;
 
 Process::~Process() {
-	if (not getValue(getPrimaryKey()).empty()) {
+	if (CollectionHandler::getInstance(COLLECTION_PROCESS)->isSet(this))
 		CollectionHandler::getInstance(COLLECTION_PROCESS)->remove(this);
-	}
 }
 
 const string Process::createPrettyName() const {

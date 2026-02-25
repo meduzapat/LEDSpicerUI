@@ -52,3 +52,7 @@ const string InputMapLink::getCssClass() const {
 	return "LinkBoxButton";
 }
 
+const string InputMapLink::createUniqueId() const {
+	// ID holds the canonical trigger combination key built by DialogInputLinkMaps.
+	return getValue(ID);
+}

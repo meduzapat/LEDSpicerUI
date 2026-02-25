@@ -24,22 +24,33 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
+InputSource::InputSource(StringUMap& data) : Data(data) {
+	static size_t sourceCount = 0;
+	setProperty(SID, std::to_string(++sourceCount));
+	// register maps against the global collections so cascade deletes propagate.
+	CollectionHandler::getInstance(COLLECTION_ELEMENT)->registerDependency({&maps});
+	CollectionHandler::getInstance(COLLECTION_GROUP)->registerDependency({&maps});
+}
+
 InputSource::~InputSource() {
-	CollectionHandler::getInstance(COLLECTION_INPUT_MAPS)->release(&maps);
-	if (not fieldsData.empty()) {
-		CollectionHandler::getInstance(COLLECTION_INPUT_SOURCES)->remove(this);
-	}
+	// Release maps from global collections so cascade deletes don't propagate.
+	CollectionHandler::getInstance(COLLECTION_ELEMENT)->release(&maps);
+	CollectionHandler::getInstance(COLLECTION_GROUP)->release(&maps);
+	// Local to Source.
+//	CollectionHandler::getInstance(COLLECTION_INPUT_MAPS + createUniqueId())->release(&maps);
+	// Local to Input.
+	string collectionId(COLLECTION_INPUT_SOURCES + getProperty(FILE_ID));
+	if (CollectionHandler::getInstance(collectionId)->isSet(this))
+		CollectionHandler::getInstance(collectionId)->remove(this);
 }
 
 const string InputSource::createUniqueId() const {
-	return Defaults::createCommonUniqueId({
-		getProperty(INPUT_PK),
-		getProperty(INDEX)
-	});
+	// An ID unique to this input and this source.
+	return Defaults::createCommonUniqueId({getProperty(FILE_ID), getValue(SOURCE)});
 }
 
 const string InputSource::createPrettyName() const {
-	string source(getValue(SOURCE));
+	string source{getValue(SOURCE)};
 	return source.empty() ? "<single>" : source;
 }
 

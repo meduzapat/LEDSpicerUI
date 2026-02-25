@@ -24,7 +24,7 @@
 
 using namespace LEDSpicerUI::Ui;
 
-const unordered_map<const DialogImport::Types, const string> DialogImport::setups {
+const std::unordered_map<const DialogImport::Types, const string> DialogImport::setups {
 	{Types::CONFIG, "Select a config file"},
 	{Types::INPUT,  "Select one or more input plugin files"}
 };

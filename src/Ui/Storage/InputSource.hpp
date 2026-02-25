@@ -38,6 +38,8 @@ public:
 
 	using Data::Data;
 
+	InputSource(StringUMap& data);
+
 	virtual ~InputSource();
 
 	const string createUniqueId() const override;

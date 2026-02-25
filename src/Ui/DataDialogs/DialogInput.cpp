@@ -24,27 +24,26 @@
 
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
-DialogInput* DialogInput::instance = nullptr;
-
-void DialogInput::initialize(Glib::RefPtr<Gtk::Builder> const& builder) {
-	if (not instance) {
-		builder->get_widget_derived("DialogInput", instance);
-	}
-}
-
-DialogInput* DialogInput::getInstance() {
-	return instance;
-}
-
 DialogInput::DialogInput(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
 	DialogForm(obj, builder),
 	dialogImportInput(DialogImport::Types::INPUT, this)
 {
-	Gtk::Button* btnAddInput = nullptr;
+
+	//	DataDialogs::DialogInputLinkMaps::buildInstance(builder);
+	DataDialogs::DialogInputSource::buildInstance(builder, "DialogInputSource");
+
+	childDialogs.push_back(DialogInputSource::getInstance());
+
+	Gtk::Button
+		* btnAddInputSource = nullptr, // Only to hide/show when source is selected.
+		* btnAddInputMap    = nullptr, // Only to hide/show when source is selected.
+		* btnAddInput       = nullptr; // Form shooter.
+
 	builder->get_widget_derived("BoxInputs",          box);
 	builder->get_widget("BtnAddInput",                btnAddInput);
 	builder->get_widget("BtnApplyInput",              btnApply);
 	builder->get_widget("BtnAddInputMap",             btnAddInputMap);
+	builder->get_widget("BtnAddInputSource",          btnAddInputSource);
 	builder->get_widget("ComboBoxInputSelectInput",   comboBoxInputSelectInput);
 	builder->get_widget("ComboBoxInputSpeed",         comboBoxInputSpeed);
 	builder->get_widget("EntryInputName",             entryInputName);
@@ -57,16 +56,26 @@ DialogInput::DialogInput(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& 
 	setSignalAdd(btnAddInput);
 	setSignalApply();
 
+	// Populate input types.
+	comboBoxInputSelectInput->append("", "Select Input Type");
+	for (const auto& [id, info] : Defaults::inputsInfo)
+		comboBoxInputSelectInput->append(id, info.name);
+	comboBoxInputSelectInput->set_active(0);
+
 	// Show/hide plugin-specific options when plugin type changes.
-	comboBoxInputSelectInput->signal_changed().connect([this]() {
-		string name(comboBoxInputSelectInput->get_active_text());
-		bool needSource(Defaults::needSource(name));
-		boxInputSourcesBox->set_visible(needSource);
-		btnAddInputMap->set_visible(not needSource);
-		comboBoxInputSpeed->get_parent()->set_visible(name == "Actions" or name == "Blinker");
-		spinInputTimes->get_parent()->set_visible(name == "Blinker");
-		switchInputBlink->get_parent()->set_visible(name == "Actions");
-		boxInputCreditsSettings->set_visible(name == "Credits");
+	comboBoxInputSelectInput->signal_changed().connect([this, btnAddInputSource, btnAddInputMap]() {
+		string name(comboBoxInputSelectInput->get_active_id());
+		bool valid = not name.empty();
+		btnAddInputSource->set_sensitive(valid);
+		boxInputSourcesBox->set_visible(Defaults::inputHasFlag(name, Defaults::INPUT_NEEDS_SOURCE));
+		boxInputLinkedMaps->set_visible(Defaults::inputHasFlag(name, Defaults::INPUT_LINKED_MAPS));
+		btnAddInputMap->set_visible(not Defaults::inputHasFlag(name, Defaults::INPUT_NEEDS_SOURCE));
+		btnAddInputMap->set_sensitive(valid);
+		btnApply->set_sensitive(valid);
+		comboBoxInputSpeed->get_parent()->set_visible(Defaults::inputHasFlag(name, Defaults::INPUT_HAS_SPEED));
+		spinInputTimes->get_parent()->set_visible(Defaults::inputHasFlag(name, Defaults::INPUT_HAS_TIMES));
+		switchInputBlink->get_parent()->set_visible(Defaults::inputHasFlag(name, Defaults::INPUT_HAS_BLINK));
+		boxInputCreditsSettings->set_visible(Defaults::inputHasFlag(name, Defaults::INPUT_HAS_CREDITS));
 	});
 
 	// Import button.
@@ -89,13 +98,18 @@ DialogInput::DialogInput(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& 
 	});
 }
 
+DialogInput::~DialogInput() {
+	//	delete DataDialogs::DialogInputLinkMaps::getInstance();
+	delete DataDialogs::DialogInputSource::getInstance();
+}
+
 void DialogInput::load(XMLHelper* values) {
 	createItems(values->getData(COLLECTION_INPUT), values);
 }
 
 void DialogInput::createSubItems(XMLHelper* values) {
 	DialogInputSource::getInstance()->load(values);
-	DialogInputLinkMaps::getInstance()->load(values);
+//	DialogInputLinkMaps::getInstance()->load(values);
 }
 
 LEDSpicerUI::Ui::Storage::CollectionHandler* DialogInput::getCollectionHandler() const {
@@ -118,6 +132,7 @@ void DialogInput::clearForm() {
 	spinInputTimes->set_text("");
 	switchInputBlink->get_parent()->hide();
 	switchInputBlink->set_active(false);
+	btnApply->set_sensitive(false);
 }
 
 void DialogInput::isValid() const {
@@ -145,7 +160,7 @@ void DialogInput::isValid() const {
 }
 
 void DialogInput::storeData() {
-	string name(comboBoxInputSelectInput->get_active_text());
+	string name(comboBoxInputSelectInput->get_active_id());
 	currentData->setValue(NAME, name);
 	currentData->setProperty(PATH,     currentPath);
 	currentData->setProperty(FILENAME, entryInputName->get_text());
@@ -163,7 +178,7 @@ void DialogInput::storeData() {
 
 void DialogInput::retrieveData() {
 	string name(currentData->getValue(NAME));
-	comboBoxInputSelectInput->set_active_text(name);
+	comboBoxInputSelectInput->set_active_id(name);
 	entryInputName->set_text(currentData->getProperty(FILENAME));
 
 	if (name == "Actions") {

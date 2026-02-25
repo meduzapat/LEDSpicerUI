@@ -88,7 +88,7 @@ void OrdenableListBox::wipe() {
 }
 
 void OrdenableListBox::sortAndMark(StringVector values) {
-	unordered_map<string, Gtk::ListBoxRow*> rows;
+	std::unordered_map<string, Gtk::ListBoxRow*> rows;
 	// move items into temp container
 	for (auto child : get_children()) {
 		auto boxChild = dynamic_cast<Gtk::ListBoxRow*>(child);

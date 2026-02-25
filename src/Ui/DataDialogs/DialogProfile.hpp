@@ -31,7 +31,7 @@ namespace LEDSpicerUI::Ui::DataDialogs {
  * LEDSpicerUI::Ui::DialogProfile
  * Dialog to create or edit profiles.
  */
-class DialogProfile: public DialogForm {
+class DialogProfile: public DialogForm, public SingletonDialog<DialogProfile> {
 
 	friend class Gtk::Builder;
 
@@ -41,8 +41,6 @@ public:
 
 	virtual ~DialogProfile() = default;
 
-	static void initialize(Glib::RefPtr<Gtk::Builder> const &builder);
-	static DialogProfile* getInstance();
 	void load(XMLHelper* values) override;
 	Storage::CollectionHandler* getCollectionHandler() const override;
 	void clearForm() override;
@@ -52,9 +50,6 @@ public:
 	const string createUniqueId() const override;
 
 protected:
-
-	/// Self instance.
-	static DialogProfile* instance;
 
 	/// Pointer to the entry for profile name input.
 	Gtk::Entry*  inputProfileName          = nullptr;

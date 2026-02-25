@@ -26,18 +26,17 @@ using namespace LEDSpicerUI::Ui::Storage;
 
 Profile::Profile(StringUMap& data) : Data(data) {
 	// Any change needs to be reflected here.
-	CollectionHandler::getInstance(COLLECTION_ELEMENT)->registerDependency(&alwaysOnElements);
-	CollectionHandler::getInstance(COLLECTION_GROUP)->registerDependency(&alwaysOnGroups);
-	CollectionHandler::getInstance(COLLECTION_INPUT)->registerDependency(&inputs);
+	CollectionHandler::getInstance(COLLECTION_ELEMENT)->registerDependency({&alwaysOnElements});
+	CollectionHandler::getInstance(COLLECTION_GROUP)->registerDependency({&alwaysOnGroups});
+	CollectionHandler::getInstance(COLLECTION_INPUT)->registerDependency({&inputs});
 //	CollectionHandler::getInstance(COLLECTION_ANIMATION)->registerDependency(&animationss);
 //	CollectionHandler::getInstance(COLLECTION_ANIMATION)->registerDependency(&startTransitions);
 //	CollectionHandler::getInstance(COLLECTION_ANIMATION)->registerDependency(&endTransitions);
 }
 
 Profile::~Profile() {
-	if (not getValue(getPrimaryKey()).empty()) {
+	if (CollectionHandler::getInstance(COLLECTION_PROFILES)->isSet(this))
 		CollectionHandler::getInstance(COLLECTION_PROFILES)->remove(this);
-	}
 	CollectionHandler::getInstance(COLLECTION_ELEMENT)->release(&alwaysOnElements);
 	CollectionHandler::getInstance(COLLECTION_GROUP)->release(&alwaysOnGroups);
 	CollectionHandler::getInstance(COLLECTION_INPUT)->release(&inputs);

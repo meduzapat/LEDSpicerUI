@@ -26,13 +26,10 @@ using namespace LEDSpicerUI::Ui::Storage;
 
 Element::~Element() {
 
-	for (auto child : stripChildren) {
-		delete child;
-	}
+	for (auto child : stripChildren) delete child;
 
-	if (not getValue(NAME).empty()) {
+	if (CollectionHandler::getInstance(COLLECTION_ELEMENT)->isSet(this))
 		CollectionHandler::getInstance(COLLECTION_ELEMENT)->remove(this);
-	}
 }
 
 const string Element::getCssClass() const {

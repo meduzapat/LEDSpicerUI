@@ -29,7 +29,7 @@ namespace LEDSpicerUI::Ui::DataDialogs {
 /**
  * LEDSpicerUI::Ui::DialogRestrictor
  */
-class DialogRestrictor: public DialogForm {
+class DialogRestrictor: public DialogForm, public SingletonDialog<DialogRestrictor> {
 
 	friend class Gtk::Builder;
 
@@ -37,9 +37,8 @@ public:
 
 	DialogRestrictor() = delete;
 
-	virtual ~DialogRestrictor() = default;
-	static void initialize(Glib::RefPtr<Gtk::Builder> const &builder);
-	static DialogRestrictor* getInstance();
+	virtual ~DialogRestrictor();
+
 	void load(XMLHelper* values) override;
 	Storage::CollectionHandler* getCollectionHandler() const override;
 	void resetForm() override;
@@ -49,9 +48,6 @@ public:
 	const string createUniqueId() const override;
 
 protected:
-
-	/// Self instance.
-	static DialogRestrictor* instance;
 
 	Gtk::ComboBox
 		* comboBoxRestrictors = nullptr,
@@ -67,7 +63,7 @@ protected:
 		* serialPort = nullptr;
 
 	// Stores the restrictors Ways icons.
-	unordered_map<Defaults::Ways, Gtk::FlowBoxChild*> waysIcons;
+	std::unordered_map<Defaults::Ways, Gtk::FlowBoxChild*> waysIcons;
 
 	Gtk::ListStore
 		* restrictorsListstore = nullptr,

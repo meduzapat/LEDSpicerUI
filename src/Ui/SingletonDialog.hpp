@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      GladeDialog.hpp
- * @since     Feb 1, 2026
+ * @file      SingletonDialog.hpp
+ * @since     Feb 23, 2026
  * @author    Patricio A. Rossi (MeduZa)
  *
  * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
@@ -20,28 +20,24 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "XMLHelper.hpp"
+#include <gtkmm/builder.h>
+#include <stdexcept>
+#include <string>
 
 #pragma once
 
-/**
- * Template that initialize Dialogs from Glade using CRTP (Curiously Recurring Template Pattern)
- * @tparam Derived
- */
-template<typename Derived>
-class GladeDialog : public Gtk::Dialog {
+namespace LEDSpicerUI::Ui {
+
+template <typename Derived>
+class SingletonDialog {
 
 public:
-
-	GladeDialog() = delete;
-
-	virtual ~GladeDialog() = default;
 
 	static Derived* getInstance() {
 		return instance;
 	}
 
-	static void buildInstance(const Glib::RefPtr<Gtk::Builder>& builder, const string& widgetId) {
+	static void buildInstance(const Glib::RefPtr<Gtk::Builder>& builder, const std::string& widgetId) {
 		if (not instance) {
 			builder->get_widget_derived(widgetId, instance);
 			if (not instance) {
@@ -54,8 +50,11 @@ protected:
 
 	static Derived* instance;
 
-	GladeDialog(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>&) : Gtk::Dialog(obj) {}
+	SingletonDialog() = default;
 };
 
-template<typename Derived>
-Derived* GladeDialog<Derived>::instance = nullptr;
+template <typename Derived>
+Derived* SingletonDialog<Derived>::instance = nullptr;
+
+} // namespace
+

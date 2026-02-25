@@ -24,35 +24,13 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-Input::Input(StringUMap& data) : Data(data) {
-	// PATH and FILENAME come pre-split from InputFile or DialogInput.
-	setProperty(PATH,     data.count(PATH)     ? data.at(PATH)     : "");
-	setProperty(FILENAME, data.count(FILENAME) ? data.at(FILENAME) : "");
-	// Store as properties so they never serialize into the XML attributes.
-	data.erase(PATH);
-	data.erase(FILENAME);
-}
-
 Input::~Input() {
-	if (not createUniqueId().empty()) {
+	if (CollectionHandler::getInstance(COLLECTION_INPUT)->isSet(this))
 		CollectionHandler::getInstance(COLLECTION_INPUT)->remove(this);
-	}
-}
-
-const string Input::createUniqueId() const {
-	string
-		path(getProperty(PATH)),
-		filename(getProperty(FILENAME));
-	if (filename.empty()) return "";
-	return path.empty() ? filename : path + "/" + filename;
-}
-
-const string Input::createPrettyName() const {
-	return getValue(NAME) + " " + getProperty(FILENAME);
 }
 
 const string Input::createTooltip() const {
-	return "Plugin " + getValue(NAME);
+	return "Input " + FileData::createTooltip();
 }
 
 const string Input::getCssClass() const {
@@ -61,7 +39,8 @@ const string Input::getCssClass() const {
 
 void Input::activate() {
 	DataDialogs::DialogInputSource::getInstance()->setOwner(&sources, this);
-//	DataDialogs::DialogInputLinkMaps::getInstance()->setOwner(&linkedMaps, this);
+	// TODO wire linkedMaps once DialogInputLinkMaps is reworked.
+	// DataDialogs::DialogInputLinkMaps::getInstance()->setOwner(&linkedMaps, this);
 }
 
 const string Input::toXML() const {

@@ -24,18 +24,6 @@
 
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
-DialogProfile* DialogProfile::instance = nullptr;
-
-void DialogProfile::initialize(Glib::RefPtr<Gtk::Builder> const &builder) {
-	if (not instance) {
-		builder->get_widget_derived("DialogProfile", instance);
-	}
-}
-
-DialogProfile* DialogProfile::getInstance() {
-	return instance;
-}
-
 DialogProfile::DialogProfile(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
 	DialogForm(obj, builder)
 {

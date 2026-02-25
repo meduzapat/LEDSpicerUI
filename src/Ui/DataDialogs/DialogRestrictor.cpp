@@ -24,23 +24,12 @@
 
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
-DialogRestrictor* DialogRestrictor::instance = nullptr;
-
-void DialogRestrictor::initialize(Glib::RefPtr<Gtk::Builder> const &builder) {
-	if (not instance) {
-		builder->get_widget_derived("DialogRestrictor", instance);
-	}
-}
-
-DialogRestrictor* DialogRestrictor::getInstance() {
-	return instance;
-}
-
 DialogRestrictor::DialogRestrictor(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
 	DialogForm(obj, builder)
 {
 
-	childDialog = DialogRestrictorMap::getInstance();
+	DataDialogs::DialogRestrictorMap::buildInstance(builder, "DialogRestrictorMap");
+	childDialogs.push_back(DialogRestrictorMap::getInstance());
 
 	// Connect Restrictor Box and buttons.
 	builder->get_widget_derived("BoxRestrictors", box);
@@ -154,8 +143,12 @@ DialogRestrictor::DialogRestrictor(BaseObjectType* obj, const Glib::RefPtr<Gtk::
 		briefRestrictor->set_label(Defaults::restrictorsInfo.at(name).brief);
 		btnApply->set_sensitive(true);
 		// Disable add interface button if there no more interfaces left.
-		btnAddRestrictorMap->set_sensitive(childDialog->getValues().size() < Defaults::restrictorsInfo.at(comboBoxRestrictors->get_active_id()).interfaces);
+		btnAddRestrictorMap->set_sensitive(DialogRestrictorMap::getInstance()->getValues().size() < Defaults::restrictorsInfo.at(comboBoxRestrictors->get_active_id()).interfaces);
 	});
+}
+
+DialogRestrictor::~DialogRestrictor() {
+	delete DataDialogs::DialogRestrictorMap::getInstance();
 }
 
 void DialogRestrictor::load(XMLHelper* values) {
@@ -163,7 +156,7 @@ void DialogRestrictor::load(XMLHelper* values) {
 }
 
 void DialogRestrictor::createSubItems(XMLHelper* values) {
-	childDialog->load(values);
+	DialogRestrictorMap::getInstance()->load(values);
 }
 
 LEDSpicerUI::Ui::Storage::CollectionHandler* DialogRestrictor::getCollectionHandler() const {

@@ -1,4 +1,5 @@
-  combobox.noRoundLeft button.combo,
+
+combobox.noRoundLeft button.combo,
 .noRoundLeft {
 	border-top-left-radius: 0;
 	border-bottom-left-radius: 0;
@@ -47,15 +48,15 @@ combobox.noRoundRight button.combo,
 .pinLabel {
 	font-size: 8pt;
 	border: 1px solid #333;
-  background: #1a1a1a;
+	background: #1a1a1a;
 	color: #fff;
 }
 
 .connectorBox {
-  margin: 0;
-  padding: 0;
-  font-size: 10pt;
-  border: 1px solid #aaa;
+	margin: 0;
+	padding: 0;
+	font-size: 10pt;
+	border: 1px solid #aaa;
 }
 
 .pinSingle {
@@ -87,21 +88,107 @@ combobox.noRoundRight button.combo,
 	color: #000;
 }
 
+/* BoxButton Styles */
+
 .BoxButton {
-	border: 2px outset rgba(61,56,70,1);
-	background-position: center center;
-	background-repeat :  repeat;
-	padding:             5px 2px;
+	border: 1px solid rgba(255,255,255,0.08);
+	background-color: rgba(20,20,20,0.85);
+	border-radius: 6px;
+	padding: 5px 2px;
 }
 
 .BoxButton > box {
-	background: rgba(0,0,0,0.75);
+	background: rgba(0,0,0,0.6);
 }
 
 .BoxButton > box > label {
 	color: white;
 }
 
+.BoxButton > box > button {
+	color: #ffffff;
+	border-radius: 4px;
+}
+
+.BoxButton.active {
+	box-shadow: 0 0 18px currentColor;
+}
+
+/* Hover effects for BoxButtons */
+
+.BoxBackgroundEdit:hover {
+	background: #72b1e8;
+}
+
+.BoxBackgroundCopy:hover {
+	background: #8ae32b;
+}
+
+.BoxBackgroundDelete:hover {
+	background: #f55d5d;
+}
+
+/* Area backgrounds */
+
+.layoutPreview {
+	background-image: url("images/layoutBackground.png");
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;
+}
+
+.zoneCanvas {
+	background-repeat:   no-repeat;
+	background-size:     cover;
+	background-position: center;
+}
+
+.zoneCanvas.devices {
+	background-image: url("images/devicesBackground.png");
+}
+
+.zoneCanvas.restrictors {
+	background-image: url("images/restrictorsBackground.png");
+}
+
+.zoneCanvas.groups {
+	background-image: url("images/groupsBackground.png");
+}
+
+.zoneCanvas.elements {
+	background-image: url("images/elementsBackground.png");
+}
+
+/* BoxButton styles for different categories */
+
+.DeviceBoxButton {
+	border-color: rgba(53,117,26,0.6);
+}
+
+.DeviceBoxButton:hover {
+	box-shadow: 0 0 10px rgba(80,255,120,0.6);
+	border-color: rgba(80,255,120,0.9);
+}
+
+.RestrictorBoxButton {
+	border-color: rgba(98,160,234,0.6);
+}
+
+.RestrictorBoxButton:hover {
+	box-shadow: 0 0 10px rgba(98,160,234,0.7);
+	border-color: rgba(98,160,234,1);
+}
+
+.ElementBoxButton {
+	border-color: rgba(140,80,255,0.6);
+}
+
+.ElementBoxButton:hover {
+	box-shadow: 0 0 12px rgba(180,120,255,0.8);
+	border-color: rgba(180,120,255,1);
+}
+
+/*
 .DeviceBoxButton {
 	background-image:    url("images/deviceButtonBackground.png");
 	border-color:        #35751a;
@@ -131,6 +218,7 @@ combobox.noRoundRight button.combo,
 	background-image:    url("images/profileButtonBackground.png");
 	border-color:        #3584e4;
 }
+*/
 
 .GroupBoxButton.system {
 	opacity: 0.7;

@@ -35,7 +35,7 @@ namespace LEDSpicerUI::Ui::DataDialogs {
  * The real link is created when 2 or more maps are selected in input dialog and the add button is clicked.
  * Is a very simple and a little nasty way to handle the links.
  */
-class DialogInputLinkMaps: public DialogForm {
+class DialogInputLinkMaps: public DialogForm, public SingletonDialog<DialogInputLinkMaps> {
 
 	friend class Gtk::Builder;
 
@@ -45,8 +45,6 @@ public:
 
 	virtual ~DialogInputLinkMaps();
 
-	static void initialize(const Glib::RefPtr<Gtk::Builder> &builder);
-	static DialogInputLinkMaps* getInstance();
 	void load(XMLHelper* values) override;
 	Storage::CollectionHandler* getCollectionHandler() const override;
 	void clearForm() override;
@@ -57,9 +55,6 @@ public:
 	void setOwner(Storage::BoxButtonCollection* collection, Storage::Data* owner = nullptr) override;
 
 protected:
-
-	/// Self instance.
-	static DialogInputLinkMaps* instance;
 
 	/// Linked maps are per input.
 	static StringVector localCollection;

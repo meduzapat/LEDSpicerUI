@@ -24,7 +24,7 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-unordered_map<string, CollectionHandler*> CollectionHandler::collections;
+std::unordered_map<string, CollectionHandler*> CollectionHandler::collections;
 
 void CollectionHandler::purgeAll() {
 	for (auto& c : collections)
@@ -77,9 +77,17 @@ void CollectionHandler::add(Data* item) {
 
 void CollectionHandler::remove(Data* item) {
 	collection.erase(item->createUniqueId());
-	for (auto destination : dependencies)
-		destination->remove(item);
+
+	/* Collect depleted callbacks first, fire after iteration. */
+	vector<std::function<void()>> pending;
+	for (auto& dep : dependencies) {
+		dep.collection->remove(item);
+		if (dep.minSize and dep.onDepletion and dep.collection->getSize() < dep.minSize)
+			pending.push_back(dep.onDepletion);
+	}
 	refreshComboBoxes();
+
+	for (auto& callback : pending) callback();
 }
 
 void CollectionHandler::replace(Data* item, const string& oldId) {
@@ -88,8 +96,8 @@ void CollectionHandler::replace(Data* item, const string& oldId) {
 	add(item);
 }
 
-void CollectionHandler::registerDependency(BoxButtonCollection* destination) {
-	dependencies.push_back(destination);
+void CollectionHandler::registerDependency(const Dependency& dependency) {
+	dependencies.push_back(dependency);
 }
 
 void CollectionHandler::registerComboBox(Gtk::ComboBoxText* destination) {
@@ -103,11 +111,14 @@ void CollectionHandler::refreshComboBox(Gtk::ComboBoxText* comboBox) {
 }
 
 void CollectionHandler::release(BoxButtonCollection* destination) {
-	auto it = std::find(dependencies.begin(), dependencies.end(), destination);
-	if (it != dependencies.end()) {
-		dependencies.erase(it);
-		return;
-	}
+	auto it = std::find_if(
+		dependencies.begin(),
+		dependencies.end(),
+		[destination](const Dependency& dep) {
+			return dep.collection == destination;
+		}
+	);
+	if (it != dependencies.end()) dependencies.erase(it);
 }
 
 void CollectionHandler::release(Gtk::ComboBoxText* destination) {

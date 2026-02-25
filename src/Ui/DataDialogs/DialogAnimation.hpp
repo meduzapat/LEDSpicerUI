@@ -30,7 +30,7 @@ namespace LEDSpicerUI::Ui::DataDialogs {
  * LEDSpicerUI::Ui::DialogAnimation
  * Dialog to create and edit animations.
  */
-class DialogAnimation: public DialogForm {
+class DialogAnimation: public DialogForm, public SingletonDialog<DialogAnimation> {
 
 public:
 
@@ -38,8 +38,6 @@ public:
 
 	virtual ~DialogAnimation() = default;
 
-	static void initialize(Glib::RefPtr<Gtk::Builder> const &builder);
-	static DialogAnimation* getInstance();
 	void load(XMLHelper* values) override;
 	Storage::CollectionHandler* getCollectionHandler() const override;
 	void clearForm() override;

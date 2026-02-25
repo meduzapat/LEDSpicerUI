@@ -33,20 +33,19 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 
 	Message::initialize(builder, this);
 
-	DialogSettings::initialize(builder, "DialogSettings");
-	DialogColors::initialize(builder,   "DialogColors");
-	DialogProject::initialize(builder,  "DialogProject");
+	DialogSettings::buildInstance(builder, "DialogSettings");
+	DialogColors::buildInstance(builder,   "DialogColors");
+	DialogProject::buildInstance(builder,  "DialogProject");
 
 	// Initialize secondary dialogs.
-	DataDialogs::DialogElement::initialize(builder);
-	DataDialogs::DialogSelect::initialize(builder);
-	DataDialogs::DialogRestrictorMap::initialize(builder);
+	DataDialogs::DialogSelect::buildInstance(builder, "DialogSelect");
+
 	// Initialize Primary Dialogs.
-	DataDialogs::DialogDevice::initialize(builder);
-	DataDialogs::DialogRestrictor::initialize(builder);
-	DataDialogs::DialogProcess::initialize(builder);
-	DataDialogs::DialogGroup::initialize(builder);
-	DataDialogs::DialogProfile::initialize(builder);
+	DataDialogs::DialogDevice::buildInstance(builder, "DialogDevice");
+	DataDialogs::DialogRestrictor::buildInstance(builder, "DialogRestrictor");
+	DataDialogs::DialogProcess::buildInstance(builder, "DialogProcess");
+	DataDialogs::DialogGroup::buildInstance(builder, "DialogGroup");
+	DataDialogs::DialogProfile::buildInstance(builder, "DialogProfile");
 
 	// Connect primary dialogs with the collections.
 	DataDialogs::DialogDevice::getInstance()->setOwner(&devices);
@@ -272,8 +271,6 @@ MainWindow::~MainWindow() {
 	// Data dialogs.
 	delete DataDialogs::DialogSelect::getInstance();
 	delete DataDialogs::DialogProfile::getInstance();
-	delete DataDialogs::DialogElement::getInstance();
-	delete DataDialogs::DialogRestrictorMap::getInstance();
 	delete DataDialogs::DialogRestrictor::getInstance();
 	delete DataDialogs::DialogProcess::getInstance();
 	delete DataDialogs::DialogGroup::getInstance();

@@ -30,7 +30,7 @@ namespace LEDSpicerUI::Ui::DataDialogs {
 /**
  * LEDSpicerUI::Ui::DialogProcess
  */
-class DialogProcess: public DialogForm {
+class DialogProcess: public DialogForm, public SingletonDialog<DialogProcess> {
 
 	friend class Gtk::Builder;
 
@@ -40,8 +40,6 @@ public:
 
 	virtual ~DialogProcess() = default;
 
-	static void initialize(Glib::RefPtr<Gtk::Builder> const &builder);
-	static DialogProcess* getInstance();
 	void load(XMLHelper* values) override;
 	Storage::CollectionHandler* getCollectionHandler() const override;
 	void clearForm() override;
@@ -51,9 +49,6 @@ public:
 	const string createUniqueId() const override;
 
 protected:
-
-	/// Self instance.
-	static DialogProcess* instance;
 
 	Gtk::Entry
 		* inputProcessName = nullptr,

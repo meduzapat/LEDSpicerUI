@@ -24,6 +24,10 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
+bool Data::operator==(const Data& other) const {
+	return this == &other;
+}
+
 Data::~Data() {
 	deActivate();
 }

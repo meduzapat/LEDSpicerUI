@@ -41,6 +41,15 @@ public:
 
 	using Link::Link;
 
+	InputMap(
+		StringUMap& data,
+		const string &key,
+		Data *link
+	) : Link(
+		data,
+		{"map", key, link}
+	) {}
+
 	virtual ~InputMap();
 
 	const string createUniqueId() const override;

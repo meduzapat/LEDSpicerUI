@@ -20,8 +20,6 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Data.hpp"
-#include "BoxButtonCollection.hpp"
 #include "CollectionHandler.hpp"
 #include "DataDialogs/DialogSelect.hpp"
 

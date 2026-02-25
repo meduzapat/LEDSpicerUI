@@ -67,14 +67,11 @@ void BoxButtonCollection::remove(Data* form) {
 	auto it = std::find_if(
 		items.begin(),
 		items.end(),
-		[form](BoxButton* button) {
-			// Cannot check on pointers because some items maybe are links.
-			return button->getData()->createUniqueId() == form->createUniqueId();
+		[form](const BoxButton* button) {
+			return *button->getData() == *form;
 		}
 	);
 	if (it == items.end()) return;
-
-	// same as BoxButton* button = *it;
 	delete *it;
 	items.erase(it);
 }

@@ -30,18 +30,59 @@ namespace LEDSpicerUI::Ui::Storage {
  * LEDSpicerUI::Ui::Storage::Link
  * Class that links other Data classes as values.
  */
-class Link: public Data {
+class Link : public Data {
 
-public:
+	public:
+
+	/**
+	 * LEDSpicerUI::Ui::Storage::LinkData
+	 * Holds the immutable data required for a Link connection.
+	 */
+	struct LinkData {
+		string
+			type,
+			key;
+		const Data* link;
+
+		LinkData() = delete;
+
+		LinkData(const string& t, const string& k, const Data* l) : type(t), key(k), link(l) {}
+
+
+	};
 
 	using Data::Data;
 
+	/**
+	 * Constructor initializing the Link with existing data and a LinkData struct.
+	 * * @param data Reference to the underlying data map.
+	 * @param linkData The struct containing type, key, and the Data pointer.
+	 */
+	Link(
+		StringUMap& data,
+		const LinkData& linkData
+	) : Data(data), linkInfo(linkData) {}
+
+	/**
+	 * Constructor initializing the Link with individual values.
+	 * @param data Reference to the underlying data map.
+	 * @param type The link type string.
+	 * @param key The link key string.
+	 * @param link Pointer to the Data object to link.
+	 */
 	Link(
 		StringUMap& data,
 		const string& type,
-		const string &key,
-		Data *link
-	) : Data(data), type(type), key(key), link(link) {}
+		const string& key,
+		Data* link
+	) : Data(data), linkInfo(type, key, link) {}
+
+	bool operator==(const Data& other) const;
+
+	Link(Link&& other) noexcept :
+		Data(std::move(other)),
+		linkInfo(std::move(other.linkInfo))
+	{}
 
 	virtual ~Link() = default;
 
@@ -57,15 +98,17 @@ public:
 
 	const string toXML() const override;
 
-protected:
+	/**
+	 * Replaces the internal link information with a new LinkData struct.
+	 * * @param newLinkData The new struct to apply to this Link.
+	 */
+	void setLinkData(const LinkData& newLinkData);
 
-	const string
-		type,
-		key;
+	protected:
 
-	/// Links a parameter name with a Data object.
-	Data* link;
+		/// Struct containing the immutable type, key, and Data link pointer.
+		LinkData linkInfo;
 
-};
+	};
 
 } // namespace

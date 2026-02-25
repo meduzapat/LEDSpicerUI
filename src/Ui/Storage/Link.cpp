@@ -24,34 +24,43 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
+
+bool Link::operator==(const Data& other) const {
+	return Data::operator==(other) or linkInfo.link == &other;
+}
+
 const string Link::getCssClass() const {
-	return link->createPrettyName();
+	return linkInfo.link ? linkInfo.link->getCssClass() : "";
 }
 
 const string Link::createPrettyName() const {
-	return link->createPrettyName();
+	return linkInfo.link ? linkInfo.link->createPrettyName() : "";
 }
 
 const string Link::createTooltip() const {
-	return link->createTooltip();
+	return linkInfo.link ? linkInfo.link->createTooltip() : "";
 }
 
 const string Link::createUniqueId() const {
-	return link->createUniqueId();
+	return linkInfo.link ? linkInfo.link->createUniqueId() : "";
 }
 
 string Link::getValue(const string &key, const string &defaultValue) const {
-	if (key == this->key) {
-		return link->getValue(key, defaultValue);
+	if (key == linkInfo.key) {
+		return linkInfo.link->getValue(key, defaultValue);
 	}
 	return Data::getValue(key, defaultValue);
 }
 
 const string Link::toXML() const {
 
-	StringUMap values{{key, link->createUniqueId()}};
+	StringUMap values{{linkInfo.key, linkInfo.link->createUniqueId()}};
 	values.insert(fieldsData.begin(), fieldsData.end());
 
 	// Generate XML using Data's utility methods
-	return createOpeningXML(type, values, ignored, true);
+	return createOpeningXML(linkInfo.type, values, ignored, true);
+}
+
+void Link::setLinkData(const LinkData& newLinkData) {
+	linkInfo = std::move(newLinkData);
 }

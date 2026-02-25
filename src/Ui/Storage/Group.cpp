@@ -26,13 +26,14 @@ using namespace LEDSpicerUI::Ui::Storage;
 
 Group::Group(StringUMap& data) : Data(data) {
 	// Any change on elements needs to be reflected here.
-	CollectionHandler::getInstance(COLLECTION_ELEMENT)->registerDependency(&elements);
+	CollectionHandler::getInstance(COLLECTION_ELEMENT)->registerDependency({&elements, 1, [this]() {
+		CollectionHandler::getInstance(COLLECTION_GROUP)->remove(this);
+	}});
 }
 
 Group::~Group() {
-	if (not getValue(getPrimaryKey()).empty()) {
+	if (CollectionHandler::getInstance(COLLECTION_GROUP)->isSet(this))
 		CollectionHandler::getInstance(COLLECTION_GROUP)->remove(this);
-	}
 	CollectionHandler::getInstance(COLLECTION_ELEMENT)->release(&elements);
 }
 

@@ -34,7 +34,7 @@ namespace LEDSpicerUI::Ui::DataDialogs {
  * The ownerData is always an InputSource — its createUniqueId() provides
  * the source prefix stored as a property on each InputMap.
  */
-class DialogInputMap : public DialogForm {
+class DialogInputMap : public DialogForm, public SingletonDialog<DialogInputMap> {
 
 	friend class Gtk::Builder;
 
@@ -44,8 +44,6 @@ public:
 
 	virtual ~DialogInputMap() = default;
 
-	static void initialize(Glib::RefPtr<Gtk::Builder> const& builder);
-	static DialogInputMap* getInstance();
 	void load(XMLHelper* values) override;
 	Storage::CollectionHandler* getCollectionHandler() const override;
 	void clearForm() override;
@@ -55,8 +53,6 @@ public:
 	const string createUniqueId() const override;
 
 protected:
-
-	static DialogInputMap* instance;
 
 	Gtk::ComboBoxText
 		* comboBoxInputMapElement = nullptr,

@@ -41,6 +41,7 @@ public:
 	const string createPrettyName() const override;
 	const string createTooltip() const override;
 	const string getCssClass() const override;
+	const string createUniqueId() const override;
 };
 
 } // namespace

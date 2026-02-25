@@ -23,6 +23,7 @@
 #include "DialogColors.hpp"
 #include "OrdenableFlowBox.hpp"
 #include "Storage/CollectionHandler.hpp"
+#include "SingletonDialog.hpp"
 
 #pragma once
 
@@ -145,8 +146,8 @@ protected:
 		/// The data record that handles this Dialog.
 		* ownerData = nullptr;
 
-	/// Child dialog, if any.
-	DataDialogs::DialogForm* childDialog = nullptr;
+	/// Child dialogs to refresh when this dialog is refreshed.
+	vector<DialogForm*> childDialogs;
 
 	/**
 	 * Constructor.
@@ -156,7 +157,8 @@ protected:
 	DialogForm(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
 
 	/**
-	 * Creates items from raw data.
+	 * Very similar to ADD but it only uses the form to validate data,
+	 * also items are not added to the box.
 	 * @param rawCollection
 	 */
 	void createItems(StringUMapVector& rawCollection, XMLHelper* values);
@@ -193,9 +195,16 @@ protected:
 	void setSignalAdd(Gtk::Button* btnAdd);
 
 	/**
+	 * Method to add generic Add functionality that opens a dialog to create new Data (item).
+	 * @param btnAdd Opens this form to create new Data (item), its located in the calling dialog.
+	 * @param dialogToOpen Dialog to open when the button is clicked, it should be a child of this dialog.
+	 */
+	void setSignalAddTo(Gtk::Button* btnAdd, DialogForm* dialogToOpen);
+
+	/**
 	 * Utility that decorates with a button that allows deletion of itself.
 	 *
-	 * @param boxButton the boxButton that will receive this delete button to delete itself.
+	 * @param boxButton the boxButton that will receive this delete button to delte itself.
 	 * @param askConfirmation if set will ask, default yes.
 	 */
 	virtual void createDeleteButton(Storage::BoxButton& boxButton, bool askConfirmation = true);

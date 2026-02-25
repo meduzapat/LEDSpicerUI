@@ -24,18 +24,6 @@
 
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
-DialogElement* DialogElement::instance = nullptr;
-
-void DialogElement::initialize(Glib::RefPtr<Gtk::Builder> const &builder) {
-	if (not instance) {
-		builder->get_widget_derived("DialogElement", instance);
-	}
-}
-
-DialogElement* DialogElement::getInstance() {
-	return instance;
-}
-
 DialogElement::DialogElement(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
 	DialogForm(obj, builder)
 {
@@ -622,7 +610,7 @@ void DialogElement::changeNumberOfPins(const uint16_t newSize) {
 	// resize.
 	if (newSize < numberOfPins) {
 		uint16_t pinsToSearch(numberOfPins - newSize);
-		unordered_set<Storage::BoxButton*> elementsToDelete;
+		std::unordered_set<Storage::BoxButton*> elementsToDelete;
 		for (uint16_t c(numberOfPins - pinsToSearch); c < numberOfPins; ++c)
 			findElementByPin(c, elementsToDelete);
 		// delete elements
@@ -866,7 +854,7 @@ void DialogElement::findLargestDivisor(uint16_t size) {
 	pinsBox->set_min_children_per_line(minPerLine);
 }
 
-void DialogElement::findElementByPin(uint16_t finder, unordered_set<Storage::BoxButton*>& elementsFound) {
+void DialogElement::findElementByPin(uint16_t finder, std::unordered_set<Storage::BoxButton*>& elementsFound) {
 	const string connector(std::to_string(finder));
 	for (auto boxButton : *items) {
 		auto data(boxButton->getData());

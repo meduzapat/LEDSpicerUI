@@ -175,15 +175,18 @@ Author: Patricio A Rossi
         <property name="orientation">vertical</property>
         <child>
           <object class="GtkFixed" id="FixedLayout">
-            <property name="width-request">1024</property>
+            <property name="width-request">1000</property>
             <property name="height-request">500</property>
             <property name="visible">True</property>
             <property name="can-focus">False</property>
+            <style>
+              <class name="layoutPreview"/>
+            </style>
           </object>
           <packing>
-            <property name="expand">True</property>
+            <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">1</property>
+            <property name="position">0</property>
           </packing>
         </child>
         <child>
@@ -1120,7 +1123,7 @@ If nothing is set, the default is 1000ms.</property>
                           <object class="GtkLabel">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
-                            <property name="label">Devices</property>
+                            <property name="label">LED Controllers</property>
                           </object>
                           <packing>
                             <property name="expand">True</property>
@@ -1142,9 +1145,6 @@ If nothing is set, the default is 1000ms.</property>
                                 <property name="use-fallback">True</property>
                               </object>
                             </child>
-                            <style>
-                              <class name="noRoundLeft"/>
-                            </style>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1178,6 +1178,10 @@ If nothing is set, the default is 1000ms.</property>
                                 <property name="selection-mode">none</property>
                               </object>
                             </child>
+                            <style>
+                              <class name="zoneCanvas"/>
+                              <class name="devices"/>
+                            </style>
                           </object>
                         </child>
                       </object>
@@ -1230,9 +1234,6 @@ If nothing is set, the default is 1000ms.</property>
                                 <property name="use-fallback">True</property>
                               </object>
                             </child>
-                            <style>
-                              <class name="noRoundLeft"/>
-                            </style>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1267,6 +1268,10 @@ If nothing is set, the default is 1000ms.</property>
                                 <property name="selection-mode">none</property>
                               </object>
                             </child>
+                            <style>
+                              <class name="zoneCanvas"/>
+                              <class name="restrictors"/>
+                            </style>
                           </object>
                         </child>
                       </object>
@@ -1862,7 +1867,7 @@ If nothing is set, the default is 1000ms.</property>
             <property name="expand">False</property>
             <property name="fill">True</property>
             <property name="padding">2</property>
-            <property name="position">2</property>
+            <property name="position">3</property>
           </packing>
         </child>
       </object>
@@ -2347,6 +2352,7 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
                             <property name="sensitive">False</property>
                             <property name="can-focus">True</property>
                             <property name="receives-default">True</property>
+                            <property name="tooltip-text" translatable="yes">Move Up</property>
                             <child>
                               <object class="GtkImage">
                                 <property name="visible">True</property>
@@ -2371,6 +2377,7 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
                             <property name="sensitive">False</property>
                             <property name="can-focus">True</property>
                             <property name="receives-default">True</property>
+                            <property name="tooltip-text" translatable="yes">Move Down</property>
                             <child>
                               <object class="GtkImage">
                                 <property name="visible">True</property>
@@ -2402,6 +2409,7 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="receives-default">True</property>
+                        <property name="tooltip-text" translatable="yes">Add new Element to group</property>
                         <child>
                           <object class="GtkImage">
                             <property name="visible">True</property>
@@ -2443,8 +2451,16 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
                             <property name="can-focus">False</property>
                             <property name="valign">start</property>
                             <property name="homogeneous">True</property>
+                            <style>
+                              <class name="zoneCanvas"/>
+                              <class name="groups"/>
+                            </style>
                           </object>
                         </child>
+                        <style>
+                          <class name="zoneCanvas"/>
+                          <class name="groups"/>
+                        </style>
                       </object>
                     </child>
                   </object>
@@ -4183,15 +4199,6 @@ Autodetected if ledspicer is installed</property>
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="tooltip-text" translatable="yes">Select input plugin</property>
-                        <items>
-                          <item id="0">Select Plugin</item>
-                          <item id="1">Actions</item>
-                          <item id="2">Blinker</item>
-                          <item id="3">Credits</item>
-                          <item id="4">Impulse</item>
-                          <item id="5">Mame</item>
-                          <item id="6">Network</item>
-                        </items>
                       </object>
                       <packing>
                         <property name="expand">True</property>
@@ -4287,9 +4294,6 @@ You can find the devices ID using inputseeker from the terminal, or by listing t
                             <property name="use-fallback">True</property>
                           </object>
                         </child>
-                        <style>
-                          <class name="noRoundLeft"/>
-                        </style>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -4368,6 +4372,7 @@ You can find the devices ID using inputseeker from the terminal, or by listing t
                     <child>
                       <object class="GtkButton" id="BtnAddInputMap">
                         <property name="visible">True</property>
+                        <property name="sensitive">False</property>
                         <property name="can-focus">True</property>
                         <property name="receives-default">True</property>
                         <property name="tooltip-text" translatable="yes">Create Mapping</property>
@@ -4379,9 +4384,6 @@ You can find the devices ID using inputseeker from the terminal, or by listing t
                             <property name="use-fallback">True</property>
                           </object>
                         </child>
-                        <style>
-                          <class name="noRoundLeft"/>
-                        </style>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -4477,9 +4479,6 @@ You can find the devices ID using inputseeker from the terminal, or by listing t
                                 <property name="use-fallback">True</property>
                               </object>
                             </child>
-                            <style>
-                              <class name="noRoundLeft"/>
-                            </style>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -5345,9 +5344,6 @@ You can find the devices ID using inputseeker from the terminal, or by listing t
                             <property name="use-fallback">True</property>
                           </object>
                         </child>
-                        <style>
-                          <class name="noRoundLeft"/>
-                        </style>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -6006,9 +6002,6 @@ If you have multiple serial devices, avoid using autodetect.</property>
                         <property name="use-fallback">True</property>
                       </object>
                     </child>
-                    <style>
-                      <class name="noRoundLeft"/>
-                    </style>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -6032,9 +6025,6 @@ If you have multiple serial devices, avoid using autodetect.</property>
                         <property name="use-fallback">True</property>
                       </object>
                     </child>
-                    <style>
-                      <class name="noRoundLeft"/>
-                    </style>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -6082,6 +6072,10 @@ If you have multiple serial devices, avoid using autodetect.</property>
                         <property name="max-children-per-line">5</property>
                       </object>
                     </child>
+                    <style>
+                      <class name="zoneCanvas"/>
+                      <class name="elements"/>
+                    </style>
                   </object>
                 </child>
               </object>
@@ -7872,9 +7866,6 @@ If you have multiple serial devices, avoid using autodetect.</property>
                             <property name="use-fallback">True</property>
                           </object>
                         </child>
-                        <style>
-                          <class name="noRoundLeft"/>
-                        </style>
                       </object>
                       <packing>
                         <property name="expand">False</property>

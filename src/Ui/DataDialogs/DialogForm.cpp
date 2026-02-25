@@ -34,8 +34,7 @@ DialogForm::~DialogForm() {
 }
 
 void DialogForm::createItems(StringUMapVector& rawCollection, XMLHelper* values) {
-	// Very similar to ADD but it only uses the form to validate data,
-	// also items are not added to the box.
+
 	action = Actions::LOAD;
 	string errors;
 	for (auto& rawItem : rawCollection) {
@@ -71,7 +70,7 @@ void DialogForm::createItems(StringUMapVector& rawCollection, XMLHelper* values)
 }
 
 void DialogForm::refreshBox() {
-	if (childDialog) childDialog->refreshBox();
+	for (auto childDialog : childDialogs) childDialog->refreshBox();
 	box->wipe();
 	if (not items) return;
 	items->populateBox(box);
@@ -111,6 +110,14 @@ void DialogForm::setSignalAdd(Gtk::Button* btnAdd) {
 	btnAdd->signal_clicked().connect(sigc::mem_fun(*this, &DialogForm::onAddClicked));
 }
 
+void DialogForm::setSignalAddTo(Gtk::Button* btnAdd, DialogForm* dialogToOpen) {
+	if (not dialogToOpen) {
+		setSignalAdd(btnAdd);
+		return;
+	}
+	btnAdd->signal_clicked().connect(sigc::mem_fun(*dialogToOpen, &DialogForm::onAddClicked));
+}
+
 void DialogForm::setSignalApply() {
 	btnApply->signal_clicked().connect([&]() {
 		try {
@@ -127,7 +134,9 @@ void DialogForm::setSignalApply() {
 void DialogForm::createDeleteButton(Storage::BoxButton& boxButton, bool askConfirmation) {
 	auto button(Gtk::make_managed<Gtk::Button>());
 	boxButton.pack_start(*button, Gtk::PACK_SHRINK);
-	button->set_image_from_icon_name("edit-delete", Gtk::ICON_SIZE_BUTTON);
+	button->set_image_from_icon_name("user-trash-symbolic", Gtk::ICON_SIZE_BUTTON);
+	button->get_style_context()->add_class("BoxBackgroundDelete");
+	button->set_tooltip_text("Delete " + boxButton.getData()->createPrettyName());
 	button->signal_clicked().connect([&, askConfirmation]() {
 		if (askConfirmation) {
 			if (Message::ask("Are you sure you want to remove " + boxButton.getData()->createPrettyName() + "?") != Gtk::ResponseType::RESPONSE_YES) {
@@ -141,7 +150,9 @@ void DialogForm::createDeleteButton(Storage::BoxButton& boxButton, bool askConfi
 void DialogForm::createEditButton(Storage::BoxButton& boxButton) {
 	auto button(Gtk::make_managed<Gtk::Button>());
 	boxButton.pack_start(*button, Gtk::PACK_SHRINK);
-	button->set_image_from_icon_name("applications-engineering", Gtk::ICON_SIZE_BUTTON);
+	button->set_image_from_icon_name("emblem-system-symbolic", Gtk::ICON_SIZE_BUTTON);
+	button->get_style_context()->add_class("BoxBackgroundEdit");
+	button->set_tooltip_text("Edit " + boxButton.getData()->createPrettyName());
 	button->signal_clicked().connect([&]() {
 		onEditClicked(boxButton);
 	});
@@ -150,7 +161,9 @@ void DialogForm::createEditButton(Storage::BoxButton& boxButton) {
 void DialogForm::createCloneButton(Storage::BoxButton& boxButton) {
 	auto button(Gtk::make_managed<Gtk::Button>());
 	boxButton.pack_start(*button, Gtk::PACK_SHRINK);
-	button->set_image_from_icon_name("edit-copy", Gtk::ICON_SIZE_BUTTON);
+	button->set_image_from_icon_name("edit-copy-symbolic", Gtk::ICON_SIZE_BUTTON);
+	button->get_style_context()->add_class("BoxBackgroundCopy");
+	button->set_tooltip_text("Clone " + boxButton.getData()->createPrettyName());
 	button->signal_clicked().connect([&]() {
 		onCloneClicked(boxButton);
 	});
@@ -232,7 +245,7 @@ void DialogForm::onEditClicked(Storage::BoxButton& boxButton) {
 		getCollectionHandler()->replace(currentData, oldName);
 		boxButton.updateLabel();
 		// This will reindex the box located on this dialog but that is handled by its children dialog.
-		if (childDialog) childDialog->reindex();
+		for (auto childDialog : childDialogs) childDialog->reindex();
 	}
 	currentData->deActivate();
 	currentData = nullptr;
@@ -265,14 +278,13 @@ void DialogForm::onCloneClicked(Storage::BoxButton& boxButton) {
 	}
 	while (getCollectionHandler()->isSet(tempData));
 
-	currentData = tempData;
 	// Add item and the box and set buttons.
-	Storage::BoxButton& bBox(items->create(currentData));
+	Storage::BoxButton& bBox(items->create(tempData));
 	addButtons(bBox);
 	box->add(bBox);
-	getCollectionHandler()->add(currentData);
+	getCollectionHandler()->add(tempData);
 	Defaults::markDirty();
 	bBox.updateLabel();
-	currentData->deActivate();
-	currentData = nullptr;
+	tempData->deActivate();
+	tempData = nullptr;
 }

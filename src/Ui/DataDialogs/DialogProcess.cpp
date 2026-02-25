@@ -24,18 +24,6 @@
 
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
-DialogProcess* DialogProcess::instance = nullptr;
-
-void DialogProcess::initialize(Glib::RefPtr<Gtk::Builder> const &builder) {
-	if (not instance) {
-		builder->get_widget_derived("DialogProcess", instance);
-	}
-}
-
-DialogProcess* DialogProcess::getInstance() {
-	return instance;
-}
-
 DialogProcess::DialogProcess(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
 	DialogForm(obj, builder)
 {

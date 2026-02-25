@@ -36,12 +36,8 @@ InputDirectoryNavigator::InputDirectoryNavigator(
 		NAV_NEW_DIR_BUTTON
 	)
 {
-	DataDialogs::DialogInputLinkMaps::initialize(builder);
-	DataDialogs::DialogInputMap::initialize(builder);
-	DataDialogs::DialogInputSource::initialize(builder);
-	DataDialogs::DialogInput::initialize(builder);
-
-	// Setup DialogInput with our collection
+	DataDialogs::DialogInput::buildInstance(builder, "DialogInput");
+	// Setup DialogInput with the collection
 	displayBox = DataDialogs::DialogInput::getInstance()->getBox();
 	DataDialogs::DialogInput::getInstance()->setOwner(&inputs);
 
@@ -50,51 +46,26 @@ InputDirectoryNavigator::InputDirectoryNavigator(
 }
 
 InputDirectoryNavigator::~InputDirectoryNavigator() {
-	delete DataDialogs::DialogInputLinkMaps::getInstance();
-	delete DataDialogs::DialogInputMap::getInstance();
+
 	delete DataDialogs::DialogInput::getInstance();
 }
 
 void InputDirectoryNavigator::loadFromDisk() {
 	clear();
 
-	string inputsPath = getInputsPath();
-
-	if (not Glib::file_test(inputsPath, Glib::FILE_TEST_IS_DIR)) {
+	string inputsPath(getInputsPath());
+	if (not Glib::file_test(inputsPath, Glib::FILE_TEST_IS_DIR))
 		return;
-	}
 
-	// Track all directories found during scan
-	std::set<string> allDirs;
-	scanDirectory(inputsPath, "", allDirs);
+	std::set<string> allDirs, occupiedDirs;
+	scanDirectory(inputsPath, "", allDirs, occupiedDirs);
 
-	// Determine which directories are empty (no items under them)
-	for (const auto& dir : allDirs) {
-		bool hasItems = false;
-		string dirPrefix = dir + "/";
-		for (auto* bb : inputs) {
-			string itemPath = bb->getData()->createUniqueId();
-			if (itemPath.find(dirPrefix) == 0 or itemPath == dir) {
-				hasItems = true;
-				break;
-			}
-		}
-		// Also check if any item is directly in this directory
-		if (not hasItems) {
-			for (auto* bb : inputs) {
-				string itemPath = bb->getData()->createUniqueId();
-				auto lastSlash = itemPath.rfind('/');
-				string itemDir = (lastSlash == string::npos) ? "" : itemPath.substr(0, lastSlash);
-				if (itemDir == dir) {
-					hasItems = true;
-					break;
-				}
-			}
-		}
-		if (not hasItems) {
-			emptyDirs.insert(dir);
-		}
-	}
+	// Dirs that exist on disk but hold no successfully loaded files are empty.
+	std::set_difference(
+		allDirs.begin(),      allDirs.end(),
+		occupiedDirs.begin(), occupiedDirs.end(),
+		std::inserter(emptyDirs, emptyDirs.begin())
+	);
 
 	refresh();
 }
@@ -183,14 +154,19 @@ void InputDirectoryNavigator::navigateToLevel(size_t level) {
 }
 
 void InputDirectoryNavigator::syncDialogPath() {
-	DataDialogs::DialogInput::getInstance()->setPath(getCurrentPath());
+	static_cast<DataDialogs::DialogInput*>(DataDialogs::DialogInput::getInstance())->setPath(getCurrentPath());
 }
 
 string InputDirectoryNavigator::getInputsPath() const {
 	return Defaults::getProjectsDir() + INPUT_PATH;
 }
 
-void InputDirectoryNavigator::scanDirectory(const string& dirPath, const string& relativePath, std::set<string>& allDirs) {
+void InputDirectoryNavigator::scanDirectory(
+	const string& dirPath,
+	const string& relativePath,
+	std::set<string>& allDirs,
+	std::set<string>& occupiedDirs
+) {
 	auto directory = Gio::File::create_for_path(dirPath);
 	Glib::RefPtr<Gio::FileEnumerator> enumerator;
 
@@ -214,20 +190,18 @@ void InputDirectoryNavigator::scanDirectory(const string& dirPath, const string&
 		string fullPath = dirPath + "/" + name;
 
 		if (fileInfo->get_file_type() == Gio::FILE_TYPE_DIRECTORY) {
-			string newRelativePath = relativePath.empty() ? name : relativePath + "/" + name;
+			string newRelativePath(relativePath.empty() ? name : relativePath + "/" + name);
 			allDirs.insert(newRelativePath);
-			scanDirectory(fullPath, newRelativePath, allDirs);
+			scanDirectory(fullPath, newRelativePath, allDirs, occupiedDirs);
 		}
 		else if (fileInfo->get_file_type() == Gio::FILE_TYPE_REGULAR) {
-			// Check for .xml extension
 			if (name.length() > 4 and name.substr(name.length() - 4) == ".xml") {
 				try {
-					/*
-					 * Load through DialogInput for validation.
-					 * DialogInput::load() validates, creates Data, adds to collection and box.
-					 */
 					InputFile inputFile(fullPath);
 					DataDialogs::DialogInput::getInstance()->load(&inputFile);
+					// Mark parent as occupied only on successful load.
+					if (not relativePath.empty())
+						occupiedDirs.insert(relativePath);
 				}
 				catch (const std::exception& e) {
 					Message::displayError("Failed to load " + fullPath + ": " + e.what());

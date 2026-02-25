@@ -20,8 +20,6 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Data.hpp"
-#include "BoxButtonCollection.hpp"
 #include "CollectionHandler.hpp"
 #include "DataDialogs/DialogSelect.hpp"
 
@@ -56,7 +54,7 @@ protected:
 		startTransitions,
 		endTransitions;
 
-	unordered_map<string, BoxButtonCollection*> itemCollections {
+	std::unordered_map<string, BoxButtonCollection*> itemCollections {
 		{TYPE_ELEMENT,          &alwaysOnElements},
 		{"group",            &alwaysOnGroups},
 		{"input",            &inputs},

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(LEDSpicerUI VERSION 0.0.5 LANGUAGES CXX)
+project(LEDSpicerUI VERSION 0.0.6 LANGUAGES CXX)
 
 # Metadata (for glade file substitution and compile definitions)
 set(PACKAGE "ledspicerui")
@@ -60,6 +60,7 @@ add_executable(ledspicerui
 	src/Ui/OrdenableListBox.cpp
 	src/Ui/Storage/CollectionHandler.cpp
 	src/Ui/Storage/Data.cpp
+	src/Ui/Storage/FileData.cpp
 	src/Ui/Storage/Selection.cpp
 	src/Ui/Storage/Link.cpp
 	src/Ui/Storage/DirectoryEntry.cpp

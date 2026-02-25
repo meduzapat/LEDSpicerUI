@@ -31,7 +31,7 @@ namespace LEDSpicerUI::Ui::DataDialogs {
  * LEDSpicerUI::DialogGroup
  * Dialog to create or edit groups.
  */
-class DialogGroup: public DialogForm {
+class DialogGroup: public DialogForm, public SingletonDialog<DialogGroup> {
 
 	friend class Gtk::Builder;
 
@@ -41,8 +41,6 @@ public:
 
 	virtual ~DialogGroup() = default;
 
-	static void initialize(Glib::RefPtr<Gtk::Builder> const &builder);
-	static DialogGroup* getInstance();
 	void load(XMLHelper* values) override;
 	Storage::CollectionHandler* getCollectionHandler() const override;
 	void isValid() const override;
@@ -52,8 +50,6 @@ public:
 	const string createUniqueId() const override;
 
 protected:
-
-	static DialogGroup* instance;
 
 	Gtk::Entry*  inputGroupName       = nullptr;
 	Gtk::Button* btnGroupDefaultColor = nullptr;

@@ -38,13 +38,13 @@ namespace LEDSpicerUI::Ui::DataDialogs {
  * but only allows to move data from one place to another using links.
  * It also allows owners with multiple sources to be used.
  */
-class DialogSelect: public Gtk::Dialog {
+class DialogSelect: public GladeDialog<DialogSelect> {
 
 	friend class Gtk::Builder;
 
 public:
 
-	using StringBoxButtonCollectionUMap = unordered_map<string, Storage::BoxButtonCollection*>;
+	using StringBoxButtonCollectionUMap = std::unordered_map<string, Storage::BoxButtonCollection*>;
 	using CollectionHandler = LEDSpicerUI::Ui::Storage::CollectionHandler;
 
 	/// Flag indicating a delete button.
@@ -104,8 +104,6 @@ public:
 	 */
 	void runSelection();
 
-	static void initialize(Glib::RefPtr<Gtk::Builder> const &builder);
-	static DialogSelect* getInstance();
 	void load(XMLHelper* values, const string& identifier);
 
 	/**
@@ -129,8 +127,6 @@ public:
 	Storage::BoxButtonCollection* getItemCollection() const;
 
 protected:
-
-	static DialogSelect* instance;
 
 	Gtk::Button
 		/// Open this form to create new Data (item), its located in the calling dialog.

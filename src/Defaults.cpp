@@ -24,7 +24,7 @@
 
 using namespace LEDSpicerUI;
 
-const unordered_map<string, Defaults::DeviceInfo> Defaults::devicesInfo = {
+const std::unordered_map<string, Defaults::DeviceInfo> Defaults::devicesInfo = {
 	{"UltimarcUltimate", {
 		"Ultimarc Ipac Ultimate IO",
 		4,                    // Max Interfaces
@@ -115,7 +115,7 @@ const unordered_map<string, Defaults::DeviceInfo> Defaults::devicesInfo = {
 	}},
 };
 
-const unordered_map<string, Defaults::RestrictorInfo> Defaults::restrictorsInfo = {
+const std::unordered_map<string, Defaults::RestrictorInfo> Defaults::restrictorsInfo = {
 	{"UltraStik360", {
 			"Ultimarc UltraStik360", // Name
 			4,                       // Maximum Ids
@@ -158,7 +158,40 @@ const unordered_map<string, Defaults::RestrictorInfo> Defaults::restrictorsInfo 
 	}}
 };
 
-const unordered_map<string, Defaults::Ways> Defaults::wayIds {
+const std::unordered_map<string, Defaults::InputInfo> Defaults::inputsInfo = {
+	{"Actions", {
+		"Actions Input",
+		INPUT_NEEDS_SOURCE | INPUT_DEV_LISTENER | INPUT_LINKED_MAPS | INPUT_HAS_SPEED | INPUT_HAS_BLINK,
+		"Maps kernel input codes from physical devices to LEDSpicer targets. "
+	}},
+	{"Blinker", {
+		"Blinker Input",
+		INPUT_NEEDS_SOURCE | INPUT_DEV_LISTENER | INPUT_HAS_SPEED | INPUT_HAS_TIMES,
+		"Activates targets in a blinking pattern driven by physical device input. "
+	}},
+	{"Credits", {
+		"Credits Input",
+		INPUT_NEEDS_SOURCE | INPUT_DEV_LISTENER | INPUT_LINKED_MAPS | INPUT_HAS_CREDITS,
+		"Tracks coin and credit inputs from physical devices. "
+	}},
+	{"Impulse", {
+		"Impulse Input",
+		INPUT_NEEDS_SOURCE | INPUT_DEV_LISTENER,
+		"Fires a single impulse activation on physical device input. "
+	}},
+	{"Mame", {
+		"MAME Input",
+		0,
+		"Receives named trigger strings from MAME via its output system. "
+	}},
+	{"Network", {
+		"Network Input",
+		0,
+		"Receives named trigger strings over a network socket. "
+	}},
+};
+
+const std::unordered_map<string, Defaults::Ways> Defaults::wayIds {
 	{"w2",       Ways::w2},
 	{"w2v",      Ways::w2v},
 	{"w4",       Ways::w4},
@@ -223,12 +256,21 @@ string Defaults::createHardwareUniqueId(const StringUMap& data, bool isDevice) {
 	return name;
 }
 
+bool Defaults::inputHasFlag(const string& input, uint8_t flag) {
+	auto it = inputsInfo.find(input);
+	return it != inputsInfo.end() and (it->second.flags & flag);
+}
+
 bool Defaults::needSource(const string& input) {
-	return input == "Actions" or input == "Blinker" or input == "Impulse" or input == "Credits";
+	return inputHasFlag(input, INPUT_NEEDS_SOURCE);
 }
 
 bool Defaults::isDevInputListener(const string& input) {
-	return input == "Actions" or input == "Blinker" or input == "Impulse" or input == "Credits";
+	return inputHasFlag(input, INPUT_DEV_LISTENER);
+}
+
+bool Defaults::hasLinkedMaps(const string& input) {
+	return inputHasFlag(input, INPUT_LINKED_MAPS);
 }
 
 string Defaults::createCommonUniqueId(const StringVector& fieldsData) {

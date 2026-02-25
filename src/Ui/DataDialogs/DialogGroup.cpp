@@ -24,18 +24,6 @@
 
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
-DialogGroup* DialogGroup::instance = nullptr;
-
-void DialogGroup::initialize(Glib::RefPtr<Gtk::Builder> const &builder) {
-	if (not instance) {
-		builder->get_widget_derived("DialogGroup", instance);
-	}
-}
-
-DialogGroup* DialogGroup::getInstance() {
-	return instance;
-}
-
 DialogGroup::DialogGroup(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
 	DialogForm(obj, builder)
 {

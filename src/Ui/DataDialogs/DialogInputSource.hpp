@@ -34,7 +34,7 @@ namespace LEDSpicerUI::Ui::DataDialogs {
  * When running locally, scans /dev/input/ for event devices and populates a combo.
  * Selecting "Other" or running in portable mode falls back to a manual text entry.
  */
-class DialogInputSource : public DialogForm {
+class DialogInputSource : public DialogForm, public SingletonDialog<DialogInputSource> {
 
 	friend class Gtk::Builder;
 
@@ -44,14 +44,14 @@ public:
 	/// Sentinel combo value that activates manual entry.
 	static constexpr const char* SOURCE_OTHER_OPTION = "Other";
 	/// Linux event device directory.
-	static constexpr const char* DEV_INPUT = "/dev/input/";
+	static constexpr const char* DEV_INPUT       = "/dev/input/";
+	static constexpr const char* DEV_INPUT_BY_ID = "/dev/input/by-id/";
+	static constexpr const char* SYS_CLASS_INPUT = "/sys/class/input/";
 
 	DialogInputSource() = delete;
 
-	virtual ~DialogInputSource() = default;
+	virtual ~DialogInputSource();
 
-	static void initialize(Glib::RefPtr<Gtk::Builder> const& builder);
-	static DialogInputSource* getInstance();
 	void load(XMLHelper* values) override;
 	Storage::CollectionHandler* getCollectionHandler() const override;
 	void resetForm() override;
@@ -61,9 +61,14 @@ public:
 	void retrieveData() override;
 	const string createUniqueId() const override;
 
-protected:
+	/**
+	 * Ensures a phantom source (source="") exists for single-source plugins.
+	 * Creates one silently if absent, then wires DialogInputMap to it.
+	 * Safe to call repeatedly — idempotent if phantom already exists.
+	 */
+	void createButtonDirectly();
 
-	static DialogInputSource* instance;
+protected:
 
 	Gtk::ComboBoxText
 		/// Stores the input in use.
@@ -90,13 +95,6 @@ protected:
 private:
 
 	/**
-	 * Scans /dev/input/ for event* device files using Gio.
-	 *
-	 * @return Sorted list of event device names (e.g. "event0", "event1").
-	 */
-	StringVector scanEventDevices();
-
-	/**
 	 * Populates the combo with detected sources plus the "Other" sentinel,
 	 * then shows/hides combo and entry according to the result.
 	 *
@@ -104,6 +102,26 @@ private:
 	 */
 	void populateSourcesList(const StringVector& devices);
 
+	/**
+	 * Resolves a device entry to its kernel human-readable name via sysfs.
+	 * Works for both by-id symlink names and raw eventX names.
+	 * @param  byIdName Entry from /dev/input/by-id/ or a plain eventX name.
+	 * @return Kernel name string, or empty on any failure.
+	 */
+	static string readDeviceName(const string& byIdName);
+
+	/**
+	 * Scans /dev/input/by-id/ for event devices, falling back to /dev/input/.
+	 * @return Ordered map of id → display label.
+	 */
+	StringMap scanEventDevices();
+
+	/**
+	 * Populates the combo with detected sources plus sentinels.
+	 * Uses id/display pairs so the stored value is stable across reboots.
+	 * @param devices Ordered map from scanEventDevices().
+	 */
+	void populateSourcesList(const StringMap& devices);
 };
 
 } // namespace

@@ -127,7 +127,7 @@ protected:
 	string setColors(StringUMap& colors);
 
 	/**
-	 * Creates a deletiable button with the desired color.
+	 * Creates a deletable button with the desired color.
 	 * @param destination
 	 * @param color
 	 */

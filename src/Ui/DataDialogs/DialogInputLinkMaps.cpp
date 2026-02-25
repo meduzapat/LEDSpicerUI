@@ -24,19 +24,7 @@
 
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
-DialogInputLinkMaps* DialogInputLinkMaps::instance = nullptr;
-
 StringVector DialogInputLinkMaps::localCollection;
-
-void DialogInputLinkMaps::initialize(Glib::RefPtr<Gtk::Builder> const &builder) {
-	if (not instance) {
-		builder->get_widget_derived("DialogSortInputLinkMaps", instance);
-	}
-}
-
-DialogInputLinkMaps* DialogInputLinkMaps::getInstance() {
-	return instance;
-}
 
 DialogInputLinkMaps::DialogInputLinkMaps(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
 	DialogForm(obj, builder)

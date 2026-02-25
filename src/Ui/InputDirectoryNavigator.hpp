@@ -95,11 +95,17 @@ protected:
 
 	/**
 	 * Recursively scans a directory for .xml files.
-	 * @param dirPath Directory to scan.
+	 * @param dirPath      Full directory path to scan.
 	 * @param relativePath Path relative to inputs root.
-	 * @param allDirs Set to collect all directories found.
+	 * @param allDirs      Collects all subdirectory relative paths found.
+	 * @param occupiedDirs Collects relative paths of dirs that contain at least one loaded file.
 	 */
-	void scanDirectory(const string& dirPath, const string& relativePath, std::set<string>& allDirs);
+	void scanDirectory(
+		const string& dirPath,
+		const string& relativePath,
+		std::set<string>& allDirs,
+		std::set<string>& occupiedDirs
+	);
 
 	/**
 	 * Creates directory structure for a file path.

@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      GladeDialog.hpp
- * @since     Feb 1, 2026
+ * @file      FileData.hpp
+ * @since     Feb 23, 2026
  * @author    Patricio A. Rossi (MeduZa)
  *
  * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
@@ -20,42 +20,34 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "XMLHelper.hpp"
+#include "Data.hpp"
 
 #pragma once
 
+namespace LEDSpicerUI::Ui::Storage {
+
 /**
- * Template that initialize Dialogs from Glade using CRTP (Curiously Recurring Template Pattern)
- * @tparam Derived
+ * LEDSpicerUI::Ui::Storage::FileData
+ * Data class for file-based items, such as Inputs and Animations.
  */
-template<typename Derived>
-class GladeDialog : public Gtk::Dialog {
+class FileData : public Data {
 
 public:
 
-	GladeDialog() = delete;
+	using Data::Data;
 
-	virtual ~GladeDialog() = default;
+	/**
+	 * Creates an object pre-populated with file unique id, path and name.
+	 * data must contain at least the current path.
+	 * @param data Iten's data.
+	 */
+	FileData(StringUMap& data);
 
-	static Derived* getInstance() {
-		return instance;
-	}
+	const string createUniqueId() const override;
+	const string createPrettyName() const override;
+	const string createTooltip() const override;
 
-	static void buildInstance(const Glib::RefPtr<Gtk::Builder>& builder, const string& widgetId) {
-		if (not instance) {
-			builder->get_widget_derived(widgetId, instance);
-			if (not instance) {
-				throw std::runtime_error("Failed to load widget: " + widgetId);
-			}
-		}
-	}
-
-protected:
-
-	static Derived* instance;
-
-	GladeDialog(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>&) : Gtk::Dialog(obj) {}
 };
 
-template<typename Derived>
-Derived* GladeDialog<Derived>::instance = nullptr;
+} // Namespace
+

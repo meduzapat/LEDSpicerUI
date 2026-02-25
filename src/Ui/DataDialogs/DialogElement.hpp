@@ -31,7 +31,7 @@ namespace LEDSpicerUI::Ui::DataDialogs {
 /**
  * LEDSpicerUI::Ui::DialogElement
  */
-class DialogElement: public DialogForm {
+class DialogElement: public DialogForm, public SingletonDialog<DialogElement> {
 
 	friend class Gtk::Builder;
 
@@ -47,8 +47,6 @@ public:
 
 	virtual ~DialogElement() = default;
 
-	static void initialize(Glib::RefPtr<Gtk::Builder> const &builder);
-	static DialogElement* getInstance();
 	void load(XMLHelper* values) override;
 	Storage::CollectionHandler* getCollectionHandler() const override;
 	void clearForm() override;
@@ -69,9 +67,6 @@ public:
 	void drawPins();
 
 protected:
-
-	/// Self instance.
-	static DialogElement* instance;
 
 	string defaultRGBFormat;
 
@@ -145,7 +140,7 @@ protected:
 
 	void drawPins(vector<Gtk::Label*>& labels);
 
-	void findElementByPin(uint16_t finder, unordered_set<Storage::BoxButton*>& elementsFound);
+	void findElementByPin(uint16_t finder, std::unordered_set<Storage::BoxButton*>& elementsFound);
 
 	void onSwitchPage(Gtk::Widget*, uint pageNum);
 };
