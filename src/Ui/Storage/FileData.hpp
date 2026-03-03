@@ -20,7 +20,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Data.hpp"
+#include "DirNode.hpp"
 
 #pragma once
 
@@ -28,26 +28,40 @@ namespace LEDSpicerUI::Ui::Storage {
 
 /**
  * LEDSpicerUI::Ui::Storage::FileData
- * Data class for file-based items, such as Inputs and Animations.
+ * Data class for file-based items (Inputs, Animations, Profiles).
+ * Holds a pointer to its owning DirectoryEntry so path resolution is always
+ * live — directory renames propagate automatically with no cascade needed.
+ * Uniqueness within CollectionHandler is keyed on FILE_ID, not path.
  */
-class FileData : public Data {
+class FileData : public DirNode {
 
 public:
 
-	using Data::Data;
-
 	/**
-	 * Creates an object pre-populated with file unique id, path and name.
-	 * data must contain at least the current path.
-	 * @param data Iten's data.
+	 * @param data  Item field data. FILENAME is extracted and stored as a property.
+	 * @param dir   Owning directory. nullptr means root of the type's tree.
 	 */
-	FileData(StringUMap& data);
+	FileData(StringUMap& data, const DirNode* dir);
 
 	const string createUniqueId() const override;
 	const string createPrettyName() const override;
 	const string createTooltip() const override;
 
+	/**
+	 * Returns a stable app-wide identifier that never changes even if renamed.
+	 * @return Stable code string, e.g. "dir_1".
+	 */
+	const string& getFsId() const;
+
+	string getName() const override;
+
+protected:
+
+	/// Stable app-wide file identifier. Never changes, never serialized.
+	const string fsId;
+
+	/// Counter for stable code generation.
+	inline static size_t fileCounter = 0;
 };
 
-} // Namespace
-
+} // namespace

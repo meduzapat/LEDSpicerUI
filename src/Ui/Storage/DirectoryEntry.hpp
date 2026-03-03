@@ -20,7 +20,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Data.hpp"
+#include "BoxButtonCollection.hpp"
+#include "DirNode.hpp"
 
 #pragma once
 
@@ -28,47 +29,60 @@ namespace LEDSpicerUI::Ui::Storage {
 
 /**
  * LEDSpicerUI::Ui::Storage::DirectoryEntry
- * Virtual directory representation for navigation.
- * Not persisted, created dynamically from item paths.
- * NAME stores directory name, PATH stores parent directory.
+ * Represents a single directory node in the navigator tree.
+ * Never serialized — exists only at runtime for navigation.
+ * Holds a pointer to its parent so full paths are resolved recursively
+ * without storing or copying path strings.
+ * NAME stores the directory's own segment name only.
  */
-class DirectoryEntry : public Data {
+class DirectoryEntry : public DirNode {
 
 public:
 
-	using Data::Data;
+	/**
+	 * @param data  Must contain NAME (directory segment name).
+	 * @param parent Parent directory node, or nullptr for root-level.
+	 */
+	DirectoryEntry(StringUMap& data, const DirectoryEntry* parent) :
+		DirNode(data, parent),
+		fsId("dir_" + std::to_string(++dirCounter))
+	{}
 
 	virtual ~DirectoryEntry() = default;
 
 	/**
-	 * Creates display name with folder icon.
-	 * @return Formatted name.
+	 * Returns a stable app-wide identifier that never changes even if renamed.
+	 * @return Stable code string, e.g. "dir_1".
 	 */
+	const string& getFsId() const;
+
+	const string createUniqueId() const override;
 	const string createPrettyName() const override;
-
-	/**
-	 * Creates tooltip text.
-	 * @return Tooltip string.
-	 */
 	const string createTooltip() const override;
-
-	/**
-	 * Returns CSS class for styling.
-	 * @return CSS class name.
-	 */
 	const string getCssClass() const override;
 
-	/**
-	 * Creates unique identifier from parent path and name.
-	 * @return Full path string.
-	 */
-	const string createUniqueId() const override;
+	string getName() const override;
 
-	/**
-	 * Returns parent directory path.
-	 * @return Parent path string.
-	 */
-	const string getParentPath() const;
+	DirectoryEntry& addChild(const string& name);
+
+	void addFile(DirNode* file);
+
+	void removeFile(DirNode* file);
+
+	DirectoryEntry* findChild(const string& name) const;
+
+	bool isEmpty() const;
+
+protected:
+
+	/// Stable app-wide identifier, set once at construction.
+	const string fsId;
+
+	/// Counter for stable code generation.
+	inline static size_t dirCounter = 0;
+
+	/// Stored files in this directory.
+	Storage::BoxButtonCollection contents;
 
 };
 

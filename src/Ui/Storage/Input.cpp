@@ -44,21 +44,14 @@ void Input::activate() {
 }
 
 const string Input::toXML() const {
-	string r(
-		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-		"<LEDSpicer\n"
-	);
-	Defaults::increaseTab();
-	r += Defaults::tab() + "version=\"1.1\"\n";
-	r += Defaults::tab() + "type=\"Input\"\n";
+	string r(XMLHelper::xmlHeader("Input"));
 	r += Data::toXML();
 	Defaults::reduceTab();
 	r += ">\n";
 	Defaults::increaseTab();
-	for (const auto& s : sources) {
+	for (const auto& s : sources)
 		r += s->getData()->toXML();
-	}
 	Defaults::reduceTab();
-	r += "</LEDSpicer>\n";
+	r += XMLHelper::xmlFooter();
 	return r;
 }

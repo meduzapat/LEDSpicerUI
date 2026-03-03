@@ -30,16 +30,9 @@ InputFile::InputFile(const string& inputFile) : ProjectFile(inputFile, "Input", 
 
 	StringUMap input(rootInfo.attributes);
 
-	// Split pathFilename into PATH and FILENAME so Input::constructor
+	// Inject FILENAME (basename of pathFilename) so FileData can store it as a property.
 	auto pos = pathFilename.find_last_of('/');
-	if (pos == string::npos) {
-		input[PATH]     = "";
-		input[FILENAME] = pathFilename;
-	}
-	else {
-		input[PATH]     = pathFilename.substr(0, pos);
-		input[FILENAME] = pathFilename.substr(pos + 1);
-	}
+	input[FILENAME] = pos == string::npos ? pathFilename : pathFilename.substr(pos + 1);
 
 	tinyxml2::XMLElement* mapsNode = getRoot()->FirstChildElement("maps");
 	if (not mapsNode) {

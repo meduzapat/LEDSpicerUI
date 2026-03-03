@@ -140,11 +140,10 @@ protected:
 	/// Created items in the dialog.
 	Storage::BoxButtonCollection* items = nullptr;
 
-	Storage::Data
-		/// Current item's data, been created, edited or loaded.
-		* currentData = nullptr,
-		/// The data record that handles this Dialog.
-		* ownerData = nullptr;
+	/// Current item's data, been created, edited or loaded.
+	Storage::Data* currentData = nullptr;
+	/// The data record that handles this Dialog.
+	const Storage::Data* ownerData = nullptr;
 
 	/// Child dialogs to refresh when this dialog is refreshed.
 	vector<DialogForm*> childDialogs;

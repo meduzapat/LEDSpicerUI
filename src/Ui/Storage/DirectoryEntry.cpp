@@ -24,23 +24,34 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
+
+string DirectoryEntry::getName() const {
+	return getValue(NAME);
+}
+
+const string DirectoryEntry::createUniqueId() const {
+	return Defaults::createCommonUniqueId({
+		isRoot() ? static_cast<const DirectoryEntry*>(parent)->getFsId() : "",
+		getValue(NAME)
+	});
+}
+
 const string DirectoryEntry::createPrettyName() const {
-	return "";
+	return "📁 " + getValue(NAME);
 }
 
 const string DirectoryEntry::createTooltip() const {
-	return "Open folder " + getValue(NAME);
+	return getFullPath();
 }
 
 const string DirectoryEntry::getCssClass() const {
 	return "DirectoryBoxButton";
 }
 
-const string DirectoryEntry::createUniqueId() const {
-	const string parent = getValue(PATH);
-	return parent.empty() ? getValue(NAME) : parent + "/" + getValue(NAME);
+bool DirectoryEntry::isEmpty() const {
+	return not contents.getSize();
 }
 
-const string DirectoryEntry::getParentPath() const {
-	return getValue(PATH);
+const string& DirectoryEntry::getFsId() const {
+	return fsId;
 }

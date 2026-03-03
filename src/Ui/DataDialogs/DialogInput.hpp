@@ -20,8 +20,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DialogForm.hpp"
 #include "Storage/Input.hpp"
+#include "DialogFileForm.hpp"
 #include "DialogImport.hpp"
 #include "config/InputFile.hpp"
 
@@ -31,17 +31,15 @@ namespace LEDSpicerUI::Ui::DataDialogs {
 
 /**
  * LEDSpicerUI::Ui::DataDialogs::DialogInput
- * Dialog to create and edit Input plugins.
+ * Dialog to create and edit Inputs.
  */
-class DialogInput : public DialogForm, public SingletonDialog<DialogInput> {
+class DialogInput : public DialogFileForm, public SingletonDialog<DialogInput> {
 
 	friend class Gtk::Builder;
 
 public:
 
 	static constexpr const char* BOX_INPUTS = "BoxInputs";
-
-	DialogInput() = delete;
 
 	virtual ~DialogInput();
 
@@ -74,9 +72,6 @@ protected:
 
 	/// The box to display linked maps.
 	OrdenableFlowBox* boxInputLinkedMaps = nullptr;
-
-	/// Current working path for new input files.
-	string currentPath;
 
 	DialogInput(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
 

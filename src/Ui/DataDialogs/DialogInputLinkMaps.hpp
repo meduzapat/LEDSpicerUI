@@ -41,8 +41,6 @@ class DialogInputLinkMaps: public DialogForm, public SingletonDialog<DialogInput
 
 public:
 
-	DialogInputLinkMaps() = delete;
-
 	virtual ~DialogInputLinkMaps();
 
 	void load(XMLHelper* values) override;

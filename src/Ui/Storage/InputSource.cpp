@@ -24,9 +24,10 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-InputSource::InputSource(StringUMap& data) : Data(data) {
-	static size_t sourceCount = 0;
-	setProperty(SID, std::to_string(++sourceCount));
+InputSource::InputSource(StringUMap& data) :
+	Data(data),
+	sId("src_" + std::to_string(++sourceCounter))
+	{
 	// register maps against the global collections so cascade deletes propagate.
 	CollectionHandler::getInstance(COLLECTION_ELEMENT)->registerDependency({&maps});
 	CollectionHandler::getInstance(COLLECTION_GROUP)->registerDependency({&maps});
@@ -45,6 +46,7 @@ InputSource::~InputSource() {
 }
 
 const string InputSource::createUniqueId() const {
+	//sId(Defaults::createCommonUniqueId({data.at(IID), "src" + std::to_string(++sourceCounter)}))
 	// An ID unique to this input and this source.
 	return Defaults::createCommonUniqueId({getProperty(FILE_ID), getValue(SOURCE)});
 }

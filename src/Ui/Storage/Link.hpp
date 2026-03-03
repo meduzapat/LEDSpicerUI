@@ -48,7 +48,6 @@ class Link : public Data {
 
 		LinkData(const string& t, const string& k, const Data* l) : type(t), key(k), link(l) {}
 
-
 	};
 
 	using Data::Data;

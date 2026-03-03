@@ -36,8 +36,6 @@ class DialogProcess: public DialogForm, public SingletonDialog<DialogProcess> {
 
 public:
 
-	DialogProcess() = delete;
-
 	virtual ~DialogProcess() = default;
 
 	void load(XMLHelper* values) override;

@@ -40,8 +40,6 @@ class DialogInputMap : public DialogForm, public SingletonDialog<DialogInputMap>
 
 public:
 
-	DialogInputMap() = delete;
-
 	virtual ~DialogInputMap() = default;
 
 	void load(XMLHelper* values) override;

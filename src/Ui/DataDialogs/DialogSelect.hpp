@@ -71,8 +71,6 @@ public:
 		const uint8_t buttons;
 	};
 
-	DialogSelect() = delete;
-
 	virtual ~DialogSelect() = default;
 
 	/**

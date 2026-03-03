@@ -37,8 +37,6 @@ class DialogSettings : public GladeDialog<DialogSettings> {
 
 public:
 
-	DialogSettings() = delete;
-
 	virtual ~DialogSettings() = default;
 
 	const string& getBinaryPath() const;

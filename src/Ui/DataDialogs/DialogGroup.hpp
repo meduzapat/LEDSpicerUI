@@ -37,8 +37,6 @@ class DialogGroup: public DialogForm, public SingletonDialog<DialogGroup> {
 
 public:
 
-	DialogGroup() = delete;
-
 	virtual ~DialogGroup() = default;
 
 	void load(XMLHelper* values) override;

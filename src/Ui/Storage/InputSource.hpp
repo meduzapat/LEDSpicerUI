@@ -54,6 +54,12 @@ protected:
 	/// Maps owned by this source.
 	BoxButtonCollection maps;
 
+	/// Stable input-wide source identifier. Set once at construction, never changes.
+	const string sId;
+
+	/// Counter for sId generation.
+	inline static size_t sourceCounter = 0;
+
 };
 
 } // namespace

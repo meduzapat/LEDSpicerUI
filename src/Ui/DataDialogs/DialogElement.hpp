@@ -43,8 +43,6 @@ public:
 	static constexpr const int MAX_COLUMNS = 20;
 	static constexpr const int MIN_COLUMNS = 10;
 
-	DialogElement() = delete;
-
 	virtual ~DialogElement() = default;
 
 	void load(XMLHelper* values) override;

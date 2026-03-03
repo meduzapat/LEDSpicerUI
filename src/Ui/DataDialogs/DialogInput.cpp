@@ -25,7 +25,7 @@
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
 DialogInput::DialogInput(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
-	DialogForm(obj, builder),
+	DialogFileForm(obj, builder),
 	dialogImportInput(DialogImport::Types::INPUT, this)
 {
 
@@ -143,13 +143,10 @@ void DialogInput::isValid() const {
 		throw Message("Invalid name.");
 	}
 
-	string uid(createUniqueId());
-	if (getCollectionHandler()->isIdSet(uid)) {
-		if (action != Actions::EDIT or uid != currentData->createUniqueId()) {
-			if (action != Actions::LOAD)
-				entryInputName->grab_focus();
-			throw Message("Name already in use.");
-		}
+	if (not isUniqueFilename(filename)) {
+		if (action != Actions::LOAD)
+			entryInputName->grab_focus();
+		throw Message("Name already in use in this directory.");
 	}
 
 	if (comboBoxInputSelectInput->get_active_text() == "Blinker") {
@@ -162,7 +159,6 @@ void DialogInput::isValid() const {
 void DialogInput::storeData() {
 	string name(comboBoxInputSelectInput->get_active_id());
 	currentData->setValue(NAME, name);
-	currentData->setProperty(PATH,     currentPath);
 	currentData->setProperty(FILENAME, entryInputName->get_text());
 
 	if (name == "Actions") {
@@ -193,12 +189,7 @@ void DialogInput::retrieveData() {
 }
 
 const string DialogInput::createUniqueId() const {
-	string filename(entryInputName->get_text());
-	return currentPath.empty() ? filename : currentPath + "/" + filename;
-}
-
-void DialogInput::setPath(const string& path) {
-	currentPath = path;
+	return entryInputName->get_text();
 }
 
 const string DialogInput::getType() const {
@@ -206,9 +197,6 @@ const string DialogInput::getType() const {
 }
 
 LEDSpicerUI::Ui::Storage::Data* DialogInput::createData(StringUMap& rawData) {
-	// Inject PATH and FILENAME as separate keys so Input constructor
-	// can store them as properties without parsing.
-	rawData[PATH]     = currentPath;
 	rawData[FILENAME] = rawData.count(FILENAME) ? rawData.at(FILENAME) : "";
-	return new Storage::Input(rawData);
+	return new Storage::Input(rawData, currentDirectory);
 }

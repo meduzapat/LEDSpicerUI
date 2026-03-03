@@ -106,6 +106,7 @@ constexpr const char* PATH     = "path";
 constexpr const char* FILE_ID  = "FID"; /// To be used with file based data objects.
 constexpr const char* PID      = "PID"; /// To be used with anything that has a P in the name.
 constexpr const char* SID      = "SID"; /// To be used with anything that has a S in the name.
+constexpr const char* IID      = "IID"; /// To be used with anything that has a I in the name.
 
 constexpr float DEFAULT_CHANGE_VALUE    = 64.00f;
 

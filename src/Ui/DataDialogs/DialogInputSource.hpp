@@ -48,8 +48,6 @@ public:
 	static constexpr const char* DEV_INPUT_BY_ID = "/dev/input/by-id/";
 	static constexpr const char* SYS_CLASS_INPUT = "/sys/class/input/";
 
-	DialogInputSource() = delete;
-
 	virtual ~DialogInputSource();
 
 	void load(XMLHelper* values) override;

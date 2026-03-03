@@ -24,29 +24,30 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-FileData::FileData(StringUMap& data) : Data(data) {
-	static size_t fileCounter = 0;
-	setProperty(FILE_ID, std::to_string(++fileCounter));
-	// PATH and FILENAME come pre-split from file loader or Dialog.
-	setProperty(PATH,     data.count(PATH)     ? data.at(PATH)     : "");
+FileData::FileData(StringUMap& data, const DirNode* dir) :
+	DirNode(data, dir),
+	fsId("file_" + std::to_string(++fileCounter))
+{
 	setProperty(FILENAME, data.count(FILENAME) ? data.at(FILENAME) : "");
-	// Store as properties so they never serialize into the XML attributes.
-	data.erase(PATH);
 	data.erase(FILENAME);
 }
 
 const string FileData::createUniqueId() const {
-	string
-		path(getProperty(PATH)),
-		filename(getProperty(FILENAME));
-	if (filename.empty()) return "";
-	return path.empty() ? filename : path + "/" + filename;
+	return Defaults::createCommonUniqueId({fsId, getProperty(FILENAME)}) ;
 }
 
 const string FileData::createPrettyName() const {
-	return getProperty(FILENAME) + "[" + getValue(NAME) + "]";
+	return getFullPath() + "[" + getValue(NAME) + "]";
 }
 
 const string FileData::createTooltip() const {
 	return "of type " + getValue(NAME);
+}
+
+const string& FileData::getFsId() const {
+	return fsId;
+}
+
+string FileData::getName() const {
+	return getProperty(FILENAME);
 }

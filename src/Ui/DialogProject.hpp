@@ -35,8 +35,6 @@ class DialogProject : public GladeDialog<DialogProject> {
 
 public:
 
-	DialogProject() = delete;
-
 	virtual ~DialogProject() = default;
 
 	const string& getProjectName() const;

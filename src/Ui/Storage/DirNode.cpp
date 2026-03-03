@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      InputFile.hpp
- * @since     Nov 14, 2023
+ * @file      DirNode.cpp
+ * @since     Feb 28, 2026
  * @author    Patricio A. Rossi (MeduZa)
  *
  * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
@@ -20,23 +20,23 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ProjectFile.hpp"
+#include "DirNode.hpp"
 
-#pragma once
+using namespace LEDSpicerUI::Ui::Storage;
 
-namespace LEDSpicerUI {
+DirNode* DirNode::getParent() const {
+	return const_cast<DirNode*>(parent);
+}
 
-class InputFile : public ProjectFile {
+string DirNode::getPath() const {
+	return parent ? parent->getFullPath() : "";
+}
 
-public:
+string DirNode::getFullPath() const {
+	const string path(getPath());
+	return path.empty() ? getName() : path + "/" + getName();
+}
 
-	InputFile(const string& inputFile);
-
-	virtual ~InputFile() = default;
-
-protected:
-
-	const string processMaps(tinyxml2::XMLElement* mapsNode, const string& inputName);
-};
-
-} // namespace
+bool DirNode::isRoot() const {
+	return not parent;
+}

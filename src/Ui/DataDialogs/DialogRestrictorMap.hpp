@@ -36,8 +36,6 @@ class DialogRestrictorMap: public DialogForm, public SingletonDialog<DialogRestr
 
 public:
 
-	DialogRestrictorMap() = delete;
-
 	virtual ~DialogRestrictorMap() = default;
 
 	void load(XMLHelper* values) override;

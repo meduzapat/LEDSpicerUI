@@ -37,8 +37,6 @@ class DialogProfile: public DialogForm, public SingletonDialog<DialogProfile> {
 
 public:
 
-	DialogProfile() = delete;
-
 	virtual ~DialogProfile() = default;
 
 	void load(XMLHelper* values) override;

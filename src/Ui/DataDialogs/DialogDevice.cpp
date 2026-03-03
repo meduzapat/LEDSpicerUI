@@ -75,13 +75,10 @@ DialogDevice::DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 	 */
 	spinnerLeds->signal_value_changed().connect([&, btnAddElement]() {
 		const string name(comboBoxDevices->get_active_id());
-		if (not name.empty() and not Defaults::isVariable(name)) {
-			return;
-		}
+		if (not name.empty() and not Defaults::isVariable(name)) return;
 		btnAddElement->set_sensitive(spinnerLeds->get_value_as_int() > 1);
 		const uint16_t pinsCount(spinnerLeds->get_value_as_int() * 3);
-		if (comboBoxDevices->get_active_id().empty() or not pinsCount)
-			return;
+		if (comboBoxDevices->get_active_id().empty() or not pinsCount) return;
 		DialogElement::getInstance()->changeNumberOfPins(pinsCount);
 	});
 
@@ -104,9 +101,7 @@ DialogDevice::DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 		}
 
 		// If the name is the same do nothing.
-		if (previousName == name) {
-			return;
-		}
+		if (previousName == name) return;
 
 		const uint16_t totalPins(Defaults::devicesInfo.at(name).pins);
 		const string currentName(currentData->getValue(NAME));
@@ -210,19 +205,14 @@ void DialogDevice::isValid() const {
 
 	bool checkDupe = true;
 
-	if (name.empty()) {
-		throw Message("Invalid device");
-	}
+	if (name.empty()) throw Message("Invalid device");
 
-	if (Defaults::isIdUser(name) and id.empty()) {
-		throw Message("Invalid device number");
-	}
+	if (Defaults::isIdUser(name) and id.empty()) throw Message("Invalid device number");
 
 	if (Defaults::isVariable(name)) {
 		string pins(spinnerLeds->get_text());
 		if (not Defaults::isBetween(pins, 1, Defaults::devicesInfo.at(name).pins)) {
-			if (action != Actions::LOAD)
-				spinnerLeds->grab_focus();
+			if (action != Actions::LOAD) spinnerLeds->grab_focus();
 			throw Message("The number of pins need to be between one and the number of pins the device allows (" + std::to_string(Defaults::devicesInfo.at(name).pins) + ")");
 		}
 	}

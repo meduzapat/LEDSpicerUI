@@ -148,7 +148,7 @@ void DialogInputSource::retrieveData() {
 const string DialogInputSource::createUniqueId() const {
 	string selected{comboBoxInputSource->get_active_id()};
 	if (selected == SOURCE_OTHER_OPTION or selected.empty()) selected = entryInputSource->get_text();
-	return Defaults::createCommonUniqueId({ownerData->getProperty(FILE_ID), selected});
+	return Defaults::createCommonUniqueId({ownerData->createUniqueId(), selected});
 }
 
 void DialogInputSource::createButtonDirectly() {
@@ -174,9 +174,8 @@ const string DialogInputSource::getType() const {
 }
 
 LEDSpicerUI::Ui::Storage::Data* DialogInputSource::createData(StringUMap& rawData) {
-	auto is = new Storage::InputSource(rawData);
-	// pass the input file id.
-	is->setProperty(FILE_ID, ownerData->getProperty(FILE_ID));
+	auto* is = new Storage::InputSource(rawData);
+	is->setProperty(FILE_ID, ownerData->createUniqueId());
 	return is;
 }
 

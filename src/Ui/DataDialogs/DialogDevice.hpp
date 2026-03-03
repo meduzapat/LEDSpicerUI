@@ -39,8 +39,6 @@ class DialogDevice: public DialogForm, public SingletonDialog<DialogDevice> {
 
 public:
 
-	DialogDevice() = delete;
-
 	virtual ~DialogDevice();
 
 	void load(XMLHelper* values) override;
