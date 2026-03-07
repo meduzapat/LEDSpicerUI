@@ -416,7 +416,8 @@ void DialogElement::storeData() {
 		}
 		currentData->setProperty("expandable", "true");
 		currentData->setProperty("system",     "true");
-		auto children = dynamic_cast<Storage::Element*>(currentData)->copyStripChildren();
+		auto currentDataE = static_cast<Storage::Element*>(currentData);
+		auto children     = currentDataE->copyStripChildren();
 
 		// Update/reuse existing children, create missing ones
 		for (size_t i = 0; i < size; ++i) {
@@ -437,7 +438,7 @@ void DialogElement::storeData() {
 				childData[POSITION] = std::to_string(position + i);
 				auto child = new Storage::Element(childData);
 				child->setProperty("strip", code);
-				dynamic_cast<Storage::Element*>(currentData)->addStripChild(child);
+				currentDataE->addStripChild(child);
 				getCollectionHandler()->add(child);
 			}
 		}

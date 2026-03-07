@@ -37,7 +37,7 @@ void Message::initialize(Glib::RefPtr<Gtk::Builder> const &builder, Gtk::Window*
 	builder->get_widget("DialogErrorMessage",    errorDialog);
 	builder->get_widget("DialogInfoMessage",     infoDialog);
 	builder->get_widget("DialogQuestionMessage", questionDialog);
-	Message::main = dynamic_cast<Gtk::Window*>(main);
+	Message::main = static_cast<Gtk::Window*>(main);
 }
 
 void Message::displayError(Gtk::Window* transient) {

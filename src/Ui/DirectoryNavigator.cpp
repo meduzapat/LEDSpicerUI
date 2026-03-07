@@ -24,3 +24,26 @@
 
 using namespace LEDSpicerUI::Ui;
 
+void DirectoryNavigator::onActivate() {
+	wireDialogs(currentDir);
+}
+
+void DirectoryNavigator::enterDirectory(Storage::DirectoryEntry* dir) {
+	currentDir = dir;
+	wireDialogs(currentDir);
+}
+
+void DirectoryNavigator::navigateUp() {
+	if (currentDir == &rootDir) return;
+	Storage::DirNode* parent = currentDir->getParent();
+	currentDir = parent ? static_cast<Storage::DirectoryEntry*>(parent) : &rootDir;
+	wireDialogs(currentDir);
+}
+
+bool DirectoryNavigator::isAtRoot() const {
+	return currentDir == &rootDir;
+}
+
+Storage::DirectoryEntry* DirectoryNavigator::getCurrentDir() const {
+	return currentDir;
+}

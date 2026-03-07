@@ -42,7 +42,7 @@ DialogRestrictorMap::DialogRestrictorMap(BaseObjectType* obj, const Glib::RefPtr
 	builder->get_widget("ComboBoxRestrictors", comboBoxRestrictors);
 
 	// list of map ids to pick from.
-	liststoreRestrictorMapId = dynamic_cast<Gtk::ListStore*>(builder->get_object("liststoreRestrictorMapId").get());
+	liststoreRestrictorMapId = static_cast<Gtk::ListStore*>(builder->get_object("liststoreRestrictorMapId").get());
 }
 
 void DialogRestrictorMap::load(XMLHelper* values) {

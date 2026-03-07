@@ -30,7 +30,7 @@ RestrictorMap::~RestrictorMap() {
 	}
 }
 
-string const RestrictorMap::createPrettyName() const {
+const string RestrictorMap::createPrettyName() const {
 	string name("Player " + fieldsData.at(PLAYER) + " Joystick " + fieldsData.at(JOYSTICK));
 	// Split hardware name out of additional info and check for multi.
 	if (not getValue(RESTRICTOR_INTERFACE).empty())
@@ -38,11 +38,11 @@ string const RestrictorMap::createPrettyName() const {
 	return name;
 }
 
-string const RestrictorMap::createUniqueId() const {
+const string RestrictorMap::createUniqueId() const {
 	return Defaults::createCommonUniqueId({getValue(PLAYER), getValue(JOYSTICK)});
 }
 
-string const RestrictorMap::getCssClass() const {
+const string RestrictorMap::getCssClass() const {
 	return "RestrictorMapBoxButton";
 }
 

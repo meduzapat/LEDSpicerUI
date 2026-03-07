@@ -50,28 +50,19 @@ public:
 
 	virtual ~DirectoryEntry() = default;
 
-	/**
-	 * Returns a stable app-wide identifier that never changes even if renamed.
-	 * @return Stable code string, e.g. "dir_1".
-	 */
-	const string& getFsId() const;
-
 	const string createUniqueId() const override;
 	const string createPrettyName() const override;
 	const string createTooltip() const override;
 	const string getCssClass() const override;
 
 	string getName() const override;
-
-	DirectoryEntry& addChild(const string& name);
-
-	void addFile(DirNode* file);
-
-	void removeFile(DirNode* file);
-
-	DirectoryEntry* findChild(const string& name) const;
+	string getFsId() const override;
 
 	bool isEmpty() const;
+
+	BoxButtonCollection& getContents();
+
+	DirNode* getParent();
 
 protected:
 

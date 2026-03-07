@@ -182,6 +182,11 @@ public:
 	 */
 	const StringUMap& getProperties() const;
 
+	/**
+	 * @return an empty data object.
+	 */
+	static StringUMap& createEmptyData();
+
 protected:
 
 	/// Data pairs.

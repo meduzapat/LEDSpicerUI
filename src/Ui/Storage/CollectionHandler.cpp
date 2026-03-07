@@ -78,7 +78,7 @@ void CollectionHandler::add(Data* item) {
 void CollectionHandler::remove(Data* item) {
 	collection.erase(item->createUniqueId());
 
-	/* Collect depleted callbacks first, fire after iteration. */
+	// Collect depleted callbacks first, fire after iteration.
 	vector<std::function<void()>> pending;
 	for (auto& dep : dependencies) {
 		dep.collection->remove(item);

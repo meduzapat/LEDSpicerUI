@@ -33,7 +33,8 @@ FileData::FileData(StringUMap& data, const DirNode* dir) :
 }
 
 const string FileData::createUniqueId() const {
-	return Defaults::createCommonUniqueId({fsId, getProperty(FILENAME)}) ;
+	const string parentId = parent ? parent->getFsId() : "";
+	return Defaults::createCommonUniqueId({parentId, getName()});
 }
 
 const string FileData::createPrettyName() const {
@@ -44,7 +45,7 @@ const string FileData::createTooltip() const {
 	return "of type " + getValue(NAME);
 }
 
-const string& FileData::getFsId() const {
+string FileData::getFsId() const {
 	return fsId;
 }
 

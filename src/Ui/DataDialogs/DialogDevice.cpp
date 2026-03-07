@@ -55,8 +55,8 @@ DialogDevice::DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 	Gtk::Notebook* notebookDeviceConnections;
 	builder->get_widget("NotebookDeviceConnections", notebookDeviceConnections);
 
-	devicesListstore = dynamic_cast<Gtk::ListStore*>(builder->get_object("ListstoreDevices").get());
-	idListstore      = dynamic_cast<Gtk::ListStore*>(builder->get_object("liststoreDeviceId").get());
+	devicesListstore = static_cast<Gtk::ListStore*>(builder->get_object("ListstoreDevices").get());
+	idListstore      = static_cast<Gtk::ListStore*>(builder->get_object("liststoreDeviceId").get());
 
 	// Set Devices
 	auto row = *(devicesListstore->append());

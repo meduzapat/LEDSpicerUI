@@ -102,8 +102,7 @@ LEDSpicerUI::Ui::OrdenableFlowBox* DialogForm::getBox() {
 }
 
 LEDSpicerUI::Ui::Storage::Data* DialogForm::createData() {
-	StringUMap rawData;
-	return createData(rawData);
+	return createData(Storage::Data::createEmptyData());
 }
 
 void DialogForm::setSignalAdd(Gtk::Button* btnAdd) {
@@ -111,10 +110,6 @@ void DialogForm::setSignalAdd(Gtk::Button* btnAdd) {
 }
 
 void DialogForm::setSignalAddTo(Gtk::Button* btnAdd, DialogForm* dialogToOpen) {
-	if (not dialogToOpen) {
-		setSignalAdd(btnAdd);
-		return;
-	}
 	btnAdd->signal_clicked().connect(sigc::mem_fun(*dialogToOpen, &DialogForm::onAddClicked));
 }
 

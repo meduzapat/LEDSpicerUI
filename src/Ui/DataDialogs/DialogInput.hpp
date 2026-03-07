@@ -22,8 +22,6 @@
 
 #include "Storage/Input.hpp"
 #include "DialogFileForm.hpp"
-#include "DialogImport.hpp"
-#include "config/InputFile.hpp"
 
 #pragma once
 
@@ -56,9 +54,6 @@ public:
 	void setPath(const string& path);
 
 protected:
-
-	/// Import input dialog.
-	DialogImport dialogImportInput;
 
 	Gtk::ComboBoxText
 		* comboBoxInputSelectInput = nullptr,

@@ -89,8 +89,8 @@ void BoxButtonCollection::reindex(OrdenableFlowBox* box) {
 	reorderedItems.reserve(items.size());
 
 	for (auto* child : box->get_children()) {
-		auto flowChild = dynamic_cast<Gtk::FlowBoxChild*>(child);
-		auto boxButton = dynamic_cast<BoxButton*>(flowChild->get_child());
+		auto flowChild = static_cast<Gtk::FlowBoxChild*>(child);
+		auto boxButton = static_cast<BoxButton*>(flowChild->get_child());
 		auto it = std::find_if(items.begin(), items.end(), [boxButton](BoxButton* item) {
 			return item->getData()->createUniqueId() == boxButton->getData()->createUniqueId();
 		});
@@ -100,6 +100,7 @@ void BoxButtonCollection::reindex(OrdenableFlowBox* box) {
 }
 
 void BoxButtonCollection::wipe() {
+	for (auto& item : items) delete item;
 	items.clear();
 }
 

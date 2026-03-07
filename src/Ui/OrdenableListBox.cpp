@@ -38,8 +38,8 @@ OrdenableListBox::OrdenableListBox(
 	builder->get_widget(dn, btnDn);
 	// Register checkbox
 	for (auto child : get_children()) {
-		auto boxChild = dynamic_cast<Gtk::ListBoxRow*>(child);
-		Defaults::registerWidget(dynamic_cast<Gtk::CheckButton*>(boxChild->get_child()));
+		auto boxChild = static_cast<Gtk::ListBoxRow*>(child);
+		Defaults::registerWidget(static_cast<Gtk::CheckButton*>(boxChild->get_child()));
 	}
 	// Set Signals.
 	signal_show().connect([=]() {
@@ -81,7 +81,7 @@ size_t OrdenableListBox::getSize() {
 
 void OrdenableListBox::wipe() {
 	for (auto child : get_children()) {
-		auto boxChild = dynamic_cast<Gtk::ListBoxRow*>(child);
+		auto boxChild = static_cast<Gtk::ListBoxRow*>(child);
 		boxChild->remove();
 		remove(*boxChild);
 	}
@@ -91,19 +91,19 @@ void OrdenableListBox::sortAndMark(StringVector values) {
 	std::unordered_map<string, Gtk::ListBoxRow*> rows;
 	// move items into temp container
 	for (auto child : get_children()) {
-		auto boxChild = dynamic_cast<Gtk::ListBoxRow*>(child);
+		auto boxChild = static_cast<Gtk::ListBoxRow*>(child);
 		rows.emplace(boxChild->get_name(), boxChild);
 		remove(*boxChild);
 	}
 	// Add items selected.
 	for (const auto& name : values) {
-		dynamic_cast<Gtk::CheckButton*>(rows[name]->get_child())->set_active(true);
+		static_cast<Gtk::CheckButton*>(rows[name]->get_child())->set_active(true);
 		add(*rows[name]);
 		rows.erase(name);
 	}
 	// Add items non selected.
 	for (const auto& row : rows) {
-		dynamic_cast<Gtk::CheckButton*>(row.second->get_child())->set_active(false);
+		static_cast<Gtk::CheckButton*>(row.second->get_child())->set_active(false);
 		add(*row.second);
 	}
 }
@@ -111,8 +111,8 @@ void OrdenableListBox::sortAndMark(StringVector values) {
 StringVector OrdenableListBox::getCheckedValues() {
 	StringVector values;
 	for (auto child : get_children()) {
-		auto boxChild(dynamic_cast<Gtk::ListBoxRow*>(child));
-		if (dynamic_cast<Gtk::CheckButton*>(boxChild->get_child())->get_active())
+		auto boxChild(static_cast<Gtk::ListBoxRow*>(child));
+		if (static_cast<Gtk::CheckButton*>(boxChild->get_child())->get_active())
 			values.push_back(boxChild->get_name());
 	}
 	return values;

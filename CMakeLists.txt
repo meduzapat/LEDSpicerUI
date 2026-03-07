@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.16)
-project(LEDSpicerUI VERSION 0.0.7 LANGUAGES CXX)
+project(LEDSpicerUI VERSION 0.0.8 LANGUAGES CXX)
 
 # Metadata (for glade file substitution and compile definitions)
 set(PACKAGE "ledspicerui")
-set(PACKAGE_NAME "${PROJECT_NAME}")  # LEDSpicerUI
-set(PACKAGE_VERSION "${PROJECT_VERSION}")  # 0.0.4
-set(PACKAGE_STRING "${PROJECT_NAME} ${PROJECT_VERSION}")  # LEDSpicerUI 0.0.4
+set(PACKAGE_NAME "${PROJECT_NAME}")
+set(PACKAGE_VERSION "${PROJECT_VERSION}")
+set(PACKAGE_STRING "${PROJECT_NAME} ${PROJECT_VERSION}")
 set(PACKAGE_TARNAME "ledspicerui")
 set(COPYRIGHT "Copyright © 2023 - 2025 Patricio A. Rossi (MeduZa)")
 set(MINIMUM_COMPATIBILITY "0.7.0")
@@ -79,6 +79,7 @@ add_executable(ledspicerui
 	src/Ui/Storage/BoxButton.cpp
 	src/Ui/Storage/BoxButtonCollection.cpp
 	src/Ui/DataDialogs/DialogForm.cpp
+	src/Ui/DataDialogs/DialogFileForm.cpp
 	src/Ui/DataDialogs/DialogSelect.cpp
 	src/Ui/DataDialogs/DialogElement.cpp
 	src/Ui/DataDialogs/DialogGroup.cpp

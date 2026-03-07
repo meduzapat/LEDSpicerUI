@@ -50,7 +50,8 @@ protected:
 
 	static Derived* instance;
 
-	SingletonDialog() = delete;
+	SingletonDialog() = default;
+
 };
 
 template <typename Derived>

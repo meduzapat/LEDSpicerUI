@@ -51,8 +51,8 @@ DialogRestrictor::DialogRestrictor(BaseObjectType* obj, const Glib::RefPtr<Gtk::
 	builder->get_widget("BriefRestrictor",              briefRestrictor);
 
 	// Models.
-	restrictorsListstore = dynamic_cast<Gtk::ListStore*>(builder->get_object("liststoreRestrictors").get());
-	idListstore          = dynamic_cast<Gtk::ListStore*>(builder->get_object("liststoreRestrictorsId").get());
+	restrictorsListstore = static_cast<Gtk::ListStore*>(builder->get_object("liststoreRestrictors").get());
+	idListstore          = static_cast<Gtk::ListStore*>(builder->get_object("liststoreRestrictorsId").get());
 
 	// Add buttons.
 	Gtk::Button* btnAddRestrictorMap = nullptr;

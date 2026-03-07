@@ -127,8 +127,8 @@ bool DialogColors::isValidColor(const string& colorName) {
 	if (colorName == "On" or colorName == "Off" or colorName == "Random")
 		return true;
 	for (auto child : ContainerColorPicker->get_children()) {
-		auto c = dynamic_cast<Gtk::FlowBoxChild*>(child);
-		auto b = dynamic_cast<Gtk::Button*>(c->get_child());
+		auto c = static_cast<Gtk::FlowBoxChild*>(child);
+		auto b = static_cast<Gtk::Button*>(c->get_child());
 		string t(b->get_label());
 		if (colorName == t)
 			return true;
@@ -180,8 +180,8 @@ void DialogColors::populateColorBox(Gtk::FlowBox* destination, const StringVecto
 StringVector DialogColors::getColorBoxValues(Gtk::FlowBox* destination) {
 	StringVector r;
 	for (auto child : destination->get_children()) {
-		auto c = dynamic_cast<Gtk::FlowBoxChild*>(child);
-		r.push_back(dynamic_cast<Gtk::Label*>(c->get_child())->get_text());
+		auto c = static_cast<Gtk::FlowBoxChild*>(child);
+		r.push_back(static_cast<Gtk::Label*>(c->get_child())->get_text());
 	}
 	return r;
 }

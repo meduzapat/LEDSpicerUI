@@ -24,6 +24,29 @@
 
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
+DialogDirectory::DialogDirectory(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
+	DialogFileForm(obj, builder)
+{
+	builder->get_widget("EntryDirectoryName", entryDirectoryName);
+	builder->get_widget("BtnApplyDirectory",  btnApply);
+	builder->get_widget_derived("BoxInputs",  box);
+
+	setSignalApply();
+
+	btnApply->set_sensitive(false);
+	entryDirectoryName->signal_changed().connect([this]() {
+		btnApply->set_sensitive(not Defaults::sanitizeFilename(entryDirectoryName->get_text()).empty());
+	});
+}
+
+void DialogDirectory::setCollectionName(const string& name) {
+	collectionName = name;
+}
+
+void DialogDirectory::load(XMLHelper* values) {
+
+}
+
 void DialogDirectory::isValid() const {
 	const string name(Defaults::sanitizeFilename(entryDirectoryName->get_text()));
 	if (name.empty()) {
@@ -47,12 +70,13 @@ void DialogDirectory::retrieveData() {
 
 void DialogDirectory::clearForm() {
 	entryDirectoryName->set_text("");
+	btnApply->set_sensitive(false);
 }
 
 const string DialogDirectory::createUniqueId() const {
-	auto parent = static_cast<const Storage::DirectoryEntry*>(ownerData);
+	// upgrade const Data* to const DirNode*
 	return Defaults::createCommonUniqueId({
-		parent->getFsId(),
+		static_cast<const Storage::DirNode*>(ownerData)->getFsId(),
 		Defaults::sanitizeFilename(entryDirectoryName->get_text())
 	});
 }
@@ -62,12 +86,8 @@ const string DialogDirectory::getType() const {
 }
 
 LEDSpicerUI::Ui::Storage::CollectionHandler* DialogDirectory::getCollectionHandler() const {
-	return nullptr;
+	return Storage::CollectionHandler::getInstance(collectionName);
 }
-
-//void DialogDirectory::setParent(Storage::DirectoryEntry* parent) {
-//	setOwner(&parent->contents, parent);
-//}
 
 LEDSpicerUI::Ui::Storage::Data* DialogDirectory::createData(StringUMap& rawData) {
 	return new Storage::DirectoryEntry(

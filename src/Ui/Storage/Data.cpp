@@ -110,6 +110,11 @@ const StringUMap& Data::getProperties() const {
 	return properties;
 }
 
+StringUMap& Data::createEmptyData() {
+	static StringUMap empty;
+	return empty;
+}
+
 string Data::valuesXML(
 	const StringUSet& ignored,
 	const StringUMap& data

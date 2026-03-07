@@ -12,7 +12,7 @@ public:
 	TestData(std::unordered_map<std::string, std::string>& data) : Data(data) {
 		ignored.insert("ignored");
 	}
-	const std::string getCssClass() const override { return "test-class"; }
+	const string getCssClass() const override { return "test-class"; }
 };
 
 class DataTest : public ::testing::Test {
@@ -65,7 +65,7 @@ TEST_F(DataTest, Wipe) {
 }
 
 TEST_F(DataTest, ToXMLSimple) {
-	std::string expected = "value=\"42\"\ntype=\"button\"\nname=\"TestItem\"\n";
+	string expected = "value=\"42\"\ntype=\"button\"\nname=\"TestItem\"\n";
 	EXPECT_EQ(data->toXML(), expected);
 	data->unSet("value");
 	expected = "type=\"button\"\nname=\"TestItem\"\n";

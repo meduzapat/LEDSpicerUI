@@ -519,8 +519,8 @@ void Defaults::setFilter(Gtk::SearchEntry* filterEntry, Gtk::FlowBox* box) {
 	filterEntry->signal_changed().connect([filterEntry, box]() {
 		const auto filterText(filterEntry->get_text().lowercase());
 		for (auto child : box->get_children()) {
-			auto c = dynamic_cast<Gtk::FlowBoxChild*>(child);
-			auto b = dynamic_cast<Gtk::Button*>(c->get_child());
+			auto c = static_cast<Gtk::FlowBoxChild*>(child);
+			auto b = static_cast<Gtk::Button*>(c->get_child());
 			auto t = b->get_label().lowercase();
 			if (t.find(filterText) != string::npos)
 				child->show();

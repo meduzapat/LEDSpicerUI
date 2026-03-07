@@ -24,8 +24,8 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-DirNode* DirNode::getParent() const {
-	return const_cast<DirNode*>(parent);
+const DirNode* DirNode::getParent() const {
+	return parent;
 }
 
 string DirNode::getPath() const {

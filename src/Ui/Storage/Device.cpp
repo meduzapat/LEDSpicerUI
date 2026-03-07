@@ -40,8 +40,8 @@ void Device::reset() {
 
 const string Device::createPrettyName() const {
 	string
-		name (fieldsData.at(NAME)),
-		r(Defaults::devicesInfo.at(name).name);
+		name{fieldsData.at(NAME)},
+		r{Defaults::devicesInfo.at(name).name};
 	if (Defaults::isIdUser(name))
 		r += " Id: " + fieldsData.at(ID);
 	if (Defaults::isSerial(name))

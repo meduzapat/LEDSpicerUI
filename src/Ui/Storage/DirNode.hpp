@@ -48,16 +48,21 @@ public:
 	/**
 	 * Returns this node's own name segment.
 	 * DirectoryEntry returns its directory name.
-	 * FileData returns its filename.
+	 * FileData returns its filename (no extension).
 	 * @return Name string.
 	 */
 	virtual string getName() const = 0;
 
 	/**
+	 * @return Returns a unique identifier for this node
+	 */
+	virtual string getFsId() const = 0;
+
+	/**
 	 * Returns the parent node pointer.
 	 * @return Parent pointer, or nullptr if at root level.
 	 */
-	DirNode* getParent() const;
+	const DirNode* getParent() const;
 
 	/**
 	 * Returns the full path of the parent.

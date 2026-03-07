@@ -28,7 +28,8 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 	Gtk::ApplicationWindow(obj),
 	// Set import dialog
 	dialogImportConfig(DialogImport::Types::CONFIG, this),
-	inputNavigator(builder)
+
+	inputNavigator(builder, this)
 {
 
 	Message::initialize(builder, this);

@@ -41,9 +41,9 @@ string DialogFileForm::getFullPath(const string& filename) const {
 bool DialogFileForm::isUniqueFilename(const string& filename) const {
 	if (not items) return true;
 	for (const auto* bb : *items) {
-		auto* fd = dynamic_cast<Storage::FileData*>(bb->getData());
+		auto fd = static_cast<const Storage::FileData*>(bb->getData());
 		if (not fd or fd == currentData) continue;
-		if (fd->getDirectory() == currentDirectory and fd->getProperty(FILENAME) == filename)
+		if (fd->getParent() == currentDirectory and fd->getProperty(FILENAME) == filename)
 			return false;
 	}
 	return true;

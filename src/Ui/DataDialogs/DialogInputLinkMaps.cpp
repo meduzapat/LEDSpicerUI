@@ -69,7 +69,7 @@ DialogInputLinkMaps::DialogInputLinkMaps(BaseObjectType* obj, const Glib::RefPtr
 		// Extract selected maps.
 		for (auto child : boxInputMaps->get_selected_children()) {
 			// Extract internal data to get ids and linkdata.
-			auto data(dynamic_cast<Storage::BoxButton*>(child->get_child())->getData());
+			auto data(static_cast<Storage::BoxButton*>(child->get_child())->getData());
 			ids.push_back(Defaults::addUnitSeparator(data->getValue(TRIGGER)));
 			linkData.emplace_back(Defaults::createCommonUniqueId({
 				data->getValue(TRIGGER),
@@ -135,8 +135,8 @@ void DialogInputLinkMaps::storeData() {
 		newIds;
 	// grab reordered links and store into the linked map object.
 	for (auto child : boxInputLinkedMappings->get_children()) {
-		auto boxChild = dynamic_cast<Gtk::FlowBoxChild*>(child);
-		auto bb = dynamic_cast<Storage::BoxButton*>(boxChild->get_child());
+		auto boxChild = static_cast<Gtk::FlowBoxChild*>(child);
+		auto bb = static_cast<Storage::BoxButton*>(boxChild->get_child());
 		// looks like this trigger(30)type target
 		auto newValues(Defaults::explode(bb->getData()->getValue(NAME), FIELD_SEPARATOR));
 		ids.push_back(Defaults::addUnitSeparator(newValues[0]));
@@ -189,8 +189,8 @@ const string DialogInputLinkMaps::createUniqueId() const {
 	StringVector ids;
 	// grab reordered links and store into the linked map object.
 	for (auto child : boxInputLinkedMappings->get_children()) {
-		auto boxChild = dynamic_cast<Gtk::FlowBoxChild*>(child);
-		auto bb = dynamic_cast<Storage::BoxButton*>(boxChild->get_child());
+		auto boxChild = static_cast<Gtk::FlowBoxChild*>(child);
+		auto bb = static_cast<Storage::BoxButton*>(boxChild->get_child());
 		// data is trigger(30)type target
 		auto newValues(Defaults::explode(bb->getData()->getValue(NAME), FIELD_SEPARATOR));
 		ids.push_back(Defaults::addUnitSeparator(newValues[0]));

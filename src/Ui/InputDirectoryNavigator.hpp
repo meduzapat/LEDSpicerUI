@@ -21,8 +21,10 @@
  */
 
 #include "DirectoryNavigator.hpp"
+#include "DataDialogs/DialogDirectory.hpp"
 #include "DataDialogs/DialogInput.hpp"
 #include "DataDialogs/DialogInputMap.hpp"
+#include "config/InputFile.hpp"
 
 #pragma once
 
@@ -36,6 +38,28 @@ namespace LEDSpicerUI::Ui {
 class InputDirectoryNavigator : public DirectoryNavigator {
 
 public:
+
+	/**
+	 * Creates navigator and sets up DialogInput.
+	 * @param builder Glade builder to fetch widgets.
+	 */
+	InputDirectoryNavigator(const Glib::RefPtr<Gtk::Builder>& builder, Gtk::Window* parentWindow);
+
+	virtual ~InputDirectoryNavigator();
+
+	void clear() override;
+
+protected:
+
+	/// Import input dialog.
+	DialogImport dialogImportInput;
+
+	Gtk::Button
+		* btnHome            = nullptr,
+		* btnNewInputFolder  = nullptr;
+	Gtk::Box* boxBreadcrumb  = nullptr;
+
+	void wireDialogs(Storage::DirectoryEntry* dir) override;
 
 };
 

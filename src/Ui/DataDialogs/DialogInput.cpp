@@ -25,8 +25,7 @@
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
 DialogInput::DialogInput(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
-	DialogFileForm(obj, builder),
-	dialogImportInput(DialogImport::Types::INPUT, this)
+	DialogFileForm(obj, builder)
 {
 
 	//	DataDialogs::DialogInputLinkMaps::buildInstance(builder);
@@ -78,24 +77,6 @@ DialogInput::DialogInput(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& 
 		boxInputCreditsSettings->set_visible(Defaults::inputHasFlag(name, Defaults::INPUT_HAS_CREDITS));
 	});
 
-	// Import button.
-	Gtk::Button* btnImportInput = nullptr;
-	builder->get_widget("BtnImportInput", btnImportInput);
-	btnImportInput->signal_clicked().connect([this]() {
-		if (dialogImportInput.run() == Gtk::ResponseType::RESPONSE_OK) {
-			StringVector selectedFiles(dialogImportInput.get_filenames());
-			for (const auto& selectedFile : selectedFiles) {
-				try {
-					InputFile datafile(selectedFile);
-					load(&datafile);
-				}
-				catch (Message& e) {
-					Message::displayError(XMLHelper::cleanError(e.getMessage()));
-				}
-			}
-		}
-		dialogImportInput.hide();
-	});
 }
 
 DialogInput::~DialogInput() {

@@ -24,14 +24,9 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-
-string DirectoryEntry::getName() const {
-	return getValue(NAME);
-}
-
 const string DirectoryEntry::createUniqueId() const {
 	return Defaults::createCommonUniqueId({
-		isRoot() ? static_cast<const DirectoryEntry*>(parent)->getFsId() : "",
+		not isRoot() ? parent->getFsId() : "",
 		getValue(NAME)
 	});
 }
@@ -48,10 +43,22 @@ const string DirectoryEntry::getCssClass() const {
 	return "DirectoryBoxButton";
 }
 
+string DirectoryEntry::getName() const {
+	return getValue(NAME);
+}
+
+string DirectoryEntry::getFsId() const {
+	return fsId;
+}
+
 bool DirectoryEntry::isEmpty() const {
 	return not contents.getSize();
 }
 
-const string& DirectoryEntry::getFsId() const {
-	return fsId;
+BoxButtonCollection& DirectoryEntry::getContents() {
+	return contents;
+}
+
+DirNode* DirectoryEntry::getParent() {
+	return const_cast<DirNode*>(parent);
 }

@@ -77,7 +77,7 @@ void DialogSelect::runSelection() {
 		items->wipe();
 		for (auto* child : boxAll->get_selected_children()) {
 			// Get the Selection object directly from the FlowBoxChild
-			auto selection = dynamic_cast<Storage::Selection*>(child->get_child());
+			auto selection = static_cast<Storage::Selection*>(child->get_child());
 			// Link data.
 			StringUMap data;
 			Storage::Link* link      = new Storage::Link(data, {setting->type, setting->parameter, selection->getData()});

@@ -75,7 +75,7 @@ size_t OrdenableFlowBox::getSize() {
 
 void OrdenableFlowBox::wipe() {
 	for (auto child : get_children()) {
-		auto flowChild = dynamic_cast<Gtk::FlowBoxChild*>(child);
+		auto flowChild = static_cast<Gtk::FlowBoxChild*>(child);
 		if (flowChild && flowChild->get_child()) {
 			// Remove BoxButton from FlowBoxChild
 			flowChild->remove();

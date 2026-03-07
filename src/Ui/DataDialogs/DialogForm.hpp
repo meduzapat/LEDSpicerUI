@@ -126,6 +126,13 @@ public:
 	 */
 	OrdenableFlowBox* getBox();
 
+	/**
+	 * Method to add generic Add functionality that opens a dialog to create new Data (item).
+	 * @param btnAdd Opens this form to create new Data (item), its located in the calling dialog.
+	 * @param dialogToOpen Dialog to open when the button is clicked, it should be a child of this dialog.
+	 */
+	static void setSignalAddTo(Gtk::Button* btnAdd, DialogForm* dialogToOpen);
+
 protected:
 
 	/// form action mode.
@@ -143,7 +150,7 @@ protected:
 	/// Current item's data, been created, edited or loaded.
 	Storage::Data* currentData = nullptr;
 	/// The data record that handles this Dialog.
-	const Storage::Data* ownerData = nullptr;
+	const Storage::Data* ownerData;
 
 	/// Child dialogs to refresh when this dialog is refreshed.
 	vector<DialogForm*> childDialogs;
@@ -192,13 +199,6 @@ protected:
 	 * @param btnAdd Opens this form to create new Data (item), its located in the calling dialog.
 	 */
 	void setSignalAdd(Gtk::Button* btnAdd);
-
-	/**
-	 * Method to add generic Add functionality that opens a dialog to create new Data (item).
-	 * @param btnAdd Opens this form to create new Data (item), its located in the calling dialog.
-	 * @param dialogToOpen Dialog to open when the button is clicked, it should be a child of this dialog.
-	 */
-	void setSignalAddTo(Gtk::Button* btnAdd, DialogForm* dialogToOpen);
 
 	/**
 	 * Utility that decorates with a button that allows deletion of itself.

@@ -51,7 +51,7 @@ public:
 	 * Returns a stable app-wide identifier that never changes even if renamed.
 	 * @return Stable code string, e.g. "dir_1".
 	 */
-	const string& getFsId() const;
+	string getFsId() const override;
 
 	string getName() const override;
 

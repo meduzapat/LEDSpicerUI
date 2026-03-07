@@ -20,7 +20,6 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Storage/BoxButtonCollection.hpp"
 #include "Storage/DirectoryEntry.hpp"
 
 #pragma once
@@ -29,15 +28,65 @@ namespace LEDSpicerUI::Ui {
 
 /**
  * LEDSpicerUI::Ui::DirectoryNavigator
- * Manages directory-style navigation over a DirNode tree.
- * Each DirectoryEntry owns its level contents via BoxButtonCollection.
- * Reusable for Inputs, Profiles, and Animations.
+ * Base controller for directory-style navigation over a DirNode tree.
+ * Owns the root DirectoryEntry and tracks the currently active directory.
+ * Subclasses wire their specific consumer dialogs via wireDialogs().
+ * Declaration order of rootData/rootDir is critical — rootData must come first.
  */
 class DirectoryNavigator {
 
 public:
 
-	DirectoryNavigator() = delete;
+	virtual ~DirectoryNavigator() = default;
+
+	/**
+	 * Called when this navigator's panel becomes active.
+	 * Re-wires all consumer dialogs to the remembered current directory.
+	 */
+	void onActivate();
+
+	/**
+	 * Enters a directory, making it current and wiring dialogs to its contents.
+	 * @param dir Directory to enter.
+	 */
+	void enterDirectory(Storage::DirectoryEntry* dir);
+
+	/**
+	 * Navigates up to the parent directory. Stops silently at root.
+	 */
+	void navigateUp();
+
+	/**
+	 * @return true if currently at root.
+	 */
+	bool isAtRoot() const;
+
+	/**
+	 * @return Currently active directory pointer.
+	 */
+	Storage::DirectoryEntry* getCurrentDir() const;
+
+	/**
+	 * Called to clean up all data.
+	 */
+	virtual void clear() = 0;
+
+protected:
+
+	/// Owned root directory entry for this navigator type.
+	Storage::DirectoryEntry rootDir;
+
+	/// Currently active directory. Always valid; starts at rootDir.
+	Storage::DirectoryEntry* currentDir;
+
+	DirectoryNavigator() : rootDir(Storage::Data::createEmptyData(), nullptr), currentDir(&rootDir) {}
+
+	/**
+	 * Wires all consumer dialogs to the given directory's contents and refreshes the view.
+	 * Each specialized navigator implements this for its own dialog set.
+	 * @param dir The directory to wire. Always a valid pointer (root or child).
+	 */
+	virtual void wireDialogs(Storage::DirectoryEntry* dir) = 0;
 
 };
 

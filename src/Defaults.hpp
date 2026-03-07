@@ -177,6 +177,7 @@ constexpr const char* COLLECTION_INPUT_SOURCES  = "sources";
 constexpr const char* COLLECTION_INPUT_MAPS     = "linkedMaps";
 constexpr const char* COLLECTION_ANIMATIONS     = "animations";
 constexpr const char* COLLECTION_PROFILES       = "profiles";
+constexpr const char* COLLECTION_DIRECTORIES    = "directories";
 
 /// Types
 constexpr const char* TYPE_DEVICE         = "device";
