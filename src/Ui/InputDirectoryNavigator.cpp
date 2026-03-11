@@ -28,28 +28,30 @@ InputDirectoryNavigator::InputDirectoryNavigator(
 	const Glib::RefPtr<Gtk::Builder>& builder,
 	Gtk::Window* parentWindow
 ) :
-	dialogImportInput(DialogImport::Types::INPUT, parentWindow)
+	DirectoryNavigator(builder),
+	dialogImportInput(DialogImport::Types::INPUT, parentWindow),
+	dirSetting {
+		boxInputs,
+		COLLECTION_INPUT_DIRECTORIES,
+		TYPE_INPUT,
+		[this](Storage::DirectoryEntry* dir) { enterDirectory(dir); }
+	}
 {
 
 	DataDialogs::DialogInput::buildInstance(builder, "DialogInput");
-	DataDialogs::DialogDirectory::buildInstance(builder, "DialogDirectory");
+	//DataDialogs::DialogDirectory::getInstance()->setSettings(dirSetting);
 
-	OrdenableFlowBox* box = nullptr;
-	builder->get_widget_derived("BoxInputs",  box);
+	builder->get_widget_derived("BoxInputs",  boxInputs);
 	builder->get_widget("BtnInputHome",       btnHome);
 	builder->get_widget("BtnNewInputFolder",  btnNewInputFolder);
 	builder->get_widget("BoxInputBreadcrumb", boxBreadcrumb);
+	builder->get_widget("BtnAddInput",        btnAddInput);
+	builder->get_widget("BtnImportInput",     btnImportInput);
 
 	// Setup DialogDirectory with the collection
 	DataDialogs::DialogForm::setSignalAddTo(btnNewInputFolder, DataDialogs::DialogDirectory::getInstance());
 
-//	DataDialogs::DialogInput::getInstance()->setOwner(&currentDir->getContents());
-
-	onActivate();
-
 	// Import button.
-	Gtk::Button* btnImportInput = nullptr;
-	builder->get_widget("BtnImportInput", btnImportInput);
 	btnImportInput->signal_clicked().connect([this]() {
 		if (dialogImportInput.run() == Gtk::ResponseType::RESPONSE_OK) {
 			StringVector selectedFiles(dialogImportInput.get_filenames());
@@ -65,10 +67,14 @@ InputDirectoryNavigator::InputDirectoryNavigator(
 		}
 		dialogImportInput.hide();
 	});
+
+	btnHome->signal_clicked().connect([this]() {
+		currentDir = &rootDir;
+		wireDialogs(currentDir);
+	});
 }
 
 InputDirectoryNavigator::~InputDirectoryNavigator() {
-
 	delete DataDialogs::DialogInput::getInstance();
 }
 
@@ -105,8 +111,8 @@ void InputDirectoryNavigator::clear() {
 //
 //	// Save all items
 //	bool success = true;
-//	for (auto* bb : inputs) {
-//		auto* data = bb->getData();
+//	for (auto bb : inputs) {
+//		auto data = bb->getData();
 //		string filename = data->createUniqueId();
 //		string fullPath = inputsPath + filename + ".xml";
 //
@@ -134,12 +140,17 @@ void InputDirectoryNavigator::clear() {
 //}
 
 void InputDirectoryNavigator::wireDialogs(Storage::DirectoryEntry* dir) {
+
+	const bool sensitive(DataDialogs::DialogElement::getInstance()->getCollectionHandler()->getSize());
+
+	btnImportInput->set_sensitive(sensitive);
+	btnAddInput->set_sensitive(sensitive);
+
 	Storage::BoxButtonCollection& contents{dir->getContents()};
 
-	// Wire DialogDirectory and DialogInput to the current dir's contents.
-	auto dirDialog(DataDialogs::DialogDirectory::getInstance());
-	dirDialog->setCollectionName(string(COLLECTION_DIRECTORIES) + "_" + COLLECTION_INPUT);
-	dirDialog->setOwner(&contents, dir);
+	// Always configure the section before wiring — fires before any button can be pressed.
+	DataDialogs::DialogDirectory::getInstance()->setSettings(dirSetting);
+	DataDialogs::DialogDirectory::getInstance()->setOwner(&contents, dir);
 
 	DataDialogs::DialogInput::getInstance()->setOwner(&contents, dir);
 	DataDialogs::DialogInput::getInstance()->refreshBox();
@@ -148,28 +159,30 @@ void InputDirectoryNavigator::wireDialogs(Storage::DirectoryEntry* dir) {
 	btnHome->set_sensitive(not isAtRoot());
 
 	// Rebuild breadcrumb.
-	for (auto* child : boxBreadcrumb->get_children())
-		boxBreadcrumb->remove(*child);
+	for (auto child : boxBreadcrumb->get_children()) boxBreadcrumb->remove(*child);
 
-	// Walk the parent chain to build segments bottom-up, then reverse.
-	vector<Storage::DirectoryEntry*> crumbs;
-	auto* node = dir;
-	while (node and not node->isRoot()) {
-		crumbs.push_back(node);
-		node = static_cast<Storage::DirectoryEntry*>(node->getParent());
-	}
+	// Walk the parent chain to build segments bottom-up.
+	if (not dir->isRoot()) {
+		auto node = static_cast<Storage::DirectoryEntry*>(dir->getParent());
+		while (not node->isRoot()) {
+			auto btn = Gtk::make_managed<Gtk::Button>(node->getName());
+			btn->get_style_context()->add_class("BreadcrumbButton");
+			btn->signal_clicked().connect([this, node]() {
+				enterDirectory(node);
+			});
+			boxBreadcrumb->pack_start(*btn, Gtk::PACK_SHRINK);
+			auto sep = Gtk::make_managed<Gtk::Label>("/");
+			sep->get_style_context()->add_class("BreadcrumbSeparator");
+			boxBreadcrumb->pack_start(*sep, Gtk::PACK_SHRINK);
+			// push to the front
+			boxBreadcrumb->reorder_child(*btn, 0);
+			boxBreadcrumb->reorder_child(*sep, 1);
+			node = static_cast<Storage::DirectoryEntry*>(node->getParent());
+		}
 
-	for (auto it = crumbs.rbegin(); it != crumbs.rend(); ++it) {
-		auto* btn = Gtk::make_managed<Gtk::Button>((*it)->getName());
-		btn->get_style_context()->add_class("BreadcrumbButton");
-		btn->signal_clicked().connect([this, entry = *it]() {
-			enterDirectory(entry);
-		});
-		boxBreadcrumb->pack_start(*btn, Gtk::PACK_SHRINK);
-
-		auto* sep = Gtk::make_managed<Gtk::Label>("/");
-		sep->get_style_context()->add_class("BreadcrumbSeparator");
-		boxBreadcrumb->pack_start(*sep, Gtk::PACK_SHRINK);
+		auto* cur = Gtk::make_managed<Gtk::Label>(dir->getName());
+		cur->get_style_context()->add_class("BreadcrumbCurrent");
+		boxBreadcrumb->pack_start(*cur, Gtk::PACK_SHRINK);
 	}
 
 	boxBreadcrumb->show_all();

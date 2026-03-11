@@ -24,6 +24,13 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
+DirectoryEntry::DirectoryEntry(StringUMap& data, const DirectoryEntry* parent) :
+	DirNode(data, parent),
+	fsId("dir_" + std::to_string(++dirCounter))
+{
+	setProperty(UID, fsId);
+}
+
 const string DirectoryEntry::createUniqueId() const {
 	return Defaults::createCommonUniqueId({
 		not isRoot() ? parent->getFsId() : "",

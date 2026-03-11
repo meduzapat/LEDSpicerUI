@@ -73,7 +73,7 @@ TEST_F(DataTest, ToXMLSimple) {
 }
 
 TEST_F(DataTest, GetValues) {
-	const auto* values = data->getValues();
+	const auto values = data->getValues();
 	EXPECT_EQ(values->size(), 4);
 }
 

@@ -94,7 +94,7 @@ void DialogInput::createSubItems(XMLHelper* values) {
 }
 
 LEDSpicerUI::Ui::Storage::CollectionHandler* DialogInput::getCollectionHandler() const {
-	return Storage::CollectionHandler::getInstance(COLLECTION_INPUT);
+	return Storage::CollectionHandler::getInstance(COLLECTION_INPUT + ownerData->getProperty(UID));
 }
 
 void DialogInput::resetForm() {
@@ -117,40 +117,45 @@ void DialogInput::clearForm() {
 }
 
 void DialogInput::isValid() const {
-	string filename(entryInputName->get_text());
+
+	const string id(comboBoxInputSelectInput->get_active_id());
+	if (id.empty()) {
+		throw Message("Select an input type.");
+	}
+
+	const string filename(entryInputName->get_text());
 	if (filename.empty()) {
 		if (action != Actions::LOAD)
 			entryInputName->grab_focus();
 		throw Message("Invalid name.");
 	}
-
 	if (not isUniqueFilename(filename)) {
 		if (action != Actions::LOAD)
 			entryInputName->grab_focus();
 		throw Message("Name already in use in this directory.");
 	}
 
-	if (comboBoxInputSelectInput->get_active_text() == "Blinker") {
-		auto blinks(spinInputTimes->get_value_as_int());
+	if (Defaults::inputHasFlag(id, Defaults::INPUT_HAS_TIMES)) {
+		const auto blinks(spinInputTimes->get_value_as_int());
 		if (blinks < 0 or blinks > 255)
 			spinInputTimes->set_value(0);
 	}
+
 }
 
 void DialogInput::storeData() {
-	string name(comboBoxInputSelectInput->get_active_id());
-	currentData->setValue(NAME, name);
+	const string id(comboBoxInputSelectInput->get_active_id());
+	currentData->setValue(NAME, id);
 	currentData->setProperty(FILENAME, entryInputName->get_text());
 
-	if (name == "Actions") {
-		currentData->setValue("blink", switchInputBlink->get_active() ? "true" : "false");
-	}
-	if (name == "Blinker") {
-		currentData->setValue("times", spinInputTimes->get_text());
-	}
-	if (name == "Actions" or name == "Blinker") {
-		currentData->setValue("speed", comboBoxInputSpeed->get_active_text());
-	}
+	if (Defaults::inputHasFlag(id, Defaults::INPUT_HAS_BLINK))
+		currentData->setValue(BLINK, switchInputBlink->get_active() ? "true" : "false");
+
+	if (Defaults::inputHasFlag(id, Defaults::INPUT_HAS_TIMES))
+		currentData->setValue(TIMES, spinInputTimes->get_text());
+
+	if (Defaults::inputHasFlag(id, Defaults::INPUT_HAS_SPEED))
+		currentData->setValue(SPEED, comboBoxInputSpeed->get_active_text());
 }
 
 void DialogInput::retrieveData() {
@@ -173,8 +178,8 @@ const string DialogInput::createUniqueId() const {
 	return entryInputName->get_text();
 }
 
-const string DialogInput::getType() const {
-	return "input";
+string_view DialogInput::getType() const {
+	return TYPE_INPUT;
 }
 
 LEDSpicerUI::Ui::Storage::Data* DialogInput::createData(StringUMap& rawData) {

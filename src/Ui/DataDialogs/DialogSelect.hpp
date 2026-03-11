@@ -146,7 +146,7 @@ protected:
 
 	DialogSelect(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
 
-	const string getType() const;
+	string_view getType() const;
 
 	Storage::Data* createData(StringUMap& rawData) ;
 

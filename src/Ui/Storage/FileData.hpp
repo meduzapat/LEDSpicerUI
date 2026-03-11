@@ -31,8 +31,7 @@ namespace LEDSpicerUI::Ui::Storage {
  * Data class for file-based items (Inputs, Animations, Profiles).
  * Holds a pointer to its owning DirectoryEntry so path resolution is always
  * live — directory renames propagate automatically with no cascade needed.
- * Uniqueness within CollectionHandler is keyed on FILE_ID, not path.
- */
+  */
 class FileData : public DirNode {
 
 public:

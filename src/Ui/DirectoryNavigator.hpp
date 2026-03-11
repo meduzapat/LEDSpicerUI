@@ -21,6 +21,7 @@
  */
 
 #include "Storage/DirectoryEntry.hpp"
+#include "DataDialogs/DialogDirectory.hpp"
 
 #pragma once
 
@@ -79,7 +80,7 @@ protected:
 	/// Currently active directory. Always valid; starts at rootDir.
 	Storage::DirectoryEntry* currentDir;
 
-	DirectoryNavigator() : rootDir(Storage::Data::createEmptyData(), nullptr), currentDir(&rootDir) {}
+	DirectoryNavigator(const Glib::RefPtr<Gtk::Builder>& builder);
 
 	/**
 	 * Wires all consumer dialogs to the given directory's contents and refreshes the view.

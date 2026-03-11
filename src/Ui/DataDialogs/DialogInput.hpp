@@ -50,9 +50,6 @@ public:
 	void retrieveData() override;
 	const string createUniqueId() const override;
 
-	/// Sets the working directory path for new input files.
-	void setPath(const string& path);
-
 protected:
 
 	Gtk::ComboBoxText
@@ -71,7 +68,7 @@ protected:
 	DialogInput(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
 
 	void createSubItems(XMLHelper* values) override;
-	const string getType() const override;
+	string_view getType() const override;
 	Storage::Data* createData(StringUMap& rawData) override;
 
 };

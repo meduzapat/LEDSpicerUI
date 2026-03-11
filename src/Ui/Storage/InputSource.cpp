@@ -28,27 +28,24 @@ InputSource::InputSource(StringUMap& data) :
 	Data(data),
 	sId("src_" + std::to_string(++sourceCounter))
 	{
+	setProperty(UID, sId);
 	// register maps against the global collections so cascade deletes propagate.
 	CollectionHandler::getInstance(COLLECTION_ELEMENT)->registerDependency({&maps});
 	CollectionHandler::getInstance(COLLECTION_GROUP)->registerDependency({&maps});
 }
 
 InputSource::~InputSource() {
-	// Release maps from global collections so cascade deletes don't propagate.
+
 	CollectionHandler::getInstance(COLLECTION_ELEMENT)->release(&maps);
 	CollectionHandler::getInstance(COLLECTION_GROUP)->release(&maps);
-	// Local to Source.
-//	CollectionHandler::getInstance(COLLECTION_INPUT_MAPS + createUniqueId())->release(&maps);
-	// Local to Input.
-	string collectionId(COLLECTION_INPUT_SOURCES + getProperty(FILE_ID));
+
+	const string collectionId(COLLECTION_INPUT_SOURCES + getProperty(PID));
 	if (CollectionHandler::getInstance(collectionId)->isSet(this))
 		CollectionHandler::getInstance(collectionId)->remove(this);
 }
 
 const string InputSource::createUniqueId() const {
-	//sId(Defaults::createCommonUniqueId({data.at(IID), "src" + std::to_string(++sourceCounter)}))
-	// An ID unique to this input and this source.
-	return Defaults::createCommonUniqueId({getProperty(FILE_ID), getValue(SOURCE)});
+	return Defaults::createCommonUniqueId({getProperty(PID), getValue(SOURCE)});
 }
 
 const string InputSource::createPrettyName() const {

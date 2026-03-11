@@ -20,7 +20,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DialogFileForm.hpp"
+#include "DialogForm.hpp"
 #include "Storage/DirectoryEntry.hpp"
 
 #pragma once
@@ -29,26 +29,40 @@ namespace LEDSpicerUI::Ui::DataDialogs {
 
 /**
  * LEDSpicerUI::Ui::DataDialogs::DialogDirectory
- * Utility dialog for creating and renaming directory nodes.
- * Acts as a shared utility across all navigator types (inputs, animations, profiles).
- * The active collection name must be set by the navigator before use via setCollectionName(),
- * keeping directory registries isolated per type.
- * Never serializes — directories are runtime-only.
+ * Generic dialog for creating and renaming directory nodes.
+ * Never serializes — DirectoryEntry objects are runtime-only.
  */
-class DialogDirectory : public DialogFileForm, public SingletonDialog<DialogDirectory> {
+class DialogDirectory : public DialogForm, public SingletonDialog<DialogDirectory> {
 
 	friend class Gtk::Builder;
 
 public:
 
+	/**
+	 * Holds all section-specific context for this dialog.
+	 * Declare as a const member of the owning navigator; call setSettings() once
+	 * after buildInstance() to wire the dialog to the correct box and collection.
+	 */
+	struct SettingRequest {
+		/// Reference to the navigator's own box pointer.
+		OrdenableFlowBox*& box;
+		/// Scoped directory collection name, e.g. COLLECTION_DIRECTORIES_INPUT.
+		string_view collectionName;
+		/// Section type label, e.g. TYPE_INPUT. Fed into getType().
+		string_view typeLabel;
+
+		/// Function to call to enter into a dir, used by BoxButtons
+		std::function<void(Storage::DirectoryEntry*)> enterDir;
+	};
+
 	virtual ~DialogDirectory() = default;
 
 	/**
-	 * Sets the collection name used by getCollectionHandler().
-	 * Must be called by the navigator before wiring this dialog.
-	 * @param name Collection name, e.g. "directories_inputs".
+	 * Wires the dialog to a specific section.
+	 * Must be called once after buildInstance(), before any setOwner() call.
+	 * @param req SettingRequest owned by the calling navigator.
 	 */
-	void setCollectionName(const string& name);
+	void setSettings(const SettingRequest& req);
 
 	void load(XMLHelper* values) override;
 	void isValid() const override;
@@ -56,14 +70,14 @@ public:
 	void retrieveData() override;
 	void clearForm() override;
 	const string createUniqueId() const override;
-	const string getType() const override;
+	string_view getType() const override;
 
 	Storage::CollectionHandler* getCollectionHandler() const override;
 
 protected:
 
-	/// Active collection name. Set by the navigator before use.
-	string collectionName;
+	/// Active settings. Set once by setSettings(); never null after that.
+	const SettingRequest* setting = nullptr;
 
 	/// Directory name input.
 	Gtk::Entry* entryDirectoryName = nullptr;
@@ -71,6 +85,8 @@ protected:
 	DialogDirectory(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
 
 	Storage::Data* createData(StringUMap& rawData) override;
+
+	void addButtons(Storage::BoxButton& boxButton) override;
 
 };
 

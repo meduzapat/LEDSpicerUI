@@ -71,9 +71,7 @@ void DialogInputMap::load(XMLHelper* values) {
 }
 
 LEDSpicerUI::Ui::Storage::CollectionHandler* DialogInputMap::getCollectionHandler() const {
-	return Storage::CollectionHandler::getInstance(
-		COLLECTION_INPUT_MAPS + ownerData->createUniqueId()
-	);
+	return Storage::CollectionHandler::getInstance(COLLECTION_INPUT_MAPS + ownerData->getProperty(UID));
 }
 
 void DialogInputMap::clearForm() {
@@ -87,6 +85,7 @@ void DialogInputMap::clearForm() {
 }
 
 void DialogInputMap::isValid() const {
+
 	if (stackElementAndGroup->get_visible_child_name() == "InputTypeElement") {
 		if (comboBoxInputMapElement->get_active_text().empty())
 			throw Message("Select a valid element.");
@@ -96,45 +95,47 @@ void DialogInputMap::isValid() const {
 			throw Message("Select a valid group.");
 	}
 
-	string trigger(inputInputMapTrigger->get_text());
-	if (trigger.empty()) {
+	if (inputInputMapTrigger->get_text().empty()) {
 		if (action != Actions::LOAD)
 			inputInputMapTrigger->grab_focus();
 		throw Message("Enter a trigger.");
 	}
 
-	if (inputMapDefaultColor->get_label().empty()) {
+	if (inputMapDefaultColor->get_label().empty())
 		throw Message("You need to set a color.");
-	}
 
-	// Build the full candidate ID and check for duplicates.
-	string target(stackElementAndGroup->get_visible_child_name() == "InputTypeElement"
-		? comboBoxInputMapElement->get_active_text()
-		: comboBoxInputMapGroup->get_active_text());
-	string candidateId(ownerData->createUniqueId() + "_" + trigger + "_" + target);
-
-	if (action != Actions::EDIT or candidateId != currentData->createUniqueId()) {
-		if (getCollectionHandler()->isIdSet(candidateId)) {
-			throw Message("This map already exists for this source.");
-		}
+	const string uid(createUniqueId());
+	if (action != Actions::EDIT or currentData->createUniqueId() != uid) {
+		if (getCollectionHandler()->isIdSet(uid))
+			throw Message("This trigger already exists for this source.");
 	}
 }
 
 void DialogInputMap::storeData() {
-	string
-		type(stackElementAndGroup->get_visible_child_name() == "InputTypeElement" ? ELEMENT : GROUP),
-		target(type == ELEMENT
-			? comboBoxInputMapElement->get_active_text()
-			: comboBoxInputMapGroup->get_active_text());
+	string type, target;
+	Storage::Data* data = nullptr;
+	if (stackElementAndGroup->get_visible_child_name() == "InputTypeElement") {
+		type   = ELEMENT;
+		target = comboBoxInputMapElement->get_active_text();
+		data   = Storage::CollectionHandler::getInstance(COLLECTION_ELEMENT)->get(target);
+	}
+	else {
+		type   = GROUP;
+		target = comboBoxInputMapGroup->get_active_text();
+		data   = Storage::CollectionHandler::getInstance(COLLECTION_GROUP)->get(target);
+	}
 
-	currentData->setValue(TRIGGER, createUniqueId());
+	currentData->setValue(TRIGGER, inputInputMapTrigger->get_text());
 	currentData->setValue(TYPE,    type);
-	currentData->setValue(TARGET,  target);
 	currentData->setValue(COLOR,   inputMapDefaultColor->get_label());
 	currentData->setValue(FILTER,  comboBoxInputMapFilter->get_active_text());
-
-	// Store source ID so InputMap::createUniqueId() can build the full key.
 	currentData->setProperty(SOURCE, ownerData->createUniqueId());
+	Storage::Link::LinkData linkData {
+		type,
+		TARGET,
+		data
+	};
+	static_cast<Storage::InputMap*>(currentData)->setLinkData(linkData);
 }
 
 void DialogInputMap::retrieveData() {
@@ -152,7 +153,10 @@ void DialogInputMap::retrieveData() {
 }
 
 const string DialogInputMap::createUniqueId() const {
-	return inputInputMapTrigger->get_text();
+	return Defaults::createCommonUniqueId({
+		ownerData->createUniqueId(),
+		inputInputMapTrigger->get_text()
+	});
 }
 
 LEDSpicerUI::Ui::Storage::Data* DialogInputMap::createData(StringUMap& rawData) {
@@ -160,15 +164,17 @@ LEDSpicerUI::Ui::Storage::Data* DialogInputMap::createData(StringUMap& rawData) 
 		type(rawData.count(TYPE)     ? rawData.at(TYPE)   : ""),
 		target(rawData.count(TARGET) ? rawData.at(TARGET) : "");
 
-	auto* handler = type == GROUP ?
+	auto handler = type == GROUP ?
 		Storage::CollectionHandler::getInstance(COLLECTION_GROUP) :
 		Storage::CollectionHandler::getInstance(COLLECTION_ELEMENT);
 
 	Storage::Data* linkTarget = handler->get(target);
 
-	return new Storage::InputMap(rawData, TARGET, linkTarget);
+	auto im = new Storage::InputMap(rawData, TARGET, handler->get(target));
+	im->setProperty(PID, ownerData->getProperty(UID));
+	return im;
 }
 
-const string DialogInputMap::getType() const {
+string_view DialogInputMap::getType() const {
 	return "Input Map";
 }

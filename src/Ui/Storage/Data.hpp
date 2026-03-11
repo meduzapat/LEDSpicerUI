@@ -103,7 +103,7 @@ public:
 	 * @param key
 	 * @param value
 	 */
-	void setValue(const string& key, const string& value);
+	virtual void setValue(const string& key, const string& value);
 
 	/**
 	 * @param number the copy number.

@@ -38,9 +38,7 @@ bool BoxButtonCollection::isSet(Data *form) const {
 
 bool BoxButtonCollection::isIdSet(const string& id) const {
 	for (const auto item : items) {
-		if (item->getData()->createUniqueId() == id) {
-			return true;
-		}
+		if (item->getData()->createUniqueId() == id) return true;
 	}
 	return false;
 }
@@ -88,7 +86,7 @@ void BoxButtonCollection::reindex(OrdenableFlowBox* box) {
 	BoxButtonVector reorderedItems;
 	reorderedItems.reserve(items.size());
 
-	for (auto* child : box->get_children()) {
+	for (auto child : box->get_children()) {
 		auto flowChild = static_cast<Gtk::FlowBoxChild*>(child);
 		auto boxButton = static_cast<BoxButton*>(flowChild->get_child());
 		auto it = std::find_if(items.begin(), items.end(), [boxButton](BoxButton* item) {

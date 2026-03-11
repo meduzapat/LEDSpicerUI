@@ -290,8 +290,8 @@ string const DialogRestrictor::createUniqueId() const {
 	}, false);
 }
 
-const string DialogRestrictor::getType() const {
-	return "restrictor";
+string_view DialogRestrictor::getType() const {
+	return TYPE_RESTRICTOR;
 }
 
 LEDSpicerUI::Ui::Storage::Data* DialogRestrictor::createData(StringUMap& rawData) {

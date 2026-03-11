@@ -95,6 +95,8 @@ class Link : public Data {
 
 	string getValue(const string& key, const string& defaultValue = "") const override;
 
+	void setValue(const string& key, const string& value) override;
+
 	const string toXML() const override;
 
 	/**

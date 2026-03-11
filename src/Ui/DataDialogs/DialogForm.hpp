@@ -179,7 +179,7 @@ protected:
 	 * Provides a nice name for the type of data this dialog will create for the dialog.
 	 * @return
 	 */
-	virtual const string getType() const = 0;
+	virtual string_view getType() const = 0;
 
 	/**
 	 * Creates a data object out of raw data.

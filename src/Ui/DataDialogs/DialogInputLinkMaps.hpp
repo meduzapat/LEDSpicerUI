@@ -64,7 +64,7 @@ protected:
 
 	DialogInputLinkMaps(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
 
-	const string getType() const override;
+	string_view getType() const override;
 
 	Storage::Data* createData(StringUMap& rawData) override;
 

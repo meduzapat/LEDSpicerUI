@@ -35,7 +35,6 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 	Message::initialize(builder, this);
 
 	DialogSettings::buildInstance(builder, "DialogSettings");
-	DialogColors::buildInstance(builder,   "DialogColors");
 	DialogProject::buildInstance(builder,  "DialogProject");
 
 	// Initialize secondary dialogs.
@@ -309,26 +308,16 @@ void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {
 		dialogImportConfig.hide();
 	});
 
-	Gtk::Button
-		* btnSelectProject,
-		* btnAddInput,
-		* btnImportInput;
+	Gtk::Button* btnSelectProject;
 	builder->get_widget("BtnSelectProject", btnSelectProject);
-	builder->get_widget("BtnAddInput",      btnAddInput);
-	builder->get_widget("BtnImportInput",   btnImportInput);
 
 	// Activate configuration tabs.
 	Gtk::Notebook* MainTabs = nullptr;
 	builder->get_widget("MainTabs", MainTabs);
-	MainTabs->signal_switch_page().connect([btnImportInput, btnAddInput](Gtk::Widget*, guint pageNum) {
-		bool sensitive(
-			DataDialogs::DialogElement::getInstance()->getCollectionHandler()->getSize() and
-			DataDialogs::DialogGroup::getInstance()->getCollectionHandler()->getSize()
-		);
-		// Inputs: If there no elements or groups, importing or adding inputs is not possible.
+	MainTabs->signal_switch_page().connect([this](Gtk::Widget*, guint pageNum) {
+		// Inputs
 		if (pageNum == 4) {
-			btnImportInput->set_sensitive(sensitive);
-			btnAddInput->set_sensitive(sensitive);
+			inputNavigator.onActivate();
 		}
 	});
 

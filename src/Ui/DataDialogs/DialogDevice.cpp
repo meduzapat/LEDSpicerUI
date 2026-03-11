@@ -286,7 +286,7 @@ string const DialogDevice::createUniqueId() const {
 	});
 }
 
-const string DialogDevice::getType() const {
+string_view DialogDevice::getType() const {
 	return TYPE_DEVICE;
 }
 

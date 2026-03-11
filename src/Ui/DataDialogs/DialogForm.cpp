@@ -24,7 +24,10 @@
 
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
-DialogForm::DialogForm(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>&) : Gtk::Dialog(obj) {
+DialogForm::DialogForm(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) : Gtk::Dialog(obj) {
+
+	DialogColors::buildInstance(builder, "DialogColors");
+
 	// this needs to be run last,
 	signal_show().connect(sigc::mem_fun(*this, &DialogForm::refreshBox), true);
 }
@@ -65,7 +68,7 @@ void DialogForm::createItems(StringUMapVector& rawCollection, XMLHelper* values)
 	// Force a refresh to clean any box handle by main process and display the loaded items.
 	currentData = nullptr;
 	if (not errors.empty()) {
-		Message::displayError("Errors in " + getType() + ":\n" + errors);
+		Message::displayError("Errors in " + string(getType()) + ":\n" + errors);
 	}
 }
 
@@ -175,7 +178,7 @@ void DialogForm::onAddClicked() {
 	action = Actions::ADD;
 	resetForm();
 	// Set label and title.
-	set_title("Add New " + getType());
+	set_title("Add New " + string(getType()));
 	btnApply->set_label("Create");
 	currentData = createData();
 	currentData->activate();
@@ -229,7 +232,7 @@ void DialogForm::onEditClicked(Storage::BoxButton& boxButton) {
 	currentData->activate();
 	string oldName(currentData->createUniqueId());
 	// Set label and title.
-	set_title("Edit " + getType() + " " + currentData->createPrettyName());
+	set_title("Edit " + string(getType()) + " " + currentData->createPrettyName());
 	btnApply->set_label("Save");
 	// Populate form.
 	retrieveData();

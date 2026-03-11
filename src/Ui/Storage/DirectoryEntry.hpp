@@ -43,10 +43,7 @@ public:
 	 * @param data  Must contain NAME (directory segment name).
 	 * @param parent Parent directory node, or nullptr for root-level.
 	 */
-	DirectoryEntry(StringUMap& data, const DirectoryEntry* parent) :
-		DirNode(data, parent),
-		fsId("dir_" + std::to_string(++dirCounter))
-	{}
+	DirectoryEntry(StringUMap& data, const DirectoryEntry* parent);
 
 	virtual ~DirectoryEntry() = default;
 

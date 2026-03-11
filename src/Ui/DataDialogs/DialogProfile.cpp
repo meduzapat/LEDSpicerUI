@@ -164,8 +164,8 @@ string const DialogProfile::createUniqueId() const {
 	return Defaults::createCommonUniqueId({inputProfileName->get_text()});
 }
 
-const string DialogProfile::getType() const {
-	return "profile";
+string_view DialogProfile::getType() const {
+	return TYPE_PROFILE;
 }
 
 LEDSpicerUI::Ui::Storage::Data* DialogProfile::createData(StringUMap& rawData) {

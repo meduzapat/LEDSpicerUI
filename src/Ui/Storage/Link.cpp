@@ -47,9 +47,15 @@ const string Link::createUniqueId() const {
 
 string Link::getValue(const string &key, const string &defaultValue) const {
 	if (key == linkInfo.key) {
-		return linkInfo.link->getValue(key, defaultValue);
+		return linkInfo.link->getValue(getPrimaryKey(), defaultValue);
 	}
 	return Data::getValue(key, defaultValue);
+}
+
+void Link::setValue(const string& key, const string& value) {
+	// Ignore
+	if (key == linkInfo.key) return;
+	Data::setValue(key, value);
 }
 
 const string Link::toXML() const {

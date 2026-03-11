@@ -118,8 +118,8 @@ bool DialogRestrictorMap::checkAvailableInterfaces() const {
 	return size < total;
 }
 
-const string DialogRestrictorMap::getType() const {
-	return "Player Mapping";
+string_view DialogRestrictorMap::getType() const {
+	return TYPE_RESTRICTOR_MAP;
 }
 
 LEDSpicerUI::Ui::Storage::Data* DialogRestrictorMap::createData(StringUMap& rawData) {

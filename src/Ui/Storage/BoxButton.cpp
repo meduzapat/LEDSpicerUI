@@ -38,7 +38,6 @@ BoxButton::BoxButton(Data* form) :
 
 	Gtk::HBox* lbox(Gtk::make_managed<Gtk::HBox>());
 	lbox->pack_start(*label, Gtk::PACK_EXPAND_WIDGET);
-	lbox->set_no_show_all(true);
 	lbox->set_visible(true);
 	label->set_margin_left(5);
 	label->set_margin_right(5);
@@ -80,6 +79,8 @@ void BoxButton::updateLabel() {
 	}
 	text = data->createPrettyName();
 	label->set_text(text);
+}
 
-	label->get_parent()->set_visible(not text.empty());
+Gtk::Label* BoxButton::getLabel() {
+	return label;
 }

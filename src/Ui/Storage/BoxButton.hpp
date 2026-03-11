@@ -90,6 +90,11 @@ public:
 	 */
 	void updateLabel();
 
+	/**
+	 * @return The box label.
+	 */
+	Gtk::Label* getLabel();
+
 protected:
 
 	/// Access to the data storage.

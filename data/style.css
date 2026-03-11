@@ -240,7 +240,7 @@ combobox.noRoundRight button.combo,
 	border-color:     #f5c211;
 }
 
-.DirectoryBoxButton > box > label {
+.DirectoryBoxButton > button > label {
 	font-weight: bold;
 }
 

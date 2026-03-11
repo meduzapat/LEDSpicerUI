@@ -48,7 +48,7 @@ public:
 	 * @param collectionName
 	 * @return an instance of that collection.
 	 */
-	static CollectionHandler* getInstance(const string& collectionName);
+	static CollectionHandler* getInstance(string_view collectionName);
 
 	/**
 	 * Removes and deletes all stored collections.

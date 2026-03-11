@@ -29,6 +29,7 @@ FileData::FileData(StringUMap& data, const DirNode* dir) :
 	fsId("file_" + std::to_string(++fileCounter))
 {
 	setProperty(FILENAME, data.count(FILENAME) ? data.at(FILENAME) : "");
+	setProperty(UID, fsId);
 	data.erase(FILENAME);
 }
 

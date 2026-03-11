@@ -47,3 +47,10 @@ bool DirectoryNavigator::isAtRoot() const {
 Storage::DirectoryEntry* DirectoryNavigator::getCurrentDir() const {
 	return currentDir;
 }
+
+DirectoryNavigator::DirectoryNavigator(const Glib::RefPtr<Gtk::Builder>& builder) :
+	rootDir(Storage::Data::createEmptyData(), nullptr),
+	currentDir(&rootDir)
+{
+	DataDialogs::DialogDirectory::buildInstance(builder, "DialogDirectory");
+}

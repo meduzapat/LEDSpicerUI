@@ -115,7 +115,7 @@ protected:
 
 	void clearFormConditinal(uint8_t flags);
 
-	const string getType() const override;
+	string_view getType() const override;
 
 	Storage::Data* createData(StringUMap& rawData) override;
 

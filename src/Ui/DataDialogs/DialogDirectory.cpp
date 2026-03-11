@@ -25,11 +25,10 @@
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
 DialogDirectory::DialogDirectory(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
-	DialogFileForm(obj, builder)
+	DialogForm(obj, builder)
 {
 	builder->get_widget("EntryDirectoryName", entryDirectoryName);
 	builder->get_widget("BtnApplyDirectory",  btnApply);
-	builder->get_widget_derived("BoxInputs",  box);
 
 	setSignalApply();
 
@@ -39,12 +38,13 @@ DialogDirectory::DialogDirectory(BaseObjectType* obj, const Glib::RefPtr<Gtk::Bu
 	});
 }
 
-void DialogDirectory::setCollectionName(const string& name) {
-	collectionName = name;
+void DialogDirectory::setSettings(const SettingRequest& req) {
+	setting = &req;
+	box     = req.box;
 }
 
 void DialogDirectory::load(XMLHelper* values) {
-
+	// Directories are runtime-only; nothing to load from XML.
 }
 
 void DialogDirectory::isValid() const {
@@ -74,19 +74,18 @@ void DialogDirectory::clearForm() {
 }
 
 const string DialogDirectory::createUniqueId() const {
-	// upgrade const Data* to const DirNode*
 	return Defaults::createCommonUniqueId({
 		static_cast<const Storage::DirNode*>(ownerData)->getFsId(),
 		Defaults::sanitizeFilename(entryDirectoryName->get_text())
 	});
 }
 
-const string DialogDirectory::getType() const {
-	return "Directory";
+string_view DialogDirectory::getType() const {
+	return setting->typeLabel;
 }
 
 LEDSpicerUI::Ui::Storage::CollectionHandler* DialogDirectory::getCollectionHandler() const {
-	return Storage::CollectionHandler::getInstance(collectionName);
+	return Storage::CollectionHandler::getInstance(setting->collectionName);
 }
 
 LEDSpicerUI::Ui::Storage::Data* DialogDirectory::createData(StringUMap& rawData) {
@@ -95,3 +94,23 @@ LEDSpicerUI::Ui::Storage::Data* DialogDirectory::createData(StringUMap& rawData)
 		static_cast<const Storage::DirectoryEntry*>(ownerData)
 	);
 }
+
+void DialogDirectory::addButtons(Storage::BoxButton& bb) {
+
+	auto navBtn = Gtk::make_managed<Gtk::Button>();
+	navBtn->set_relief(Gtk::RELIEF_NONE);
+	navBtn->set_hexpand(true);
+
+	// Move the existing label into the nav button.
+	auto lbox = static_cast<Gtk::HBox*>(bb.getLabel()->get_parent());
+	lbox->remove(*bb.getLabel());
+	navBtn->add(*bb.getLabel());
+	lbox->pack_start(*navBtn, Gtk::PACK_EXPAND_WIDGET);
+	navBtn->signal_clicked().connect([this, &bb]() {
+		setting->enterDir(static_cast<Storage::DirectoryEntry*>(bb.getData()));
+	});
+
+	// Standard edit/delete buttons.
+	DialogForm::addButtons(bb);
+}
+

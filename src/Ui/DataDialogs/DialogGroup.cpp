@@ -131,8 +131,8 @@ string const DialogGroup::createUniqueId() const {
 	return Defaults::createCommonUniqueId({inputGroupName->get_text()});
 }
 
-const string DialogGroup::getType() const {
-	return "group";
+string_view DialogGroup::getType() const {
+	return TYPE_GROUP;
 }
 
 LEDSpicerUI::Ui::Storage::Data* DialogGroup::createData(StringUMap& rawData) {

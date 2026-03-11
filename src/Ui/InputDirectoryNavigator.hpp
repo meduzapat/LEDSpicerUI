@@ -21,10 +21,11 @@
  */
 
 #include "DirectoryNavigator.hpp"
-#include "DataDialogs/DialogDirectory.hpp"
+#include "DataDialogs/DialogElement.hpp"
 #include "DataDialogs/DialogInput.hpp"
 #include "DataDialogs/DialogInputMap.hpp"
 #include "config/InputFile.hpp"
+#include "DialogImport.hpp"
 
 #pragma once
 
@@ -39,10 +40,6 @@ class InputDirectoryNavigator : public DirectoryNavigator {
 
 public:
 
-	/**
-	 * Creates navigator and sets up DialogInput.
-	 * @param builder Glade builder to fetch widgets.
-	 */
 	InputDirectoryNavigator(const Glib::RefPtr<Gtk::Builder>& builder, Gtk::Window* parentWindow);
 
 	virtual ~InputDirectoryNavigator();
@@ -56,8 +53,17 @@ protected:
 
 	Gtk::Button
 		* btnHome            = nullptr,
-		* btnNewInputFolder  = nullptr;
+		* btnNewInputFolder  = nullptr,
+		* btnAddInput        = nullptr,
+		* btnImportInput     = nullptr;
+
 	Gtk::Box* boxBreadcrumb  = nullptr;
+
+	/// Display box for input directory contents. Populated by the builder.
+	OrdenableFlowBox* boxInputs = nullptr;
+
+	/// Section settings for DialogDirectory. References boxInputs — declared after it.
+	const DataDialogs::DialogDirectory::SettingRequest dirSetting;
 
 	void wireDialogs(Storage::DirectoryEntry* dir) override;
 

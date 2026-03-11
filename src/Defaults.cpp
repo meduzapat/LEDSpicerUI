@@ -237,8 +237,8 @@ bool Defaults::isVariable(const string& name) {
 bool Defaults::isSerial(const string& name, bool isDevice) {
 	if (isDevice)
 		return (devicesInfo.at(name).connection == Connection::SERIAL);
-	else
-		return (restrictorsInfo.at(name).connection == Connection::SERIAL);
+
+	return (restrictorsInfo.at(name).connection == Connection::SERIAL);
 }
 
 bool Defaults::isMulti(const string& name) {
@@ -303,17 +303,18 @@ string Defaults::addUnitSeparator(const string& unit) {
 
 double Defaults::getLuminance(const string& color) {
 	Gdk::RGBA rgba;
-	if (not rgba.set("#" + color)) {
-		return 0.0;
-	}
+	if (not rgba.set("#" + color)) return 0.0;
+
 	double
 		r = rgba.get_red(),
 		g = rgba.get_green(),
 		b = rgba.get_blue();
+
 	return 0.299 * r + 0.587 * g + 0.114 * b;
 }
 
 StringVector Defaults::explode(const string& text, const char delimiter, const size_t limit) {
+
 	StringVector result;
 	if (text.empty()) {
 		return result;

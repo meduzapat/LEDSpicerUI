@@ -720,7 +720,7 @@ void DialogElement::drawPins(vector<Gtk::Label *>& labels) {
 	}
 }
 
-const string DialogElement::getType() const {
+string_view DialogElement::getType() const {
 	return TYPE_ELEMENT;
 }
 

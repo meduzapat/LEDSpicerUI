@@ -67,7 +67,7 @@ protected:
 	 */
 	bool checkAvailableInterfaces() const;
 
-	const string getType() const override;
+	string_view getType() const override;
 
 	Storage::Data* createData(StringUMap& rawData) override;
 

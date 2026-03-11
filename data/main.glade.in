@@ -2197,8 +2197,6 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
               <object class="GtkEntry" id="EntryDirectoryName">
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
-                <property name="tooltip-text">One ore more device IDs, comma separated, used in the action.
-You can find the devices ID using inputseeker from the terminal, or by listing the input ls /dev/input/by-id</property>
               </object>
               <packing>
                 <property name="expand">True</property>

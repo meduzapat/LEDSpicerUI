@@ -207,8 +207,8 @@ void DialogInputLinkMaps::setOwner(Storage::BoxButtonCollection* collection, Sto
 		localCollection.push_back(extractIds(bb->getData()));
 }
 
-const string DialogInputLinkMaps::getType() const {
-	return "input Link";
+string_view DialogInputLinkMaps::getType() const {
+	return "input Link"; // TYPE_INPUT_MAP
 }
 
 LEDSpicerUI::Ui::Storage::Data* DialogInputLinkMaps::createData(StringUMap& rawData) {

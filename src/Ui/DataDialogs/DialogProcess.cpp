@@ -108,8 +108,8 @@ string const DialogProcess::createUniqueId() const {
 	return inputProcessName->get_text();
 }
 
-const string DialogProcess::getType() const {
-	return "map";
+string_view DialogProcess::getType() const {
+	return TYPE_MAP;
 }
 
 LEDSpicerUI::Ui::Storage::Data* DialogProcess::createData(StringUMap& rawData) {

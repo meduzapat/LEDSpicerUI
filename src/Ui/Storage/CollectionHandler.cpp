@@ -32,8 +32,8 @@ void CollectionHandler::purgeAll() {
 	collections.clear();
 }
 
-CollectionHandler* CollectionHandler::getInstance(const string& collectionName) {
-	auto [it, inserted] = collections.try_emplace(collectionName, new CollectionHandler());
+CollectionHandler* CollectionHandler::getInstance(string_view collectionName) {
+	auto [it, inserted] = collections.try_emplace(string(collectionName), new CollectionHandler());
 	return it->second;
 }
 
@@ -41,7 +41,7 @@ size_t CollectionHandler::getSize() const {
 	return collection.size();
 }
 
-Data* CollectionHandler::get(const string &id) const {
+Data* CollectionHandler::get(const string& id) const {
 	return (isIdSet(id) ? collection.at(id) : nullptr);
 }
 

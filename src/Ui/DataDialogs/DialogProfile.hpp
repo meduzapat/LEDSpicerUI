@@ -137,7 +137,7 @@ protected:
 
 	void createSubItems(XMLHelper* values) override;
 
-	const string getType() const override;
+	string_view getType() const override;
 
 	Storage::Data* createData(StringUMap& rawData) override;
 

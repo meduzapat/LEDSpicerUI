@@ -91,10 +91,8 @@ void DialogInputSource::load(XMLHelper* values) {
 }
 
 LEDSpicerUI::Ui::Storage::CollectionHandler* DialogInputSource::getCollectionHandler() const {
-	return Storage::CollectionHandler::getInstance(
-		// local to it's input.
-		COLLECTION_INPUT_SOURCES + ownerData->getProperty(FILE_ID)
-	);
+	// local to it's input.
+	return Storage::CollectionHandler::getInstance(COLLECTION_INPUT_SOURCES + ownerData->getProperty(UID));
 }
 
 void DialogInputSource::resetForm() {
@@ -158,7 +156,7 @@ void DialogInputSource::createButtonDirectly() {
 	}
 	StringUMap rawData;
 	// Injects INPUT_PK and INDEX=0.
-	auto* phantom = createData(rawData);
+	auto phantom = createData(rawData);
 	// Wires DialogInputMap to phantom's maps.
 	phantom->activate();
 	items->create(phantom);
@@ -169,13 +167,13 @@ void DialogInputSource::createSubItems(XMLHelper* values) {
 	DialogInputMap::getInstance()->load(values);
 }
 
-const string DialogInputSource::getType() const {
-	return "source";
+string_view DialogInputSource::getType() const {
+	return TYPE_INPUT_SOURCE;
 }
 
 LEDSpicerUI::Ui::Storage::Data* DialogInputSource::createData(StringUMap& rawData) {
-	auto* is = new Storage::InputSource(rawData);
-	is->setProperty(FILE_ID, ownerData->createUniqueId());
+	auto is = new Storage::InputSource(rawData);
+	is->setProperty(PID, ownerData->getProperty(UID));
 	return is;
 }
 

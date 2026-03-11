@@ -25,20 +25,17 @@
 using namespace LEDSpicerUI::Ui::Storage;
 
 InputMap::~InputMap() {
-	auto collectionName(COLLECTION_INPUT_MAPS + getProperty(SOURCE));
-	if (CollectionHandler::getInstance(collectionName)->isSet(this))
-		CollectionHandler::getInstance(collectionName)->remove(this);
+	const string collectionId(COLLECTION_INPUT_MAPS + getProperty(PID));
+	if (CollectionHandler::getInstance(collectionId)->isSet(this))
+		CollectionHandler::getInstance(collectionId)->remove(this);
 }
 
 const string InputMap::createUniqueId() const {
-	string trigger(getValue(TRIGGER));
-	if (trigger.empty()) return "";
-	// Source ID stored as a property by DialogInputMap::createData().
-	return getProperty(SOURCE) + "_" + trigger + "_" + getValue(NAME);
+	return Defaults::createCommonUniqueId({getProperty(PID), getValue(TRIGGER)});
 }
 
 const string InputMap::createPrettyName() const {
-	return "[" + getValue(TRIGGER) + "] " + getValue(TYPE) + " " + getValue(NAME);
+	return "[" + getValue(TRIGGER) + "] " + getValue(TYPE) + " " + getValue(TARGET);
 }
 
 const string InputMap::getCssClass() const {

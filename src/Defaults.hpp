@@ -35,6 +35,9 @@ using std::vector;
 using std::string;
 using std::stringstream;
 
+#include <string_view>
+using std::string_view;
+
 #include <functional>
 
 #include <filesystem>
@@ -104,7 +107,8 @@ constexpr const char* PORT     = "port";
 constexpr const char* PINS     = "leds";
 constexpr const char* PATH     = "path";
 constexpr const char* FILE_ID  = "FID"; /// To be used with file based data objects.
-constexpr const char* PID      = "PID"; /// To be used with anything that has a P in the name.
+constexpr const char* UID      = "UID"; /// Stable self-identifier, set at construction.
+constexpr const char* PID      = "PID"; /// Parent UID, injected by createData().
 constexpr const char* SID      = "SID"; /// To be used with anything that has a S in the name.
 constexpr const char* IID      = "IID"; /// To be used with anything that has a I in the name.
 
@@ -157,13 +161,32 @@ constexpr const char* COLOR        = "color";
 constexpr const char* FILTER       = "filter";
 constexpr const char* ELEMENT      = "Element";
 constexpr const char* GROUP        = "Group";
-constexpr const char* SOURCE       = "source";   // input attribute in XML
-constexpr const char* INDEX        = "index";    // a property positional index.
+constexpr const char* SOURCE       = "source"; /// input attribute in XML
+constexpr const char* INDEX        = "index";  /// a property positional index.
+constexpr const char* SPEED        = "speed";  /// Input playback speed setting.
+constexpr const char* BLINK        = "blink";  /// Input blink switch.
+constexpr const char* TIMES        = "times";  /// Input repeat count.
 
 /// UI-related constants.
 constexpr const char* DEFAULT_ELEMENT_TYPE = "9";
 constexpr const char* PLAYER               = "player";
 constexpr const char* JOYSTICK             = "joystick";
+
+/// Types
+#define               TYPE_MAP              "map"
+#define               TYPE_DIRECTORY        "directory"
+constexpr const char* TYPE_DEVICE         = "device";
+constexpr const char* TYPE_RESTRICTOR     = "restrictor";
+constexpr const char* TYPE_ELEMENT        = "element";
+constexpr const char* TYPE_GROUP          = "group";
+constexpr const char* TYPE_PROCESS        = "process";
+constexpr const char* TYPE_RESTRICTOR_MAP = "Player Mapping";
+#define               TYPE_INPUT            "input"
+#define               TYPE_INPUT_SOURCE     TYPE_INPUT "source"
+#define               TYPE_INPUT_MAP        TYPE_INPUT TYPE_MAP
+#define               TYPE_INPUT_DIR        TYPE_INPUT TYPE_DIRECTORY
+constexpr const char* TYPE_ANIMATION      = "animation";
+constexpr const char* TYPE_PROFILE        = "profile";
 
 /// Collection names.
 constexpr const char* COLLECTION_DEVICES        = "devices";
@@ -177,21 +200,10 @@ constexpr const char* COLLECTION_INPUT_SOURCES  = "sources";
 constexpr const char* COLLECTION_INPUT_MAPS     = "linkedMaps";
 constexpr const char* COLLECTION_ANIMATIONS     = "animations";
 constexpr const char* COLLECTION_PROFILES       = "profiles";
-constexpr const char* COLLECTION_DIRECTORIES    = "directories";
 
-/// Types
-constexpr const char* TYPE_DEVICE         = "device";
-constexpr const char* TYPE_RESTRICTOR     = "restrictor";
-constexpr const char* TYPE_ELEMENT        = "element";
-constexpr const char* TYPE_GROUP          = "group";
-constexpr const char* TYPE_PROCESS        = "process";
-constexpr const char* TYPE_RESTRICTOR_MAP = "playerCombination";
-constexpr const char* TYPE_INPUT          = "input";
-constexpr const char* TYPE_INPUT_SOURCE   = "source";
-constexpr const char* TYPE_INPUT_MAP      = "linkedMap";
-constexpr const char* TYPE_ANIMATION      = "animation";
-constexpr const char* TYPE_PROFILE        = "profile";
-
+/// Directories
+#define               COLLECTION_DIRECTORIES       "directories"
+#define               COLLECTION_INPUT_DIRECTORIES TYPE_INPUT COLLECTION_DIRECTORIES
 
 } // namespace
 
