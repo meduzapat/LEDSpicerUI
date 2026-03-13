@@ -20,7 +20,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DialogForm.hpp"
+#include "DialogFormHost.hpp"
 #include "DialogInputMap.hpp"
 #include "Storage/InputSource.hpp"
 
@@ -30,11 +30,12 @@ namespace LEDSpicerUI::Ui::DataDialogs {
 
 /**
  * LEDSpicerUI::Ui::DataDialogs::DialogInputSource
- * Dialog to add/edit event sources (hardware input devices) for multi-source plugins.
+ * Dialog to add/edit event sources (hardware input devices) for multi-source inputs.
  * When running locally, scans /dev/input/ for event devices and populates a combo.
  * Selecting "Other" or running in portable mode falls back to a manual text entry.
+ * Both the combo and entry resolve to a single source value via resolvedSource().
  */
-class DialogInputSource : public DialogForm, public SingletonDialog<DialogInputSource> {
+class DialogInputSource : public DialogFormHost, public SingletonDialog<DialogInputSource> {
 
 	friend class Gtk::Builder;
 
@@ -43,7 +44,7 @@ public:
 	static constexpr const char* SOURCE_EMPTY_OPTION = "Select Source";
 	/// Sentinel combo value that activates manual entry.
 	static constexpr const char* SOURCE_OTHER_OPTION = "Other";
-	/// Linux event device directory.
+	/// Linux event device directories.
 	static constexpr const char* DEV_INPUT       = "/dev/input/";
 	static constexpr const char* DEV_INPUT_BY_ID = "/dev/input/by-id/";
 	static constexpr const char* SYS_CLASS_INPUT = "/sys/class/input/";
@@ -60,51 +61,51 @@ public:
 	const string createUniqueId() const override;
 
 	/**
-	 * Ensures a phantom source (source="") exists for single-source plugins.
+	 * Ensures a sourceless InputSource exists for single-source inputs.
 	 * Creates one silently if absent, then wires DialogInputMap to it.
-	 * Safe to call repeatedly — idempotent if phantom already exists.
+	 * Safe to call repeatedly — idempotent if sourceless source already exists.
 	 */
 	void createButtonDirectly();
 
 protected:
 
 	Gtk::ComboBoxText
-		/// Stores the input in use.
+		/// Input type selector, shared with DialogInput.
 		* comboBoxInputSelectInput = nullptr,
-		/// Detected event devices combo (shown when running locally).
+		/// Detected event devices (shown when running locally).
 		* comboBoxInputSource      = nullptr;
 
-	/// Manual entry (shown in portable mode or when "Other" is selected).
+	/// Manual entry shown in portable mode or when "Other" is selected.
 	Gtk::Entry* entryInputSource = nullptr;
 
-	/// To manipulate the maps accessibility when the source is being entered.
-	Gtk::Button * btnAddMap = nullptr;
-
-//	OrdenableFlowBox* boxInputMap = nullptr;
+	/// Controls map-add button accessibility.
+	Gtk::Button* btnAddMap = nullptr;
 
 	DialogInputSource(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
 
 	void createSubItems(XMLHelper* values) override;
-
 	string_view getType() const override;
-
 	Storage::Data* createData(StringUMap& rawData) override;
 
 private:
 
 	/**
-	 * Populates the combo with detected sources plus the "Other" sentinel,
-	 * then shows/hides combo and entry according to the result.
-	 *
-	 * @param sources List.
+	 * Resolves the current source value from combo or manual entry.
+	 * Returns entry text when "Other" is selected or the combo id is empty.
+	 * @return The resolved source string.
 	 */
-	void populateSourcesList(const StringVector& devices);
+	string resolvedSource() const;
+
+	/**
+	 * Populates the source combo with detected devices plus sentinels.
+	 * @param devices Ordered map of id → display label from scanEventDevices().
+	 */
+	void populateSourcesList(const StringMap& devices);
 
 	/**
 	 * Resolves a device entry to its kernel human-readable name via sysfs.
-	 * Works for both by-id symlink names and raw eventX names.
 	 * @param  byIdName Entry from /dev/input/by-id/ or a plain eventX name.
-	 * @return Kernel name string, or empty on any failure.
+	 * @return Kernel name string, or the original name on any failure.
 	 */
 	static string readDeviceName(const string& byIdName);
 
@@ -114,12 +115,6 @@ private:
 	 */
 	StringMap scanEventDevices();
 
-	/**
-	 * Populates the combo with detected sources plus sentinels.
-	 * Uses id/display pairs so the stored value is stable across reboots.
-	 * @param devices Ordered map from scanEventDevices().
-	 */
-	void populateSourcesList(const StringMap& devices);
 };
 
 } // namespace

@@ -25,7 +25,7 @@
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
 DialogDevice::DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
-	DialogForm(obj, builder)
+	DialogFormHost(obj, builder)
 {
 
 	// Init Elements and register for refresh.
@@ -58,7 +58,7 @@ DialogDevice::DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 	devicesListstore = static_cast<Gtk::ListStore*>(builder->get_object("ListstoreDevices").get());
 	idListstore      = static_cast<Gtk::ListStore*>(builder->get_object("liststoreDeviceId").get());
 
-	// Set Devices
+	// Populate Devices
 	auto row = *(devicesListstore->append());
 	row.set_value(0, string());
 	row.set_value(1, string("Select Device"));
@@ -92,36 +92,21 @@ DialogDevice::DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 	comboBoxDevices->signal_changed().connect([&, btnAddElement, notebookDeviceConnections]() {
 		const string name(comboBoxDevices->get_active_id());
 		// If current ID is empty just reset the form for Add task.
-		if (name.empty()) {
-			clearForm();
+		switch (handleTypeSwitch(
+			comboBoxDevices,
+			name,
+			"Are you sure you want to change the device? All settings will be lost.")
+		) {
+		case TypeSwitchResult::Empty:
 			btnAddElement->set_sensitive(false);
 			btnApply->set_sensitive(false);
-			previousName = "";
 			return;
+		case TypeSwitchResult::Unchanged:
+			return;
+		case TypeSwitchResult::Proceed:
+			break;
 		}
-
-		// If the name is the same do nothing.
-		if (previousName == name) return;
-
 		const uint16_t totalPins(Defaults::devicesInfo.at(name).pins);
-		const string currentName(currentData->getValue(NAME));
-		// For non stored data, do a change device without asking for losing the data.
-		if (currentName.empty()) {
-			recreateData();
-		}
-		// If there is a device already, clean the form and change to the new device, warn the user about losing data.
-		else if (name != currentName) {
-			if (Message::ask("Are you sure you want to change the device? all settings will be loss") == Gtk::ResponseType::RESPONSE_YES) {
-				recreateData();
-			}
-			else {
-				// If the user decide to keep the data, move the selection to the previous selected device.
-				comboBoxDevices->set_active_id(previousName);
-				return;
-			}
-		}
-
-		previousName = name;
 
 		if (Defaults::isIdUser(name)) {
 			Defaults::populateComboBoxWithIds(
@@ -149,7 +134,7 @@ DialogDevice::DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 			spinnerLeds->get_adjustment()->set_upper(totalPins);
 			// assume all variable hardware only supports RGB leds, for now.
 
-			// if there are elements and is not
+			// No pins no add elements.
 			btnAddElement->set_sensitive(not currentData->getValue(PINS).empty());
 		}
 		else {
@@ -275,7 +260,10 @@ void DialogDevice::retrieveData() {
 	if (Defaults::isMonochrome(name)) {
 		changePoint->set_value(std::stod(currentData->getValue(CHANGE_POINT, std::to_string(DEFAULT_CHANGE_VALUE))));
 	}
-	markDevicesUsed();
+
+	markUsed(devicesListstore, [this](const string& id) {
+		return getCollectionHandler()->countByKey(NAME, id) < Defaults::devicesInfo.at(id).maxIds;
+	});
 }
 
 string const DialogDevice::createUniqueId() const {
@@ -294,26 +282,9 @@ LEDSpicerUI::Ui::Storage::Data* DialogDevice::createData(StringUMap& rawData) {
 	return new Storage::Device(rawData);
 }
 
-void DialogDevice::recreateData() {
-	currentData->reset();
-	clearForm();
-	refreshBox();
-}
-
 void DialogDevice::markDevicesUsed() {
-	for (auto& di : Defaults::devicesInfo) {
-		const uint total     = getCollectionHandler()->countByKey(NAME, di.first);
-		const auto& children = devicesListstore->children();
-
-		for (auto iter = children.begin(); iter != children.end(); ++iter) {
-			Gtk::TreeModel::Row dataRow = *iter;
-
-			string data;
-			dataRow.get_value(0, data);
-			if (data == di.first) {
-				dataRow.set_value(2, total < di.second.maxIds);
-				break;
-			}
-		}
-	}
+	markUsed(devicesListstore, [this](const string& id) {
+		return getCollectionHandler()->countByKey(NAME, id) < Defaults::devicesInfo.at(id).maxIds;
+	});
 }
+

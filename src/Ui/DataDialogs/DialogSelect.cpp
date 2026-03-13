@@ -175,17 +175,14 @@ void DialogSelect::addButtons(Storage::BoxButton& boxButton) {
 }
 
 void DialogSelect::populateSelectables() {
-	for (auto child : boxAll->get_children()) {
-		boxAll->remove(*child);
-	}
+
+	for (auto child : boxAll->get_children()) boxAll->remove(*child);
 
 	for (const auto& collection : *getCollection()) {
 		// Only expand if this is an element collection
-		if (setting->sourceCollection == COLLECTION_ELEMENT && collection.second->hasProperty("expandable")) {
+		if (setting->sourceCollection == COLLECTION_ELEMENT && collection.second->hasProperty(PROP_EXPAND)) {
 			auto elem = static_cast<Storage::Element*>(collection.second);
-			for (auto child : elem->copyStripChildren()) {
-				createSelectableItem(child);
-			}
+			for (auto child : elem->copyStripChildren()) createSelectableItem(child);
 			continue;
 		}
 

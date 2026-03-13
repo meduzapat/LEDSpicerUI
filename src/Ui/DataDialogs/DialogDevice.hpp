@@ -20,7 +20,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DialogForm.hpp"
+#include "DialogFormHost.hpp"
 #include "Storage/Device.hpp"
 
 #pragma once
@@ -28,12 +28,11 @@
 namespace LEDSpicerUI::Ui::DataDialogs {
 
 /**
- * LEDSpicerUI::Ui::DialogDevice
+ * LEDSpicerUI::Ui::DataDialogs::DialogDevice
  *
  * Data Owner: MainDialog
- *
  */
-class DialogDevice: public DialogForm, public SingletonDialog<DialogDevice> {
+class DialogDevice : public DialogFormHost, public SingletonDialog<DialogDevice> {
 
 	friend class Gtk::Builder;
 
@@ -48,14 +47,13 @@ public:
 	void isValid() const override;
 	void storeData() override;
 	void retrieveData() override;
-
 	const string createUniqueId() const override;
 
 protected:
 
 	Gtk::ComboBox
-		* comboBoxDevices  = nullptr,
-		* comboBoxId       = nullptr;
+		* comboBoxDevices = nullptr,
+		* comboBoxId      = nullptr;
 	Gtk::ListStore
 		* devicesListstore = nullptr,
 		* idListstore      = nullptr;
@@ -63,9 +61,6 @@ protected:
 	Gtk::SpinButton* spinnerLeds     = nullptr;
 	Gtk::Entry*      inputDevicePort = nullptr;
 	Gtk::Label*      brief           = nullptr;
-
-	/// Stores the previous selected device, to be used when the user cancels a change action.
-	string previousName;
 
 	DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
 
@@ -76,12 +71,7 @@ protected:
 	Storage::Data* createData(StringUMap& rawData) override;
 
 	/**
-	 * Destroys and creates the data again.
-	 */
-	void recreateData();
-
-	/**
-	 * Marks a device disabled if it depleted all its IDs.
+	 * Marks a device row disabled once all its hardware IDs are in use.
 	 */
 	void markDevicesUsed();
 };

@@ -49,8 +49,10 @@ DialogInput::DialogInput(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& 
 	builder->get_widget("SwitchInputBlink",           switchInputBlink);
 	builder->get_widget("SpinInputTimes",             spinInputTimes);
 	builder->get_widget("BoxInputSourcesBox",         boxInputSourcesBox);
+	builder->get_widget("BoxInputMapsBox",            boxInputMapsBox);
 	builder->get_widget("BoxInputCreditsSettings",    boxInputCreditsSettings);
 	builder->get_widget_derived("BoxInputLinkedMaps", boxInputLinkedMaps);
+	builder->get_widget_derived("BoxInputMaps",       boxDirectMaps);
 
 	setSignalAdd(btnAddInput);
 	setSignalApply();
@@ -59,14 +61,25 @@ DialogInput::DialogInput(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& 
 	comboBoxInputSelectInput->append("", "Select Input Type");
 	for (const auto& [id, info] : Defaults::inputsInfo)
 		comboBoxInputSelectInput->append(id, info.name);
-	comboBoxInputSelectInput->set_active(0);
 
-	// Show/hide plugin-specific options when plugin type changes.
 	comboBoxInputSelectInput->signal_changed().connect([this, btnAddInputSource, btnAddInputMap]() {
-		string name(comboBoxInputSelectInput->get_active_id());
-		bool valid = not name.empty();
+		const string name(comboBoxInputSelectInput->get_active_id());
+		switch (handleTypeSwitch(comboBoxInputSelectInput, name, "Are you sure you want to change the input type? All settings will be lost.")) {
+		case TypeSwitchResult::Empty:
+			btnAddInputSource->set_sensitive(false);
+			btnAddInputMap->set_sensitive(false);
+			btnApply->set_sensitive(false);
+			return;
+		case TypeSwitchResult::Unchanged:
+			return;
+		case TypeSwitchResult::Proceed:
+			break;
+		}
+
+		const bool valid = not name.empty();
 		btnAddInputSource->set_sensitive(valid);
 		boxInputSourcesBox->set_visible(Defaults::inputHasFlag(name, Defaults::INPUT_NEEDS_SOURCE));
+		boxInputMapsBox->set_visible(not Defaults::inputHasFlag(name, Defaults::INPUT_NEEDS_SOURCE));
 		boxInputLinkedMaps->set_visible(Defaults::inputHasFlag(name, Defaults::INPUT_LINKED_MAPS));
 		btnAddInputMap->set_visible(not Defaults::inputHasFlag(name, Defaults::INPUT_NEEDS_SOURCE));
 		btnAddInputMap->set_sensitive(valid);
@@ -98,12 +111,14 @@ LEDSpicerUI::Ui::Storage::CollectionHandler* DialogInput::getCollectionHandler()
 }
 
 void DialogInput::resetForm() {
+	previousName = "";
 	comboBoxInputSelectInput->set_active(0);
 	clearForm();
 }
 
 void DialogInput::clearForm() {
 	boxInputSourcesBox->hide();
+	boxInputMapsBox->hide();
 	boxInputLinkedMaps->hide();
 	boxInputCreditsSettings->hide();
 	entryInputName->set_text("");
@@ -114,6 +129,7 @@ void DialogInput::clearForm() {
 	switchInputBlink->get_parent()->hide();
 	switchInputBlink->set_active(false);
 	btnApply->set_sensitive(false);
+	boxDirectMaps->wipe();
 }
 
 void DialogInput::isValid() const {
@@ -159,19 +175,18 @@ void DialogInput::storeData() {
 }
 
 void DialogInput::retrieveData() {
-	string name(currentData->getValue(NAME));
+	const string name(currentData->getValue(NAME));
 	comboBoxInputSelectInput->set_active_id(name);
 	entryInputName->set_text(currentData->getProperty(FILENAME));
 
-	if (name == "Actions") {
-		switchInputBlink->set_active(currentData->getValue("blink") == "true");
-	}
-	if (name == "Blinker") {
-		spinInputTimes->set_text(currentData->getValue("times"));
-	}
-	if (name == "Actions" or name == "Blinker") {
-		comboBoxInputSpeed->set_active_text(currentData->getValue("speed"));
-	}
+	if (Defaults::inputHasFlag(name, Defaults::INPUT_HAS_BLINK))
+		switchInputBlink->set_active(currentData->getValue(BLINK) == "true");
+
+	if (Defaults::inputHasFlag(name, Defaults::INPUT_HAS_TIMES))
+		spinInputTimes->set_text(currentData->getValue(TIMES));
+
+	if (Defaults::inputHasFlag(name, Defaults::INPUT_HAS_SPEED))
+		comboBoxInputSpeed->set_active_text(currentData->getValue(SPEED));
 }
 
 const string DialogInput::createUniqueId() const {

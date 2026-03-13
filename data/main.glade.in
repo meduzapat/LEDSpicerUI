@@ -4430,7 +4430,7 @@ You can find the devices ID using inputseeker from the terminal, or by listing t
               </packing>
             </child>
             <child>
-              <object class="GtkBox">
+              <object class="GtkBox" id="BoxInputMapsBox">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="orientation">vertical</property>
@@ -5260,6 +5260,8 @@ you can set the same trigger multiple time on different maps but only the last o
     </child>
   </object>
   <object class="GtkDialog" id="DialogInputSource">
+    <property name="width-request">800</property>
+    <property name="height-request">300</property>
     <property name="can-focus">False</property>
     <property name="title" translatable="yes">Input Event Listener Setup</property>
     <property name="modal">True</property>
@@ -5450,7 +5452,6 @@ You can find the devices ID using inputseeker from the terminal, or by listing t
                     <property name="shadow-type">in</property>
                     <child>
                       <object class="GtkViewport">
-                        <property name="width-request">800</property>
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <child>

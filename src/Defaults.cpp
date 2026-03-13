@@ -535,6 +535,17 @@ void Defaults::setIgnoreChanges(bool state) {
 	ignoreChanges = state;
 }
 
+void Defaults::indexDuplicateLabels(StringMap& items) {
+	std::unordered_map<string, uint8_t>
+		count,
+		index;
+	for (const auto& [id, label] : items) ++count[label];
+	for (auto& [id, label] : items) {
+		if (count[label] > 1)
+			label += " #" + std::to_string(++index[label]);
+	}
+}
+
 string Defaults::extractName(const string& fullFileName, const string& rootPath) {
 
 	// Get fullFileName without extension.

@@ -55,3 +55,9 @@ const string Input::toXML() const {
 	r += XMLHelper::xmlFooter();
 	return r;
 }
+
+void Input::reset() {
+	sources.wipe();
+	linkedMaps.wipe();
+	Data::reset();
+}

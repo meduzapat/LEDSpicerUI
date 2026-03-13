@@ -43,6 +43,7 @@ public:
 	virtual ~DialogInputMap() = default;
 
 	void load(XMLHelper* values) override;
+	void setOwner(Storage::BoxButtonCollection* collection, Storage::Data* owner = nullptr) override;
 	Storage::CollectionHandler* getCollectionHandler() const override;
 	void clearForm() override;
 	void isValid() const override;
@@ -60,11 +61,19 @@ protected:
 	Gtk::Button* inputMapDefaultColor = nullptr;
 	Gtk::Stack*  stackElementAndGroup = nullptr;
 
+	OrdenableFlowBox
+		/// Maps box inside DialogInputSource — used by real (hardware) sources.
+		* boxSourceMaps = nullptr,
+		/// Maps box inside DialogInput — used by sourceless inputs.
+		* boxDirectMaps = nullptr;
+
 	DialogInputMap(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
 
 	string_view getType() const override;
 
 	Storage::Data* createData(StringUMap& rawData) override;
+
+	static bool elementFilter(const Storage::Data* data);
 
 };
 

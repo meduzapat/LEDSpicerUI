@@ -100,14 +100,24 @@ void CollectionHandler::registerDependency(const Dependency& dependency) {
 	dependencies.push_back(dependency);
 }
 
-void CollectionHandler::registerComboBox(Gtk::ComboBoxText* destination) {
-	comboBoxes.push_back(destination);
-}
-
 void CollectionHandler::refreshComboBox(Gtk::ComboBoxText* comboBox) {
 	comboBox->remove_all();
 	for (const auto& item : collection)
-		comboBox->append(item.second->createPrettyName());
+		comboBox->append(item.second->createUniqueId(), item.second->createPrettyName());
+}
+
+void CollectionHandler::refreshComboBox(
+	Gtk::ComboBoxText* comboBox,
+	const std::function<bool(const Data*)>& filter
+) {
+	comboBox->remove_all();
+	for (const auto& item : collection)
+		if (filter(item.second))
+			comboBox->append(item.second->createUniqueId(), item.second->createPrettyName());
+}
+
+void CollectionHandler::registerComboBox(Gtk::ComboBoxText* destination) {
+	comboBoxes.push_back(destination);
 }
 
 void CollectionHandler::release(BoxButtonCollection* destination) {

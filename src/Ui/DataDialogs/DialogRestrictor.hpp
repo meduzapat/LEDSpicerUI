@@ -20,6 +20,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "DialogFormHost.hpp"
 #include "Storage/Restrictor.hpp"
 
 #pragma once
@@ -27,9 +28,9 @@
 namespace LEDSpicerUI::Ui::DataDialogs {
 
 /**
- * LEDSpicerUI::Ui::DialogRestrictor
+ * LEDSpicerUI::Ui::DataDialogs::DialogRestrictor
  */
-class DialogRestrictor: public DialogForm, public SingletonDialog<DialogRestrictor> {
+class DialogRestrictor : public DialogFormHost, public SingletonDialog<DialogRestrictor> {
 
 	friend class Gtk::Builder;
 
@@ -40,6 +41,7 @@ public:
 	void load(XMLHelper* values) override;
 	Storage::CollectionHandler* getCollectionHandler() const override;
 	void resetForm() override;
+	void clearForm() override;
 	void isValid() const override;
 	void storeData() override;
 	void retrieveData() override;
@@ -57,10 +59,9 @@ protected:
 	Gtk::SpinButton
 		* speedOn  = nullptr,
 		* speedOff = nullptr;
-	Gtk::Entry
-		* serialPort = nullptr;
+	Gtk::Entry* serialPort = nullptr;
 
-	// Stores the restrictors Ways icons.
+	/// Restrictor ways icon map keyed by Ways enum value.
 	std::unordered_map<Defaults::Ways, Gtk::FlowBoxChild*> waysIcons;
 
 	Gtk::ListStore
@@ -69,23 +70,15 @@ protected:
 
 	Gtk::Label* briefRestrictor = nullptr;
 
-	string previousName;
-
 	DialogRestrictor(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
+
 	void createSubItems(XMLHelper* values) override;
 	string_view getType() const override;
 	Storage::Data* createData(StringUMap& rawData) override;
 
 	/**
-	 * Destroys and creates the data again.
+	 * Marks a restrictor row disabled once all its hardware IDs are in use.
 	 */
-	void recreateData();
-
-	/**
-	 * Reset all fields except devices id.
-	 */
-	void clearForm();
-
 	void markRestrictorUsed();
 };
 

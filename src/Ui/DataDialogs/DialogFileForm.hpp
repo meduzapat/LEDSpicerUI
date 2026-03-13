@@ -20,7 +20,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DialogForm.hpp"
+#include "DialogFormHost.hpp"
 #include "Storage/DirectoryEntry.hpp"
 #include "Storage/FileData.hpp"
 
@@ -34,7 +34,7 @@ namespace LEDSpicerUI::Ui::DataDialogs {
  * (Inputs, Animations, Profiles) stored inside project directories.
  * Provides directory tracking and per-directory filename uniqueness checks,
  */
-class DialogFileForm : public DialogForm {
+class DialogFileForm : public DialogFormHost {
 
 public:
 
@@ -71,7 +71,7 @@ public:
 
 protected:
 
-	using DialogForm::DialogForm;
+	using DialogFormHost::DialogFormHost;
 
 	/// Active directory for new items. nullptr = root.
 	Storage::DirectoryEntry* currentDirectory = nullptr;

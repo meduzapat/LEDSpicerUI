@@ -59,11 +59,17 @@ protected:
 	Gtk::Switch*     switchInputBlink = nullptr;
 	Gtk::SpinButton* spinInputTimes   = nullptr;
 	Gtk::Box
-		* boxInputSourcesBox        = nullptr,
-		* boxInputCreditsSettings   = nullptr;
+		* boxInputSourcesBox      = nullptr,
+		* boxInputMapsBox         = nullptr,
+		* boxInputCreditsSettings = nullptr;
 
 	/// The box to display linked maps.
-	OrdenableFlowBox* boxInputLinkedMaps = nullptr;
+	OrdenableFlowBox
+		* boxDirectMaps      = nullptr,
+		* boxInputLinkedMaps = nullptr;
+
+	/// Stores the previous selected device, to be used when the user cancels a change action.
+	string previousName;
 
 	DialogInput(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
 

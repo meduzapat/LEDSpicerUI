@@ -46,6 +46,7 @@ public:
 	const string createPrettyName() const override;
 	const string createTooltip() const override;
 	const string getCssClass() const override;
+	void reset() override;
 	void activate() override;
 	const string toXML() const override;
 

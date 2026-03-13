@@ -25,7 +25,7 @@
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
 DialogRestrictor::DialogRestrictor(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
-	DialogForm(obj, builder)
+	DialogFormHost(obj, builder)
 {
 
 	DataDialogs::DialogRestrictorMap::buildInstance(builder, "DialogRestrictorMap");
@@ -80,34 +80,21 @@ DialogRestrictor::DialogRestrictor(BaseObjectType* obj, const Glib::RefPtr<Gtk::
 
 	comboBoxRestrictors->signal_changed().connect([&, btnAddRestrictorMap]() {
 		const string name = comboBoxRestrictors->get_active_id();
-		if (name.empty()) {
-			clearForm();
+
+		switch (handleTypeSwitch(
+			comboBoxRestrictors,
+			name,
+			"Are you sure you want to change the restrictor? All settings will be lost.")
+		) {
+		case TypeSwitchResult::Empty:
 			btnAddRestrictorMap->set_sensitive(false);
 			btnApply->set_sensitive(false);
-			previousName = "";
 			return;
-		}
-
-		if (previousName == name) {
+		case TypeSwitchResult::Unchanged:
 			return;
+		case TypeSwitchResult::Proceed:
+			break;
 		}
-
-		const string currentName(currentData->getValue(NAME));
-		// Changed Restriction option.
-		if (currentName.empty()) {
-			recreateData();
-		}
-		else if (name != currentName) {
-			if (Message::ask("Are you sure you want to change the restrictor? all settings will be loss") == Gtk::ResponseType::RESPONSE_YES) {
-				recreateData();
-			}
-			else {
-				comboBoxRestrictors->set_active_id(previousName);
-				return;
-			}
-		}
-
-		previousName = name;
 
 		if (name == "UltraStik360") {
 			hasRestrictor->get_parent()->show();
@@ -279,7 +266,10 @@ void DialogRestrictor::retrieveData() {
 		speedOn->set_value(std::stod(currentData->getValue(GZ40_SPEED_ON, std::to_string(GZ40_DEFAULT_SPEED))));
 		speedOff->set_value(std::stod(currentData->getValue(GZ40_SPEED_OFF, std::to_string(GZ40_DEFAULT_SPEED))));
 	}
-	markRestrictorUsed();
+
+	markUsed(restrictorsListstore, [this](const string& id) {
+		return getCollectionHandler()->countByKey(NAME, id) < Defaults::restrictorsInfo.at(id).maxIds;
+	});
 }
 
 string const DialogRestrictor::createUniqueId() const {
@@ -298,27 +288,8 @@ LEDSpicerUI::Ui::Storage::Data* DialogRestrictor::createData(StringUMap& rawData
 	return new Storage::Restrictor(rawData);
 }
 
-void DialogRestrictor::recreateData() {
-	currentData->reset();
-	clearForm();
-	refreshBox();
-}
-
 void DialogRestrictor::markRestrictorUsed() {
-	for (auto& ri : Defaults::restrictorsInfo) {
-		// count used devices.
-		const uint  total    = getCollectionHandler()->countByKey(NAME, ri.first);
-		const auto& children = restrictorsListstore->children();
-
-		for (auto iter = children.begin(); iter != children.end(); ++iter) {
-			Gtk::TreeModel::Row dataRow = *iter;
-
-			string data;
-			dataRow.get_value(0, data);
-			if (data == ri.first) {
-				dataRow.set_value(2, total < ri.second.maxIds);
-				break;
-			}
-		}
-	}
+	markUsed(restrictorsListstore, [this](const string& id) {
+		return getCollectionHandler()->countByKey(NAME, id) < Defaults::restrictorsInfo.at(id).maxIds;
+	});
 }

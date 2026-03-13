@@ -105,7 +105,7 @@ class Link : public Data {
 	 */
 	void setLinkData(const LinkData& newLinkData);
 
-	protected:
+protected:
 
 		/// Struct containing the immutable type, key, and Data link pointer.
 		LinkData linkInfo;

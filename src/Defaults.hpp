@@ -128,6 +128,9 @@ constexpr const char* COLORFORMAT   = "colorFormat";
 constexpr const char* CHANGE_POINT  = "changePoint";
 constexpr const char* DEFAULT_COLOR = "defaultColor";
 constexpr const char* BRIGHTNESS    = "brightness";
+constexpr const char* PROP_EXPAND   = "expandable";
+constexpr const char* PROP_SYSTEMM  = "system";
+constexpr const char* PROP_STRIP    = "stripDescriptor";
 
 constexpr const char* DEFAULT_BRIGHTNESS = "100";
 constexpr unsigned int DEFAULT_SOLENOID  = 50;
@@ -166,7 +169,7 @@ constexpr const char* INDEX        = "index";  /// a property positional index.
 constexpr const char* SPEED        = "speed";  /// Input playback speed setting.
 constexpr const char* BLINK        = "blink";  /// Input blink switch.
 constexpr const char* TIMES        = "times";  /// Input repeat count.
-
+constexpr const char* SOURCELESS   = "sourceless";
 /// UI-related constants.
 constexpr const char* DEFAULT_ELEMENT_TYPE = "9";
 constexpr const char* PLAYER               = "player";
@@ -585,6 +588,13 @@ public:
 	 * @param state True to ignore changes, false otherwise.
 	 */
 	static void setIgnoreChanges(bool state);
+
+	/**
+	 * Appends a numeric index to duplicate display labels in a StringMap.
+	 * Entries with unique labels are unchanged; duplicates become "Label 1", "Label 2", etc.
+	 * @param items id → display label map to process in-place.
+	 */
+	static void indexDuplicateLabels(StringMap& items);
 
 	/**
 	 * Extracts the name from a file and a root.

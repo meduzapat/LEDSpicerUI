@@ -49,6 +49,8 @@ const string InputSource::createUniqueId() const {
 }
 
 const string InputSource::createPrettyName() const {
+	const string label(getProperty(NAME));
+	if (not label.empty()) return label;
 	string source{getValue(SOURCE)};
 	return source.empty() ? "<single>" : source;
 }
@@ -59,6 +61,13 @@ const string InputSource::createTooltip() const {
 
 const string InputSource::getCssClass() const {
 	return "InputSourceBoxButton";
+}
+
+void InputSource::reset() {
+	maps.wipe();
+	if (not fieldsData.empty())
+		CollectionHandler::getInstance(COLLECTION_INPUT_SOURCES + getProperty(PID))->remove(this);
+	Data::reset();
 }
 
 void InputSource::activate() {

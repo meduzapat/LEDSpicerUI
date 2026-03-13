@@ -125,6 +125,13 @@ public:
 	void refreshComboBox(Gtk::ComboBoxText* comboBox);
 
 	/**
+	 * Refresh a single combobox contents with the collection values.
+	 * @param comboBox the combobox to refresh.
+	 * @param a filter to use
+	 */
+	void refreshComboBox(Gtk::ComboBoxText* comboBox, const std::function<bool(const Data*)>& filter);
+
+	/**
 	 * Register a collection consumer.
 	 * @param destination
 	 */

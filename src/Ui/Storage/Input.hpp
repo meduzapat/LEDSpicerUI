@@ -47,6 +47,7 @@ public:
 	const string getCssClass() const override;
 	void activate() override;
 	const string toXML() const override;
+	void reset() override;
 
 protected:
 
