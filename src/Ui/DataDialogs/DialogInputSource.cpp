@@ -27,19 +27,9 @@ using namespace LEDSpicerUI::Ui::DataDialogs;
 DialogInputSource::DialogInputSource(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
 	DialogFormHost(obj, builder)
 {
-	Gtk::Button
-		* btnAdd          = nullptr,
-		* btnAddMapSingle = nullptr; // From Input Dialog — sourceless path.
 
-	/*
-	 * Register before initializing child dialog so the sourceless creation
-	 * signal is wired before DialogInputMap claims the same button.
-	 */
-	builder->get_widget("BtnAddInputMap",       btnAddMapSingle);
-	btnAddMapSingle->signal_clicked().connect([this]() {
-		createButtonDirectly();
-	});
-
+	// From Input Dialog — sourceless path.
+	Gtk::Button* btnAdd = nullptr;
 	DataDialogs::DialogInputMap::buildInstance(builder, "DialogInputMap");
 
 	builder->get_widget_derived("BoxInputSources",  box);
@@ -55,58 +45,56 @@ DialogInputSource::DialogInputSource(BaseObjectType* obj, const Glib::RefPtr<Gtk
 
 	childDialogs.push_back(DialogInputMap::getInstance());
 
-	/*
-	 * Unified source-change handler.
-	 * Fires when either the combo settles on a real value or the entry loses focus.
-	 * Wipes maps after confirmation if any exist; reverts UI on cancel.
-	 */
-	std::function<void()> onSourceChanged = [this]() {
-		const string resolved(resolvedSource());
-		if (resolved.empty() or resolved == previousName) return;
+	static const string question {"Are you sure you want to change the source? All maps will be lost."};
 
-		if (
-			DialogInputMap::getInstance()->getBox()->getSize() == 0 or
-			Message::ask("Changing the source will delete all maps. Are you sure?") == Gtk::ResponseType::RESPONSE_YES
+	comboBoxInputSource->signal_changed().connect([this]() {
+
+		switch (
+			handleTypeSwitch(
+				comboBoxInputSource,
+				DialogInputMap::getInstance()->getBox(),
+				question
+			)
 		) {
-			previousName = resolved;
-			switchType();
-			comboBoxInputSource->set_active_id(resolved);
+		case TypeResult::Empty:
+			btnApply->set_sensitive(false);
+			btnAddMap->set_sensitive(false);
 			return;
+		case TypeResult::Unchanged:
+			return;
+		case TypeResult::Proceed:
+			break;
 		}
 
-		// User cancelled — revert UI to previousName.
-		if (not comboBoxInputSource->set_active_id(previousName)) {
-			comboBoxInputSource->set_active_id(SOURCE_OTHER_OPTION);
-			entryInputSource->set_text(previousName);
-		}
-	};
-
-	comboBoxInputSource->signal_changed().connect([this, onSourceChanged]() {
-		const string selected(comboBoxInputSource->get_active_id());
-		btnAddMap->set_sensitive(false);
-		entryInputSource->get_parent()->set_visible(false);
-
-		if (selected.empty()) return;
-
-		if (selected == SOURCE_OTHER_OPTION) {
+		if (comboBoxInputSource->get_active_id() == SOURCE_OTHER_OPTION) {
 			entryInputSource->get_parent()->set_visible(true);
 			entryInputSource->grab_focus();
-			return; // commit deferred until focus_out
+			return;
 		}
-
-		onSourceChanged();
-		// Re-enable after onSourceChanged() — previousName holds the committed value.
-		btnAddMap->set_sensitive(not previousName.empty());
+		entryInputSource->get_parent()->set_visible(false);
 	});
 
 	entryInputSource->signal_changed().connect([this]() {
-		btnAddMap->set_sensitive(not entryInputSource->get_text().empty());
+		switch (
+			handleTypeChange(
+				entryInputSource,
+				DialogInputMap::getInstance()->getBox(),
+				question
+			)
+		) {
+		case TypeResult::Empty:
+			btnApply->set_sensitive(false);
+			return;
+		case TypeResult::Unchanged:
+			return;
+		case TypeResult::Proceed:
+			break;
+		}
 	});
 
-	entryInputSource->signal_focus_out_event().connect([onSourceChanged](GdkEventFocus*) {
-		onSourceChanged();
-		return false;
-	});
+//	entryInputSource->signal_focus_out_event().connect([this](GdkEventFocus*) {
+//		return false;
+//	});
 }
 
 DialogInputSource::~DialogInputSource() {
@@ -125,34 +113,33 @@ LEDSpicerUI::Ui::Storage::CollectionHandler* DialogInputSource::getCollectionHan
 }
 
 void DialogInputSource::resetForm() {
-	previousName = "";
-	comboBoxInputSource->set_active(-1);
+	comboBoxInputSource->set_active_id("");
+	entryInputSource->set_text("");
+	if (Defaults::needSource(comboBoxInputSelectInput->get_active_id())) {
+		if (Defaults::isDevInputListener(comboBoxInputSelectInput->get_active_id()))
+			populateSourcesList(scanEventDevices());
+	}
 	clearForm();
 }
 
 void DialogInputSource::clearForm() {
-	comboBoxInputSource->get_parent()->hide();
+//	comboBoxInputSource->get_parent()->hide();
 	entryInputSource->get_parent()->hide();
-	entryInputSource->set_text("");
 	btnAddMap->set_sensitive(false);
-
-	if (Defaults::needSource(comboBoxInputSelectInput->get_active_id()))
-		populateSourcesList(scanEventDevices());
 }
 
 void DialogInputSource::isValid() const {
-	if (Defaults::needSource(comboBoxInputSelectInput->get_active_id())) {
-		if (resolvedSource().empty())
-			throw Message("Enter a valid event source name.");
+	// no name for sourceless only.
+	if (currentData->getProperty(SOURCELESS).empty()) {
+		if (resolvedSource().empty()) throw Message("Enter a valid source name.");
 	}
-	if (not DialogInputMap::getInstance()->getBox()->getSize())
-		throw Message("Add at least one map.");
+	if (not DialogInputMap::getInstance()->getBox()->getSize()) throw Message("Add at least one map.");
 }
 
 void DialogInputSource::storeData() {
 	const string resolved(resolvedSource());
 	currentData->setValue(SOURCE, resolved);
-	/* Store a human-friendly display label as a UI-only property. */
+	// Store a human-friendly display label as a UI-only property.
 	string label(comboBoxInputSource->get_active_text());
 	if (label == SOURCE_OTHER_OPTION or label == SOURCE_EMPTY_OPTION or label.empty())
 		label = resolved;
@@ -163,27 +150,29 @@ void DialogInputSource::retrieveData() {
 	if (not Defaults::needSource(comboBoxInputSelectInput->get_active_id())) return;
 
 	const string source(currentData->getValue(SOURCE));
+	previousName = source;
+	// If setting the id fail because the source do not exists, set other and use entry instead.
 	if (not comboBoxInputSource->set_active_id(source)) {
 		comboBoxInputSource->set_active_id(SOURCE_OTHER_OPTION);
 		entryInputSource->set_text(source);
 	}
-	previousName = source;
 }
 
 const string DialogInputSource::createUniqueId() const {
 	return Defaults::createCommonUniqueId({ownerData->getProperty(UID), resolvedSource()});
 }
 
-void DialogInputSource::createButtonDirectly() {
-	if (items->getSize() > 0) {
+void DialogInputSource::createPhantomSource() {
+	// Activate the phantom immediately so the box gets populated.
+	if (items->getSize()) {
 		(*items->begin())->getData()->activate();
 		return;
 	}
+	// Otherwise create the phantom source
 	StringUMap rawData;
 	auto phantom = createData(rawData);
-	// TODO: future — preserve compatible sources when switching within the
-	//       same INPUT_DEV_LISTENER family (same device model).
-	phantom->setProperty(SOURCELESS, "true");
+	phantom->setProperty(SOURCELESS, "1");
+//	phantom->setProperty(NAME, "<single>"); // never displayed
 	phantom->activate();
 	items->create(phantom);
 	getCollectionHandler()->add(phantom);
@@ -205,7 +194,7 @@ LEDSpicerUI::Ui::Storage::Data* DialogInputSource::createData(StringUMap& rawDat
 
 string DialogInputSource::resolvedSource() const {
 	string s(comboBoxInputSource->get_active_id());
-	return (s == SOURCE_OTHER_OPTION or s.empty()) ? string(entryInputSource->get_text()) : s;
+	return (s == SOURCE_OTHER_OPTION) ? string(entryInputSource->get_text()) : s;
 }
 
 StringMap DialogInputSource::scanEventDevices() {
@@ -220,23 +209,20 @@ StringMap DialogInputSource::scanEventDevices() {
 	}
 
 	auto addDevices = [&](const std::filesystem::path& dirPath, bool useById) {
-		for (const auto& entry : std::filesystem::directory_iterator(dirPath)) {
-			if (not entry.is_regular_file() and not entry.is_symlink()) continue;
-			string name = entry.path().filename().string();
-			if (name.empty() or name[0] == '.' or (useById and name.find("event") == string::npos)) continue;
+		std::error_code ec;
+		for (const auto& entry : std::filesystem::directory_iterator(dirPath, ec)) {
+			if (ec) break;
+			if (not entry.is_character_file() and not entry.is_symlink()) continue;
+			const string name = entry.path().filename().string();
+			if (useById and name.find("event") == string::npos) continue;
 			string humanName = readDeviceName(name);
-			if (humanName.empty()) humanName = name;
-			devices.emplace(name, humanName);
+			devices.emplace(name, humanName.empty() ? name : humanName);
 		}
 	};
 
 	addDevices(DEV_INPUT_BY_ID, true);
-	if (not devices.empty()) {
-		Defaults::indexDuplicateLabels(devices);
-		return devices;
-	}
+	if (devices.empty()) addDevices(DEV_INPUT, false);
 
-	addDevices(DEV_INPUT, false);
 	Defaults::indexDuplicateLabels(devices);
 	return devices;
 }
@@ -251,7 +237,7 @@ void DialogInputSource::populateSourcesList(const StringMap& devices) {
 		return;
 	}
 
-	comboBoxInputSource->get_parent()->show();
+//	comboBoxInputSource->get_parent()->show();
 	comboBoxInputSource->append("", SOURCE_EMPTY_OPTION);
 	for (const auto& [id, display] : devices)
 		comboBoxInputSource->append(id, display);

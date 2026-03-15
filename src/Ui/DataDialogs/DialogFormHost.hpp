@@ -43,7 +43,7 @@ class DialogFormHost : public DialogForm {
 public:
 
 	/// Result codes returned by handleTypeSwitch().
-	enum class TypeSwitchResult {
+	enum class TypeResult {
 		Empty,     /// The combo was cleared; clearForm() was already called.
 		Unchanged, /// The selection did not actually change; caller does nothing.
 		Proceed    /// Type was switched (or confirmed); caller updates type-specific UI.
@@ -75,14 +75,27 @@ protected:
 	 *   5. set previousName = name → return Proceed.
 	 *
 	 * @param combo       The type-selector combo being changed.
-	 * @param newName     The newly selected id (may be empty).
+	 * @param box         The box of object to check if not empty.
 	 * @param confirmMsg  Shown to the user when switching away from saved data.
-	 * @return            Empty, Unchanged, or Proceed.
+	 * @return Empty, Unchanged, or Proceed.
 	 */
-	TypeSwitchResult handleTypeSwitch(
+	TypeResult handleTypeSwitch(
 		Gtk::ComboBox* combo,
-		const string&  newName,
-		const string&  confirmMsg
+		const OrdenableFlowBox* box,
+		const string& confirmMsg
+	);
+
+	/**
+	 * Same as handleTypeSwitch but for text entries.
+	 * @param entry
+	 * @param box
+	 * @param confirmMsg
+	 * @return Empty, Unchanged, or Proceed.
+	 */
+	TypeResult handleTypeChange(
+		Gtk::Entry* entry,
+		const OrdenableFlowBox* box,
+		const string& confirmMsg
 	);
 
 	/**

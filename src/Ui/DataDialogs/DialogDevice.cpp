@@ -90,20 +90,20 @@ DialogDevice::DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 	});
 
 	comboBoxDevices->signal_changed().connect([&, btnAddElement, notebookDeviceConnections]() {
-		const string name(comboBoxDevices->get_active_id());
+		const string name{comboBoxDevices->get_active_id()};
 		// If current ID is empty just reset the form for Add task.
 		switch (handleTypeSwitch(
 			comboBoxDevices,
-			name,
-			"Are you sure you want to change the device? All settings will be lost.")
+			DialogElement::getInstance()->getBox(),
+			"Are you sure you want to change the device? All elements will be lost.")
 		) {
-		case TypeSwitchResult::Empty:
+		case TypeResult::Empty:
 			btnAddElement->set_sensitive(false);
 			btnApply->set_sensitive(false);
 			return;
-		case TypeSwitchResult::Unchanged:
+		case TypeResult::Unchanged:
 			return;
-		case TypeSwitchResult::Proceed:
+		case TypeResult::Proceed:
 			break;
 		}
 		const uint16_t totalPins(Defaults::devicesInfo.at(name).pins);

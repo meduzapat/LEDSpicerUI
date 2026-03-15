@@ -50,7 +50,7 @@ public:
 	const string createUniqueId() const override;
 	const string createPrettyName() const override;
 	const string createTooltip() const override;
-	const string getCssClass() const override;
+	string_view getCssClass() const noexcept override;
 
 	string getName() const override;
 	string getFsId() const override;

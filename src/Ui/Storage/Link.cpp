@@ -29,7 +29,7 @@ bool Link::operator==(const Data& other) const {
 	return Data::operator==(other) or linkInfo.link == &other;
 }
 
-const string Link::getCssClass() const {
+string_view Link::getCssClass() const noexcept {
 	return linkInfo.link ? linkInfo.link->getCssClass() : "";
 }
 

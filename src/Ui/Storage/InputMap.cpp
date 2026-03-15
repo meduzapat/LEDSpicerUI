@@ -25,9 +25,8 @@
 using namespace LEDSpicerUI::Ui::Storage;
 
 InputMap::~InputMap() {
-	const string collectionId(COLLECTION_INPUT_MAPS + getProperty(PID));
-	if (CollectionHandler::getInstance(collectionId)->isSet(this))
-		CollectionHandler::getInstance(collectionId)->remove(this);
+	if (not fieldsData.empty())
+		CollectionHandler::getInstance(COLLECTION_INPUT_MAPS + getProperty(PID))->remove(this);
 }
 
 const string InputMap::createUniqueId() const {
@@ -38,6 +37,6 @@ const string InputMap::createPrettyName() const {
 	return "[" + getValue(TRIGGER) + "] " + getValue(TYPE) + " " + getValue(TARGET);
 }
 
-const string InputMap::getCssClass() const {
+string_view InputMap::getCssClass() const noexcept {
 	return "InputMapBoxButton";
 }

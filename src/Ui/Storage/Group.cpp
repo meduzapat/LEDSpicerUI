@@ -32,12 +32,11 @@ Group::Group(StringUMap& data) : Data(data) {
 }
 
 Group::~Group() {
-	if (CollectionHandler::getInstance(COLLECTION_GROUP)->isSet(this))
-		CollectionHandler::getInstance(COLLECTION_GROUP)->remove(this);
+	CollectionHandler::getInstance(COLLECTION_GROUP)->remove(this);
 	CollectionHandler::getInstance(COLLECTION_ELEMENT)->release(&elements);
 }
 
-const string Group::getCssClass() const {
+string_view Group::getCssClass() const noexcept {
 	return "GroupBoxButton";
 }
 

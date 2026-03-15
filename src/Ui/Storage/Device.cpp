@@ -25,16 +25,14 @@
 using namespace LEDSpicerUI::Ui::Storage;
 
 Device::~Device() {
-	if (not fieldsData.empty()) {
+	if (not fieldsData.empty())
 		CollectionHandler::getInstance(COLLECTION_DEVICES)->remove(this);
-	}
 }
 
 void Device::reset() {
 	elements.wipe();
-	if (not fieldsData.empty()) {
+	if (not fieldsData.empty())
 		CollectionHandler::getInstance(COLLECTION_DEVICES)->remove(this);
-	}
 	Data::reset();
 }
 
@@ -49,7 +47,7 @@ const string Device::createPrettyName() const {
 	return r;
 }
 
-const string Device::getCssClass() const {
+string_view Device::getCssClass() const noexcept {
 	return "DeviceBoxButton";
 }
 

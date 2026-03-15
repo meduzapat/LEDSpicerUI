@@ -46,9 +46,9 @@ BoxButton::BoxButton(Data* form) :
 	pack_start(*lbox, Gtk::PACK_EXPAND_WIDGET);
 
 	get_style_context()->add_class("BoxButton");
-	const string cssClass = form->getCssClass();
+	auto cssClass = form->getCssClass();
 	if (not cssClass.empty())
-		get_style_context()->add_class(cssClass);
+		get_style_context()->add_class(string(cssClass));
 	updateLabel();
 	show_all();
 }

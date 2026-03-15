@@ -185,9 +185,9 @@ constexpr const char* TYPE_GROUP          = "group";
 constexpr const char* TYPE_PROCESS        = "process";
 constexpr const char* TYPE_RESTRICTOR_MAP = "Player Mapping";
 #define               TYPE_INPUT            "input"
-#define               TYPE_INPUT_SOURCE     TYPE_INPUT "source"
-#define               TYPE_INPUT_MAP        TYPE_INPUT TYPE_MAP
-#define               TYPE_INPUT_DIR        TYPE_INPUT TYPE_DIRECTORY
+#define               TYPE_INPUT_SOURCE     TYPE_INPUT " source"
+#define               TYPE_INPUT_MAP        TYPE_INPUT " " TYPE_MAP
+#define               TYPE_INPUT_DIR        TYPE_INPUT " " TYPE_DIRECTORY
 constexpr const char* TYPE_ANIMATION      = "animation";
 constexpr const char* TYPE_PROFILE        = "profile";
 

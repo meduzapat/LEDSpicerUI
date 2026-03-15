@@ -48,7 +48,7 @@ const string InputMapLink::createPrettyName() const {
 	return Defaults::implode(prettyName, " ➡️ ") + " 🔙";
 }
 
-const string InputMapLink::getCssClass() const {
+string_view InputMapLink::getCssClass() const noexcept {
 	return "LinkBoxButton";
 }
 

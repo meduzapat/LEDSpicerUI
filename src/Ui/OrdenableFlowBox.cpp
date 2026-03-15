@@ -69,7 +69,7 @@ OrdenableFlowBox::OrdenableFlowBox(
 	});
 }
 
-size_t OrdenableFlowBox::getSize() {
+size_t OrdenableFlowBox::getSize() const noexcept {
 	return get_children().size();
 }
 

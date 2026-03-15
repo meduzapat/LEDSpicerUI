@@ -41,7 +41,7 @@ public:
 
 	virtual ~OrdenableFlowBox() = default;
 
-	size_t getSize();
+	size_t getSize() const noexcept;
 
 	void wipe();
 

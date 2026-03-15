@@ -54,7 +54,7 @@ const string Restrictor::createUniqueId() const {
 	return Defaults::createHardwareUniqueId(*getValues(), false);
 }
 
-const string Restrictor::getCssClass() const {
+string_view Restrictor::getCssClass() const noexcept {
 	return "RestrictorBoxButton";
 }
 

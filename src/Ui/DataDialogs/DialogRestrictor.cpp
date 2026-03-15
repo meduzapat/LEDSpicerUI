@@ -83,16 +83,16 @@ DialogRestrictor::DialogRestrictor(BaseObjectType* obj, const Glib::RefPtr<Gtk::
 
 		switch (handleTypeSwitch(
 			comboBoxRestrictors,
-			name,
-			"Are you sure you want to change the restrictor? All settings will be lost.")
+			DialogRestrictorMap::getInstance()->getBox(),
+			"Are you sure you want to change the restrictor? All mappings will be lost.")
 		) {
-		case TypeSwitchResult::Empty:
+		case TypeResult::Empty:
 			btnAddRestrictorMap->set_sensitive(false);
 			btnApply->set_sensitive(false);
 			return;
-		case TypeSwitchResult::Unchanged:
+		case TypeResult::Unchanged:
 			return;
-		case TypeSwitchResult::Proceed:
+		case TypeResult::Proceed:
 			break;
 		}
 

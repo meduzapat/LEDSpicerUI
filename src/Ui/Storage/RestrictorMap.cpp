@@ -42,7 +42,7 @@ const string RestrictorMap::createUniqueId() const {
 	return Defaults::createCommonUniqueId({getValue(PLAYER), getValue(JOYSTICK)});
 }
 
-const string RestrictorMap::getCssClass() const {
+string_view RestrictorMap::getCssClass() const noexcept {
 	return "RestrictorMapBoxButton";
 }
 

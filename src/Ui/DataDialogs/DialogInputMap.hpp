@@ -42,6 +42,11 @@ public:
 
 	virtual ~DialogInputMap() = default;
 
+	/**
+	 * Changes the box where the items will be displayed.
+	 * @param flag 1 sources box, 0 input box.
+	 */
+	void setNormalBox(const bool flag);
 	void load(XMLHelper* values) override;
 	void setOwner(Storage::BoxButtonCollection* collection, Storage::Data* owner = nullptr) override;
 	Storage::CollectionHandler* getCollectionHandler() const override;
@@ -65,7 +70,7 @@ protected:
 		/// Maps box inside DialogInputSource — used by real (hardware) sources.
 		* boxSourceMaps = nullptr,
 		/// Maps box inside DialogInput — used by sourceless inputs.
-		* boxDirectMaps = nullptr;
+		* boxInputMaps = nullptr;
 
 	DialogInputMap(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
 

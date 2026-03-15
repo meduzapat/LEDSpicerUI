@@ -274,24 +274,47 @@ After `activate()` the child dialog knows:
   XML scoping.
 
 ### `deActivate()`
-
-Called on destruction (the base `~Data()` calls it) or whenever the item is
-removed from a collection. Clean up any registrations in `CollectionHandler`
-that were made during `activate()`.
-
+ 
+`deActivate()` is NOT called automatically by `~Data()`. It must be called
+explicitly:
+ 
+- **ADD and EDIT flows:** `DialogForm` calls `currentData->deActivate()`
+  explicitly after the dialog closes.
+- **DELETE flow:** `DialogForm::onDelClicked` does **not** call `deActivate()`
+  before deleting. The comment in the source states: *"the destructor must call
+  deActivate if necessary."* Therefore, any `Data` subclass that wires a child
+  dialog in `activate()` **must** call `deActivate()` from its destructor.
+ 
+### Rule
+ 
+> `activate()` wires. `deActivate()` unwires.
+> If your `activate()` calls `setOwner()` on a child dialog, your destructor
+> must call `deActivate()`. Do not rely on the base class to do it.
+ 
 ```cpp
 InputSource::~InputSource() {
-    // Remove from the input-scoped source collection if still registered.
-    string collectionId(COLLECTION_INPUT_SOURCES + getProperty(FILE_ID));
-    if (CollectionHandler::getInstance(collectionId)->isSet(this))
-        CollectionHandler::getInstance(collectionId)->remove(this);
+    deActivate(); // unwires DialogInputMap before maps is destroyed
+    CollectionHandler::getInstance(COLLECTION_ELEMENT)->release(&maps);
+    CollectionHandler::getInstance(COLLECTION_GROUP)->release(&maps);
+    const string id(COLLECTION_INPUT_SOURCES + getProperty(PID));
+    if (CollectionHandler::getInstance(id)->isSet(this))
+        CollectionHandler::getInstance(id)->remove(this);
+}
+ 
+void InputSource::activate() {
+    DialogInputMap::getInstance()->setOwner(&maps, this);
+}
+ 
+void InputSource::deActivate() {
+    DialogInputMap::getInstance()->setOwner(nullptr, nullptr);
 }
 ```
-
-### Rule
-
-> `activate()` wires. `deActivate()` / destructor unwires.
-> Never leave dangling registrations.
+ 
+**Why this matters:** When `BoxButtonCollection::wipe()` destroys items
+(e.g. during `switchType()` → `reset()`), `~Data()` runs before the member
+`BoxButtonCollection` is destroyed. If `deActivate()` is not called first, the
+child dialog's `items` pointer is left dangling, and the subsequent
+`refreshBox()` call crashes at `populateBox()`.
 
 ---
 
@@ -455,7 +478,7 @@ creates a fresh `Data` from the same raw values via `createData(rawData)`. Use
 | `Element` | name, pin, position, brightness, … | `stripDescriptor` (when strip) | — | Yes — `<element>` |
 | `Group` | name | — | Link→Element items | Yes — `<group>` |
 | `Input` | name (input type) | `PATH`, `FILENAME` | `sources`, `linkedMaps` | Yes — per-file XML |
-| `InputSource` | source (hardware id, may be empty) | `FILE_ID` | `maps` | Yes — `<maps>` |
+| `InputSource` | `source` (hardware path, may be empty) | `UID`, `PID`, `NAME` (display label), `SOURCELESS` | `maps` | `SOURCELESS="true"` marks phantom sources for source-free inputs. `deActivate()` must be overridden — see §8. |
 | `InputMap` | trigger, type, target, … | — | — | Yes — `<map>` |
 | `DirectoryEntry` | name (segment only) | — | `contents` (BoxButtonCollection of FileData*) | **No** — runtime only |
 | `FileData` (base) | name (input/animation type) | `FILENAME`, `fsId` | — (overridden by subtypes) | Yes |

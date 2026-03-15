@@ -30,18 +30,19 @@ void DialogFormHost::switchType() {
 	refreshBox();
 }
 
-DialogFormHost::TypeSwitchResult DialogFormHost::handleTypeSwitch(
+DialogFormHost::TypeResult DialogFormHost::handleTypeSwitch(
 	Gtk::ComboBox* combo,
-	const string&  newName,
-	const string&  confirmMsg
+	const OrdenableFlowBox* box,
+	const string& confirmMsg
 ) {
+	const string newName {combo->get_active_id()};
 	if (newName.empty()) {
 		clearForm();
 		previousName = "";
-		return TypeSwitchResult::Empty;
+		return TypeResult::Empty;
 	}
 
-	if (previousName == newName) return TypeSwitchResult::Unchanged;
+	if (previousName == newName) return TypeResult::Unchanged;
 
 	const string currentName(currentData->getValue(NAME));
 
@@ -50,17 +51,51 @@ DialogFormHost::TypeSwitchResult DialogFormHost::handleTypeSwitch(
 		switchType();
 	}
 	else if (newName != currentName) {
-		if (Message::ask(confirmMsg) == Gtk::ResponseType::RESPONSE_YES) {
+		if (not box->getSize() or Message::ask(confirmMsg) == Gtk::ResponseType::RESPONSE_YES) {
 			switchType();
 		}
 		else {
 			combo->set_active_id(previousName);
-			return TypeSwitchResult::Unchanged;
+			return TypeResult::Unchanged;
 		}
 	}
 
 	previousName = newName;
-	return TypeSwitchResult::Proceed;
+	return TypeResult::Proceed;
+}
+
+DialogFormHost::TypeResult DialogFormHost::handleTypeChange(
+	Gtk::Entry* entry,
+	const OrdenableFlowBox* box,
+	const string& confirmMsg
+) {
+	const string newName {entry->get_text()};
+	if (newName.empty()) {
+		clearForm();
+		previousName = "";
+		return TypeResult::Empty;
+	}
+
+	if (previousName == newName) return TypeResult::Unchanged;
+
+	const string currentName(currentData->getValue(NAME));
+
+	if (currentName.empty()) {
+		// No committed data yet — switch silently.
+		switchType();
+	}
+	else if (newName != currentName) {
+		if (not box->getSize() or Message::ask(confirmMsg) == Gtk::ResponseType::RESPONSE_YES) {
+			switchType();
+		}
+		else {
+			entry->set_text(previousName);
+			return TypeResult::Unchanged;
+		}
+	}
+
+	previousName = newName;
+	return TypeResult::Proceed;
 }
 
 void DialogFormHost::markUsed(

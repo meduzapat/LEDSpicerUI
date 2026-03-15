@@ -27,7 +27,7 @@ using namespace LEDSpicerUI::Ui::Storage;
 InputSource::InputSource(StringUMap& data) :
 	Data(data),
 	sId("src_" + std::to_string(++sourceCounter))
-	{
+{
 	setProperty(UID, sId);
 	// register maps against the global collections so cascade deletes propagate.
 	CollectionHandler::getInstance(COLLECTION_ELEMENT)->registerDependency({&maps});
@@ -35,13 +35,13 @@ InputSource::InputSource(StringUMap& data) :
 }
 
 InputSource::~InputSource() {
-
 	CollectionHandler::getInstance(COLLECTION_ELEMENT)->release(&maps);
 	CollectionHandler::getInstance(COLLECTION_GROUP)->release(&maps);
 
-	const string collectionId(COLLECTION_INPUT_SOURCES + getProperty(PID));
-	if (CollectionHandler::getInstance(collectionId)->isSet(this))
-		CollectionHandler::getInstance(collectionId)->remove(this);
+//	deActivate();
+
+	if (not fieldsData.empty())
+		CollectionHandler::getInstance(COLLECTION_INPUT_SOURCES + getProperty(PID))->remove(this);
 }
 
 const string InputSource::createUniqueId() const {
@@ -49,17 +49,15 @@ const string InputSource::createUniqueId() const {
 }
 
 const string InputSource::createPrettyName() const {
-	const string label(getProperty(NAME));
-	if (not label.empty()) return label;
-	string source{getValue(SOURCE)};
-	return source.empty() ? "<single>" : source;
+	// Stored at store, empty otherwise.
+	return getProperty(NAME);
 }
 
 const string InputSource::createTooltip() const {
 	return "Source " + createPrettyName() + " with " + std::to_string(maps.getSize()) + " maps";
 }
 
-const string InputSource::getCssClass() const {
+string_view InputSource::getCssClass() const noexcept {
 	return "InputSourceBoxButton";
 }
 
@@ -71,8 +69,14 @@ void InputSource::reset() {
 }
 
 void InputSource::activate() {
+	// Point the box sources (empty) or input.
+	DataDialogs::DialogInputMap::getInstance()->setNormalBox(getProperty(SOURCELESS).empty());
 	DataDialogs::DialogInputMap::getInstance()->setOwner(&maps, this);
 }
+
+//void InputSource::deActivate() {
+//	DataDialogs::DialogInputMap::getInstance()->setOwner(nullptr);
+//}
 
 const string InputSource::toXML() const {
 	string source(getValue(SOURCE));

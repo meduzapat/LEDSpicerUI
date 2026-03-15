@@ -33,7 +33,7 @@ DialogInputMap::DialogInputMap(BaseObjectType* obj, const Glib::RefPtr<Gtk::Buil
 		* btnAddInputMap  = nullptr;
 
 	builder->get_widget_derived("BoxInputSourceMaps", boxSourceMaps);
-	builder->get_widget_derived("BoxInputMaps",       boxDirectMaps);
+	builder->get_widget_derived("BoxInputMaps",       boxInputMaps);
 	builder->get_widget("BtnApplyInputMap",           btnApply);
 	builder->get_widget("BtnInputMapDefaultColor",    inputMapDefaultColor);
 	builder->get_widget("ComboBoxInputMapFilter",     comboBoxInputMapFilter);
@@ -43,9 +43,6 @@ DialogInputMap::DialogInputMap(BaseObjectType* obj, const Glib::RefPtr<Gtk::Buil
 	builder->get_widget("StackElementAndGroup",       stackElementAndGroup);
 	builder->get_widget("BtnAddInputSourceMap",       btnAddSourceMap);
 	builder->get_widget("BtnAddInputMap",             btnAddInputMap);
-
-	// Default map.
-	box = boxSourceMaps;
 
 	setSignalAdd(btnAddSourceMap);
 	setSignalAdd(btnAddInputMap);
@@ -80,6 +77,10 @@ DialogInputMap::DialogInputMap(BaseObjectType* obj, const Glib::RefPtr<Gtk::Buil
 
 }
 
+void DialogInputMap::setNormalBox(const bool flag) {
+	box = flag ? boxSourceMaps : boxInputMaps;
+}
+
 void DialogInputMap::load(XMLHelper* values) {
 	createItems(
 		values->getData(Defaults::createCommonUniqueId({ownerData->createUniqueId(), COLLECTION_INPUT_MAPS})),
@@ -94,7 +95,7 @@ void DialogInputMap::setOwner(
 	DialogForm::setOwner(collection, owner);
 	// Sourceless inputs route their maps into the input-level BoxInputMaps panel;
 	// real hardware sources use the per-source BoxInputSourceMaps panel.
-	box = (owner and owner->hasProperty(SOURCELESS)) ? boxDirectMaps : boxSourceMaps;
+	box = (owner->hasProperty(SOURCELESS)) ? boxInputMaps : boxSourceMaps;
 }
 
 LEDSpicerUI::Ui::Storage::CollectionHandler* DialogInputMap::getCollectionHandler() const {
@@ -182,7 +183,7 @@ const string DialogInputMap::createUniqueId() const {
 }
 
 string_view DialogInputMap::getType() const {
-	return "Input Map";
+	return TYPE_INPUT_MAP;
 }
 
 LEDSpicerUI::Ui::Storage::Data* DialogInputMap::createData(StringUMap& rawData) {

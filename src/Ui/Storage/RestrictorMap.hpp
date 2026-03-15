@@ -39,7 +39,7 @@ public:
 
 	const string createPrettyName() const override;
 	const string createUniqueId() const override;
-	const string getCssClass() const override;
+	string_view getCssClass() const noexcept override;
 	const string toXML() const override;
 
 };

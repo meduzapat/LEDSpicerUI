@@ -25,7 +25,7 @@
 using namespace LEDSpicerUI::Ui::Storage;
 
 Input::~Input() {
-	if (CollectionHandler::getInstance(COLLECTION_INPUT)->isSet(this))
+	if (not fieldsData.empty())
 		CollectionHandler::getInstance(COLLECTION_INPUT)->remove(this);
 }
 
@@ -33,7 +33,7 @@ const string Input::createTooltip() const {
 	return "Input " + FileData::createTooltip();
 }
 
-const string Input::getCssClass() const {
+string_view Input::getCssClass() const noexcept {
 	return "InputBoxButton";
 }
 
@@ -42,6 +42,10 @@ void Input::activate() {
 	// TODO wire linkedMaps once DialogInputLinkMaps is reworked.
 	// DataDialogs::DialogInputLinkMaps::getInstance()->setOwner(&linkedMaps, this);
 }
+
+//void Input::deActivate() {
+//	DataDialogs::DialogInputSource::getInstance()->setOwner(nullptr);
+//}
 
 const string Input::toXML() const {
 	string r(XMLHelper::xmlHeader("Input"));
@@ -59,5 +63,7 @@ const string Input::toXML() const {
 void Input::reset() {
 	sources.wipe();
 	linkedMaps.wipe();
+	if (not fieldsData.empty())
+		CollectionHandler::getInstance(COLLECTION_DEVICES)->remove(this);
 	Data::reset();
 }

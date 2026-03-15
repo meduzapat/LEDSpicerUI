@@ -54,7 +54,7 @@ public:
 
 	const string createUniqueId() const override;
 	const string createPrettyName() const override;
-	const string getCssClass() const override;
+	string_view getCssClass() const noexcept override;
 
 };
 

@@ -35,8 +35,7 @@ Profile::Profile(StringUMap& data) : Data(data) {
 }
 
 Profile::~Profile() {
-	if (CollectionHandler::getInstance(COLLECTION_PROFILES)->isSet(this))
-		CollectionHandler::getInstance(COLLECTION_PROFILES)->remove(this);
+	CollectionHandler::getInstance(COLLECTION_PROFILES)->remove(this);
 	CollectionHandler::getInstance(COLLECTION_ELEMENT)->release(&alwaysOnElements);
 	CollectionHandler::getInstance(COLLECTION_GROUP)->release(&alwaysOnGroups);
 	CollectionHandler::getInstance(COLLECTION_INPUT)->release(&inputs);
@@ -45,7 +44,7 @@ Profile::~Profile() {
 //	CollectionHandler::getInstance(COLLECTION_ANIMATION)->release(&endTransitions);
 }
 
-const string Profile::getCssClass() const {
+string_view Profile::getCssClass() const noexcept {
 	return "ProfileBoxButton";
 }
 

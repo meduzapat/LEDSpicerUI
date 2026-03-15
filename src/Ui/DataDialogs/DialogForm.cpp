@@ -74,6 +74,7 @@ void DialogForm::createItems(StringUMapVector& rawCollection, XMLHelper* values)
 
 void DialogForm::refreshBox() {
 	for (auto childDialog : childDialogs) childDialog->refreshBox();
+	if (not box) return; // this will avoid chaining into non initialized dialogs.
 	box->wipe();
 	if (not items) return;
 	items->populateBox(box);

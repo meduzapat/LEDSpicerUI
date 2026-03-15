@@ -46,7 +46,7 @@ const string DirectoryEntry::createTooltip() const {
 	return getFullPath();
 }
 
-const string DirectoryEntry::getCssClass() const {
+string_view DirectoryEntry::getCssClass() const noexcept {
 	return "DirectoryBoxButton";
 }
 

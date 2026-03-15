@@ -76,6 +76,9 @@ void CollectionHandler::add(Data* item) {
 }
 
 void CollectionHandler::remove(Data* item) {
+
+	if (not isSet(item)) return;
+
 	collection.erase(item->createUniqueId());
 
 	// Collect depleted callbacks first, fire after iteration.

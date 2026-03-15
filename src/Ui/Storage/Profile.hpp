@@ -40,7 +40,7 @@ public:
 
 	virtual ~Profile();
 
-	const string getCssClass() const override;
+	string_view getCssClass() const noexcept override;
 	void activate() override;
 	const string toXML() const override;
 

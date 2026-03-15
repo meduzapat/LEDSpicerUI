@@ -25,15 +25,14 @@
 using namespace LEDSpicerUI::Ui::Storage;
 
 Process::~Process() {
-	if (CollectionHandler::getInstance(COLLECTION_PROCESS)->isSet(this))
-		CollectionHandler::getInstance(COLLECTION_PROCESS)->remove(this);
+	CollectionHandler::getInstance(COLLECTION_PROCESS)->remove(this);
 }
 
 const string Process::createPrettyName() const {
 	return string("Process: " + fieldsData.at(getPrimaryKey()) + " System: " + fieldsData.at(PARAM_SYSTEM));
 }
 
-const string Process::getCssClass() const {
+string_view Process::getCssClass() const noexcept {
 	return "ProcessBoxButton";
 }
 

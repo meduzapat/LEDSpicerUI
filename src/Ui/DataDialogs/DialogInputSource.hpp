@@ -65,7 +65,7 @@ public:
 	 * Creates one silently if absent, then wires DialogInputMap to it.
 	 * Safe to call repeatedly — idempotent if sourceless source already exists.
 	 */
-	void createButtonDirectly();
+	void createPhantomSource();
 
 protected:
 

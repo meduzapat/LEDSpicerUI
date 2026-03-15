@@ -40,7 +40,7 @@ public:
 
 	virtual ~Group();
 
-	const string getCssClass() const override;
+	string_view getCssClass() const noexcept override;
 
 	void activate() override;
 

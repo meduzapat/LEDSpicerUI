@@ -48,7 +48,7 @@ public:
 		OrdenableFlowBox*& box;
 		/// Scoped directory collection name, e.g. COLLECTION_DIRECTORIES_INPUT.
 		string_view collectionName;
-		/// Section type label, e.g. TYPE_INPUT. Fed into getType().
+		/// Section type label Fed into getType().
 		string_view typeLabel;
 
 		/// Function to call to enter into a dir, used by BoxButtons

@@ -28,9 +28,8 @@ DialogInput::DialogInput(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& 
 	DialogFileForm(obj, builder)
 {
 
-	//	DataDialogs::DialogInputLinkMaps::buildInstance(builder);
+	// DataDialogs::DialogInputLinkMaps::buildInstance(builder);
 	DataDialogs::DialogInputSource::buildInstance(builder, "DialogInputSource");
-
 	childDialogs.push_back(DialogInputSource::getInstance());
 
 	Gtk::Button
@@ -51,8 +50,9 @@ DialogInput::DialogInput(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& 
 	builder->get_widget("BoxInputSourcesBox",         boxInputSourcesBox);
 	builder->get_widget("BoxInputMapsBox",            boxInputMapsBox);
 	builder->get_widget("BoxInputCreditsSettings",    boxInputCreditsSettings);
-	builder->get_widget_derived("BoxInputLinkedMaps", boxInputLinkedMaps);
-	builder->get_widget_derived("BoxInputMaps",       boxDirectMaps);
+	builder->get_widget("BoxLinkedElementsAndGroups", boxLinkedElementsAndGroups);
+//	builder->get_widget_derived("BoxInputLinkedMaps", boxInputLinkedMaps);
+//	builder->get_widget_derived("BoxInputMaps",       boxDirectMaps);
 
 	setSignalAdd(btnAddInput);
 	setSignalApply();
@@ -64,30 +64,40 @@ DialogInput::DialogInput(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& 
 
 	comboBoxInputSelectInput->signal_changed().connect([this, btnAddInputSource, btnAddInputMap]() {
 		const string name(comboBoxInputSelectInput->get_active_id());
-		switch (handleTypeSwitch(comboBoxInputSelectInput, name, "Are you sure you want to change the input type? All settings will be lost.")) {
-		case TypeSwitchResult::Empty:
+		switch (handleTypeSwitch(
+			comboBoxInputSelectInput,
+			DialogInputSource::getInstance()->getBox(),
+			"Are you sure you want to change the input type? All sources will be lost.")
+		) {
+		case TypeResult::Empty:
 			btnAddInputSource->set_sensitive(false);
-			btnAddInputMap->set_sensitive(false);
 			btnApply->set_sensitive(false);
 			return;
-		case TypeSwitchResult::Unchanged:
+		case TypeResult::Unchanged:
 			return;
-		case TypeSwitchResult::Proceed:
+		case TypeResult::Proceed:
 			break;
 		}
 
-		const bool valid = not name.empty();
-		btnAddInputSource->set_sensitive(valid);
-		boxInputSourcesBox->set_visible(Defaults::inputHasFlag(name, Defaults::INPUT_NEEDS_SOURCE));
-		boxInputMapsBox->set_visible(not Defaults::inputHasFlag(name, Defaults::INPUT_NEEDS_SOURCE));
-		boxInputLinkedMaps->set_visible(Defaults::inputHasFlag(name, Defaults::INPUT_LINKED_MAPS));
-		btnAddInputMap->set_visible(not Defaults::inputHasFlag(name, Defaults::INPUT_NEEDS_SOURCE));
-		btnAddInputMap->set_sensitive(valid);
-		btnApply->set_sensitive(valid);
+		bool needSources {Defaults::inputHasFlag(name, Defaults::INPUT_NEEDS_SOURCE)};
+
+		// Single source inputs uses maps directly, create a phantom source to store it.
+		if (not needSources) DialogInputSource::getInstance()->createPhantomSource();
+
+		btnAddInputSource->set_sensitive(true);
+		boxInputSourcesBox->set_visible(needSources);
+		boxInputMapsBox->set_visible(not needSources);
+		boxLinkedElementsAndGroups->set_visible(Defaults::inputHasFlag(name, Defaults::INPUT_LINKED_MAPS));
+
+		btnAddInputMap->set_visible(not needSources);
+
 		comboBoxInputSpeed->get_parent()->set_visible(Defaults::inputHasFlag(name, Defaults::INPUT_HAS_SPEED));
 		spinInputTimes->get_parent()->set_visible(Defaults::inputHasFlag(name, Defaults::INPUT_HAS_TIMES));
 		switchInputBlink->get_parent()->set_visible(Defaults::inputHasFlag(name, Defaults::INPUT_HAS_BLINK));
 		boxInputCreditsSettings->set_visible(Defaults::inputHasFlag(name, Defaults::INPUT_HAS_CREDITS));
+
+		//brief->set_text(Defaults::inputsInfo.at(name).brief);
+		btnApply->set_sensitive(true);
 	});
 
 }
@@ -111,15 +121,14 @@ LEDSpicerUI::Ui::Storage::CollectionHandler* DialogInput::getCollectionHandler()
 }
 
 void DialogInput::resetForm() {
-	previousName = "";
-	comboBoxInputSelectInput->set_active(0);
+	comboBoxInputSelectInput->set_active_id("");
 	clearForm();
 }
 
 void DialogInput::clearForm() {
 	boxInputSourcesBox->hide();
 	boxInputMapsBox->hide();
-	boxInputLinkedMaps->hide();
+	boxLinkedElementsAndGroups->hide();
 	boxInputCreditsSettings->hide();
 	entryInputName->set_text("");
 	comboBoxInputSpeed->get_parent()->hide();
@@ -129,38 +138,35 @@ void DialogInput::clearForm() {
 	switchInputBlink->get_parent()->hide();
 	switchInputBlink->set_active(false);
 	btnApply->set_sensitive(false);
-	boxDirectMaps->wipe();
+//	boxDirectMaps->wipe();
 }
 
 void DialogInput::isValid() const {
 
 	const string id(comboBoxInputSelectInput->get_active_id());
-	if (id.empty()) {
-		throw Message("Select an input type.");
-	}
+	if (id.empty()) throw Message("Select an input type.");
 
 	const string filename(entryInputName->get_text());
 	if (filename.empty()) {
-		if (action != Actions::LOAD)
-			entryInputName->grab_focus();
+		if (action != Actions::LOAD) entryInputName->grab_focus();
 		throw Message("Invalid name.");
 	}
 	if (not isUniqueFilename(filename)) {
-		if (action != Actions::LOAD)
-			entryInputName->grab_focus();
+		if (action != Actions::LOAD) entryInputName->grab_focus();
 		throw Message("Name already in use in this directory.");
 	}
 
 	if (Defaults::inputHasFlag(id, Defaults::INPUT_HAS_TIMES)) {
 		const auto blinks(spinInputTimes->get_value_as_int());
-		if (blinks < 0 or blinks > 255)
-			spinInputTimes->set_value(0);
+		if (blinks < 0 or blinks > 255) spinInputTimes->set_value(0);
 	}
 
 }
 
 void DialogInput::storeData() {
+
 	const string id(comboBoxInputSelectInput->get_active_id());
+
 	currentData->setValue(NAME, id);
 	currentData->setProperty(FILENAME, entryInputName->get_text());
 
@@ -175,7 +181,9 @@ void DialogInput::storeData() {
 }
 
 void DialogInput::retrieveData() {
+
 	const string name(currentData->getValue(NAME));
+
 	comboBoxInputSelectInput->set_active_id(name);
 	entryInputName->set_text(currentData->getProperty(FILENAME));
 
@@ -190,7 +198,8 @@ void DialogInput::retrieveData() {
 }
 
 const string DialogInput::createUniqueId() const {
-	return entryInputName->get_text();
+	const string parentId = static_cast<Storage::DirNode*>(currentData)->getParent()->getFsId();
+	return Defaults::createCommonUniqueId({parentId, entryInputName->get_text()});
 }
 
 string_view DialogInput::getType() const {
@@ -198,6 +207,5 @@ string_view DialogInput::getType() const {
 }
 
 LEDSpicerUI::Ui::Storage::Data* DialogInput::createData(StringUMap& rawData) {
-	rawData[FILENAME] = rawData.count(FILENAME) ? rawData.at(FILENAME) : "";
 	return new Storage::Input(rawData, currentDirectory);
 }

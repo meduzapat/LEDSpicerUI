@@ -53,15 +53,12 @@ public:
 	virtual ~Data();
 
 	/**
-	 * The form should be realized.
-	 *
 	 * @returns a CSS class that identifies the object and the data.
 	 */
-	virtual const string getCssClass() const = 0;
+	virtual constexpr string_view getCssClass() const noexcept = 0;
 
 	/**
 	 * Creates a human readable name for the form.
-	 * The form should be realized.
 	 *
 	 * @return pretty name for the form.
 	 */
@@ -69,7 +66,6 @@ public:
 
 	/**
 	 * Creates a tooltip.
-	 * The form should be realized.
 	 *
 	 * @return the tooltip text.
 	 */
@@ -77,7 +73,7 @@ public:
 
 	/**
 	 * Creates a unique ID for the form.
-	 * The form should be realized (use createUniqueId() in the dialog for temporary unique id).
+	 *
 	 * @return unique ID out of current data.
 	 */
 	virtual const string createUniqueId() const;
@@ -90,7 +86,6 @@ public:
 
 	/**
 	 * Returns a value using the key name.
-	 * The form should be realized or default will be returned.
 	 *
 	 * @param key
 	 * @param defaultValue the default value if the key is not found.
@@ -112,13 +107,13 @@ public:
 	StringUMap copyValues(uint8_t number) const;
 
 	/**
-	 * Returns a list of stored values.
-	 * @return
+	 * @return a list of stored values
 	 */
 	const StringUMap* getValues() const;
 
 	/**
 	 * Replace values from a map.
+	 *
 	 * @param values
 	 */
 	void setValues(const StringUMap& values);
@@ -151,6 +146,7 @@ public:
 
 	/**
 	 * Sets a property value.
+	 *
 	 * @param key Property name.
 	 * @param value Property value.
 	 */

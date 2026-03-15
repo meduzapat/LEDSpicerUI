@@ -40,7 +40,7 @@ public:
 
 	const string createPrettyName() const override;
 	const string createTooltip() const override;
-	const string getCssClass() const override;
+	string_view getCssClass() const noexcept override;
 	const string createUniqueId() const override;
 };
 

@@ -12,7 +12,7 @@ public:
 	TestData(std::unordered_map<std::string, std::string>& data) : Data(data) {
 		ignored.insert("ignored");
 	}
-	const string getCssClass() const override { return "test-class"; }
+	constexpr string_view getCssClass() const noexcept override { return "test-class"; }
 };
 
 class DataTest : public ::testing::Test {

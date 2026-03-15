@@ -39,7 +39,7 @@ const string FileData::createUniqueId() const {
 }
 
 const string FileData::createPrettyName() const {
-	return getFullPath() + "[" + getValue(NAME) + "]";
+	return getFullPath() + " [" + getValue(NAME) + "]";
 }
 
 const string FileData::createTooltip() const {
