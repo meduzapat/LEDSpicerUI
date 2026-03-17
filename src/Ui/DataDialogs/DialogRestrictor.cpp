@@ -40,7 +40,7 @@ DialogRestrictor::DialogRestrictor(BaseObjectType* obj, const Glib::RefPtr<Gtk::
 	setSignalApply();
 
 	// Restrictor fields.
-	builder->get_widget("ComboBoxRestrictors",          comboBoxRestrictors);
+	builder->get_widget("ComboBoxRestrictors",          selectorCombo);
 	builder->get_widget("ComboBoxRestrictorId",         comboBoxId);
 	builder->get_widget("InputRestrictorPort",          serialPort);
 	builder->get_widget("InputRestrictorHasRestrictor", hasRestrictor);
@@ -48,27 +48,15 @@ DialogRestrictor::DialogRestrictor(BaseObjectType* obj, const Glib::RefPtr<Gtk::
 	builder->get_widget("InputRestrictorWilliamsMode",  williamsMode);
 	builder->get_widget("InputRestrictorSpeedOn",       speedOn);
 	builder->get_widget("InputRestrictorSpeedOff",      speedOff);
-	builder->get_widget("BriefRestrictor",              briefRestrictor);
+	builder->get_widget("BriefRestrictor",              brief);
+	builder->get_widget("BtnAddRestrictorMap",          btnAddRestrictorMap);
+
+
+	// Populate Restrictors
+	initializeSelector(noRestrictor, Defaults::restrictorsInfo);
 
 	// Models.
-	restrictorsListstore = static_cast<Gtk::ListStore*>(builder->get_object("liststoreRestrictors").get());
-	idListstore          = static_cast<Gtk::ListStore*>(builder->get_object("liststoreRestrictorsId").get());
-
-	// Add buttons.
-	Gtk::Button* btnAddRestrictorMap = nullptr;
-	builder->get_widget("BtnAddRestrictorMap", btnAddRestrictorMap);
-
-	// Set Restrictors
-	auto row = *(restrictorsListstore->append());
-	row.set_value(0, string());
-	row.set_value(1, string("Select Restrictor"));
-	row.set_value(2, false);
-	for (auto& d : Defaults::restrictorsInfo) {
-		row = *(restrictorsListstore->append());
-		row.set_value(0, d.first);
-		row.set_value(1, d.second.name);
-		row.set_value(2, true);
-	}
+	idListstore = static_cast<Gtk::ListStore*>(builder->get_object("liststoreRestrictorsId").get());
 
 	// Restrictor Icons.
 	for (auto& w : Defaults::wayIds) {
@@ -78,59 +66,13 @@ DialogRestrictor::DialogRestrictor(BaseObjectType* obj, const Glib::RefPtr<Gtk::
 		waysIcons.emplace(w.second, i);
 	}
 
-	comboBoxRestrictors->signal_changed().connect([&, btnAddRestrictorMap]() {
-		const string name = comboBoxRestrictors->get_active_id();
-
-		switch (handleTypeSwitch(
-			comboBoxRestrictors,
+	selectorCombo->signal_changed().connect([this]() {
+		if (handleTypeSwitch(
 			DialogRestrictorMap::getInstance()->getBox(),
 			"Are you sure you want to change the restrictor? All mappings will be lost.")
 		) {
-		case TypeResult::Empty:
-			btnAddRestrictorMap->set_sensitive(false);
-			btnApply->set_sensitive(false);
-			return;
-		case TypeResult::Unchanged:
-			return;
-		case TypeResult::Proceed:
-			break;
+			resetForm();
 		}
-
-		if (name == "UltraStik360") {
-			hasRestrictor->get_parent()->show();
-		}
-		if (name == "GPWiz49") {
-			williamsMode->show();
-		}
-		if (name == "GPWiz40RotoX") {
-			speedOn->get_parent()->get_parent()->show();
-		}
-
-		if (Defaults::isIdUser(name, false)) {
-			Defaults::populateComboBoxWithIds(
-				idListstore,
-				Defaults::restrictorsInfo.at(name).maxIds,
-				[=](const string& id) {
-					return getCollectionHandler()->isIdSet(Defaults::createHardwareUniqueId({{NAME, name}, {ID, id}}, false));
-				},
-				"Restrictor Number",
-				"Hardware #"
-			);
-			comboBoxId->get_parent()->show();
-		}
-		if (Defaults::isSerial(name, false)) {
-			serialPort->get_parent()->show();
-		}
-
-		// Set ways.
-		for (auto& w : Defaults::restrictorsInfo.at(name).ways) {
-			waysIcons.at(w)->show();
-		}
-
-		briefRestrictor->set_label(Defaults::restrictorsInfo.at(name).brief);
-		btnApply->set_sensitive(true);
-		// Disable add interface button if there no more interfaces left.
-		btnAddRestrictorMap->set_sensitive(DialogRestrictorMap::getInstance()->getValues().size() < Defaults::restrictorsInfo.at(comboBoxRestrictors->get_active_id()).interfaces);
 	});
 }
 
@@ -151,40 +93,44 @@ LEDSpicerUI::Ui::Storage::CollectionHandler* DialogRestrictor::getCollectionHand
 }
 
 void DialogRestrictor::resetForm() {
-	comboBoxRestrictors->set_active_id("");
-	clearForm();
-}
 
-void DialogRestrictor::clearForm() {
+	const string name = selectorCombo->get_active_id();
 
-	comboBoxId->get_parent()->hide();
-	comboBoxId->set_active_id("");
-	serialPort->get_parent()->hide();
-	serialPort->set_text("");
-
-	// UltraStik360
-	hasRestrictor->get_parent()->hide();
-	hasRestrictor->set_active(false);
-	handleMouse->set_active(false);
-
-	// GPWiz49
-	williamsMode->hide();
-	williamsMode->set_active(false);
-
-	// GPWiz40RotoX
-	speedOn->get_parent()->get_parent()->hide();
-	speedOn->set_value(GZ40_DEFAULT_SPEED);
-	speedOff->set_value(GZ40_DEFAULT_SPEED);
-
-	for (auto& w : Defaults::allWays) {
-		waysIcons.at(w)->hide();
+	if (name == "UltraStik360") {
+		hasRestrictor->get_parent()->show();
 	}
-	briefRestrictor->set_label("");
+	if (name == "GPWiz49") {
+		williamsMode->show();
+	}
+	if (name == "GPWiz40RotoX") {
+		speedOn->get_parent()->get_parent()->show();
+	}
+
+	if (Defaults::isIdUser(name, false)) {
+		comboBoxId->get_parent()->show();
+	}
+
+	if (Defaults::isSerial(name, false)) {
+		serialPort->get_parent()->show();
+	}
+
+	// Set ways.
+	for (auto& w : Defaults::restrictorsInfo.at(name).ways) {
+		waysIcons.at(w)->show();
+	}
+
+	brief->set_label(Defaults::restrictorsInfo.at(name).brief.data());
+	btnApply->set_sensitive(true);
+	// Disable add interface button if there no more interfaces left.
+	btnAddRestrictorMap->set_sensitive(
+		DialogRestrictorMap::getInstance()->getValues().size() < Defaults::restrictorsInfo.at(selectorCombo->get_active_id()).interfaces
+	);
+	DialogForm::resetForm();
 }
 
 void DialogRestrictor::isValid() const {
 	string
-		name(comboBoxRestrictors->get_active_id()),
+		name(selectorCombo->get_active_id()),
 		id(comboBoxId->get_active_id()),
 		port(serialPort->get_text());
 
@@ -200,7 +146,8 @@ void DialogRestrictor::isValid() const {
 
 	string
 		newName(createUniqueId()),
-		hardwareName("Hardware " + Defaults::restrictorsInfo.at(name).name );
+		hardwareName("Hardware ");
+	hardwareName += Defaults::restrictorsInfo.at(name).name;
 	if (action == Actions::EDIT) {
 		checkDupe = (currentData->createUniqueId() != newName);
 	}
@@ -218,7 +165,7 @@ void DialogRestrictor::isValid() const {
 
 void DialogRestrictor::storeData() {
 
-	const string name(comboBoxRestrictors->get_active_id());
+	const string name(selectorCombo->get_active_id());
 
 	currentData->setValue(NAME, name);
 	if (Defaults::isIdUser(name, false)) {
@@ -246,7 +193,7 @@ void DialogRestrictor::retrieveData() {
 
 	const string name(currentData->getValue(NAME));
 
-	comboBoxRestrictors->set_active_id(name);
+	selectorCombo->set_active_id(name);
 
 	if (Defaults::isIdUser(name, false)) {
 		comboBoxId->set_active_id(currentData->getValue(ID));
@@ -267,14 +214,14 @@ void DialogRestrictor::retrieveData() {
 		speedOff->set_value(std::stod(currentData->getValue(GZ40_SPEED_OFF, std::to_string(GZ40_DEFAULT_SPEED))));
 	}
 
-	markUsed(restrictorsListstore, [this](const string& id) {
+	markUsed([this](const string& id) {
 		return getCollectionHandler()->countByKey(NAME, id) < Defaults::restrictorsInfo.at(id).maxIds;
 	});
 }
 
 string const DialogRestrictor::createUniqueId() const {
 	return Defaults::createHardwareUniqueId({
-		{NAME, comboBoxRestrictors->get_active_id()},
+		{NAME, selectorCombo->get_active_id()},
 		{ID,   comboBoxId->get_active_id()},
 		{PORT, serialPort->get_text()}
 	}, false);
@@ -288,8 +235,45 @@ LEDSpicerUI::Ui::Storage::Data* DialogRestrictor::createData(StringUMap& rawData
 	return new Storage::Restrictor(rawData);
 }
 
-void DialogRestrictor::markRestrictorUsed() {
-	markUsed(restrictorsListstore, [this](const string& id) {
-		return getCollectionHandler()->countByKey(NAME, id) < Defaults::restrictorsInfo.at(id).maxIds;
-	});
+void DialogRestrictor::onEmpty() {
+	btnAddRestrictorMap->set_sensitive(false);
+	comboBoxId->get_parent()->hide();
+	comboBoxId->set_active_id("");
+	serialPort->get_parent()->hide();
+	serialPort->set_text("");
+
+	// UltraStik360
+	hasRestrictor->get_parent()->hide();
+	hasRestrictor->set_active(false);
+	handleMouse->set_active(false);
+
+	// GPWiz49
+	williamsMode->hide();
+	williamsMode->set_active(false);
+
+	// GPWiz40RotoX
+	speedOn->get_parent()->get_parent()->hide();
+	speedOn->set_value(GZ40_DEFAULT_SPEED);
+	speedOff->set_value(GZ40_DEFAULT_SPEED);
+
+	for (auto& w : Defaults::allWays) {
+		waysIcons.at(w)->hide();
+	}
+	brief->set_label("");
+	btnApply->set_sensitive(false);
+}
+
+void DialogRestrictor::onSelected() {
+	const string name = selectorCombo->get_active_id();
+	if (Defaults::isIdUser(name, false)) {
+		Defaults::populateComboBoxWithIds(
+			idListstore,
+			Defaults::restrictorsInfo.at(name).maxIds,
+			[=](const string& id) {
+				return getCollectionHandler()->isIdSet(Defaults::createHardwareUniqueId({{NAME, name}, {ID, id}}, false));
+			},
+			"Restrictor Number",
+			"Hardware #"
+		);
+	}
 }

@@ -42,58 +42,38 @@ class DialogFormHost : public DialogForm {
 
 public:
 
-	/// Result codes returned by handleTypeSwitch().
-	enum class TypeResult {
-		Empty,     /// The combo was cleared; clearForm() was already called.
-		Unchanged, /// The selection did not actually change; caller does nothing.
-		Proceed    /// Type was switched (or confirmed); caller updates type-specific UI.
-	};
+	void clearForm() override;
 
 protected:
 
 	/// Last active type-selector value; prevents spurious signal re-fires.
 	string previousName;
 
+	Gtk::ComboBox* selectorCombo = nullptr;
+	Gtk::ListStore* listStore    = nullptr;
+
 	using DialogForm::DialogForm;
 
 	/**
-	 * Wipes child data, clears the form, and refreshes the display box.
-	 * Called automatically by handleTypeSwitch() when a type change is accepted.
+	 * Called when the type need to be empty.
 	 */
-	void switchType();
+	virtual void onEmpty() = 0;
 
 	/**
-	 * Runs the standard decision tree for a type-selector combo signal_changed().
+	 * Called when the type was selected but before resetFrom.
+	 */
+	virtual void onSelected() = 0;
+
+	/**
+	 * Verifies and calculate the selection and reacts.
 	 *
-	 * Decision order:
-	 *   1. name empty        → clearForm(), reset previousName → return Empty.
-	 *   2. name == previous  → return Unchanged.
-	 *   3. no stored data    → switchType() silently → return Proceed.
-	 *   4. name != stored    → ask confirmation:
-	 *        yes → switchType() → return Proceed.
-	 *        no  → revert combo to previousName → return Unchanged.
-	 *   5. set previousName = name → return Proceed.
+	 * If the selection changed to empty, onEmpty is called.
 	 *
-	 * @param combo       The type-selector combo being changed.
-	 * @param box         The box of object to check if not empty.
+	 * @param box         The box of objects to check if not empty.
 	 * @param confirmMsg  Shown to the user when switching away from saved data.
-	 * @return Empty, Unchanged, or Proceed.
+	 * @return false if no changes or empty, true if the selection changed.
 	 */
-	TypeResult handleTypeSwitch(
-		Gtk::ComboBox* combo,
-		const OrdenableFlowBox* box,
-		const string& confirmMsg
-	);
-
-	/**
-	 * Same as handleTypeSwitch but for text entries.
-	 * @param entry
-	 * @param box
-	 * @param confirmMsg
-	 * @return Empty, Unchanged, or Proceed.
-	 */
-	TypeResult handleTypeChange(
-		Gtk::Entry* entry,
+	bool handleTypeSwitch(
 		const OrdenableFlowBox* box,
 		const string& confirmMsg
 	);
@@ -105,11 +85,30 @@ protected:
 	 * @param liststore   The liststore to update.
 	 * @param isAvailable Predicate: receives the row id string, returns true if available.
 	 */
-	static void markUsed(
-		Gtk::ListStore* liststore,
-		std::function<bool(const string&)> isAvailable
-	);
+	void markUsed(std::function<bool(const string&)> isAvailable);
 
+	template<typename TMap>
+	void initializeSelector(
+		string_view emptyMsg,
+		const TMap& infoMap
+	) {
+		static_assert(
+			std::is_base_of_v<Defaults::BaseInfo, typename TMap::mapped_type>,
+			"TMap value type must derive from Defaults::BaseInfo"
+		);
+		if (not listStore)
+			listStore   = static_cast<Gtk::ListStore*>(selectorCombo->get_model().get());
+		auto row = *(listStore->append());
+		row.set_value(0, string());
+		row.set_value(1, string(emptyMsg));
+		row.set_value(2, false);
+		for (const auto& [id, info] : infoMap) {
+			row = *(listStore->append());
+			row.set_value(0, id);
+			row.set_value(1, string(info.name));
+			row.set_value(2, true);
+		}
+	}
 };
 
 } // namespace

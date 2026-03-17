@@ -47,7 +47,7 @@ public:
 	enum class Actions : uint8_t {
 		ADD,  /// Adding new
 		LOAD, /// Loading new
-		EDIT  /// Editing existing
+		EDIT /// Editing existing
 	};
 
 	DialogForm() = delete;
@@ -60,9 +60,11 @@ public:
 	virtual void load(XMLHelper* values) = 0;
 
 	/**
-	 * Refresh the box contents, intended to be used when an item is deleted directly without using the delete button.
+	 * Cleans and re-populates the box with stored items.
+	 * Intended to be used when the parent's box needs a refresh.
+	 * like when an item is deleted without using the delete button or startup refresh.
 	 */
-	virtual void refreshBox();
+	virtual void refreshItems();
 
 	/**
 	 * Sets the collection where the items will be stored and if there is a data owner for this dialog.
@@ -70,7 +72,7 @@ public:
 	 * @param collection
 	 * @param owner
 	 */
-	virtual void setOwner(Storage::BoxButtonCollection* collection, Storage::Data* owner = nullptr);
+	virtual void setOwner(Storage::BoxButtonCollection* collection, const Storage::Data* owner);
 
 	/**
 	 * @return The collection handler that keeps track of this form items.
@@ -78,7 +80,7 @@ public:
 	virtual Storage::CollectionHandler* getCollectionHandler() const = 0;
 
 	/**
-	 * Does extra changes that are not done in clearform() and calls clearForm() if needed (default).
+	 * Does extra changes to the form based on current data.
 	 */
 	virtual void resetForm();
 
@@ -149,8 +151,9 @@ protected:
 
 	/// Current item's data, been created, edited or loaded.
 	Storage::Data* currentData = nullptr;
+
 	/// The data record that handles this Dialog.
-	const Storage::Data* ownerData;
+	const Storage::Data* ownerData = nullptr;
 
 	/// Child dialogs to refresh when this dialog is refreshed.
 	vector<DialogForm*> childDialogs;

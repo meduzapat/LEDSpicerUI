@@ -64,6 +64,6 @@ void Input::reset() {
 	sources.wipe();
 	linkedMaps.wipe();
 	if (not fieldsData.empty())
-		CollectionHandler::getInstance(COLLECTION_DEVICES)->remove(this);
+		CollectionHandler::getInstance(COLLECTION_INPUT)->remove(this);
 	Data::reset();
 }

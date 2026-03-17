@@ -199,13 +199,13 @@ const string DialogInputLinkMaps::createUniqueId() const {
 	return Defaults::implode(ids, ID_GROUP_SEPARATOR);
 }
 
-void DialogInputLinkMaps::setOwner(Storage::BoxButtonCollection* collection, Storage::Data* owner) {
-	DialogForm::setOwner(collection, owner);
-	// When the dialog opens, generate the local collection.
-	localCollection.clear();
-	for(auto& bb : *collection)
-		localCollection.push_back(extractIds(bb->getData()));
-}
+//void DialogInputLinkMaps::setOwner(Storage::BoxButtonCollection* collection, Storage::Data* owner) {
+//	DialogForm::setOwner(collection, owner);
+//	// When the dialog opens, generate the local collection.
+//	localCollection.clear();
+//	for(auto& bb : *collection)
+//		localCollection.push_back(extractIds(bb->getData()));
+//}
 
 string_view DialogInputLinkMaps::getType() const {
 	return "input Link"; // TYPE_INPUT_MAP

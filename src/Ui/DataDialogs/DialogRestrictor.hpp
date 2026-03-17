@@ -36,12 +36,13 @@ class DialogRestrictor : public DialogFormHost, public SingletonDialog<DialogRes
 
 public:
 
+	static constexpr string_view noRestrictor {"Select Restrictor"};
+
 	virtual ~DialogRestrictor();
 
 	void load(XMLHelper* values) override;
 	Storage::CollectionHandler* getCollectionHandler() const override;
 	void resetForm() override;
-	void clearForm() override;
 	void isValid() const override;
 	void storeData() override;
 	void retrieveData() override;
@@ -49,9 +50,8 @@ public:
 
 protected:
 
-	Gtk::ComboBox
-		* comboBoxRestrictors = nullptr,
-		* comboBoxId          = nullptr;
+	Gtk::ComboBox* comboBoxId = nullptr;
+
 	Gtk::ToggleButton
 		* williamsMode  = nullptr,
 		* hasRestrictor = nullptr,
@@ -64,11 +64,11 @@ protected:
 	/// Restrictor ways icon map keyed by Ways enum value.
 	std::unordered_map<Defaults::Ways, Gtk::FlowBoxChild*> waysIcons;
 
-	Gtk::ListStore
-		* restrictorsListstore = nullptr,
-		* idListstore          = nullptr;
+	Gtk::ListStore* idListstore = nullptr;
 
-	Gtk::Label* briefRestrictor = nullptr;
+	Gtk::Label* brief = nullptr;
+
+	Gtk::Button* btnAddRestrictorMap = nullptr;
 
 	DialogRestrictor(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
 
@@ -76,10 +76,9 @@ protected:
 	string_view getType() const override;
 	Storage::Data* createData(StringUMap& rawData) override;
 
-	/**
-	 * Marks a restrictor row disabled once all its hardware IDs are in use.
-	 */
-	void markRestrictorUsed();
+	void onEmpty() override;
+
+	void onSelected() override;
 };
 
 } // namespace

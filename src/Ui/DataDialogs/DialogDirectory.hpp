@@ -65,10 +65,10 @@ public:
 	void setSettings(const SettingRequest& req);
 
 	void load(XMLHelper* values) override;
+	void clearForm() override;
 	void isValid() const override;
 	void storeData() override;
 	void retrieveData() override;
-	void clearForm() override;
 	const string createUniqueId() const override;
 	string_view getType() const override;
 

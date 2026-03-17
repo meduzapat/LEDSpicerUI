@@ -38,13 +38,13 @@ class DialogInput : public DialogFileForm, public SingletonDialog<DialogInput> {
 public:
 
 	static constexpr const char* BOX_INPUTS = "BoxInputs";
+	static constexpr string_view noInput{"Select Input Type"};
 
 	virtual ~DialogInput();
 
 	void load(XMLHelper* values) override;
 	Storage::CollectionHandler* getCollectionHandler() const override;
 	void resetForm() override;
-	void clearForm() override;
 	void isValid() const override;
 	void storeData() override;
 	void retrieveData() override;
@@ -52,9 +52,8 @@ public:
 
 protected:
 
-	Gtk::ComboBoxText
-		* comboBoxInputSelectInput = nullptr,
-		* comboBoxInputSpeed       = nullptr;
+	Gtk::ComboBox* comboBoxInputSpeed = nullptr;
+
 	Gtk::Entry*      entryInputName   = nullptr;
 	Gtk::Switch*     switchInputBlink = nullptr;
 	Gtk::SpinButton* spinInputTimes   = nullptr;
@@ -64,7 +63,14 @@ protected:
 		* boxInputCreditsSettings    = nullptr,
 		* boxLinkedElementsAndGroups = nullptr;
 
-	/// The box to display linked maps.
+	Gtk::Button
+		* btnAddInputSource = nullptr, // Only to hide/show when source is selected.
+		* btnAddInputMap    = nullptr, // Only to hide/show when source is selected.
+		* btnAddInput       = nullptr; // Form shooter.
+
+	Gtk::Label* brief = nullptr;
+
+	// The box to display linked maps.
 //	OrdenableFlowBox* boxDirectMaps = nullptr;
 
 	DialogInput(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
@@ -73,6 +79,9 @@ protected:
 	string_view getType() const override;
 	Storage::Data* createData(StringUMap& rawData) override;
 
+	void onEmpty() override;
+
+	void onSelected() override;
 };
 
 } // namespace

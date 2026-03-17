@@ -80,7 +80,7 @@ InputDirectoryNavigator::~InputDirectoryNavigator() {
 
 void InputDirectoryNavigator::clear() {
 	rootDir.reset();
-	DataDialogs::DialogInput::getInstance();
+//	DataDialogs::DialogInput::getInstance();
 }
 
 //void InputDirectoryNavigator::saveToDisk() {
@@ -153,7 +153,6 @@ void InputDirectoryNavigator::wireDialogs(Storage::DirectoryEntry* dir) {
 	DataDialogs::DialogDirectory::getInstance()->setOwner(&contents, dir);
 
 	DataDialogs::DialogInput::getInstance()->setOwner(&contents, dir);
-	DataDialogs::DialogInput::getInstance()->refreshBox();
 
 	// Update navigation buttons.
 	btnHome->set_sensitive(not isAtRoot());

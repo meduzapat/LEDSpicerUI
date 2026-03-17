@@ -79,6 +79,12 @@ public:
 	virtual const string createUniqueId() const;
 
 	/**
+	 * Alinas of value(primary key)
+	 * @return a string with the primary key value or ""
+	 */
+	const string getPrimaryValue() const;
+
+	/**
 	 * Removes a value by key name.
 	 * @param key
 	 */

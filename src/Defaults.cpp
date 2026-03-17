@@ -27,167 +27,177 @@ using namespace LEDSpicerUI;
 const std::unordered_map<string, Defaults::DeviceInfo> Defaults::devicesInfo = {
 	{"UltimarcUltimate", {
 		"Ultimarc Ipac Ultimate IO",
-		4,                    // Max Interfaces
-		false,                // Monochrome
-		false,                // Variable number of pins
-		true,                 // Layout RGB
-		false,                // Supports RGB strip
-		96,                   // Maximum number of Pins
-		Connection::USB,      // Connection type
-		""                    // Description
+		// Description
+		"USB RGB controller with 96 pins and 256 intensity levels. Supports up to 4 boards.",
+		4,              // Max Interfaces
+		false,          // Monochrome
+		false,          // Variable number of pins
+		true,           // Layout RGB
+		false,          // Supports RGB strip
+		96,             // Maximum number of Pins
+		Connection::USB // Connection type
 	}},
 	{"UltimarcPacLed64", {
 		"Ultimarc PacLed 64",
-		4,                    // Max Interfaces
-		false,                // Monochrome
-		false,                // Variable number of pins
-		true,                 // Layout RGB
-		false,                // Supports RGB strip
-		64,                   // Maximum number of Pins
-		Connection::USB,      // Connection type
-		""                    // Description
+		// Description
+		"USB RGB controller with 64 pins and 256 intensity levels. Supports up to 4 boards.",
+		4,              // Max Interfaces
+		false,          // Monochrome
+		false,          // Variable number of pins
+		true,           // Layout RGB
+		false,          // Supports RGB strip
+		64,             // Maximum number of Pins
+		Connection::USB // Connection type
 	}},
 	{"UltimarcPacDrive", {
 		"Ultimarc Pac Drive",
-		4,                    // Max Interfaces
-		true,                 // Monochrome
-		false,                // Variable number of pins
-		false,                // Layout RGB
-		false,                // Supports RGB strip
-		16,                   // Maximum number of Pins
-		Connection::USB,      // Connection type
-		""                    // Description
+		// Description
+		"USB monochrome controller with 16 pins (On/Off only). Supports up to 4 boards.",
+		4,              // Max Interfaces
+		true,           // Monochrome
+		false,          // Variable number of pins
+		false,          // Layout RGB
+		false,          // Supports RGB strip
+		16,             // Maximum number of Pins
+		Connection::USB // Connection type
 	}},
 	{"UltimarcNanoLed", {
 		"Ultimarc NanoLed",
-		4,                    // Max Interfaces
-		false,                // Monochrome
-		true,                 // Variable number of pins
-		true,                 // Layout RGB
-		true,                 // Supports RGB strip
-		60,                   // Maximum number of Pins
-		Connection::USB,      // Connection type
-		""                    // Description
+		// Description
+		"USB RGB strip controller with up to 60 variable pins.",
+		4,              // Max Interfaces
+		false,          // Monochrome
+		true,           // Variable number of pins
+		true,           // Layout RGB
+		true,           // Supports RGB strip
+		60,             // Maximum number of Pins
+		Connection::USB // Connection type
 	}},
 	{"LedWiz32", {
 		"Groovy Game Gear Led-Wiz 32",
-		16,                   // Max Interfaces
-		false,                // Monochrome
-		false,                // Variable number of pins
-		false,                // Layout RGB
-		false,                // Supports RGB strip
-		32,                   // Maximum number of Pins
-		Connection::USB,      // Connection type
-		""                    // Description
+		// Description
+		"USB controller with 32 pins and 49 PWM intensity levels. Supports up to 16 boards.",
+		16,             // Max Interfaces
+		false,          // Monochrome
+		false,          // Variable number of pins
+		false,          // Layout RGB
+		false,          // Supports RGB strip
+		32,             // Maximum number of Pins
+		Connection::USB // Connection type
 	}},
 	{"Howler", {
 		"Wolfware Howler",
-		4,                    // Max Interfaces
-		false,                // Monochrome
-		false,                // Variable number of pins
-		true,                 // Layout RGB
-		false,                // Supports RGB strip
-		96,                   // Maximum number of Pins
-		Connection::USB,      // Connection type
-		""                    // Description
+		// Description
+		"USB RGB controller with 96 pins and 256 intensity levels.",
+		4,              // Max Interfaces
+		false,          // Monochrome
+		false,          // Variable number of pins
+		true,           // Layout RGB
+		false,          // Supports RGB strip
+		96,             // Maximum number of Pins
+		Connection::USB // Connection type
 	}},
 	{"Adalight", {
 		"Adalight Compatible",
-		127,                  // Max Interfaces
-		false,                // Monochrome
-		true,                 // Variable number of pins
-		true,                 // Layout RGB
-		true,                 // Supports RGB strip
-		1000,                 // Maximum number of Pins
-		Connection::SERIAL,   // Connection type
-		""                    // Description
+		// Description
+		"Serial RGB LED strip controller. Variable pin count, up to 128 boards.",
+		127,               // Max Interfaces
+		false,             // Monochrome
+		true,              // Variable number of pins
+		true,              // Layout RGB
+		true,              // Supports RGB strip
+		1000,              // Maximum number of Pins
+		Connection::SERIAL // Connection type
 	}},
 	{"RaspberryPi", {
 		"Raspberry Pi GPIO",
-		1,                    // Max Interfaces
-		false,                // Monochrome
-		false,                // Variable number of pins
-		false,                // Layout RGB
-		false,                // Supports RGB strip
-		28,                   // Maximum number of Pins
-		Connection::NONE,     // Connection type
-		""                    // Description
+		// Description
+		"Direct GPIO control for Raspberry Pi. 28 pins via software PWM.",
+		1,               // Max Interfaces
+		false,           // Monochrome
+		false,           // Variable number of pins
+		false,           // Layout RGB
+		false,           // Supports RGB strip
+		28,              // Maximum number of Pins
+		Connection::NONE // Connection type
 	}},
 };
 
 const std::unordered_map<string, Defaults::RestrictorInfo> Defaults::restrictorsInfo = {
 	{"UltraStik360", {
-			"Ultimarc UltraStik360", // Name
-			4,                       // Maximum Ids
-			Connection::USB,         // Connection type
-			1,                       // Interfaces
-			{Ways::w2, Ways::w2v, Ways::w4, Ways::w4x, Ways::w8, Ways::w16, Ways::w49, Ways::analog, Ways::mouse}, // Ways
-			"Logical restrictor, supports multiple digital modes; allows mechanical attachments like ServoStik" // Description (clarified)
+		"Ultimarc UltraStik360", // Name
+		"Logical restrictor, supports multiple digital modes",
+		4,                       // Maximum Ids
+		Connection::USB,         // Connection type
+		1,                       // Interfaces
+		// Ways
+		{Ways::w2, Ways::w2v, Ways::w4, Ways::w4x, Ways::w8, Ways::w16, Ways::w49, Ways::analog, Ways::mouse},
 	}},
 	{"ServoStik", {
-			"Ultimarc ServoStik", // Name
-			4,                    // Maximum Ids
-			Connection::USB,      // Connection type
-			2,                    // Interfaces
-			{Ways::w4, Ways::w8}, // Ways
-			"Mechanical restrictor, switches between 4-way and 8-way control" // Description (clarified)
+		"Ultimarc ServoStik", // Name
+		"Mechanical restrictor, switches between 4-way and 8-way control",
+		4,                    // Maximum Ids
+		Connection::USB,      // Connection type
+		2,                    // Interfaces
+		{Ways::w4, Ways::w8}, // Ways
 	}},
 	{"GPWiz40RotoX", {
-			"Groovy Game Gear GPWiz40 RotoX", // Name
-			4,                                // Maximum Ids
-			Connection::USB,                  // Connection type
-			2,                                // Interfaces
-			{Ways::rotary8, Ways::rotary12},  // Ways
-			"Mechanical rotator, supports two independent rotary switches (8-way and 12-way)" // Description (clarified)
+		"Groovy Game Gear GPWiz40 RotoX", // Name
+		"Mechanical rotator, supports two independent rotary switches (8-way and 12-way)",
+		4,                                // Maximum Ids
+		Connection::USB,                  // Connection type
+		2,                                // Interfaces
+		{Ways::rotary8, Ways::rotary12}   // Ways
 	}},
 	{"GPWiz49", {
-			"Groovy Game Gear GPWiz49", // Name
-			4,                          // Maximum Ids
-			Connection::USB,            // Connection type
-			1,                          // Interfaces
-			{Ways::w2, Ways::w2v, Ways::w4, Ways::w4x, Ways::w8, Ways::w16, Ways::w49, Ways::analog, Ways::mouse}, // Ways
-			"Logical restrictor, supports multiple digital and analog joystick modes" // Description (clarified)
+		"Groovy Game Gear GPWiz49", // Name
+		"Logical restrictor, supports multiple digital and analog joystick modes",
+		4,                          // Maximum Ids
+		Connection::USB,            // Connection type
+		1,                          // Interfaces
+		// Ways
+		{Ways::w2, Ways::w2v, Ways::w4, Ways::w4x, Ways::w8, Ways::w16, Ways::w49, Ways::analog, Ways::mouse}
 	}},
 	{"TOS428", {
-			"TOS GRS Gate Restrictor", // Name
-			127,                       // Maximum Ids
-			Connection::SERIAL,        // Connection type
-			4,                         // Interfaces
-			{Ways::w4, Ways::w8},      // Ways
-			"Mechanical restrictor, supports up to four independent gate mechanisms" // Description (clarified)
+		"TOS GRS Gate Restrictor", // Name
+		"Mechanical restrictor, supports up to four independent gate mechanisms",
+		127,                       // Maximum Ids
+		Connection::SERIAL,        // Connection type
+		4,                         // Interfaces
+		{Ways::w4, Ways::w8}       // Ways
 	}}
 };
 
-const std::unordered_map<string, Defaults::InputInfo> Defaults::inputsInfo = {
+const std::unordered_map<string, Defaults::InputInfo> Defaults::inputInfo = {
 	{"Actions", {
-		"Actions Input",
-		INPUT_NEEDS_SOURCE | INPUT_DEV_LISTENER | INPUT_LINKED_MAPS | INPUT_HAS_SPEED | INPUT_HAS_BLINK,
-		"Maps kernel input codes from physical devices to LEDSpicer targets. "
+		"Input Actions",
+		"Creates interactive guided events using blinking elements. Supports linked trigger sequences.",
+		INPUT_NEEDS_SOURCE | INPUT_DEV_LISTENER | INPUT_LINKED_MAPS | INPUT_HAS_SPEED | INPUT_HAS_BLINK
 	}},
 	{"Blinker", {
-		"Blinker Input",
-		INPUT_NEEDS_SOURCE | INPUT_DEV_LISTENER | INPUT_HAS_SPEED | INPUT_HAS_TIMES,
-		"Activates targets in a blinking pattern driven by physical device input. "
+		"Input Blinker",
+		"Blinks an element or group a set number of times after a hardware input trigger.",
+		INPUT_NEEDS_SOURCE | INPUT_DEV_LISTENER | INPUT_HAS_SPEED | INPUT_HAS_TIMES
 	}},
 	{"Credits", {
-		"Credits Input",
-		INPUT_NEEDS_SOURCE | INPUT_DEV_LISTENER | INPUT_LINKED_MAPS | INPUT_HAS_CREDITS,
-		"Tracks coin and credit inputs from physical devices. "
+		"Player's Credits",
+		"Manages coin and start button interactions with configurable credit-per-coin and multi-player modes.",
+		INPUT_NEEDS_SOURCE | INPUT_DEV_LISTENER | INPUT_LINKED_MAPS | INPUT_HAS_CREDITS
 	}},
 	{"Impulse", {
-		"Impulse Input",
-		INPUT_NEEDS_SOURCE | INPUT_DEV_LISTENER,
-		"Fires a single impulse activation on physical device input. "
+		"Keyboard Impulse",
+		"Lights an element or group when a hardware input is triggered.",
+		INPUT_NEEDS_SOURCE | INPUT_DEV_LISTENER
 	}},
 	{"Mame", {
-		"MAME Input",
-		0,
-		"Receives named trigger strings from MAME via its output system. "
+		"MAME Output",
+	    "Listens for output from MAME on port 8000 and maps events to elements and groups.",
+		0
 	}},
 	{"Network", {
-		"Network Input",
-		0,
-		"Receives named trigger strings over a network socket. "
+		"Network Listener",
+		"Receives named trigger strings over a network socket.",
+		0
 	}},
 };
 
@@ -257,8 +267,8 @@ string Defaults::createHardwareUniqueId(const StringUMap& data, bool isDevice) {
 }
 
 bool Defaults::inputHasFlag(const string& input, uint8_t flag) {
-	auto it = inputsInfo.find(input);
-	return it != inputsInfo.end() and (it->second.flags & flag);
+	auto it = inputInfo.find(input);
+	return it != inputInfo.end() and (it->second.flags & flag);
 }
 
 bool Defaults::needSource(const string& input) {

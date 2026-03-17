@@ -48,7 +48,7 @@ public:
 	 */
 	void setNormalBox(const bool flag);
 	void load(XMLHelper* values) override;
-	void setOwner(Storage::BoxButtonCollection* collection, Storage::Data* owner = nullptr) override;
+	void setOwner(Storage::BoxButtonCollection* collection, const Storage::Data* owner) override;
 	Storage::CollectionHandler* getCollectionHandler() const override;
 	void clearForm() override;
 	void isValid() const override;
@@ -60,7 +60,8 @@ protected:
 
 	Gtk::ComboBoxText
 		* comboBoxInputMapElement = nullptr,
-		* comboBoxInputMapGroup   = nullptr,
+		* comboBoxInputMapGroup   = nullptr;
+	Gtk::ComboBox
 		* comboBoxInputMapFilter  = nullptr;
 	Gtk::Entry*  inputInputMapTrigger = nullptr;
 	Gtk::Button* inputMapDefaultColor = nullptr;

@@ -33,11 +33,15 @@ Data::~Data() {
 }
 
 const string Data::createPrettyName() const {
-	return fieldsData.at(getPrimaryKey());
+	return getPrimaryValue();
 }
 
 const string Data::createUniqueId() const {
-	return Defaults::createCommonUniqueId({getValue(getPrimaryKey())});
+	return Defaults::createCommonUniqueId({getPrimaryValue()});
+}
+
+const string Data::getPrimaryValue() const {
+	return getValue(getPrimaryKey());
 }
 
 const string Data::createTooltip() const {

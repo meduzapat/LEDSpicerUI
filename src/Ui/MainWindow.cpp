@@ -48,11 +48,11 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 	DataDialogs::DialogProfile::buildInstance(builder, "DialogProfile");
 
 	// Connect primary dialogs with the collections.
-	DataDialogs::DialogDevice::getInstance()->setOwner(&devices);
-	DataDialogs::DialogRestrictor::getInstance()->setOwner(&restrictors);
-	DataDialogs::DialogProcess::getInstance()->setOwner(&processes);
-	DataDialogs::DialogGroup::getInstance()->setOwner(&groups);
-	DataDialogs::DialogProfile::getInstance()->setOwner(&profiles);
+	DataDialogs::DialogDevice::getInstance()->setOwner(&devices, nullptr);
+	DataDialogs::DialogRestrictor::getInstance()->setOwner(&restrictors, nullptr);
+	DataDialogs::DialogProcess::getInstance()->setOwner(&processes, nullptr);
+	DataDialogs::DialogGroup::getInstance()->setOwner(&groups, nullptr);
+	DataDialogs::DialogProfile::getInstance()->setOwner(&profiles, nullptr);
 
 	// Setup ledspicer fields.
 	builder->get_widget("InputUserId",     inputUserId);
@@ -432,9 +432,9 @@ void MainWindow::readConfigFile(const string& dataFilePath, bool wipe, uint8_t i
 			groups.wipe();
 		}
 		DataDialogs::DialogDevice::getInstance()->load(&datafile);
-		DataDialogs::DialogDevice::getInstance()->refreshBox();
+		DataDialogs::DialogDevice::getInstance()->refreshItems();
 		DataDialogs::DialogGroup::getInstance()->load(&datafile);
-		DataDialogs::DialogGroup::getInstance()->refreshBox();
+		DataDialogs::DialogGroup::getInstance()->refreshItems();
 		// TODO: set default profile
 	}
 
@@ -444,7 +444,7 @@ void MainWindow::readConfigFile(const string& dataFilePath, bool wipe, uint8_t i
 			restrictors.wipe();
 		}
 		DataDialogs::DialogRestrictor::getInstance()->load(&datafile);
-		DataDialogs::DialogRestrictor::getInstance()->refreshBox();
+		DataDialogs::DialogRestrictor::getInstance()->refreshItems();
 	}
 
 	// Load process mappings from config file.
@@ -453,7 +453,7 @@ void MainWindow::readConfigFile(const string& dataFilePath, bool wipe, uint8_t i
 			processes.wipe();
 		}
 		DataDialogs::DialogProcess::getInstance()->load(&datafile);
-		DataDialogs::DialogProcess::getInstance()->refreshBox();
+		DataDialogs::DialogProcess::getInstance()->refreshItems();
 		inputRunEvery->set_text(datafile.getProcessLookupRunEvery());
 	}
 
@@ -468,7 +468,7 @@ void MainWindow::readConfigFile(const string& dataFilePath, bool wipe, uint8_t i
 	// todo: using default profile load inputs and animations.
 	/*	if (wipe) {
 		inputs.wipe();
-		//DataDialogs::DialogProfile::getInstance()->refreshBox();
+		//DataDialogs::DialogProfile::getInstance()->refreshItems();
 	}*/
 }
 

@@ -50,7 +50,7 @@ public:
 	void storeData() override;
 	void retrieveData() override;
 	const string createUniqueId() const override;
-	void setOwner(Storage::BoxButtonCollection* collection, Storage::Data* owner = nullptr) override;
+//	void setOwner(Storage::BoxButtonCollection* collection, Storage::Data* owner = nullptr) override;
 
 protected:
 

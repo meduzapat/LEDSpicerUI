@@ -52,7 +52,7 @@ DialogInputMap::DialogInputMap(BaseObjectType* obj, const Glib::RefPtr<Gtk::Buil
 	// Activate color button.
 	DialogColors::getInstance()->activateColorButton(inputMapDefaultColor);
 
-	stackElementAndGroup->connect_property_changed("visible-child", [&]() {
+	stackElementAndGroup->connect_property_changed("visible-child", [this]() {
 		if (stackElementAndGroup->get_visible_child_name() == "InputTypeElement") {
 			Storage::CollectionHandler::getInstance(COLLECTION_ELEMENT)->refreshComboBox(comboBoxInputMapElement, &DialogInputMap::elementFilter);
 			comboBoxInputMapGroup->set_active(-1);
@@ -64,7 +64,7 @@ DialogInputMap::DialogInputMap(BaseObjectType* obj, const Glib::RefPtr<Gtk::Buil
 	});
 
 	// When the stack page changes, refresh the relevant combo and clear the other.
-	stackElementAndGroup->connect_property_changed("visible-child", [&]() {
+	stackElementAndGroup->connect_property_changed("visible-child", [this]() {
 		if (stackElementAndGroup->get_visible_child_name() == "InputTypeElement") {
 			Storage::CollectionHandler::getInstance(COLLECTION_ELEMENT)->refreshComboBox(comboBoxInputMapElement);
 			comboBoxInputMapGroup->set_active(-1);
@@ -90,12 +90,11 @@ void DialogInputMap::load(XMLHelper* values) {
 
 void DialogInputMap::setOwner(
 	Storage::BoxButtonCollection* collection,
-	Storage::Data*                owner
+	const Storage::Data*          owner
 ) {
-	DialogForm::setOwner(collection, owner);
 	// Sourceless inputs route their maps into the input-level BoxInputMaps panel;
-	// real hardware sources use the per-source BoxInputSourceMaps panel.
 	box = (owner->hasProperty(SOURCELESS)) ? boxInputMaps : boxSourceMaps;
+	DialogForm::setOwner(collection, owner);
 }
 
 LEDSpicerUI::Ui::Storage::CollectionHandler* DialogInputMap::getCollectionHandler() const {
@@ -108,7 +107,7 @@ void DialogInputMap::clearForm() {
 	comboBoxInputMapElement->set_active(-1);
 	comboBoxInputMapGroup->set_active(-1);
 	inputInputMapTrigger->set_text("");
-	comboBoxInputMapFilter->set_active_text("Normal");
+	comboBoxInputMapFilter->set_active_id("Normal");
 	DialogColors::getInstance()->colorizeButton(inputMapDefaultColor, NO_COLOR);
 }
 
@@ -156,7 +155,7 @@ void DialogInputMap::storeData() {
 	currentData->setValue(TRIGGER, inputInputMapTrigger->get_text());
 	currentData->setValue(TYPE,    type);
 	currentData->setValue(COLOR,   inputMapDefaultColor->get_label());
-	currentData->setValue(FILTER,  comboBoxInputMapFilter->get_active_text());
+	currentData->setValue(FILTER,  comboBoxInputMapFilter->get_active_id());
 	Storage::Link::LinkData linkData {type, TARGET, data};
 	static_cast<Storage::InputMap*>(currentData)->setLinkData(linkData);
 }
@@ -172,7 +171,7 @@ void DialogInputMap::retrieveData() {
 	}
 	inputInputMapTrigger->set_text(currentData->getValue(TRIGGER));
 	DialogColors::getInstance()->colorizeButton(inputMapDefaultColor, currentData->getValue(COLOR));
-	comboBoxInputMapFilter->set_active_text(currentData->getValue(FILTER));
+	comboBoxInputMapFilter->set_active_id(currentData->getValue(FILTER));
 }
 
 const string DialogInputMap::createUniqueId() const {

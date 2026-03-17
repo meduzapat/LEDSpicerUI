@@ -31,8 +31,6 @@ DialogDirectory::DialogDirectory(BaseObjectType* obj, const Glib::RefPtr<Gtk::Bu
 	builder->get_widget("BtnApplyDirectory",  btnApply);
 
 	setSignalApply();
-
-	btnApply->set_sensitive(false);
 	entryDirectoryName->signal_changed().connect([this]() {
 		btnApply->set_sensitive(not Defaults::sanitizeFilename(entryDirectoryName->get_text()).empty());
 	});
@@ -45,6 +43,11 @@ void DialogDirectory::setSettings(const SettingRequest& req) {
 
 void DialogDirectory::load(XMLHelper* values) {
 	// Directories are runtime-only; nothing to load from XML.
+}
+
+void DialogDirectory::clearForm() {
+	entryDirectoryName->set_text("");
+	btnApply->set_sensitive(false);
 }
 
 void DialogDirectory::isValid() const {
@@ -66,11 +69,6 @@ void DialogDirectory::storeData() {
 
 void DialogDirectory::retrieveData() {
 	entryDirectoryName->set_text(currentData->getValue(NAME));
-}
-
-void DialogDirectory::clearForm() {
-	entryDirectoryName->set_text("");
-	btnApply->set_sensitive(false);
 }
 
 const string DialogDirectory::createUniqueId() const {

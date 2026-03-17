@@ -25,11 +25,9 @@
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
 DialogForm::DialogForm(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) : Gtk::Dialog(obj) {
-
 	DialogColors::buildInstance(builder, "DialogColors");
-
 	// this needs to be run last,
-	signal_show().connect(sigc::mem_fun(*this, &DialogForm::refreshBox), true);
+//	signal_show().connect(sigc::mem_fun(*this, &DialogForm::resetForm), true);
 }
 
 DialogForm::~DialogForm() {
@@ -38,14 +36,15 @@ DialogForm::~DialogForm() {
 
 void DialogForm::createItems(StringUMapVector& rawCollection, XMLHelper* values) {
 
-	action = Actions::LOAD;
 	string errors;
 	for (auto& rawItem : rawCollection) {
-		resetForm();
+		action = Actions::LOAD;
+		clearForm();
 		currentData = createData(rawItem);
 		currentData->activate();
 		// Sanity check by load and unload, this will sanitize (or error out) the data.
 		retrieveData();
+//		resetForm();
 		try {
 			isValid();
 		}
@@ -72,22 +71,24 @@ void DialogForm::createItems(StringUMapVector& rawCollection, XMLHelper* values)
 	}
 }
 
-void DialogForm::refreshBox() {
-	for (auto childDialog : childDialogs) childDialog->refreshBox();
-	if (not box) return; // this will avoid chaining into non initialized dialogs.
+void DialogForm::refreshItems() {
+	// this will avoid chaining into non initialized dialogs.
+	if (not box) return;
 	box->wipe();
 	if (not items) return;
 	items->populateBox(box);
 	box->show_all();
+	for (auto childDialog : childDialogs) childDialog->refreshItems();
 }
 
-void DialogForm::setOwner(Storage::BoxButtonCollection* collection, Storage::Data* owner) {
+void DialogForm::setOwner(Storage::BoxButtonCollection* collection, const Storage::Data* owner) {
 	this->ownerData = owner;
 	items = collection;
+	refreshItems();
 }
 
 void DialogForm::resetForm() {
-	clearForm();
+	refreshItems();
 }
 
 vector<const StringUMap*> DialogForm::getValues() {
@@ -175,10 +176,8 @@ void DialogForm::addButtons(Storage::BoxButton& boxButton) {
 }
 
 void DialogForm::onAddClicked() {
-	// set dialog to add.
 	action = Actions::ADD;
-	resetForm();
-	// Set label and title.
+	clearForm();
 	set_title("Add New " + string(getType()));
 	btnApply->set_label("Create");
 	currentData = createData();
@@ -218,17 +217,8 @@ void DialogForm::onAddClicked() {
 }
 
 void DialogForm::onEditClicked(Storage::BoxButton& boxButton) {
-	/*
-	 * Steps:
-	 * 1 Set the action to edit and reset the form
-	 * 2 extract payload from the boxbutton and activate any children.
-	 * 3 store the current unique id and set the dialog texts and fields.
-	 * 4 run the dialog and wait for the apply signal (4a) or cancel (5).
-	 * 4a clean previous data and store new values, update collection and label.
-	 * 5 deactivate and hide.
-	 */
 	action = Actions::EDIT;
-	resetForm();
+	clearForm();
 	currentData = boxButton.getData();
 	currentData->activate();
 	string oldName(currentData->createUniqueId());
@@ -237,6 +227,8 @@ void DialogForm::onEditClicked(Storage::BoxButton& boxButton) {
 	btnApply->set_label("Save");
 	// Populate form.
 	retrieveData();
+	resetForm();
+	// Run Dialog.
 	if (run() == Gtk::ResponseType::RESPONSE_APPLY) {
 		Defaults::markDirty();
 		currentData->wipe();
@@ -265,7 +257,7 @@ void DialogForm::onDelClicked(Storage::BoxButton& boxButton) {
 
 void DialogForm::onCloneClicked(Storage::BoxButton& boxButton) {
 	action = Actions::ADD;
-	resetForm();
+	clearForm();
 	// clone the data.
 	uint8_t count = 1;
 	Storage::Data* tempData = nullptr;

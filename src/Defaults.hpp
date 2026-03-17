@@ -251,53 +251,39 @@ public:
 		INPUT_HAS_CREDITS     = 1 << 6, /// Has credits-specific settings.
 	};
 
+	struct BaseInfo {
+		string_view name;  /// Human-readable display name.
+		string_view brief; /// A brief description of the device.
+	};
+
 	/**
 	 * Structure with LED devices information.
 	 */
-	struct DeviceInfo {
-		const string     name;
-		/// Max number of devices that can be connected at the same time.
-		const uint8_t    maxIds;
-		/// Some devices only support ON/OFF
-		const bool       monochrome;
-		/// If the hardware supports a variable number of pins.
-		const bool       variable;
-		/// If the hardware have the pins in groups of 3.
-		const bool       layoutRGB;
-		/// If the hardware supports addressable RGB strips.
-		const bool       supportStrip;
-		/// Max number of pins.
-		const uint16_t   pins;
-		/// What connection uses.
-		const Connection connection;
-		/// A brief description of the device.
-		const string     brief;
+	struct DeviceInfo : public BaseInfo {
+		const uint8_t    maxIds;       /// Max number of devices that can be connected at the same time.
+		const bool       monochrome;   /// Some devices only support ON/OFF
+		const bool       variable;     /// If the hardware supports a variable number of pins.
+		const bool       layoutRGB;    /// If the hardware have the pins in groups of 3.
+		const bool       supportStrip; /// If the hardware supports addressable RGB strips.
+		const uint16_t   pins;         /// Max number of pins.
+		const Connection connection;   /// What connection uses.
 	};
 
 	/**
 	 * Structure with restrictors and rotators information.
 	 */
-	struct RestrictorInfo {
-		const string       name;
-		/// Max number of devices that can be connected at the same time.
-		const uint8_t      maxIds;
-		/// What connection uses.
-		const Connection   connection;
-		/// The number of individual interfaces that this controller handles.
-		const uint8_t      interfaces;
-		/// Supported restrictions.
-		const vector<Ways> ways;
-		/// A brief description of the restrictor.
-		const string       brief;
+	struct RestrictorInfo : public BaseInfo {
+		const uint8_t      maxIds;     /// Max number of devices that can be connected at the same time.
+		const Connection   connection; /// What connection uses.
+		const uint8_t      interfaces; /// The number of individual interfaces that this controller handles.
+		const vector<Ways> ways;       /// Supported restrictions.
 	};
 
 	/**
 	 * Structure with input plugins information.
 	 */
-	struct InputInfo {
-		const char* name;    /// Human-readable display name.
+	struct InputInfo : public BaseInfo {
 		const uint8_t flags; /// Bitwise capability flags.
-		const string brief;  /// A brief description of the input plugin.
 	};
 
 	Defaults() = delete;
@@ -484,7 +470,7 @@ public:
 	static const std::unordered_map<string, RestrictorInfo> restrictorsInfo;
 
 	/// A list of input plugins to their information.
-	static const std::unordered_map<string, InputInfo> inputsInfo;
+	static const std::unordered_map<string, InputInfo> inputInfo;
 
 	/// A List of string names to its internal enumerated type.
 	static const std::unordered_map<string, Ways> wayIds;

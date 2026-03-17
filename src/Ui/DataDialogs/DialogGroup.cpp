@@ -89,7 +89,6 @@ LEDSpicerUI::Ui::Storage::CollectionHandler* DialogGroup::getCollectionHandler()
 void DialogGroup::clearForm() {
 	inputGroupName->set_text("");
 	DialogColors::getInstance()->colorizeButton(btnGroupDefaultColor, NO_COLOR);
-	boxElements->wipe();
 }
 
 void DialogGroup::isValid() const {

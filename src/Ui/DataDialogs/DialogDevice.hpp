@@ -40,10 +40,11 @@ public:
 
 	virtual ~DialogDevice();
 
+	static constexpr string_view noDevice {"Select Device"};
+
 	void load(XMLHelper* values) override;
 	Storage::CollectionHandler* getCollectionHandler() const override;
 	void resetForm() override;
-	void clearForm() override;
 	void isValid() const override;
 	void storeData() override;
 	void retrieveData() override;
@@ -51,16 +52,13 @@ public:
 
 protected:
 
-	Gtk::ComboBox
-		* comboBoxDevices = nullptr,
-		* comboBoxId      = nullptr;
-	Gtk::ListStore
-		* devicesListstore = nullptr,
-		* idListstore      = nullptr;
+	Gtk::ComboBox*   comboBoxId      = nullptr;
+	Gtk::ListStore*  idListstore     = nullptr;
 	Gtk::Scale*      changePoint     = nullptr;
 	Gtk::SpinButton* spinnerLeds     = nullptr;
 	Gtk::Entry*      inputDevicePort = nullptr;
 	Gtk::Label*      brief           = nullptr;
+	Gtk::Button*     btnAddElement   = nullptr;
 
 	DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
 
@@ -70,10 +68,9 @@ protected:
 
 	Storage::Data* createData(StringUMap& rawData) override;
 
-	/**
-	 * Marks a device row disabled once all its hardware IDs are in use.
-	 */
-	void markDevicesUsed();
+	void onEmpty() override;
+
+	void onSelected() override;
 };
 
 } // namespace

@@ -32,11 +32,10 @@ DialogInputSource::DialogInputSource(BaseObjectType* obj, const Glib::RefPtr<Gtk
 	Gtk::Button* btnAdd = nullptr;
 	DataDialogs::DialogInputMap::buildInstance(builder, "DialogInputMap");
 
+	builder->get_widget("ComboBoxInputSource",      selectorCombo);
 	builder->get_widget_derived("BoxInputSources",  box);
 	builder->get_widget("BtnApplyInputSource",      btnApply);
 	builder->get_widget("ComboBoxInputSelectInput", comboBoxInputSelectInput);
-	builder->get_widget("ComboBoxInputSource",      comboBoxInputSource);
-	builder->get_widget("EntryInputSource",         entryInputSource);
 	builder->get_widget("BtnAddInputSource",        btnAdd);
 	builder->get_widget("BtnAddInputSourceMap",     btnAddMap);
 
@@ -45,56 +44,16 @@ DialogInputSource::DialogInputSource(BaseObjectType* obj, const Glib::RefPtr<Gtk
 
 	childDialogs.push_back(DialogInputMap::getInstance());
 
-	static const string question {"Are you sure you want to change the source? All maps will be lost."};
-
-	comboBoxInputSource->signal_changed().connect([this]() {
-
-		switch (
+	selectorCombo->signal_changed().connect([this]() {
+		if (
 			handleTypeSwitch(
-				comboBoxInputSource,
 				DialogInputMap::getInstance()->getBox(),
-				question
+				"Are you sure you want to change the source? All maps will be lost."
 			)
 		) {
-		case TypeResult::Empty:
-			btnApply->set_sensitive(false);
-			btnAddMap->set_sensitive(false);
-			return;
-		case TypeResult::Unchanged:
-			return;
-		case TypeResult::Proceed:
-			break;
-		}
-
-		if (comboBoxInputSource->get_active_id() == SOURCE_OTHER_OPTION) {
-			entryInputSource->get_parent()->set_visible(true);
-			entryInputSource->grab_focus();
-			return;
-		}
-		entryInputSource->get_parent()->set_visible(false);
-	});
-
-	entryInputSource->signal_changed().connect([this]() {
-		switch (
-			handleTypeChange(
-				entryInputSource,
-				DialogInputMap::getInstance()->getBox(),
-				question
-			)
-		) {
-		case TypeResult::Empty:
-			btnApply->set_sensitive(false);
-			return;
-		case TypeResult::Unchanged:
-			return;
-		case TypeResult::Proceed:
-			break;
+			resetForm();
 		}
 	});
-
-//	entryInputSource->signal_focus_out_event().connect([this](GdkEventFocus*) {
-//		return false;
-//	});
 }
 
 DialogInputSource::~DialogInputSource() {
@@ -113,19 +72,9 @@ LEDSpicerUI::Ui::Storage::CollectionHandler* DialogInputSource::getCollectionHan
 }
 
 void DialogInputSource::resetForm() {
-	comboBoxInputSource->set_active_id("");
-	entryInputSource->set_text("");
-	if (Defaults::needSource(comboBoxInputSelectInput->get_active_id())) {
-		if (Defaults::isDevInputListener(comboBoxInputSelectInput->get_active_id()))
-			populateSourcesList(scanEventDevices());
-	}
-	clearForm();
-}
-
-void DialogInputSource::clearForm() {
-//	comboBoxInputSource->get_parent()->hide();
-	entryInputSource->get_parent()->hide();
-	btnAddMap->set_sensitive(false);
+	if (comboBoxInputSelectInput->get_active_id().empty()) return;
+	btnApply->set_sensitive(true);
+	btnAddMap->set_sensitive(true);
 }
 
 void DialogInputSource::isValid() const {
@@ -137,25 +86,33 @@ void DialogInputSource::isValid() const {
 }
 
 void DialogInputSource::storeData() {
-	const string resolved(resolvedSource());
-	currentData->setValue(SOURCE, resolved);
+	Glib::ustring
+		id{selectorCombo->get_active_id()},
+		label;
+	if (id.empty()) {
+		label = id = selectorCombo->get_entry()->get_text();
+	}
+	else {
+		auto iter = selectorCombo->get_active();
+		if (iter)
+			iter->get_value(1, label);
+		else
+			label = selectorCombo->get_entry()->get_text();
+	}
+	currentData->setValue(SOURCE, id);
 	// Store a human-friendly display label as a UI-only property.
-	string label(comboBoxInputSource->get_active_text());
-	if (label == SOURCE_OTHER_OPTION or label == SOURCE_EMPTY_OPTION or label.empty())
-		label = resolved;
 	currentData->setProperty(NAME, label);
 }
 
 void DialogInputSource::retrieveData() {
+	// sourceless will be handled at activation.
 	if (not Defaults::needSource(comboBoxInputSelectInput->get_active_id())) return;
 
 	const string source(currentData->getValue(SOURCE));
-	previousName = source;
+
 	// If setting the id fail because the source do not exists, set other and use entry instead.
-	if (not comboBoxInputSource->set_active_id(source)) {
-		comboBoxInputSource->set_active_id(SOURCE_OTHER_OPTION);
-		entryInputSource->set_text(source);
-	}
+	if (not selectorCombo->set_active_id(source))
+		selectorCombo->get_entry()->set_text(source);
 }
 
 const string DialogInputSource::createUniqueId() const {
@@ -172,7 +129,6 @@ void DialogInputSource::createPhantomSource() {
 	StringUMap rawData;
 	auto phantom = createData(rawData);
 	phantom->setProperty(SOURCELESS, "1");
-//	phantom->setProperty(NAME, "<single>"); // never displayed
 	phantom->activate();
 	items->create(phantom);
 	getCollectionHandler()->add(phantom);
@@ -187,14 +143,9 @@ string_view DialogInputSource::getType() const {
 }
 
 LEDSpicerUI::Ui::Storage::Data* DialogInputSource::createData(StringUMap& rawData) {
-	auto is = new Storage::InputSource(rawData);
+	auto is{new Storage::InputSource(rawData)};
 	is->setProperty(PID, ownerData->getProperty(UID));
 	return is;
-}
-
-string DialogInputSource::resolvedSource() const {
-	string s(comboBoxInputSource->get_active_id());
-	return (s == SOURCE_OTHER_OPTION) ? string(entryInputSource->get_text()) : s;
 }
 
 StringMap DialogInputSource::scanEventDevices() {
@@ -227,22 +178,31 @@ StringMap DialogInputSource::scanEventDevices() {
 	return devices;
 }
 
+Glib::ustring DialogInputSource::resolvedSource() const {
+	auto id{selectorCombo->get_active_id()};
+	if (id.empty())
+		id = selectorCombo->get_entry()->get_text();
+	return id;
+}
+
 void DialogInputSource::populateSourcesList(const StringMap& devices) {
 
-	comboBoxInputSource->remove_all();
+	auto listStore = static_cast<Gtk::ListStore*>(selectorCombo->get_model().get());
+	listStore->clear();
 
 	if (devices.empty()) {
-		entryInputSource->get_parent()->show();
-		entryInputSource->grab_focus();
+		selectorCombo->get_entry()->grab_focus();
 		return;
 	}
 
-//	comboBoxInputSource->get_parent()->show();
-	comboBoxInputSource->append("", SOURCE_EMPTY_OPTION);
-	for (const auto& [id, display] : devices)
-		comboBoxInputSource->append(id, display);
-	comboBoxInputSource->append(SOURCE_OTHER_OPTION, SOURCE_OTHER_OPTION);
-	comboBoxInputSource->set_active_id("");
+	for (const auto& [id, display] : devices) {
+		auto row = *(listStore->append());
+		row.set_value(0, id);
+		row.set_value(1, display);
+		row.set_value(2, true);
+	}
+
+	selectorCombo->set_active_id("");
 }
 
 string DialogInputSource::readDeviceName(const string& byIdName) {
@@ -262,4 +222,17 @@ string DialogInputSource::readDeviceName(const string& byIdName) {
 	std::getline(file, name);
 	Defaults::rtrim(name);
 	return name;
+}
+
+void DialogInputSource::onEmpty() {
+	btnApply->set_sensitive(false);
+	btnAddMap->set_sensitive(false);
+}
+
+void DialogInputSource::onSelected() {
+	auto id {comboBoxInputSelectInput->get_active_id()};
+	if (Defaults::needSource(id)) {
+		if (Defaults::isDevInputListener(id))
+			populateSourcesList(scanEventDevices());
+	}
 }

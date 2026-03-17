@@ -41,9 +41,6 @@ class DialogInputSource : public DialogFormHost, public SingletonDialog<DialogIn
 
 public:
 
-	static constexpr const char* SOURCE_EMPTY_OPTION = "Select Source";
-	/// Sentinel combo value that activates manual entry.
-	static constexpr const char* SOURCE_OTHER_OPTION = "Other";
 	/// Linux event device directories.
 	static constexpr const char* DEV_INPUT       = "/dev/input/";
 	static constexpr const char* DEV_INPUT_BY_ID = "/dev/input/by-id/";
@@ -54,7 +51,6 @@ public:
 	void load(XMLHelper* values) override;
 	Storage::CollectionHandler* getCollectionHandler() const override;
 	void resetForm() override;
-	void clearForm() override;
 	void isValid() const override;
 	void storeData() override;
 	void retrieveData() override;
@@ -63,20 +59,14 @@ public:
 	/**
 	 * Ensures a sourceless InputSource exists for single-source inputs.
 	 * Creates one silently if absent, then wires DialogInputMap to it.
-	 * Safe to call repeatedly — idempotent if sourceless source already exists.
+	 * Safe to call repeatedly, idempotent if sourceless source already exists.
 	 */
 	void createPhantomSource();
 
 protected:
 
-	Gtk::ComboBoxText
-		/// Input type selector, shared with DialogInput.
-		* comboBoxInputSelectInput = nullptr,
-		/// Detected event devices (shown when running locally).
-		* comboBoxInputSource      = nullptr;
-
-	/// Manual entry shown in portable mode or when "Other" is selected.
-	Gtk::Entry* entryInputSource = nullptr;
+	/// Input type selector, shared with DialogInput.
+	Gtk::ComboBox* comboBoxInputSelectInput = nullptr;
 
 	/// Controls map-add button accessibility.
 	Gtk::Button* btnAddMap = nullptr;
@@ -91,10 +81,9 @@ private:
 
 	/**
 	 * Resolves the current source value from combo or manual entry.
-	 * Returns entry text when "Other" is selected or the combo id is empty.
 	 * @return The resolved source string.
 	 */
-	string resolvedSource() const;
+	Glib::ustring resolvedSource() const;
 
 	/**
 	 * Populates the source combo with detected devices plus sentinels.
@@ -115,6 +104,9 @@ private:
 	 */
 	StringMap scanEventDevices();
 
+	void onEmpty() override;
+
+	void onSelected() override;
 };
 
 } // namespace

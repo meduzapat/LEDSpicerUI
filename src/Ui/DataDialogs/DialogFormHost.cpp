@@ -24,85 +24,53 @@
 
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
-void DialogFormHost::switchType() {
+void DialogFormHost::clearForm() {
+	selectorCombo->set_active_id("");
+	previousName = "";
+	//currentData->getPrimaryValue();
+}
+
+bool DialogFormHost::handleTypeSwitch(const OrdenableFlowBox* box, const string& confirmMsg) {
+	const string newName {selectorCombo->get_active_id()};
+
+	// Clean up.
+	if (newName.empty()) {
+		onEmpty();
+		return false;
+	}
+
+	// Dialog setup.
+	if (previousName.empty()) {
+		previousName = newName;
+		onSelected();
+		return false;
+	}
+
+	// Refresh.
+	if (previousName == newName) return false;
+
+	const string currentName(currentData->getPrimaryValue());
+
+	// Original data or replaced
+	if (not currentName.empty()) {
+		// ask to avoid losses.
+		if (box->getSize() and Message::ask(confirmMsg) != Gtk::ResponseType::RESPONSE_YES) {
+			selectorCombo->set_active_id(previousName);
+			return false;
+		}
+	}
+	// New data or replaced.
+	previousName = newName;
 	currentData->reset();
-	clearForm();
-	refreshBox();
-}
-
-DialogFormHost::TypeResult DialogFormHost::handleTypeSwitch(
-	Gtk::ComboBox* combo,
-	const OrdenableFlowBox* box,
-	const string& confirmMsg
-) {
-	const string newName {combo->get_active_id()};
-	if (newName.empty()) {
-		clearForm();
-		previousName = "";
-		return TypeResult::Empty;
-	}
-
-	if (previousName == newName) return TypeResult::Unchanged;
-
-	const string currentName(currentData->getValue(NAME));
-
-	if (currentName.empty()) {
-		// No committed data yet — switch silently.
-		switchType();
-	}
-	else if (newName != currentName) {
-		if (not box->getSize() or Message::ask(confirmMsg) == Gtk::ResponseType::RESPONSE_YES) {
-			switchType();
-		}
-		else {
-			combo->set_active_id(previousName);
-			return TypeResult::Unchanged;
-		}
-	}
-
-	previousName = newName;
-	return TypeResult::Proceed;
-}
-
-DialogFormHost::TypeResult DialogFormHost::handleTypeChange(
-	Gtk::Entry* entry,
-	const OrdenableFlowBox* box,
-	const string& confirmMsg
-) {
-	const string newName {entry->get_text()};
-	if (newName.empty()) {
-		clearForm();
-		previousName = "";
-		return TypeResult::Empty;
-	}
-
-	if (previousName == newName) return TypeResult::Unchanged;
-
-	const string currentName(currentData->getValue(NAME));
-
-	if (currentName.empty()) {
-		// No committed data yet — switch silently.
-		switchType();
-	}
-	else if (newName != currentName) {
-		if (not box->getSize() or Message::ask(confirmMsg) == Gtk::ResponseType::RESPONSE_YES) {
-			switchType();
-		}
-		else {
-			entry->set_text(previousName);
-			return TypeResult::Unchanged;
-		}
-	}
-
-	previousName = newName;
-	return TypeResult::Proceed;
+	onEmpty();
+	onSelected();
+	return true;
 }
 
 void DialogFormHost::markUsed(
-	Gtk::ListStore* liststore,
 	std::function<bool(const string&)> isAvailable
 ) {
-	for (auto iter = liststore->children().begin(); iter != liststore->children().end(); ++iter) {
+	for (auto iter = listStore->children().begin(); iter != listStore->children().end(); ++iter) {
 		Gtk::TreeModel::Row row = *iter;
 		string id;
 		row.get_value(0, id);

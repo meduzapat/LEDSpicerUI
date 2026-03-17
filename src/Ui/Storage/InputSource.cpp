@@ -37,9 +37,6 @@ InputSource::InputSource(StringUMap& data) :
 InputSource::~InputSource() {
 	CollectionHandler::getInstance(COLLECTION_ELEMENT)->release(&maps);
 	CollectionHandler::getInstance(COLLECTION_GROUP)->release(&maps);
-
-//	deActivate();
-
 	if (not fieldsData.empty())
 		CollectionHandler::getInstance(COLLECTION_INPUT_SOURCES + getProperty(PID))->remove(this);
 }
@@ -73,10 +70,6 @@ void InputSource::activate() {
 	DataDialogs::DialogInputMap::getInstance()->setNormalBox(getProperty(SOURCELESS).empty());
 	DataDialogs::DialogInputMap::getInstance()->setOwner(&maps, this);
 }
-
-//void InputSource::deActivate() {
-//	DataDialogs::DialogInputMap::getInstance()->setOwner(nullptr);
-//}
 
 const string InputSource::toXML() const {
 	string source(getValue(SOURCE));
