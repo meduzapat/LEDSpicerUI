@@ -21,6 +21,7 @@
  */
 
 #include "DataDialogs/DialogInputMap.hpp"
+#include "Revertible.hpp"
 
 #pragma once
 
@@ -28,15 +29,12 @@ namespace LEDSpicerUI::Ui::Storage {
 
 /**
  * LEDSpicerUI::Ui::Storage::InputSource
- * Represents a single input source (hardware event device) inside an Input plugin.
+ * Represents a single input source inside Input.
  * Owns the maps that belong to this source.
- * For single-source plugins the source name is empty.
  */
-class InputSource : public Data {
+class InputSource : public Revertible {
 
 public:
-
-	using Data::Data;
 
 	InputSource(StringUMap& data);
 

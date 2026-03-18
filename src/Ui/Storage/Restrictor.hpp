@@ -21,7 +21,7 @@
  */
 
 #include "DataDialogs/DialogRestrictorMap.hpp"
-#include "Data.hpp"
+#include "Revertible.hpp"
 
 #pragma once
 
@@ -31,11 +31,11 @@ namespace LEDSpicerUI::Ui::Storage {
  * LEDSpicerUI::Ui::Form::Restrictor
  * A class that adds functionality for Restrictors form.
  */
-class Restrictor : public Data {
+class Restrictor : public Revertible {
 
 public:
 
-	using Data::Data;
+	Restrictor(StringUMap& data);
 
 	virtual ~Restrictor();
 

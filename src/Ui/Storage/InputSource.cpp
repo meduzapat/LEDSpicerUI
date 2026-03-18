@@ -25,9 +25,10 @@
 using namespace LEDSpicerUI::Ui::Storage;
 
 InputSource::InputSource(StringUMap& data) :
-	Data(data),
+	Revertible(data),
 	sId("src_" + std::to_string(++sourceCounter))
 {
+	registerChild(maps);
 	setProperty(UID, sId);
 	// register maps against the global collections so cascade deletes propagate.
 	CollectionHandler::getInstance(COLLECTION_ELEMENT)->registerDependency({&maps});
@@ -62,7 +63,7 @@ void InputSource::reset() {
 	maps.wipe();
 	if (not fieldsData.empty())
 		CollectionHandler::getInstance(COLLECTION_INPUT_SOURCES + getProperty(PID))->remove(this);
-	Data::reset();
+	Revertible::reset();
 }
 
 void InputSource::activate() {

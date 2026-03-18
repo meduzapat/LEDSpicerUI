@@ -240,7 +240,7 @@ public:
 		MAPPINGS    = 8
 	};
 
-	/// Input plugin capability flags.
+	/// Input capability flags.
 	enum InputFlags : uint8_t {
 		INPUT_NEEDS_SOURCE    = 1 << 0, /// Has multiple hardware sources.
 		INPUT_DEV_LISTENER    = 1 << 1, /// Reads from /dev/input/ kernel devices.
@@ -280,7 +280,7 @@ public:
 	};
 
 	/**
-	 * Structure with input plugins information.
+	 * Structure with input information.
 	 */
 	struct InputInfo : public BaseInfo {
 		const uint8_t flags; /// Bitwise capability flags.
@@ -341,8 +341,9 @@ public:
 	static bool needSource(const string& input);
 
 	/**
-	 * Returns true if the input plugin type supports linked map triggers.
-	 * @param input Plugin name.
+	 * Returns true if the input type supports linked map triggers.
+	 * @param input name.
+	 * @returns True if the input uses linked maps.
 	 */
 	static bool hasLinkedMaps(const string& input);
 
@@ -469,7 +470,7 @@ public:
 	/// A list of restrictor to their information.
 	static const std::unordered_map<string, RestrictorInfo> restrictorsInfo;
 
-	/// A list of input plugins to their information.
+	/// A list of input to their information.
 	static const std::unordered_map<string, InputInfo> inputInfo;
 
 	/// A List of string names to its internal enumerated type.

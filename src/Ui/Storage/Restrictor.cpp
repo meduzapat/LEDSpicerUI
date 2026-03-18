@@ -24,6 +24,10 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
+Restrictor::Restrictor(StringUMap& data) : Revertible(data) {
+	registerChild(playerMapping);
+}
+
 Restrictor::~Restrictor() {
 	if (not fieldsData.empty()) {
 		CollectionHandler::getInstance(COLLECTION_RESTRICTORS)->remove(this);
@@ -35,7 +39,7 @@ void Restrictor::reset() {
 	if (not fieldsData.empty()) {
 		CollectionHandler::getInstance(COLLECTION_RESTRICTORS)->remove(this);
 	}
-	Data::reset();
+	Revertible::reset();
 }
 
 const string Restrictor::createPrettyName() const {
@@ -70,4 +74,3 @@ const string Restrictor::toXML() const {
 	r += createClosingXML("restrictor");
 	return r;
 }
-

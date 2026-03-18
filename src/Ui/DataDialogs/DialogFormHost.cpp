@@ -21,6 +21,7 @@
  */
 
 #include "DialogFormHost.hpp"
+#include "Storage/Revertible.hpp"
 
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
@@ -61,7 +62,8 @@ bool DialogFormHost::handleTypeSwitch(const OrdenableFlowBox* box, const string&
 	}
 	// New data or replaced.
 	previousName = newName;
-	currentData->reset();
+	// backup
+	static_cast<Storage::Revertible*>(currentData)->swap();
 	onEmpty();
 	onSelected();
 	return true;

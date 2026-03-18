@@ -74,9 +74,10 @@ public:
 	size_t getSize() const;
 
 	/**
-	 * Check if an item with the Data is set in the collection.
-	 * @param form The Data object to check.
-	 * @return True if the item is set, false otherwise.
+	 * Checks whether a Data object with the same unique ID is present in the collection.
+	 *
+	 * @param form The Data object whose ID to look up.
+	 * @return True if an item with a matching ID is found.
 	 */
 	bool isSet(Data* form) const;
 
@@ -105,6 +106,14 @@ public:
 	 * @param form Pointer to the Data object to delete.
 	 */
 	void remove(Data* form);
+
+	/**
+	 * Exchanges the contents of this collection with another.
+	 * Both collections retain their own identity — only the owned BoxButton
+	 * pointers move.
+	 * @param other The collection to swap contents with.
+	 */
+	void swap(BoxButtonCollection& other);
 
 	/**
 	 * Populate an OrdenableFlowBox with the BoxButton items.

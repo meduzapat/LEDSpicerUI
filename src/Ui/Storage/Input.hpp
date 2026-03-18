@@ -30,7 +30,7 @@ namespace LEDSpicerUI::Ui::Storage {
 
 /**
  * LEDSpicerUI::Ui::Storage::Input
- * Represents a single input plugin configuration file.
+ * Represents a single input configuration file.
  * Owns a collection of InputSource objects (one per hardware source),
  * and a collection of InputMapLinks that cross sources.
  * PATH and FILENAME are stored as properties and never serialized to XML.
@@ -39,7 +39,7 @@ class Input: public FileData {
 
 public:
 
-	using FileData::FileData;
+	Input(StringUMap& data, const DirNode* dir);
 
 	virtual ~Input();
 

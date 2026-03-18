@@ -20,7 +20,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Data.hpp"
+#include "Revertible.hpp"
 
 #pragma once
 
@@ -31,7 +31,7 @@ namespace LEDSpicerUI::Ui::Storage {
  * Base for any object that lives inside a directory tree.
  * Provides parent pointer, path resolution, and name abstraction.
  */
-class DirNode : public Data {
+class DirNode : public Revertible {
 
 public:
 
@@ -39,8 +39,8 @@ public:
 	 * @param parent Parent node. nullptr = root level.
 	 */
 	DirNode(StringUMap& data, const DirNode* parent) :
-		Data(data),
-		parent(parent)
+	Revertible(data),
+	parent(parent)
 	{}
 
 	virtual ~DirNode() = default;

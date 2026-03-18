@@ -24,6 +24,10 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
+Device::Device(StringUMap& data) : Revertible(data) {
+	registerChild(elements);
+}
+
 Device::~Device() {
 	if (not fieldsData.empty())
 		CollectionHandler::getInstance(COLLECTION_DEVICES)->remove(this);
@@ -33,7 +37,7 @@ void Device::reset() {
 	elements.wipe();
 	if (not fieldsData.empty())
 		CollectionHandler::getInstance(COLLECTION_DEVICES)->remove(this);
-	Data::reset();
+	Revertible::reset();
 }
 
 const string Device::createPrettyName() const {
@@ -68,5 +72,3 @@ const string Device::toXML() const {
 	r += createClosingXML("device");
 	return r;
 }
-
-

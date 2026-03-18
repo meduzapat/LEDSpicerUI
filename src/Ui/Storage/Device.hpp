@@ -21,7 +21,7 @@
  */
 
 #include "DataDialogs/DialogElement.hpp"
-#include "Data.hpp"
+#include "Revertible.hpp"
 
 #pragma once
 
@@ -35,11 +35,11 @@ namespace LEDSpicerUI::Ui::Storage {
  * A device will provide a number of pins where the LEDS are connected, but this are handled by elements.
  * A device will store the elements attached to the pins.
  */
-class Device : public Data {
+	class Device : public Revertible {
 
 public:
 
-	using Data::Data;
+	Device(StringUMap& data);
 
 	virtual ~Device();
 
@@ -52,7 +52,7 @@ public:
 
 protected:
 
-	/// Store a copy of elements from the elements dialog.
+	/// Stores elements from the elements dialog that belong to this Device.
 	BoxButtonCollection elements;
 
 };

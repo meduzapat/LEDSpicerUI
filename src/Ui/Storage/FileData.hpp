@@ -37,8 +37,8 @@ class FileData : public DirNode {
 public:
 
 	/**
-	 * @param data  Item field data. FILENAME is extracted and stored as a property.
-	 * @param dir   Owning directory. nullptr means root of the type's tree.
+	 * @param data Item field data. FILENAME is extracted and stored as a property.
+	 * @param dir  Owning directory. nullptr means root of the type's tree.
 	 */
 	FileData(StringUMap& data, const DirNode* dir);
 

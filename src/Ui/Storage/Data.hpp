@@ -125,12 +125,12 @@ public:
 	void setValues(const StringUMap& values);
 
 	/**
-	 * Removes all data.
+	 * Clears all serializable fields.
 	 */
 	virtual void wipe();
 
 	/**
-	 * Cleans other dependent data.
+	 * Clears fields and unregisters from active collections.
 	 */
 	virtual void reset();
 

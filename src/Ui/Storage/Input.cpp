@@ -24,6 +24,11 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
+Input::Input(StringUMap& data, const DirNode* dir) : FileData(data, dir) {
+	registerChild(sources);
+	registerChild(linkedMaps);
+}
+
 Input::~Input() {
 	if (not fieldsData.empty())
 		CollectionHandler::getInstance(COLLECTION_INPUT)->remove(this);
@@ -65,5 +70,5 @@ void Input::reset() {
 	linkedMaps.wipe();
 	if (not fieldsData.empty())
 		CollectionHandler::getInstance(COLLECTION_INPUT)->remove(this);
-	Data::reset();
+	Revertible::reset();
 }

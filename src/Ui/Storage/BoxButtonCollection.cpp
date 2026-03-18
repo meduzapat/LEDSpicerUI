@@ -33,7 +33,10 @@ size_t BoxButtonCollection::getSize() const {
 }
 
 bool BoxButtonCollection::isSet(Data *form) const {
-	return isIdSet(form->createUniqueId());
+	for (const auto item : items)
+		if (item->getData() == form) return true;
+	return false;
+	//return isIdSet(form->createUniqueId());
 }
 
 bool BoxButtonCollection::isIdSet(const string& id) const {
@@ -74,6 +77,10 @@ void BoxButtonCollection::remove(Data* form) {
 	items.erase(it);
 }
 
+void BoxButtonCollection::swap(BoxButtonCollection& other) {
+	std::swap(items, other.items);
+}
+
 void BoxButtonCollection::populateBox(OrdenableFlowBox* box) {
 	for (auto& item : items) {
 		box->add(*item);
@@ -90,7 +97,8 @@ void BoxButtonCollection::reindex(OrdenableFlowBox* box) {
 		auto flowChild = static_cast<Gtk::FlowBoxChild*>(child);
 		auto boxButton = static_cast<BoxButton*>(flowChild->get_child());
 		auto it = std::find_if(items.begin(), items.end(), [boxButton](BoxButton* item) {
-			return item->getData()->createUniqueId() == boxButton->getData()->createUniqueId();
+			return item == boxButton;
+//			return item->getData()->createUniqueId() == boxButton->getData()->createUniqueId();
 		});
 		reorderedItems.push_back(*it);
 	}
