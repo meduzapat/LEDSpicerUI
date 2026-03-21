@@ -92,8 +92,10 @@ void DialogInputMap::setOwner(
 	Storage::BoxButtonCollection* collection,
 	const Storage::Data*          owner
 ) {
+	boxSourceMaps->wipe();
+	boxInputMaps->wipe();
 	// Sourceless inputs route their maps into the input-level BoxInputMaps panel;
-	box = (owner->hasProperty(SOURCELESS)) ? boxInputMaps : boxSourceMaps;
+	setNormalBox(not owner->hasProperty(SOURCELESS));
 	DialogForm::setOwner(collection, owner);
 }
 

@@ -49,12 +49,19 @@ public:
 	virtual ~DialogInputSource();
 
 	void load(XMLHelper* values) override;
+	void setOwner(Storage::BoxButtonCollection* collection, const Storage::Data* owner) override;
 	Storage::CollectionHandler* getCollectionHandler() const override;
 	void resetForm() override;
 	void isValid() const override;
 	void storeData() override;
 	void retrieveData() override;
 	const string createUniqueId() const override;
+
+	/**
+	 * Attempts to populate sources for that input if needed.
+	 * @param name of the input
+	 */
+	void populateSources(const string& name);
 
 	/**
 	 * Ensures a sourceless InputSource exists for single-source inputs.
@@ -76,8 +83,6 @@ protected:
 	void createSubItems(XMLHelper* values) override;
 	string_view getType() const override;
 	Storage::Data* createData(StringUMap& rawData) override;
-
-private:
 
 	/**
 	 * Resolves the current source value from combo or manual entry.
@@ -106,7 +111,7 @@ private:
 
 	void onEmpty() override;
 
-	void onSelected() override;
+	void onSelected() override {}
 };
 
 } // namespace

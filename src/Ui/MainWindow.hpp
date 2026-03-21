@@ -47,6 +47,8 @@
 
 namespace LEDSpicerUI::Ui {
 
+using LEDSpicerUI::Config::ConfigFile;
+
 /**
  * LEDSpicerUI::MainWindow
  */

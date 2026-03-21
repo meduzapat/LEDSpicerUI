@@ -122,9 +122,13 @@ void DialogInput::isValid() const {
 		if (action != Actions::LOAD) entryInputName->grab_focus();
 		throw Message("Invalid name.");
 	}
-	if (not isUniqueFilename(filename)) {
-		if (action != Actions::LOAD) entryInputName->grab_focus();
-		throw Message("Name already in use in this directory.");
+
+	const string uid(createUniqueId());
+	if (getCollectionHandler()->isIdSet(uid)) {
+		if (action != Actions::EDIT or currentData->createUniqueId() != uid) {
+			if (action != Actions::LOAD) entryInputName->grab_focus();
+			throw Message("Name already in use in this directory.");
+		}
 	}
 
 	if (Defaults::inputHasFlag(id, Defaults::INPUT_HAS_TIMES)) {
@@ -155,7 +159,6 @@ void DialogInput::retrieveData() {
 	const string name(currentData->getValue(NAME));
 
 	selectorCombo->set_active_id(name);
-
 	entryInputName->set_text(currentData->getProperty(FILENAME));
 
 	if (Defaults::inputHasFlag(name, Defaults::INPUT_HAS_BLINK))
@@ -169,8 +172,7 @@ void DialogInput::retrieveData() {
 }
 
 const string DialogInput::createUniqueId() const {
-	const string parentId = static_cast<Storage::DirNode*>(currentData)->getParent()->getFsId();
-	return Defaults::createCommonUniqueId({parentId, entryInputName->get_text()});
+	return Defaults::createCommonUniqueId({currentData->getProperty(PID), entryInputName->get_text()});
 }
 
 string_view DialogInput::getType() const {
@@ -200,7 +202,10 @@ void DialogInput::onEmpty() {
 }
 
 void DialogInput::onSelected() {
-	const bool needSources {Defaults::inputHasFlag(selectorCombo->get_active_id(), Defaults::INPUT_NEEDS_SOURCE)};
+	auto id{selectorCombo->get_active_id()};
+	const bool needSources {Defaults::inputHasFlag(id, Defaults::INPUT_NEEDS_SOURCE)};
 	if (not needSources)
 		DialogInputSource::getInstance()->createPhantomSource();
+	else
+		DialogInputSource::getInstance()->populateSources(id);
 }

@@ -2494,7 +2494,6 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
                       <object class="GtkViewport">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="valign">start</property>
                         <child>
                           <object class="GtkFlowBox" id="BoxGroupElements">
                             <property name="width-request">570</property>
@@ -5502,7 +5501,7 @@ Default is 50ms</property>
             </child>
           </object>
           <packing>
-            <property name="expand">False</property>
+            <property name="expand">True</property>
             <property name="fill">True</property>
             <property name="position">4</property>
           </packing>
@@ -8031,12 +8030,13 @@ you can set the same trigger multiple time on different maps but only the last o
                       <object class="GtkCellRendererText" id="inputsourcecell"/>
                       <attributes>
                         <attribute name="sensitive">2</attribute>
-                        <attribute name="text">1</attribute>
                       </attributes>
                     </child>
                     <child internal-child="entry">
                       <object class="GtkEntry">
-                        <property name="can-focus">False</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="placeholder-text" translatable="yes">Select or type a source</property>
                       </object>
                     </child>
                   </object>

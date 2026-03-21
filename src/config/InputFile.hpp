@@ -24,19 +24,37 @@
 
 #pragma once
 
-namespace LEDSpicerUI {
+namespace LEDSpicerUI::Config {
 
+/**
+ * LEDSpicerUI::Config::InputFile
+ * Single-use parser for one input XML file.
+ * Extracts the input attributes and all maps/sources into extractedData
+ * so DialogInput::load() can consume them.
+ */
 class InputFile : public ProjectFile {
 
 public:
 
-	InputFile(const string& inputFile);
+	/**
+	 * @param filePath Full path to the .xml file on disk.
+	 * @param parent Owning directory node, or nullptr for root level.
+	 * @throws Message on parse errors.
+	 */
+	InputFile(const string& filePath, const Ui::Storage::DirectoryEntry* parent);
 
 	virtual ~InputFile() = default;
 
-protected:
+private:
 
+	/**
+	 * Extracts maps from a single <maps> node into extractedData.
+	 * @param mapsNode The <maps> XML element.
+	 * @param inputName Scoped collection key for this source's maps.
+	 * @return Error string, empty if clean.
+	 */
 	const string processMaps(tinyxml2::XMLElement* mapsNode, const string& inputName);
+
 };
 
 } // namespace

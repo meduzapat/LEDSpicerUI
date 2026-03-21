@@ -54,6 +54,10 @@ DialogInputSource::DialogInputSource(BaseObjectType* obj, const Glib::RefPtr<Gtk
 			resetForm();
 		}
 	});
+
+	selectorCombo->get_entry()->signal_changed().connect([this]() {
+		resetForm();
+	});
 }
 
 DialogInputSource::~DialogInputSource() {
@@ -72,7 +76,7 @@ LEDSpicerUI::Ui::Storage::CollectionHandler* DialogInputSource::getCollectionHan
 }
 
 void DialogInputSource::resetForm() {
-	if (comboBoxInputSelectInput->get_active_id().empty()) return;
+	if (resolvedSource().empty()) return;
 	btnApply->set_sensitive(true);
 	btnAddMap->set_sensitive(true);
 }
@@ -117,6 +121,26 @@ void DialogInputSource::retrieveData() {
 
 const string DialogInputSource::createUniqueId() const {
 	return Defaults::createCommonUniqueId({ownerData->getProperty(UID), resolvedSource()});
+}
+
+void DialogInputSource::populateSources(const string& name) {
+	if (Defaults::needSource(name)) {
+		if (Defaults::isDevInputListener(name))
+			populateSourcesList(scanEventDevices());
+		// add other future sources here
+	}
+}
+
+void DialogInputSource::setOwner(Storage::BoxButtonCollection* collection, const Storage::Data* owner) {
+	this->ownerData = owner;
+	items = collection;
+	auto s{comboBoxInputSelectInput->get_active_id()};
+	if (not s.empty() and not Defaults::inputHasFlag(
+		s,
+		Defaults::INPUT_NEEDS_SOURCE
+	))
+		createPhantomSource();
+	refreshItems();
 }
 
 void DialogInputSource::createPhantomSource() {
@@ -195,6 +219,11 @@ void DialogInputSource::populateSourcesList(const StringMap& devices) {
 		return;
 	}
 
+	auto row = *(listStore->append());
+	row.set_value(0, string());
+	row.set_value(1, string());
+	row.set_value(2, true);
+
 	for (const auto& [id, display] : devices) {
 		auto row = *(listStore->append());
 		row.set_value(0, id);
@@ -202,7 +231,7 @@ void DialogInputSource::populateSourcesList(const StringMap& devices) {
 		row.set_value(2, true);
 	}
 
-	selectorCombo->set_active_id("");
+	selectorCombo->set_active(-1);
 }
 
 string DialogInputSource::readDeviceName(const string& byIdName) {
@@ -227,12 +256,4 @@ string DialogInputSource::readDeviceName(const string& byIdName) {
 void DialogInputSource::onEmpty() {
 	btnApply->set_sensitive(false);
 	btnAddMap->set_sensitive(false);
-}
-
-void DialogInputSource::onSelected() {
-	auto id {comboBoxInputSelectInput->get_active_id()};
-	if (Defaults::needSource(id)) {
-		if (Defaults::isDevInputListener(id))
-			populateSourcesList(scanEventDevices());
-	}
 }

@@ -22,13 +22,32 @@
 
 #include "ProjectFile.hpp"
 
-using namespace LEDSpicerUI;
+using namespace LEDSpicerUI::Config;
 
-ProjectFile::ProjectFile(const string& filePath, const string& fileType, const string& subPath) :
+namespace {
+	string extractBasename(const string& filePath) {
+		string base(Glib::path_get_basename(filePath));
+		const auto dot(base.find_last_of('.'));
+		if (dot != string::npos)
+			base = base.substr(0, dot);
+		return base;
+	}
+}
+
+ProjectFile::ProjectFile(
+	const string& filePath,
+	const string& fileType,
+	const LEDSpicerUI::Ui::Storage::DirectoryEntry* parent
+) :
 	XMLHelper(filePath, fileType),
-	pathFilename(Defaults::extractName(filePath, Defaults::getProjectsDir() + subPath))
+	filename(extractBasename(filePath)),
+	parent(parent)
 {}
 
-const string& ProjectFile::getPathFilename() const {
-	return pathFilename;
+const string& ProjectFile::getFilename() const {
+	return filename;
+}
+
+const LEDSpicerUI::Ui::Storage::DirectoryEntry* ProjectFile::getParent() const {
+	return parent;
 }

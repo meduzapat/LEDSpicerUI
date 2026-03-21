@@ -26,7 +26,7 @@
 
 #define UI_CONFIG_FILE "ledspicerui.conf"
 
-namespace LEDSpicerUI {
+namespace LEDSpicerUI::Config {
 
 /**
  * LEDSpicerUI::SettingsFile
@@ -45,8 +45,6 @@ public:
 	SettingsFile(const string& settingsFile);
 
 	virtual ~SettingsFile() = default;
-
-	// getSettings() inherited from XMLHelper
 
 	/**
 	 * Saves settings to file.

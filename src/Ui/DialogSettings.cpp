@@ -24,6 +24,8 @@
 
 using namespace LEDSpicerUI::Ui;
 
+using LEDSpicerUI::Config::SettingsFile;
+
 const string& DialogSettings::getBinaryPath() const {
 	return binaryPath;
 }

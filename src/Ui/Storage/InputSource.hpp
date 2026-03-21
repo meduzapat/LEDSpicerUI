@@ -46,7 +46,6 @@ public:
 	string_view getCssClass() const noexcept override;
 	void reset() override;
 	void activate() override;
-//	void deActivate() override;
 	const string toXML() const override;
 
 protected:
@@ -54,11 +53,10 @@ protected:
 	/// Maps owned by this source.
 	BoxButtonCollection maps;
 
-	/// Stable input-wide source identifier. Set once at construction, never changes.
-	const string sId;
-
 	/// Counter for sId generation.
 	inline static size_t sourceCounter = 0;
+
+	const string getPrimaryKey() const override;
 
 };
 

@@ -26,8 +26,6 @@ using namespace LEDSpicerUI::Ui::DataDialogs;
 
 DialogForm::DialogForm(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) : Gtk::Dialog(obj) {
 	DialogColors::buildInstance(builder, "DialogColors");
-	// this needs to be run last,
-//	signal_show().connect(sigc::mem_fun(*this, &DialogForm::resetForm), true);
 }
 
 DialogForm::~DialogForm() {
@@ -44,7 +42,6 @@ void DialogForm::createItems(StringUMapVector& rawCollection, XMLHelper* values)
 		currentData->activate();
 		// Sanity check by load and unload, this will sanitize (or error out) the data.
 		retrieveData();
-//		resetForm();
 		try {
 			isValid();
 		}
@@ -72,12 +69,13 @@ void DialogForm::createItems(StringUMapVector& rawCollection, XMLHelper* values)
 }
 
 void DialogForm::refreshItems() {
-	// this will avoid chaining into non initialized dialogs.
-	if (not box) return;
 	box->wipe();
+	// No items no work.
 	if (not items) return;
 	items->populateBox(box);
 	box->show_all();
+	// this will avoid chaining into uninitialized dialogs.
+	if (not currentData) return;
 	for (auto childDialog : childDialogs) childDialog->refreshItems();
 }
 
@@ -121,7 +119,7 @@ void DialogForm::setSignalAddTo(Gtk::Button* btnAdd, DialogForm* dialogToOpen) {
 void DialogForm::setSignalApply() {
 	btnApply->signal_clicked().connect([&]() {
 		try {
-			// Apply changes after sanitize.
+			// sanitize.
 			isValid();
 			response(Gtk::ResponseType::RESPONSE_APPLY);
 		}

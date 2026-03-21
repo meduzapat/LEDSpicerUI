@@ -31,22 +31,21 @@ namespace LEDSpicerUI::Ui::Storage {
 /**
  * LEDSpicerUI::Ui::Storage::Input
  * Represents a single input configuration file.
- * Owns a collection of InputSource objects (one per hardware source),
- * and a collection of InputMapLinks that cross sources.
- * PATH and FILENAME are stored as properties and never serialized to XML.
+ * Inherits FileData for path tracking, field storage, and snap/restore.
+ * Owns a collection of InputSource objects and a collection of linked maps.
  */
-class Input: public FileData {
+class Input : public FileData {
 
 public:
 
-	Input(StringUMap& data, const DirNode* dir);
+	Input(StringUMap& data, const DirNode* parent);
 
 	virtual ~Input();
 
+	const string createPrettyName() const override;
 	const string createTooltip() const override;
 	string_view getCssClass() const noexcept override;
 	void activate() override;
-//	void deActivate() override;
 	const string toXML() const override;
 	void reset() override;
 
@@ -55,7 +54,7 @@ protected:
 	/// Keeps track of different input sources.
 	BoxButtonCollection sources;
 
-	/// Linked maps, these are used to link multiple input maps together.
+	/// Linked maps across sources.
 	BoxButtonCollection linkedMaps;
 
 };

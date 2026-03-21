@@ -23,60 +23,38 @@
 #include <gtest/gtest.h>
 #include "config/InputFile.hpp"
 
-namespace LEDSpicerUI {
+using namespace LEDSpicerUI::Config;
 
 /**
  * ProjectFileTest
- * Tests only the unique ProjectFile functionality (filename extraction).
- * XML parsing is already tested in XMLHelperTest.
- * Input-specific functionality is tested in InputFileTest.
+ * Tests ProjectFile base functionality: basename extraction and parent tracking.
+ * XML parsing is tested in XMLHelperTest.
+ * Input-specific parsing is tested in InputFileTest.
  */
-class ProjectFileTest : public ::testing::Test {
+class ProjectFileTest : public ::testing::Test {};
 
-protected:
-
-	void SetUp() override {
-		// Set projects dir for filename extraction
-		Defaults::setProjectsDir(PACKAGE_SAMPLES_DIR "data/");
-	}
-
-	void TearDown() override {
-		Defaults::setProjectsDir("");
-	}
-};
-
-// Test filename extraction with simple filename
+// Basename is extracted from the full path — no extension, no directory prefix.
 TEST_F(ProjectFileTest, FilenameExtractionSimple) {
-	InputFile input(PACKAGE_SAMPLES_DIR "data/" INPUT_PATH "inputSingle.xml");
-	EXPECT_EQ("inputSingle", input.getPathFilename());
+	InputFile input(PACKAGE_SAMPLES_DIR "data/" INPUT_PATH "inputSingle.xml", nullptr);
+	EXPECT_EQ("inputSingle", input.getFilename());
 }
 
-// Test filename extraction with subdirectory
-TEST_F(ProjectFileTest, FilenameExtractionWithSubdir) {
-	InputFile input(PACKAGE_SAMPLES_DIR "data/" INPUT_PATH "inputMulti.xml");
-	EXPECT_EQ("inputMulti", input.getPathFilename());
+TEST_F(ProjectFileTest, FilenameExtractionMulti) {
+	InputFile input(PACKAGE_SAMPLES_DIR "data/" INPUT_PATH "inputMulti.xml", nullptr);
+	EXPECT_EQ("inputMulti", input.getFilename());
 }
 
-// Test filename extraction removes extension
+// Extension must be stripped.
 TEST_F(ProjectFileTest, FilenameRemovesExtension) {
-	InputFile input(PACKAGE_SAMPLES_DIR "data/" INPUT_PATH "inputSingle.xml");
-	const string& filename = input.getPathFilename();
-	EXPECT_EQ(string::npos, filename.find(".xml")) << "Extension should be removed";
+	InputFile input(PACKAGE_SAMPLES_DIR "data/" INPUT_PATH "inputSingle.xml", nullptr);
+	EXPECT_EQ(string::npos, input.getFilename().find(".xml")) << "Extension should be removed";
 }
 
-// Test filename extraction is relative to project directory
-TEST_F(ProjectFileTest, FilenameRelativeToProjectDir) {
-	InputFile input(PACKAGE_SAMPLES_DIR "data/" INPUT_PATH "inputMulti.xml");
-	const string& filename = input.getPathFilename();
-
-	// Should not contain the projects directory path
-	EXPECT_EQ(string::npos, filename.find(PACKAGE_SAMPLES_DIR))
-		<< "Filename should not contain absolute path";
-	EXPECT_EQ(string::npos, filename.find("data/"))
-		<< "Filename should not contain project directory";
+// With nullptr parent the file is at root level.
+TEST_F(ProjectFileTest, NullParentReturnsNullptr) {
+	InputFile input(PACKAGE_SAMPLES_DIR "data/" INPUT_PATH "inputSingle.xml", nullptr);
+	EXPECT_EQ(nullptr, input.getParent());
 }
-
-} // namespace LEDSpicerUI
 
 int main(int argc, char **argv) {
 	::testing::InitGoogleTest(&argc, argv);

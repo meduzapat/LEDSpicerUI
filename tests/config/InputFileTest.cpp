@@ -20,23 +20,19 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <gtest/gtest.h>
 #include "config/InputFile.hpp"
 
-#include <gtest/gtest.h>
-
-namespace LEDSpicerUI {
+using namespace LEDSpicerUI;
+using namespace LEDSpicerUI::Config;
 
 class InputFileTest : public ::testing::Test {
 
 protected:
 
 	void SetUp() override {
-		// Set projects dir for filename extraction
-		Defaults::setProjectsDir(PACKAGE_SAMPLES_DIR "data/");
-
-		// Initialize InputFile instances with the sample files
-		inputMulti  = std::make_unique<InputFile>(PACKAGE_SAMPLES_DIR "data/" INPUT_PATH "inputMulti.xml");
-		inputSingle = std::make_unique<InputFile>(PACKAGE_SAMPLES_DIR "data/" INPUT_PATH "inputSingle.xml");
+		inputMulti  = std::make_unique<InputFile>(PACKAGE_SAMPLES_DIR "data/" INPUT_PATH "inputMulti.xml",  nullptr);
+		inputSingle = std::make_unique<InputFile>(PACKAGE_SAMPLES_DIR "data/" INPUT_PATH "inputSingle.xml", nullptr);
 	}
 
 	void TearDown() override {
@@ -46,11 +42,17 @@ protected:
 
 	std::unique_ptr<InputFile> inputMulti;
 	std::unique_ptr<InputFile> inputSingle;
+
+	/*
+	 * Builds the base collection key for a file at root level (nullptr parent).
+	 * Matches InputFile::InputFile() → createCommonUniqueId({"", filename}).
+	 */
+	static string baseId(const string& filename) {
+		return Defaults::createCommonUniqueId({"", filename});
+	}
 };
 
-// Test that the multi-source input file (Credits) is loaded and parsed correctly
 TEST_F(InputFileTest, MultiSourceInputIsLoaded) {
-	// Check basic input attributes
 	auto& inputData = inputMulti->getData(COLLECTION_INPUT);
 	ASSERT_FALSE(inputData.empty());
 	ASSERT_FALSE(inputData[0].empty());
@@ -63,47 +65,34 @@ TEST_F(InputFileTest, MultiSourceInputIsLoaded) {
 	EXPECT_EQ("False",   inputData[0]["alwaysOn"]);
 	EXPECT_EQ("1",       inputData[0]["coinsPerCredit"]);
 
-	// Filename now via getFilename()
-	EXPECT_EQ("inputMulti", inputMulti->getPathFilename());
+	EXPECT_EQ("inputMulti", inputMulti->getFilename());
 }
 
-// Test that listenEvents are correctly extracted from multi-source input
 TEST_F(InputFileTest, SourcesAreExtracted) {
-	const string
-		name(inputMulti->getPathFilename()),
-		eventName(Defaults::createCommonUniqueId({name, COLLECTION_INPUT_SOURCES})),
-		hardware1Name(inputMulti->getData(eventName)[0]["source"]),
-		hardware2Name(inputMulti->getData(eventName)[1]["source"]);
+	const string eventName(Defaults::createCommonUniqueId({baseId("inputMulti"), COLLECTION_INPUT_SOURCES}));
 
-	EXPECT_EQ("hardware1", hardware1Name);
-	EXPECT_EQ("hardware2", hardware2Name);
+	EXPECT_EQ("hardware1", inputMulti->getData(eventName)[0]["source"]);
+	EXPECT_EQ("hardware2", inputMulti->getData(eventName)[1]["source"]);
 }
 
-// Test that maps for the first source in multi-source input are correctly processed
 TEST_F(InputFileTest, FirstSourceMapsAreProcessed) {
-	// Construct the unique ID for the first source maps (now using index)
-	const string
-		name(inputMulti->getPathFilename()),
-		mapName(Defaults::createCommonUniqueId({name, "0", COLLECTION_INPUT_MAPS}));
+	const string mapName(Defaults::createCommonUniqueId({baseId("inputMulti"), "0", COLLECTION_INPUT_MAPS}));
 
 	auto& maps = inputMulti->getData(mapName);
 	ASSERT_EQ(3, maps.size());
 
-	// Check first map
 	EXPECT_EQ("Element", maps[0]["type"]);
 	EXPECT_EQ("P1_COIN", maps[0]["target"]);
 	EXPECT_EQ("309",     maps[0]["trigger"]);
 	EXPECT_EQ("White",   maps[0]["color"]);
 	EXPECT_EQ("Combine", maps[0]["filter"]);
 
-	// Check second map
 	EXPECT_EQ("Element",  maps[1]["type"]);
 	EXPECT_EQ("P1_START", maps[1]["target"]);
 	EXPECT_EQ("313",      maps[1]["trigger"]);
 	EXPECT_EQ("Blue",     maps[1]["color"]);
 	EXPECT_EQ("Combine",  maps[1]["filter"]);
 
-	// Check third map
 	EXPECT_EQ("Element",    maps[2]["type"]);
 	EXPECT_EQ("P1_BUTTON1", maps[2]["target"]);
 	EXPECT_EQ("315",        maps[2]["trigger"]);
@@ -111,17 +100,12 @@ TEST_F(InputFileTest, FirstSourceMapsAreProcessed) {
 	EXPECT_EQ("Normal",     maps[2]["filter"]);
 }
 
-// Test that maps for the second source in multi-source input are correctly processed
 TEST_F(InputFileTest, SecondSourceMapsAreProcessed) {
-	// Construct the unique ID for the second source maps (now using index)
-	const string
-		name(inputMulti->getPathFilename()),
-		mapName(Defaults::createCommonUniqueId({name, "1", COLLECTION_INPUT_MAPS}));
+	const string mapName(Defaults::createCommonUniqueId({baseId("inputMulti"), "1", COLLECTION_INPUT_MAPS}));
 
 	auto& maps = inputMulti->getData(mapName);
 	ASSERT_EQ(1, maps.size());
 
-	// Check the map
 	EXPECT_EQ("Element",  maps[0]["type"]);
 	EXPECT_EQ("P2_START", maps[0]["target"]);
 	EXPECT_EQ("313",      maps[0]["trigger"]);
@@ -129,39 +113,31 @@ TEST_F(InputFileTest, SecondSourceMapsAreProcessed) {
 	EXPECT_EQ("Combine",  maps[0]["filter"]);
 }
 
-// Test that the single-source input file (Mame) is loaded and parsed correctly
 TEST_F(InputFileTest, SingleSourceInputIsLoaded) {
 	auto& inputData = inputSingle->getData(COLLECTION_INPUT);
 	ASSERT_FALSE(inputData.empty());
 	EXPECT_EQ("Mame", inputData[0][NAME]);
-
-	// Filename now via getFilename()
-	EXPECT_EQ("inputSingle", inputSingle->getPathFilename());
+	EXPECT_EQ("inputSingle", inputSingle->getFilename());
 }
 
-// Test that maps for single-source input are correctly processed
 TEST_F(InputFileTest, SingleSourceMapsAreProcessed) {
-	// Construct the unique ID for the maps (using index 0)
-	const string mapsId = Defaults::createCommonUniqueId({inputSingle->getPathFilename(), "0", COLLECTION_INPUT_MAPS});
+	const string mapName(Defaults::createCommonUniqueId({baseId("inputSingle"), "0", COLLECTION_INPUT_MAPS}));
 
-	auto& maps = inputSingle->getData(mapsId);
+	auto& maps = inputSingle->getData(mapName);
 	ASSERT_EQ(3, maps.size());
 
-	// Check first map
-	EXPECT_EQ("Group",    maps[0]["type"]);
-	EXPECT_EQ("player 1", maps[0]["target"]);
-	EXPECT_EQ("Left_Gun", maps[0]["trigger"]);
-	EXPECT_EQ("Red",      maps[0]["color"]);
-	EXPECT_EQ("Normal",   maps[0]["filter"]);
+	EXPECT_EQ("Group",        maps[0]["type"]);
+	EXPECT_EQ("player 1",     maps[0]["target"]);
+	EXPECT_EQ("Left_Gun",     maps[0]["trigger"]);
+	EXPECT_EQ("Red",          maps[0]["color"]);
+	EXPECT_EQ("Normal",       maps[0]["filter"]);
 
-	// Check second map
-	EXPECT_EQ("Group",      maps[1]["type"]);
-	EXPECT_EQ("player 1",   maps[1]["target"]);
-	EXPECT_EQ("Left_Green", maps[1]["trigger"]);
-	EXPECT_EQ("Green",      maps[1]["color"]);
-	EXPECT_EQ("Normal",     maps[1]["filter"]);
+	EXPECT_EQ("Group",        maps[1]["type"]);
+	EXPECT_EQ("player 1",     maps[1]["target"]);
+	EXPECT_EQ("Left_Green",   maps[1]["trigger"]);
+	EXPECT_EQ("Green",        maps[1]["color"]);
+	EXPECT_EQ("Normal",       maps[1]["filter"]);
 
-	// Check third map
 	EXPECT_EQ("Group",        maps[2]["type"]);
 	EXPECT_EQ("player 1",     maps[2]["target"]);
 	EXPECT_EQ("Left_Flash_1", maps[2]["trigger"]);
@@ -169,28 +145,26 @@ TEST_F(InputFileTest, SingleSourceMapsAreProcessed) {
 	EXPECT_EQ("Combine",      maps[2]["filter"]);
 }
 
-// Test checking error handling for missing required attributes in maps
 TEST_F(InputFileTest, MissingAttributesHandling) {
-	EXPECT_THROW(InputFile(PACKAGE_SAMPLES_DIR "data/" INPUT_PATH "inputMalformed.xml"), Message);
+	EXPECT_THROW(
+		InputFile(PACKAGE_SAMPLES_DIR "data/" INPUT_PATH "inputMalformed.xml", nullptr),
+		Message
+	);
 }
 
-// Test ProjectFile getFilename functionality
 TEST_F(InputFileTest, FilenameExtraction) {
-	EXPECT_EQ("inputMulti",  inputMulti->getPathFilename());
-	EXPECT_EQ("inputSingle", inputSingle->getPathFilename());
+	EXPECT_EQ("inputMulti",  inputMulti->getFilename());
+	EXPECT_EQ("inputSingle", inputSingle->getFilename());
 }
 
-// Test getRootInfo returns expected values
 TEST_F(InputFileTest, RootInfoIsPopulated) {
 	const auto& rootInfo = inputMulti->getRootInfo();
 
 	EXPECT_EQ(PACKAGE_DATA_VERSION, rootInfo.version);
-	EXPECT_EQ("Input", rootInfo.type);
+	EXPECT_EQ("Input",   rootInfo.type);
 	EXPECT_FALSE(rootInfo.attributes.empty());
 	EXPECT_EQ("Credits", rootInfo.attributes.at(NAME));
 }
-
-} // namespace LEDSpicerUI
 
 int main(int argc, char **argv) {
 	::testing::InitGoogleTest(&argc, argv);

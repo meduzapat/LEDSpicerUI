@@ -18,7 +18,6 @@ include_directories(
 
 add_compile_options(-Wall -Wextra -fexceptions)
 
-# Define a macro to create test executables
 macro(add_test_executable TEST_NAME TEST_SRC EXTRA_SRCS EXTRA_LIBS)
 	add_executable(${TEST_NAME}
 		${TEST_SRC}
@@ -36,12 +35,27 @@ macro(add_test_executable TEST_NAME TEST_SRC EXTRA_SRCS EXTRA_LIBS)
 	add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
 endmacro()
 
-# Common source files used by multiple tests
+# Common source files used by multiple tests.
 set(COMMON_SRCS
 	${CMAKE_SOURCE_DIR}/src/Defaults.cpp
 )
 
-# Define each test using the macro
+# Storage sources needed by anything that includes DirectoryEntry.hpp.
+set(STORAGE_SRCS
+	${CMAKE_SOURCE_DIR}/src/Ui/Storage/Data.cpp
+	${CMAKE_SOURCE_DIR}/src/Ui/Storage/DirNode.cpp
+	${CMAKE_SOURCE_DIR}/src/Ui/Storage/DirectoryEntry.cpp
+	${CMAKE_SOURCE_DIR}/src/Ui/Storage/BoxButton.cpp
+	${CMAKE_SOURCE_DIR}/src/Ui/Storage/BoxButtonCollection.cpp
+)
+
+# Storage sources including Revertible — needed by FileData subclasses.
+set(STORAGE_REVERTIBLE_SRCS
+	${STORAGE_SRCS}
+	${CMAKE_SOURCE_DIR}/src/Ui/Storage/Revertible.cpp
+	${CMAKE_SOURCE_DIR}/src/Ui/Storage/FileData.cpp
+)
+
 add_test_executable(DefaultsTest
 	"DefaultsTest.cpp"
 	"${COMMON_SRCS}"
@@ -66,6 +80,18 @@ add_test_executable(XMLHelperTest
 	"${TINYXML2_LIBRARIES}"
 )
 
+add_test_executable(DirectoryEntryTest
+	"Ui/Storage/DirectoryEntryTest.cpp"
+	"${COMMON_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp;${STORAGE_SRCS}"
+	""
+)
+
+add_test_executable(FileDataTest
+	"Ui/Storage/FileDataTest.cpp"
+	"${COMMON_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp;${STORAGE_REVERTIBLE_SRCS}"
+	""
+)
+
 add_test_executable(ConfigFileTest
 	"config/ConfigFileTest.cpp"
 	"${COMMON_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp;${CMAKE_SOURCE_DIR}/src/XMLHelper.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/BoxButton.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/BoxButtonCollection.cpp;${CMAKE_SOURCE_DIR}/src/config/ConfigFile.cpp"
@@ -74,13 +100,13 @@ add_test_executable(ConfigFileTest
 
 add_test_executable(ProjectFileTest
 	"config/ProjectFileTest.cpp"
-	"${COMMON_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp;${CMAKE_SOURCE_DIR}/src/XMLHelper.cpp;${CMAKE_SOURCE_DIR}/src/config/ProjectFile.cpp;${CMAKE_SOURCE_DIR}/src/config/InputFile.cpp"
+	"${COMMON_SRCS};${STORAGE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp;${CMAKE_SOURCE_DIR}/src/XMLHelper.cpp;${CMAKE_SOURCE_DIR}/src/config/ProjectFile.cpp;${CMAKE_SOURCE_DIR}/src/config/InputFile.cpp"
 	"${TINYXML2_LIBRARIES}"
 )
 
 add_test_executable(InputFileTest
 	"config/InputFileTest.cpp"
-	"${COMMON_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp;${CMAKE_SOURCE_DIR}/src/XMLHelper.cpp;${CMAKE_SOURCE_DIR}/src/config/ProjectFile.cpp;${CMAKE_SOURCE_DIR}/src/config/InputFile.cpp"
+	"${COMMON_SRCS};${STORAGE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp;${CMAKE_SOURCE_DIR}/src/XMLHelper.cpp;${CMAKE_SOURCE_DIR}/src/config/ProjectFile.cpp;${CMAKE_SOURCE_DIR}/src/config/InputFile.cpp"
 	"${TINYXML2_LIBRARIES}"
 )
 
@@ -90,7 +116,9 @@ add_test_executable(SettingsFileTest
 	"${TINYXML2_LIBRARIES}"
 )
 
-# Set colored output for all tests
-set_tests_properties(DefaultsTest DataTest MessageTest XMLHelperTest ConfigFileTest InputFileTest ProjectFileTest SettingsFileTest
+set_tests_properties(
+	DefaultsTest DataTest MessageTest XMLHelperTest
+	DirectoryEntryTest FileDataTest
+	ConfigFileTest InputFileTest ProjectFileTest SettingsFileTest
 	PROPERTIES ENVIRONMENT "GTEST_COLOR=1"
 )

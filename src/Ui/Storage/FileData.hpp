@@ -20,6 +20,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "Revertible.hpp"
 #include "DirNode.hpp"
 
 #pragma once
@@ -28,39 +29,35 @@ namespace LEDSpicerUI::Ui::Storage {
 
 /**
  * LEDSpicerUI::Ui::Storage::FileData
- * Data class for file-based items (Inputs, Animations, Profiles).
- * Holds a pointer to its owning DirectoryEntry so path resolution is always
- * live — directory renames propagate automatically with no cascade needed.
-  */
-class FileData : public DirNode {
+ * Base for file-based items (Inputs, Animations, Profiles).
+ * Inherits Revertible for serializable field storage and snap/restore support.
+ * Inherits DirNode for parent pointer and recursive path resolution.
+ * FILENAME is stored as a runtime property — never serialized to XML.
+ * Subclasses add their own fields, collections, and visual decoration.
+ */
+class FileData : public Revertible, public DirNode {
 
 public:
 
 	/**
-	 * @param data Item field data. FILENAME is extracted and stored as a property.
-	 * @param dir  Owning directory. nullptr means root of the type's tree.
+	 * @param data Field data.
+	 * FILENAME is rescued into properties before being erased from fieldsData so it is never serialized.
+	 * @param parent Owning directory node. nullptr = root of the type's tree.
 	 */
-	FileData(StringUMap& data, const DirNode* dir);
+	FileData(StringUMap& data, const DirNode* parent);
+
+	virtual ~FileData() = default;
 
 	const string createUniqueId() const override;
-	const string createPrettyName() const override;
-	const string createTooltip() const override;
-
-	/**
-	 * Returns a stable app-wide identifier that never changes even if renamed.
-	 * @return Stable code string, e.g. "dir_1".
-	 */
-	string getFsId() const override;
 
 	string getName() const override;
+	string getFsId() const override;
 
 protected:
 
-	/// Stable app-wide file identifier. Never changes, never serialized.
-	const string fsId;
-
-	/// Counter for stable code generation.
+	/// Counter for stable id generation.
 	inline static size_t fileCounter = 0;
+
 };
 
 } // namespace

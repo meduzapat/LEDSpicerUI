@@ -21,14 +21,18 @@
  */
 
 #include "XMLHelper.hpp"
+#include "Ui/Storage/DirectoryEntry.hpp"
 
 #pragma once
 
-namespace LEDSpicerUI {
+
+namespace LEDSpicerUI::Config {
 
 /**
- * LEDSpicerUI::ProjectFile
+ * LEDSpicerUI::Config::ProjectFile
  * Base class for project-based XML files (inputs, animations, profiles).
+ * Stores the bare filename and a pointer to the owning directory node so
+ * callers can build scoped collection keys without storing path strings.
  */
 class ProjectFile : public XMLHelper {
 
@@ -39,22 +43,33 @@ public:
 	virtual ~ProjectFile() = default;
 
 	/**
-	 * @return Relative filename (without extension).
+	 * @return Bare filename without extension.
 	 */
-	const string& getPathFilename() const;
+	const string& getFilename() const;
+
+	/**
+	 * @return Owning directory node, or nullptr if at root level.
+	 */
+	const Ui::Storage::DirectoryEntry* getParent() const;
 
 protected:
 
-	/// Relative filename from project directory.
-	string pathFilename;
+	/// Bare filename without extension.
+	string filename;
+
+	/// Owning directory node. nullptr = root of the type's tree.
+	const Ui::Storage::DirectoryEntry* const parent;
 
 	/**
-	 * Creates a ProjectFile and extracts filename.
-	 * @param filePath Full path to file.
-	 * @param fileType Expected type attribute.
-	 * @param subPath Subdirectory within project (e.g., "inputs/").
+	 * @param filePath Full path to the file on disk.
+	 * @param fileType Expected type attribute for XML validation.
+	 * @param parent   Owning directory node, or nullptr for root level.
 	 */
-	ProjectFile(const string& filePath, const string& fileType, const string& subPath);
+	ProjectFile(
+		const string& filePath,
+		const string& fileType,
+		const Ui::Storage::DirectoryEntry* parent
+	);
 };
 
 } // namespace

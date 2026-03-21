@@ -24,32 +24,24 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-FileData::FileData(StringUMap& data, const DirNode* dir) :
-	DirNode(data, dir),
-	fsId("file_" + std::to_string(++fileCounter))
+FileData::FileData(StringUMap& data, const DirNode* parent) :
+	Revertible(data),
+	DirNode(parent)
 {
-	setProperty(FILENAME, data.count(FILENAME) ? data.at(FILENAME) : "");
-	setProperty(UID, fsId);
-	data.erase(FILENAME);
+	setProperty(FILENAME, fieldsData.count(FILENAME) ? fieldsData.at(FILENAME) : "");
+	setProperty(PID, parent ? parent->getFsId() : "");
+	setProperty(UID, "file_" + std::to_string(++fileCounter));
+	fieldsData.erase(FILENAME);
 }
 
 const string FileData::createUniqueId() const {
-	const string parentId = parent ? parent->getFsId() : "";
-	return Defaults::createCommonUniqueId({parentId, getName()});
-}
-
-const string FileData::createPrettyName() const {
-	return getFullPath() + " [" + getValue(NAME) + "]";
-}
-
-const string FileData::createTooltip() const {
-	return "of type " + getValue(NAME);
-}
-
-string FileData::getFsId() const {
-	return fsId;
+	return Defaults::createCommonUniqueId({parent ? parent->getFsId() : "", getProperty(FILENAME)});
 }
 
 string FileData::getName() const {
 	return getProperty(FILENAME);
+}
+
+string FileData::getFsId() const {
+	return getProperty(UID);
 }

@@ -25,11 +25,10 @@
 using namespace LEDSpicerUI::Ui::Storage;
 
 InputSource::InputSource(StringUMap& data) :
-	Revertible(data),
-	sId("src_" + std::to_string(++sourceCounter))
+	Revertible(data)
 {
 	registerChild(maps);
-	setProperty(UID, sId);
+	setProperty(UID, "src_" + std::to_string(++sourceCounter));
 	// register maps against the global collections so cascade deletes propagate.
 	CollectionHandler::getInstance(COLLECTION_ELEMENT)->registerDependency({&maps});
 	CollectionHandler::getInstance(COLLECTION_GROUP)->registerDependency({&maps});
@@ -67,8 +66,6 @@ void InputSource::reset() {
 }
 
 void InputSource::activate() {
-	// Point the box sources (empty) or input.
-	DataDialogs::DialogInputMap::getInstance()->setNormalBox(getProperty(SOURCELESS).empty());
 	DataDialogs::DialogInputMap::getInstance()->setOwner(&maps, this);
 }
 
@@ -91,4 +88,8 @@ const string InputSource::toXML() const {
 
 	r += Defaults::tab() + "</maps>\n";
 	return r;
+}
+
+const string InputSource::getPrimaryKey() const {
+	return SOURCE;
 }

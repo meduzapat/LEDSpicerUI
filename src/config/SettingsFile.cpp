@@ -22,7 +22,7 @@
 
 #include "SettingsFile.hpp"
 
-using namespace LEDSpicerUI;
+using namespace LEDSpicerUI::Config;
 
 SettingsFile::SettingsFile(const string& settingsFile) : XMLHelper(settingsFile, XML_FILE_PLAIN) {
 	rootInfo.attributes = processNode(root);

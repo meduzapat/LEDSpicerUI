@@ -37,6 +37,6 @@ string DirNode::getFullPath() const {
 	return path.empty() ? getName() : path + "/" + getName();
 }
 
-bool DirNode::isRoot() const {
+bool DirNode::isAtRoot() const {
 	return not parent;
 }

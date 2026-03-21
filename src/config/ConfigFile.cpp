@@ -22,7 +22,7 @@
 
 #include "ConfigFile.hpp"
 
-using namespace LEDSpicerUI;
+using namespace LEDSpicerUI::Config;
 
 ConfigFile::ConfigFile(const string& ledspicerconf) : XMLHelper(ledspicerconf, "Configuration") {
 	// rootInfo.attributes already populated by XMLHelper constructor

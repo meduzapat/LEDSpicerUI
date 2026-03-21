@@ -23,6 +23,7 @@
 #include "InputDirectoryNavigator.hpp"
 
 using namespace LEDSpicerUI::Ui;
+using namespace LEDSpicerUI::Config;
 
 InputDirectoryNavigator::InputDirectoryNavigator(
 	const Glib::RefPtr<Gtk::Builder>& builder,
@@ -57,7 +58,7 @@ InputDirectoryNavigator::InputDirectoryNavigator(
 			StringVector selectedFiles(dialogImportInput.get_filenames());
 			for (const auto& selectedFile : selectedFiles) {
 				try {
-					InputFile datafile(selectedFile);
+					InputFile datafile(selectedFile, currentDir);
 					DataDialogs::DialogInput::getInstance()->load(&datafile);
 				}
 				catch (Message& e) {
@@ -161,9 +162,9 @@ void InputDirectoryNavigator::wireDialogs(Storage::DirectoryEntry* dir) {
 	for (auto child : boxBreadcrumb->get_children()) boxBreadcrumb->remove(*child);
 
 	// Walk the parent chain to build segments bottom-up.
-	if (not dir->isRoot()) {
+	if (not dir->isAtRoot()) {
 		auto node = static_cast<Storage::DirectoryEntry*>(dir->getParent());
-		while (not node->isRoot()) {
+		while (not node->isAtRoot()) {
 			auto btn = Gtk::make_managed<Gtk::Button>(node->getName());
 			btn->get_style_context()->add_class("BreadcrumbButton");
 			btn->signal_clicked().connect([this, node]() {
@@ -186,4 +187,3 @@ void InputDirectoryNavigator::wireDialogs(Storage::DirectoryEntry* dir) {
 
 	boxBreadcrumb->show_all();
 }
-

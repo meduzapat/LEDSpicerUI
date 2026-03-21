@@ -24,7 +24,7 @@
 #include <fstream>
 #include "config/SettingsFile.hpp"
 
-namespace LEDSpicerUI {
+using namespace LEDSpicerUI::Config;
 
 /**
  * SettingsFileTest
@@ -38,23 +38,19 @@ protected:
 	string testConfigFile;
 
 	void SetUp() override {
-		// Use a temporary test config file
 		testConfigFile = PACKAGE_SAMPLES_DIR "test_settings.conf";
 	}
 
 	void TearDown() override {
-		// Clean up test file
-		if (Glib::file_test(testConfigFile, Glib::FILE_TEST_EXISTS)) {
+		if (Glib::file_test(testConfigFile, Glib::FILE_TEST_EXISTS))
 			std::remove(testConfigFile.c_str());
-		}
 	}
 };
 
-// Test save creates valid XML file
 TEST_F(SettingsFileTest, SaveCreatesValidFile) {
 	StringUMap settings = {
-		{"binaryPath", "/usr/bin/ledspicerd"},
-		{"dataDir", "/usr/share/ledspicer"},
+		{"binaryPath",  "/usr/bin/ledspicerd"},
+		{"dataDir",     "/usr/share/ledspicer"},
 		{"projectsDir", "/home/user/projects"}
 	};
 
@@ -62,11 +58,10 @@ TEST_F(SettingsFileTest, SaveCreatesValidFile) {
 	EXPECT_TRUE(Glib::file_test(testConfigFile, Glib::FILE_TEST_EXISTS));
 }
 
-// Test save writes correct content
 TEST_F(SettingsFileTest, SaveWritesCorrectContent) {
 	StringUMap settings = {
 		{"binaryPath", "/usr/bin/ledspicerd"},
-		{"dataDir", "/usr/share/ledspicer"}
+		{"dataDir",    "/usr/share/ledspicer"}
 	};
 
 	SettingsFile::save(testConfigFile, settings);
@@ -80,11 +75,10 @@ TEST_F(SettingsFileTest, SaveWritesCorrectContent) {
 	EXPECT_NE(string::npos, content.find("/>"));
 }
 
-// Test save skips empty values
 TEST_F(SettingsFileTest, SaveSkipsEmptyValues) {
 	StringUMap settings = {
-		{"binaryPath", "/usr/bin/ledspicerd"},
-		{"dataDir", ""},  // Empty value should be skipped
+		{"binaryPath",  "/usr/bin/ledspicerd"},
+		{"dataDir",     ""},
 		{"projectsDir", "/home/user/projects"}
 	};
 
@@ -97,11 +91,10 @@ TEST_F(SettingsFileTest, SaveSkipsEmptyValues) {
 	EXPECT_NE(string::npos, content.find("projectsDir=\"/home/user/projects\""));
 }
 
-// Test loading saved settings
 TEST_F(SettingsFileTest, LoadSavedSettings) {
 	StringUMap originalSettings = {
-		{"binaryPath", "/usr/bin/ledspicerd"},
-		{"dataDir", "/usr/share/ledspicer"},
+		{"binaryPath",  "/usr/bin/ledspicerd"},
+		{"dataDir",     "/usr/share/ledspicer"},
 		{"projectsDir", "/home/user/projects"}
 	};
 
@@ -111,13 +104,12 @@ TEST_F(SettingsFileTest, LoadSavedSettings) {
 		SettingsFile config(testConfigFile);
 		StringUMap loadedSettings = config.getSettings();
 
-		EXPECT_EQ("/usr/bin/ledspicerd", loadedSettings["binaryPath"]);
-		EXPECT_EQ("/usr/share/ledspicer", loadedSettings["dataDir"]);
-		EXPECT_EQ("/home/user/projects", loadedSettings["projectsDir"]);
+		EXPECT_EQ("/usr/bin/ledspicerd",   loadedSettings["binaryPath"]);
+		EXPECT_EQ("/usr/share/ledspicer",  loadedSettings["dataDir"]);
+		EXPECT_EQ("/home/user/projects",   loadedSettings["projectsDir"]);
 	});
 }
 
-// Test getConfigFilePath returns valid path
 TEST_F(SettingsFileTest, GetConfigFilePathReturnsValidPath) {
 	string configPath = SettingsFile::getConfigFilePath();
 
@@ -128,19 +120,12 @@ TEST_F(SettingsFileTest, GetConfigFilePathReturnsValidPath) {
 		<< "Config path should contain config filename";
 }
 
-// Test configExists when file doesn't exist
 TEST_F(SettingsFileTest, ConfigExistsReturnsFalseWhenMissing) {
-	// This test assumes the actual config file doesn't exist in test environment
-	// If it does exist, this test would need modification
 	string actualConfigPath = SettingsFile::getConfigFilePath();
-
-	// Only run if config doesn't actually exist
-	if (not Glib::file_test(actualConfigPath, Glib::FILE_TEST_EXISTS)) {
+	if (not Glib::file_test(actualConfigPath, Glib::FILE_TEST_EXISTS))
 		EXPECT_FALSE(SettingsFile::configExists());
-	}
 }
 
-// Test save with special characters
 TEST_F(SettingsFileTest, SaveHandlesSpecialCharacters) {
 	StringUMap settings = {
 		{"path", "/home/user/My Projects/LEDSpicer Files"},
@@ -153,10 +138,9 @@ TEST_F(SettingsFileTest, SaveHandlesSpecialCharacters) {
 	StringUMap loadedSettings = config.getSettings();
 
 	EXPECT_EQ("/home/user/My Projects/LEDSpicer Files", loadedSettings["path"]);
-	EXPECT_EQ("Test & Development", loadedSettings["note"]);
+	EXPECT_EQ("Test & Development",                     loadedSettings["note"]);
 }
 
-// Test empty settings map
 TEST_F(SettingsFileTest, SaveEmptySettings) {
 	StringUMap emptySettings;
 
@@ -164,13 +148,10 @@ TEST_F(SettingsFileTest, SaveEmptySettings) {
 
 	string content = Glib::file_get_contents(testConfigFile);
 
-	// Should still have XML structure
 	EXPECT_NE(string::npos, content.find("<?xml"));
 	EXPECT_NE(string::npos, content.find("<" PACKAGE_NAME));
 	EXPECT_NE(string::npos, content.find("/>"));
 }
-
-} // namespace LEDSpicerUI
 
 int main(int argc, char **argv) {
 	::testing::InitGoogleTest(&argc, argv);

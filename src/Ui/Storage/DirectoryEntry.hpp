@@ -31,16 +31,16 @@ namespace LEDSpicerUI::Ui::Storage {
  * LEDSpicerUI::Ui::Storage::DirectoryEntry
  * Represents a single directory node in the navigator tree.
  * Never serialized — exists only at runtime for navigation.
- * Holds a pointer to its parent so full paths are resolved recursively
- * without storing or copying path strings.
- * NAME stores the directory's own segment name only.
+ * Inherits Data for field storage (NAME) and BoxButton compatibility.
+ * Inherits DirNode for parent pointer and path resolution.
+ * Does not inherit Revertible — directories are never snap/restored.
  */
-class DirectoryEntry : public DirNode {
+class DirectoryEntry : public Data, public DirNode {
 
 public:
 
 	/**
-	 * @param data  Must contain NAME (directory segment name).
+	 * @param data   Must contain NAME (directory segment name).
 	 * @param parent Parent directory node, or nullptr for root-level.
 	 */
 	DirectoryEntry(StringUMap& data, const DirectoryEntry* parent);
@@ -55,22 +55,28 @@ public:
 	string getName() const override;
 	string getFsId() const override;
 
+	/**
+	 * @return true if this directory contains no items.
+	 */
 	bool isEmpty() const;
 
+	/**
+	 * @return The mutable contents collection for this directory.
+	 */
 	BoxButtonCollection& getContents();
 
+	/**
+	 * @return Non-const parent pointer for tree navigation.
+	 */
 	DirNode* getParent();
 
 protected:
 
-	/// Stable app-wide identifier, set once at construction.
-	const string fsId;
-
-	/// Counter for stable code generation.
+	/// Counter for stable id generation.
 	inline static size_t dirCounter = 0;
 
-	/// Stored files in this directory.
-	Storage::BoxButtonCollection contents;
+	/// Items owned by this directory.
+	BoxButtonCollection contents;
 
 };
 

@@ -108,6 +108,7 @@ protected:
 			row.set_value(1, string(info.name));
 			row.set_value(2, true);
 		}
+		selectorCombo->set_active(-1);
 	}
 };
 

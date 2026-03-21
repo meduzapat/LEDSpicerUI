@@ -20,7 +20,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Revertible.hpp"
+#include "Defaults.hpp"
 
 #pragma once
 
@@ -28,33 +28,29 @@ namespace LEDSpicerUI::Ui::Storage {
 
 /**
  * LEDSpicerUI::Ui::Storage::DirNode
- * Base for any object that lives inside a directory tree.
- * Provides parent pointer, path resolution, and name abstraction.
+ * Pure structural mixin for objects that live inside a directory tree.
+ * Provides parent pointer and recursive path resolution only.
  */
-class DirNode : public Revertible {
+class DirNode {
 
 public:
 
 	/**
 	 * @param parent Parent node. nullptr = root level.
 	 */
-	DirNode(StringUMap& data, const DirNode* parent) :
-	Revertible(data),
-	parent(parent)
-	{}
+	DirNode(const DirNode* parent) : parent(parent) {}
 
 	virtual ~DirNode() = default;
 
 	/**
 	 * Returns this node's own name segment.
-	 * DirectoryEntry returns its directory name.
-	 * FileData returns its filename (no extension).
 	 * @return Name string.
 	 */
 	virtual string getName() const = 0;
 
 	/**
-	 * @return Returns a unique identifier for this node
+	 * Returns a stable app-wide identifier for this node.
+	 * @return Stable id string, e.g. "dir_1", "file_3".
 	 */
 	virtual string getFsId() const = 0;
 
@@ -74,7 +70,7 @@ public:
 	/**
 	 * Returns the full relative path including this node's own name.
 	 * Resolves recursively via the parent chain.
-	 * e.g. root → dir1 → dir2 returns "dir1/dir2"
+	 * e.g. root → dir1 → file returns "dir1/file"
 	 * @return Full path string.
 	 */
 	string getFullPath() const;
@@ -82,7 +78,7 @@ public:
 	/**
 	 * @return true if this node is at root level (no parent).
 	 */
-	bool isRoot() const;
+	bool isAtRoot() const;
 
 protected:
 

@@ -22,21 +22,25 @@
 
 #include "InputFile.hpp"
 
-using namespace LEDSpicerUI;
+using namespace LEDSpicerUI::Config;
 
-InputFile::InputFile(const string& inputFile) : ProjectFile(inputFile, "Input", INPUT_PATH) {
-
+InputFile::InputFile(const string& filePath, const Ui::Storage::DirectoryEntry* parent) :
+	ProjectFile(filePath, "Input", parent)
+{
 	string errors;
 
-	StringUMap input(rootInfo.attributes);
+	/* Base key matches FileData::createUniqueId() for the resulting Input object. */
+	const string baseId(Defaults::createCommonUniqueId({
+		parent ? parent->getFsId() : "",
+		filename
+	}));
 
-	// Inject FILENAME (basename of pathFilename) so FileData can store it as a property.
-	auto pos = pathFilename.find_last_of('/');
-	input[FILENAME] = pos == string::npos ? pathFilename : pathFilename.substr(pos + 1);
+	StringUMap input(rootInfo.attributes);
+	input[FILENAME] = filename;
 
 	tinyxml2::XMLElement* mapsNode = getRoot()->FirstChildElement("maps");
 	if (not mapsNode) {
-		errors += "Missing maps section for input " + pathFilename + '\n';
+		errors += "Missing maps section for input " + filename + '\n';
 	}
 	else {
 		StringUMapVector mapsSources;
@@ -45,11 +49,14 @@ InputFile::InputFile(const string& inputFile) : ProjectFile(inputFile, "Input", 
 			mapsSources.push_back(processNode(mapsNode));
 			errors += processMaps(
 				mapsNode,
-				Defaults::createCommonUniqueId({pathFilename, std::to_string(idx), COLLECTION_INPUT_MAPS})
+				Defaults::createCommonUniqueId({baseId, std::to_string(idx), COLLECTION_INPUT_MAPS})
 			);
 		}
 
-		extractedData.emplace(Defaults::createCommonUniqueId({pathFilename, COLLECTION_INPUT_SOURCES}), std::move(mapsSources));
+		extractedData.emplace(
+			Defaults::createCommonUniqueId({baseId, COLLECTION_INPUT_SOURCES}),
+			std::move(mapsSources)
+		);
 	}
 
 	extractedData.emplace(COLLECTION_INPUT, StringUMapVector{input});

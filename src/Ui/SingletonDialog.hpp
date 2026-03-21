@@ -37,7 +37,7 @@ public:
 		return instance;
 	}
 
-	static void buildInstance(const Glib::RefPtr<Gtk::Builder>& builder, const std::string& widgetId) {
+	static void buildInstance(const Glib::RefPtr<Gtk::Builder>& builder, const string& widgetId) {
 		if (not instance) {
 			builder->get_widget_derived(widgetId, instance);
 			if (not instance) {

@@ -26,12 +26,15 @@
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
 void DialogFormHost::clearForm() {
-	selectorCombo->set_active_id("");
+	selectorCombo->set_active(0);
 	previousName = "";
-	//currentData->getPrimaryValue();
 }
 
 bool DialogFormHost::handleTypeSwitch(const OrdenableFlowBox* box, const string& confirmMsg) {
+
+	if (selectorCombo->get_active_row_number() == -1)
+		return false;
+
 	const string newName {selectorCombo->get_active_id()};
 
 	// Clean up.
@@ -44,7 +47,8 @@ bool DialogFormHost::handleTypeSwitch(const OrdenableFlowBox* box, const string&
 	if (previousName.empty()) {
 		previousName = newName;
 		onSelected();
-		return false;
+		// Only ADD needs reset!
+		return action == Actions::ADD;
 	}
 
 	// Refresh.

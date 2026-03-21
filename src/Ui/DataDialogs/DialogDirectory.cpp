@@ -73,7 +73,7 @@ void DialogDirectory::retrieveData() {
 
 const string DialogDirectory::createUniqueId() const {
 	return Defaults::createCommonUniqueId({
-		static_cast<const Storage::DirNode*>(ownerData)->getFsId(),
+		ownerData->getProperty(PID),
 		Defaults::sanitizeFilename(entryDirectoryName->get_text())
 	});
 }

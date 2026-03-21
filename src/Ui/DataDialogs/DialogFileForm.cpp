@@ -24,27 +24,10 @@
 
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
-
 void DialogFileForm::setCurrentDirectory(Storage::DirectoryEntry* directory) {
 	currentDirectory = directory;
 }
 
 LEDSpicerUI::Ui::Storage::DirectoryEntry* DialogFileForm::getCurrentDirectory() const {
 	return currentDirectory;
-}
-
-string DialogFileForm::getFullPath(const string& filename) const {
-	if (not currentDirectory) return filename;
-	return currentDirectory->createUniqueId() + "/" + filename;
-}
-
-bool DialogFileForm::isUniqueFilename(const string& filename) const {
-	if (not items) return true;
-	for (const auto bb : *items) {
-		auto fd = static_cast<const Storage::FileData*>(bb->getData());
-		if (not fd or fd == currentData) continue;
-		if (fd->getParent() == currentDirectory and fd->getProperty(FILENAME) == filename)
-			return false;
-	}
-	return true;
 }

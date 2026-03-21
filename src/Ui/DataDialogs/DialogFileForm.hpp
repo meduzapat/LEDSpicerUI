@@ -22,7 +22,6 @@
 
 #include "DialogFormHost.hpp"
 #include "Storage/DirectoryEntry.hpp"
-#include "Storage/FileData.hpp"
 
 #pragma once
 
@@ -32,7 +31,8 @@ namespace LEDSpicerUI::Ui::DataDialogs {
  * LEDSpicerUI::Ui::DataDialogs::DialogFileForm
  * Intermediate base for dialogs that manage file-based Data objects
  * (Inputs, Animations, Profiles) stored inside project directories.
- * Provides directory tracking and per-directory filename uniqueness checks,
+ * Tracks the active directory so subclasses know where new items land.
+ * Uniqueness checks are delegated to CollectionHandler via createUniqueId().
  */
 class DialogFileForm : public DialogFormHost {
 
@@ -41,7 +41,7 @@ public:
 	virtual ~DialogFileForm() = default;
 
 	/**
-	 * Sets the active directory for new file creation.
+	 * Sets the active directory for new item creation.
 	 * Pass nullptr to indicate the root of the type's directory tree.
 	 * @param directory Pointer to the current DirectoryEntry, or nullptr for root.
 	 */
@@ -52,22 +52,6 @@ public:
 	 * @return Current DirectoryEntry pointer.
 	 */
 	Storage::DirectoryEntry* getCurrentDirectory() const;
-
-	/**
-	 * Resolves the full relative path for a given filename inside the current directory.
-	 * @param filename Bare filename without extension.
-	 * @return Relative path string, e.g. "subdir/name" or just "name" at root.
-	 */
-	string getFullPath(const string& filename) const;
-
-	/**
-	 * Checks whether a filename is already used by another FileData item
-	 * residing in the same directory as currentDirectory.
-	 * Ignores the item currently being edited (currentData).
-	 * @param filename Bare filename to check.
-	 * @return true if the filename is already taken in this directory.
-	 */
-	bool isUniqueFilename(const string& filename) const;
 
 protected:
 

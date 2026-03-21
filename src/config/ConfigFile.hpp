@@ -20,12 +20,12 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Ui/Storage/BoxButtonCollection.hpp"
+#include "Storage/BoxButtonCollection.hpp"
 #include "XMLHelper.hpp"
 
 #pragma once
 
-namespace LEDSpicerUI {
+namespace LEDSpicerUI::Config {
 
 using Ui::Storage::BoxButtonCollection;
 

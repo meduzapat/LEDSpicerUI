@@ -24,7 +24,9 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-Input::Input(StringUMap& data, const DirNode* dir) : FileData(data, dir) {
+Input::Input(StringUMap& data, const DirNode* parent) :
+	FileData(data, parent)
+{
 	registerChild(sources);
 	registerChild(linkedMaps);
 }
@@ -34,8 +36,12 @@ Input::~Input() {
 		CollectionHandler::getInstance(COLLECTION_INPUT)->remove(this);
 }
 
+const string Input::createPrettyName() const {
+	return getFullPath() + " [" + getValue(NAME) + "]";
+}
+
 const string Input::createTooltip() const {
-	return "Input " + FileData::createTooltip();
+	return "Input of type " + getValue(NAME);
 }
 
 string_view Input::getCssClass() const noexcept {
@@ -47,10 +53,6 @@ void Input::activate() {
 	// TODO wire linkedMaps once DialogInputLinkMaps is reworked.
 	// DataDialogs::DialogInputLinkMaps::getInstance()->setOwner(&linkedMaps, this);
 }
-
-//void Input::deActivate() {
-//	DataDialogs::DialogInputSource::getInstance()->setOwner(nullptr);
-//}
 
 const string Input::toXML() const {
 	string r(XMLHelper::xmlHeader("Input"));
