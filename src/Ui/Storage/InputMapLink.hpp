@@ -38,10 +38,10 @@ public:
 
 	virtual ~InputMapLink() = default;
 
-	const string createPrettyName() const override;
-	const string createTooltip() const override;
+	const string createPrettyName() const noexcept override;
+	const string createTooltip() const noexcept override;
 	string_view getCssClass() const noexcept override;
-	const string createUniqueId() const override;
+	const string createUniqueId() const noexcept override;
 };
 
 } // namespace

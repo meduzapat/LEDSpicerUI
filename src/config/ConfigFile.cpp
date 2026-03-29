@@ -164,7 +164,7 @@ const string ConfigFile::processProcessLookup() {
 
 const string ConfigFile::processElements(tinyxml2::XMLElement* deviceNode, const string& deviceName) {
 
-	tinyxml2::XMLElement* elementNode = deviceNode->FirstChildElement(TYPE_ELEMENT);
+	tinyxml2::XMLElement* elementNode {deviceNode->FirstChildElement(TYPE_ELEMENT)};
 	if (not elementNode)
 		return "Missing elements node for " + deviceName + '\n';
 	StringUMapVector elements;
@@ -184,14 +184,14 @@ const string ConfigFile::processElements(tinyxml2::XMLElement* deviceNode, const
 }
 
 const string ConfigFile::processRestrictorMaps(tinyxml2::XMLElement* restrictorNode, const string& restrictorName) {
-	tinyxml2::XMLElement* mapNode = restrictorNode->FirstChildElement("map");
+	tinyxml2::XMLElement* mapNode {restrictorNode->FirstChildElement("map")};
 	if (not mapNode)
 		return "Missing player map node for " + restrictorName + '\n';
 	StringUMapVector maps;
 	string errors;
 	for (; mapNode; mapNode = mapNode->NextSiblingElement("map")) {
 
-		StringUMap mapAttr = processNode(mapNode);
+		StringUMap mapAttr {processNode(mapNode)};
 		try {
 			checkAttributes({PLAYER, JOYSTICK, RESTRICTOR_INTERFACE}, mapAttr, "restrictor map");
 		}
@@ -207,7 +207,7 @@ const string ConfigFile::processRestrictorMaps(tinyxml2::XMLElement* restrictorN
 
 const string ConfigFile::processGroups() {
 	StringUMap group;
-	tinyxml2::XMLElement* layoutNode = root->FirstChildElement("layout");
+	tinyxml2::XMLElement* layoutNode {root->FirstChildElement("layout")};
 	if (not layoutNode)
 		throw Message("Missing layout section, no groups\n");
 
@@ -217,7 +217,7 @@ const string ConfigFile::processGroups() {
 	defaultProfile = group["defaultProfile"];
 	group.clear();
 
-	tinyxml2::XMLElement* groupNode = layoutNode->FirstChildElement("group");
+	tinyxml2::XMLElement* groupNode {layoutNode->FirstChildElement("group")};
 	StringUMapVector groups;
 	if (groupNode)
 	for (; groupNode; groupNode = groupNode->NextSiblingElement("group")) {
@@ -262,7 +262,7 @@ void ConfigFile::save(const ConfigData& data) {
 		throw Message("At least one device is required");
 
 	// Build XML
-	string xmlData = xmlHeader("Configuration");
+	string xmlData {xmlHeader("Configuration")};
 	xmlData += toXML(data.settings);
 	Defaults::reduceTab();
 	xmlData += ">\n";
@@ -277,7 +277,7 @@ void ConfigFile::save(const ConfigData& data) {
 		}
 		xmlData += ">\n";
 		Defaults::increaseTab();
-		for (const auto& p : data.processes) {
+		for (const auto p : data.processes) {
 			xmlData += p->getData()->toXML();
 		}
 		Defaults::reduceTab();
@@ -287,7 +287,7 @@ void ConfigFile::save(const ConfigData& data) {
 	// Devices (required)
 	xmlData += Defaults::tab() + "<devices>\n";
 	Defaults::increaseTab();
-	for (const auto& d : data.devices) {
+	for (const auto d : data.devices) {
 		xmlData += d->getData()->toXML();
 	}
 	Defaults::reduceTab();
@@ -297,7 +297,7 @@ void ConfigFile::save(const ConfigData& data) {
 	if (data.restrictors.getSize()) {
 		xmlData += Defaults::tab() + "<restrictors>\n";
 		Defaults::increaseTab();
-		for (const auto& r : data.restrictors) {
+		for (const auto r : data.restrictors) {
 			xmlData += r->getData()->toXML();
 		}
 		Defaults::reduceTab();
@@ -307,7 +307,7 @@ void ConfigFile::save(const ConfigData& data) {
 	// Layout with groups
 	xmlData += Defaults::tab() + "<layout defaultProfile=\"" + data.defaultProfile + "\">\n";
 	Defaults::increaseTab();
-	for (const auto& g : data.groups) {
+	for (const auto g : data.groups) {
 		xmlData += g->getData()->toXML();
 	}
 	Defaults::reduceTab();

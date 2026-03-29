@@ -339,17 +339,21 @@ void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {
 		}
 
 		currentProjectName = newProject;
-		// TODO when selecting a project check if is portable mode and do if (mode == Portable) configPath = dataDir + this->projectName + "/ledspicer.conf" in settings
+		Defaults::setSubtitle(currentProjectName);
+		// Resolve from where the config will be read.
+		const string configPath = (Defaults::getMode() == Defaults::Mode::Portable) ?
+			Defaults::getProjectsDir() + currentProjectName + "/ledspicer.conf" :
+			DialogSettings::getInstance()->getConfigPath();
+
 		// Wipe random colors and any other color and read config.
 		setColorFile("");
-		bool exists = Glib::file_test(DialogSettings::getInstance()->getConfigPath(), Glib::FileTest::FILE_TEST_EXISTS);
 		// Old data.
 		try {
-			readConfigFile(DialogSettings::getInstance()->getConfigPath(), true, IMPORT_ALL);
+			readConfigFile(configPath, true, IMPORT_ALL);
 		}
 		// New data.
 		catch (Message& e) {
-			if (exists)
+			if (Glib::file_test(configPath, Glib::FileTest::FILE_TEST_EXISTS))
 				Message::displayError(XMLHelper::cleanError("The config file raised an error:\n" + e.getMessage()));
 			// Wipe all data.
 			profiles.wipe();
@@ -360,10 +364,20 @@ void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {
 			inputNavigator.clear();
 			// animationNavigator.clear();
 			//profileNavigator.clear();
+			// Refresh UI boxes after wipe.
+			// Clear random colors and profile selector.
+			DialogColors::getInstance()->resetColorButtons();
+			comboDefaultProfile->remove_all();
 			StringUMap values;
 			setConfiguration(values);
 		}
+		// Always refresh all boxes — covers load, new project, and (conditionally) import.
+		DataDialogs::DialogDevice::getInstance()->refreshItems();
+		DataDialogs::DialogGroup::getInstance()->refreshItems();
+		DataDialogs::DialogRestrictor::getInstance()->refreshItems();
+		DataDialogs::DialogProcess::getInstance()->refreshItems();
 		Defaults::cleanDirty();
+		MainTabs->set_current_page(0);
 		MainTabs->set_sensitive(true);
 		DialogProject::getInstance()->hide();
 	});
@@ -432,9 +446,7 @@ void MainWindow::readConfigFile(const string& dataFilePath, bool wipe, uint8_t i
 			groups.wipe();
 		}
 		DataDialogs::DialogDevice::getInstance()->load(&datafile);
-		DataDialogs::DialogDevice::getInstance()->refreshItems();
 		DataDialogs::DialogGroup::getInstance()->load(&datafile);
-		DataDialogs::DialogGroup::getInstance()->refreshItems();
 		// TODO: set default profile
 	}
 
@@ -444,7 +456,6 @@ void MainWindow::readConfigFile(const string& dataFilePath, bool wipe, uint8_t i
 			restrictors.wipe();
 		}
 		DataDialogs::DialogRestrictor::getInstance()->load(&datafile);
-		DataDialogs::DialogRestrictor::getInstance()->refreshItems();
 	}
 
 	// Load process mappings from config file.
@@ -453,7 +464,6 @@ void MainWindow::readConfigFile(const string& dataFilePath, bool wipe, uint8_t i
 			processes.wipe();
 		}
 		DataDialogs::DialogProcess::getInstance()->load(&datafile);
-		DataDialogs::DialogProcess::getInstance()->refreshItems();
 		inputRunEvery->set_text(datafile.getProcessLookupRunEvery());
 	}
 

@@ -42,7 +42,7 @@ class DialogFormHost : public DialogForm {
 
 public:
 
-	void clearForm() override;
+	void clearForm() noexcept override;
 
 protected:
 

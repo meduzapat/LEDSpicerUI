@@ -20,8 +20,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Data.hpp"
-#include "Storage/CollectionHandler.hpp"
+#include "CollectionHandler.hpp"
 
 #pragma once
 
@@ -34,11 +33,11 @@ class Element: public Data {
 
 public:
 
-	using Data::Data;
+	Element(StringUMap& data) : Data(data, COLLECTION_ELEMENT) {}
 
 	virtual ~Element();
 
-	string_view getCssClass() const noexcept override;
+	string_view getCssClass() const noexcept override { return "ElementBoxButton"; }
 
 	const string createPrettyName() const override;
 

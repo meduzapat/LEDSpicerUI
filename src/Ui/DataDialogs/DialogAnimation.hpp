@@ -34,17 +34,20 @@ class DialogAnimation: public DialogForm, public SingletonDialog<DialogAnimation
 
 public:
 
-	using DialogForm::DialogForm;
 
 	virtual ~DialogAnimation() = default;
 
 	void load(XMLHelper* values) override;
 	Storage::CollectionHandler* getCollectionHandler() const override;
-	void clearForm() override;
+	void clearForm() noexcept override;
 	void isValid() const override;
-	void storeData() override;
-	void retrieveData() override;
-	const string createUniqueId() const override;
+	void storeData() noexcept override;
+	void retrieveData() noexcept override;
+	const string createUniqueId() const noexcept override;
+
+protected:
+
+	using DialogForm::DialogForm;
 
 };
 

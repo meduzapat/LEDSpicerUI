@@ -24,31 +24,21 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-Profile::Profile(StringUMap& data) : Data(data) {
-	// Any change needs to be reflected here.
-	CollectionHandler::getInstance(COLLECTION_ELEMENT)->registerDependency({&alwaysOnElements});
-	CollectionHandler::getInstance(COLLECTION_GROUP)->registerDependency({&alwaysOnGroups});
-	CollectionHandler::getInstance(COLLECTION_INPUT)->registerDependency({&inputs});
-//	CollectionHandler::getInstance(COLLECTION_ANIMATION)->registerDependency(&animationss);
-//	CollectionHandler::getInstance(COLLECTION_ANIMATION)->registerDependency(&startTransitions);
-//	CollectionHandler::getInstance(COLLECTION_ANIMATION)->registerDependency(&endTransitions);
+Profile::Profile(StringUMap& data) :
+	Parent(data, COLLECTION_PROFILES, {
+		{COLLECTION_ELEMENT,    BoxButtonCollection{}},
+		{COLLECTION_GROUP,      BoxButtonCollection{}},
+		{COLLECTION_ANIMATIONS, BoxButtonCollection{}},
+		{COLLECTION_INPUT,      BoxButtonCollection{}}
+	})
+{
+	registerDependency(COLLECTION_ELEMENT);
+	registerDependency(COLLECTION_GROUP);
+	registerDependency(COLLECTION_ANIMATIONS);
+	registerDependency(COLLECTION_INPUT);
 }
 
-Profile::~Profile() {
-	CollectionHandler::getInstance(COLLECTION_PROFILES)->remove(this);
-	CollectionHandler::getInstance(COLLECTION_ELEMENT)->release(&alwaysOnElements);
-	CollectionHandler::getInstance(COLLECTION_GROUP)->release(&alwaysOnGroups);
-	CollectionHandler::getInstance(COLLECTION_INPUT)->release(&inputs);
-//	CollectionHandler::getInstance(COLLECTION_ANIMATION)->release(&animationss);
-//	CollectionHandler::getInstance(COLLECTION_ANIMATION)->release(&startTransitions);
-//	CollectionHandler::getInstance(COLLECTION_ANIMATION)->release(&endTransitions);
-}
-
-string_view Profile::getCssClass() const noexcept {
-	return "ProfileBoxButton";
-}
-
-void Profile::activate() {
+void Profile::setUp() {
 	DataDialogs::DialogSelect::getInstance()->setDestinations(itemCollections, this);
 }
 

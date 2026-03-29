@@ -37,10 +37,6 @@ CollectionHandler* CollectionHandler::getInstance(string_view collectionName) {
 	return it->second;
 }
 
-size_t CollectionHandler::getSize() const {
-	return collection.size();
-}
-
 Data* CollectionHandler::get(const string& id) const {
 	return (isIdSet(id) ? collection.at(id) : nullptr);
 }
@@ -62,9 +58,9 @@ size_t CollectionHandler::countByKey(const string& key, const string& value) con
 
 vector<Data*> CollectionHandler::findByProperty(const string& property, const string& value) {
 	vector<Data*> results;
-	for (auto& [id, data] : collection) {
-		if (data->getProperty(property) == value) {
-			results.push_back(data);
+	for (const auto& item : collection) {
+		if (item.second->getProperty(property) == value) {
+			results.push_back(item.second);
 		}
 	}
 	return results;
@@ -138,21 +134,6 @@ void CollectionHandler::release(Gtk::ComboBoxText* destination) {
 	comboBoxes.erase(std::find(comboBoxes.begin(), comboBoxes.end(), destination));
 }
 
-StringDataMap::iterator CollectionHandler::begin() {
-	return collection.begin();
-}
-
-StringDataMap::iterator CollectionHandler::end() {
-	return collection.end();
-}
-
-StringDataMap::const_iterator CollectionHandler::begin() const {
-	return collection.begin();
-}
-
-StringDataMap::const_iterator CollectionHandler::end() const {
-	return collection.end();
-}
 void CollectionHandler::refreshComboBoxes() {
 	for (auto comboBox : comboBoxes) {
 		refreshComboBox(comboBox);

@@ -25,7 +25,7 @@
 using namespace LEDSpicerUI::Ui::Storage;
 
 DirectoryEntry::DirectoryEntry(StringUMap& data, const DirectoryEntry* parent) :
-	Data(data),
+	Data(data, COLLECTION_DIRECTORIES),
 	DirNode(parent)
 {
 	setProperty(PID, parent ? parent->getFsId() : "");
@@ -39,32 +39,24 @@ const string DirectoryEntry::createUniqueId() const {
 	});
 }
 
-const string DirectoryEntry::createPrettyName() const {
+const string DirectoryEntry::createPrettyName() const noexcept {
 	return "📁 " + getValue(NAME);
 }
 
-const string DirectoryEntry::createTooltip() const {
+const string DirectoryEntry::createTooltip() const noexcept {
 	return getFullPath();
 }
 
-string_view DirectoryEntry::getCssClass() const noexcept {
-	return "DirectoryBoxButton";
-}
-
-string DirectoryEntry::getName() const {
+string DirectoryEntry::getName() const noexcept {
 	return getValue(NAME);
 }
 
-string DirectoryEntry::getFsId() const {
+string DirectoryEntry::getFsId() const noexcept {
 	return getProperty(UID);
 }
 
-bool DirectoryEntry::isEmpty() const {
+bool DirectoryEntry::isEmpty() const noexcept {
 	return not contents.getSize();
-}
-
-BoxButtonCollection& DirectoryEntry::getContents() {
-	return contents;
 }
 
 DirNode* DirectoryEntry::getParent() {

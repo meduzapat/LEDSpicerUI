@@ -24,24 +24,6 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-Restrictor::Restrictor(StringUMap& data) : Revertible(data) {
-	registerChild(playerMapping);
-}
-
-Restrictor::~Restrictor() {
-	if (not fieldsData.empty()) {
-		CollectionHandler::getInstance(COLLECTION_RESTRICTORS)->remove(this);
-	}
-}
-
-void Restrictor::reset() {
-	playerMapping.wipe();
-	if (not fieldsData.empty()) {
-		CollectionHandler::getInstance(COLLECTION_RESTRICTORS)->remove(this);
-	}
-	Revertible::reset();
-}
-
 const string Restrictor::createPrettyName() const {
 	string
 		name (fieldsData.at(NAME)),
@@ -62,13 +44,9 @@ string_view Restrictor::getCssClass() const noexcept {
 	return "RestrictorBoxButton";
 }
 
-void Restrictor::activate() {
-	DataDialogs::DialogRestrictorMap::getInstance()->setOwner(&playerMapping, this);
-}
-
 const string Restrictor::toXML() const {
 	string r(createOpeningXML("restrictor", fieldsData, ignored, false));
-	for (const auto& e : playerMapping) {
+	for (const auto& e : children.at(COLLECTION_RESTRICTOR_MAP)) {
 		r += e->getData()->toXML();
 	}
 	r += createClosingXML("restrictor");

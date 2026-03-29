@@ -46,26 +46,26 @@ public:
 	 * Returns this node's own name segment.
 	 * @return Name string.
 	 */
-	virtual string getName() const = 0;
+	virtual string getName() const noexcept = 0;
 
 	/**
 	 * Returns a stable app-wide identifier for this node.
 	 * @return Stable id string, e.g. "dir_1", "file_3".
 	 */
-	virtual string getFsId() const = 0;
+	virtual string getFsId() const noexcept = 0;
 
 	/**
 	 * Returns the parent node pointer.
 	 * @return Parent pointer, or nullptr if at root level.
 	 */
-	const DirNode* getParent() const;
+	const DirNode* getParent() const noexcept { return parent; }
 
 	/**
 	 * Returns the full path of the parent.
 	 * Empty string if this node is at root level.
 	 * @return Parent full path string.
 	 */
-	string getPath() const;
+	string getPath() const noexcept;
 
 	/**
 	 * Returns the full relative path including this node's own name.
@@ -73,12 +73,12 @@ public:
 	 * e.g. root → dir1 → file returns "dir1/file"
 	 * @return Full path string.
 	 */
-	string getFullPath() const;
+	string getFullPath() const noexcept;
 
 	/**
 	 * @return true if this node is at root level (no parent).
 	 */
-	bool isAtRoot() const;
+	bool isAtRoot() const noexcept { return not parent; }
 
 protected:
 

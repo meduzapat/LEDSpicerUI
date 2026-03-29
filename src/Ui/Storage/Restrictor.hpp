@@ -20,7 +20,6 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DataDialogs/DialogRestrictorMap.hpp"
 #include "Revertible.hpp"
 
 #pragma once
@@ -35,20 +34,15 @@ class Restrictor : public Revertible {
 
 public:
 
-	Restrictor(StringUMap& data);
+	Restrictor(StringUMap& data) :
+		Revertible(data, COLLECTION_RESTRICTORS, {{COLLECTION_RESTRICTOR_MAP, BoxButtonCollection()}}) {}
 
-	virtual ~Restrictor();
+	virtual ~Restrictor() = default;
 
-	void reset() override;
 	const string createPrettyName() const override;
-	const string createUniqueId() const override;
+	const string createUniqueId() const noexcept override;
 	string_view getCssClass() const noexcept override;
-	void activate() override;
 	const string toXML() const override;
-
-protected:
-
-	BoxButtonCollection playerMapping;
 
 };
 

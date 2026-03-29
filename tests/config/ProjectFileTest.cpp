@@ -55,8 +55,3 @@ TEST_F(ProjectFileTest, NullParentReturnsNullptr) {
 	InputFile input(PACKAGE_SAMPLES_DIR "data/" INPUT_PATH "inputSingle.xml", nullptr);
 	EXPECT_EQ(nullptr, input.getParent());
 }
-
-int main(int argc, char **argv) {
-	::testing::InitGoogleTest(&argc, argv);
-	return RUN_ALL_TESTS();
-}

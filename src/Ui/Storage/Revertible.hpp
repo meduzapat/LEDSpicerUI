@@ -5,11 +5,22 @@
  * @author    Patricio A. Rossi (MeduZa)
  *
  * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
- * ...
+ *
+ * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * @copyright LEDSpicerUI is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * @copyright You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Data.hpp"
-#include "BoxButtonCollection.hpp"
+#include "Parent.hpp"
 
 #pragma once
 
@@ -36,11 +47,17 @@ namespace LEDSpicerUI::Ui::Storage {
  *     deActivate() detects the live snapshot and calls restore(), returning
  *     fieldsData and all child collections to their pre-edit state.
  */
-class Revertible : public Data {
+class Revertible : public Parent {
 
 public:
 
-	virtual ~Revertible() = default;
+	Revertible(
+		StringUMap& data,
+		const string& collectionId,
+		StringBoxButtonCollectionUMap children
+	);
+
+	virtual ~Revertible();
 
 	/**
 	 * Swaps fieldsData and all registered child collections into snapshot storage.
@@ -52,7 +69,7 @@ public:
 	 * Restores fieldsData and all registered child collections from snapshot.
 	 * No-op if no snapshot is present.
 	 */
-	virtual void restore();
+	virtual void revert();
 
 	/**
 	 * Clears fieldsData and discards all snapshot storage.
@@ -61,14 +78,18 @@ public:
 	void wipe() override;
 
 	/**
-	 * Restores snapshot if present, then delegates to Data::deActivate().
+	 * Restores snapshot if present, then delegates to Data::tearDown().
 	 * This is the CANCEL path — called by DialogForm after the modal loop.
 	 */
-	void deActivate() override;
+	void tearDown() override;
 
 protected:
 
-	using Data::Data;
+	/// Snapshot of fieldsData. Empty means no snapshot is active.
+	StringUMap snapFields;
+
+	/// Registered children paired with their snapshot storage.
+	vector<std::pair<BoxButtonCollection*, BoxButtonCollection>> childrenSnaps;
 
 	/**
 	 * Registers a child BoxButtonCollection to be included in swap/restore.
@@ -77,14 +98,6 @@ protected:
 	 * @param child The child collection to register.
 	 */
 	void registerChild(BoxButtonCollection& child);
-
-private:
-
-	/// Snapshot of fieldsData. Empty means no snapshot is active.
-	StringUMap snapFields;
-
-	/// Registered children paired with their snapshot storage.
-	vector<std::pair<BoxButtonCollection*, BoxButtonCollection>> children;
 
 };
 

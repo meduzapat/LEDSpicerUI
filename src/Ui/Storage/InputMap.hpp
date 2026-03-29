@@ -29,6 +29,7 @@ namespace LEDSpicerUI::Ui::Storage {
 
 /**
  * LEDSpicerUI::Ui::Storage::InputMap
+ *
  * A single input map entry. Extends Link to wrap the target Element or Group
  * so renames and deletes propagate automatically via CollectionHandler.
  * Carries its own extra values: trigger, color, filter, type.
@@ -52,7 +53,7 @@ public:
 
 	virtual ~InputMap();
 
-	const string createUniqueId() const override;
+	const string createUniqueId() const noexcept override;
 	const string createPrettyName() const override;
 	string_view getCssClass() const noexcept override;
 

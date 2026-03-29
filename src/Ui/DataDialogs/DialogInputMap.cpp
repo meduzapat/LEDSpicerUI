@@ -25,7 +25,7 @@
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
 DialogInputMap::DialogInputMap(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
-	DialogForm(obj, builder)
+	DialogForm(obj, builder, COLLECTION_INPUT_MAPS)
 {
 
 	Gtk::Button
@@ -103,7 +103,7 @@ LEDSpicerUI::Ui::Storage::CollectionHandler* DialogInputMap::getCollectionHandle
 	return Storage::CollectionHandler::getInstance(COLLECTION_INPUT_MAPS + ownerData->getProperty(UID));
 }
 
-void DialogInputMap::clearForm() {
+void DialogInputMap::clearForm() noexcept {
 	Storage::CollectionHandler::getInstance(COLLECTION_ELEMENT)->refreshComboBox(comboBoxInputMapElement, &DialogInputMap::elementFilter);
 	Storage::CollectionHandler::getInstance(COLLECTION_GROUP)->refreshComboBox(comboBoxInputMapGroup);
 	comboBoxInputMapElement->set_active(-1);
@@ -183,11 +183,11 @@ const string DialogInputMap::createUniqueId() const {
 	});
 }
 
-string_view DialogInputMap::getType() const {
+string_view DialogInputMap::getType() const noexcept {
 	return TYPE_INPUT_MAP;
 }
 
-LEDSpicerUI::Ui::Storage::Data* DialogInputMap::createData(StringUMap& rawData) {
+LEDSpicerUI::Ui::Storage::Data* DialogInputMap::createData(StringUMap& rawData) noexcept {
 	string
 		type(rawData.count(TYPE)     ? rawData.at(TYPE)   : ""),
 		target(rawData.count(TARGET) ? rawData.at(TARGET) : "");

@@ -24,7 +24,7 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-const string InputMapLink::createTooltip() const {
+const string InputMapLink::createTooltip() const noexcept {
 	string tooltip("This action will start with the ");
 	StringVector txts;
 	// data is trigger(30)type target(31)trigger(30)type target(31)trigger(30)type target
@@ -37,7 +37,7 @@ const string InputMapLink::createTooltip() const {
 	return tooltip + Defaults::implode(txts, " is detected, will move to ") + " is detected, will start over";
 }
 
-const string InputMapLink::createPrettyName() const {
+const string InputMapLink::createPrettyName() const noexcept {
 	StringVector prettyName;
 	// data is trigger(30)type target(31)trigger(30)type target(31)trigger(30)type target
 	for (const auto& group : Defaults::explode(fieldsData.at(NAME), RECORD_SEPARATOR)) {

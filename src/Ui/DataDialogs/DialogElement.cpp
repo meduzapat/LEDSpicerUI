@@ -25,7 +25,7 @@
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
 DialogElement::DialogElement(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
-	DialogForm(obj, builder)
+	DialogForm(obj, builder, COLLECTION_ELEMENT)
 {
 
 	// Connect Element Box and buttons.
@@ -182,7 +182,7 @@ LEDSpicerUI::Ui::Storage::CollectionHandler* DialogElement::getCollectionHandler
 	return LEDSpicerUI::Ui::Storage::CollectionHandler::getInstance(COLLECTION_ELEMENT);
 }
 
-void DialogElement::clearForm() {
+void DialogElement::clearForm() noexcept {
 	clearFormConditinal(false);
 }
 
@@ -720,11 +720,11 @@ void DialogElement::drawPins(vector<Gtk::Label *>& labels) {
 	}
 }
 
-string_view DialogElement::getType() const {
+string_view DialogElement::getType() const noexcept {
 	return TYPE_ELEMENT;
 }
 
-LEDSpicerUI::Ui::Storage::Data* DialogElement::createData(StringUMap& rawData) {
+LEDSpicerUI::Ui::Storage::Data* DialogElement::createData(StringUMap& rawData) noexcept {
 	return new Storage::Element(rawData);
 }
 

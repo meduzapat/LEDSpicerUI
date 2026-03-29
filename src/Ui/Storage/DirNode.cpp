@@ -24,19 +24,11 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-const DirNode* DirNode::getParent() const {
-	return parent;
-}
-
-string DirNode::getPath() const {
+string DirNode::getPath() const noexcept {
 	return parent ? parent->getFullPath() : "";
 }
 
-string DirNode::getFullPath() const {
+string DirNode::getFullPath() const noexcept {
 	const string path(getPath());
 	return path.empty() ? getName() : path + "/" + getName();
-}
-
-bool DirNode::isAtRoot() const {
-	return not parent;
 }

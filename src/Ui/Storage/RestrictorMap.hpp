@@ -33,13 +33,13 @@ class RestrictorMap: public Data {
 
 public:
 
-	using Data::Data;
+	RestrictorMap(StringUMap& data) : Data(data, COLLECTION_RESTRICTOR_MAP) {}
 
-	virtual ~RestrictorMap();
+	virtual ~RestrictorMap() = default;
 
 	const string createPrettyName() const override;
-	const string createUniqueId() const override;
-	string_view getCssClass() const noexcept override;
+	const string createUniqueId() const noexcept override;
+	string_view getCssClass() const noexcept override { return "RestrictorMapBoxButton"; }
 	const string toXML() const override;
 
 };

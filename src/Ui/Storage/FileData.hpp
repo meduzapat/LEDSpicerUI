@@ -48,7 +48,7 @@ public:
 
 	virtual ~FileData() = default;
 
-	const string createUniqueId() const override;
+	const string createUniqueId() const noexcept override;
 
 	string getName() const override;
 	string getFsId() const override;

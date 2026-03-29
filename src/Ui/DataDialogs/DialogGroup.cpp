@@ -25,7 +25,7 @@
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
 DialogGroup::DialogGroup(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
-	DialogForm(obj, builder)
+	DialogForm(obj, builder, COLLECTION_GROUP)
 {
 
 	// Connect Groups Box and button.
@@ -86,7 +86,7 @@ LEDSpicerUI::Ui::Storage::CollectionHandler* DialogGroup::getCollectionHandler()
 	return LEDSpicerUI::Ui::Storage::CollectionHandler::getInstance(COLLECTION_GROUP);
 }
 
-void DialogGroup::clearForm() {
+void DialogGroup::clearForm() noexcept {
 	inputGroupName->set_text("");
 	DialogColors::getInstance()->colorizeButton(btnGroupDefaultColor, NO_COLOR);
 }
@@ -130,10 +130,10 @@ string const DialogGroup::createUniqueId() const {
 	return Defaults::createCommonUniqueId({inputGroupName->get_text()});
 }
 
-string_view DialogGroup::getType() const {
+string_view DialogGroup::getType() const noexcept {
 	return TYPE_GROUP;
 }
 
-LEDSpicerUI::Ui::Storage::Data* DialogGroup::createData(StringUMap& rawData) {
+LEDSpicerUI::Ui::Storage::Data* DialogGroup::createData(StringUMap& rawData) noexcept {
 	return new Storage::Group(rawData);
 }

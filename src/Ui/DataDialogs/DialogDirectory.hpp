@@ -65,12 +65,12 @@ public:
 	void setSettings(const SettingRequest& req);
 
 	void load(XMLHelper* values) override;
-	void clearForm() override;
+	void clearForm() noexcept override;
 	void isValid() const override;
-	void storeData() override;
-	void retrieveData() override;
-	const string createUniqueId() const override;
-	string_view getType() const override;
+	void storeData() noexcept override;
+	void retrieveData() noexcept override;
+	const string createUniqueId() const noexcept override;
+	string_view getType() const noexcept override;
 
 	Storage::CollectionHandler* getCollectionHandler() const override;
 
@@ -84,7 +84,7 @@ protected:
 
 	DialogDirectory(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
 
-	Storage::Data* createData(StringUMap& rawData) override;
+	Storage::Data* createData(StringUMap& rawData) noexcept override;
 
 	void addButtons(Storage::BoxButton& boxButton) override;
 

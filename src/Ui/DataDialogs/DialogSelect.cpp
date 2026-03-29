@@ -44,9 +44,10 @@ DialogSelect::DialogSelect(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 	Defaults::setFilter(filterEntry, boxAll);
 }
 
-void DialogSelect::setDestinations(const StringBoxButtonCollectionUMap& itemCollections, const Storage::Data* caller) {
-	this->itemCollections = itemCollections;
+void DialogSelect::setDestinations(BoxButtonCollection& itemCollections, const Storage::Data* caller) {
+	this->itemCollections = &itemCollections;
 	this->caller          = caller;
+	refresh();
 }
 
 void DialogSelect::setSettings(const SettingRequest& setting) {
@@ -132,11 +133,11 @@ size_t DialogSelect::getNumberOfSelectables() const {
 	return setting->workingBox->get_children().size();
 }
 
-LEDSpicerUI::Ui::Storage::CollectionHandler* DialogSelect::getCollection() const {
+CollectionHandler* DialogSelect::getCollection() const {
 	return CollectionHandler::getInstance(setting->sourceCollection);
 }
 
-LEDSpicerUI::Ui::Storage::BoxButtonCollection* DialogSelect::getItemCollection() const {
+BoxButtonCollection* DialogSelect::getItemCollection() const {
 	return itemCollections.at(setting->type);
 }
 

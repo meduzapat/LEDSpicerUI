@@ -20,7 +20,6 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DataDialogs/DialogInputMap.hpp"
 #include "Revertible.hpp"
 
 #pragma once
@@ -36,27 +35,22 @@ class InputSource : public Revertible {
 
 public:
 
-	InputSource(StringUMap& data);
+	InputSource(StringUMap& data, const string& ownerId);
 
-	virtual ~InputSource();
+	virtual ~InputSource() = default;
 
-	const string createUniqueId() const override;
-	const string createPrettyName() const override;
-	const string createTooltip() const override;
-	string_view getCssClass() const noexcept override;
-	void reset() override;
-	void activate() override;
+	const string createUniqueId() const noexcept override;
+	const string createPrettyName() const noexcept override;
+	const string createTooltip() const noexcept override;
+	string_view getCssClass() const noexcept override { return "InputSourceBoxButton"; }
 	const string toXML() const override;
 
 protected:
 
-	/// Maps owned by this source.
-	BoxButtonCollection maps;
-
 	/// Counter for sId generation.
 	inline static size_t sourceCounter = 0;
 
-	const string getPrimaryKey() const override;
+	const string getPrimaryKey() const override { return SOURCE; }
 
 };
 

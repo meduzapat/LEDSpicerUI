@@ -24,12 +24,6 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-RestrictorMap::~RestrictorMap() {
-	if (not fieldsData.empty()) {
-		CollectionHandler::getInstance(COLLECTION_RESTRICTOR_MAP)->remove(this);
-	}
-}
-
 const string RestrictorMap::createPrettyName() const {
 	string name("Player " + fieldsData.at(PLAYER) + " Joystick " + fieldsData.at(JOYSTICK));
 	// Split hardware name out of additional info and check for multi.
@@ -40,10 +34,6 @@ const string RestrictorMap::createPrettyName() const {
 
 const string RestrictorMap::createUniqueId() const {
 	return Defaults::createCommonUniqueId({getValue(PLAYER), getValue(JOYSTICK)});
-}
-
-string_view RestrictorMap::getCssClass() const noexcept {
-	return "RestrictorMapBoxButton";
 }
 
 const string RestrictorMap::toXML() const {

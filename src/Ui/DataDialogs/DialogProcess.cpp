@@ -25,7 +25,7 @@
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
 DialogProcess::DialogProcess(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
-	DialogForm(obj, builder)
+	DialogForm(obj, builder, COLLECTION_PROCESS)
 {
 
 	// Connect Process Box and buttons.
@@ -50,7 +50,7 @@ LEDSpicerUI::Ui::Storage::CollectionHandler* DialogProcess::getCollectionHandler
 	return LEDSpicerUI::Ui::Storage::CollectionHandler::getInstance(COLLECTION_PROCESS);
 }
 
-void DialogProcess::clearForm() {
+void DialogProcess::clearForm() noexcept {
 	inputProcessName->set_text("");
 	inputSystemType->set_text("");
 	inputRomPosition->set_text("0");
@@ -108,10 +108,10 @@ string const DialogProcess::createUniqueId() const {
 	return inputProcessName->get_text();
 }
 
-string_view DialogProcess::getType() const {
+string_view DialogProcess::getType() const noexcept {
 	return TYPE_MAP;
 }
 
-LEDSpicerUI::Ui::Storage::Data* DialogProcess::createData(StringUMap& rawData) {
+LEDSpicerUI::Ui::Storage::Data* DialogProcess::createData(StringUMap& rawData) noexcept {
 	return new Storage::Process(rawData);
 }

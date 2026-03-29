@@ -25,8 +25,9 @@
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
 DialogProfile::DialogProfile(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
-	DialogForm(obj, builder)
+	DialogForm(obj, builder, COLLECTION_PROFILES)
 {
+
 	// Connect Profile Box and button.
 	builder->get_widget_derived("BoxProfiles", box);
 	builder->get_widget("BtnApplyProfile",     btnApply);
@@ -112,7 +113,7 @@ void DialogProfile::createSubItems(XMLHelper* values) {
 	dialogSelect->load(values, COLLECTION_PROFILES);
 }
 
-void DialogProfile::clearForm() {
+void DialogProfile::clearForm() noexcept {
 	inputProfileName->set_text("");
 	DialogColors::getInstance()->colorizeButton(btnProfileBackgroundColor, DEFAULT_PROFILE_BACKGROUND_COLOR);
 	// if no group, elements, animations or input disable button add
@@ -164,11 +165,11 @@ string const DialogProfile::createUniqueId() const {
 	return Defaults::createCommonUniqueId({inputProfileName->get_text()});
 }
 
-string_view DialogProfile::getType() const {
+string_view DialogProfile::getType() const noexcept {
 	return TYPE_PROFILE;
 }
 
-LEDSpicerUI::Ui::Storage::Data* DialogProfile::createData(StringUMap& rawData) {
+LEDSpicerUI::Ui::Storage::Data* DialogProfile::createData(StringUMap& rawData) noexcept {
 	return new Storage::Profile(rawData);
 }
 

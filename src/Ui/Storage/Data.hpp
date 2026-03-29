@@ -26,6 +26,9 @@
 
 namespace LEDSpicerUI::Ui::Storage {
 
+// Forward declaration
+class CollectionHandler;
+
 /**
  * LEDSpicerUI::Ui::Storage::Data
  *
@@ -40,16 +43,25 @@ public:
 	/**
 	 * Creates an object pre-populated.
 	 * @param data Iten's data.
+	 * @param collection Id to use.
 	 */
-	Data(StringUMap& data) : fieldsData(std::move(data)) {}
+	Data(
+		StringUMap& data,
+		const string& collectionId
+	) noexcept :
+		fieldsData(std::move(data)),
+		collectionId(std::move(collectionId)) {}
 
 	/**
 	 * Compares two Data objects for equality.
 	 * @param other The other Data object to compare with.
 	 * @return True if the objects are equal, false otherwise.
 	 */
-	virtual bool operator==(const Data& other) const;
+	virtual bool operator==(const Data& other) const noexcept {return this == &other;}
 
+	/**
+	 * Unregisters from collection if registered.
+	 */
 	virtual ~Data();
 
 	/**
@@ -62,93 +74,89 @@ public:
 	 *
 	 * @return pretty name for the form.
 	 */
-	virtual const string createPrettyName() const;
+	virtual const string createPrettyName() const noexcept;
 
 	/**
 	 * Creates a tooltip.
 	 *
 	 * @return the tooltip text.
 	 */
-	virtual const string createTooltip() const;
+	virtual const string createTooltip() const noexcept { return ""; }
 
 	/**
 	 * Creates a unique ID for the form.
 	 *
 	 * @return unique ID out of current data.
 	 */
-	virtual const string createUniqueId() const;
+	virtual const string createUniqueId() const noexcept;
 
 	/**
-	 * Alinas of value(primary key)
+	 * Alias of value(primary key)
 	 * @return a string with the primary key value or ""
 	 */
-	const string getPrimaryValue() const;
+	const string getPrimaryValue() const noexcept;
 
 	/**
 	 * Removes a value by key name.
 	 * @param key
 	 */
-	virtual void unSet(const string& key);
+	virtual void unSet(const string& key) noexcept;
+
+
+	/**
+	 * Returns a value using the key name.
+	 *
+	 * @param key
+	 * @return value or empty string if not found.
+	 */
+	const string& getValue(const string& key) const noexcept;
 
 	/**
 	 * Returns a value using the key name.
 	 *
 	 * @param key
 	 * @param defaultValue the default value if the key is not found.
-	 * @return
+	 * @return value or default.
 	 */
-	virtual string getValue(const string& key, const string& defaultValue = "") const;
+	virtual string getValue(const string& key, const string& defaultValue) const noexcept;
 
 	/**
 	 * Allows the change of an internal value.
 	 * @param key
 	 * @param value
 	 */
-	virtual void setValue(const string& key, const string& value);
+	virtual void setValue(const string& key, const string& value) noexcept;
 
 	/**
-	 * @param number the copy number.
+	 * Creates a copy of the internal data but adding
+	 * a copy number to the primary key value
+	 *
 	 * @return a copy of the values with a new primary key.
 	 */
-	StringUMap copyValues(uint8_t number) const;
+	StringUMap copyValues() const noexcept;
 
 	/**
 	 * @return a list of stored values
 	 */
-	const StringUMap* getValues() const;
+	const StringUMap* getValues() const noexcept;
 
 	/**
 	 * Replace values from a map.
 	 *
 	 * @param values
 	 */
-	void setValues(const StringUMap& values);
+	void setValues(const StringUMap& values) noexcept;
 
 	/**
 	 * Clears all serializable fields.
 	 */
-	virtual void wipe();
-
-	/**
-	 * Clears fields and unregisters from active collections.
-	 */
-	virtual void reset();
-
-	/**
-	 * If the data owns dialogs, do any data handling setup.
-	 */
-	virtual void activate() {}
-
-	/**
-	 * Do any shutdown when the dialog finished handling data.
-	 */
-	virtual void deActivate() {}
+	virtual void wipe() noexcept;
 
 	/**
 	 * @brief Converts the data into XML string.
 	 * @return The XML string representation of the box element.
 	 */
-	virtual const string toXML() const;
+	virtual const string toXML() const noexcept;
 
 	/**
 	 * Sets a property value.
@@ -156,7 +164,14 @@ public:
 	 * @param key Property name.
 	 * @param value Property value.
 	 */
-	void setProperty(const string& key, const string& value);
+	void setProperty(const string& key, const string& value) noexcept;
+
+	/**
+	 * Gets a property value.
+	 * @param key Property name.
+	 * @return Property value or empty string if not found.
+	 */
+	const string& getProperty(const string& key) const noexcept;
 
 	/**
 	 * Gets a property value.
@@ -164,30 +179,52 @@ public:
 	 * @param def Default value if not found.
 	 * @return Property value or default.
 	 */
-	string getProperty(const string& key, const string& def = "") const;
+	string getProperty(const string& key, const string& defaultProperty) const noexcept;
 
 	/**
 	 * Checks if a property exists.
 	 * @param key Property name.
 	 * @return True if property exists.
 	 */
-	bool hasProperty(const string& key) const;
+	bool hasProperty(const string& key) const noexcept;
 
 	/**
 	 * Removes a property by key name.
 	 * @param key
 	 */
-	void removeProperty(const string& key);
+	void removeProperty(const string& key) noexcept;
 
 	/**
 	 * @return All properties.
 	 */
-	const StringUMap& getProperties() const;
+	const StringUMap& getProperties() const noexcept;
 
 	/**
 	 * @return an empty data object.
 	 */
-	static StringUMap& createEmptyData();
+	static StringUMap& createEmptyData() noexcept;
+
+	virtual void setUp() noexcept {}
+
+	virtual void tearDown() noexcept {}
+
+	/**
+	 * @return the CollectionHandler this item registers itself into.
+	 */
+	CollectionHandler* getCollectionHandler() const noexcept;
+
+	/**
+	 * Registers this item into its collection.
+	 * No-op if already registered or if createUniqueId() is empty.
+	 * Normally called when the object is realized, but can be called manually if needed.
+	 */
+	void registerToCollection() noexcept;
+
+	/**
+	 * Unregisters this item from its collection.
+	 * No-op if not registered or if createUniqueId() is empty.
+	 */
+	void unregisterFromCollection() noexcept;
 
 protected:
 
@@ -200,12 +237,21 @@ protected:
 	/// List of ignored data fields.
 	mutable StringUSet ignored;
 
+	/// The Id of the collection to use
+	const string collectionId;
+
 	/**
 	 * Returns the field name used as the primary identifier for this data type.
 	 *
 	 * @return Field name to use as primary key (default: NAME).
 	 */
-	virtual const string getPrimaryKey() const;
+	virtual const string getPrimaryKey() const noexcept { return NAME; }
+
+	/**
+	 * Handles auto-registration and re-keying after a primary key field changes.
+	 * @param oldId The unique ID before the change, empty if not yet registered.
+	 */
+	void handleRegistration(const string& oldId) noexcept;
 
 	/**
 	 * Organizes data vertically or horizontally based on the number of elements.
@@ -216,7 +262,7 @@ protected:
 	static string valuesXML(
 		const StringUSet& ignored,
 		const StringUMap& data
-	);
+	) noexcept;
 
 	/**
 	 * Based on data it creates a single or multiple node.
@@ -231,13 +277,13 @@ protected:
 		const StringUMap& data,
 		const StringUSet& ignored,
 		bool empty
-	);
+	) noexcept;
 
 	/**
 	 * @param node
 	 * @return
 	 */
-	static string createClosingXML(const string& node);
+	static string createClosingXML(const string& node) noexcept;
 
 };
 

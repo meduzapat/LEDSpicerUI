@@ -47,11 +47,11 @@ public:
 
 	void load(XMLHelper* values) override;
 	Storage::CollectionHandler* getCollectionHandler() const override;
-	void clearForm() override;
+	void clearForm() noexcept override;
 	void isValid() const override;
-	void storeData() override;
-	void retrieveData() override;
-	const string createUniqueId() const override;
+	void storeData() noexcept override;
+	void retrieveData() noexcept override;
+	const string createUniqueId() const noexcept override;
 
 	/**
 	 * Sets the current number of pins.
@@ -115,9 +115,9 @@ protected:
 
 	void clearFormConditinal(uint8_t flags);
 
-	string_view getType() const override;
+	string_view getType() const noexcept override;
 
-	Storage::Data* createData(StringUMap& rawData) override;
+	Storage::Data* createData(StringUMap& rawData) noexcept override;
 
 	void addButtons(Storage::BoxButton& boxButton) override;
 

@@ -43,11 +43,11 @@ set(COMMON_SRCS
 # Storage sources needed by anything that includes DirectoryEntry.hpp.
 set(STORAGE_SRCS
 	${CMAKE_SOURCE_DIR}/src/Ui/Storage/Data.cpp
-	${CMAKE_SOURCE_DIR}/src/Ui/Storage/DirNode.cpp
-	${CMAKE_SOURCE_DIR}/src/Ui/Storage/DirectoryEntry.cpp
 	${CMAKE_SOURCE_DIR}/src/Ui/Storage/BoxButton.cpp
 	${CMAKE_SOURCE_DIR}/src/Ui/Storage/BoxButtonCollection.cpp
 )
+#	${CMAKE_SOURCE_DIR}/src/Ui/Storage/DirNode.cpp
+#	${CMAKE_SOURCE_DIR}/src/Ui/Storage/DirectoryEntry.cpp
 
 # Storage sources including Revertible — needed by FileData subclasses.
 set(STORAGE_REVERTIBLE_SRCS
@@ -64,7 +64,19 @@ add_test_executable(DefaultsTest
 
 add_test_executable(DataTest
 	"Ui/Storage/DataTest.cpp"
-	"${COMMON_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Storage/Data.cpp"
+	"${COMMON_SRCS};${STORAGE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Storage/CollectionHandler.cpp"
+	""
+)
+
+add_test_executable(ParentTest
+	"Ui/Storage/ParentTest.cpp"
+	"${COMMON_SRCS};${STORAGE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Storage/Parent.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/CollectionHandler.cpp"
+	""
+)
+
+add_test_executable(RevertibleTest
+	"Ui/Storage/RevertibleTest.cpp"
+	"${COMMON_SRCS};${STORAGE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Storage/Revertible.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/Parent.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/CollectionHandler.cpp"
 	""
 )
 

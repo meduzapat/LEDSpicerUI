@@ -26,8 +26,8 @@ using namespace LEDSpicerUI::Ui::Storage;
 
 BoxButton::BoxButton(Data* form) :
 	Gtk::HBox(false, 2),
-	data(form),
-	label(Gtk::make_managed<Gtk::Label>())
+	data{form},
+	label{Gtk::make_managed<Gtk::Label>()}
 {
 	set_valign(Gtk::ALIGN_START);
 	set_vexpand(false);
@@ -36,7 +36,7 @@ BoxButton::BoxButton(Data* form) :
 	set_margin_left(2);
 	set_margin_right(2);
 
-	Gtk::HBox* lbox(Gtk::make_managed<Gtk::HBox>());
+	Gtk::HBox* lbox{Gtk::make_managed<Gtk::HBox>()};
 	lbox->pack_start(*label, Gtk::PACK_EXPAND_WIDGET);
 	lbox->set_visible(true);
 	label->set_margin_left(5);
@@ -46,7 +46,7 @@ BoxButton::BoxButton(Data* form) :
 	pack_start(*lbox, Gtk::PACK_EXPAND_WIDGET);
 
 	get_style_context()->add_class("BoxButton");
-	auto cssClass = form->getCssClass();
+	auto cssClass{form->getCssClass()};
 	if (not cssClass.empty())
 		get_style_context()->add_class(string(cssClass));
 	updateLabel();
@@ -73,7 +73,7 @@ const Data* BoxButton::getData() const {
 }
 
 void BoxButton::updateLabel() {
-	string text(data->createTooltip());
+	auto text{data->createTooltip()};
 	if (not text.empty()) {
 		label->set_tooltip_text(text);
 	}

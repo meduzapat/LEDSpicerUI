@@ -25,7 +25,7 @@
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
 DialogRestrictorMap::DialogRestrictorMap(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
-	DialogForm(obj, builder)
+	DialogForm(obj, builder, COLLECTION_RESTRICTOR_MAP)
 {
 	// Connect Restrictor Box and buttons.
 	builder->get_widget_derived("BoxRestrictorMappings", box);
@@ -53,7 +53,7 @@ LEDSpicerUI::Ui::Storage::CollectionHandler* DialogRestrictorMap::getCollectionH
 	return LEDSpicerUI::Ui::Storage::CollectionHandler::getInstance(COLLECTION_RESTRICTOR_MAP);
 }
 
-void DialogRestrictorMap::clearForm() {
+void DialogRestrictorMap::clearForm() noexcept {
 	player->set_active(0);
 	joystick->set_active(0);
 	populateInterfacesCombobox();
@@ -118,11 +118,11 @@ bool DialogRestrictorMap::checkAvailableInterfaces() const {
 	return size < total;
 }
 
-string_view DialogRestrictorMap::getType() const {
+string_view DialogRestrictorMap::getType() const noexcept {
 	return TYPE_RESTRICTOR_MAP;
 }
 
-LEDSpicerUI::Ui::Storage::Data* DialogRestrictorMap::createData(StringUMap& rawData) {
+LEDSpicerUI::Ui::Storage::Data* DialogRestrictorMap::createData(StringUMap& rawData) noexcept {
 	return new Storage::RestrictorMap(rawData);
 }
 

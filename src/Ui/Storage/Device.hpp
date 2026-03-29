@@ -20,7 +20,6 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DataDialogs/DialogElement.hpp"
 #include "Revertible.hpp"
 
 #pragma once
@@ -29,31 +28,24 @@ namespace LEDSpicerUI::Ui::Storage {
 
 /**
  * LEDSpicerUI::Ui::Storage::Device
- * A class that adds functionality for Devices form.
- * A device is driven by device name combobox.
- * Then it needs either a hardware ID, a port number or nothing else.
+ *
+ * A class that adds storage to Devices form.
  * A device will provide a number of pins where the LEDS are connected, but this are handled by elements.
  * A device will store the elements attached to the pins.
  */
-	class Device : public Revertible {
+class Device : public Revertible {
 
 public:
 
-	Device(StringUMap& data);
+	Device(StringUMap& data) :
+		Revertible(data, COLLECTION_DEVICES, {{COLLECTION_ELEMENT, BoxButtonCollection()}}) {}
 
-	virtual ~Device();
+	virtual ~Device() = default;
 
-	void reset() override;
-	const string createPrettyName() const override;
-	const string createUniqueId() const override;
-	string_view getCssClass() const noexcept override;
-	void activate() override;
+	const string createPrettyName() const noexcept override;
+	const string createUniqueId() const noexcept override;
+	string_view getCssClass() const noexcept override { return "DeviceBoxButton"; }
 	const string toXML() const override;
-
-protected:
-
-	/// Stores elements from the elements dialog that belong to this Device.
-	BoxButtonCollection elements;
 
 };
 

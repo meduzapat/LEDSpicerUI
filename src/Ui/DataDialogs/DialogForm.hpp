@@ -24,6 +24,7 @@
 #include "OrdenableFlowBox.hpp"
 #include "Storage/CollectionHandler.hpp"
 #include "SingletonDialog.hpp"
+#include "Storage/Parent.hpp"
 
 #pragma once
 
@@ -47,7 +48,7 @@ public:
 	enum class Actions : uint8_t {
 		ADD,  /// Adding new
 		LOAD, /// Loading new
-		EDIT /// Editing existing
+		EDIT  /// Editing existing
 	};
 
 	DialogForm() = delete;
@@ -57,14 +58,7 @@ public:
 	/**
 	 * Load Function.
 	 */
-	virtual void load(XMLHelper* values) = 0;
-
-	/**
-	 * Cleans and re-populates the box with stored items.
-	 * Intended to be used when the parent's box needs a refresh.
-	 * like when an item is deleted without using the delete button or startup refresh.
-	 */
-	virtual void refreshItems();
+	virtual void load(XMLHelper* values) noexcept = 0;
 
 	/**
 	 * Sets the collection where the items will be stored and if there is a data owner for this dialog.
@@ -72,22 +66,29 @@ public:
 	 * @param collection
 	 * @param owner
 	 */
-	virtual void setOwner(Storage::BoxButtonCollection* collection, const Storage::Data* owner);
-
-	/**
-	 * @return The collection handler that keeps track of this form items.
-	 */
-	virtual Storage::CollectionHandler* getCollectionHandler() const = 0;
-
-	/**
-	 * Does extra changes to the form based on current data.
-	 */
-	virtual void resetForm();
+	virtual void setOwner(Storage::BoxButtonCollection* collection, const Storage::Data* owner) noexcept;
+//
+//	/**
+//	 * @return The collection handler that keeps track of this form items.
+//	 */
+//	Storage::CollectionHandler* getCollectionHandler() const;
 
 	/**
 	 * Clear the From leaving it empty for data entry.
 	 */
-	virtual void clearForm() = 0;
+	virtual void clearForm() noexcept = 0;
+
+	/**
+	 * Cleans and re-populates the box with stored items.
+	 * Intended to be used when the parent's box needs a refresh.
+	 * like when an item is deleted without using the delete button or startup refresh.
+	 */
+	virtual void refreshItems() noexcept;
+
+	/**
+	 * Does extra changes to the form based on current data.
+	 */
+	virtual void resetForm() noexcept;
 
 	/**
 	 * Check if the values on the fields are valid.
@@ -98,47 +99,52 @@ public:
 	 * Send fields into the storage
 	 * @param mode
 	 */
-	virtual void storeData() = 0;
+	virtual void storeData() noexcept = 0;
 
 	/**
 	 * Bring stored info into fields.
 	 */
-	virtual void retrieveData() = 0;
+	virtual void retrieveData() noexcept = 0;
 
 	/**
 	 * Returns an array with a list of stored key values values.
 	 * @return
 	 */
-	vector<const StringUMap*> getValues();
+	vector<const StringUMap*> getValues() const noexcept;
 
 	/**
 	 * Create an unique using the dialog fields.
-	 * @return
+	 * Mimic the createUniqueId in Data, but with fresh data.
+	 * While a Dialog is open, Data information must be considered stale.
+	 * @return a unique id that identifies the Data inside the form.
 	 */
-	virtual const string createUniqueId() const = 0;
+	virtual const string createUniqueId() const noexcept = 0;
 
 	/**
 	 * Using the box and the items it arrange the items based on the OrdenableFlowBox order.
 	 */
-	void reindex();
+	void reindex() noexcept;
 
 	/**
 	 * Returns the display box for items.
+	 *
 	 * @return OrdenableFlowBox pointer.
 	 */
-	OrdenableFlowBox* getBox();
+	OrdenableFlowBox* getBox() const noexcept { return box; }
 
 	/**
 	 * Method to add generic Add functionality that opens a dialog to create new Data (item).
 	 * @param btnAdd Opens this form to create new Data (item), its located in the calling dialog.
 	 * @param dialogToOpen Dialog to open when the button is clicked, it should be a child of this dialog.
 	 */
-	static void setSignalAddTo(Gtk::Button* btnAdd, DialogForm* dialogToOpen);
+	static void setSignalAddTo(Gtk::Button* btnAdd, DialogForm* dialogToOpen) noexcept;
 
 protected:
 
 	/// form action mode.
 	Actions action = Actions::ADD;
+
+	static std::unordered_map<string, DialogForm*> dialogsMap;
 
 	/// Store changes.
 	Gtk::Button* btnApply = nullptr;
@@ -163,45 +169,71 @@ protected:
 	 * @param obj
 	 * @param builder
 	 */
-	DialogForm(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
+	DialogForm(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept;
 
 	/**
 	 * Very similar to ADD but it only uses the form to validate data,
 	 * also items are not added to the box.
 	 * @param rawCollection
 	 */
-	void createItems(StringUMapVector& rawCollection, XMLHelper* values);
+	void createItems(StringUMapVector& rawCollection, XMLHelper* values) noexcept;
 
 	/**
 	 * Creates any sub items, called from created items, per item.
 	 * @param values (not used here)
 	 */
-	virtual void createSubItems(XMLHelper*) {}
+	virtual void createSubItems(XMLHelper*) noexcept {}
 
 	/**
 	 * Provides a nice name for the type of data this dialog will create for the dialog.
 	 * @return
 	 */
-	virtual string_view getType() const = 0;
+	virtual string_view getType() const noexcept = 0;
 
 	/**
 	 * Creates a data object out of raw data.
 	 * @param rawData this values will be moved into the class.
 	 * @return
 	 */
-	virtual Storage::Data* createData(StringUMap& rawData) = 0;
+	virtual Storage::Data* createData(StringUMap& rawData) noexcept = 0;
 
 	/**
 	 * Creates an empty object.
 	 * @return
 	 */
-	virtual Storage::Data* createData();
+	virtual Storage::Data* createData() noexcept;
+
+	/**
+	 * Prepares the owner's sub dialogs.
+	 */
+	virtual void wireChildrenDialogs() noexcept {}
+
+	/**
+	 * Unlink the owner's sub dialogs.
+	 */
+	virtual void disconnectChildrenDialogs() noexcept {}
+//
+//	/**
+//	 *  Adds an item and all its children (if any) into their collections.
+//	 *
+//	 * @param collectionId
+//	 * @param data
+//	 */
+//	void addIntoCollection(const string& collectionId, Storage::Data* data);
+//
+//	/**
+//	 * Adds an item and all its children (if any) into their collections.
+//	 *
+//	 * @param collectionId
+//	 * @param data
+//	 */
+//	void removeFromCollection(const string& collectionId, Storage::Data* data);
 
 	/**
 	 * Method to add generic Add functionality.
 	 * @param btnAdd Opens this form to create new Data (item), its located in the calling dialog.
 	 */
-	void setSignalAdd(Gtk::Button* btnAdd);
+	void setSignalAdd(Gtk::Button* btnAdd) noexcept;
 
 	/**
 	 * Utility that decorates with a button that allows deletion of itself.
@@ -209,68 +241,68 @@ protected:
 	 * @param boxButton the boxButton that will receive this delete button to delte itself.
 	 * @param askConfirmation if set will ask, default yes.
 	 */
-	virtual void createDeleteButton(Storage::BoxButton& boxButton, bool askConfirmation = true);
+	virtual void createDeleteButton(Storage::BoxButton& boxButton, bool askConfirmation = true) noexcept;
 
 	/**
 	 * Utility that decorates with a button that allows to edit itself.
 	 *
 	 * @param boxButton the BoxButton that will receive this edit button to been able to get edited.
 	 */
-	virtual void createEditButton(Storage::BoxButton& boxButton);
+	virtual void createEditButton(Storage::BoxButton& boxButton) noexcept;
 
 	/**
 	 * Utility that decorates with a button that allows to clone itself.
 	 *
 	 * @param boxButton the BoxButton that will receive this clone button to been able to get cloned.
 	 */
-	void createCloneButton(Storage::BoxButton& boxButton);
+	void createCloneButton(Storage::BoxButton& boxButton) noexcept;
 
 	/**
 	 * Function to decorate the boxButton with the necessary buttons.
 	 *
 	 * @param boxButton The BoxButton that will get buttons.
 	 */
-	virtual void addButtons(Storage::BoxButton& boxButton);
+	virtual void addButtons(Storage::BoxButton& boxButton) noexcept;
 
 	/**
 	 * Method to add generic Apply functionality.
 	 */
-	void setSignalApply();
+	void setSignalApply() noexcept;
 
 	/**
 	 * When the add button is clicked.
 	 */
-	virtual void onAddClicked();
+	virtual void onAddClicked() noexcept;
 
 	/**
 	 * Called after Add, when the data is stored and the button created.
 	 * @param boxButton the newly created box button.
 	 */
-	virtual void afterCreate(Storage::BoxButton&) {}
+	virtual void afterCreate(Storage::BoxButton&) noexcept {}
 
 	/**
 	 * When the edit button is clicked.
 	 * @param boxButton the button that called delete.
 	 */
-	virtual void onEditClicked(Storage::BoxButton& boxButton);
+	virtual void onEditClicked(Storage::BoxButton& boxButton) noexcept;
 
 	/**
 	 * When the delete button is clicked.
 	 * @param boxButton the button that called delete.
 	 */
-	virtual void onDelClicked(Storage::BoxButton& boxButton);
+	virtual void onDelClicked(Storage::BoxButton& boxButton) noexcept;
 
 	/**
 	 * Called after delete confirmation is accented.
 	 * @param boxButton the button that called delete.
 	 */
-	virtual void afterDeleteConfirmation(Storage::BoxButton&) {}
+	virtual void afterDeleteConfirmation(Storage::BoxButton&) noexcept {}
 
 	/**
 	 * When the clone button is clicked.
 	 * @param boxButton the button that called clone.
 	 */
-	virtual void onCloneClicked(Storage::BoxButton& boxButton);
+	virtual void onCloneClicked(Storage::BoxButton& boxButton) noexcept;
 };
 
 } // namespace

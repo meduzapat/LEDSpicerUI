@@ -80,7 +80,7 @@ InputDirectoryNavigator::~InputDirectoryNavigator() {
 }
 
 void InputDirectoryNavigator::clear() {
-	rootDir.reset();
+	rootDir.wipe();
 //	DataDialogs::DialogInput::getInstance();
 }
 

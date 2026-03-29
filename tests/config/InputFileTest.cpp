@@ -165,8 +165,3 @@ TEST_F(InputFileTest, RootInfoIsPopulated) {
 	EXPECT_FALSE(rootInfo.attributes.empty());
 	EXPECT_EQ("Credits", rootInfo.attributes.at(NAME));
 }
-
-int main(int argc, char **argv) {
-	::testing::InitGoogleTest(&argc, argv);
-	return RUN_ALL_TESTS();
-}

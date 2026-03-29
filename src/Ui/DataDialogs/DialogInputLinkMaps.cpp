@@ -27,9 +27,10 @@ using namespace LEDSpicerUI::Ui::DataDialogs;
 StringVector DialogInputLinkMaps::localCollection;
 
 DialogInputLinkMaps::DialogInputLinkMaps(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
-	DialogForm(obj, builder)
+	DialogForm(obj, builder, COLLECTION_INPUT_LINKMAP)
 {
 
+//	DialogForm::dialogsMap.emplace(COLLECTION_, this);
 	builder->get_widget_derived("BoxInputLinkedMaps", box);
 	builder->get_widget("BtnApplyInputLinkedMap",     btnApply);
 	// Create link, will open the dialog in edit mode.
@@ -112,7 +113,7 @@ LEDSpicerUI::Ui::Storage::CollectionHandler* DialogInputLinkMaps::getCollectionH
 	return nullptr;
 }
 
-void DialogInputLinkMaps::clearForm() {
+void DialogInputLinkMaps::clearForm() noexcept {
 	boxInputLinkedMappings->wipe();
 	indivitualMaps.wipe();
 }
@@ -207,11 +208,11 @@ const string DialogInputLinkMaps::createUniqueId() const {
 //		localCollection.push_back(extractIds(bb->getData()));
 //}
 
-string_view DialogInputLinkMaps::getType() const {
+string_view DialogInputLinkMaps::getType() const noexcept {
 	return "input Link"; // TYPE_INPUT_MAP
 }
 
-LEDSpicerUI::Ui::Storage::Data* DialogInputLinkMaps::createData(StringUMap& rawData) {
+LEDSpicerUI::Ui::Storage::Data* DialogInputLinkMaps::createData(StringUMap& rawData) noexcept {
 	return new Storage::InputMapLink(rawData);
 }
 

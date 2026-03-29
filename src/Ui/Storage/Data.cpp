@@ -20,109 +20,144 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Data.hpp"
+#include "CollectionHandler.hpp"
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-bool Data::operator==(const Data& other) const {
-	return this == &other;
-}
-
 Data::~Data() {
-	deActivate();
+	unregisterFromCollection();
 }
 
-const string Data::createPrettyName() const {
+const string Data::createPrettyName() const noexcept {
 	return getPrimaryValue();
 }
 
-const string Data::createUniqueId() const {
+const string Data::createUniqueId() const noexcept {
 	return Defaults::createCommonUniqueId({getPrimaryValue()});
 }
 
-const string Data::getPrimaryValue() const {
+const string Data::getPrimaryValue() const noexcept {
 	return getValue(getPrimaryKey());
 }
 
-const string Data::createTooltip() const {
-	return "";
+const string& Data::getValue(const string& key) const noexcept {
+	return (fieldsData.find(key) != fieldsData.end() ? fieldsData.at(key) : emptyString);
 }
 
-string Data::getValue(const string& key, const string& defaultValue) const {
+string Data::getValue(const string& key, const string& defaultValue) const noexcept {
 	return (fieldsData.find(key) != fieldsData.end() ? fieldsData.at(key) : defaultValue);
 }
 
-void Data::unSet(const string& key) {
+void Data::unSet(const string& key) noexcept {
 	fieldsData.erase(key);
 }
 
-void Data::setValue(const string& key, const string& value) {
+void Data::setValue(const string& key, const string& value) noexcept {
+	const string oldId{createUniqueId()};
 	fieldsData[key] = value;
+	handleRegistration(oldId);
 }
 
-StringUMap Data::copyValues(uint8_t number) const {
-	StringUMap r;
-	for (const auto &v : fieldsData) {
-		if (v.first == getPrimaryKey()) {
-			r[v.first] = v.second  + " copy" + std::to_string(number);
-			continue;
-		}
-		r[v.first] = v.second;
-	}
-	return r;
+StringUMap Data::copyValues() const noexcept {
+	if (collectionId.empty()) return {};
+	const string baseId{createUniqueId()};
+	string candidateId;
+	uint8_t count{1};
+	do {
+		candidateId = baseId + "_" + std::to_string(count++);
+	} while (getCollectionHandler()->isIdSet(candidateId));
+	StringUMap copy{fieldsData};
+	copy[getPrimaryKey()] = candidateId;
+	return copy;
 }
 
-const StringUMap* Data::getValues() const {
+const StringUMap* Data::getValues() const noexcept {
 	return &fieldsData;
 }
 
-void Data::setValues(const StringUMap& values) {
-	for (const auto& valPair : values) {
-		fieldsData[valPair.first] = valPair.second;
-	}
+void Data::setValues(const StringUMap& values) noexcept {
+	const string oldId{createUniqueId()};
+	fieldsData.insert(values.begin(), values.end());
+	handleRegistration(oldId);
 }
 
-void Data::wipe() {
+void Data::wipe() noexcept {
+	if (not collectionId.empty()) getCollectionHandler()->remove(this);
 	fieldsData.clear();
 }
 
-void Data::reset() {
-	wipe();
-}
-
-const string Data::toXML() const {
+const string Data::toXML() const noexcept {
 	return valuesXML(ignored, fieldsData);
 }
 
-void Data::setProperty(const string& key, const string& value) {
+void Data::setProperty(const string& key, const string& value) noexcept {
 	properties[key] = value;
 }
 
-string Data::getProperty(const string& key, const string& def) const {
-	return (properties.find(key) != properties.end()) ? properties.at(key) : def;
+const string& Data::getProperty(const string& key) const noexcept {
+	return (properties.find(key) != properties.end()) ? properties.at(key) : emptyString;
 }
 
-bool Data::hasProperty(const string& key) const {
+string Data::getProperty(
+	const string& key,
+	const string& defaultProperty
+) const noexcept {
+	return (properties.find(key) != properties.end()) ? properties.at(key) : defaultProperty;
+}
+
+bool Data::hasProperty(const string& key) const noexcept {
 	return properties.find(key) != properties.end();
 }
 
-void Data::removeProperty(const string& key) {
+void Data::removeProperty(const string& key) noexcept {
 	properties.erase(key);
 }
 
-const StringUMap& Data::getProperties() const {
+const StringUMap& Data::getProperties() const noexcept {
 	return properties;
 }
 
-StringUMap& Data::createEmptyData() {
+StringUMap& Data::createEmptyData() noexcept {
 	static StringUMap empty;
 	return empty;
+}
+
+CollectionHandler* Data::getCollectionHandler() const noexcept {
+	if (collectionId.empty()) return nullptr;
+	return CollectionHandler::getInstance(collectionId);
+}
+
+void Data::registerToCollection() noexcept {
+	if (not collectionId.empty() and not createUniqueId().empty())
+		getCollectionHandler()->add(this);
+}
+
+void Data::unregisterFromCollection() noexcept {
+	if (not collectionId.empty() and not createUniqueId().empty())
+		getCollectionHandler()->remove(this);
+}
+
+void Data::handleRegistration(const string& oldId) noexcept {
+	if (collectionId.empty()) return;
+	const string newId{createUniqueId()};
+//	 No registration needed.
+//	if (newId == oldId) return;
+//	 Remove if new ID is empty, if this a possible scenario?.
+//	if (newId.empty())
+//		getCollectionHandler()->remove(this);
+//	Add if old ID is empty.
+//	else if (oldId.empty())
+//		getCollectionHandler()->add(this);
+//	else
+	// Replace if both IDs are non-empty and different.
+	if (oldId != newId)
+		getCollectionHandler()->replace(this, oldId);
 }
 
 string Data::valuesXML(
 	const StringUSet& ignored,
 	const StringUMap& data
-) {
+) noexcept {
 	string r, el, tab(" ");
 	if (data.size() > 2) {
 		el  = "\n";
@@ -135,16 +170,12 @@ string Data::valuesXML(
 	return r;
 }
 
-const string Data::getPrimaryKey() const {
-	return NAME;
-}
-
 string Data::createOpeningXML(
 	const string& node,
 	const StringUMap& data,
 	const StringUSet& ignored,
 	bool empty
-) {
+) noexcept {
 	string r(Defaults::tab() + "<" + node);
 	if (data.size() > 2) {
 		r += "\n";
@@ -166,7 +197,7 @@ string Data::createOpeningXML(
 	return r;
 }
 
-string Data::createClosingXML(const string& node) {
+string Data::createClosingXML(const string& node) noexcept {
 	Defaults::reduceTab();
 	string r(Defaults::tab() + "</" + node + ">\n");
 	return r;

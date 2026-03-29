@@ -20,36 +20,31 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CollectionHandler.hpp"
 #include "DataDialogs/DialogSelect.hpp"
+#include "Parent.hpp"
 
 #pragma once
 
 namespace LEDSpicerUI::Ui::Storage {
 
 /**
- * LEDSpicerUI::Ui::Storage::ElementForm
+ * LEDSpicerUI::Ui::Storage::Group
+ *
+ * This class stores links to real elements
  */
-class Group: public Data {
+class Group : public Parent {
 
 public:
-
-	using Data::Data;
 
 	Group(StringUMap& data);
 
 	virtual ~Group();
 
-	string_view getCssClass() const noexcept override;
+	string_view getCssClass() const noexcept override { return "GroupBoxButton"; }
 
-	void activate() override;
+	void setUp() override;
 
 	const string toXML() const override;
-
-protected:
-
-	/// This need to be links to elements.
-	BoxButtonCollection elements;
 
 };
 

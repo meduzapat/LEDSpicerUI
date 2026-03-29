@@ -202,8 +202,3 @@ TEST(XMLHelperTest, CleanError) {
 	string simpleError = "Unable to read the file /xxx/yyy/zzzz.xml";
 	EXPECT_EQ(XMLHelper::cleanError(simpleError), simpleError) << "Simple error should return unchanged";
 }
-
-int main(int argc, char** argv) {
-	::testing::InitGoogleTest(&argc, argv);
-	return RUN_ALL_TESTS();
-}

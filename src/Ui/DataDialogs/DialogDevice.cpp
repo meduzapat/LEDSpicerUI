@@ -25,11 +25,12 @@
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
 DialogDevice::DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
-	DialogFormHost(obj, builder)
+	DialogFormHost(obj, builder, COLLECTION_DEVICES)
 {
 
 	// Init Elements and register for refresh.
 	DialogElement::buildInstance(builder, "DialogElement");
+
 	childDialogs.push_back(DialogElement::getInstance());
 
 	// Connect Device Box and buttons.
@@ -69,9 +70,7 @@ DialogDevice::DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 		DialogElement::getInstance()->changeNumberOfPins(pinsCount);
 	});
 
-	/*
-	 * On Number of LEDs is changed, update the add button.
-	 */
+	// On Number of LEDs is changed, update the add button.
 	spinnerLeds->signal_changed().connect([this]() {
 		btnAddElement->set_sensitive(spinnerLeds->get_value_as_int() > 1);
 	});
@@ -92,6 +91,14 @@ DialogDevice::~DialogDevice() {
 
 void DialogDevice::load(XMLHelper* values) {
 	createItems(values->getData(COLLECTION_DEVICES), values);
+}
+
+void DialogDevice::wireChildren() {
+	DialogElement::getInstance()->setOwner(static_cast<Storage::Device*>(currentData)->collectionHandler, currentData);
+}
+
+void DialogDevice::disconnectChildren() {
+
 }
 
 void DialogDevice::createSubItems(XMLHelper* values) {
@@ -219,11 +226,11 @@ string const DialogDevice::createUniqueId() const {
 	});
 }
 
-string_view DialogDevice::getType() const {
+string_view DialogDevice::getType() const noexcept {
 	return TYPE_DEVICE;
 }
 
-LEDSpicerUI::Ui::Storage::Data* DialogDevice::createData(StringUMap& rawData) {
+LEDSpicerUI::Ui::Storage::Data* DialogDevice::createData(StringUMap& rawData) noexcept {
 	return new Storage::Device(rawData);
 }
 

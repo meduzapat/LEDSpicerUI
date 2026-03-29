@@ -44,11 +44,11 @@ public:
 
 	void load(XMLHelper* values) override;
 	Storage::CollectionHandler* getCollectionHandler() const override;
-	void resetForm() override;
+	void resetForm() noexcept override;
 	void isValid() const override;
-	void storeData() override;
-	void retrieveData() override;
-	const string createUniqueId() const override;
+	void storeData() noexcept override;
+	void retrieveData() noexcept override;
+	const string createUniqueId() const noexcept override;
 
 protected:
 
@@ -76,8 +76,8 @@ protected:
 	DialogInput(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
 
 	void createSubItems(XMLHelper* values) override;
-	string_view getType() const override;
-	Storage::Data* createData(StringUMap& rawData) override;
+	string_view getType() const noexcept override;
+	Storage::Data* createData(StringUMap& rawData) noexcept override;
 
 	void onEmpty() override;
 

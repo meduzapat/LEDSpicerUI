@@ -468,6 +468,10 @@ void Defaults::cleanDirty() {
 	btnSave->set_sensitive(false);
 }
 
+void Defaults::setSubtitle(const string& text) {
+	header->set_subtitle(text);
+}
+
 void Defaults::increaseTab() {
 	tabs += '\t';
 }

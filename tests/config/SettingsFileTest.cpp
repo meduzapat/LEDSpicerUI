@@ -152,8 +152,3 @@ TEST_F(SettingsFileTest, SaveEmptySettings) {
 	EXPECT_NE(string::npos, content.find("<" PACKAGE_NAME));
 	EXPECT_NE(string::npos, content.find("/>"));
 }
-
-int main(int argc, char **argv) {
-	::testing::InitGoogleTest(&argc, argv);
-	return RUN_ALL_TESTS();
-}

@@ -58,7 +58,7 @@ public:
 	/**
 	 * @return the number of registered items.
 	 */
-	size_t getSize() const;
+	size_t getSize() const noexcept { return collection.size(); }
 
 	/**
 	 * @param id
@@ -149,10 +149,10 @@ public:
 	 */
 	void release(Gtk::ComboBoxText* destination);
 
-	StringDataMap::iterator begin();
-	StringDataMap::iterator end();
-	StringDataMap::const_iterator begin() const;
-	StringDataMap::const_iterator end() const;
+	StringDataMap::iterator begin() noexcept { return collection.begin(); }
+	StringDataMap::iterator end() noexcept { return collection.end(); }
+	StringDataMap::const_iterator begin() const noexcept { return collection.begin(); }
+	StringDataMap::const_iterator end() const noexcept { return collection.end(); }
 
 protected:
 

@@ -25,7 +25,7 @@
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
 DialogInputSource::DialogInputSource(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
-	DialogFormHost(obj, builder)
+	DialogFormHost(obj, builder, COLLECTION_INPUT_SOURCES)
 {
 
 	// From Input Dialog — sourceless path.
@@ -72,6 +72,7 @@ void DialogInputSource::load(XMLHelper* values) {
 }
 
 LEDSpicerUI::Ui::Storage::CollectionHandler* DialogInputSource::getCollectionHandler() const {
+	// Collection ID + input ID
 	return Storage::CollectionHandler::getInstance(COLLECTION_INPUT_SOURCES + ownerData->getProperty(UID));
 }
 
@@ -126,7 +127,7 @@ const string DialogInputSource::createUniqueId() const {
 void DialogInputSource::populateSources(const string& name) {
 	if (Defaults::needSource(name)) {
 		if (Defaults::isDevInputListener(name))
-			populateSourcesList(scanEventDevices());
+			populateSourcesComboBox(scanEventDevices());
 		// add other future sources here
 	}
 }
@@ -162,12 +163,12 @@ void DialogInputSource::createSubItems(XMLHelper* values) {
 	DialogInputMap::getInstance()->load(values);
 }
 
-string_view DialogInputSource::getType() const {
+string_view DialogInputSource::getType() const noexcept {
 	return TYPE_INPUT_SOURCE;
 }
 
-LEDSpicerUI::Ui::Storage::Data* DialogInputSource::createData(StringUMap& rawData) {
-	auto is{new Storage::InputSource(rawData)};
+LEDSpicerUI::Ui::Storage::Data* DialogInputSource::createData(StringUMap& rawData) noexcept {
+	auto is{new Storage::InputSource(rawData, ownerData->getProperty(UID))};
 	is->setProperty(PID, ownerData->getProperty(UID));
 	return is;
 }
@@ -209,12 +210,12 @@ Glib::ustring DialogInputSource::resolvedSource() const {
 	return id;
 }
 
-void DialogInputSource::populateSourcesList(const StringMap& devices) {
+void DialogInputSource::populateSourcesComboBox(const StringMap& sources) {
 
 	auto listStore = static_cast<Gtk::ListStore*>(selectorCombo->get_model().get());
 	listStore->clear();
 
-	if (devices.empty()) {
+	if (sources.empty()) {
 		selectorCombo->get_entry()->grab_focus();
 		return;
 	}
@@ -224,7 +225,7 @@ void DialogInputSource::populateSourcesList(const StringMap& devices) {
 	row.set_value(1, string());
 	row.set_value(2, true);
 
-	for (const auto& [id, display] : devices) {
+	for (const auto& [id, display] : sources) {
 		auto row = *(listStore->append());
 		row.set_value(0, id);
 		row.set_value(1, display);

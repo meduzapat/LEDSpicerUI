@@ -20,7 +20,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Storage/CollectionHandler.hpp"
+#include "CollectionHandler.hpp"
 
 #pragma once
 
@@ -33,7 +33,7 @@ class Process: public Data {
 
 public:
 
-	using Data::Data;
+	Process(StringUMap& data) : Data(data, COLLECTION_PROCESS) {}
 
 	virtual ~Process();
 
@@ -45,7 +45,8 @@ public:
 
 protected:
 
-	const string getPrimaryKey() const override;
+	const string getPrimaryKey() const override {return PARAM_PROCESS_NAME;}
+
 };
 
 } // namespace

@@ -24,49 +24,30 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-InputSource::InputSource(StringUMap& data) :
-	Revertible(data)
-{
-	registerChild(maps);
+InputSource::InputSource(StringUMap& data, const string& ownerId) :
+	Revertible(
+		data,
+		// Input source is unique to its input.
+		COLLECTION_INPUT_SOURCES + ownerId,
+		{{COLLECTION_INPUT_MAPS, BoxButtonCollection()}}
+	) {
 	setProperty(UID, "src_" + std::to_string(++sourceCounter));
-	// register maps against the global collections so cascade deletes propagate.
-	CollectionHandler::getInstance(COLLECTION_ELEMENT)->registerDependency({&maps});
-	CollectionHandler::getInstance(COLLECTION_GROUP)->registerDependency({&maps});
-}
-
-InputSource::~InputSource() {
-	CollectionHandler::getInstance(COLLECTION_ELEMENT)->release(&maps);
-	CollectionHandler::getInstance(COLLECTION_GROUP)->release(&maps);
-	if (not fieldsData.empty())
-		CollectionHandler::getInstance(COLLECTION_INPUT_SOURCES + getProperty(PID))->remove(this);
+	setProperty(PID, ownerId);
+	registerDependency(COLLECTION_ELEMENT);
+	registerDependency(COLLECTION_GROUP);
 }
 
 const string InputSource::createUniqueId() const {
 	return Defaults::createCommonUniqueId({getProperty(PID), getValue(SOURCE)});
 }
 
-const string InputSource::createPrettyName() const {
+const string InputSource::createPrettyName() const noexcept {
 	// Stored at store, empty otherwise.
 	return getProperty(NAME);
 }
 
-const string InputSource::createTooltip() const {
+const string InputSource::createTooltip() const noexcept {
 	return "Source " + createPrettyName() + " with " + std::to_string(maps.getSize()) + " maps";
-}
-
-string_view InputSource::getCssClass() const noexcept {
-	return "InputSourceBoxButton";
-}
-
-void InputSource::reset() {
-	maps.wipe();
-	if (not fieldsData.empty())
-		CollectionHandler::getInstance(COLLECTION_INPUT_SOURCES + getProperty(PID))->remove(this);
-	Revertible::reset();
-}
-
-void InputSource::activate() {
-	DataDialogs::DialogInputMap::getInstance()->setOwner(&maps, this);
 }
 
 const string InputSource::toXML() const {
@@ -88,8 +69,4 @@ const string InputSource::toXML() const {
 
 	r += Defaults::tab() + "</maps>\n";
 	return r;
-}
-
-const string InputSource::getPrimaryKey() const {
-	return SOURCE;
 }

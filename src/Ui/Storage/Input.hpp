@@ -42,12 +42,11 @@ public:
 
 	virtual ~Input();
 
-	const string createPrettyName() const override;
-	const string createTooltip() const override;
+	const string createPrettyName() const noexcept override;
+	const string createTooltip() const noexcept override;
 	string_view getCssClass() const noexcept override;
 	void activate() override;
 	const string toXML() const override;
-	void reset() override;
 
 protected:
 

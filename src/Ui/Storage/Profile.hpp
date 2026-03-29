@@ -30,18 +30,16 @@ namespace LEDSpicerUI::Ui::Storage {
 /**
  * LEDSpicerUI::Ui::Storage::Profile
  */
-class Profile: public Data {
+class Profile: public Parent {
 
 public:
 
-	using Data::Data;
-
 	Profile(StringUMap& data);
 
-	virtual ~Profile();
+	virtual ~Profile() = default;
 
-	string_view getCssClass() const noexcept override;
-	void activate() override;
+	string_view getCssClass() const noexcept override { return "ProfileBoxButton"; }
+	void setUp() override;
 	const string toXML() const override;
 
 protected:
@@ -51,16 +49,14 @@ protected:
 		alwaysOnGroups,
 		inputs,
 		animations,
-		startTransitions,
-		endTransitions;
+		transitions;
 
 	std::unordered_map<string, BoxButtonCollection*> itemCollections {
-		{TYPE_ELEMENT,          &alwaysOnElements},
+		{TYPE_ELEMENT,       &alwaysOnElements},
 		{"group",            &alwaysOnGroups},
 		{"input",            &inputs},
 		{"animation",        &animations},
-		{"startTransitions", &startTransitions},
-		{"endTransitions",   &endTransitions}
+		{"ransitions"        &transitions}
 	};
 
 	const string getPrimaryKey() const override;

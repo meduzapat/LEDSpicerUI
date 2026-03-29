@@ -26,11 +26,6 @@ using namespace LEDSpicerUI::Ui::Storage;
 
 Element::~Element() {
 	for (auto child : stripChildren) delete child;
-	CollectionHandler::getInstance(COLLECTION_ELEMENT)->remove(this);
-}
-
-string_view Element::getCssClass() const noexcept {
-	return "ElementBoxButton";
 }
 
 const string Element::createPrettyName() const {
@@ -100,4 +95,3 @@ void Element::convertPositionToRGB(Data* data, const string& position, const str
 uint16_t Element::findFirstConnectorIndexByPosition(const string& position) {
 	return (((std::stod(position) -1) * 3) + 1) - 1;
 }
-

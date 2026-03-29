@@ -47,23 +47,23 @@ public:
 
 	virtual ~DirectoryEntry() = default;
 
-	const string createUniqueId() const override;
-	const string createPrettyName() const override;
-	const string createTooltip() const override;
-	string_view getCssClass() const noexcept override;
+	const string createUniqueId() const noexcept override;
+	const string createPrettyName() const noexcept override;
+	const string createTooltip() const noexcept override;
+	string_view getCssClass() const noexcept override { return "DirectoryBoxButton"; }
 
-	string getName() const override;
-	string getFsId() const override;
+	string getName() const noexcept override;
+	string getFsId() const noexcept override;
 
 	/**
 	 * @return true if this directory contains no items.
 	 */
-	bool isEmpty() const;
+	bool isEmpty() const noexcept;
 
 	/**
 	 * @return The mutable contents collection for this directory.
 	 */
-	BoxButtonCollection& getContents();
+	BoxButtonCollection& getContents() noexcept { return contents; }
 
 	/**
 	 * @return Non-const parent pointer for tree navigation.

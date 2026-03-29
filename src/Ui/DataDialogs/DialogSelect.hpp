@@ -30,22 +30,22 @@
 
 namespace LEDSpicerUI::Ui::DataDialogs {
 
+using LEDSpicerUI::Ui::Storage::CollectionHandler;
+using LEDSpicerUI::Ui::Storage::BoxButtonCollection;
+using LEDSpicerUI::Ui::Storage::StringBoxButtonCollectionPtrUMap;
+
 /**
  * LEDSpicerUI::Ui::DialogSelect
  * Handles the selection of already created items by other dialogs.
  * Will allow to select and populate a box with selections from other collections.
  * This dialog differs from the rest because it does not store any data itself,
  * but only allows to move data from one place to another using links.
- * It also allows owners with multiple sources to be used.
  */
 class DialogSelect: public GladeDialog<DialogSelect> {
 
 	friend class Gtk::Builder;
 
 public:
-
-	using StringBoxButtonCollectionUMap = std::unordered_map<string, Storage::BoxButtonCollection*>;
-	using CollectionHandler = LEDSpicerUI::Ui::Storage::CollectionHandler;
 
 	/// Flag indicating a delete button.
 	static constexpr const uint8_t BUTTON_DELETER = 0b00000001;
@@ -78,7 +78,7 @@ public:
 	 * @param itemCollections
 	 * @param caller
 	 */
-	void setDestinations(const StringBoxButtonCollectionUMap& itemCollections, const Storage::Data* caller);
+	void setDestinations(BoxButtonCollection& itemCollections, const Storage::Data* caller);
 
 	/**
 	 * Prepares the dialog to be used.
@@ -146,9 +146,9 @@ protected:
 
 	DialogSelect(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
 
-	string_view getType() const;
+	string_view getType() const noexcept;
 
-	Storage::Data* createData(StringUMap& rawData) ;
+	Storage::Data* createData(StringUMap& rawData) noexcept ;
 
 	/**
 	 * Decorates the boxButton with the necessary buttons.

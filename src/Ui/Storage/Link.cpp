@@ -33,11 +33,11 @@ string_view Link::getCssClass() const noexcept {
 	return linkInfo.link ? linkInfo.link->getCssClass() : "";
 }
 
-const string Link::createPrettyName() const {
+const string Link::createPrettyName() const noexcept {
 	return linkInfo.link ? linkInfo.link->createPrettyName() : "";
 }
 
-const string Link::createTooltip() const {
+const string Link::createTooltip() const noexcept {
 	return linkInfo.link ? linkInfo.link->createTooltip() : "";
 }
 

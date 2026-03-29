@@ -128,8 +128,3 @@ TEST_F(MessageTest, GetMessage) {
 	EXPECT_EQ(msg.getMessage(), "Temp error");
 	EXPECT_EQ(msg.getMessage(), "");
 }
-
-int main(int argc, char** argv) {
-	::testing::InitGoogleTest(&argc, argv);
-	return RUN_ALL_TESTS();
-}

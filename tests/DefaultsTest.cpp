@@ -224,9 +224,3 @@ TEST(DefaultsTest, ExtractName) {
 	EXPECT_EQ("file.v1", Defaults::extractName("/a/b/c/file.v1.xml", "/a/b/c"));
 	EXPECT_EQ("file",    Defaults::extractName("/a/b/c/file.xml",    "/a/b/c/file.xml"));
 }
-
-// Main function for running tests
-int main(int argc, char **argv) {
-	::testing::InitGoogleTest(&argc, argv);
-	return RUN_ALL_TESTS();
-}

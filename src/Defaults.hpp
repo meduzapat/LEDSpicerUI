@@ -67,6 +67,9 @@ namespace LEDSpicerUI {
 
 namespace Constants {
 
+/// Commonly used empty string.
+const string emptyString;
+
 /// Separators.
 constexpr char FIELD_SEPARATOR    = 30;  // Record Separator (RS)
 constexpr char RECORD_SEPARATOR   = 31;  // Unit Separator (US)
@@ -108,7 +111,7 @@ constexpr const char* PINS     = "leds";
 constexpr const char* PATH     = "path";
 constexpr const char* FILE_ID  = "FID"; /// To be used with file based data objects.
 constexpr const char* UID      = "UID"; /// Stable self-identifier, set at construction.
-constexpr const char* PID      = "PID"; /// Parent UID, injected by createData().
+constexpr const char* PID      = "PID"; /// Parent UID, injected by createData() noexcept.
 constexpr const char* SID      = "SID"; /// To be used with anything that has a S in the name.
 constexpr const char* IID      = "IID"; /// To be used with anything that has a I in the name.
 
@@ -183,7 +186,7 @@ constexpr const char* TYPE_RESTRICTOR     = "restrictor";
 constexpr const char* TYPE_ELEMENT        = "element";
 constexpr const char* TYPE_GROUP          = "group";
 constexpr const char* TYPE_PROCESS        = "process";
-constexpr const char* TYPE_RESTRICTOR_MAP = "Player Mapping";
+constexpr const char* TYPE_RESTRICTOR_MAP = "player mapping";
 #define               TYPE_INPUT            "input"
 #define               TYPE_INPUT_SOURCE     TYPE_INPUT " source"
 #define               TYPE_INPUT_MAP        TYPE_INPUT " " TYPE_MAP
@@ -192,17 +195,18 @@ constexpr const char* TYPE_ANIMATION      = "animation";
 constexpr const char* TYPE_PROFILE        = "profile";
 
 /// Collection names.
-constexpr const char* COLLECTION_DEVICES        = "devices";
-constexpr const char* COLLECTION_RESTRICTORS    = "restrictors";
-constexpr const char* COLLECTION_ELEMENT        = "elements";
-constexpr const char* COLLECTION_GROUP          = "groups";
-constexpr const char* COLLECTION_PROCESS        = "processes";
-constexpr const char* COLLECTION_RESTRICTOR_MAP = "playerCombinations";
-constexpr const char* COLLECTION_INPUT          = "inputs";
-constexpr const char* COLLECTION_INPUT_SOURCES  = "sources";
-constexpr const char* COLLECTION_INPUT_MAPS     = "linkedMaps";
-constexpr const char* COLLECTION_ANIMATIONS     = "animations";
-constexpr const char* COLLECTION_PROFILES       = "profiles";
+constexpr const char* COLLECTION_DEVICES        = "d";
+constexpr const char* COLLECTION_RESTRICTORS    = "r";
+constexpr const char* COLLECTION_ELEMENT        = "e";
+constexpr const char* COLLECTION_GROUP          = "g";
+constexpr const char* COLLECTION_PROCESS        = "p";
+constexpr const char* COLLECTION_RESTRICTOR_MAP = "r.m";
+constexpr const char* COLLECTION_INPUT          = "i";
+constexpr const char* COLLECTION_INPUT_SOURCES  = "i.s";
+constexpr const char* COLLECTION_INPUT_MAPS     = "i.m";
+constexpr const char* COLLECTION_INPUT_LINKMAP  = "i.l";
+constexpr const char* COLLECTION_ANIMATIONS     = "a";
+constexpr const char* COLLECTION_PROFILES       = "pr";
 
 /// Directories
 #define               COLLECTION_DIRECTORIES       "directories"
@@ -518,6 +522,12 @@ public:
 	 * Removes the dirty state.
 	 */
 	static void cleanDirty();
+
+	/**
+	 * Sets the subtitle in the header bar.
+	 * @param text The text to display, or empty to clear.
+	 */
+	static void setSubtitle(const string& text);
 
 	/**
 	 * Add tabulation.

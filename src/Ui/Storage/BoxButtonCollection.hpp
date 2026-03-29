@@ -25,12 +25,13 @@
 
 #pragma once
 
-using BoxButtonVector = vector<LEDSpicerUI::Ui::Storage::BoxButton*>;
-
 namespace LEDSpicerUI::Ui::Storage {
+
+using BoxButtonVector = vector<BoxButton*>;
 
 /**
  * LEDSpicerUI::Ui::BoxButtonCollection
+ *
  * Represents a collection of BoxButton items.
  *
  * This class manages a collection of BoxButton items, providing functionality
@@ -71,7 +72,7 @@ public:
 	 * Get the size of the collection.
 	 * @return The number of items in the collection.
 	 */
-	size_t getSize() const;
+	size_t getSize() const noexcept { return items.size(); }
 
 	/**
 	 * Checks whether a Data object with the same unique ID is present in the collection.
@@ -79,33 +80,33 @@ public:
 	 * @param form The Data object whose ID to look up.
 	 * @return True if an item with a matching ID is found.
 	 */
-	bool isSet(Data* form) const;
+	bool isSet(Data* form) const noexcept;
 
 	/**
 	 * Check if an item with the specified name exists in the collection.
 	 * @param name The name to check.
 	 * @return True if an item with the given name exists, false otherwise.
 	 */
-	bool isIdSet(const string& name) const;
+	bool isIdSet(const string& name) const noexcept;
 
 	/**
 	 * Creates a new BoxButton item and adds it to the collection.
 	 * @param form The Data object to create a BoxButton.
 	 * @return Reference to the added BoxButton item.
 	 */
-	BoxButton& create(Data* form);
+	BoxButton& create(Data* form) noexcept;
 
 	/**
 	 * Remove a BoxButton item from the collection.
 	 * @param item Pointer to the BoxButton item to be removed.
 	 */
-	void remove(BoxButton& item);
+	void remove(BoxButton& item) noexcept;
 
 	/**
 	 * Remove a BoxButton item from the collection by its data.
 	 * @param form Pointer to the Data object to delete.
 	 */
-	void remove(Data* form);
+	void remove(Data* form) noexcept;
 
 	/**
 	 * Exchanges the contents of this collection with another.
@@ -113,7 +114,7 @@ public:
 	 * pointers move.
 	 * @param other The collection to swap contents with.
 	 */
-	void swap(BoxButtonCollection& other);
+	void swap(BoxButtonCollection& other) noexcept;
 
 	/**
 	 * Populate an OrdenableFlowBox with the BoxButton items.
@@ -136,25 +137,25 @@ public:
 	 * Get an iterator pointing to the beginning of the collection.
 	 * @return Iterator pointing to the beginning of the collection.
 	 */
-	BoxButtonVector::iterator begin();
+	BoxButtonVector::iterator begin() noexcept { return items.begin(); }
 
 	/**
 	 * Get an iterator pointing to the end of the collection.
 	 * @return Iterator pointing to the end of the collection.
 	 */
-	BoxButtonVector::iterator end();
+	BoxButtonVector::iterator end() noexcept { return items.end(); }
 
 	/**
 	 * Get a const iterator pointing to the beginning of the collection.
 	 * @return Const iterator pointing to the beginning of the collection.
 	 */
-	BoxButtonVector::const_iterator begin() const;
+	BoxButtonVector::const_iterator begin() const noexcept { return items.begin(); }
 
 	/**
 	 * Get a const iterator pointing to the end of the collection.
 	 * @return Const iterator pointing to the end of the collection.
 	 */
-	BoxButtonVector::const_iterator end() const;
+	BoxButtonVector::const_iterator end() const noexcept { return items.end(); }
 
 protected:
 
@@ -162,5 +163,7 @@ protected:
 	BoxButtonVector items;
 
 };
+
+using StringBoxButtonCollectionUMap = std::unordered_map<string, BoxButtonCollection>;
 
 } // namespace

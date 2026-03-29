@@ -24,31 +24,23 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-Group::Group(StringUMap& data) : Data(data) {
-	// Any change on elements needs to be reflected here.
-	CollectionHandler::getInstance(COLLECTION_ELEMENT)->registerDependency({&elements, 1, [this]() {
-		CollectionHandler::getInstance(COLLECTION_GROUP)->remove(this);
-	}});
+Group::Group(StringUMap& data) :
+	Parent(data, COLLECTION_GROUP, {{COLLECTION_ELEMENT, BoxButtonCollection{}}})
+{
+	registerDependency(COLLECTION_ELEMENT, 1, [this]() {
+		getCollectionHandler()->remove(this);
+	});
 }
 
-Group::~Group() {
-	CollectionHandler::getInstance(COLLECTION_GROUP)->remove(this);
-	CollectionHandler::getInstance(COLLECTION_ELEMENT)->release(&elements);
-}
-
-string_view Group::getCssClass() const noexcept {
-	return "GroupBoxButton";
-}
-
-void Group::activate() {
-	DataDialogs::DialogSelect::getInstance()->setDestinations({{TYPE_ELEMENT, &elements}}, this);
+void Group::setUp() {
+	DataDialogs::DialogSelect::getInstance()->setDestinations(children.at(COLLECTION_ELEMENT), this);
 }
 
 const string Group::toXML() const {
 	if (fieldsData.at(DEFAULT_COLOR).empty())
 		ignored.insert(DEFAULT_COLOR);
 	string r(createOpeningXML("group", fieldsData, ignored, false));
-	for (const auto& e : elements) {
+	for (const auto e : children.at(COLLECTION_ELEMENT)) {
 		r += e->getData()->toXML();
 	}
 	r += createClosingXML("group");

@@ -25,8 +25,9 @@
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
 DialogDirectory::DialogDirectory(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
-	DialogForm(obj, builder)
+	DialogForm(obj, builder, COLLECTION_DIRECTORIES)
 {
+
 	builder->get_widget("EntryDirectoryName", entryDirectoryName);
 	builder->get_widget("BtnApplyDirectory",  btnApply);
 
@@ -45,7 +46,7 @@ void DialogDirectory::load(XMLHelper* values) {
 	// Directories are runtime-only; nothing to load from XML.
 }
 
-void DialogDirectory::clearForm() {
+void DialogDirectory::clearForm() noexcept {
 	entryDirectoryName->set_text("");
 	btnApply->set_sensitive(false);
 }
@@ -78,7 +79,7 @@ const string DialogDirectory::createUniqueId() const {
 	});
 }
 
-string_view DialogDirectory::getType() const {
+string_view DialogDirectory::getType() const noexcept {
 	return setting->typeLabel;
 }
 
@@ -86,7 +87,7 @@ LEDSpicerUI::Ui::Storage::CollectionHandler* DialogDirectory::getCollectionHandl
 	return Storage::CollectionHandler::getInstance(setting->collectionName);
 }
 
-LEDSpicerUI::Ui::Storage::Data* DialogDirectory::createData(StringUMap& rawData) {
+LEDSpicerUI::Ui::Storage::Data* DialogDirectory::createData(StringUMap& rawData) noexcept {
 	return new Storage::DirectoryEntry(
 		rawData,
 		static_cast<const Storage::DirectoryEntry*>(ownerData)

@@ -40,11 +40,17 @@ public:
 
 	void load(XMLHelper* values) override;
 	Storage::CollectionHandler* getCollectionHandler() const override;
-	void clearForm() override;
+	void clearForm() noexcept override;
 	void isValid() const override;
-	void storeData() override;
-	void retrieveData() override;
-	const string createUniqueId() const override;
+	void storeData() noexcept override;
+	void retrieveData() noexcept override;
+	const string createUniqueId() const noexcept override;
+
+	/**
+	 * This function will populate the interfaces combobox with values.
+	 * @param currentData the form with data.
+	 */
+	void populateInterfacesCombobox();
 
 protected:
 
@@ -67,15 +73,9 @@ protected:
 	 */
 	bool checkAvailableInterfaces() const;
 
-	string_view getType() const override;
+	string_view getType() const noexcept override;
 
-	Storage::Data* createData(StringUMap& rawData) override;
-
-	/**
-	 * This function will populate the interfaces combobox with values.
-	 * @param currentData the form with data.
-	 */
-	void populateInterfacesCombobox();
+	Storage::Data* createData(StringUMap& rawData) noexcept override;
 
 	/**
 	 * After add check if more can be added.

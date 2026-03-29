@@ -60,7 +60,7 @@ class Link : public Data {
 	Link(
 		StringUMap& data,
 		const LinkData& linkData
-	) : Data(data), linkInfo(linkData) {}
+	) : Data(data, ""), linkInfo(linkData) {}
 
 	/**
 	 * Constructor initializing the Link with individual values.
@@ -74,7 +74,7 @@ class Link : public Data {
 		const string& type,
 		const string& key,
 		Data* link
-	) : Data(data), linkInfo(type, key, link) {}
+	) : Data(data, ""), linkInfo(type, key, link) {}
 
 	bool operator==(const Data& other) const;
 
@@ -87,11 +87,11 @@ class Link : public Data {
 
 	string_view getCssClass() const noexcept override;
 
-	const string createPrettyName() const override;
+	const string createPrettyName() const noexcept override;
 
-	const string createTooltip() const override;
+	const string createTooltip() const noexcept override;
 
-	const string createUniqueId() const override;
+	const string createUniqueId() const noexcept override;
 
 	string getValue(const string& key, const string& defaultValue = "") const override;
 

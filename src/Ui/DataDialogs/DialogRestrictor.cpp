@@ -25,7 +25,7 @@
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
 DialogRestrictor::DialogRestrictor(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
-	DialogFormHost(obj, builder)
+	DialogFormHost(obj, builder, COLLECTION_RESTRICTORS)
 {
 
 	DataDialogs::DialogRestrictorMap::buildInstance(builder, "DialogRestrictorMap");
@@ -227,11 +227,11 @@ string const DialogRestrictor::createUniqueId() const {
 	}, false);
 }
 
-string_view DialogRestrictor::getType() const {
+string_view DialogRestrictor::getType() const noexcept {
 	return TYPE_RESTRICTOR;
 }
 
-LEDSpicerUI::Ui::Storage::Data* DialogRestrictor::createData(StringUMap& rawData) {
+LEDSpicerUI::Ui::Storage::Data* DialogRestrictor::createData(StringUMap& rawData) noexcept {
 	return new Storage::Restrictor(rawData);
 }
 
@@ -276,4 +276,5 @@ void DialogRestrictor::onSelected() {
 			"Hardware #"
 		);
 	}
+	DialogRestrictorMap::getInstance()->populateInterfacesCombobox();
 }

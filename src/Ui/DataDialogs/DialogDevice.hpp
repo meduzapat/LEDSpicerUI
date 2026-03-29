@@ -43,12 +43,14 @@ public:
 	static constexpr string_view noDevice {"Select Device"};
 
 	void load(XMLHelper* values) override;
+	void wireChildren() override;
+	void disconnectChildren() override;
 	Storage::CollectionHandler* getCollectionHandler() const override;
-	void resetForm() override;
+	void resetForm() noexcept override;
 	void isValid() const override;
-	void storeData() override;
-	void retrieveData() override;
-	const string createUniqueId() const override;
+	void storeData() noexcept override;
+	void retrieveData() noexcept override;
+	const string createUniqueId() const noexcept override;
 
 protected:
 
@@ -64,9 +66,9 @@ protected:
 
 	void createSubItems(XMLHelper* values) override;
 
-	string_view getType() const override;
+	string_view getType() const noexcept override;
 
-	Storage::Data* createData(StringUMap& rawData) override;
+	Storage::Data* createData(StringUMap& rawData) noexcept override;
 
 	void onEmpty() override;
 

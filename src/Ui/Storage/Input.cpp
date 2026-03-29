@@ -36,11 +36,11 @@ Input::~Input() {
 		CollectionHandler::getInstance(COLLECTION_INPUT)->remove(this);
 }
 
-const string Input::createPrettyName() const {
+const string Input::createPrettyName() const noexcept {
 	return getFullPath() + " [" + getValue(NAME) + "]";
 }
 
-const string Input::createTooltip() const {
+const string Input::createTooltip() const noexcept {
 	return "Input of type " + getValue(NAME);
 }
 
@@ -65,12 +65,4 @@ const string Input::toXML() const {
 	Defaults::reduceTab();
 	r += XMLHelper::xmlFooter();
 	return r;
-}
-
-void Input::reset() {
-	sources.wipe();
-	linkedMaps.wipe();
-	if (not fieldsData.empty())
-		CollectionHandler::getInstance(COLLECTION_INPUT)->remove(this);
-	Revertible::reset();
 }

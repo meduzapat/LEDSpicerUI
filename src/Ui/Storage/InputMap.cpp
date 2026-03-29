@@ -24,11 +24,6 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-InputMap::~InputMap() {
-	if (not fieldsData.empty())
-		CollectionHandler::getInstance(COLLECTION_INPUT_MAPS + getProperty(PID))->remove(this);
-}
-
 const string InputMap::createUniqueId() const {
 	return Defaults::createCommonUniqueId({getProperty(PID), getValue(TRIGGER)});
 }

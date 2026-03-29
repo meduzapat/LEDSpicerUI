@@ -51,11 +51,11 @@ public:
 	void load(XMLHelper* values) override;
 	void setOwner(Storage::BoxButtonCollection* collection, const Storage::Data* owner) override;
 	Storage::CollectionHandler* getCollectionHandler() const override;
-	void resetForm() override;
+	void resetForm() noexcept override;
 	void isValid() const override;
-	void storeData() override;
-	void retrieveData() override;
-	const string createUniqueId() const override;
+	void storeData() noexcept override;
+	void retrieveData() noexcept override;
+	const string createUniqueId() const noexcept override;
 
 	/**
 	 * Attempts to populate sources for that input if needed.
@@ -81,8 +81,8 @@ protected:
 	DialogInputSource(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
 
 	void createSubItems(XMLHelper* values) override;
-	string_view getType() const override;
-	Storage::Data* createData(StringUMap& rawData) override;
+	string_view getType() const noexcept override;
+	Storage::Data* createData(StringUMap& rawData) noexcept override;
 
 	/**
 	 * Resolves the current source value from combo or manual entry.
@@ -91,10 +91,9 @@ protected:
 	Glib::ustring resolvedSource() const;
 
 	/**
-	 * Populates the source combo with detected devices plus sentinels.
-	 * @param devices Ordered map of id → display label from scanEventDevices().
+	 * @param sources Ordered map of id → display label.
 	 */
-	void populateSourcesList(const StringMap& devices);
+	void populateSourcesComboBox(const StringMap& sources);
 
 	/**
 	 * Resolves a device entry to its kernel human-readable name via sysfs.

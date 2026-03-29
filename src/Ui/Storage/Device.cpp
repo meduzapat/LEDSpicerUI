@@ -24,22 +24,6 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-Device::Device(StringUMap& data) : Revertible(data) {
-	registerChild(elements);
-}
-
-Device::~Device() {
-	if (not fieldsData.empty())
-		CollectionHandler::getInstance(COLLECTION_DEVICES)->remove(this);
-}
-
-void Device::reset() {
-	elements.wipe();
-	if (not fieldsData.empty())
-		CollectionHandler::getInstance(COLLECTION_DEVICES)->remove(this);
-	Revertible::reset();
-}
-
 const string Device::createPrettyName() const {
 	string
 		name{fieldsData.at(NAME)},
@@ -51,22 +35,14 @@ const string Device::createPrettyName() const {
 	return r;
 }
 
-string_view Device::getCssClass() const noexcept {
-	return "DeviceBoxButton";
-}
-
 const string Device::createUniqueId() const {
 	if (getValues()->empty()) return "";
 	return Defaults::createHardwareUniqueId(*getValues());
 }
 
-void Device::activate() {
-	DataDialogs::DialogElement::getInstance()->setOwner(&elements, this);
-}
-
 const string Device::toXML() const {
 	string r(createOpeningXML("device", fieldsData, ignored, false));
-	for (const auto& e : elements) {
+	for (const auto e : children.at(COLLECTION_ELEMENT)) {
 		r += e->getData()->toXML();
 	}
 	r += createClosingXML("device");

@@ -25,7 +25,7 @@
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
 DialogInput::DialogInput(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
-	DialogFileForm(obj, builder)
+	DialogFileForm(obj, builder, COLLECTION_INPUT)
 {
 
 	// DataDialogs::DialogInputLinkMaps::buildInstance(builder);
@@ -175,11 +175,11 @@ const string DialogInput::createUniqueId() const {
 	return Defaults::createCommonUniqueId({currentData->getProperty(PID), entryInputName->get_text()});
 }
 
-string_view DialogInput::getType() const {
+string_view DialogInput::getType() const noexcept {
 	return TYPE_INPUT;
 }
 
-LEDSpicerUI::Ui::Storage::Data* DialogInput::createData(StringUMap& rawData) {
+LEDSpicerUI::Ui::Storage::Data* DialogInput::createData(StringUMap& rawData) noexcept {
 	return new Storage::Input(rawData, currentDirectory);
 }
 
