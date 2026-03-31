@@ -46,8 +46,8 @@ public:
 	struct SettingRequest {
 		/// Reference to the navigator's own box pointer.
 		OrdenableFlowBox*& box;
-		/// Scoped directory collection name, e.g. COLLECTION_DIRECTORIES_INPUT.
-		string_view collectionName;
+		/// Scoped directory collection Id.
+		string_view collectionId;
 		/// Section type label Fed into getType().
 		string_view typeLabel;
 

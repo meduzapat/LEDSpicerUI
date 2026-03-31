@@ -24,7 +24,7 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-BoxButton::BoxButton(Data* form) :
+BoxButton::BoxButton(Data* form) noexcept :
 	Gtk::HBox(false, 2),
 	data{form},
 	label{Gtk::make_managed<Gtk::Label>()}
@@ -60,27 +60,15 @@ BoxButton::~BoxButton() {
 	}
 }
 
-void BoxButton::packButtonStart(Gtk::Button& button) {
+void BoxButton::packButtonStart(Gtk::Button& button) noexcept {
 	pack_start(button, Gtk::PACK_SHRINK);
 }
 
-Data* BoxButton::getData() {
-	return data;
-}
-
-const Data* BoxButton::getData() const {
-	return data;
-}
-
-void BoxButton::updateLabel() {
+void BoxButton::updateLabel() noexcept {
 	auto text{data->createTooltip()};
 	if (not text.empty()) {
 		label->set_tooltip_text(text);
 	}
 	text = data->createPrettyName();
 	label->set_text(text);
-}
-
-Gtk::Label* BoxButton::getLabel() {
-	return label;
 }

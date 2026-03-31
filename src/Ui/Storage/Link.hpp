@@ -46,7 +46,11 @@ class Link : public Data {
 
 		LinkData() = delete;
 
-		LinkData(const string& t, const string& k, const Data* l) : type(t), key(k), link(l) {}
+		LinkData(
+			const string& t,
+			const string& k,
+			const Data* l
+		) noexcept : type(t), key(k), link(l) {}
 
 	};
 
@@ -60,7 +64,7 @@ class Link : public Data {
 	Link(
 		StringUMap& data,
 		const LinkData& linkData
-	) : Data(data, ""), linkInfo(linkData) {}
+	) noexcept : Data(data, ""), linkInfo(linkData) {}
 
 	/**
 	 * Constructor initializing the Link with individual values.
@@ -74,9 +78,9 @@ class Link : public Data {
 		const string& type,
 		const string& key,
 		Data* link
-	) : Data(data, ""), linkInfo(type, key, link) {}
+	) noexcept : Data(data, ""), linkInfo(type, key, link) {}
 
-	bool operator==(const Data& other) const;
+	bool operator==(const Data& other) const noexcept override;
 
 	Link(Link&& other) noexcept :
 		Data(std::move(other)),
@@ -85,31 +89,26 @@ class Link : public Data {
 
 	virtual ~Link() = default;
 
-	string_view getCssClass() const noexcept override;
-
+	string_view getCssClass()       const noexcept override;
 	const string createPrettyName() const noexcept override;
+	const string createTooltip()    const noexcept override;
+	const string createUniqueId()   const noexcept override;
+	const string toXML()            const noexcept override;
 
-	const string createTooltip() const noexcept override;
-
-	const string createUniqueId() const noexcept override;
-
-	string getValue(const string& key, const string& defaultValue = "") const override;
-
-	void setValue(const string& key, const string& value) override;
-
-	const string toXML() const override;
+	const string& getValue(const string& key)                      const noexcept override;
+	string getValue(const string& key, const string& defaultValue) const noexcept override;
+	void setValue(const string& key, const string& value)                noexcept override;
 
 	/**
 	 * Replaces the internal link information with a new LinkData struct.
 	 * * @param newLinkData The new struct to apply to this Link.
 	 */
-	void setLinkData(const LinkData& newLinkData);
+	void setLinkData(const LinkData& newLinkData) noexcept;
 
 protected:
 
-		/// Struct containing the immutable type, key, and Data link pointer.
-		LinkData linkInfo;
-
-	};
+	/// Struct containing the immutable type, key, and Data link pointer.
+	LinkData linkInfo;
+};
 
 } // namespace

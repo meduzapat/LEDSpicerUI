@@ -20,7 +20,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DataDialogs/DialogSelect.hpp"
+//#include "DataDialogs/DialogSelect.hpp"
 #include "Parent.hpp"
 
 #pragma once
@@ -29,22 +29,18 @@ namespace LEDSpicerUI::Ui::Storage {
 
 /**
  * LEDSpicerUI::Ui::Storage::Group
- *
- * This class stores links to real elements
+ * Stores links to elements forming a named group.
  */
 class Group : public Parent {
 
 public:
 
-	Group(StringUMap& data);
+	Group(StringUMap& data) noexcept;
 
-	virtual ~Group();
+	virtual ~Group() = default;
 
-	string_view getCssClass() const noexcept override { return "GroupBoxButton"; }
-
-	void setUp() override;
-
-	const string toXML() const override;
+	string_view  getCssClass() const noexcept override { return "GroupBoxButton"; }
+	const string toXML()       const noexcept override;
 
 };
 

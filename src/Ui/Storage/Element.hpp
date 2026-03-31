@@ -33,50 +33,48 @@ class Element: public Data {
 
 public:
 
-	Element(StringUMap& data) : Data(data, COLLECTION_ELEMENT) {}
+	Element(StringUMap& data) noexcept : Data(data, COLLECTION_ELEMENT) {}
 
 	virtual ~Element();
 
-	string_view getCssClass() const noexcept override { return "ElementBoxButton"; }
-
-	const string createPrettyName() const override;
-
-	const string toXML() const override;
+	string_view getCssClass()       const noexcept override { return "ElementBoxButton"; }
+	const string createPrettyName() const noexcept override;
+	const string toXML()            const noexcept override;
 
 	/**
 	 * Adds a child to the element, this is used for RGB strips.
 	 * @param child
 	 */
-	void addStripChild(Element* child);
+	void addStripChild(Element* child) noexcept;
 
 	/**
 	 * @return the list of strip children.
 	 */
-	vector<Element*> copyStripChildren();
+	vector<Element*> copyStripChildren() noexcept;
 
 	/**
 	 * Clears all strip children.
 	 */
-	void clearStripChildren();
+	void clearStripChildren() noexcept;
 
 	/**
 	 * Attempts to convert any RGB setup into scattered RGB.
 	 * @param data
 	 */
-	static void splitRGB(Data* data);
+	static void splitRGB(Data* data) noexcept;
 
 	/**
 	 * Using the position, stores the split RGB connectors.
 	 * @param data
 	 * @param position
 	 */
-	static void convertPositionToRGB(Data* data, const string& position, const string& colorFormat);
+	static void convertPositionToRGB(Data* data, const string& position, const string& colorFormat) noexcept;
 
 	/**
 	 * @param position
 	 * @return the position of the first connector on the position.
 	 */
-	static uint16_t findFirstConnectorIndexByPosition(const string& position);
+	static uint16_t findFirstConnectorIndexByPosition(const string& position) noexcept;
 
 protected:
 

@@ -33,19 +33,17 @@ class Process: public Data {
 
 public:
 
-	Process(StringUMap& data) : Data(data, COLLECTION_PROCESS) {}
+	Process(StringUMap& data) noexcept : Data(data, COLLECTION_PROCESS) {}
 
-	virtual ~Process();
+	virtual ~Process() = default;
 
-	string_view getCssClass() const noexcept override;
-
-	const string createPrettyName() const override;
-
-	const string toXML() const override;
+	string_view getCssClass()       const noexcept override { return "ProcessBoxButton"; }
+	const string createPrettyName() const noexcept override;
+	const string toXML()            const noexcept override;
 
 protected:
 
-	const string getPrimaryKey() const override {return PARAM_PROCESS_NAME;}
+	const string getPrimaryKey() const noexcept override {return PARAM_PROCESS_NAME;}
 
 };
 

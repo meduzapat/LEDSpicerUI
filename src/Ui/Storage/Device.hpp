@@ -20,6 +20,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "Parent.hpp"
 #include "Revertible.hpp"
 
 #pragma once
@@ -29,23 +30,26 @@ namespace LEDSpicerUI::Ui::Storage {
 /**
  * LEDSpicerUI::Ui::Storage::Device
  *
- * A class that adds storage to Devices form.
- * A device will provide a number of pins where the LEDS are connected, but this are handled by elements.
- * A device will store the elements attached to the pins.
+ * Stores a hardware device and its attached elements.
  */
-class Device : public Revertible {
+class Device : public Parent, public Revertible {
 
 public:
 
-	Device(StringUMap& data) :
-		Revertible(data, COLLECTION_DEVICES, {{COLLECTION_ELEMENT, BoxButtonCollection()}}) {}
+	Device(StringUMap& data) noexcept :
+		Parent(data, COLLECTION_DEVICES, {COLLECTION_ELEMENT}),
+		Revertible(fieldsData, &children)
+	{}
 
 	virtual ~Device() = default;
 
 	const string createPrettyName() const noexcept override;
-	const string createUniqueId() const noexcept override;
-	string_view getCssClass() const noexcept override { return "DeviceBoxButton"; }
-	const string toXML() const override;
+	const string createUniqueId()   const noexcept override;
+	string_view  getCssClass()      const noexcept override { return "DeviceBoxButton"; }
+	const string toXML()            const noexcept override;
+
+	void wipe()     noexcept override;
+	void tearDown() noexcept override;
 
 };
 

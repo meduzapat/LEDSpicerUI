@@ -34,26 +34,32 @@ namespace LEDSpicerUI::Ui::Storage {
  * Inherits Data for field storage (NAME) and BoxButton compatibility.
  * Inherits DirNode for parent pointer and path resolution.
  * Does not inherit Revertible — directories are never snap/restored.
+ * TODO: add move support — requires reseating parent pointer on move.
  */
 class DirectoryEntry : public Data, public DirNode {
 
 public:
 
 	/**
-	 * @param data   Must contain NAME (directory segment name).
-	 * @param parent Parent directory node, or nullptr for root-level.
+	 * @param data         Must contain NAME (directory segment name).
+	 * @param parent       Parent directory node, or nullptr for root-level.
+	 * @param collectionId Collection this entry registers into.
 	 */
-	DirectoryEntry(StringUMap& data, const DirectoryEntry* parent);
+	DirectoryEntry(
+		StringUMap&     data,
+		DirectoryEntry* parent,
+		const string&   collectionId
+	) noexcept;
 
 	virtual ~DirectoryEntry() = default;
 
-	const string createUniqueId() const noexcept override;
-	const string createPrettyName() const noexcept override;
-	const string createTooltip() const noexcept override;
-	string_view getCssClass() const noexcept override { return "DirectoryBoxButton"; }
+	const string  createUniqueId()   const noexcept override;
+	const string  createPrettyName() const noexcept override;
+	const string  createTooltip()    const noexcept override;
+	string_view   getCssClass()      const noexcept override { return "DirectoryBoxButton"; }
 
-	string getName() const noexcept override;
-	string getFsId() const noexcept override;
+	const string& getName()  const noexcept override;
+	const string& getFsId()  const noexcept override;
 
 	/**
 	 * @return true if this directory contains no items.
@@ -64,11 +70,6 @@ public:
 	 * @return The mutable contents collection for this directory.
 	 */
 	BoxButtonCollection& getContents() noexcept { return contents; }
-
-	/**
-	 * @return Non-const parent pointer for tree navigation.
-	 */
-	DirNode* getParent();
 
 protected:
 

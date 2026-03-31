@@ -152,11 +152,6 @@ TEST_F(InputFileTest, MissingAttributesHandling) {
 	);
 }
 
-TEST_F(InputFileTest, FilenameExtraction) {
-	EXPECT_EQ("inputMulti",  inputMulti->getFilename());
-	EXPECT_EQ("inputSingle", inputSingle->getFilename());
-}
-
 TEST_F(InputFileTest, RootInfoIsPopulated) {
 	const auto& rootInfo = inputMulti->getRootInfo();
 

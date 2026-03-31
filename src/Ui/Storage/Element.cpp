@@ -28,7 +28,7 @@ Element::~Element() {
 	for (auto child : stripChildren) delete child;
 }
 
-const string Element::createPrettyName() const {
+const string Element::createPrettyName() const noexcept {
 	string pname(Data::createPrettyName());
 	if (hasProperty("stripDescriptor")) {
 		pname += " [" + getValue(STRIPSIZE) + "]";
@@ -36,26 +36,26 @@ const string Element::createPrettyName() const {
 	return pname;
 }
 
-const string Element::toXML() const {
+const string Element::toXML() const noexcept {
 	StringUSet ignored;
 	if (fieldsData.at(BRIGHTNESS) == "100")
 		ignored.insert(BRIGHTNESS);
 	return createOpeningXML("element", fieldsData, ignored, true);
 }
 
-void Element::addStripChild(Element* child) {
+void Element::addStripChild(Element* child) noexcept {
 	stripChildren.push_back(child);
 }
 
-vector<Element*> Element::copyStripChildren() {
+vector<Element*> Element::copyStripChildren() noexcept {
 	return stripChildren;
 }
 
-void Element::clearStripChildren() {
+void Element::clearStripChildren() noexcept {
 	stripChildren.clear();
 }
 
-void Element::splitRGB(Data* data) {
+void Element::splitRGB(Data* data) noexcept {
 	if (not data->getValue(POSITIONS).empty()) {
 		// Always assume good data.
 		const string position(Defaults::explode(data->getValue(POSITIONS), ',')[0]);
@@ -74,7 +74,7 @@ void Element::splitRGB(Data* data) {
 	}
 }
 
-void Element::convertPositionToRGB(Data* data, const string& position, const string& colorFormat) {
+void Element::convertPositionToRGB(Data* data, const string& position, const string& colorFormat) noexcept {
 	auto pin(findFirstConnectorIndexByPosition(position));
 	for (const auto& c : colorFormat) {
 		switch (c) {
@@ -92,6 +92,6 @@ void Element::convertPositionToRGB(Data* data, const string& position, const str
 	}
 }
 
-uint16_t Element::findFirstConnectorIndexByPosition(const string& position) {
+uint16_t Element::findFirstConnectorIndexByPosition(const string& position) noexcept {
 	return (((std::stod(position) -1) * 3) + 1) - 1;
 }

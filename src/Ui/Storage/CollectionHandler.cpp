@@ -26,37 +26,37 @@ using namespace LEDSpicerUI::Ui::Storage;
 
 std::unordered_map<string, CollectionHandler*> CollectionHandler::collections;
 
-void CollectionHandler::purgeAll() {
+CollectionHandler* CollectionHandler::getInstance(string_view collectionName) noexcept {
+	auto [it, inserted] = collections.try_emplace(string(collectionName), new CollectionHandler());
+	return it->second;
+}
+
+void CollectionHandler::purgeAll() noexcept {
 	for (auto& c : collections)
 		delete c.second;
 	collections.clear();
 }
 
-CollectionHandler* CollectionHandler::getInstance(string_view collectionName) {
-	auto [it, inserted] = collections.try_emplace(string(collectionName), new CollectionHandler());
-	return it->second;
-}
-
-Data* CollectionHandler::get(const string& id) const {
+Data* CollectionHandler::get(const string& id) const noexcept {
 	return (isIdSet(id) ? collection.at(id) : nullptr);
 }
 
-bool CollectionHandler::isSet(const Data* item) const {
+bool CollectionHandler::isSet(const Data* item) const noexcept {
 	return isIdSet(item->createUniqueId());
 }
 
-bool CollectionHandler::isIdSet(const string& id) const {
+bool CollectionHandler::isIdSet(const string& id) const noexcept {
 	return collection.find(id) != collection.end();
 }
 
-size_t CollectionHandler::countByKey(const string& key, const string& value) const {
+size_t CollectionHandler::countByKey(const string& key, const string& value) const noexcept {
 	size_t count = 0;
 	for (const auto& item : collection)
 		if (item.second->getValue(key) == value) ++count;
 	return count;
 }
 
-vector<Data*> CollectionHandler::findByProperty(const string& property, const string& value) {
+vector<Data*> CollectionHandler::findByProperty(const string& property, const string& value) noexcept {
 	vector<Data*> results;
 	for (const auto& item : collection) {
 		if (item.second->getProperty(property) == value) {
@@ -66,12 +66,12 @@ vector<Data*> CollectionHandler::findByProperty(const string& property, const st
 	return results;
 }
 
-void CollectionHandler::add(Data* item) {
+void CollectionHandler::add(Data* item) noexcept {
 	collection.emplace(item->createUniqueId(), item);
 	refreshComboBoxes();
 }
 
-void CollectionHandler::remove(Data* item) {
+void CollectionHandler::remove(Data* item) noexcept {
 
 	if (not isSet(item)) return;
 
@@ -89,17 +89,17 @@ void CollectionHandler::remove(Data* item) {
 	for (auto& callback : pending) callback();
 }
 
-void CollectionHandler::replace(Data* item, const string& oldId) {
+void CollectionHandler::replace(Data* item, const string& oldId) noexcept {
 	if (item->createUniqueId() == oldId) return;
 	collection.erase(oldId);
 	add(item);
 }
 
-void CollectionHandler::registerDependency(const Dependency& dependency) {
+void CollectionHandler::registerDependency(const Dependency& dependency) noexcept {
 	dependencies.push_back(dependency);
 }
 
-void CollectionHandler::refreshComboBox(Gtk::ComboBoxText* comboBox) {
+void CollectionHandler::refreshComboBox(Gtk::ComboBoxText* comboBox) noexcept {
 	comboBox->remove_all();
 	for (const auto& item : collection)
 		comboBox->append(item.second->createUniqueId(), item.second->createPrettyName());
@@ -108,18 +108,18 @@ void CollectionHandler::refreshComboBox(Gtk::ComboBoxText* comboBox) {
 void CollectionHandler::refreshComboBox(
 	Gtk::ComboBoxText* comboBox,
 	const std::function<bool(const Data*)>& filter
-) {
+) noexcept {
 	comboBox->remove_all();
 	for (const auto& item : collection)
 		if (filter(item.second))
 			comboBox->append(item.second->createUniqueId(), item.second->createPrettyName());
 }
 
-void CollectionHandler::registerComboBox(Gtk::ComboBoxText* destination) {
+void CollectionHandler::registerComboBox(Gtk::ComboBoxText* destination) noexcept {
 	comboBoxes.push_back(destination);
 }
 
-void CollectionHandler::release(BoxButtonCollection* destination) {
+void CollectionHandler::release(BoxButtonCollection* destination) noexcept {
 	auto it = std::find_if(
 		dependencies.begin(),
 		dependencies.end(),
@@ -130,11 +130,11 @@ void CollectionHandler::release(BoxButtonCollection* destination) {
 	if (it != dependencies.end()) dependencies.erase(it);
 }
 
-void CollectionHandler::release(Gtk::ComboBoxText* destination) {
+void CollectionHandler::release(Gtk::ComboBoxText* destination) noexcept {
 	comboBoxes.erase(std::find(comboBoxes.begin(), comboBoxes.end(), destination));
 }
 
-void CollectionHandler::refreshComboBoxes() {
+void CollectionHandler::refreshComboBoxes() noexcept {
 	for (auto comboBox : comboBoxes) {
 		refreshComboBox(comboBox);
 	}

@@ -20,7 +20,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Parent.hpp"
+#include "CollectionHandler.hpp"
 
 #pragma once
 
@@ -29,75 +29,65 @@ namespace LEDSpicerUI::Ui::Storage {
 /**
  * LEDSpicerUI::Ui::Storage::Revertible
  *
- * Intermediate base for Data subclasses that participate in the DialogFormHost
- * EDIT lifecycle and need safe cancel semantics when the type-selector combo
- * is changed mid-edit.
+ * Pure mixin for objects that participate in the DialogFormHost EDIT lifecycle
+ * and need safe cancel semantics when a type-selector combo changes mid-edit.
  *
- * Subclasses call registerChild() once per owned BoxButtonCollection from
- * their constructor body. Revertible then handles swap and restore of both
- * fieldsData and all registered children automatically.
+ * Receives references to the consumer's own fieldsData and optionally its
+ * children map at construction.
+ * Consumers are responsible for calling clearSnap() inside their wipe() and
+ * revert() inside their tearDown().
  *
  * Lifecycle:
- *   - DialogFormHost calls swap() just before onEmpty()/onSelected() on a
- *     type switch. fieldsData and all child collections are swapped into
- *     snapshot storage in one O(n) pass.
- *   - On APPLY, DialogForm calls wipe() before storeData(), which discards
- *     all snapshot storage as a side effect.
- *   - On CANCEL, DialogForm calls deActivate() without having called wipe().
- *     deActivate() detects the live snapshot and calls restore(), returning
- *     fieldsData and all child collections to their pre-edit state.
+ *   - DialogFormHost calls swap() on type switch — fields and children move into snapshot storage in one pass.
+ *   - On APPLY: consumer calls clearSnap() then Data::wipe().
+ *   - On CANCEL: consumer calls revert() from tearDown() before Data::tearDown().
  */
-class Revertible : public Parent {
+class Revertible {
 
 public:
 
+	/**
+	 * @param fields   Reference to the consumer's fieldsData.
+	 * @param children Pointer to the consumer's children map, or nullptr if none.
+	 */
 	Revertible(
-		StringUMap& data,
-		const string& collectionId,
-		StringBoxButtonCollectionUMap children
-	);
+		StringUMap& fields,
+		StringBoxButtonCollectionUMap* children = nullptr
+	) noexcept;
 
 	virtual ~Revertible();
 
 	/**
-	 * Swaps fieldsData and all registered child collections into snapshot storage.
-	 * No-op if fieldsData is empty or a snapshot already exists.
+	 * Moves fields and all child collections into snapshot storage.
+	 * No-op if fields are empty or a snapshot already exists.
 	 */
 	virtual void swap();
 
 	/**
-	 * Restores fieldsData and all registered child collections from snapshot.
+	 * Restores fields and all child collections from snapshot.
 	 * No-op if no snapshot is present.
 	 */
 	virtual void revert();
 
 	/**
-	 * Clears fieldsData and discards all snapshot storage.
-	 * This is the APPLY path — called by DialogForm before storeData().
+	 * Discards all snapshot storage without touching live fields or children.
+	 * Call this from the consumer's wipe() before Data::wipe().
 	 */
-	void wipe() override;
-
-	/**
-	 * Restores snapshot if present, then delegates to Data::tearDown().
-	 * This is the CANCEL path — called by DialogForm after the modal loop.
-	 */
-	void tearDown() override;
+	void clearSnap() noexcept;
 
 protected:
 
-	/// Snapshot of fieldsData. Empty means no snapshot is active.
+	/// Reference to the consumer's serializable field storage.
+	StringUMap& liveFields;
+
+	/// Pointer to the consumer's children map. nullptr = no children.
+	StringBoxButtonCollectionUMap* liveChildren;
+
+	/// Snapshot of liveFields. Empty = no snapshot active.
 	StringUMap snapFields;
 
-	/// Registered children paired with their snapshot storage.
+	/// Child collections paired with their snapshot storage.
 	vector<std::pair<BoxButtonCollection*, BoxButtonCollection>> childrenSnaps;
-
-	/**
-	 * Registers a child BoxButtonCollection to be included in swap/restore.
-	 * Must be called from the subclass constructor body, after all members
-	 * are initialized.
-	 * @param child The child collection to register.
-	 */
-	void registerChild(BoxButtonCollection& child);
 
 };
 

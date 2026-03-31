@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      FileData.cpp
+ * @file      FileNode.cpp
  * @since     Feb 23, 2026
  * @author    Patricio A. Rossi (MeduZa)
  *
@@ -20,12 +20,17 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "FileData.hpp"
+#include "FileNode.hpp"
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-FileData::FileData(StringUMap& data, const DirNode* parent) :
-	Revertible(data),
+FileNode::FileNode(
+	StringUMap& data,
+	DirNode* parent,
+	const string& collectionId,
+	const vector<string>& childIds
+) noexcept :
+	Parent(data, collectionId, childIds),
 	DirNode(parent)
 {
 	setProperty(FILENAME, fieldsData.count(FILENAME) ? fieldsData.at(FILENAME) : "");
@@ -34,14 +39,17 @@ FileData::FileData(StringUMap& data, const DirNode* parent) :
 	fieldsData.erase(FILENAME);
 }
 
-const string FileData::createUniqueId() const {
-	return Defaults::createCommonUniqueId({parent ? parent->getFsId() : "", getProperty(FILENAME)});
+const string FileNode::createUniqueId() const noexcept {
+	return Defaults::createCommonUniqueId({
+		parent ? parent->getFsId() : "",
+		getProperty(FILENAME)
+	});
 }
 
-string FileData::getName() const {
+const string& FileNode::getName() const noexcept {
 	return getProperty(FILENAME);
 }
 
-string FileData::getFsId() const {
+const string& FileNode::getFsId() const noexcept {
 	return getProperty(UID);
 }

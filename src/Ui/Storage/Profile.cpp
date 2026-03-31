@@ -24,42 +24,44 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-Profile::Profile(StringUMap& data) :
-	Parent(data, COLLECTION_PROFILES, {
-		{COLLECTION_ELEMENT,    BoxButtonCollection{}},
-		{COLLECTION_GROUP,      BoxButtonCollection{}},
-		{COLLECTION_ANIMATIONS, BoxButtonCollection{}},
-		{COLLECTION_INPUT,      BoxButtonCollection{}}
+Profile::Profile(StringUMap& data, DirNode* parent) noexcept :
+	FileNode(data, parent, COLLECTION_PROFILES, {
+		{COLLECTION_PROFILE_ELEMENTS,   {}},
+		{COLLECTION_PROFILE_GROUPS,     {}},
+		{COLLECTION_PROFILE_INPUTS,     {}},
+		{COLLECTION_PROFILE_ANIMATIONS, {}}
 	})
 {
-	registerDependency(COLLECTION_ELEMENT);
-	registerDependency(COLLECTION_GROUP);
-	registerDependency(COLLECTION_ANIMATIONS);
-	registerDependency(COLLECTION_INPUT);
+	registerDependency(COLLECTION_ELEMENT,    COLLECTION_PROFILE_ELEMENTS);
+	registerDependency(COLLECTION_GROUP,      COLLECTION_PROFILE_GROUPS);
+	registerDependency(COLLECTION_INPUT,      COLLECTION_PROFILE_INPUTS);
+	registerDependency(COLLECTION_ANIMATIONS, COLLECTION_PROFILE_ANIMATIONS);
 }
 
-void Profile::setUp() {
-	DataDialogs::DialogSelect::getInstance()->setDestinations(itemCollections, this);
-}
-
-const string Profile::toXML() const {
-	string r("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\
-	<LEDSpicer\
-		version=\"1.0\"\
-		type=\"Profile\"\n");
-	Defaults::increaseTab();
+const string Profile::toXML() const noexcept {
+	string r(XMLHelper::xmlHeader("Profile"));
 	r += Data::toXML();
 	Defaults::reduceTab();
 	r += ">\n";
 	Defaults::increaseTab();
-	for (const auto& e : alwaysOnElements) {
-		r += e->getData()->toXML();
-	}
-	Defaults::reduceTab();
-	r += "</LEDSpicer>\n";
-	return r;
-}
 
-const string Profile::getPrimaryKey() const {
-	return FILENAME;
+	const auto emit = [&](const string& tag, const string& key) {
+		const auto& col = children.at(key);
+		if (col.getSize() == 0) return;
+		r += Defaults::tab() + "<" + tag + ">\n";
+		Defaults::increaseTab();
+		for (const auto& e : col)
+			r += e->getData()->toXML();
+		Defaults::reduceTab();
+		r += Defaults::tab() + "</" + tag + ">\n";
+	};
+
+	emit("alwaysOnElements", COLLECTION_PROFILE_ELEMENTS);
+	emit("alwaysOnGroups",   COLLECTION_PROFILE_GROUPS);
+	emit("inputs",           COLLECTION_PROFILE_INPUTS);
+	emit("animations",       COLLECTION_PROFILE_ANIMATIONS);
+
+	Defaults::reduceTab();
+	r += XMLHelper::xmlFooter();
+	return r;
 }

@@ -41,18 +41,18 @@ public:
 	* Creates a new BoxButton object.
 	* @param form The data to store.
 	*/
-	BoxButton(Data* form);
+	BoxButton(Data* form) noexcept;
 
 	/**
 	 * Move constructor for BoxButton.
 	 * @param other The BoxButton instance to move from.
 	 */
-	BoxButton(BoxButton&& other) :
+	BoxButton(BoxButton&& other) noexcept :
 		Gtk::HBox(std::move(other)),
 		data(std::exchange(other.data, nullptr)),
 		label(std::move(other.label)) {}
 
-	BoxButton& operator=(BoxButton&& other) {
+	BoxButton& operator=(BoxButton&& other) noexcept {
 		if (this != &other) {
 			Gtk::HBox::operator=(std::move(other));
 			data     = std::exchange(other.data, nullptr);
@@ -61,9 +61,7 @@ public:
 		return *this;
 	}
 
-	bool operator==(const BoxButton& other) const {
-		return (this == &other);
-	}
+	bool operator==(const BoxButton& other) const noexcept { return (this == &other); }
 
 	virtual ~BoxButton();
 
@@ -71,29 +69,29 @@ public:
 	 * Adds a button to the front of the buttons.
 	 * @param button
 	 */
-	void packButtonStart(Gtk::Button& button);
+	void packButtonStart(Gtk::Button& button) noexcept;
 
 	/**
 	 * Returns the internal form that contains the values.
 	 * @return
 	 */
-	Data* getData();
+	Data* getData() noexcept { return data; }
 
 	/**
 	 * Return the Form
 	 * @return
 	 */
-	const Data* getData() const;
+	const Data* getData() const noexcept { return data; }
 
 	/**
 	 * Updates it own label that represents in a human way what is stored inside the box.
 	 */
-	void updateLabel();
+	void updateLabel() noexcept;
 
 	/**
 	 * @return The box label.
 	 */
-	Gtk::Label* getLabel();
+	Gtk::Label* getLabel() const noexcept { return label; }
 
 protected:
 

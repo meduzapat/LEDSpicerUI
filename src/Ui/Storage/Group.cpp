@@ -24,25 +24,23 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-Group::Group(StringUMap& data) :
-	Parent(data, COLLECTION_GROUP, {{COLLECTION_ELEMENT, BoxButtonCollection{}}})
+Group::Group(StringUMap& data) noexcept :
+	Parent(data, COLLECTION_GROUP, {COLLECTION_GROUP_LINKS})
 {
-	registerDependency(COLLECTION_ELEMENT, 1, [this]() {
+	registerDependency(COLLECTION_ELEMENT, COLLECTION_GROUP_LINKS, 1, [this]() {
 		getCollectionHandler()->remove(this);
 	});
 }
-
-void Group::setUp() {
-	DataDialogs::DialogSelect::getInstance()->setDestinations(children.at(COLLECTION_ELEMENT), this);
-}
-
-const string Group::toXML() const {
+//
+//void Group::setUp() {
+//	DataDialogs::DialogSelect::getInstance()->setDestinations(children.at(COLLECTION_ELEMENT), this);
+//}
+const string Group::toXML() const noexcept {
 	if (fieldsData.at(DEFAULT_COLOR).empty())
 		ignored.insert(DEFAULT_COLOR);
 	string r(createOpeningXML("group", fieldsData, ignored, false));
-	for (const auto e : children.at(COLLECTION_ELEMENT)) {
+	for (const auto e : children.at(COLLECTION_GROUP_LINKS))
 		r += e->getData()->toXML();
-	}
 	r += createClosingXML("group");
 	ignored.clear();
 	return r;

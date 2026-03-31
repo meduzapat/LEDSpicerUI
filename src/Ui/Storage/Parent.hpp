@@ -43,16 +43,13 @@ public:
 	 *
 	 * @param data Serializable field data forwarded to Data.
 	 * @param collectionId the collection id forwarded to Data.
-	 * @param children Map of collection ID → BoxButtonCollection forwarded to Data.
+	 * @param childCollectionIds a lit of collection ID to create the children.
 	 */
 	Parent(
 		StringUMap& data,
 		const string& collectionId,
-		StringBoxButtonCollectionUMap children
-	) :
-		Data(data, collectionId),
-		children(std::move(children))
-	{}
+		const vector<string>& childCollectionIds
+	);
 
 	virtual ~Parent();
 
@@ -69,13 +66,13 @@ public:
 	StringBoxButtonCollectionUMap& getChildren() noexcept;
 	const StringBoxButtonCollectionUMap& getChildren() const noexcept;
 
-	/// Iteration support — for (auto& [id, collection] : parent)
+	/// Iteration support.
 	auto begin() noexcept        { return children.begin(); }
-	auto end()   noexcept        { return children.end(); }
+	auto end()   noexcept        { return children.end();   }
 	auto begin() const noexcept  { return children.begin(); }
-	auto end()   const noexcept  { return children.end(); }
+	auto end()   const noexcept  { return children.end();   }
 
-	size_t getSize() const noexcept { return children.size(); }
+	size_t getSize() const noexcept { return children.size();  }
 	bool   empty()   const noexcept { return children.empty(); }
 
 protected:

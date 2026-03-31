@@ -20,8 +20,10 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "FileData.hpp"
-#include "DataDialogs/DialogInputSource.hpp"
+#include "XMLHelper.hpp"
+#include "FileNode.hpp"
+#include "Revertible.hpp"
+// TODO: wire once DialogInputLinkMaps is reworked.
 //#include "DataDialogs/DialogInputLinkMaps.hpp"
 
 #pragma once
@@ -31,30 +33,29 @@ namespace LEDSpicerUI::Ui::Storage {
 /**
  * LEDSpicerUI::Ui::Storage::Input
  * Represents a single input configuration file.
- * Inherits FileData for path tracking, field storage, and snap/restore.
- * Owns a collection of InputSource objects and a collection of linked maps.
+ * Owns collections of InputSource objects and linked maps.
  */
-class Input : public FileData {
+class Input : public FileNode, public Revertible {
 
 public:
 
-	Input(StringUMap& data, const DirNode* parent);
+	Input(StringUMap& data, DirNode* parent) noexcept :
+		FileNode(data, parent, COLLECTION_INPUT, vector<string>{
+			COLLECTION_INPUT_SOURCES,
+			COLLECTION_INPUT_LINKMAP
+		}),
+		Revertible(fieldsData, &children)
+	{}
 
-	virtual ~Input();
+	virtual ~Input() = default;
 
+	string_view  getCssClass()      const noexcept override { return "InputBoxButton"; }
 	const string createPrettyName() const noexcept override;
-	const string createTooltip() const noexcept override;
-	string_view getCssClass() const noexcept override;
-	void activate() override;
-	const string toXML() const override;
+	const string createTooltip()    const noexcept override;
+	const string toXML()            const noexcept override;
 
-protected:
-
-	/// Keeps track of different input sources.
-	BoxButtonCollection sources;
-
-	/// Linked maps across sources.
-	BoxButtonCollection linkedMaps;
+	void wipe()     noexcept override;
+	void tearDown() noexcept override;
 
 };
 

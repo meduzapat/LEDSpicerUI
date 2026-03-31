@@ -41,7 +41,7 @@ public:
 	 * @param parent Owning directory node, or nullptr for root level.
 	 * @throws Message on parse errors.
 	 */
-	InputFile(const string& filePath, const Ui::Storage::DirectoryEntry* parent);
+	InputFile(const string& filePath, DirectoryEntry* parent);
 
 	virtual ~InputFile() = default;
 
@@ -53,7 +53,7 @@ private:
 	 * @param inputName Scoped collection key for this source's maps.
 	 * @return Error string, empty if clean.
 	 */
-	const string processMaps(tinyxml2::XMLElement* mapsNode, const string& inputName);
+	const string processMaps(tinyxml2::XMLElement* mapsNode, const string& inputName) noexcept;
 
 };
 

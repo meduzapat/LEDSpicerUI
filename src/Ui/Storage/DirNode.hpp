@@ -38,7 +38,7 @@ public:
 	/**
 	 * @param parent Parent node. nullptr = root level.
 	 */
-	DirNode(const DirNode* parent) : parent(parent) {}
+	DirNode(DirNode* parent) : parent(parent) {}
 
 	virtual ~DirNode() = default;
 
@@ -46,19 +46,19 @@ public:
 	 * Returns this node's own name segment.
 	 * @return Name string.
 	 */
-	virtual string getName() const noexcept = 0;
+	virtual const string& getName() const noexcept abstract;
 
 	/**
 	 * Returns a stable app-wide identifier for this node.
-	 * @return Stable id string, e.g. "dir_1", "file_3".
+	 * @return Stable id string, e.g. "d_1", "f_3".
 	 */
-	virtual string getFsId() const noexcept = 0;
+	virtual const string& getFsId() const noexcept abstract;
 
 	/**
 	 * Returns the parent node pointer.
 	 * @return Parent pointer, or nullptr if at root level.
 	 */
-	const DirNode* getParent() const noexcept { return parent; }
+	DirNode* getParent() const noexcept { return parent; }
 
 	/**
 	 * Returns the full path of the parent.
@@ -83,7 +83,7 @@ public:
 protected:
 
 	/// Parent node. nullptr = root level.
-	const DirNode* const parent;
+	DirNode* parent;
 
 };
 

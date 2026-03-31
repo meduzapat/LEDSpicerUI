@@ -31,16 +31,15 @@ InputDirectoryNavigator::InputDirectoryNavigator(
 ) :
 	DirectoryNavigator(builder),
 	dialogImportInput(DialogImport::Types::INPUT, parentWindow),
-	dirSetting {
+	dirSetting (
 		boxInputs,
 		COLLECTION_INPUT_DIRECTORIES,
 		TYPE_INPUT_DIR,
 		[this](Storage::DirectoryEntry* dir) { enterDirectory(dir); }
-	}
+	)
 {
 
 	DataDialogs::DialogInput::buildInstance(builder, "DialogInput");
-	//DataDialogs::DialogDirectory::getInstance()->setSettings(dirSetting);
 
 	builder->get_widget_derived("BoxInputs",  boxInputs);
 	builder->get_widget("BtnInputHome",       btnHome);
@@ -49,7 +48,7 @@ InputDirectoryNavigator::InputDirectoryNavigator(
 	builder->get_widget("BtnAddInput",        btnAddInput);
 	builder->get_widget("BtnImportInput",     btnImportInput);
 
-	// Setup DialogDirectory with the collection
+	// Setup DialogDirectory.
 	DataDialogs::DialogForm::setSignalAddTo(btnNewInputFolder, DataDialogs::DialogDirectory::getInstance());
 
 	// Import button.

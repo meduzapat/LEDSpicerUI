@@ -24,7 +24,9 @@
 
 using namespace LEDSpicerUI::Config;
 
-InputFile::InputFile(const string& filePath, const Ui::Storage::DirectoryEntry* parent) :
+using LEDSpicerUI::Ui::Storage::DirectoryEntry;
+
+InputFile::InputFile(const string& filePath, DirectoryEntry* parent) :
 	ProjectFile(filePath, "Input", parent)
 {
 	string errors;
@@ -65,7 +67,10 @@ InputFile::InputFile(const string& filePath, const Ui::Storage::DirectoryEntry* 
 		Message::displayError("Errors:\n" + errors);
 }
 
-const string InputFile::processMaps(tinyxml2::XMLElement* mapsNode, const string& inputName) {
+const string InputFile::processMaps(
+	tinyxml2::XMLElement* mapsNode,
+	const string& inputName
+) noexcept {
 
 	tinyxml2::XMLElement* mapNode = mapsNode->FirstChildElement("map");
 	if (not mapNode) return "Missing input map section\n";

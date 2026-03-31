@@ -20,6 +20,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "Parent.hpp"
 #include "Revertible.hpp"
 
 #pragma once
@@ -28,29 +29,33 @@ namespace LEDSpicerUI::Ui::Storage {
 
 /**
  * LEDSpicerUI::Ui::Storage::InputSource
- * Represents a single input source inside Input.
- * Owns the maps that belong to this source.
+ * Represents a single input source inside an Input.
+ * Owns the maps belonging to this source.
+ * Collection ID is scoped to its parent Input via ownerId.
  */
-class InputSource : public Revertible {
+class InputSource : public Parent, public Revertible {
 
 public:
 
-	InputSource(StringUMap& data, const string& ownerId);
+	InputSource(StringUMap& data, const string& ownerId) noexcept;
 
 	virtual ~InputSource() = default;
 
-	const string createUniqueId() const noexcept override;
+	const string createUniqueId()   const noexcept override;
 	const string createPrettyName() const noexcept override;
-	const string createTooltip() const noexcept override;
-	string_view getCssClass() const noexcept override { return "InputSourceBoxButton"; }
-	const string toXML() const override;
+	const string createTooltip()    const noexcept override;
+	string_view  getCssClass()      const noexcept override { return "InputSourceBoxButton"; }
+	const string toXML()            const noexcept override;
+
+	void wipe()     noexcept override;
+	void tearDown() noexcept override;
 
 protected:
 
-	/// Counter for sId generation.
+	/// Counter for stable UID generation.
 	inline static size_t sourceCounter = 0;
 
-	const string getPrimaryKey() const override { return SOURCE; }
+	const string getPrimaryKey() const noexcept override { return SOURCE; }
 
 };
 

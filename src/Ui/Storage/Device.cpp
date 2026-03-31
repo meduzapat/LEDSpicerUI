@@ -24,7 +24,7 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-const string Device::createPrettyName() const {
+const string Device::createPrettyName() const noexcept {
 	string
 		name{fieldsData.at(NAME)},
 		r{Defaults::devicesInfo.at(name).name};
@@ -35,16 +35,24 @@ const string Device::createPrettyName() const {
 	return r;
 }
 
-const string Device::createUniqueId() const {
+const string Device::createUniqueId() const noexcept {
 	if (getValues()->empty()) return "";
 	return Defaults::createHardwareUniqueId(*getValues());
 }
 
-const string Device::toXML() const {
+const string Device::toXML() const noexcept {
 	string r(createOpeningXML("device", fieldsData, ignored, false));
-	for (const auto e : children.at(COLLECTION_ELEMENT)) {
+	for (const auto e : children.at(COLLECTION_ELEMENT))
 		r += e->getData()->toXML();
-	}
-	r += createClosingXML("device");
-	return r;
+	return r + createClosingXML("device");
+}
+
+void Device::wipe() noexcept {
+	clearSnap();
+	Data::wipe();
+}
+
+void Device::tearDown() noexcept {
+	revert();
+	Data::tearDown();
 }

@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      FileData.hpp
+ * @file      FileNode.hpp
  * @since     Feb 23, 2026
  * @author    Patricio A. Rossi (MeduZa)
  *
@@ -20,7 +20,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Revertible.hpp"
+#include "Parent.hpp"
 #include "DirNode.hpp"
 
 #pragma once
@@ -28,30 +28,29 @@
 namespace LEDSpicerUI::Ui::Storage {
 
 /**
- * LEDSpicerUI::Ui::Storage::FileData
+ * LEDSpicerUI::Ui::Storage::FileNode
  * Base for file-based items (Inputs, Animations, Profiles).
- * Inherits Revertible for serializable field storage and snap/restore support.
+ * Inherits Parent for field storage and child collection ownership.
  * Inherits DirNode for parent pointer and recursive path resolution.
  * FILENAME is stored as a runtime property — never serialized to XML.
- * Subclasses add their own fields, collections, and visual decoration.
  */
-class FileData : public Revertible, public DirNode {
+class FileNode : public Parent, public DirNode {
 
 public:
 
-	/**
-	 * @param data Field data.
-	 * FILENAME is rescued into properties before being erased from fieldsData so it is never serialized.
-	 * @param parent Owning directory node. nullptr = root of the type's tree.
-	 */
-	FileData(StringUMap& data, const DirNode* parent);
+	FileNode(
+		StringUMap& data,
+		DirNode* parent,
+		const string& collectionId,
+		const vector<string>& childIds
+	) noexcept;
 
-	virtual ~FileData() = default;
+	virtual ~FileNode() = default;
 
 	const string createUniqueId() const noexcept override;
 
-	string getName() const override;
-	string getFsId() const override;
+	const string& getName() const noexcept override;
+	const string& getFsId() const noexcept override;
 
 protected:
 

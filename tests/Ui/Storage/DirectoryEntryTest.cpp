@@ -33,13 +33,13 @@ protected:
 
 	void SetUp() override {
 		StringUMap rootData{{NAME, "root"}};
-		root = std::make_unique<DirectoryEntry>(rootData, nullptr);
+		root = std::make_unique<DirectoryEntry>(rootData, nullptr, COLLECTION_DIRECTORIES);
 
 		StringUMap childData{{NAME, "subdir"}};
-		child = std::make_unique<DirectoryEntry>(childData, root.get());
+		child = std::make_unique<DirectoryEntry>(childData, root.get(), COLLECTION_DIRECTORIES);
 
 		StringUMap grandData{{NAME, "deep"}};
-		grand = std::make_unique<DirectoryEntry>(grandData, child.get());
+		grand = std::make_unique<DirectoryEntry>(grandData, child.get(), COLLECTION_DIRECTORIES);
 	}
 
 	std::unique_ptr<DirectoryEntry> root;

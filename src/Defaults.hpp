@@ -25,7 +25,6 @@
 #include <giomm.h>
 
 #include <unordered_map>
-
 #include <unordered_set>
 
 #include <vector>
@@ -46,6 +45,9 @@ using std::string_view;
 
 #include <memory>
 using std::unique_ptr;
+
+// This looks cool.
+#define abstract = 0
 
 #pragma once
 
@@ -207,6 +209,13 @@ constexpr const char* COLLECTION_INPUT_MAPS     = "i.m";
 constexpr const char* COLLECTION_INPUT_LINKMAP  = "i.l";
 constexpr const char* COLLECTION_ANIMATIONS     = "a";
 constexpr const char* COLLECTION_PROFILES       = "pr";
+
+/// Link collection keys.
+constexpr const char* COLLECTION_GROUP_LINKS         = "g.l";
+constexpr const char* COLLECTION_PROFILE_ELEMENTS    = "pr.e";
+constexpr const char* COLLECTION_PROFILE_GROUPS      = "pr.g";
+constexpr const char* COLLECTION_PROFILE_INPUTS      = "pr.i";
+constexpr const char* COLLECTION_PROFILE_ANIMATIONS  = "pr.a";
 
 /// Directories
 #define               COLLECTION_DIRECTORIES       "directories"

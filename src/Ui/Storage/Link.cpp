@@ -25,7 +25,7 @@
 using namespace LEDSpicerUI::Ui::Storage;
 
 
-bool Link::operator==(const Data& other) const {
+bool Link::operator==(const Data& other) const noexcept {
 	return Data::operator==(other) or linkInfo.link == &other;
 }
 
@@ -41,24 +41,31 @@ const string Link::createTooltip() const noexcept {
 	return linkInfo.link ? linkInfo.link->createTooltip() : "";
 }
 
-const string Link::createUniqueId() const {
+const string Link::createUniqueId() const noexcept {
 	return linkInfo.link ? linkInfo.link->createUniqueId() : "";
 }
 
-string Link::getValue(const string &key, const string &defaultValue) const {
+const string& Link::getValue(const string& key) const noexcept {
+	if (key == linkInfo.key) {
+		return linkInfo.link->getValue(getPrimaryKey());
+	}
+	return Data::getValue(key);
+}
+
+string Link::getValue(const string &key, const string &defaultValue) const noexcept {
 	if (key == linkInfo.key) {
 		return linkInfo.link->getValue(getPrimaryKey(), defaultValue);
 	}
 	return Data::getValue(key, defaultValue);
 }
 
-void Link::setValue(const string& key, const string& value) {
+void Link::setValue(const string& key, const string& value) noexcept {
 	// Ignore
 	if (key == linkInfo.key) return;
 	Data::setValue(key, value);
 }
 
-const string Link::toXML() const {
+const string Link::toXML() const noexcept {
 
 	StringUMap values{{linkInfo.key, linkInfo.link->createUniqueId()}};
 	values.insert(fieldsData.begin(), fieldsData.end());
@@ -67,6 +74,6 @@ const string Link::toXML() const {
 	return createOpeningXML(linkInfo.type, values, ignored, true);
 }
 
-void Link::setLinkData(const LinkData& newLinkData) {
+void Link::setLinkData(const LinkData& newLinkData) noexcept {
 	linkInfo = std::move(newLinkData);
 }

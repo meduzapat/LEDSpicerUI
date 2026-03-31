@@ -57,12 +57,12 @@ protected:
 	/**
 	 * Called when the type need to be empty.
 	 */
-	virtual void onEmpty() = 0;
+	virtual void onEmpty() abstract;
 
 	/**
 	 * Called when the type was selected but before resetFrom.
 	 */
-	virtual void onSelected() = 0;
+	virtual void onSelected() abstract;
 
 	/**
 	 * Verifies and calculate the selection and reacts.

@@ -40,22 +40,20 @@ class InputMap : public Link {
 
 public:
 
-	using Link::Link;
-
 	InputMap(
 		StringUMap& data,
 		const string &key,
 		Data *link
-	) : Link(
+	) noexcept : Link(
 		data,
 		{"map", key, link}
 	) {}
 
-	virtual ~InputMap();
+	virtual ~InputMap() = default;
 
-	const string createUniqueId() const noexcept override;
-	const string createPrettyName() const override;
-	string_view getCssClass() const noexcept override;
+	string_view getCssClass()       const noexcept override { return "InputMapBoxButton"; }
+	const string createUniqueId()   const noexcept override;
+	const string createPrettyName() const noexcept override;
 
 };
 

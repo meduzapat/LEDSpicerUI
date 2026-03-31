@@ -95,14 +95,18 @@ void Data::setProperty(const string& key, const string& value) noexcept {
 }
 
 const string& Data::getProperty(const string& key) const noexcept {
-	return (properties.find(key) != properties.end()) ? properties.at(key) : emptyString;
+	if (auto it = properties.find(key); it != properties.end())
+		return it->second;
+	return emptyString;
 }
 
 string Data::getProperty(
 	const string& key,
 	const string& defaultProperty
 ) const noexcept {
-	return (properties.find(key) != properties.end()) ? properties.at(key) : defaultProperty;
+	if (auto it = properties.find(key); it != properties.end())
+		return it->second;
+	return defaultProperty;
 }
 
 bool Data::hasProperty(const string& key) const noexcept {

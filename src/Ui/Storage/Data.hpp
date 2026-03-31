@@ -67,7 +67,7 @@ public:
 	/**
 	 * @returns a CSS class that identifies the object and the data.
 	 */
-	virtual constexpr string_view getCssClass() const noexcept = 0;
+	virtual constexpr string_view getCssClass() const noexcept abstract;
 
 	/**
 	 * Creates a human readable name for the form.
@@ -109,7 +109,7 @@ public:
 	 * @param key
 	 * @return value or empty string if not found.
 	 */
-	const string& getValue(const string& key) const noexcept;
+	virtual const string& getValue(const string& key) const noexcept;
 
 	/**
 	 * Returns a value using the key name.
@@ -153,10 +153,19 @@ public:
 	virtual void wipe() noexcept;
 
 	/**
-	 * @brief Converts the data into XML string.
-	 * @return The XML string representation of the box element.
+	 * Serializes this object to XML.
+	 * Default emits flat attributes using getXmlTag().
+	 * Subclasses override for children or conditional field exclusions.
+	 * @return XML string.
 	 */
 	virtual const string toXML() const noexcept;
+
+	/**
+	 * Returns the XML tag name for this data type.
+	 * Used by toXML() helpers to emit the correct element name.
+	 * @return XML tag string, e.g. "device", "element", "group".
+	 */
+	virtual string_view getXmlTag() const noexcept abstract;
 
 	/**
 	 * Sets a property value.
@@ -233,9 +242,6 @@ protected:
 
 	/// Extra property with important information.
 	StringUMap properties;
-
-	/// List of ignored data fields.
-	mutable StringUSet ignored;
 
 	/// The Id of the collection to use
 	const string collectionId;

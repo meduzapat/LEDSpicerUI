@@ -39,14 +39,14 @@ public:
 	 * Create a new selection button.
 	 * @param data values to be used.
 	 */
-	Selection(Data* data);
+	Selection(Data* data) noexcept;
 
 	~Selection() = default;
 
 	/**
 	 * @return The data object.
 	 */
-	Data* getData() const;
+	Data* getData() const noexcept { return data; }
 
 protected:
 

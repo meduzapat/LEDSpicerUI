@@ -24,18 +24,6 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-Input::Input(StringUMap& data, const DirNode* parent) :
-	FileData(data, parent)
-{
-	registerChild(sources);
-	registerChild(linkedMaps);
-}
-
-Input::~Input() {
-	if (not fieldsData.empty())
-		CollectionHandler::getInstance(COLLECTION_INPUT)->remove(this);
-}
-
 const string Input::createPrettyName() const noexcept {
 	return getFullPath() + " [" + getValue(NAME) + "]";
 }
@@ -44,25 +32,25 @@ const string Input::createTooltip() const noexcept {
 	return "Input of type " + getValue(NAME);
 }
 
-string_view Input::getCssClass() const noexcept {
-	return "InputBoxButton";
-}
-
-void Input::activate() {
-	DataDialogs::DialogInputSource::getInstance()->setOwner(&sources, this);
-	// TODO wire linkedMaps once DialogInputLinkMaps is reworked.
-	// DataDialogs::DialogInputLinkMaps::getInstance()->setOwner(&linkedMaps, this);
-}
-
-const string Input::toXML() const {
+const string Input::toXML() const noexcept {
 	string r(XMLHelper::xmlHeader("Input"));
 	r += Data::toXML();
 	Defaults::reduceTab();
 	r += ">\n";
 	Defaults::increaseTab();
-	for (const auto& s : sources)
+	for (const auto& s : children.at(COLLECTION_INPUT_SOURCES))
 		r += s->getData()->toXML();
 	Defaults::reduceTab();
 	r += XMLHelper::xmlFooter();
 	return r;
+}
+
+void Input::wipe() noexcept {
+	clearSnap();
+	Data::wipe();
+}
+
+void Input::tearDown() noexcept {
+	revert();
+	Data::tearDown();
 }

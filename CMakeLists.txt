@@ -48,7 +48,6 @@ endif()
 add_executable(ledspicerui
 	src/Defaults.cpp
 	src/XMLHelper.cpp
-	src/config/ProjectFile.cpp
 	src/config/SettingsFile.cpp
 	src/config/ConfigFile.cpp
 	src/config/InputFile.cpp
@@ -63,7 +62,7 @@ add_executable(ledspicerui
 	src/Ui/Storage/Parent.cpp
 	src/Ui/Storage/Revertible.cpp
 	src/Ui/Storage/DirNode.cpp
-	src/Ui/Storage/FileData.cpp
+	src/Ui/Storage/FileNode.cpp
 	src/Ui/Storage/Selection.cpp
 	src/Ui/Storage/Link.cpp
 	src/Ui/Storage/DirectoryEntry.cpp

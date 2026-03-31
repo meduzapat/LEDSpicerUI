@@ -70,7 +70,7 @@ public:
 	/**
 	 * Called to clean up all data.
 	 */
-	virtual void clear() = 0;
+	virtual void clear() abstract;
 
 protected:
 
@@ -87,7 +87,7 @@ protected:
 	 * Each specialized navigator implements this for its own dialog set.
 	 * @param dir The directory to wire. Always a valid pointer (root or child).
 	 */
-	virtual void wireDialogs(Storage::DirectoryEntry* dir) = 0;
+	virtual void wireDialogs(Storage::DirectoryEntry* dir) abstract;
 
 };
 

@@ -33,14 +33,14 @@ class RestrictorMap: public Data {
 
 public:
 
-	RestrictorMap(StringUMap& data) : Data(data, COLLECTION_RESTRICTOR_MAP) {}
+	RestrictorMap(StringUMap& data) noexcept : Data(data, COLLECTION_RESTRICTOR_MAP) {}
 
 	virtual ~RestrictorMap() = default;
 
-	const string createPrettyName() const override;
-	const string createUniqueId() const noexcept override;
-	string_view getCssClass() const noexcept override { return "RestrictorMapBoxButton"; }
-	const string toXML() const override;
+	string_view getCssClass()       const noexcept override { return "RestrictorMapBoxButton"; }
+	const string createPrettyName() const noexcept override;
+	const string createUniqueId()   const noexcept override;
+	const string toXML()            const noexcept override;
 
 };
 

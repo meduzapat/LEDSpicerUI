@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      FileDataTest.cpp
+ * @file      FileNodeTest.cpp
  * @since     Mar 2026
  * @author    Patricio A. Rossi (MeduZa)
  *
@@ -21,108 +21,112 @@
  */
 
 #include <gtest/gtest.h>
-#include "Storage/FileData.hpp"
-#include "Storage/DirectoryEntry.hpp"
+#include "Storage/FileNode.hpp"
 
 using namespace LEDSpicerUI::Ui::Storage;
 using namespace LEDSpicerUI::Constants;
 using LEDSpicerUI::Defaults;
 
-// Minimal concrete FileData subclass for testing.
-class TestFileData : public FileData {
+class StubDirNode : public DirNode {
 public:
-	TestFileData(StringUMap& data, const DirNode* parent) : FileData(data, parent) {}
+	StubDirNode() : DirNode(nullptr) {}
+	const string& getName()  const noexcept override { return id; }
+	const string& getFsId()  const noexcept override { return id; }
+private:
+	inline static const string id = "stub_1";
+};
+
+class TestFileNode : public FileNode {
+public:
+	TestFileNode(StringUMap& data, DirNode* parent) :
+		FileNode(data, parent, "test", {}) {}
 	constexpr string_view getCssClass() const noexcept override { return "test"; }
 };
 
-class FileDataTest : public ::testing::Test {
+class FileNodeTest : public ::testing::Test {
 
 protected:
 
 	void SetUp() override {
-		// Root-level file — no parent.
 		StringUMap rootData{{NAME, "Credits"}, {FILENAME, "myinput"}};
-		rootFile = std::make_unique<TestFileData>(rootData, nullptr);
+		rootFile = std::make_unique<TestFileNode>(rootData, nullptr);
 
-		// Directory for nested file.
-		StringUMap dirData{{NAME, "subdir"}};
-		parentDir = std::make_unique<DirectoryEntry>(dirData, nullptr);
+		parentDir = std::make_unique<StubDirNode>();
 
-		// Nested file inside parentDir.
 		StringUMap nestedData{{NAME, "Credits"}, {FILENAME, "nestedinput"}};
-		nestedFile = std::make_unique<TestFileData>(nestedData, parentDir.get());
+		nestedFile = std::make_unique<TestFileNode>(nestedData, parentDir.get());
 	}
 
-	std::unique_ptr<TestFileData>    rootFile;
-	std::unique_ptr<DirectoryEntry>  parentDir;
-	std::unique_ptr<TestFileData>    nestedFile;
+	std::unique_ptr<TestFileNode> rootFile;
+	std::unique_ptr<StubDirNode>  parentDir;
+	std::unique_ptr<TestFileNode> nestedFile;
 };
 
 // FILENAME must be in properties, not fieldsData.
-TEST_F(FileDataTest, FilenameInProperties) {
+TEST_F(FileNodeTest, FilenameInProperties) {
 	EXPECT_EQ("myinput", rootFile->getProperty(FILENAME));
 	EXPECT_EQ("",        rootFile->getValue(FILENAME));
 }
 
 // FILENAME must not appear in XML output.
-TEST_F(FileDataTest, FilenameNotSerialized) {
+TEST_F(FileNodeTest, FilenameNotSerialized) {
 	EXPECT_EQ(string::npos, rootFile->toXML().find(FILENAME));
 }
 
 // getName() returns the stored filename property.
-TEST_F(FileDataTest, GetNameReturnsFilename) {
+TEST_F(FileNodeTest, GetNameReturnsFilename) {
 	EXPECT_EQ("myinput", rootFile->getName());
 }
 
 // PID is empty at root level.
-TEST_F(FileDataTest, PidEmptyAtRoot) {
+TEST_F(FileNodeTest, PidEmptyAtRoot) {
 	EXPECT_EQ("", rootFile->getProperty(PID));
 }
 
-// PID matches parent UID for nested file.
-TEST_F(FileDataTest, PidMatchesParentUid) {
-	EXPECT_EQ(parentDir->getProperty(UID), nestedFile->getProperty(PID));
+// PID matches parent getFsId() for nested file.
+TEST_F(FileNodeTest, PidMatchesParentFsId) {
+	EXPECT_EQ(parentDir->getFsId(), nestedFile->getProperty(PID));
 }
 
 // UID is set and starts with "file_".
-TEST_F(FileDataTest, UidSetAtConstruction) {
+TEST_F(FileNodeTest, UidSetAtConstruction) {
 	const string uid(rootFile->getProperty(UID));
 	EXPECT_FALSE(uid.empty());
 	EXPECT_EQ(0, uid.find("file_"));
 }
 
 // getFsId() is an alias for getProperty(UID).
-TEST_F(FileDataTest, GetFsIdAliasesUid) {
+TEST_F(FileNodeTest, GetFsIdAliasesUid) {
 	EXPECT_EQ(rootFile->getProperty(UID), rootFile->getFsId());
 }
 
 // createUniqueId() == createCommonUniqueId({PID, FILENAME}).
-TEST_F(FileDataTest, CreateUniqueIdAtRoot) {
+TEST_F(FileNodeTest, CreateUniqueIdAtRoot) {
 	const string expected(Defaults::createCommonUniqueId({"", "myinput"}));
 	EXPECT_EQ(expected, rootFile->createUniqueId());
 }
 
-TEST_F(FileDataTest, CreateUniqueIdNested) {
+TEST_F(FileNodeTest, CreateUniqueIdNested) {
 	const string expected(Defaults::createCommonUniqueId({
-		parentDir->getProperty(UID), "nestedinput"
+		parentDir->getFsId(), "nestedinput"
 	}));
 	EXPECT_EQ(expected, nestedFile->createUniqueId());
 }
 
 // Path resolution via DirNode chain.
-TEST_F(FileDataTest, GetFullPathAtRoot) {
+TEST_F(FileNodeTest, GetFullPathAtRoot) {
 	EXPECT_EQ("myinput", rootFile->getFullPath());
 }
 
-TEST_F(FileDataTest, GetFullPathNested) {
-	EXPECT_EQ("subdir/nestedinput", nestedFile->getFullPath());
+TEST_F(FileNodeTest, GetFullPathNested) {
+	EXPECT_EQ("stub_1/nestedinput", nestedFile->getFullPath());
 }
 
-/* isAtRoot() reflects parent pointer state. */
-TEST_F(FileDataTest, IsRootAtRoot) {
+// isAtRoot() reflects parent pointer state.
+TEST_F(FileNodeTest, IsRootAtRoot) {
 	EXPECT_TRUE(rootFile->isAtRoot());
 }
 
-TEST_F(FileDataTest, IsRootNested) {
+TEST_F(FileNodeTest, IsRootNested) {
 	EXPECT_FALSE(nestedFile->isAtRoot());
 }

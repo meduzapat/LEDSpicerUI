@@ -48,12 +48,12 @@ public:
 	 * @param collectionName
 	 * @return an instance of that collection.
 	 */
-	static CollectionHandler* getInstance(string_view collectionName);
+	static CollectionHandler* getInstance(string_view collectionName) noexcept;
 
 	/**
 	 * Removes and deletes all stored collections.
 	 */
-	static void purgeAll();
+	static void purgeAll() noexcept;
 
 	/**
 	 * @return the number of registered items.
@@ -64,26 +64,26 @@ public:
 	 * @param id
 	 * @return an item by its ID.
 	 */
-	Data* get(const string& id) const;
+	Data* get(const string& id) const noexcept;
 
 	/**
 	 * @param item
 	 * @return true if the item is registered.
 	 */
-	bool isSet(const Data* item) const;
+	bool isSet(const Data* item) const noexcept;
 
 	/**
 	 * @param id
 	 * @return true if the ID is registered.
 	 */
-	bool isIdSet(const string& id) const;
+	bool isIdSet(const string& id) const noexcept;
 
 	/**
 	 * Search the collection for a value, and count the number of occurrences.
 	 * @param value the value to search on every BoxButton inside the collection.
 	 * @return the number of occurrences.
 	 */
-	size_t countByKey(const string& key, const string& value) const;
+	size_t countByKey(const string& key, const string& value) const noexcept;
 
 	/**
 	 * Finds all data with matching property.
@@ -91,63 +91,63 @@ public:
 	 * @param value Property value.
 	 * @return Vector of matching Data pointers.
 	 */
-	vector<Data*> findByProperty(const string& property, const string& value);
+	vector<Data*> findByProperty(const string& property, const string& value) noexcept;
 
 	/**
 	 * Adds an item to the collection.
 	 * @param item
 	 */
-	void add(Data* item);
+	void add(Data* item) noexcept;
 
 	/**
 	 * Removes an item from the collection and removing consumers that uses that item.
 	 * @param item
 	 */
-	void remove(Data* item);
+	void remove(Data* item) noexcept;
 
 	/**
 	 * Replace an item in the collection.
 	 * @param oldItem
 	 * @param newItem
 	 */
-	void replace(Data* item, const string& oldId);
+	void replace(Data* item, const string& oldId) noexcept;
 
 	/**
 	 * Register a collection dependency to be tracked.
 	 * @param dependency Dependency struct with collection, optional min size and callback.
 	 */
-	void registerDependency(const Dependency& dependency);
+	void registerDependency(const Dependency& dependency) noexcept;
 
 	/**
 	 * Refresh a single combobox contents with the collection values.
 	 * @param comboBox the combobox to refresh.
 	 */
-	void refreshComboBox(Gtk::ComboBoxText* comboBox);
+	void refreshComboBox(Gtk::ComboBoxText* comboBox) noexcept;
 
 	/**
 	 * Refresh a single combobox contents with the collection values.
 	 * @param comboBox the combobox to refresh.
 	 * @param a filter to use
 	 */
-	void refreshComboBox(Gtk::ComboBoxText* comboBox, const std::function<bool(const Data*)>& filter);
+	void refreshComboBox(Gtk::ComboBoxText* comboBox, const std::function<bool(const Data*)>& filter) noexcept;
 
 	/**
 	 * Register a collection consumer.
 	 * @param destination
 	 */
-	void registerComboBox(Gtk::ComboBoxText* destination);
+	void registerComboBox(Gtk::ComboBoxText* destination) noexcept;
 
 	/**
 	 * Removes a collection consumer.
 	 * @param destination
 	 */
-	void release(BoxButtonCollection* destination);
+	void release(BoxButtonCollection* destination) noexcept;
 
 	/**
 	 * Removes a tracked dependency or selection binding.
 	 * @param destination
 	 */
-	void release(Gtk::ComboBoxText* destination);
+	void release(Gtk::ComboBoxText* destination) noexcept;
 
 	StringDataMap::iterator begin() noexcept { return collection.begin(); }
 	StringDataMap::iterator end() noexcept { return collection.end(); }
@@ -176,7 +176,7 @@ protected:
 	/**
 	 * Populates comboboxes.
 	 */
-	void refreshComboBoxes();
+	void refreshComboBoxes() noexcept;
 };
 
 } // namespace

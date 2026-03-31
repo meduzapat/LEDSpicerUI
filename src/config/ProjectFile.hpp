@@ -25,8 +25,8 @@
 
 #pragma once
 
-
 namespace LEDSpicerUI::Config {
+using Ui::Storage::DirectoryEntry;
 
 /**
  * LEDSpicerUI::Config::ProjectFile
@@ -42,15 +42,11 @@ public:
 
 	virtual ~ProjectFile() = default;
 
-	/**
-	 * @return Bare filename without extension.
-	 */
-	const string& getFilename() const;
+	/// @return Bare filename without extension.
+	const string& getFilename() const noexcept { return filename; }
 
-	/**
-	 * @return Owning directory node, or nullptr if at root level.
-	 */
-	const Ui::Storage::DirectoryEntry* getParent() const;
+	/// @return Owning directory node, or nullptr if at root level.
+	DirectoryEntry* getParent() const noexcept { return parent; }
 
 protected:
 
@@ -58,18 +54,23 @@ protected:
 	string filename;
 
 	/// Owning directory node. nullptr = root of the type's tree.
-	const Ui::Storage::DirectoryEntry* const parent;
+	DirectoryEntry* parent;
 
 	/**
 	 * @param filePath Full path to the file on disk.
 	 * @param fileType Expected type attribute for XML validation.
 	 * @param parent   Owning directory node, or nullptr for root level.
+	 * @throws Message on parse errors.
 	 */
 	ProjectFile(
 		const string& filePath,
 		const string& fileType,
-		const Ui::Storage::DirectoryEntry* parent
-	);
+		DirectoryEntry* parent
+	) :
+		XMLHelper(filePath, fileType),
+		filename(Defaults::extractName(filePath, Glib::path_get_dirname(filePath))),
+		parent(parent)
+	{}
 };
 
 } // namespace

@@ -1,32 +1,10 @@
-/* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
-/**
- * @file	Restrictor.cpp
- * @since	Apr 30, 2023
- * @author	Patricio A. Rossi (MeduZa)
- *
- * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
- *
- * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * @copyright LEDSpicerUI is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * @copyright You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
- */
-
 #include "Restrictor.hpp"
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-const string Restrictor::createPrettyName() const {
+const string Restrictor::createPrettyName() const noexcept {
 	string
-		name (fieldsData.at(NAME)),
+		name(fieldsData.at(NAME)),
 		r(Defaults::restrictorsInfo.at(name).name);
 	if (Defaults::isIdUser(name, false))
 		r += " Id: " + fieldsData.at(ID);
@@ -35,20 +13,24 @@ const string Restrictor::createPrettyName() const {
 	return r;
 }
 
-const string Restrictor::createUniqueId() const {
+const string Restrictor::createUniqueId() const noexcept {
 	if (getValues()->empty()) return "";
 	return Defaults::createHardwareUniqueId(*getValues(), false);
 }
 
-string_view Restrictor::getCssClass() const noexcept {
-	return "RestrictorBoxButton";
+const string Restrictor::toXML() const noexcept {
+	string r(createOpeningXML("restrictor", fieldsData, ignored, false));
+	for (const auto& e : children.at(COLLECTION_RESTRICTOR_MAP))
+		r += e->getData()->toXML();
+	return r + createClosingXML("restrictor");
 }
 
-const string Restrictor::toXML() const {
-	string r(createOpeningXML("restrictor", fieldsData, ignored, false));
-	for (const auto& e : children.at(COLLECTION_RESTRICTOR_MAP)) {
-		r += e->getData()->toXML();
-	}
-	r += createClosingXML("restrictor");
-	return r;
+void Restrictor::wipe() noexcept {
+	clearSnap();
+	Data::wipe();
+}
+
+void Restrictor::tearDown() noexcept {
+	revert();
+	Data::tearDown();
 }

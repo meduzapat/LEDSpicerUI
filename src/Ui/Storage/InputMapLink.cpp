@@ -48,11 +48,7 @@ const string InputMapLink::createPrettyName() const noexcept {
 	return Defaults::implode(prettyName, " ➡️ ") + " 🔙";
 }
 
-string_view InputMapLink::getCssClass() const noexcept {
-	return "LinkBoxButton";
-}
-
-const string InputMapLink::createUniqueId() const {
+const string InputMapLink::createUniqueId() const noexcept {
 	// ID holds the canonical trigger combination key built by DialogInputLinkMaps.
 	return getValue(ID);
 }

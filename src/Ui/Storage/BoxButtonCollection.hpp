@@ -45,7 +45,7 @@ public:
 	/**
 	 * Default constructor.
 	 */
-	BoxButtonCollection() = default;
+	BoxButtonCollection() noexcept = default;
 
 	/**
 	 * Move constructor.
@@ -120,18 +120,18 @@ public:
 	 * Populate an OrdenableFlowBox with the BoxButton items.
 	 * @param box The OrdenableFlowBox to be populated.
 	 */
-	void populateBox(OrdenableFlowBox* box);
+	void populateBox(OrdenableFlowBox* box) noexcept;
 
 	/**
 	 * Reindex the items in the collection for ordering.
 	 * @param box The OrdenableFlowBox containing the items.
 	 */
-	void reindex(OrdenableFlowBox* box);
+	void reindex(OrdenableFlowBox* box) noexcept;
 
 	/**
 	 * Destroys all items from the collection.
 	 */
-	void wipe();
+	void wipe() noexcept;
 
 	/**
 	 * Get an iterator pointing to the beginning of the collection.

@@ -20,8 +20,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CollectionHandler.hpp"
-#include "DataDialogs/DialogSelect.hpp"
+#include "FileNode.hpp"
 
 #pragma once
 
@@ -29,37 +28,23 @@ namespace LEDSpicerUI::Ui::Storage {
 
 /**
  * LEDSpicerUI::Ui::Storage::Profile
+ * Represents a single profile configuration file.
+ * Owns link collections for elements, groups, inputs and animations.
  */
-class Profile: public Parent {
+class Profile : public FileNode {
 
 public:
 
-	Profile(StringUMap& data);
+	Profile(StringUMap& data, DirNode* parent) noexcept;
 
 	virtual ~Profile() = default;
 
-	string_view getCssClass() const noexcept override { return "ProfileBoxButton"; }
-	void setUp() override;
-	const string toXML() const override;
+	string_view  getCssClass() const noexcept override { return "ProfileBoxButton"; }
+	const string toXML()       const noexcept override;
 
 protected:
 
-	BoxButtonCollection
-		alwaysOnElements,
-		alwaysOnGroups,
-		inputs,
-		animations,
-		transitions;
-
-	std::unordered_map<string, BoxButtonCollection*> itemCollections {
-		{TYPE_ELEMENT,       &alwaysOnElements},
-		{"group",            &alwaysOnGroups},
-		{"input",            &inputs},
-		{"animation",        &animations},
-		{"ransitions"        &transitions}
-	};
-
-	const string getPrimaryKey() const override;
+	const string getPrimaryKey() const noexcept override { return FILENAME; }
 
 };
 

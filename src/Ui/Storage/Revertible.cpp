@@ -1,8 +1,8 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      Revertible.cpp
- * @since     Mar 2026
- * @author    Patricio A. Rossi (MeduZa)
+ * @file   Revertible.cpp
+ * @since  Mar 2026
+ * @author Patricio A. Rossi (MeduZa)
  *
  * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
@@ -25,56 +25,59 @@
 using namespace LEDSpicerUI::Ui::Storage;
 
 Revertible::Revertible(
-	StringUMap& data,
-	const string& collectionId,
-	StringBoxButtonCollectionUMap children
-) :
-	Parent(data, collectionId, std::move(children))
+	StringUMap& fields,
+	StringBoxButtonCollectionUMap* children
+) noexcept :
+	liveFields(fields),
+	liveChildren(children)
 {
-	for (auto& child : this->children) registerChild(child.second);
+	if (not liveChildren) return;
+	for (auto& [id, collection] : *liveChildren)
+		childrenSnaps.emplace_back(&collection, BoxButtonCollection{});
 }
 
 Revertible::~Revertible() {
-	snapFields.clear();
-	for (auto& [live, snap] : childrenSnaps)
-		snap.wipe();
+	clearSnap();
 }
 
 void Revertible::swap() {
-	if (fieldsData.empty() or not snapFields.empty()) return;
-	for (auto& [id, collection] : children)
-		for (auto btn : collection)
-			btn->getData()->getCollectionHandler()->remove(btn->getData());
-	std::swap(fieldsData, snapFields);
+
+	if (liveFields.empty() or not snapFields.empty()) return;
+
+	if (liveChildren) {
+		for (auto& [id, collection] : *liveChildren) {
+			for (auto btn : collection) {
+				if (auto handler{btn->getData()->getCollectionHandler()}; handler) handler->remove(btn->getData());
+			}
+		}
+	}
+
+	std::swap(liveFields, snapFields);
 	for (auto& [live, snap] : childrenSnaps)
 		live->swap(snap);
 }
 
 void Revertible::revert() {
+
 	if (snapFields.empty()) return;
-	std::swap(fieldsData, snapFields);
+
+	std::swap(liveFields, snapFields);
 	snapFields.clear();
 	for (auto& [live, snap] : childrenSnaps) {
 		live->swap(snap);
 		snap.wipe();
 	}
-	for (auto& [id, collection] : children)
-		for (auto btn : collection)
-			btn->getData()->getCollectionHandler()->add(btn->getData());
+
+	if (liveChildren) {
+		for (auto& [id, collection] : *liveChildren) {
+			for (auto btn : collection)
+				if (auto handler{btn->getData()->getCollectionHandler()}; handler) handler->add(btn->getData());
+		}
+	}
 }
 
-void Revertible::wipe() {
+void Revertible::clearSnap() noexcept {
 	snapFields.clear();
 	for (auto& [live, snap] : childrenSnaps)
 		snap.wipe();
-	Data::wipe();
-}
-
-void Revertible::tearDown() {
-	revert();
-	Data::tearDown();
-}
-
-void Revertible::registerChild(BoxButtonCollection& child) {
-	childrenSnaps.emplace_back(&child, BoxButtonCollection{});
 }

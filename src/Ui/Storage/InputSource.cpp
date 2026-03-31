@@ -24,49 +24,46 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-InputSource::InputSource(StringUMap& data, const string& ownerId) :
-	Revertible(
-		data,
-		// Input source is unique to its input.
-		COLLECTION_INPUT_SOURCES + ownerId,
-		{{COLLECTION_INPUT_MAPS, BoxButtonCollection()}}
-	) {
+InputSource::InputSource(StringUMap& data, const string& ownerId) noexcept :
+	Parent(data, COLLECTION_INPUT_SOURCES + ownerId, {{COLLECTION_INPUT_MAPS, {}}}),
+	Revertible(fieldsData, &children)
+{
 	setProperty(UID, "src_" + std::to_string(++sourceCounter));
 	setProperty(PID, ownerId);
-	registerDependency(COLLECTION_ELEMENT);
-	registerDependency(COLLECTION_GROUP);
+	registerDependency(COLLECTION_ELEMENT, COLLECTION_INPUT_MAPS);
+	registerDependency(COLLECTION_GROUP,   COLLECTION_INPUT_MAPS);
 }
 
-const string InputSource::createUniqueId() const {
+const string InputSource::createUniqueId() const noexcept {
 	return Defaults::createCommonUniqueId({getProperty(PID), getValue(SOURCE)});
 }
 
 const string InputSource::createPrettyName() const noexcept {
-	// Stored at store, empty otherwise.
 	return getProperty(NAME);
 }
 
 const string InputSource::createTooltip() const noexcept {
-	return "Source " + createPrettyName() + " with " + std::to_string(maps.getSize()) + " maps";
+	return "Source " + createPrettyName() + " with "
+		+ std::to_string(children.at(COLLECTION_INPUT_MAPS).getSize()) + " maps";
 }
 
-const string InputSource::toXML() const {
-	string source(getValue(SOURCE));
+const string InputSource::toXML() const noexcept {
+	const string source(getValue(SOURCE));
 	string r(Defaults::tab());
-
-	if (source.empty()) {
-		r += "<maps>\n";
-	}
-	else {
-		r += "<maps source=\"" + source + "\">\n";
-	}
-
+	r += source.empty() ? "<maps>\n" : "<maps source=\"" + source + "\">\n";
 	Defaults::increaseTab();
-	for (const auto& m : maps) {
+	for (const auto& m : children.at(COLLECTION_INPUT_MAPS))
 		r += m->getData()->toXML();
-	}
 	Defaults::reduceTab();
+	return r + Defaults::tab() + "</maps>\n";
+}
 
-	r += Defaults::tab() + "</maps>\n";
-	return r;
+void InputSource::wipe() noexcept {
+	clearSnap();
+	Data::wipe();
+}
+
+void InputSource::tearDown() noexcept {
+	revert();
+	Data::tearDown();
 }

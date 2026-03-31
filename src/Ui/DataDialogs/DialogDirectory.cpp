@@ -25,7 +25,7 @@
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
 DialogDirectory::DialogDirectory(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
-	DialogForm(obj, builder, COLLECTION_DIRECTORIES)
+	DialogForm(obj, builder)
 {
 
 	builder->get_widget("EntryDirectoryName", entryDirectoryName);

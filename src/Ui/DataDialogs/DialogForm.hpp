@@ -58,7 +58,7 @@ public:
 	/**
 	 * Load Function.
 	 */
-	virtual void load(XMLHelper* values) noexcept = 0;
+	virtual void load(XMLHelper* values) noexcept abstract;
 
 	/**
 	 * Sets the collection where the items will be stored and if there is a data owner for this dialog.
@@ -76,7 +76,7 @@ public:
 	/**
 	 * Clear the From leaving it empty for data entry.
 	 */
-	virtual void clearForm() noexcept = 0;
+	virtual void clearForm() noexcept abstract;
 
 	/**
 	 * Cleans and re-populates the box with stored items.
@@ -93,18 +93,18 @@ public:
 	/**
 	 * Check if the values on the fields are valid.
 	 */
-	virtual void isValid() const = 0;
+	virtual void isValid() const abstract;
 
 	/**
 	 * Send fields into the storage
 	 * @param mode
 	 */
-	virtual void storeData() noexcept = 0;
+	virtual void storeData() noexcept abstract;
 
 	/**
 	 * Bring stored info into fields.
 	 */
-	virtual void retrieveData() noexcept = 0;
+	virtual void retrieveData() noexcept abstract;
 
 	/**
 	 * Returns an array with a list of stored key values values.
@@ -118,7 +118,7 @@ public:
 	 * While a Dialog is open, Data information must be considered stale.
 	 * @return a unique id that identifies the Data inside the form.
 	 */
-	virtual const string createUniqueId() const noexcept = 0;
+	virtual const string createUniqueId() const noexcept abstract;
 
 	/**
 	 * Using the box and the items it arrange the items based on the OrdenableFlowBox order.
@@ -188,14 +188,14 @@ protected:
 	 * Provides a nice name for the type of data this dialog will create for the dialog.
 	 * @return
 	 */
-	virtual string_view getType() const noexcept = 0;
+	virtual string_view getType() const noexcept abstract;
 
 	/**
 	 * Creates a data object out of raw data.
 	 * @param rawData this values will be moved into the class.
 	 * @return
 	 */
-	virtual Storage::Data* createData(StringUMap& rawData) noexcept = 0;
+	virtual Storage::Data* createData(StringUMap& rawData) noexcept abstract;
 
 	/**
 	 * Creates an empty object.

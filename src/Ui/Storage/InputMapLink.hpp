@@ -20,7 +20,6 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Data.hpp"
 #include "CollectionHandler.hpp"
 
 #pragma once
@@ -38,10 +37,11 @@ public:
 
 	virtual ~InputMapLink() = default;
 
+	string_view getCssClass()       const noexcept override { return "LinkBoxButton"; }
 	const string createPrettyName() const noexcept override;
-	const string createTooltip() const noexcept override;
-	string_view getCssClass() const noexcept override;
-	const string createUniqueId() const noexcept override;
+	const string createTooltip()    const noexcept override;
+	const string createUniqueId()   const noexcept override;
+
 };
 
 } // namespace
