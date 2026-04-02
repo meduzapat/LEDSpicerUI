@@ -36,19 +36,8 @@ const string Element::createPrettyName() const noexcept {
 	return pname;
 }
 
-const string Element::toXML() const noexcept {
-	StringUSet ignored;
-	if (fieldsData.at(BRIGHTNESS) == "100")
-		ignored.insert(BRIGHTNESS);
-	return createOpeningXML("element", fieldsData, ignored, true);
-}
-
 void Element::addStripChild(Element* child) noexcept {
 	stripChildren.push_back(child);
-}
-
-vector<Element*> Element::copyStripChildren() noexcept {
-	return stripChildren;
 }
 
 void Element::clearStripChildren() noexcept {

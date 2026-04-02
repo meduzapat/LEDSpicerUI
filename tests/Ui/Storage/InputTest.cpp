@@ -140,3 +140,9 @@ TEST_F(InputTest, SwapAndRevert) {
 	rootInput->revert();
 	EXPECT_EQ(before, *rootInput->getValues());
 }
+
+int main(int argc, char** argv) {
+	auto app = Gtk::Application::create(argc, argv, "org.test");
+	::testing::InitGoogleTest(&argc, argv);
+	return RUN_ALL_TESTS();
+}

@@ -71,5 +71,12 @@ TEST_F(GroupTest, CssClass) {
 TEST_F(GroupTest, ToXMLStructure) {
 	const string xml(group->toXML());
 	EXPECT_NE(string::npos, xml.find("<group"));
-	EXPECT_NE(string::npos, xml.find("</group>"));
+	// Empty group emits self-closing tag
+	EXPECT_NE(string::npos, xml.find("/>"));
+}
+
+int main(int argc, char** argv) {
+	auto app = Gtk::Application::create(argc, argv, "org.test");
+	::testing::InitGoogleTest(&argc, argv);
+	return RUN_ALL_TESTS();
 }

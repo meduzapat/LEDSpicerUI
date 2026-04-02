@@ -28,7 +28,9 @@ using namespace LEDSpicerUI::Ui::Storage;
 using namespace LEDSpicerUI::Constants;
 
 class RestrictorTest : public ::testing::Test {
+
 protected:
+
 	void TearDown() override {
 		CollectionHandler::purgeAll();
 	}
@@ -82,7 +84,8 @@ TEST_F(RestrictorTest, ToXMLStructure) {
 	Restrictor r(data);
 	const string xml(r.toXML());
 	EXPECT_NE(string::npos, xml.find("<restrictor"));
-	EXPECT_NE(string::npos, xml.find("</restrictor>"));
+	// Empty emits self-closing tag
+	EXPECT_NE(string::npos, xml.find("/>"));
 }
 
 // wipe clears fieldsData.
@@ -91,4 +94,10 @@ TEST_F(RestrictorTest, WipeClearsFields) {
 	Restrictor r(data);
 	r.wipe();
 	EXPECT_TRUE(r.getValues()->empty());
+}
+
+int main(int argc, char** argv) {
+	auto app = Gtk::Application::create(argc, argv, "org.test");
+	::testing::InitGoogleTest(&argc, argv);
+	return RUN_ALL_TESTS();
 }

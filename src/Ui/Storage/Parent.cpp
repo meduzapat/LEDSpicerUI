@@ -71,3 +71,11 @@ void Parent::registerDependency(
 	});
 	dependencyRegistry.emplace_back(watchedCollection, targetCollection);
 }
+
+string Parent::xmlBody() const noexcept {
+	string r;
+	for (const auto& [id, collection] : children)
+		for (const auto btn : collection)
+			r += btn->getData()->toXML();
+	return r;
+}

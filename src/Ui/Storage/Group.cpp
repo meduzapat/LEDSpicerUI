@@ -31,17 +31,7 @@ Group::Group(StringUMap& data) noexcept :
 		getCollectionHandler()->remove(this);
 	});
 }
-//
-//void Group::setUp() {
-//	DataDialogs::DialogSelect::getInstance()->setDestinations(children.at(COLLECTION_ELEMENT), this);
-//}
-const string Group::toXML() const noexcept {
-	if (fieldsData.at(DEFAULT_COLOR).empty())
-		ignored.insert(DEFAULT_COLOR);
-	string r(createOpeningXML("group", fieldsData, ignored, false));
-	for (const auto e : children.at(COLLECTION_GROUP_LINKS))
-		r += e->getData()->toXML();
-	r += createClosingXML("group");
-	ignored.clear();
-	return r;
+
+bool Group::shouldSerialize(const string& key, const string& value) const noexcept {
+	return not (key == DEFAULT_COLOR and value.empty());
 }

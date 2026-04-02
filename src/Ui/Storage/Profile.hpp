@@ -39,13 +39,14 @@ public:
 
 	virtual ~Profile() = default;
 
-	string_view  getCssClass() const noexcept override { return "ProfileBoxButton"; }
-	const string toXML()       const noexcept override;
+	string_view getCssClass() const noexcept override { return "ProfileBoxButton"; }
+	string_view getXmlTag()   const noexcept override { return "Profile"; }
 
 protected:
 
 	const string getPrimaryKey() const noexcept override { return FILENAME; }
 
+	string xmlBody() const noexcept override;
 };
 
 } // namespace

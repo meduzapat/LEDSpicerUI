@@ -153,34 +153,51 @@ TEST(XMLHelperTest, ToXML) {
 
 TEST(XMLHelperTest, XmlHeader) {
 	string header = XMLHelper::xmlHeader("Configuration");
+	EXPECT_NE(string::npos, header.find("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"));
+	EXPECT_NE(string::npos, header.find(DEFAULT_MESSAGE));
+	EXPECT_NE(string::npos, header.find("version=\"" PACKAGE_DATA_VERSION "\""));
+	EXPECT_NE(string::npos, header.find("type=\"Configuration\""));
+	// Root tag must be closed.
+	EXPECT_NE(string::npos, header.find(">\n"));
+}
 
-	EXPECT_NE(header.find("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"), string::npos)
-		<< "Should contain XML declaration";
-	EXPECT_NE(header.find(DEFAULT_MESSAGE), string::npos)
-		<< "Should contain default message";
-	EXPECT_NE(header.find("<" PACKAGE_DATA_NAME), string::npos)
-		<< "Should contain root element";
-	EXPECT_NE(header.find("version=\"" PACKAGE_DATA_VERSION "\""), string::npos)
-		<< "Should contain version";
-	EXPECT_NE(header.find("type=\"Configuration\""), string::npos)
-		<< "Should contain type";
+TEST(XMLHelperTest, XmlHeaderWithAttrs) {
+	const string header = XMLHelper::xmlHeader("Input", {{NAME, "Mame"}});
+	EXPECT_NE(string::npos, header.find("type=\"Input\""));
+	EXPECT_NE(string::npos, header.find("name=\"Mame\""));
+	EXPECT_NE(string::npos, header.find(">\n"));
+}
+
+TEST(XMLHelperTest, XmlSection) {
+	const string content(Defaults::tab() + "<item/>\n");
+	const string result = XMLHelper::xmlSection("items", content);
+	EXPECT_NE(string::npos, result.find("<items>"));
+	EXPECT_NE(string::npos, result.find("</items>"));
+	EXPECT_NE(string::npos, result.find(content));
+}
+
+TEST(XMLHelperTest, XmlSectionEmptySkipped) {
+	EXPECT_TRUE(XMLHelper::xmlSection("items", "").empty());
+}
+
+TEST(XMLHelperTest, XmlSectionWithAttrs) {
+	const string result = XMLHelper::xmlSection(
+		"maps", "<map/>\n", {{"source", "hw1"}}
+	);
+	EXPECT_NE(string::npos, result.find("source=\"hw1\""));
+	EXPECT_NE(string::npos, result.find("<maps"));
+	EXPECT_NE(string::npos, result.find("</maps>"));
 }
 
 TEST(XMLHelperTest, XmlHeaderNoType) {
-	string header = XMLHelper::xmlHeader("");
-
-	EXPECT_NE(header.find("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"), string::npos)
-		<< "Should contain XML declaration";
-	EXPECT_NE(header.find("version=\"" PACKAGE_DATA_VERSION "\""), string::npos)
-		<< "Should contain version";
-	EXPECT_NE(header.find("type=\"\""), string::npos)
-		<< "Should contain type when empty";
+	const string header = XMLHelper::xmlHeader("");
+	EXPECT_NE(string::npos, header.find("version=\"" PACKAGE_DATA_VERSION "\""));
+	EXPECT_NE(string::npos, header.find("type=\"\""));
+	EXPECT_NE(string::npos, header.find(">\n"));
 }
 
 TEST(XMLHelperTest, XmlFooter) {
-	string footer = XMLHelper::xmlFooter();
-
-	EXPECT_EQ(footer, "</" PACKAGE_DATA_NAME ">\n") << "Footer should be closing tag";
+	EXPECT_EQ("</" PACKAGE_DATA_NAME ">\n", XMLHelper::xmlFooter());
 }
 
 TEST(XMLHelperTest, GetData) {

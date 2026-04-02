@@ -17,9 +17,11 @@ WORKDIR /app
 COPY . /app
 
 # Prepare the build environment
-RUN mkdir target \
-  cmake .. -DCMAKE_CXX_FLAGS="-g3 -O0" \
-  cmake --build target --target DefaultsTest --target DataTest --target MessageTest --target XMLHelperTest
+RUN mkdir autotest && \
+  cd autotest && \
+  cmake .. -DCMAKE_CXX_FLAGS="-g1 -O0" && \
+  cd .. && \
+  cmake --build autotest --parallel 8
 
 # Default command: run tests
-CMD cd target && export DISPLAY=:99 && xvfb-run --auto-servernum ctest --output-on-failure
+CMD cd autotest && export DISPLAY=:99 && xvfb-run --auto-servernum ctest --output-on-failure

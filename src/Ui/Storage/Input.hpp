@@ -49,10 +49,10 @@ public:
 
 	virtual ~Input() = default;
 
-	string_view  getCssClass()      const noexcept override { return "InputBoxButton"; }
+	string_view getXmlTag()         const noexcept override { return "Input"; }
+	string_view getCssClass()       const noexcept override { return "InputBoxButton"; }
 	const string createPrettyName() const noexcept override;
 	const string createTooltip()    const noexcept override;
-	const string toXML()            const noexcept override;
 
 	void wipe()     noexcept override;
 	void tearDown() noexcept override;

@@ -79,15 +79,15 @@ StringUMap XMLHelper::processNode(const string& nodeElement) {
 	return processNode(node);
 }
 
-StringUMap XMLHelper::getSettings() const {
+StringUMap XMLHelper::getSettings() const noexcept {
 	return rootInfo.attributes;
 }
 
-tinyxml2::XMLElement* XMLHelper::getRoot() const {
+tinyxml2::XMLElement* XMLHelper::getRoot() const noexcept {
 	return root;
 }
 
-const XMLHelper::RootInfo& XMLHelper::getRootInfo() const {
+const XMLHelper::RootInfo& XMLHelper::getRootInfo() const noexcept {
 	return rootInfo;
 }
 
@@ -101,37 +101,73 @@ void XMLHelper::checkAttributes(
 			throw Message("Missing attribute '" + attribute + "' inside " + place);
 }
 
-string XMLHelper::valueOf(const StringUMap& values, const string& value, string def) {
-	return (values.find(value) != values.end() ? values.at(value) : def);
+const string& XMLHelper::valueOf(
+	const StringUMap& values,
+	const string& value
+) noexcept {
+	return (values.find(value) != values.end() ? values.at(value) : emptyString);
 }
 
-string XMLHelper::xmlHeader(const string& type) {
-	string header;
-	header  = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-	header += "<!-- " DEFAULT_MESSAGE " -->\n";
-	header += "<" PACKAGE_DATA_NAME "\n";
+string XMLHelper::valueOf(
+	const StringUMap& values,
+	const string& value,
+	string defaultValue
+) noexcept {
+	return (values.find(value) != values.end() ? values.at(value) : defaultValue);
+}
+
+string XMLHelper::xmlHeader(
+	const string& type,
+	const StringUMap& attrs
+) noexcept {
+	string r;
+	r  = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+	r += "<!-- " DEFAULT_MESSAGE " -->\n";
+	r += "<" PACKAGE_DATA_NAME "\n";
 	Defaults::increaseTab();
-	header += Defaults::tab() + "version=\"" PACKAGE_DATA_VERSION "\"\n";
-	header += Defaults::tab() + "type=\"" + type + "\"\n";
-	return header;
+	r += Defaults::tab() + "version=\"" PACKAGE_DATA_VERSION "\"\n";
+	r += Defaults::tab() + "type=\"" + type + "\"\n";
+	for (const auto& [k, v] : attrs)
+		r += Defaults::tab() + k + "=\"" + v + "\"\n";
+	Defaults::reduceTab();
+	r += ">\n";
+	Defaults::increaseTab();
+	return r;
 }
 
-string XMLHelper::xmlFooter() {
+string XMLHelper::xmlSection(
+	const string& tag,
+	const string& content,
+	const StringUMap& attrs
+) noexcept {
+	if (content.empty()) return "";
+	string r(Defaults::tab() + "<" + tag);
+	for (const auto& [k, v] : attrs)
+		r += " " + k + "=\"" + v + "\"";
+	r += ">\n";
+	Defaults::increaseTab();
+	r += content;
+	Defaults::reduceTab();
+	r += Defaults::tab() + "</" + tag + ">\n";
+	return r;
+}
+
+string XMLHelper::xmlFooter() noexcept {
 	return "</" PACKAGE_DATA_NAME ">\n";
 }
 
-string XMLHelper::toXML(const StringUMap& values) {
+string XMLHelper::toXML(const StringUMap& values) noexcept {
 	string r;
 	for (const auto& v : values)
 		r += Defaults::tab() + v.first + "=\"" + v.second + "\"\n";
 	return r;
 }
 
-StringUMapVector& XMLHelper::getData(const string& dataName) {
+StringUMapVector& XMLHelper::getData(const string& dataName) noexcept {
 	return extractedData[dataName];
 }
 
-string XMLHelper::cleanError(const string& error) {
+string XMLHelper::cleanError(const string& error) noexcept {
 	// ex: Unable to read the file /xxx/yyy/zzzz.xml Error=XML_ERROR_MISMATCHED_ELEMENT ErrorID=14 (0xe) Line number=369: XMLElement name=map
 	string result;
 	size_t pos = error.find("Error=");

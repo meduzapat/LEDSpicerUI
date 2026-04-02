@@ -22,6 +22,7 @@
 
 #include "Parent.hpp"
 #include "DirNode.hpp"
+#include "XMLHelper.hpp"
 
 #pragma once
 
@@ -51,6 +52,13 @@ public:
 
 	const string& getName() const noexcept override;
 	const string& getFsId() const noexcept override;
+
+	/**
+	 * Serializes this file-based item using XMLHelper::xmlHeader/Footer.
+	 * Subclasses provide xmlBody() for inner content.
+	 * @return Full XML file string.
+	 */
+	const string toXML() const noexcept override;
 
 protected:
 

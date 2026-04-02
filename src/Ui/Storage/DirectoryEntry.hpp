@@ -57,9 +57,9 @@ public:
 	const string  createPrettyName() const noexcept override;
 	const string  createTooltip()    const noexcept override;
 	string_view   getCssClass()      const noexcept override { return "DirectoryBoxButton"; }
-
-	const string& getName()  const noexcept override;
-	const string& getFsId()  const noexcept override;
+	string_view getXmlTag()          const noexcept override { return ""; }
+	const string& getName()          const noexcept override;
+	const string& getFsId()          const noexcept override;
 
 	/**
 	 * @return true if this directory contains no items.

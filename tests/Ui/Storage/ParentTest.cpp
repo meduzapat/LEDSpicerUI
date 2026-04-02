@@ -27,56 +27,55 @@ using namespace LEDSpicerUI::Constants;
 using namespace LEDSpicerUI::Ui::Storage;
 
 class TestData : public Data {
+
 public:
-	TestData(StringUMap& d) : Data(d, "TEST_DATA") {}
+
+	TestData(StringUMap& d) : Data(d, "") {}
 	string_view getCssClass() const noexcept override { return ""; }
+	string_view getXmlTag()   const noexcept override { return "item"; }
 };
 
 struct TestParent : Parent {
-	TestParent(StringUMap& d, StringBoxButtonCollectionUMap ch)
-		: Parent(d, "TEST_COLLECTION", std::move(ch)) {}
+
+	TestParent(StringUMap& d, const vector<string>& ids)
+		: Parent(d, "TEST_COLLECTION", ids) {}
+
 	string_view getCssClass() const noexcept override { return ""; }
+	string_view getXmlTag()   const noexcept override { return "parent"; }
 	using Parent::registerDependency;
 };
 
 struct ParentTest : ::testing::Test {
-
-	StringUMap                    data;
-	StringBoxButtonCollectionUMap children;
-
-	void SetUp() override {
-		children["A"]; // default-constructs in place — no copy
-		children["B"];
-	}
+	StringUMap data;
 };
 
 TEST_F(ParentTest, getChild_existingKey_returnsPointer) {
-	TestParent p(data, std::move(children));
+	TestParent p(data, {"A", "B"});
 	EXPECT_NE(p.getChild("A"), nullptr);
 }
 
 TEST_F(ParentTest, getChild_missingKey_returnsNull) {
-	TestParent p(data, std::move(children));
+	TestParent p(data, {"A", "B"});
 	EXPECT_EQ(p.getChild("MISSING"), nullptr);
 }
 
 TEST_F(ParentTest, getChild_constOverload_returnsPointer) {
-	const TestParent p(data, std::move(children));
+	const TestParent p(data, {"A", "B"});
 	EXPECT_NE(p.getChild("A"), nullptr);
 }
 
 TEST_F(ParentTest, getChildren_returnsAllChildren) {
-	TestParent p(data, std::move(children));
+	TestParent p(data, {"A", "B"});
 	EXPECT_EQ(p.getChildren().size(), 2u);
 }
 
 TEST_F(ParentTest, getSize_matchesInjectedSize) {
-	TestParent p(data, std::move(children));
+	TestParent p(data, {"A", "B"});
 	EXPECT_EQ(p.getSize(), 2u);
 }
 
 TEST_F(ParentTest, empty_falseWhenChildrenPresent) {
-	TestParent p(data, std::move(children));
+	TestParent p(data, {"A", "B"});
 	EXPECT_FALSE(p.empty());
 }
 
@@ -86,9 +85,27 @@ TEST_F(ParentTest, empty_trueWhenNoChildren) {
 }
 
 TEST_F(ParentTest, iteration_visitsAllChildren) {
-	TestParent p(data, std::move(children));
+	TestParent p(data, {"A", "B"});
 	size_t count = 0;
 	for (auto& _ : p)
 		++count;
 	EXPECT_EQ(count, 2u);
+}
+
+TEST_F(ParentTest, xmlBody_emitsChildrenInOrder) {
+	TestParent p(data, {"A"});
+	StringUMap d1{{NAME, "first"}};
+	StringUMap d2{{NAME, "second"}};
+	p.getChild("A")->create(new TestData(d1));
+	p.getChild("A")->create(new TestData(d2));
+	const string xml(p.toXML());
+	EXPECT_NE(string::npos, xml.find("first"));
+	EXPECT_NE(string::npos, xml.find("second"));
+	EXPECT_LT(xml.find("first"), xml.find("second"));
+}
+
+int main(int argc, char** argv) {
+	auto app = Gtk::Application::create(argc, argv, "org.test");
+	::testing::InitGoogleTest(&argc, argv);
+	return RUN_ALL_TESTS();
 }

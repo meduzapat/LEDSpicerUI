@@ -25,11 +25,11 @@
 using namespace LEDSpicerUI::Ui::Storage;
 
 Profile::Profile(StringUMap& data, DirNode* parent) noexcept :
-	FileNode(data, parent, COLLECTION_PROFILES, {
-		{COLLECTION_PROFILE_ELEMENTS,   {}},
-		{COLLECTION_PROFILE_GROUPS,     {}},
-		{COLLECTION_PROFILE_INPUTS,     {}},
-		{COLLECTION_PROFILE_ANIMATIONS, {}}
+	FileNode(data, parent, COLLECTION_PROFILES, vector<string>{
+		COLLECTION_PROFILE_ELEMENTS,
+		COLLECTION_PROFILE_GROUPS,
+		COLLECTION_PROFILE_INPUTS,
+		COLLECTION_PROFILE_ANIMATIONS
 	})
 {
 	registerDependency(COLLECTION_ELEMENT,    COLLECTION_PROFILE_ELEMENTS);
@@ -38,30 +38,21 @@ Profile::Profile(StringUMap& data, DirNode* parent) noexcept :
 	registerDependency(COLLECTION_ANIMATIONS, COLLECTION_PROFILE_ANIMATIONS);
 }
 
-const string Profile::toXML() const noexcept {
-	string r(XMLHelper::xmlHeader("Profile"));
-	r += Data::toXML();
-	Defaults::reduceTab();
-	r += ">\n";
-	Defaults::increaseTab();
-
+string Profile::xmlBody() const noexcept {
+	string r;
 	const auto emit = [&](const string& tag, const string& key) {
 		const auto& col = children.at(key);
 		if (col.getSize() == 0) return;
-		r += Defaults::tab() + "<" + tag + ">\n";
-		Defaults::increaseTab();
-		for (const auto& e : col)
-			r += e->getData()->toXML();
-		Defaults::reduceTab();
-		r += Defaults::tab() + "</" + tag + ">\n";
+		r += XMLHelper::xmlSection(tag, [&]{
+			string s;
+			for (const auto& e : col)
+				s += e->getData()->toXML();
+			return s;
+		}());
 	};
-
 	emit("alwaysOnElements", COLLECTION_PROFILE_ELEMENTS);
 	emit("alwaysOnGroups",   COLLECTION_PROFILE_GROUPS);
 	emit("inputs",           COLLECTION_PROFILE_INPUTS);
 	emit("animations",       COLLECTION_PROFILE_ANIMATIONS);
-
-	Defaults::reduceTab();
-	r += XMLHelper::xmlFooter();
 	return r;
 }

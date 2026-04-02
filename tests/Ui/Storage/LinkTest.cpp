@@ -31,6 +31,7 @@ class TargetData : public Data {
 public:
 	TargetData(StringUMap& d) : Data(d, "") {}
 	constexpr string_view getCssClass() const noexcept override { return "TargetClass"; }
+	constexpr string_view getXmlTag()   const noexcept override { return "target"; }
 };
 
 class LinkTest : public ::testing::Test {

@@ -74,18 +74,17 @@ public:
 	/**
 	 * @return Root node attributes.
 	 */
-	StringUMap getSettings() const;
+	StringUMap getSettings() const noexcept;
 
 	/**
-	 * Returns a pointer to the root node.
-	 * @return
+	 * @return a pointer to the root node.
 	 */
-	tinyxml2::XMLElement* getRoot() const;
+	tinyxml2::XMLElement* getRoot() const noexcept;
 
 	/**
 	 * @return Root node information.
 	 */
-	const RootInfo& getRootInfo() const;
+	const RootInfo& getRootInfo() const noexcept;
 
 	/**
 	 * Checks if the map subject have the attributeList elements.
@@ -103,44 +102,73 @@ public:
 	);
 
 	/**
+	 * Returns the value from the map or an empty string if key is missing.
+	 *
+	 * @param values The map to query.
+	 * @param value The key to look up.
+	 * @return The value or empty string.
+	 */
+	static const string& valueOf(
+		const StringUMap& values,
+		const string& value
+	) noexcept;
+
+	/**
 	 * Returns the value from the map or a default string.
 	 *
 	 * @param values The map to query.
 	 * @param value The key to look up.
-	 * @param def The default value to return if key is missing (defaults to empty string).
+	 * @param defaultValue The default value to return if key is missing.
 	 * @return The value or default.
 	 */
 	static string valueOf(
 		const StringUMap& values,
 		const string& value,
-		string def = ""
-	);
+		string defaultValue
+	) noexcept;
 
 	/**
-	 * Generates XML file header.
-	 * @param type File type (Configuration, Input, Profile, etc.)
-	 * @return XML header string with root opening tag started.
+	 * Generates a complete XML file header with closed root opening tag.
+	 * @param type  File type attribute (Input, Animation, Profile, etc.)
+	 * @param attrs Additional root attributes beyond version and type.
+	 * @return Complete root opening including closing >.
 	 */
-	static string xmlHeader(const string& type);
+	static string xmlHeader(
+		const string& type,
+		const StringUMap& attrs = {}
+	) noexcept;
+
+	/**
+	 * Wraps content in a named XML section.
+	 * Skips output entirely if content is empty.
+	 * @param tag     Element tag name.
+	 * @param content Inner XML string.
+	 * @param attrs   Optional attributes on the opening tag.
+	 */
+	static string xmlSection(
+		const string& tag,
+		const string& content,
+		const StringUMap& attrs = {}
+	) noexcept;
 
 	/**
 	 * Generates XML root closing tag.
 	 * @return Closing tag string.
 	 */
-	static string xmlFooter();
+	static string xmlFooter() noexcept;
 
 	/**
 	 * Converts a map into xml string.
 	 * @param values
 	 * @return
 	 */
-	static string toXML(const StringUMap& values);
+	static string toXML(const StringUMap& values) noexcept;
 
 	/**
 	 * @param dataName
 	 * @return The stored values for that collection.
 	 */
-	StringUMapVector& getData(const string& dataName);
+	StringUMapVector& getData(const string& dataName) noexcept;
 
 	/**
 	 * Convert a XML error into human readable text.
@@ -148,7 +176,7 @@ public:
 	 * @param error A raw error message from XML.
 	 * @return A text in a more human way to be displayed.
 	 */
-	static string cleanError(const string& error);
+	static string cleanError(const string& error) noexcept;
 
 protected:
 

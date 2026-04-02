@@ -53,3 +53,15 @@ const string& FileNode::getName() const noexcept {
 const string& FileNode::getFsId() const noexcept {
 	return getProperty(UID);
 }
+
+const string FileNode::toXML() const noexcept {
+	StringUMap attrs;
+	for (const auto& [k, v] : fieldsData)
+		if (shouldSerialize(k, v))
+			attrs.emplace(k, v);
+	string r(XMLHelper::xmlHeader(string(getXmlTag()), attrs));
+	r += xmlBody();
+	Defaults::reduceTab();
+	r += XMLHelper::xmlFooter();
+	return r;
+}

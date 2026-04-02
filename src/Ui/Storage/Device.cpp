@@ -40,13 +40,6 @@ const string Device::createUniqueId() const noexcept {
 	return Defaults::createHardwareUniqueId(*getValues());
 }
 
-const string Device::toXML() const noexcept {
-	string r(createOpeningXML("device", fieldsData, ignored, false));
-	for (const auto e : children.at(COLLECTION_ELEMENT))
-		r += e->getData()->toXML();
-	return r + createClosingXML("device");
-}
-
 void Device::wipe() noexcept {
 	clearSnap();
 	Data::wipe();

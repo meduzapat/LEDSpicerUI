@@ -83,12 +83,21 @@ protected:
 	/// List of dependencies acting over children, watchedCollection → targetCollection
 	vector<std::pair<string, string>> dependencyRegistry;
 
+	/**
+	 * Registers a dependency between a watched collection and a child collection.
+	 * @param watchedCollection The collection ID to watch for changes (e.g. COLLECTION_ELEMENT).
+	 * @param targetCollection The child collection ID to apply the dependency to (must be a key in children).
+	 * @param minSize Minimum size of the watched collection before onDepletion is triggered (default: 0).
+	 * @param onDepletion Optional callback to invoke when the watched collection falls below minSize (default: no-op).
+	 */
 	void registerDependency(
 		const string& watchedCollection,
 		const string& targetCollection,
 		size_t minSize = 0,
 		std::function<void()> onDepletion = {}
 	);
+
+	string xmlBody() const noexcept override;
 };
 
 } // namespace

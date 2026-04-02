@@ -67,3 +67,7 @@ void InputSource::tearDown() noexcept {
 	revert();
 	Data::tearDown();
 }
+
+bool InputSource::shouldSerialize(const string& key, const string& value) const noexcept {
+	return not (key == SOURCE and value.empty());
+}

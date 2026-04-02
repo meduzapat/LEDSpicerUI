@@ -27,16 +27,29 @@ using namespace LEDSpicerUI::Ui::Storage;
 
 // Does not self-register.
 class TestData : public Data {
+
 public:
-	TestData(StringUMap& data) noexcept : Data(data, "") { ignored.insert("ignored"); }
+
+	TestData(StringUMap& data) noexcept : Data(data, "") {}
 	constexpr string_view getCssClass() const noexcept override { return "test-class"; }
+	constexpr string_view getXmlTag()   const noexcept override { return "test"; }
+
+protected:
+
+	bool shouldSerialize(const string& key, const string&) const noexcept override {
+		return key != "ignored";
+	}
 };
 
 // Self-registers into "t".
 class RegisteringData : public Data {
+
 public:
+
 	RegisteringData(StringUMap& data) noexcept : Data(data, "t") {}
 	constexpr string_view getCssClass() const noexcept override { return "reg"; }
+	constexpr string_view getXmlTag()   const noexcept override { return "test"; }
+
 };
 
 class DataTest : public ::testing::Test {
@@ -78,11 +91,11 @@ TEST_F(DataTest, Wipe) {
 }
 
 TEST_F(DataTest, ToXML) {
-	string expected{"value=\"42\"\ntype=\"button\"\nname=\"TestItem\"\n"};
-	EXPECT_EQ(expected, data->toXML());
-	data->unSet("value");
-	expected = "type=\"button\"\nname=\"TestItem\"\n";
-	EXPECT_EQ(expected, data->toXML());
+	const string xml(data->toXML());
+	EXPECT_NE(string::npos, xml.find("<test"));
+	EXPECT_NE(string::npos, xml.find("name=\"TestItem\""));
+	EXPECT_NE(string::npos, xml.find("value=\"42\""));
+	EXPECT_EQ(string::npos, xml.find("ignored="));
 }
 
 TEST_F(DataTest, GetValues) {

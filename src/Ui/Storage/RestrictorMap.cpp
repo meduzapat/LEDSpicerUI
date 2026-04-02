@@ -35,7 +35,3 @@ const string RestrictorMap::createPrettyName() const noexcept {
 const string RestrictorMap::createUniqueId() const noexcept {
 	return Defaults::createCommonUniqueId({getValue(PLAYER), getValue(JOYSTICK)});
 }
-
-const string RestrictorMap::toXML() const noexcept {
-	return createOpeningXML("map", fieldsData, ignored, true);
-}

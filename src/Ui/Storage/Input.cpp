@@ -32,19 +32,6 @@ const string Input::createTooltip() const noexcept {
 	return "Input of type " + getValue(NAME);
 }
 
-const string Input::toXML() const noexcept {
-	string r(XMLHelper::xmlHeader("Input"));
-	r += Data::toXML();
-	Defaults::reduceTab();
-	r += ">\n";
-	Defaults::increaseTab();
-	for (const auto& s : children.at(COLLECTION_INPUT_SOURCES))
-		r += s->getData()->toXML();
-	Defaults::reduceTab();
-	r += XMLHelper::xmlFooter();
-	return r;
-}
-
 void Input::wipe() noexcept {
 	clearSnap();
 	Data::wipe();

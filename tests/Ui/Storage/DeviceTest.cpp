@@ -82,7 +82,8 @@ TEST_F(DeviceTest, ToXMLStructure) {
 	Device d(data);
 	const string xml(d.toXML());
 	EXPECT_NE(string::npos, xml.find("<device"));
-	EXPECT_NE(string::npos, xml.find("</device>"));
+	// Empty emits self-closing tag
+	EXPECT_NE(string::npos, xml.find("/>"));
 }
 
 // wipe clears fieldsData, snap stays clean.
@@ -91,4 +92,10 @@ TEST_F(DeviceTest, WipeClearsFields) {
 	Device d(data);
 	d.wipe();
 	EXPECT_TRUE(d.getValues()->empty());
+}
+
+int main(int argc, char** argv) {
+	auto app = Gtk::Application::create(argc, argv, "org.test");
+	::testing::InitGoogleTest(&argc, argv);
+	return RUN_ALL_TESTS();
 }

@@ -41,11 +41,15 @@ const string Data::getPrimaryValue() const noexcept {
 }
 
 const string& Data::getValue(const string& key) const noexcept {
-	return (fieldsData.find(key) != fieldsData.end() ? fieldsData.at(key) : emptyString);
+	if (auto it = fieldsData.find(key); it != fieldsData.end())
+		return it->second;
+	return emptyString;
 }
 
 string Data::getValue(const string& key, const string& defaultValue) const noexcept {
-	return (fieldsData.find(key) != fieldsData.end() ? fieldsData.at(key) : defaultValue);
+	if (auto it = fieldsData.find(key); it != fieldsData.end())
+		return it->second;
+	return defaultValue;
 }
 
 void Data::unSet(const string& key) noexcept {
@@ -60,11 +64,14 @@ void Data::setValue(const string& key, const string& value) noexcept {
 
 StringUMap Data::copyValues() const noexcept {
 	if (collectionId.empty()) return {};
-	const string baseId{createUniqueId()};
+	string baseId{createUniqueId()};
 	string candidateId;
 	uint8_t count{1};
 	do {
 		candidateId = baseId + "_" + std::to_string(count++);
+		if (not count) {
+			baseId += "X";
+		}
 	} while (getCollectionHandler()->isIdSet(candidateId));
 	StringUMap copy{fieldsData};
 	copy[getPrimaryKey()] = candidateId;
@@ -87,7 +94,15 @@ void Data::wipe() noexcept {
 }
 
 const string Data::toXML() const noexcept {
-	return valuesXML(ignored, fieldsData);
+	StringUMap filtered;
+	for (const auto& [k, v] : fieldsData)
+		if (shouldSerialize(k, v))
+			filtered.emplace(k, v);
+	const string body(xmlBody());
+	string r(createOpeningXML(string(getXmlTag()), filtered, {}, body.empty()));
+	if (not body.empty())
+		r += body + createClosingXML(string(getXmlTag()));
+	return r;
 }
 
 void Data::setProperty(const string& key, const string& value) noexcept {

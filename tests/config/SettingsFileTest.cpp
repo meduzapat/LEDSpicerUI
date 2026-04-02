@@ -122,8 +122,9 @@ TEST_F(SettingsFileTest, GetConfigFilePathReturnsValidPath) {
 
 TEST_F(SettingsFileTest, ConfigExistsReturnsFalseWhenMissing) {
 	string actualConfigPath = SettingsFile::getConfigFilePath();
-	if (not Glib::file_test(actualConfigPath, Glib::FILE_TEST_EXISTS))
+	if (not Glib::file_test(actualConfigPath, Glib::FILE_TEST_EXISTS)) {
 		EXPECT_FALSE(SettingsFile::configExists());
+	}
 }
 
 TEST_F(SettingsFileTest, SaveHandlesSpecialCharacters) {

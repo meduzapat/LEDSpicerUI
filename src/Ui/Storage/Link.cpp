@@ -65,13 +65,14 @@ void Link::setValue(const string& key, const string& value) noexcept {
 	Data::setValue(key, value);
 }
 
-const string Link::toXML() const noexcept {
+string_view Link::getXmlTag() const noexcept {
+	return linkInfo.link ? linkInfo.link->getXmlTag() : "";
+}
 
+const string Link::toXML() const noexcept {
 	StringUMap values{{linkInfo.key, linkInfo.link->createUniqueId()}};
 	values.insert(fieldsData.begin(), fieldsData.end());
-
-	// Generate XML using Data's utility methods
-	return createOpeningXML(linkInfo.type, values, ignored, true);
+	return createOpeningXML(string(linkInfo.type), values, {}, true);
 }
 
 void Link::setLinkData(const LinkData& newLinkData) noexcept {

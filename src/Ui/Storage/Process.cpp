@@ -27,12 +27,3 @@ using namespace LEDSpicerUI::Ui::Storage;
 const string Process::createPrettyName() const noexcept {
 	return string("Process: " + fieldsData.at(getPrimaryKey()) + " System: " + fieldsData.at(PARAM_SYSTEM));
 }
-
-const string Process::toXML() const noexcept {
-	string r(Defaults::tab() + "<map\n");
-	Defaults::increaseTab();
-	r += Data::toXML();
-	Defaults::reduceTab();
-	r += Defaults::tab() + "/>\n";
-	return r;
-}

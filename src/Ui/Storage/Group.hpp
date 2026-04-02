@@ -39,9 +39,12 @@ public:
 
 	virtual ~Group() = default;
 
-	string_view  getCssClass() const noexcept override { return "GroupBoxButton"; }
-	const string toXML()       const noexcept override;
+	string_view getXmlTag()    const noexcept override { return "group"; }
+	string_view getCssClass() const noexcept override { return "GroupBoxButton"; }
 
+protected:
+
+	bool shouldSerialize(const string& key, const string& value) const noexcept override;
 };
 
 } // namespace

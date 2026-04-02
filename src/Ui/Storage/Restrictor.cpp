@@ -18,13 +18,6 @@ const string Restrictor::createUniqueId() const noexcept {
 	return Defaults::createHardwareUniqueId(*getValues(), false);
 }
 
-const string Restrictor::toXML() const noexcept {
-	string r(createOpeningXML("restrictor", fieldsData, ignored, false));
-	for (const auto& e : children.at(COLLECTION_RESTRICTOR_MAP))
-		r += e->getData()->toXML();
-	return r + createClosingXML("restrictor");
-}
-
 void Restrictor::wipe() noexcept {
 	clearSnap();
 	Data::wipe();

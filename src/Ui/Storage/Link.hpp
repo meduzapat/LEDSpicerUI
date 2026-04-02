@@ -94,6 +94,7 @@ class Link : public Data {
 	const string createTooltip()    const noexcept override;
 	const string createUniqueId()   const noexcept override;
 	const string toXML()            const noexcept override;
+	string_view getXmlTag()         const noexcept override;
 
 	const string& getValue(const string& key)                      const noexcept override;
 	string getValue(const string& key, const string& defaultValue) const noexcept override;

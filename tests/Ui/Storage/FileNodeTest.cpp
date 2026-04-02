@@ -28,19 +28,28 @@ using namespace LEDSpicerUI::Constants;
 using LEDSpicerUI::Defaults;
 
 class StubDirNode : public DirNode {
+
 public:
+
 	StubDirNode() : DirNode(nullptr) {}
 	const string& getName()  const noexcept override { return id; }
 	const string& getFsId()  const noexcept override { return id; }
+
 private:
+
 	inline static const string id = "stub_1";
 };
 
 class TestFileNode : public FileNode {
+
 public:
+
 	TestFileNode(StringUMap& data, DirNode* parent) :
 		FileNode(data, parent, "test", {}) {}
+
 	constexpr string_view getCssClass() const noexcept override { return "test"; }
+	constexpr string_view getXmlTag()   const noexcept override { return "test"; }
+
 };
 
 class FileNodeTest : public ::testing::Test {

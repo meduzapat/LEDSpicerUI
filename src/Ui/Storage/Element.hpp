@@ -37,9 +37,9 @@ public:
 
 	virtual ~Element();
 
+	string_view getXmlTag()         const noexcept override { return "element"; }
 	string_view getCssClass()       const noexcept override { return "ElementBoxButton"; }
 	const string createPrettyName() const noexcept override;
-	const string toXML()            const noexcept override;
 
 	/**
 	 * Adds a child to the element, this is used for RGB strips.
@@ -50,7 +50,7 @@ public:
 	/**
 	 * @return the list of strip children.
 	 */
-	vector<Element*> copyStripChildren() noexcept;
+	vector<Element*> copyStripChildren() noexcept { return stripChildren; }
 
 	/**
 	 * Clears all strip children.
@@ -80,6 +80,10 @@ protected:
 
 	// Owns pseudo children.
 	vector<Element*> stripChildren;
+
+	bool shouldSerialize(const string& key, const string& value) const noexcept override {
+		return not (key == BRIGHTNESS and value == DEFAULT_BRIGHTNESS);
+	}
 };
 
 } // namespace

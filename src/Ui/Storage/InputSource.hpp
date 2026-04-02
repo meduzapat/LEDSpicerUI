@@ -44,8 +44,8 @@ public:
 	const string createUniqueId()   const noexcept override;
 	const string createPrettyName() const noexcept override;
 	const string createTooltip()    const noexcept override;
-	string_view  getCssClass()      const noexcept override { return "InputSourceBoxButton"; }
-	const string toXML()            const noexcept override;
+	string_view getCssClass()       const noexcept override { return "InputSourceBoxButton"; }
+	string_view getXmlTag()         const noexcept override { return "maps"; }
 
 	void wipe()     noexcept override;
 	void tearDown() noexcept override;
@@ -56,6 +56,8 @@ protected:
 	inline static size_t sourceCounter = 0;
 
 	const string getPrimaryKey() const noexcept override { return SOURCE; }
+
+	bool shouldSerialize(const string& key, const string& value) const noexcept override;
 
 };
 

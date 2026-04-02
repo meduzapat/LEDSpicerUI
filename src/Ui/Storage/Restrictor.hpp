@@ -22,8 +22,8 @@ public:
 
 	const string createPrettyName() const noexcept override;
 	const string createUniqueId()   const noexcept override;
-	string_view  getCssClass()      const noexcept override { return "RestrictorBoxButton"; }
-	const string toXML()            const noexcept override;
+	string_view getCssClass()       const noexcept override { return "RestrictorBoxButton"; }
+	string_view getXmlTag()         const noexcept override { return "restrictor"; }
 
 	void wipe()     noexcept override;
 	void tearDown() noexcept override;

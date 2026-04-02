@@ -257,65 +257,47 @@ void ConfigFile::save(const ConfigData& data) {
 	// Validation
 	if (data.defaultProfile.empty())
 		throw Message("Select a default profile in the profile section");
-
 	if (data.devices.getSize() == 0)
 		throw Message("At least one device is required");
 
+	/* Helper: collect toXML() from a BoxButtonCollection into one string. */
+	const auto collect = [](const BoxButtonCollection& col) {
+		string r;
+		for (const auto btn : col)
+			r += btn->getData()->toXML();
+		return r;
+	};
+
 	// Build XML
-	string xmlData {xmlHeader("Configuration")};
+	string xmlData(xmlHeader("Configuration"));
 	xmlData += toXML(data.settings);
 	Defaults::reduceTab();
 	xmlData += ">\n";
-
 	Defaults::increaseTab();
 
 	// Process lookup (optional)
 	if (data.processes.getSize()) {
-		xmlData += Defaults::tab() + "<processLookup";
-		if (not data.runEvery.empty()) {
-			xmlData += " runEvery=\"" + data.runEvery + "\"";
-		}
-		xmlData += ">\n";
-		Defaults::increaseTab();
-		for (const auto p : data.processes) {
-			xmlData += p->getData()->toXML();
-		}
-		Defaults::reduceTab();
-		xmlData += Defaults::tab() + "</processLookup>\n";
+		StringUMap plAttrs;
+		if (not data.runEvery.empty())
+			plAttrs.emplace(PARAM_MILLISECONDS, data.runEvery);
+		xmlData += xmlSection("processLookup", collect(data.processes), plAttrs);
 	}
 
 	// Devices (required)
-	xmlData += Defaults::tab() + "<devices>\n";
-	Defaults::increaseTab();
-	for (const auto d : data.devices) {
-		xmlData += d->getData()->toXML();
-	}
-	Defaults::reduceTab();
-	xmlData += Defaults::tab() + "</devices>\n";
+	xmlData += xmlSection("devices", collect(data.devices));
 
 	// Restrictors (optional)
-	if (data.restrictors.getSize()) {
-		xmlData += Defaults::tab() + "<restrictors>\n";
-		Defaults::increaseTab();
-		for (const auto r : data.restrictors) {
-			xmlData += r->getData()->toXML();
-		}
-		Defaults::reduceTab();
-		xmlData += Defaults::tab() + "</restrictors>\n";
-	}
+	xmlData += xmlSection("restrictors", collect(data.restrictors));
 
 	// Layout with groups
-	xmlData += Defaults::tab() + "<layout defaultProfile=\"" + data.defaultProfile + "\">\n";
-	Defaults::increaseTab();
-	for (const auto g : data.groups) {
-		xmlData += g->getData()->toXML();
-	}
-	Defaults::reduceTab();
-	xmlData += Defaults::tab() + "</layout>\n";
+	xmlData += xmlSection(
+		"layout",
+		collect(data.groups),
+		{{string("defaultProfile"), data.defaultProfile}}
+	);
 
 	Defaults::reduceTab();
 	xmlData += xmlFooter();
 
-	// Write file
 	Glib::file_set_contents(data.configPath, xmlData);
 }

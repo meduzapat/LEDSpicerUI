@@ -102,7 +102,6 @@ public:
 	 */
 	virtual void unSet(const string& key) noexcept;
 
-
 	/**
 	 * Returns a value using the key name.
 	 *
@@ -155,7 +154,6 @@ public:
 	/**
 	 * Serializes this object to XML.
 	 * Default emits flat attributes using getXmlTag().
-	 * Subclasses override for children or conditional field exclusions.
 	 * @return XML string.
 	 */
 	virtual const string toXML() const noexcept;
@@ -258,6 +256,24 @@ protected:
 	 * @param oldId The unique ID before the change, empty if not yet registered.
 	 */
 	void handleRegistration(const string& oldId) noexcept;
+
+	/**
+	 * Controls which fields are included in XML output.
+	 * Override to exclude fields conditionally.
+	 * Default: serialize all fields.
+	 * @param key   Field name.
+	 * @param value Field value.
+	 * @return True to include in XML, false to exclude.
+	 */
+	virtual bool shouldSerialize(
+		const string&,
+		const string&
+	) const noexcept { return true; }
+
+	/**
+	 * @return Content between opening and closing tag.
+	 */
+	virtual string xmlBody() const noexcept { return ""; }
 
 	/**
 	 * Organizes data vertically or horizontally based on the number of elements.

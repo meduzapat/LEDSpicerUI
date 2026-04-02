@@ -37,10 +37,10 @@ public:
 
 	virtual ~RestrictorMap() = default;
 
+	string_view getXmlTag()         const noexcept override { return "map"; }
 	string_view getCssClass()       const noexcept override { return "RestrictorMapBoxButton"; }
 	const string createPrettyName() const noexcept override;
 	const string createUniqueId()   const noexcept override;
-	const string toXML()            const noexcept override;
 
 };
 
