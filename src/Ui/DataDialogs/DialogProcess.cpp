@@ -42,7 +42,7 @@ DialogProcess::DialogProcess(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 	builder->get_widget("InputRomPosition", inputRomPosition);
 }
 
-void DialogProcess::load(XMLHelper* values) {
+void DialogProcess::load(XMLHelper* values) noexcept {
 	createItems(values->getData(COLLECTION_PROCESS), values);
 }
 

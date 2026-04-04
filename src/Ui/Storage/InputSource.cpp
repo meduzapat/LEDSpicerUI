@@ -47,17 +47,6 @@ const string InputSource::createTooltip() const noexcept {
 		+ std::to_string(children.at(COLLECTION_INPUT_MAPS).getSize()) + " maps";
 }
 
-const string InputSource::toXML() const noexcept {
-	const string source(getValue(SOURCE));
-	string r(Defaults::tab());
-	r += source.empty() ? "<maps>\n" : "<maps source=\"" + source + "\">\n";
-	Defaults::increaseTab();
-	for (const auto& m : children.at(COLLECTION_INPUT_MAPS))
-		r += m->getData()->toXML();
-	Defaults::reduceTab();
-	return r + Defaults::tab() + "</maps>\n";
-}
-
 void InputSource::wipe() noexcept {
 	clearSnap();
 	Data::wipe();

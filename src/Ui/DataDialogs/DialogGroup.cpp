@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      GroupDialog.cpp
+ * @file      DialogGroup.cpp
  * @since     Feb 13, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
@@ -23,24 +23,43 @@
 #include "DialogGroup.hpp"
 
 using namespace LEDSpicerUI::Ui::DataDialogs;
+using namespace LEDSpicerUI::Ui::Storage;
 
 DialogGroup::DialogGroup(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
-	DialogForm(obj, builder, COLLECTION_GROUP)
+	DialogForm(obj, builder)
 {
-
-	// Connect Groups Box and button.
 	builder->get_widget_derived("BoxGroups", box);
 	builder->get_widget("BtnApplyGroup",     btnApply);
 	Gtk::Button* btnAdd = nullptr;
-	builder->get_widget("BtnAddGroup", btnAdd);
+	builder->get_widget("BtnAddGroup",           btnAdd);
+	builder->get_widget("InputGroupName",        inputGroupName);
+	builder->get_widget("BtnGroupDefaultColor",  btnGroupDefaultColor);
+	builder->get_widget_derived("BoxGroupElements", boxElements, "BtnGroupElementUp", "BtnGroupElementDn");
+
 	setSignalAdd(btnAdd);
 	setSignalApply();
 
-	builder->get_widget("InputGroupName",       inputGroupName);
-	builder->get_widget("BtnGroupDefaultColor", btnGroupDefaultColor);
 	DialogColors::getInstance()->activateColorButton(btnGroupDefaultColor);
 
-	// Name Generator.
+	// Element selector button — opens picker with strip-expand support.
+	Gtk::Button* btnAddElements = nullptr;
+	builder->get_widget("BtnAddGroupElements", btnAddElements);
+	btnAddElements->signal_clicked().connect([this]() {
+		DialogSelect::getInstance()->open(
+			{
+				boxElements,z
+				elementLinks(),
+				NAME,
+				TYPE_ELEMENT,
+				COLLECTION_ELEMENT,
+				{},              // no extra link fields.
+				&expandStrips
+			},
+			currentData
+		);
+	});
+
+	// Group name generator dialog.
 	Gtk::Dialog* dialogGenerateGroupName = nullptr;
 	Gtk::Button* btnGenerateGroupName    = nullptr;
 	Gtk::ComboBoxText
@@ -49,18 +68,8 @@ DialogGroup::DialogGroup(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& 
 
 	builder->get_widget("DialogGenerateGroupName", dialogGenerateGroupName);
 	builder->get_widget("BtnGenerateGroupName",    btnGenerateGroupName);
-	builder->get_widget("ComboBoxGN1", comboBoxGN1);
-	builder->get_widget("ComboBoxGN2", comboBoxGN2);
-
-	// Element Selector
-	builder->get_widget_derived("BoxGroupElements", boxElements, "BtnGroupElementUp", "BtnGroupElementDn");
-	Gtk::Button* btnAddElements = nullptr;
-	builder->get_widget("BtnAddGroupElements", btnAddElements);
-	btnAddElements->signal_clicked().connect([&]() {
-		DialogSelect::getInstance()->setSettings(groupElementsSetting);
-		DialogSelect::getInstance()->refresh();
-		DialogSelect::getInstance()->runSelection();
-	});
+	builder->get_widget("ComboBoxGN1",             comboBoxGN1);
+	builder->get_widget("ComboBoxGN2",             comboBoxGN2);
 
 	btnGenerateGroupName->signal_clicked().connect([=]() {
 		comboBoxGN1->set_active(-1);
@@ -74,59 +83,61 @@ DialogGroup::DialogGroup(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& 
 }
 
 void DialogGroup::load(XMLHelper* values) {
-	DialogSelect::getInstance()->setSettings(groupElementsSetting);
 	createItems(values->getData(COLLECTION_GROUP), values);
 }
 
 void DialogGroup::createSubItems(XMLHelper* values) {
-	DialogSelect::getInstance()->load(values, COLLECTION_GROUP);
-}
-
-LEDSpicerUI::Ui::Storage::CollectionHandler* DialogGroup::getCollectionHandler() const {
-	return LEDSpicerUI::Ui::Storage::CollectionHandler::getInstance(COLLECTION_GROUP);
+	DialogSelect::getInstance()->load(
+		values,
+		currentData->createUniqueId(),
+		{boxElements, elementLinks(), NAME, TYPE_ELEMENT, COLLECTION_ELEMENT, {}}
+	);
 }
 
 void DialogGroup::clearForm() noexcept {
 	inputGroupName->set_text("");
 	DialogColors::getInstance()->colorizeButton(btnGroupDefaultColor, NO_COLOR);
+	// Wipe the display box — currentData is not yet set in ADD flow.
+	boxElements->wipe();
 }
 
 void DialogGroup::isValid() const {
-	string name(createUniqueId());
+	const string name(createUniqueId());
 	if (name.empty()) {
 		if (action != Actions::LOAD)
 			inputGroupName->grab_focus();
 		throw Message("Invalid group name.");
 	}
-
-	// If is not edit, or data is not the same, check for dupes.
-	if (getCollectionHandler()->isIdSet(name)) {
+	if (currentData->getCollectionHandler()->isIdSet(name)) {
 		if (action != Actions::EDIT or currentData->createUniqueId() != name) {
-			if (action != Actions::LOAD) inputGroupName->grab_focus();
-			throw Message("Group with name " + name + " already exist.");
+			if (action != Actions::LOAD)
+				inputGroupName->grab_focus();
+			throw Message("Group with name " + name + " already exists.");
 		}
 	}
 }
 
-void DialogGroup::storeData() {
+void DialogGroup::storeData() noexcept {
 	currentData->setValue(NAME, inputGroupName->get_text());
-	if (not btnGroupDefaultColor->get_label().empty()) {
+	if (not btnGroupDefaultColor->get_label().empty())
 		currentData->setValue(DEFAULT_COLOR, btnGroupDefaultColor->get_label());
-	}
-	DataDialogs::DialogSelect::getInstance()->reindex();
+	DialogSelect::getInstance()->reindex(
+		{boxElements, elementLinks(), NAME, TYPE_ELEMENT, COLLECTION_ELEMENT, {}}
+	);
 }
 
-void DialogGroup::retrieveData() {
+void DialogGroup::retrieveData() noexcept {
 	inputGroupName->set_text(currentData->getValue(NAME));
 	DialogColors::getInstance()->colorizeButton(
 		btnGroupDefaultColor,
 		currentData->getValue(DEFAULT_COLOR).empty() ? NO_COLOR : currentData->getValue(DEFAULT_COLOR)
 	);
-	// Populate the items.
-	DataDialogs::DialogSelect::getInstance()->refresh();
+	DialogSelect::getInstance()->refresh(
+		{boxElements, elementLinks(), NAME, TYPE_ELEMENT, COLLECTION_ELEMENT, {}}
+	);
 }
 
-string const DialogGroup::createUniqueId() const {
+const string DialogGroup::createUniqueId() const noexcept {
 	return Defaults::createCommonUniqueId({inputGroupName->get_text()});
 }
 
@@ -134,6 +145,16 @@ string_view DialogGroup::getType() const noexcept {
 	return TYPE_GROUP;
 }
 
-LEDSpicerUI::Ui::Storage::Data* DialogGroup::createData(StringUMap& rawData) noexcept {
+Data* DialogGroup::createData(StringUMap& rawData) noexcept {
 	return new Storage::Group(rawData);
+}
+
+BoxButtonCollection* DialogGroup::elementLinks() const noexcept {
+	return static_cast<Storage::Parent*>(currentData)->getChild(COLLECTION_GROUP_LINKS);
+}
+
+vector<Data*> DialogGroup::expandStrips(Storage::Data* data) {
+	if (data->hasProperty(PROP_EXPAND))
+		return static_cast<Storage::Element*>(data)->copyStripChildren();
+	return {data};
 }

@@ -38,7 +38,7 @@ public:
 
 	virtual ~DialogProcess() = default;
 
-	void load(XMLHelper* values) override;
+	void load(XMLHelper* values) noexcept override;
 	Storage::CollectionHandler* getCollectionHandler() const override;
 	void clearForm() noexcept override;
 	void isValid() const override;

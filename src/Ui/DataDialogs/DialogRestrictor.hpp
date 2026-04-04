@@ -40,7 +40,7 @@ public:
 
 	virtual ~DialogRestrictor();
 
-	void load(XMLHelper* values) override;
+	void load(XMLHelper* values) noexcept override;
 	Storage::CollectionHandler* getCollectionHandler() const override;
 	void resetForm() noexcept override;
 	void isValid() const override;

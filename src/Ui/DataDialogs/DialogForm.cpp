@@ -27,7 +27,7 @@ using namespace LEDSpicerUI::Ui::DataDialogs;
 DialogForm::DialogForm(
 	BaseObjectType* obj,
 	const Glib::RefPtr<Gtk::Builder>& builder
-) : Gtk::Dialog(obj) {
+) noexcept : Gtk::Dialog(obj) {
 
 	// Initialize the dialog colors.
 	DialogColors::buildInstance(builder, "DialogColors");
@@ -65,6 +65,7 @@ void DialogForm::createItems(StringUMapVector& rawCollection, XMLHelper* values)
 		addButtons(b);
 		createSubItems(values);
 		disconnectChildrenDialogs();
+		currentData->tearDown();
 	}
 	currentData = nullptr;
 	if (not errors.empty()) {
@@ -77,10 +78,6 @@ void DialogForm::setOwner(Storage::BoxButtonCollection* collection, const Storag
 	items = collection;
 	refreshItems();
 }
-
-//Storage::CollectionHandler* DialogForm::getCollectionHandler() const {
-//	return currentData->getCollectionHandler();
-//}
 
 void DialogForm::refreshItems() noexcept {
 	box->wipe();
@@ -127,28 +124,6 @@ void DialogForm::disconnectChildrenDialogs() noexcept {
 		dialogsMap.at(collection)->setOwner(nullptr, nullptr);
 	}
 }
-
-//void DialogForm::addIntoCollection(const string& collectionId, Storage::Data* data) {
-//	if (data->getValues()->empty()) return;
-//	dialogsMap.at(collectionId)->getCollectionHandler()->add(data);
-//	auto parent{dynamic_cast<Storage::Parent*>(data)};
-//	if (not parent) return;
-//	for (auto& [collection, items] : parent->getChildren()) {
-//		for (auto btn : items)
-//			addIntoCollection(collection, btn->getData());
-//	}
-//}
-//
-//void DialogForm::removeFromCollection(const string& collectionId, Storage::Data* data) {
-//	if (data->getValues()->empty()) return;
-//	dialogsMap.at(collectionId)->getCollectionHandler()->remove(data);
-//	auto parent{dynamic_cast<Storage::Parent*>(data)};
-//	if (not parent) return;
-//	for (auto& [collection, items] : parent->getChildren()) {
-//		for (auto btn : items)
-//			removeFromCollection(collection, btn->getData());
-//	}
-//}
 
 void DialogForm::setSignalAdd(Gtk::Button* btnAdd) noexcept {
 	btnAdd->signal_clicked().connect(sigc::mem_fun(*this, &DialogForm::onAddClicked));
@@ -266,7 +241,6 @@ void DialogForm::onEditClicked(Storage::BoxButton& boxButton) noexcept {
 		currentData->wipe();
 		storeData();
 		boxButton.updateLabel();
-		// This will reindex the box located on this dialog but that is handled by its children dialog.
 		for (auto childDialog : childDialogs) childDialog->reindex();
 	}
 	disconnectChildrenDialogs();
@@ -283,9 +257,8 @@ void DialogForm::onDelClicked(Storage::BoxButton& boxButton) noexcept {
 	afterDeleteConfirmation(boxButton);
 	Defaults::markDirty();
 	box->remove(boxButton);
-	// This will also delete the object, the destructor must call deActivate if necessary.
-	items->remove(boxButton);
 	disconnectChildrenDialogs();
+	items->remove(boxButton);
 	currentData = nullptr;
 }
 

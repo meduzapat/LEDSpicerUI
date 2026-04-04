@@ -64,7 +64,7 @@ public:
 	 */
 	void setSettings(const SettingRequest& req);
 
-	void load(XMLHelper* values) override;
+	void load(XMLHelper* values) noexcept override;
 	void clearForm() noexcept override;
 	void isValid() const override;
 	void storeData() noexcept override;

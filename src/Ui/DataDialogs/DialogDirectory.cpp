@@ -42,7 +42,7 @@ void DialogDirectory::setSettings(const SettingRequest& req) {
 	box     = req.box;
 }
 
-void DialogDirectory::load(XMLHelper* values) {
+void DialogDirectory::load(XMLHelper* values) noexcept {
 	// Directories are runtime-only; nothing to load from XML.
 }
 

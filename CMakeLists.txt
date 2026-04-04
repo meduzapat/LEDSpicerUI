@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(LEDSpicerUI VERSION 0.0.12 LANGUAGES CXX)
+project(LEDSpicerUI VERSION 0.0.13 LANGUAGES CXX)
 
 # Metadata (for glade file substitution and compile definitions)
 set(PACKAGE "ledspicerui")
@@ -82,6 +82,7 @@ add_executable(ledspicerui
 	src/Ui/DataDialogs/DialogForm.cpp
 	src/Ui/DataDialogs/DialogFormHost.cpp
 	src/Ui/DataDialogs/DialogFileForm.cpp
+	src/Ui/DataDialogs/DialogLinkEdit.cpp
 	src/Ui/DataDialogs/DialogSelect.cpp
 	src/Ui/DataDialogs/DialogElement.cpp
 	src/Ui/DataDialogs/DialogGroup.cpp

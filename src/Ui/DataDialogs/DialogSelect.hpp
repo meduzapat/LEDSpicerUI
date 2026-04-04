@@ -20,11 +20,9 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DialogColors.hpp"
-#include "Storage/Element.hpp"
+#include "DialogLinkEdit.hpp"
 #include "Storage/CollectionHandler.hpp"
 #include "Storage/Selection.hpp"
-#include "Storage/Link.hpp"
 
 #pragma once
 
@@ -32,140 +30,151 @@ namespace LEDSpicerUI::Ui::DataDialogs {
 
 using LEDSpicerUI::Ui::Storage::CollectionHandler;
 using LEDSpicerUI::Ui::Storage::BoxButtonCollection;
-using LEDSpicerUI::Ui::Storage::StringBoxButtonCollectionPtrUMap;
 
 /**
- * LEDSpicerUI::Ui::DialogSelect
- * Handles the selection of already created items by other dialogs.
- * Will allow to select and populate a box with selections from other collections.
- * This dialog differs from the rest because it does not store any data itself,
- * but only allows to move data from one place to another using links.
+ * LEDSpicerUI::Ui::DataDialogs::DialogSelect
+ *
+ * Generic stateless link-selection dialog.
+ * Each call is fully self-contained — all context is supplied via SelectionRequest.
+ * No state is retained between calls.
+ *
+ * Usage:
+ *   - open()    — lets the user pick from a collection; applies differentially on confirm.
+ *   - refresh() — repopulates the parent displayBox from the current destination state.
+ *   - reindex() — reorders destination to match the visual order of displayBox.
+ *   - load()    — populates destination from XML without user interaction.
+ *
+ * Buttons per item in displayBox:
+ *   - DELETE is always present.
+ *   - EDIT is added when linkFields is non-empty; opens DialogLinkEdit.
  */
-class DialogSelect: public GladeDialog<DialogSelect> {
+class DialogSelect : public GladeDialog<DialogSelect> {
 
 	friend class Gtk::Builder;
 
 public:
 
-	/// Flag indicating a delete button.
-	static constexpr const uint8_t BUTTON_DELETER = 0b00000001;
-	/// Flag indicating a default color picker button.
-	static constexpr const uint8_t BUTTON_COLORER = 0b00000010;
-	/// Flag indicating an edit button.
-	static constexpr const uint8_t BUTTON_EDITER  = 0b00000100;
-
 	/**
-	 * Holds the rules for the selector.
+	 * All context needed for one selection operation.
+	 * Construct at the call site — the dialog holds no reference after
+	 * open() / refresh() / reindex() / load() returns.
 	 */
-	struct SettingRequest {
-		/// The box where the selectables are handled.
-		OrdenableFlowBox*& workingBox;
-		const string
-			/// The key that will contain the selection inside link (ex: name).
-			parameter,
-			/// The type of selection, used later to create the node that will be used in the XML (ex: element).
-			type,
-			/// The Collection to do lookups for already existing items (ex: elements).
-			sourceCollection;
-		/// The buttons to add to the selectable items.
-		const uint8_t buttons;
+	struct SelectionRequest {
+
+		/// Box in the parent dialog where selected items are displayed.
+		OrdenableFlowBox*    displayBox;
+
+		/// Destination collection that owns the resulting Link objects.
+		BoxButtonCollection* destination;
+
+		/// Field name written into each Link (e.g. NAME).
+		const string         linkKey;
+
+		/// Semantic type label used in XML and Link identity (e.g. "element").
+		const string         linkType;
+
+		/// CollectionHandler key to source items from (e.g. COLLECTION_ELEMENT).
+		const string         sourceCollectionId;
+
+		/**
+		 * Extra fields editable per Link via DialogLinkEdit.
+		 * Empty  → DELETE button only.
+		 * Non-empty → EDIT + DELETE; EDIT opens DialogLinkEdit with these descriptors.
+		 */
+		const vector<LinkField> linkFields;
+
+		/**
+		 * Optional expander: given a Data*, returns zero or more Data* to show
+		 * in the picker instead of the item itself.
+		 * Use for strip elements that expand into individual pins.
+		 * nullptr = no expansion.
+		 */
+		std::function<vector<Storage::Data*>(Storage::Data*)> expander;
+
 	};
 
 	virtual ~DialogSelect() = default;
 
 	/**
-	 * Sets the item destinations to be used by the running setting.
-	 * @param itemCollections
-	 * @param caller
+	 * Opens the picker for one selection set.
+	 * Pre-selects items already in destination, then applies a differential
+	 * save on confirm: removes deselected Links, adds newly selected ones.
+	 * Closing the window leaves destination unchanged.
+	 *
+	 * @param request   Full context for this selection.
+	 * @param ownerData Data that owns the destination collection.
 	 */
-	void setDestinations(BoxButtonCollection& itemCollections, const Storage::Data* caller);
+	void open(const SelectionRequest& request, const Storage::Data* ownerData);
 
 	/**
-	 * Prepares the dialog to be used.
-	 * @param setting
+	 * Repopulates displayBox from the current contents of destination.
+	 * Call from clearForm() and retrieveData() in the parent dialog.
+	 *
+	 * @param request Must supply displayBox and destination.
 	 */
-	void setSettings(const SettingRequest& setting);
+	void refresh(const SelectionRequest& request);
 
 	/**
-	 * Refresh the destination box.
+	 * Reorders destination to match the visual order of displayBox.
+	 *
+	 * @param request Must supply displayBox and destination.
 	 */
-	void refresh();
+	void reindex(const SelectionRequest& request);
 
 	/**
-	 * Sort the items by the box.
+	 * Loads Link items from XML into destination, then refreshes displayBox.
+	 * Errors are accumulated and displayed as a batch.
+	 *
+	 * @param values        XMLHelper carrying the raw data.
+	 * @param ownerUniqueId Unique ID of the owning Data (keys into XMLHelper).
+	 * @param request       Full context for this load.
 	 */
-	void reindex();
-
-	/**
-	 * Executes the dialog with a set of rules.
-	 * @param setting
-	 */
-	void runSelection();
-
-	void load(XMLHelper* values, const string& identifier);
-
-	/**
-	 * @return The number of selected items.
-	 */
-	size_t getNumberOfSelections() const;
-
-	/**
-	 * @return The number of available items to select from.
-	 */
-	size_t getNumberOfSelectables() const;
-
-	/**
-	 * @return The current setting's collection.
-	 */
-	Storage::CollectionHandler* getCollection() const;
-
-	/**
-	 * @return The current item collection based on the settings.
-	 */
-	Storage::BoxButtonCollection* getItemCollection() const;
+	void load(
+		XMLHelper*              values,
+		const string&           ownerUniqueId,
+		const SelectionRequest& request
+	);
 
 protected:
 
-	Gtk::Button
-		/// Open this form to create new Data (item), its located in the calling dialog.
-		* btnAdd = nullptr,
-		/// Store changes.
-		* btnApply = nullptr;
+	/// Confirm button inside the picker dialog.
+	Gtk::Button* btnApply = nullptr;
 
-	/// Box where the selectables are displayed.
-	Gtk::FlowBox* boxAll = nullptr;
-
-	/// Pointer to the current settings.
-	const SettingRequest* setting = nullptr;
-
-	/// The data record that called this Dialog.
-	const Storage::Data* caller = nullptr;
-
-	/// For storage with multiple items.
-	StringBoxButtonCollectionUMap itemCollections;
+	/// Box inside the picker dialog where all source items are shown.
+	Gtk::FlowBox* pickerBox = nullptr;
 
 	DialogSelect(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
 
-	string_view getType() const noexcept;
-
-	Storage::Data* createData(StringUMap& rawData) noexcept ;
+private:
 
 	/**
-	 * Decorates the boxButton with the necessary buttons.
-	 * Replaces the default buttons with the ones for this specialized dialog.
+	 * Fills pickerBox with Selection widgets for all items in sourceCollectionId.
+	 * Pre-selects items already present in destination.
 	 */
-	void addButtons(Storage::BoxButton& boxButton);
+	void populatePicker(const SelectionRequest& request);
 
 	/**
-	 * Populates all the items and selects the ones in the group.
+	 * Creates one Selection widget inside pickerBox for data.
+	 *
+	 * @param data        Item to make selectable.
+	 * @param destination Used to determine initial selection state.
 	 */
-	void populateSelectables();
+	void createPickerItem(Storage::Data* data, BoxButtonCollection* destination);
 
 	/**
-	 * Creates a selectable item for the given data and adds it to the box.
-	 * @param data
+	 * Adds DELETE (always) and EDIT (when linkFields non-empty) to a BoxButton.
+	 *
+	 * @param boxButton Target BoxButton in displayBox.
+	 * @param request   Supplies linkFields, displayBox, and destination.
 	 */
-	void createSelectableItem(Storage::Data* data);
+	void addDisplayButtons(Storage::BoxButton& boxButton, const SelectionRequest& request);
+
+	/**
+	 * Creates a Link for target, adds it to destination, adds its BoxButton
+	 * to displayBox with the appropriate buttons.
+	 */
+	void addLink(Storage::Data* target, const SelectionRequest& request);
+
 };
 
 } // namespace

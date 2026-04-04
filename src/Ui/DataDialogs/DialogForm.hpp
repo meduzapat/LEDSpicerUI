@@ -67,11 +67,6 @@ public:
 	 * @param owner
 	 */
 	virtual void setOwner(Storage::BoxButtonCollection* collection, const Storage::Data* owner) noexcept;
-//
-//	/**
-//	 * @return The collection handler that keeps track of this form items.
-//	 */
-//	Storage::CollectionHandler* getCollectionHandler() const;
 
 	/**
 	 * Clear the From leaving it empty for data entry.
@@ -174,7 +169,6 @@ protected:
 	/**
 	 * Very similar to ADD but it only uses the form to validate data,
 	 * also items are not added to the box.
-	 * @param rawCollection
 	 */
 	void createItems(StringUMapVector& rawCollection, XMLHelper* values) noexcept;
 
@@ -206,28 +200,12 @@ protected:
 	/**
 	 * Prepares the owner's sub dialogs.
 	 */
-	virtual void wireChildrenDialogs() noexcept {}
+	virtual void wireChildrenDialogs() noexcept;
 
 	/**
 	 * Unlink the owner's sub dialogs.
 	 */
-	virtual void disconnectChildrenDialogs() noexcept {}
-//
-//	/**
-//	 *  Adds an item and all its children (if any) into their collections.
-//	 *
-//	 * @param collectionId
-//	 * @param data
-//	 */
-//	void addIntoCollection(const string& collectionId, Storage::Data* data);
-//
-//	/**
-//	 * Adds an item and all its children (if any) into their collections.
-//	 *
-//	 * @param collectionId
-//	 * @param data
-//	 */
-//	void removeFromCollection(const string& collectionId, Storage::Data* data);
+	virtual void disconnectChildrenDialogs() noexcept;
 
 	/**
 	 * Method to add generic Add functionality.

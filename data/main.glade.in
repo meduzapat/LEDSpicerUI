@@ -2679,6 +2679,149 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
       </object>
     </child>
   </object>
+  <object class="GtkDialog" id="DialogLinkEdit">
+    <property name="width-request">300</property>
+    <property name="can-focus">False</property>
+    <property name="title">Edit Selection</property>
+    <property name="modal">True</property>
+    <property name="window-position">center-on-parent</property>
+    <property name="destroy-with-parent">True</property>
+    <property name="type-hint">dialog</property>
+    <property name="transient-for">MainWindow</property>
+    <child internal-child="vbox">
+      <object class="GtkBox">
+        <property name="can-focus">False</property>
+        <property name="margin-start">2</property>
+        <property name="margin-end">2</property>
+        <property name="margin-top">2</property>
+        <property name="margin-bottom">2</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox">
+            <property name="can-focus">False</property>
+            <property name="layout-style">end</property>
+            <child>
+              <object class="GtkButton" id="BtnApplyLinkEdit">
+                <property name="label">Apply</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox" id="BoxLinkEditColor">
+            <property name="can-focus">False</property>
+            <property name="spacing">5</property>
+            <property name="homogeneous">True</property>
+            <child>
+              <object class="GtkLabel" id="LabelLinkEditColor">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="halign">end</property>
+                <property name="label">Color</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="BtnLinkEditColor">
+                <property name="label">Default Color</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="tooltip-text" translatable="yes">The color that will be used for this selection.</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox" id="BoxLinkEditCombo">
+            <property name="can-focus">False</property>
+            <property name="spacing">5</property>
+            <property name="homogeneous">True</property>
+            <child>
+              <object class="GtkLabel" id="LabelLinkEditCombo">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="halign">end</property>
+                <property name="label">Filter</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkComboBox" id="ComboLinkEditCombo">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="tooltip-markup">&lt;big&gt;Filter this selection uses:&lt;/big&gt;
+
+&lt;b&gt;Normal&lt;/b&gt;	Overwrites the background color.
+&lt;b&gt;Combine&lt;/b&gt;	Blends with the background using transition.
+&lt;b&gt;Mask&lt;/b&gt;		Covers the background using monochrome mask.
+&lt;b&gt;Invert&lt;/b&gt;		Inverts current color relative to input.
+&lt;b&gt;Subtract&lt;/b&gt;	Subtracts input from current (wraps on underflow).
+&lt;b&gt;Add&lt;/b&gt;		Adds input to current (wraps on overflow).
+&lt;b&gt;Max&lt;/b&gt;		Keeps brightest channel from both colors.
+&lt;b&gt;Min&lt;/b&gt;		Keeps darkest channel from both colors.
+&lt;b&gt;Multiply&lt;/b&gt;	Tints current color by input.</property>
+                <property name="model">liststoreFilter</property>
+                <property name="active">0</property>
+                <property name="id-column">0</property>
+                <child>
+                  <object class="GtkCellRendererText" id="LinkEditFilterCell"/>
+                  <attributes>
+                    <attribute name="text">1</attribute>
+                  </attributes>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="-10">BtnApplyLinkEdit</action-widget>
+    </action-widgets>
+  </object>
   <object class="GtkDialog" id="DialogProcess">
     <property name="width-request">400</property>
     <property name="can-focus">False</property>

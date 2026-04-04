@@ -21,17 +21,20 @@
  */
 
 #include "DialogForm.hpp"
+#include "DialogSelect.hpp"
 #include "Storage/Group.hpp"
+#include "Storage/Element.hpp"
 
 #pragma once
 
 namespace LEDSpicerUI::Ui::DataDialogs {
 
 /**
- * LEDSpicerUI::DialogGroup
+ * LEDSpicerUI::Ui::DataDialogs::DialogGroup
  * Dialog to create or edit groups.
+ * Element links live in Group::children[COLLECTION_GROUP_LINKS].
  */
-class DialogGroup: public DialogForm, public SingletonDialog<DialogGroup> {
+class DialogGroup : public DialogForm, public SingletonDialog<DialogGroup> {
 
 	friend class Gtk::Builder;
 
@@ -39,8 +42,7 @@ public:
 
 	virtual ~DialogGroup() = default;
 
-	void load(XMLHelper* values) override;
-	Storage::CollectionHandler* getCollectionHandler() const override;
+	void load(XMLHelper* values) noexcept override;
 	void isValid() const override;
 	void clearForm() noexcept override;
 	void storeData() noexcept override;
@@ -52,24 +54,29 @@ protected:
 	Gtk::Entry*  inputGroupName       = nullptr;
 	Gtk::Button* btnGroupDefaultColor = nullptr;
 
-	/// The box where group elements are displayed.
+	/// Box in this dialog where selected element links are displayed.
 	OrdenableFlowBox* boxElements = nullptr;
 
-	const DialogSelect::SettingRequest groupElementsSetting {
-		boxElements,
-		NAME,
-		TYPE_ELEMENT,
-		COLLECTION_ELEMENT,
-		DialogSelect::BUTTON_DELETER,
-	};
+	DialogGroup(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept;
 
-	DialogGroup(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
-
-	void createSubItems(XMLHelper* values) override;
-
+	void createSubItems(XMLHelper* values) noexcept override;
 	string_view getType() const noexcept override;
-
 	Storage::Data* createData(StringUMap& rawData) noexcept override;
+
+private:
+
+	/**
+	 * Returns the element-link child collection of the current group.
+	 * Only valid while currentData is set (ADD, EDIT, LOAD flows).
+	 */
+	Storage::BoxButtonCollection* elementLinks() const noexcept;
+
+	/**
+	 * Expands strip elements into their individual child pins for the picker.
+	 * Non-strip elements pass through unchanged.
+	 */
+	static vector<Storage::Data*> expandStrips(Storage::Data* data);
+
 };
 
 } // namespace
