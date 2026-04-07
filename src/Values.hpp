@@ -82,12 +82,12 @@ public:
 	 *
 	 * @param values
 	 */
-	virtual void setValues(const StringUMap& values) noexcept;
+	void setValues(const StringUMap& values) noexcept;
 
 	/**
 	 * @return a copy of the internal data but adding.
 	 */
-	virtual StringUMap copyValues() const noexcept;
+	StringUMap copyValues() const noexcept;
 
 	/**
 	 * Clears all serializable fields.

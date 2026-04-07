@@ -42,7 +42,6 @@ bool BoxButtonCollection::isIdSet(const string& id) const noexcept {
 }
 
 BoxButton& BoxButtonCollection::create(Data* form) noexcept {
-	form->registerToCollection();
 	BoxButton* ptr{new BoxButton(form)};
 	items.push_back(ptr);
 	return *ptr;

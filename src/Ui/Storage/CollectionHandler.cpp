@@ -67,6 +67,7 @@ vector<Data*> CollectionHandler::findByProperty(const string& property, const st
 }
 
 void CollectionHandler::add(Data* item) noexcept {
+	if (isSet(item)) return;
 	collection.emplace(item->createUniqueId(), item);
 	refreshComboBoxes();
 }

@@ -36,12 +36,6 @@ const string Data::getPrimaryValue() const noexcept {
 	return getValue(getPrimaryKey());
 }
 
-void Data::setValue(const string& key, const string& value) noexcept {
-	const string oldId{createUniqueId()};
-	Values::setValue(key, value);
-	handleRegistration(oldId);
-}
-
 StringUMap Data::copyValues() const noexcept {
 	auto handler = getCollectionHandler();
 	if (not handler) return {};
@@ -57,12 +51,6 @@ StringUMap Data::copyValues() const noexcept {
 	StringUMap copy{Values::copyValues()};
 	copy[getPrimaryKey()] = candidateId;
 	return copy;
-}
-
-void Data::setValues(const StringUMap& values) noexcept {
-	const string oldId{createUniqueId()};
-	Values::setValues(values);
-	handleRegistration(oldId);
 }
 
 void Data::wipe() noexcept {
@@ -103,7 +91,7 @@ void Data::unregisterFromCollection() noexcept {
 		handler->remove(this);
 }
 
-void Data::handleRegistration(const string& oldId) noexcept {
+void Data::syncRegistration(const string& oldId) noexcept {
 	auto handler = getCollectionHandler();
 	if (not handler) return;
 	// ID will never be empty.

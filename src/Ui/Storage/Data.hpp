@@ -109,11 +109,7 @@ public:
 	 */
 	const Values& getProperties() const noexcept { return properties; }
 
-	void setValue(const string& key, const string& value) noexcept override;
-
 	StringUMap copyValues() const noexcept override;
-
-	void setValues(const StringUMap& values) noexcept override;
 
 	void wipe() noexcept override;
 
@@ -157,7 +153,7 @@ protected:
 	 * Handles auto-registration and re-keying after a primary key field changes.
 	 * @param oldId The unique ID before the change, empty if not yet registered.
 	 */
-	void handleRegistration(const string& oldId) noexcept;
+	void syncRegistration(const string& oldId) noexcept;
 
 	/**
 	 * Controls which fields are included in XML output.

@@ -67,6 +67,7 @@ void BoxButton::packButtonStart(Gtk::Button& button) noexcept {
 }
 
 void BoxButton::updateLabel() noexcept {
+	data->registerToCollection();
 	auto text{data->createTooltip()};
 	if (not text.empty()) {
 		label->set_tooltip_text(text);
