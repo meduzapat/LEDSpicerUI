@@ -20,7 +20,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Message.hpp"
+#include "Values.hpp"
 
 #pragma once
 
@@ -34,23 +34,15 @@ class CollectionHandler;
  *
  * Data will store information to be moved around.
  */
-class Data {
+class Data : public Values {
 
 public:
-
-	Data() = delete;
 
 	/**
 	 * Creates an object pre-populated.
 	 * @param data Iten's data.
-	 * @param collection Id to use.
 	 */
-	Data(
-		StringUMap& data,
-		const string& collectionId
-	) noexcept :
-		fieldsData(std::move(data)),
-		collectionId(std::move(collectionId)) {}
+	Data(StringUMap& data) noexcept : Values(data) {}
 
 	/**
 	 * Compares two Data objects for equality.
@@ -59,10 +51,7 @@ public:
 	 */
 	virtual bool operator==(const Data& other) const noexcept {return this == &other;}
 
-	/**
-	 * Unregisters from collection if registered.
-	 */
-	virtual ~Data();
+	virtual ~Data() = default;
 
 	/**
 	 * @returns a CSS class that identifies the object and the data.
@@ -97,61 +86,6 @@ public:
 	const string getPrimaryValue() const noexcept;
 
 	/**
-	 * Removes a value by key name.
-	 * @param key
-	 */
-	virtual void unSet(const string& key) noexcept;
-
-	/**
-	 * Returns a value using the key name.
-	 *
-	 * @param key
-	 * @return value or empty string if not found.
-	 */
-	virtual const string& getValue(const string& key) const noexcept;
-
-	/**
-	 * Returns a value using the key name.
-	 *
-	 * @param key
-	 * @param defaultValue the default value if the key is not found.
-	 * @return value or default.
-	 */
-	virtual string getValue(const string& key, const string& defaultValue) const noexcept;
-
-	/**
-	 * Allows the change of an internal value.
-	 * @param key
-	 * @param value
-	 */
-	virtual void setValue(const string& key, const string& value) noexcept;
-
-	/**
-	 * Creates a copy of the internal data but adding
-	 * a copy number to the primary key value
-	 *
-	 * @return a copy of the values with a new primary key.
-	 */
-	StringUMap copyValues() const noexcept;
-
-	/**
-	 * @return a list of stored values
-	 */
-	const StringUMap* getValues() const noexcept;
-
-	/**
-	 * Replace values from a map.
-	 *
-	 * @param values
-	 */
-	void setValues(const StringUMap& values) noexcept;
-
-	/**
-	 * Clears all serializable fields.
-	 */
-	virtual void wipe() noexcept;
-
-	/**
 	 * Serializes this object to XML.
 	 * Default emits flat attributes using getXmlTag().
 	 * @return XML string.
@@ -166,50 +100,24 @@ public:
 	virtual string_view getXmlTag() const noexcept abstract;
 
 	/**
-	 * Sets a property value.
-	 *
-	 * @param key Property name.
-	 * @param value Property value.
+	 * @return a reference to the internal properties map, allowing direct manipulation.
 	 */
-	void setProperty(const string& key, const string& value) noexcept;
+	Values& getProperties() noexcept { return properties; }
 
 	/**
-	 * Gets a property value.
-	 * @param key Property name.
-	 * @return Property value or empty string if not found.
+	 * @return a const reference to the internal properties map, allowing read-only access.
 	 */
-	const string& getProperty(const string& key) const noexcept;
+	const Values& getProperties() const noexcept { return properties; }
 
-	/**
-	 * Gets a property value.
-	 * @param key Property name.
-	 * @param def Default value if not found.
-	 * @return Property value or default.
-	 */
-	string getProperty(const string& key, const string& defaultProperty) const noexcept;
+	void setValue(const string& key, const string& value) noexcept override;
 
-	/**
-	 * Checks if a property exists.
-	 * @param key Property name.
-	 * @return True if property exists.
-	 */
-	bool hasProperty(const string& key) const noexcept;
+	StringUMap copyValues() const noexcept override;
 
-	/**
-	 * Removes a property by key name.
-	 * @param key
-	 */
-	void removeProperty(const string& key) noexcept;
+	void setValues(const StringUMap& values) noexcept override;
 
-	/**
-	 * @return All properties.
-	 */
-	const StringUMap& getProperties() const noexcept;
+	void wipe() noexcept override;
 
-	/**
-	 * @return an empty data object.
-	 */
-	static StringUMap& createEmptyData() noexcept;
+	void unSet(const string& key) noexcept override;
 
 	virtual void setUp() noexcept {}
 
@@ -218,7 +126,7 @@ public:
 	/**
 	 * @return the CollectionHandler this item registers itself into.
 	 */
-	CollectionHandler* getCollectionHandler() const noexcept;
+	virtual CollectionHandler* getCollectionHandler() const noexcept abstract;
 
 	/**
 	 * Registers this item into its collection.
@@ -235,14 +143,8 @@ public:
 
 protected:
 
-	/// Data pairs.
-	StringUMap fieldsData;
-
 	/// Extra property with important information.
-	StringUMap properties;
-
-	/// The Id of the collection to use
-	const string collectionId;
+	Values properties;
 
 	/**
 	 * Returns the field name used as the primary identifier for this data type.

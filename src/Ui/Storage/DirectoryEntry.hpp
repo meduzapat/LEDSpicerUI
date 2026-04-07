@@ -33,7 +33,6 @@ namespace LEDSpicerUI::Ui::Storage {
  * Never serialized — exists only at runtime for navigation.
  * Inherits Data for field storage (NAME) and BoxButton compatibility.
  * Inherits DirNode for parent pointer and path resolution.
- * Does not inherit Revertible — directories are never snap/restored.
  * TODO: add move support — requires reseating parent pointer on move.
  */
 class DirectoryEntry : public Data, public DirNode {
@@ -41,14 +40,12 @@ class DirectoryEntry : public Data, public DirNode {
 public:
 
 	/**
-	 * @param data         Must contain NAME (directory segment name).
-	 * @param parent       Parent directory node, or nullptr for root-level.
-	 * @param collectionId Collection this entry registers into.
+	 * @param data   Must contain NAME (directory segment name).
+	 * @param parent Parent directory node, or nullptr for root-level.
 	 */
 	DirectoryEntry(
 		StringUMap&     data,
 		DirectoryEntry* parent,
-		const string&   collectionId
 	) noexcept;
 
 	virtual ~DirectoryEntry() = default;

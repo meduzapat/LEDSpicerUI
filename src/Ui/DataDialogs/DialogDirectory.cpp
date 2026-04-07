@@ -74,7 +74,7 @@ void DialogDirectory::retrieveData() {
 
 const string DialogDirectory::createUniqueId() const {
 	return Defaults::createCommonUniqueId({
-		ownerData->getProperty(PID),
+		ownerData->getProperties().getValue(PID),
 		Defaults::sanitizeFilename(entryDirectoryName->get_text())
 	});
 }

@@ -25,7 +25,7 @@
 using namespace LEDSpicerUI::Ui::Storage;
 
 Group::Group(StringUMap& data) noexcept :
-	Parent(data, COLLECTION_GROUP, {COLLECTION_GROUP_LINKS})
+	Parent(data, {COLLECTION_GROUP_LINKS})
 {
 	registerDependency(COLLECTION_ELEMENT, COLLECTION_GROUP_LINKS, 1, [this]() {
 		getCollectionHandler()->remove(this);

@@ -73,7 +73,7 @@ TEST_F(ProfileTest, CssClass) {
 
 // FILENAME is a property, not serialized.
 TEST_F(ProfileTest, FilenameInProperties) {
-	EXPECT_EQ("default", rootProfile->getProperty(FILENAME));
+	EXPECT_EQ("default", rootProfile->getProperties().getValue(FILENAME));
 	EXPECT_EQ("",        rootProfile->getValue(FILENAME));
 }
 

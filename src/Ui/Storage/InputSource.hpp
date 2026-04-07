@@ -47,6 +47,8 @@ public:
 	string_view getCssClass()       const noexcept override { return "InputSourceBoxButton"; }
 	string_view getXmlTag()         const noexcept override { return "maps"; }
 
+	CollectionHandler* getCollectionHandler() const noexcept override;
+
 	void wipe()     noexcept override;
 	void tearDown() noexcept override;
 

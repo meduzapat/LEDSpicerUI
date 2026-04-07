@@ -100,7 +100,9 @@ void DialogInputMap::setOwner(
 }
 
 LEDSpicerUI::Ui::Storage::CollectionHandler* DialogInputMap::getCollectionHandler() const {
-	return Storage::CollectionHandler::getInstance(COLLECTION_INPUT_MAPS + ownerData->getProperty(UID));
+	return Storage::CollectionHandler::getInstance(
+		COLLECTION_INPUT_MAPS + ownerData->getProperties().getValue(UID)
+	);
 }
 
 void DialogInputMap::clearForm() noexcept {
@@ -178,7 +180,7 @@ void DialogInputMap::retrieveData() {
 
 const string DialogInputMap::createUniqueId() const {
 	return Defaults::createCommonUniqueId({
-		ownerData->getProperty(UID),
+		ownerData->getProperties().getValue(UID),
 		inputInputMapTrigger->get_text()
 	});
 }
@@ -197,10 +199,10 @@ LEDSpicerUI::Ui::Storage::Data* DialogInputMap::createData(StringUMap& rawData) 
 		Storage::CollectionHandler::getInstance(COLLECTION_ELEMENT);
 
 	auto im = new Storage::InputMap(rawData, TARGET, handler->get(target));
-	im->setProperty(PID, ownerData->getProperty(UID));
+	im->getProperties().setValue(PID, ownerData->getProperties().getValue(UID));
 	return im;
 }
 
 bool DialogInputMap::elementFilter(const LEDSpicerUI::Ui::Storage::Data* data) {
-	return not data->hasProperty(PROP_EXPAND);
+	return not data->getProperties().isSet(PROP_EXPAND);
 }

@@ -40,6 +40,10 @@ const string Device::createUniqueId() const noexcept {
 	return Defaults::createHardwareUniqueId(*getValues());
 }
 
+CollectionHandler* Device::getCollectionHandler() const noexcept {
+	return CollectionHandler::getInstance(COLLECTION_DEVICES);
+}
+
 void Device::wipe() noexcept {
 	clearSnap();
 	Data::wipe();

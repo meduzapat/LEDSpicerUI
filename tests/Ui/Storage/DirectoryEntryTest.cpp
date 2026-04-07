@@ -49,26 +49,26 @@ protected:
 
 // PID is empty at root level.
 TEST_F(DirectoryEntryTest, PidEmptyAtRoot) {
-	EXPECT_EQ("", root->getProperty(PID));
+	EXPECT_EQ("", root->getProperties().getValue(PID));
 }
 
 // PID matches parent UID for child.
 TEST_F(DirectoryEntryTest, PidMatchesParentUid) {
-	EXPECT_EQ(root->getProperty(UID),  child->getProperty(PID));
-	EXPECT_EQ(child->getProperty(UID), grand->getProperty(PID));
+	EXPECT_EQ(root->getProperties().getValue(UID),  child->getProperties().getValue(PID));
+	EXPECT_EQ(child->getProperties().getValue(UID), grand->getProperties().getValue(PID));
 }
 
 // UID is set and starts with "dir_".
 TEST_F(DirectoryEntryTest, UidSetAtConstruction) {
-	const string uid(root->getProperty(UID));
+	const string uid(root->getProperties().getValue(UID));
 	EXPECT_FALSE(uid.empty());
 	EXPECT_EQ(0, uid.find("dir_"));
 }
 
 // getFsId() is an alias for getProperty(UID).
 TEST_F(DirectoryEntryTest, GetFsIdAliasesUid) {
-	EXPECT_EQ(root->getProperty(UID),  root->getFsId());
-	EXPECT_EQ(child->getProperty(UID), child->getFsId());
+	EXPECT_EQ(root->getProperties().getValue(UID),  root->getFsId());
+	EXPECT_EQ(child->getProperties().getValue(UID), child->getFsId());
 }
 
 // getName() returns the NAME field value.
@@ -109,7 +109,7 @@ TEST_F(DirectoryEntryTest, CreateUniqueIdAtRoot) {
 
 TEST_F(DirectoryEntryTest, CreateUniqueIdNested) {
 	const string expected(Defaults::createCommonUniqueId({
-		root->getProperty(UID), "subdir"
+		root->getProperties().getValue(UID), "subdir"
 	}));
 	EXPECT_EQ(expected, child->createUniqueId());
 }

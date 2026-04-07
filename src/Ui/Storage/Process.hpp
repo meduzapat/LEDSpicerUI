@@ -33,13 +33,15 @@ class Process: public Data {
 
 public:
 
-	Process(StringUMap& data) noexcept : Data(data, COLLECTION_PROCESS) {}
+	using Data::Data;
 
 	virtual ~Process() = default;
 
 	string_view getXmlTag()         const noexcept override { return "map"; }
 	string_view getCssClass()       const noexcept override { return "ProcessBoxButton"; }
 	const string createPrettyName() const noexcept override;
+
+	CollectionHandler* getCollectionHandler() const noexcept override;
 
 protected:
 

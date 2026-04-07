@@ -47,7 +47,6 @@ public:
 	 */
 	Parent(
 		StringUMap& data,
-		const string& collectionId,
 		const vector<string>& childCollectionIds
 	);
 

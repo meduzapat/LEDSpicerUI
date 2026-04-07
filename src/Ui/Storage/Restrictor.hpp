@@ -14,7 +14,7 @@ class Restrictor : public Parent, public Revertible {
 public:
 
 	Restrictor(StringUMap& data) noexcept :
-		Parent(data, COLLECTION_RESTRICTORS, {COLLECTION_RESTRICTOR_MAP}),
+		Parent(data, {COLLECTION_RESTRICTOR_MAP}),
 		Revertible(fieldsData, &children)
 	{}
 
@@ -24,6 +24,10 @@ public:
 	const string createUniqueId()   const noexcept override;
 	string_view getCssClass()       const noexcept override { return "RestrictorBoxButton"; }
 	string_view getXmlTag()         const noexcept override { return "restrictor"; }
+
+	CollectionHandler* getCollectionHandler() const noexcept override {
+		return CollectionHandler::getInstance(COLLECTION_RESTRICTORS);
+	}
 
 	void wipe()     noexcept override;
 	void tearDown() noexcept override;

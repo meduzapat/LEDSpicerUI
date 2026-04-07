@@ -33,7 +33,7 @@ class Element: public Data {
 
 public:
 
-	Element(StringUMap& data) noexcept : Data(data, COLLECTION_ELEMENT) {}
+	using Data::Data;
 
 	virtual ~Element();
 

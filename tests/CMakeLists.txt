@@ -35,19 +35,6 @@ macro(add_test_executable TEST_NAME TEST_SRC EXTRA_SRCS EXTRA_LIBS)
 	add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
 endmacro()
 
-#macro(add_gtk_test_executable TEST_NAME TEST_SRC EXTRA_SRCS EXTRA_LIBS)
-#	add_executable(${TEST_NAME} ${TEST_SRC} ${EXTRA_SRCS})
-#	target_compile_definitions(${TEST_NAME} PRIVATE
-#		PACKAGE_SAMPLES_DIR="${CMAKE_SOURCE_DIR}/tests/"
-#	)
-#	target_link_libraries(${TEST_NAME} PRIVATE
-#		${GTKMM30_LIBRARIES}
-#		${GTEST_LIBRARIES}
-#		${EXTRA_LIBS}
-#	)
-#	add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
-#endmacro()
-
 # Common source files used by multiple tests.
 set(COMMON_SRCS
 	${CMAKE_SOURCE_DIR}/src/Defaults.cpp
@@ -55,6 +42,7 @@ set(COMMON_SRCS
 
 # Storage sources needed by anything that includes DirectoryEntry.hpp.
 set(STORAGE_SRCS
+	${CMAKE_SOURCE_DIR}/src/Values.cpp
 	${CMAKE_SOURCE_DIR}/src/Ui/Storage/Data.cpp
 	${CMAKE_SOURCE_DIR}/src/Ui/Storage/BoxButton.cpp
 	${CMAKE_SOURCE_DIR}/src/Ui/Storage/BoxButtonCollection.cpp
@@ -98,6 +86,12 @@ set(STORAGE_PROFILE_SRCS
 add_test_executable(DefaultsTest
 	"DefaultsTest.cpp"
 	"${COMMON_SRCS}"
+	""
+)
+
+add_test_executable(ValuesTest
+	"ValuesTest.cpp"
+	"${COMMON_SRCS};${CMAKE_SOURCE_DIR}/src/Values.cpp"
 	""
 )
 

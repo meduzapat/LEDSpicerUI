@@ -86,7 +86,9 @@ void DialogInput::createSubItems(XMLHelper* values) {
 }
 
 LEDSpicerUI::Ui::Storage::CollectionHandler* DialogInput::getCollectionHandler() const {
-	return Storage::CollectionHandler::getInstance(COLLECTION_INPUT + ownerData->getProperty(UID));
+	return Storage::CollectionHandler::getInstance(
+		COLLECTION_INPUT + ownerData->getProperties().getValue(UID)
+	);
 }
 
 void DialogInput::resetForm() {
@@ -159,7 +161,7 @@ void DialogInput::retrieveData() {
 	const string name(currentData->getValue(NAME));
 
 	selectorCombo->set_active_id(name);
-	entryInputName->set_text(currentData->getProperty(FILENAME));
+	entryInputName->set_text(currentData->getProperties().getValue(FILENAME));
 
 	if (Defaults::inputHasFlag(name, Defaults::INPUT_HAS_BLINK))
 		switchInputBlink->set_active(currentData->getValue(BLINK) == "true");
@@ -172,7 +174,7 @@ void DialogInput::retrieveData() {
 }
 
 const string DialogInput::createUniqueId() const {
-	return Defaults::createCommonUniqueId({currentData->getProperty(PID), entryInputName->get_text()});
+	return Defaults::createCommonUniqueId({currentData->getProperties().getValue(PID), entryInputName->get_text()});
 }
 
 string_view DialogInput::getType() const noexcept {

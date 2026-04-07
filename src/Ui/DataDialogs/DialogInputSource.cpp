@@ -73,7 +73,9 @@ void DialogInputSource::load(XMLHelper* values) {
 
 LEDSpicerUI::Ui::Storage::CollectionHandler* DialogInputSource::getCollectionHandler() const {
 	// Collection ID + input ID
-	return Storage::CollectionHandler::getInstance(COLLECTION_INPUT_SOURCES + ownerData->getProperty(UID));
+	return Storage::CollectionHandler::getInstance(
+		COLLECTION_INPUT_SOURCES + ownerData->getProperties().getValue(UID)
+	);
 }
 
 void DialogInputSource::resetForm() {
@@ -84,7 +86,7 @@ void DialogInputSource::resetForm() {
 
 void DialogInputSource::isValid() const {
 	// no name for sourceless only.
-	if (currentData->getProperty(SOURCELESS).empty()) {
+	if (currentData->getProperties().getValue(SOURCELESS).empty()) {
 		if (resolvedSource().empty()) throw Message("Enter a valid source name.");
 	}
 	if (not DialogInputMap::getInstance()->getBox()->getSize()) throw Message("Add at least one map.");
@@ -106,7 +108,7 @@ void DialogInputSource::storeData() {
 	}
 	currentData->setValue(SOURCE, id);
 	// Store a human-friendly display label as a UI-only property.
-	currentData->setProperty(NAME, label);
+	currentData->getProperties().setValue(NAME, label);
 }
 
 void DialogInputSource::retrieveData() {
@@ -121,7 +123,10 @@ void DialogInputSource::retrieveData() {
 }
 
 const string DialogInputSource::createUniqueId() const {
-	return Defaults::createCommonUniqueId({ownerData->getProperty(UID), resolvedSource()});
+	return Defaults::createCommonUniqueId({
+		ownerData->getProperties().getValue(UID),
+		resolvedSource()
+	});
 }
 
 void DialogInputSource::populateSources(const string& name) {
@@ -168,8 +173,8 @@ string_view DialogInputSource::getType() const noexcept {
 }
 
 LEDSpicerUI::Ui::Storage::Data* DialogInputSource::createData(StringUMap& rawData) noexcept {
-	auto is{new Storage::InputSource(rawData, ownerData->getProperty(UID))};
-	is->setProperty(PID, ownerData->getProperty(UID));
+	auto is{new Storage::InputSource(rawData, ownerData->getProperties().getValue(UID))};
+	is->getProperties().setValue(PID, ownerData->getProperties().getValue(UID));
 	return is;
 }
 

@@ -40,7 +40,7 @@ class Input : public FileNode, public Revertible {
 public:
 
 	Input(StringUMap& data, DirNode* parent) noexcept :
-		FileNode(data, parent, COLLECTION_INPUT, vector<string>{
+		FileNode(data, parent, vector<string>{
 			COLLECTION_INPUT_SOURCES,
 			COLLECTION_INPUT_LINKMAP
 		}),

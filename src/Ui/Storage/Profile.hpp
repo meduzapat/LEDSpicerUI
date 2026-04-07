@@ -42,6 +42,8 @@ public:
 	string_view getCssClass() const noexcept override { return "ProfileBoxButton"; }
 	string_view getXmlTag()   const noexcept override { return "Profile"; }
 
+	CollectionHandler* getCollectionHandler() const noexcept override {return CollectionHandler::getInstance(COLLECTION_PROFILES);}
+
 protected:
 
 	const string getPrimaryKey() const noexcept override { return FILENAME; }

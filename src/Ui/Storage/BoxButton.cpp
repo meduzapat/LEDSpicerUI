@@ -29,6 +29,7 @@ BoxButton::BoxButton(Data* form) noexcept :
 	data{form},
 	label{Gtk::make_managed<Gtk::Label>()}
 {
+	form->registerToCollection();
 	set_valign(Gtk::ALIGN_START);
 	set_vexpand(false);
 	set_margin_top(2);
@@ -55,6 +56,7 @@ BoxButton::BoxButton(Data* form) noexcept :
 
 BoxButton::~BoxButton() {
 	if (data) {
+		data->unregisterFromCollection();
 		delete data;
 		data = nullptr;
 	}

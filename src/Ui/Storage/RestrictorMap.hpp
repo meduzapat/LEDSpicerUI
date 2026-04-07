@@ -33,7 +33,7 @@ class RestrictorMap: public Data {
 
 public:
 
-	RestrictorMap(StringUMap& data) noexcept : Data(data, COLLECTION_RESTRICTOR_MAP) {}
+	using Data::Data;
 
 	virtual ~RestrictorMap() = default;
 
@@ -41,6 +41,8 @@ public:
 	string_view getCssClass()       const noexcept override { return "RestrictorMapBoxButton"; }
 	const string createPrettyName() const noexcept override;
 	const string createUniqueId()   const noexcept override;
+
+	CollectionHandler* getCollectionHandler() const noexcept override { return CollectionHandler::getInstance(COLLECTION_RESTRICTOR_MAP); }
 
 };
 

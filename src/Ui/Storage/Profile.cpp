@@ -25,7 +25,7 @@
 using namespace LEDSpicerUI::Ui::Storage;
 
 Profile::Profile(StringUMap& data, DirNode* parent) noexcept :
-	FileNode(data, parent, COLLECTION_PROFILES, vector<string>{
+	FileNode(data, parent, vector<string>{
 		COLLECTION_PROFILE_ELEMENTS,
 		COLLECTION_PROFILE_GROUPS,
 		COLLECTION_PROFILE_INPUTS,

@@ -1,6 +1,6 @@
 # LEDSpicerUI — Data System Developer Guide
 
-> **Status:** Work in progress — reflects design as of v0.0.10 / data format 1.1.
+> **Status:** Work in progress — reflects design as of v0.0.13 / data format 1.1.
 
 ---
 
@@ -13,13 +13,12 @@
 5. [Data That Stores Data (Composition)](#5-data-that-stores-data-composition)
 6. [Links — `Link`](#6-links--link)
 7. [Selection — `Selection`](#7-selection--selection)
-8. [Activation and Deactivation](#8-activation-and-deactivation)
+8. [Ignoring Fields During XML Serialization](#8-ignoring-fields-during-xml-serialization)
 9. [Revertible — Snapshot and Restore](#9-revertible--snapshot-and-restore)
 10. [Visual and Textual Decoration](#10-visual-and-textual-decoration)
-11. [Ignoring Fields During XML Serialization](#11-ignoring-fields-during-xml-serialization)
-12. [Ownership — BoxButton and BoxButtonCollection](#12-ownership--boxbutton-and-boxbuttoncollection)
-13. [Use Cases by Concrete Type](#13-use-cases-by-concrete-type)
-14. [Quick Reference — Virtual Methods to Override](#14-quick-reference--virtual-methods-to-override)
+11. [Ownership — BoxButton and BoxButtonCollection](#11-ownership--boxbutton-and-boxbuttoncollection)
+12. [Use Cases by Concrete Type](#12-use-cases-by-concrete-type)
+13. [Quick Reference — Virtual Methods to Override](#13-quick-reference--virtual-methods-to-override)
 
 ---
 
@@ -38,22 +37,25 @@
 ```
 Data
 ├── Link               — Wraps a pointer to another Data; delegates identity.
-├── Revertible         — Adds snap/restore capability.
-│   ├── DirNode        — Base for tree-navigable items (path-aware).
-│   │   ├── DirectoryEntry — Runtime-only directory node. Never serialized.
-│   │   └── FileData   — File-based items; stores FILENAME as a property.
-│   │       ├── Input
-│   │       ├── Animation
-│   │       └── Profile
-│   ├── Device         — Owns an Element collection.
-│   ├── Restrictor     — Owns a RestrictorMap collection.
-│   └── InputSource    — Owns a maps collection.
+├── Parent             — Adds named child BoxButtonCollection storage.
+│   ├── Device         (+ Revertible mixin) — Owns an Element collection.
+│   ├── Restrictor     (+ Revertible mixin) — Owns a RestrictorMap collection.
+│   ├── InputSource    (+ Revertible mixin) — Owns a maps collection.
+│   └── FileNode       (+ DirNode mixin)    — File-based items; FILENAME stored as property.
+│       ├── Input      (+ Revertible mixin)
+│       ├── Animation  (+ Revertible mixin) [pending]
+│       └── Profile
+├── DirNode            — Pure structural mixin; parent pointer + path resolution.
+│   └── DirectoryEntry — Runtime-only directory node. Never serialized.
 ├── Group
 ├── Element
 ├── InputMap
 ├── InputMapLink
 └── ...
 ```
+
+`Revertible` is a **pure mixin** — it does not appear in the `Data` inheritance chain.
+It receives references to the consumer's own `fieldsData` and `children` at construction.
 
 ---
 
@@ -68,7 +70,6 @@ string port = data->getValue(PORT, "auto");  // default if missing
 ```
 
 **`wipe()`** — clears all serializable fields.
-**`reset()`** — clears fields and unregisters from active collections.
 
 ---
 
@@ -88,21 +89,24 @@ bool  has = hasProperty(UID);
 
 ## 5. Data That Stores Data (Composition)
 
-A `Data` subclass can own child `BoxButtonCollection` members to hold related sub-items. How those collections are populated and exposed is up to the subclass.
+`Parent` subclasses own child `BoxButtonCollection` members keyed by collection ID. The constructor receives a `vector<string>` of child collection IDs to pre-create.
 
 ```cpp
-class Device : public Revertible {
-    BoxButtonCollection elements;
-};
+Device::Device(StringUMap& data) noexcept :
+    Parent(data, COLLECTION_DEVICES, {COLLECTION_ELEMENT}),
+    Revertible(fieldsData, &children)
+{}
 ```
 
-The child collection is destroyed with the parent, recursively deleting all owned `BoxButton`s and `Data` objects.
+Child collections are destroyed with the parent, recursively deleting all owned `BoxButton`s and `Data` objects.
+
+`getChild(key)` returns the `BoxButtonCollection*` for that key, or `nullptr` if absent.
 
 ---
 
 ## 6. Links — `Link`
 
-`Link` holds a raw pointer to another `Data` and delegates display and identity to it. Used to reference another `Data` without copying it.
+`Link` holds a raw pointer to another `Data` and delegates display and identity to it.
 
 ```cpp
 StringUMap empty;
@@ -126,37 +130,52 @@ Lightweight `Gtk::FlowBoxChild` used exclusively by `DialogSelect`. Holds a `Dat
 
 ---
 
-## 8. Activation and Deactivation
+## 8. Ignoring Fields During XML Serialization
 
-`activate()` and `deActivate()` are lifecycle hooks called by the dialog system when an item is opened for editing and when the dialog closes. Override them to perform any setup or teardown the object needs during those moments.
+Override `shouldSerialize(key, value)` to suppress specific fields from XML output. The base implementation returns `true` for all fields. Prefer local logic inside the override rather than mutating any shared state.
 
 ```cpp
-void MyData::activate()   { /* prepare while being edited */ }
-void MyData::deActivate() { /* clean up after dialog closes */ }
+bool MyData::shouldSerialize(const string& key, const string& value) const noexcept {
+    if (key == BRIGHTNESS and value == "100") return false;
+    return true;
+}
 ```
 
-Both default to no-ops in `Data`. Override only when needed.
+`toXML()` in `Data` calls `shouldSerialize()` for every entry in `fieldsData` before building the XML attribute list.
 
 ---
 
 ## 9. Revertible — Snapshot and Restore
 
-`Revertible : public Data` adds the ability to snapshot `fieldsData` and registered child collections, then restore them on demand. Useful wherever an object may be partially mutated during an operation the user can cancel.
-
-Subclasses call `registerChild()` from their constructor body for each owned `BoxButtonCollection` that should participate in the snapshot:
+`Revertible` is a **pure mixin**. It is not a `Data` subclass. Consumers pass references to their own `fieldsData` and, optionally, their `children` map at construction:
 
 ```cpp
-Device::Device(StringUMap& data) : Revertible(data) {
-    registerChild(elements);
-}
+Device::Device(StringUMap& data) noexcept :
+    Parent(data, COLLECTION_DEVICES, {COLLECTION_ELEMENT}),
+    Revertible(fieldsData, &children)
+{}
 ```
 
 | Method | Effect |
 |--------|--------|
 | `swap()` | Moves `fieldsData` and all registered child collections into snapshot storage. No-op if already snapped or `fieldsData` is empty. |
-| `restore()` | Swaps back and wipes orphaned snapshot children. No-op if no snapshot. |
-| `wipe()` | Discards snapshot and clears `fieldsData`. |
-| `deActivate()` | Calls `restore()` if a snapshot is present, then `Data::deActivate()`. |
+| `revert()` | Swaps back and wipes orphaned snapshot children. No-op if no snapshot. |
+| `clearSnap()` | Discards snapshot without touching live fields or children. |
+
+**Consumer contract:**
+- Call `clearSnap()` inside `wipe()` **before** `Data::wipe()`.
+- Call `revert()` inside `tearDown()` **before** `Data::tearDown()`.
+
+```cpp
+void Device::wipe() noexcept {
+    clearSnap();
+    Data::wipe();
+}
+void Device::tearDown() noexcept {
+    revert();
+    Data::tearDown();
+}
+```
 
 ---
 
@@ -172,25 +191,7 @@ Call `boxButton.updateLabel()` after any `setValue()` that affects the label.
 
 ---
 
-## 11. Ignoring Fields During XML Serialization
-
-The `ignored` member (`StringUSet`, `mutable`) lists field keys that exist in `fieldsData` but should be omitted from XML output. It predates `properties` and was originally used to suppress fields stored in `fieldsData` for UI convenience that were optional or had omittable defaults in the config.
-
-Current use: suppress fields whose value is empty or equal to a known default the loader handles implicitly.
-
-```cpp
-const string Element::toXML() const {
-    StringUSet ignored;
-    if (fieldsData.at(BRIGHTNESS) == "100") ignored.insert(BRIGHTNESS);
-    return createOpeningXML("element", fieldsData, ignored, true);
-}
-```
-
-Prefer a local `StringUSet` inside `toXML()` for conditional logic rather than mutating the member.
-
----
-
-## 12. Ownership — BoxButton and BoxButtonCollection
+## 11. Ownership — BoxButton and BoxButtonCollection
 
 ```
 BoxButtonCollection
@@ -204,54 +205,55 @@ BoxButtonCollection
 
 ### `toXML()`
 
-Subclasses override `toXML()` to produce the XML representation of the item. Use the static helpers:
+`Data::toXML()` is a **non-virtual orchestrator**. It filters `fieldsData` through `shouldSerialize()`, then calls the virtual `xmlBody()` hook for inner content:
 
 ```cpp
-// Self-closing element (no children):
-const string MyData::toXML() const {
-    return createOpeningXML("myData", fieldsData, ignored, true);
-}
-// Element with children:
-const string MyData::toXML() const {
-    string r(createOpeningXML("myData", fieldsData, ignored, false));
-    for (const auto& child : children)
-        r += child->getData()->toXML();
-    return r + createClosingXML("myData");
+// Self-closing (no body):
+// No override needed — default xmlBody() returns "".
+
+// Element with inner content — override xmlBody():
+string MyData::xmlBody() const noexcept {
+    string r;
+    for (const auto& bb : *getChild(COLLECTION_FOO))
+        r += bb->getData()->toXML();
+    return r;
 }
 ```
 
-`valuesXML()` chooses inline or multi-line attribute layout automatically based on the number of fields.
+`FileNode` subclasses override `toXML()` directly, wrapping with `XMLHelper::xmlHeader()` / `XMLHelper::xmlFooter()` because they represent standalone files rather than embedded elements.
 
 ---
 
-## 13. Use Cases by Concrete Type
+## 12. Use Cases by Concrete Type
 
 | Type | `fieldsData` | Properties | Child collections | Serialized |
 |------|-------------|------------|-------------------|------------|
 | `Device` | name, port, id, … | — | `elements` | Yes — `<device>` |
 | `Element` | name, pin, position, … | strip descriptor (when strip) | — | Yes — `<element>` |
-| `Group` | name | — | Link→Element items | Yes — `<group>` |
-| `Input` | name (input type) | `FILENAME`, `UID` | `sources` | Yes — per-file XML |
+| `Group` | name, defaultColor | — | link→Element items | Yes — `<group>` |
+| `Input` | input type key | `FILENAME`, `UID`, `PID` | `sources`, `linkmaps` | Yes — per-file XML |
+| `Animation` | animation type key | `FILENAME`, `UID`, `PID` | (pending) | Yes — per-file XML |
+| `Profile` | backgroundcolor, … | `FILENAME`, `UID`, `PID` | elements, groups, inputs, animations | Yes — per-file XML |
 | `InputSource` | `source` (hw path) | `UID`, `PID`, `SOURCELESS` | `maps` | Yes — `<maps>` |
 | `InputMap` | trigger, type, target, … | — | — | Yes — `<map>` |
 | `DirectoryEntry` | name (segment only) | `UID` | `contents` | **No** — runtime only |
-| `FileData` | name (item type) | `FILENAME`, `UID` | — | Yes |
 | `Link` | extra attributes | — | — | Yes — self-closing element |
 
 ---
 
-## 14. Quick Reference — Virtual Methods to Override
+## 13. Quick Reference — Virtual Methods to Override
 
 | Method | Must override? | Purpose |
 |--------|---------------|---------|
 | `getCssClass()` | **Yes** (pure) | CSS class for the `BoxButton`. |
+| `getXmlTag()` | **Yes** (pure) | XML element name. |
 | `createPrettyName()` | Recommended | Human label. Default uses primary key field. |
 | `createTooltip()` | Optional | Hover text. Default `""`. |
 | `createUniqueId()` | Recommended | Stable collection key. Default hashes primary key. |
-| `toXML()` | Recommended | XML output. Default emits flat attributes. |
-| `activate()` | When needed | Lifecycle hook on edit open. |
-| `deActivate()` | When needed | Lifecycle hook on edit close. |
-| `wipe()` | When has children | Clears all serializable fields. |
-| `reset()` | When wipe must unregister | Clears fields and unregisters from active collections. |
+| `xmlBody()` | When has serializable children | Inner XML content. Default `""` (self-closing). |
+| `toXML()` | `FileNode` subclasses only | Full file serialization via `XMLHelper::xmlHeader/Footer`. |
+| `shouldSerialize(key, value)` | When fields need suppression | Return `false` to omit a field from XML. |
+| `wipe()` | When `Revertible` | Call `clearSnap()` then `Data::wipe()`. |
+| `tearDown()` | When `Revertible` | Call `revert()` then `Data::tearDown()`. |
 | `getPrimaryKey()` | When primary key ≠ `name` | Drives default `createUniqueId()`. |
 | `getValue()` | `Link` only | Redirect key lookups to target. |

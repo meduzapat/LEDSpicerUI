@@ -46,7 +46,6 @@ public:
 	virtual ~DialogElement() = default;
 
 	void load(XMLHelper* values) override;
-	Storage::CollectionHandler* getCollectionHandler() const override;
 	void clearForm() noexcept override;
 	void isValid() const override;
 	void storeData() noexcept override;

@@ -28,6 +28,7 @@ DialogElement::DialogElement(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 	DialogForm(obj, builder, COLLECTION_ELEMENT)
 {
 
+	dialogsMap.emplace(COLLECTION_ELEMENT, this);
 	// Connect Element Box and buttons.
 	builder->get_widget_derived("BoxElements", box, "BtnDeviceElementUp", "BtnDeviceElementDn");
 	builder->get_widget("BtnApplyElement",     btnApply);
@@ -178,10 +179,6 @@ void DialogElement::load(XMLHelper* values) {
 	createItems(values->getData(Defaults::createCommonUniqueId({ownerData->createUniqueId(), COLLECTION_ELEMENT})), values);
 }
 
-LEDSpicerUI::Ui::Storage::CollectionHandler* DialogElement::getCollectionHandler() const {
-	return LEDSpicerUI::Ui::Storage::CollectionHandler::getInstance(COLLECTION_ELEMENT);
-}
-
 void DialogElement::clearForm() noexcept {
 	clearFormConditinal(false);
 }
@@ -258,7 +255,7 @@ void DialogElement::isValid() const {
 	}
 
 	// If is not edit, or data is not the same, check for dupes.
-	if (getCollectionHandler()->isIdSet(name)) {
+	if (currentData->getCollectionHandler()->isIdSet(name)) {
 		if (action != Actions::EDIT or currentData->createUniqueId() != name) {
 			if (action != Actions::LOAD)
 				elementName->grab_focus();
@@ -409,13 +406,13 @@ void DialogElement::storeData() {
 			position = std::stoi(positionStrip->get_text()),
 			size     = std::stoi(sizeStrip->get_text());
 
-		string code = currentData->getProperty("stripDescriptor");
+		string code = currentData->getProperties().getValue("stripDescriptor");
 		if (code.empty()) {
 			code = std::to_string(++lastStripCode);
-			currentData->setProperty("stripDescriptor", code);
+			currentData->getProperties().setValue("stripDescriptor", code);
 		}
-		currentData->setProperty("expandable", "true");
-		currentData->setProperty("system",     "true");
+		currentData->getProperties().setValue("expandable", "true");
+		currentData->getProperties().setValue("system",     "true");
 		auto currentDataE = static_cast<Storage::Element*>(currentData);
 		auto children     = currentDataE->copyStripChildren();
 
@@ -437,7 +434,7 @@ void DialogElement::storeData() {
 				childData[NAME] = childName;
 				childData[POSITION] = std::to_string(position + i);
 				auto child = new Storage::Element(childData);
-				child->setProperty("strip", code);
+				child->getProperties().setValue("strip", code);
 				currentDataE->addStripChild(child);
 				getCollectionHandler()->add(child);
 			}
@@ -457,14 +454,14 @@ void DialogElement::storeData() {
 			// Create new group
 			StringUMap groupData{{"name", name}};
 			auto group = new Storage::Group(groupData);
-			group->setProperty("system",   "true");
-			group->setProperty("readOnly", "true");
+			group->getProperties().setValue("system",   "true");
+			group->getProperties().setValue("readOnly", "true");
 			groupCollectionHandler->add(group);
 		}
 		else if (oldName != name) {
 			// Rename existing group
 			auto group = groupCollectionHandler->get(oldName);
-			if (group && group->hasProperty("system")) {
+			if (group && group->getProperties().isSet("system")) {
 				group->setValue(NAME, name);
 				groupCollectionHandler->replace(group, oldName);
 			}
@@ -486,12 +483,12 @@ void DialogElement::storeData() {
 
 	// Cleanup if changed from strip to non-strip
 	if (wasStrip && not isStrip) {
-		string code = currentData->getProperty("stripDescriptor");
+		string code = currentData->getProperties().getValue("stripDescriptor");
 		auto children = getCollectionHandler()->findByProperty("strip", code);
 		toDelete.insert(toDelete.end(), children.begin(), children.end());
-		currentData->removeProperty("stripDescriptor");
-		currentData->removeProperty("expandable");
-		currentData->removeProperty("system");
+		currentData->getProperties().unSet("stripDescriptor");
+		currentData->getProperties().unSet("expandable");
+		currentData->getProperties().unSet("system");
 
 		auto group = groupCollectionHandler->get(oldName);
 		if (group && group->hasProperty("system")) {

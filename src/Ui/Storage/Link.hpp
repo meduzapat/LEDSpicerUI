@@ -64,7 +64,7 @@ class Link : public Data {
 	Link(
 		StringUMap& data,
 		const LinkData& linkData
-	) noexcept : Data(data, ""), linkInfo(linkData) {}
+	) noexcept : Data(data), linkInfo(linkData) {}
 
 	/**
 	 * Constructor initializing the Link with individual values.
@@ -78,7 +78,7 @@ class Link : public Data {
 		const string& type,
 		const string& key,
 		Data* link
-	) noexcept : Data(data, ""), linkInfo(type, key, link) {}
+	) noexcept : Data(data), linkInfo(type, key, link) {}
 
 	bool operator==(const Data& other) const noexcept override;
 
@@ -95,6 +95,8 @@ class Link : public Data {
 	const string createUniqueId()   const noexcept override;
 	const string toXML()            const noexcept override;
 	string_view getXmlTag()         const noexcept override;
+
+	CollectionHandler* getCollectionHandler() const noexcept override { return nullptr; }
 
 	const string& getValue(const string& key)                      const noexcept override;
 	string getValue(const string& key, const string& defaultValue) const noexcept override;

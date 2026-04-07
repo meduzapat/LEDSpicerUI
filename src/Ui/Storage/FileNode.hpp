@@ -42,7 +42,6 @@ public:
 	FileNode(
 		StringUMap& data,
 		DirNode* parent,
-		const string& collectionId,
 		const vector<string>& childIds
 	) noexcept;
 

@@ -73,7 +73,7 @@ protected:
 
 // FILENAME must be in properties, not fieldsData.
 TEST_F(FileNodeTest, FilenameInProperties) {
-	EXPECT_EQ("myinput", rootFile->getProperty(FILENAME));
+	EXPECT_EQ("myinput", rootFile->getProperties().getValue(FILENAME));
 	EXPECT_EQ("",        rootFile->getValue(FILENAME));
 }
 
@@ -89,24 +89,24 @@ TEST_F(FileNodeTest, GetNameReturnsFilename) {
 
 // PID is empty at root level.
 TEST_F(FileNodeTest, PidEmptyAtRoot) {
-	EXPECT_EQ("", rootFile->getProperty(PID));
+	EXPECT_EQ("", rootFile->getProperties().getValue(PID));
 }
 
 // PID matches parent getFsId() for nested file.
 TEST_F(FileNodeTest, PidMatchesParentFsId) {
-	EXPECT_EQ(parentDir->getFsId(), nestedFile->getProperty(PID));
+	EXPECT_EQ(parentDir->getFsId(), nestedFile->getProperties().getValue(PID));
 }
 
 // UID is set and starts with "file_".
 TEST_F(FileNodeTest, UidSetAtConstruction) {
-	const string uid(rootFile->getProperty(UID));
+	const string uid(rootFile->getProperties().getValue(UID));
 	EXPECT_FALSE(uid.empty());
 	EXPECT_EQ(0, uid.find("file_"));
 }
 
 // getFsId() is an alias for getProperty(UID).
 TEST_F(FileNodeTest, GetFsIdAliasesUid) {
-	EXPECT_EQ(rootFile->getProperty(UID), rootFile->getFsId());
+	EXPECT_EQ(rootFile->getProperties().getValue(UID), rootFile->getFsId());
 }
 
 // createUniqueId() == createCommonUniqueId({PID, FILENAME}).

@@ -25,7 +25,7 @@
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
 DialogRestrictor::DialogRestrictor(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
-	DialogFormHost(obj, builder, COLLECTION_RESTRICTORS)
+	DialogFormHost(obj, builder)
 {
 
 	DataDialogs::DialogRestrictorMap::buildInstance(builder, "DialogRestrictorMap");

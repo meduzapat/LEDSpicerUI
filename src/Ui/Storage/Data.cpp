@@ -24,10 +24,6 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-Data::~Data() {
-	unregisterFromCollection();
-}
-
 const string Data::createPrettyName() const noexcept {
 	return getPrimaryValue();
 }
@@ -40,30 +36,15 @@ const string Data::getPrimaryValue() const noexcept {
 	return getValue(getPrimaryKey());
 }
 
-const string& Data::getValue(const string& key) const noexcept {
-	if (auto it = fieldsData.find(key); it != fieldsData.end())
-		return it->second;
-	return emptyString;
-}
-
-string Data::getValue(const string& key, const string& defaultValue) const noexcept {
-	if (auto it = fieldsData.find(key); it != fieldsData.end())
-		return it->second;
-	return defaultValue;
-}
-
-void Data::unSet(const string& key) noexcept {
-	fieldsData.erase(key);
-}
-
 void Data::setValue(const string& key, const string& value) noexcept {
 	const string oldId{createUniqueId()};
-	fieldsData[key] = value;
+	Values::setValue(key, value);
 	handleRegistration(oldId);
 }
 
 StringUMap Data::copyValues() const noexcept {
-	if (collectionId.empty()) return {};
+	auto handler = getCollectionHandler();
+	if (not handler) return {};
 	string baseId{createUniqueId()};
 	string candidateId;
 	uint8_t count{1};
@@ -72,30 +53,35 @@ StringUMap Data::copyValues() const noexcept {
 		if (not count) {
 			baseId += "X";
 		}
-	} while (getCollectionHandler()->isIdSet(candidateId));
-	StringUMap copy{fieldsData};
+	} while (handler->isIdSet(candidateId));
+	StringUMap copy{Values::copyValues()};
 	copy[getPrimaryKey()] = candidateId;
 	return copy;
 }
 
-const StringUMap* Data::getValues() const noexcept {
-	return &fieldsData;
-}
-
 void Data::setValues(const StringUMap& values) noexcept {
 	const string oldId{createUniqueId()};
-	fieldsData.insert(values.begin(), values.end());
+	Values::setValues(values);
 	handleRegistration(oldId);
 }
 
 void Data::wipe() noexcept {
-	if (not collectionId.empty()) getCollectionHandler()->remove(this);
-	fieldsData.clear();
+	auto handler = getCollectionHandler();
+	if (handler) handler->remove(this);
+	Values::wipe();
+}
+
+void Data::unSet(const string& key) noexcept {
+	if (key == getPrimaryKey()) {
+		auto handler = getCollectionHandler();
+		if (handler) handler->remove(this);
+	}
+	Values::unSet(key);
 }
 
 const string Data::toXML() const noexcept {
 	StringUMap filtered;
-	for (const auto& [k, v] : fieldsData)
+	for (const auto& [k, v] : values)
 		if (shouldSerialize(k, v))
 			filtered.emplace(k, v);
 	const string body(xmlBody());
@@ -105,72 +91,26 @@ const string Data::toXML() const noexcept {
 	return r;
 }
 
-void Data::setProperty(const string& key, const string& value) noexcept {
-	properties[key] = value;
-}
-
-const string& Data::getProperty(const string& key) const noexcept {
-	if (auto it = properties.find(key); it != properties.end())
-		return it->second;
-	return emptyString;
-}
-
-string Data::getProperty(
-	const string& key,
-	const string& defaultProperty
-) const noexcept {
-	if (auto it = properties.find(key); it != properties.end())
-		return it->second;
-	return defaultProperty;
-}
-
-bool Data::hasProperty(const string& key) const noexcept {
-	return properties.find(key) != properties.end();
-}
-
-void Data::removeProperty(const string& key) noexcept {
-	properties.erase(key);
-}
-
-const StringUMap& Data::getProperties() const noexcept {
-	return properties;
-}
-
-StringUMap& Data::createEmptyData() noexcept {
-	static StringUMap empty;
-	return empty;
-}
-
-CollectionHandler* Data::getCollectionHandler() const noexcept {
-	if (collectionId.empty()) return nullptr;
-	return CollectionHandler::getInstance(collectionId);
-}
-
 void Data::registerToCollection() noexcept {
-	if (not collectionId.empty() and not createUniqueId().empty())
-		getCollectionHandler()->add(this);
+	auto handler = getCollectionHandler();
+	if (handler and not createUniqueId().empty())
+		handler->add(this);
 }
 
 void Data::unregisterFromCollection() noexcept {
-	if (not collectionId.empty() and not createUniqueId().empty())
-		getCollectionHandler()->remove(this);
+	auto handler = getCollectionHandler();
+	if (handler and not createUniqueId().empty())
+		handler->remove(this);
 }
 
 void Data::handleRegistration(const string& oldId) noexcept {
-	if (collectionId.empty()) return;
+	auto handler = getCollectionHandler();
+	if (not handler) return;
+	// ID will never be empty.
 	const string newId{createUniqueId()};
-//	 No registration needed.
-//	if (newId == oldId) return;
-//	 Remove if new ID is empty, if this a possible scenario?.
-//	if (newId.empty())
-//		getCollectionHandler()->remove(this);
-//	Add if old ID is empty.
-//	else if (oldId.empty())
-//		getCollectionHandler()->add(this);
-//	else
 	// Replace if both IDs are non-empty and different.
 	if (oldId != newId)
-		getCollectionHandler()->replace(this, oldId);
+		handler->replace(this, oldId);
 }
 
 string Data::valuesXML(

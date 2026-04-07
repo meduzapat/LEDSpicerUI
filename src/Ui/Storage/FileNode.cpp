@@ -27,10 +27,9 @@ using namespace LEDSpicerUI::Ui::Storage;
 FileNode::FileNode(
 	StringUMap& data,
 	DirNode* parent,
-	const string& collectionId,
 	const vector<string>& childIds
 ) noexcept :
-	Parent(data, collectionId, childIds),
+	Parent(data, childIds),
 	DirNode(parent)
 {
 	setProperty(FILENAME, fieldsData.count(FILENAME) ? fieldsData.at(FILENAME) : "");

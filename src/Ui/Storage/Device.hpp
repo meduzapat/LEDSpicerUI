@@ -37,7 +37,7 @@ class Device : public Parent, public Revertible {
 public:
 
 	Device(StringUMap& data) noexcept :
-		Parent(data, COLLECTION_DEVICES, {COLLECTION_ELEMENT}),
+		Parent(data, {COLLECTION_ELEMENT}),
 		Revertible(fieldsData, &children)
 	{}
 
@@ -47,6 +47,8 @@ public:
 	string_view getCssClass()       const noexcept override { return "DeviceBoxButton"; }
 	const string createPrettyName() const noexcept override;
 	const string createUniqueId()   const noexcept override;
+
+	CollectionHandler* getCollectionHandler() const noexcept override;
 
 	void wipe()     noexcept override;
 	void tearDown() noexcept override;

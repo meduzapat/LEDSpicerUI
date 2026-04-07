@@ -27,9 +27,8 @@ using namespace LEDSpicerUI::Ui::Storage;
 DirectoryEntry::DirectoryEntry(
 	StringUMap&     data,
 	DirectoryEntry* parent,
-	const string&   collectionId
 ) noexcept :
-	Data(data, collectionId),
+	Data(data),
 	DirNode(parent)
 {
 	setProperty(PID, parent ? parent->getFsId() : "");
