@@ -33,13 +33,13 @@ protected:
 
 	void SetUp() override {
 		StringUMap rootData{{NAME, "root"}};
-		root = std::make_unique<DirectoryEntry>(rootData, nullptr, COLLECTION_DIRECTORIES);
+		root = std::make_unique<DirectoryEntry>(rootData, nullptr);
 
 		StringUMap childData{{NAME, "subdir"}};
-		child = std::make_unique<DirectoryEntry>(childData, root.get(), COLLECTION_DIRECTORIES);
+		child = std::make_unique<DirectoryEntry>(childData, root.get());
 
 		StringUMap grandData{{NAME, "deep"}};
-		grand = std::make_unique<DirectoryEntry>(grandData, child.get(), COLLECTION_DIRECTORIES);
+		grand = std::make_unique<DirectoryEntry>(grandData, child.get());
 	}
 
 	std::unique_ptr<DirectoryEntry> root;
@@ -58,11 +58,11 @@ TEST_F(DirectoryEntryTest, PidMatchesParentUid) {
 	EXPECT_EQ(child->getProperties().getValue(UID), grand->getProperties().getValue(PID));
 }
 
-// UID is set and starts with "dir_".
+// UID is set and starts with "d_".
 TEST_F(DirectoryEntryTest, UidSetAtConstruction) {
 	const string uid(root->getProperties().getValue(UID));
 	EXPECT_FALSE(uid.empty());
-	EXPECT_EQ(0, uid.find("dir_"));
+	EXPECT_EQ(0, uid.find("d_"));
 }
 
 // getFsId() is an alias for getProperty(UID).

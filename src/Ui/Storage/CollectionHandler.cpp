@@ -74,9 +74,10 @@ void CollectionHandler::add(Data* item) noexcept {
 
 void CollectionHandler::remove(Data* item) noexcept {
 
-	if (not isSet(item)) return;
+	auto uid{item->createUniqueId()};
+	if (uid.empty() or not isIdSet(uid)) return;
 
-	collection.erase(item->createUniqueId());
+	collection.erase(uid);
 
 	// Collect depleted callbacks first, fire after iteration.
 	vector<std::function<void()>> pending;

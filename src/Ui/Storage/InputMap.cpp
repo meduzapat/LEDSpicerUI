@@ -25,7 +25,7 @@
 using namespace LEDSpicerUI::Ui::Storage;
 
 const string InputMap::createUniqueId() const noexcept {
-	return Defaults::createCommonUniqueId({getProperty(PID), getValue(TRIGGER)});
+	return Defaults::createCommonUniqueId({properties.getValue(PID), getValue(TRIGGER)});
 }
 
 const string InputMap::createPrettyName() const noexcept {

@@ -26,13 +26,13 @@ using namespace LEDSpicerUI::Ui::Storage;
 
 DirectoryEntry::DirectoryEntry(
 	StringUMap&     data,
-	DirectoryEntry* parent,
+	DirectoryEntry* parent
 ) noexcept :
 	Data(data),
 	DirNode(parent)
 {
-	setProperty(PID, parent ? parent->getFsId() : "");
-	setProperty(UID, "dir_" + std::to_string(++dirCounter));
+	properties.setValue(PID, parent ? parent->getFsId() : "");
+	properties.setValue(UID, "d_" + std::to_string(++dirCounter));
 }
 
 const string DirectoryEntry::createUniqueId() const noexcept {
@@ -55,7 +55,7 @@ const string& DirectoryEntry::getName() const noexcept {
 }
 
 const string& DirectoryEntry::getFsId() const noexcept {
-	return getProperty(UID);
+	return properties.getValue(UID);
 }
 
 bool DirectoryEntry::isEmpty() const noexcept {

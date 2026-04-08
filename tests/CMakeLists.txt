@@ -113,6 +113,12 @@ add_test_executable(RevertibleTest
 	""
 )
 
+add_test_executable(BoxButtonTest
+	"Ui/Storage/BoxButtonTest.cpp"
+	"${COMMON_SRCS};${STORAGE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Storage/CollectionHandler.cpp"
+	""
+)
+
 add_test_executable(MessageTest
 	"Ui/MessageTest.cpp"
 	"${COMMON_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp"

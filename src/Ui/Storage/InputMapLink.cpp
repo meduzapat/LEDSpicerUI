@@ -28,7 +28,7 @@ const string InputMapLink::createTooltip() const noexcept {
 	string tooltip("This action will start with the ");
 	StringVector txts;
 	// data is trigger(30)type target(31)trigger(30)type target(31)trigger(30)type target
-	for (const auto& group : Defaults::explode(fieldsData.at(NAME), RECORD_SEPARATOR)) {
+	for (const auto& group : Defaults::explode(getValue(NAME), RECORD_SEPARATOR)) {
 		// group is trigger(30)type target
 		const auto parts(Defaults::explode(group, FIELD_SEPARATOR));
 		const auto item(Defaults::explode(parts.at(1), ' '));
@@ -40,7 +40,7 @@ const string InputMapLink::createTooltip() const noexcept {
 const string InputMapLink::createPrettyName() const noexcept {
 	StringVector prettyName;
 	// data is trigger(30)type target(31)trigger(30)type target(31)trigger(30)type target
-	for (const auto& group : Defaults::explode(fieldsData.at(NAME), RECORD_SEPARATOR)) {
+	for (const auto& group : Defaults::explode(getValue(NAME), RECORD_SEPARATOR)) {
 		// group is trigger(30)type target
 		const auto parts(Defaults::explode(group, FIELD_SEPARATOR));
 		prettyName.push_back(parts.at(1));

@@ -137,6 +137,14 @@ public:
 	 */
 	void unregisterFromCollection() noexcept;
 
+	/**
+	 * Synchronizes the item's registration in its CollectionHandler after a primary key change.
+	 * Call with the previous unique ID when the primary key has been changed manually.
+	 * No-op when the ID is unchanged or when there is no handler.
+	 * @param oldId The unique ID before the change.
+	 */
+	void syncRegistration(const string& oldId) noexcept;
+
 protected:
 
 	/// Extra property with important information.
@@ -148,12 +156,6 @@ protected:
 	 * @return Field name to use as primary key (default: NAME).
 	 */
 	virtual const string getPrimaryKey() const noexcept { return NAME; }
-
-	/**
-	 * Handles auto-registration and re-keying after a primary key field changes.
-	 * @param oldId The unique ID before the change, empty if not yet registered.
-	 */
-	void syncRegistration(const string& oldId) noexcept;
 
 	/**
 	 * Controls which fields are included in XML output.

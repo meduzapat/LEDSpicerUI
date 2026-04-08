@@ -8,7 +8,7 @@
 
 1. [Overview](#1-overview)
 2. [Class Hierarchy](#2-class-hierarchy)
-3. [Basic Data Storage — `fieldsData`](#3-basic-data-storage--fieldsdata)
+3. [Basic Data Storage — `values`](#3-basic-data-storage--values)
 4. [Runtime Properties — `properties`](#4-runtime-properties--properties)
 5. [Data That Stores Data (Composition)](#5-data-that-stores-data-composition)
 6. [Links — `Link`](#6-links--link)
@@ -25,8 +25,9 @@
 ## 1. Overview
 
 `Data` is the central storage unit. Every piece of configuration is an instance of a `Data` subclass.
+- `Data` inherits `Values`, which holds the serializable map and all field accessors.
 - `Data` only **holds** values. All display and dialog logic lives elsewhere.
-- Persistent values (serialized to XML) live in `fieldsData`.
+- Persistent values (serialized to XML) live in `values`.
 - Runtime-only state that must never be serialized lives in `properties`.
 - A `Data*` is always owned by exactly one `BoxButton`, which is owned by a `BoxButtonCollection`.
 
@@ -35,33 +36,35 @@
 ## 2. Class Hierarchy
 
 ```
-Data
-├── Link               — Wraps a pointer to another Data; delegates identity.
-├── Parent             — Adds named child BoxButtonCollection storage.
-│   ├── Device         (+ Revertible mixin) — Owns an Element collection.
-│   ├── Restrictor     (+ Revertible mixin) — Owns a RestrictorMap collection.
-│   ├── InputSource    (+ Revertible mixin) — Owns a maps collection.
-│   └── FileNode       (+ DirNode mixin)    — File-based items; FILENAME stored as property.
-│       ├── Input      (+ Revertible mixin)
-│       ├── Animation  (+ Revertible mixin) [pending]
-│       └── Profile
-├── DirNode            — Pure structural mixin; parent pointer + path resolution.
-│   └── DirectoryEntry — Runtime-only directory node. Never serialized.
-├── Group
-├── Element
-├── InputMap
-├── InputMapLink
-└── ...
+Values
+└── Data
+    ├── Link               — Wraps a pointer to another Data; delegates identity.
+    ├── Parent             — Adds named child BoxButtonCollection storage.
+    │   ├── Device         (+ Revertible mixin) — Owns an Element collection.
+    │   ├── Restrictor     (+ Revertible mixin) — Owns a RestrictorMap collection.
+    │   ├── InputSource    (+ Revertible mixin) — Owns a maps collection.
+    │   └── FileNode       (+ DirNode mixin)    — File-based items; FILENAME stored as property.
+    │       ├── Input      (+ Revertible mixin)
+    │       ├── Animation  (+ Revertible mixin) [pending]
+    │       └── Profile
+    ├── DirNode            — Pure structural mixin; parent pointer + path resolution.
+    │   └── DirectoryEntry — Runtime-only directory node. Never serialized.
+    ├── Group
+    ├── Element
+    ├── InputMap
+    ├── InputMapLink
+    └── ...
 ```
 
 `Revertible` is a **pure mixin** — it does not appear in the `Data` inheritance chain.
-It receives references to the consumer's own `fieldsData` and `children` at construction.
+It receives a reference to the consumer's own `values` and optionally its `children` map at construction.
 
 ---
 
-## 3. Basic Data Storage — `fieldsData`
+## 3. Basic Data Storage — `values`
 
-`fieldsData` is a `StringUMap` mapping field names to string values. Everything in it is serialized to XML via `toXML()`.
+`values` (inherited from `Values`) is a `StringUMap` mapping field names to string values.
+Everything in it is serialized to XML via `toXML()`.
 
 ```cpp
 data->setValue(NAME, "MyDevice");
@@ -69,7 +72,7 @@ string name = data->getValue(NAME);
 string port = data->getValue(PORT, "auto");  // default if missing
 ```
 
-**`wipe()`** — clears all serializable fields.
+**`wipe()`** — unregisters from the collection handler, then clears all fields.
 
 ---
 
@@ -78,12 +81,12 @@ string port = data->getValue(PORT, "auto");  // default if missing
 Properties carry extra information the object needs at runtime but that has no place in the serialized config — stable identifiers, state flags, anything the object needs to track independently of the config values.
 
 ```cpp
-setProperty(UID, "file_3");
-string id = getProperty(UID);
-bool  has = hasProperty(UID);
+data->getProperties().setValue(UID, "file_3");
+string id  = data->getProperties().getValue(UID);
+bool   has = data->getProperties().isSet(UID);
 ```
 
-> `fieldsData` → XML config. `properties` → runtime information.
+> `values` → XML config. `properties` → runtime information.
 
 ---
 
@@ -94,7 +97,7 @@ bool  has = hasProperty(UID);
 ```cpp
 Device::Device(StringUMap& data) noexcept :
     Parent(data, COLLECTION_DEVICES, {COLLECTION_ELEMENT}),
-    Revertible(fieldsData, &children)
+    Revertible(values, &children)
 {}
 ```
 
@@ -118,8 +121,8 @@ auto* link = new Storage::Link(empty, {"element", "name", targetData});
 | `getCssClass()` | Delegates to the target. |
 | `createPrettyName()` | Delegates to the target. |
 | `createUniqueId()` | Delegates to the target. |
-| `getValue(key)` | Returns target's value if key matches `linkInfo.key`; otherwise own `fieldsData`. |
-| `toXML()` | Emits a self-closing XML element with the target's unique ID as the key attribute, plus any extra values in own `fieldsData`. |
+| `getValue(key)` | Returns target's value if key matches `linkInfo.key`; otherwise own `values`. |
+| `toXML()` | Emits a self-closing XML element with the target's unique ID as the key attribute, plus any extra values in own `values`. |
 | `operator==` | True if same object identity **or** if compared against the target pointer. |
 
 ---
@@ -141,24 +144,24 @@ bool MyData::shouldSerialize(const string& key, const string& value) const noexc
 }
 ```
 
-`toXML()` in `Data` calls `shouldSerialize()` for every entry in `fieldsData` before building the XML attribute list.
+`toXML()` in `Data` calls `shouldSerialize()` for every entry in `values` before building the XML attribute list.
 
 ---
 
 ## 9. Revertible — Snapshot and Restore
 
-`Revertible` is a **pure mixin**. It is not a `Data` subclass. Consumers pass references to their own `fieldsData` and, optionally, their `children` map at construction:
+`Revertible` is a **pure mixin**. It is not a `Data` subclass. Consumers pass a reference to their own `values` and, optionally, their `children` map at construction:
 
 ```cpp
 Device::Device(StringUMap& data) noexcept :
     Parent(data, COLLECTION_DEVICES, {COLLECTION_ELEMENT}),
-    Revertible(fieldsData, &children)
+    Revertible(values, &children)
 {}
 ```
 
 | Method | Effect |
 |--------|--------|
-| `swap()` | Moves `fieldsData` and all registered child collections into snapshot storage. No-op if already snapped or `fieldsData` is empty. |
+| `swap()` | Moves `values` and all registered child collections into snapshot storage. No-op if already snapped or `values` is empty. |
 | `revert()` | Swaps back and wipes orphaned snapshot children. No-op if no snapshot. |
 | `clearSnap()` | Discards snapshot without touching live fields or children. |
 
@@ -201,11 +204,17 @@ BoxButtonCollection
 
 `create(Data*)` is the only correct way to hand a `Data*` to a collection. Never `delete` a `Data*` that has been passed to `create()`.
 
+Registration in `CollectionHandler` is driven entirely by `BoxButton`:
+- **Constructor** — calls `registerToCollection()` on the owned `Data`.
+- **Destructor** — calls `unregisterFromCollection()` on the owned `Data`.
+
+When a primary key changes mid-edit, call `syncRegistration(oldId)` manually after updating the field value — it re-keys the entry in the handler without destroying or recreating the `BoxButton`.
+
 `BoxButtonCollection::swap(other)` exchanges internal contents in O(1).
 
 ### `toXML()`
 
-`Data::toXML()` is a **non-virtual orchestrator**. It filters `fieldsData` through `shouldSerialize()`, then calls the virtual `xmlBody()` hook for inner content:
+`Data::toXML()` is a **non-virtual orchestrator**. It filters `values` through `shouldSerialize()`, then calls the virtual `xmlBody()` hook for inner content:
 
 ```cpp
 // Self-closing (no body):
@@ -226,8 +235,8 @@ string MyData::xmlBody() const noexcept {
 
 ## 12. Use Cases by Concrete Type
 
-| Type | `fieldsData` | Properties | Child collections | Serialized |
-|------|-------------|------------|-------------------|------------|
+| Type | `values` | Properties | Child collections | Serialized |
+|------|----------|------------|-------------------|------------|
 | `Device` | name, port, id, … | — | `elements` | Yes — `<device>` |
 | `Element` | name, pin, position, … | strip descriptor (when strip) | — | Yes — `<element>` |
 | `Group` | name, defaultColor | — | link→Element items | Yes — `<group>` |

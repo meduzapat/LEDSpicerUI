@@ -25,14 +25,17 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-class TestRevertible : public Revertible {
+class TestRevertible : public LEDSpicerUI::Values, public Revertible {
 
 public:
 
-	using Revertible::Revertible;
+	TestRevertible(StringUMap& data, StringBoxButtonCollectionUMap* children = nullptr) :
+		Values(data),
+		Revertible(*this, children)
+	{}
 
 	// Expose snap storage for assertions only.
-	const StringUMap& getSnapFields() const noexcept { return snapFields; }
+	const StringUMap* getSnapFields() const noexcept { return snapFields.getValues(); }
 
 };
 
@@ -43,16 +46,15 @@ TEST(RevertibleTest, SwapAndRevert) {
 
 	TestRevertible r(data);
 
-	EXPECT_EQ(data, expected);
-	EXPECT_TRUE(r.getSnapFields().empty());
+	EXPECT_TRUE(r.getSnapFields()->empty());
 
-	r.swap();
-	EXPECT_TRUE(data.empty());
-	EXPECT_EQ(r.getSnapFields(), expected);
+	r.snapshot();
+	EXPECT_TRUE(r.getValues()->empty());
+	EXPECT_EQ(*r.getSnapFields(), expected);
 
 	r.revert();
-	EXPECT_EQ(data, expected);
-	EXPECT_TRUE(r.getSnapFields().empty());
+	EXPECT_EQ(*r.getValues(), expected);
+	EXPECT_TRUE(r.getSnapFields()->empty());
 }
 
 // swap() is a no-op when fields are already empty.
@@ -60,8 +62,8 @@ TEST(RevertibleTest, SwapNoOpOnEmptyFields) {
 	StringUMap data;
 	TestRevertible r(data);
 
-	r.swap();
-	EXPECT_TRUE(r.getSnapFields().empty());
+	r.snapshot();
+	EXPECT_TRUE(r.getSnapFields()->empty());
 }
 
 // swap() is a no-op when a snapshot already exists.
@@ -69,12 +71,12 @@ TEST(RevertibleTest, SwapNoOpWhenAlreadySnapped) {
 	StringUMap data{{"k", "v"}};
 	TestRevertible r(data);
 
-	r.swap();
-	const StringUMap firstSnap{r.getSnapFields()};
-	data["extra"] = "x";
-	r.swap();
+	r.snapshot();
+	const StringUMap firstSnap{*r.getSnapFields()};
+	r.setValue("extra", "x");
+	r.snapshot();
 
-	EXPECT_EQ(r.getSnapFields(), firstSnap);
+	EXPECT_EQ(*r.getSnapFields(), firstSnap);
 }
 
 // revert() is a no-op when no snapshot exists.
@@ -84,21 +86,20 @@ TEST(RevertibleTest, RevertNoOpWithoutSnap) {
 	TestRevertible r(data);
 
 	r.revert();
-	EXPECT_EQ(data, expected);
+	EXPECT_EQ(*r.getValues(), expected);
 }
 
 // clearSnap() discards snap without touching live fields.
 TEST(RevertibleTest, ClearSnapLeavesLiveFields) {
 	StringUMap data{{"k", "v"}};
-	const StringUMap expected{data};
 	TestRevertible r(data);
 
-	r.swap();
+	r.snapshot();
 	r.clearSnap();
 
-	EXPECT_TRUE(r.getSnapFields().empty());
+	EXPECT_TRUE(r.getSnapFields()->empty());
 	// Live fields were swapped out — clearSnap does not restore them.
-	EXPECT_TRUE(data.empty());
+	EXPECT_TRUE(r.getValues()->empty());
 }
 
 // nullptr children — construction and swap/revert work without crash.
@@ -106,9 +107,9 @@ TEST(RevertibleTest, NullChildrenSafe) {
 	StringUMap data{{"k", "v"}};
 	TestRevertible r(data, nullptr);
 
-	r.swap();
+	r.snapshot();
 	r.revert();
-	EXPECT_TRUE(r.getSnapFields().empty());
+	EXPECT_TRUE(r.getSnapFields()->empty());
 }
 
 // With children map — swap clears it, revert restores it.
@@ -120,9 +121,9 @@ TEST(RevertibleTest, SwapAndRevertWithChildren) {
 
 	TestRevertible r(data, &children);
 
-	r.swap();
-	EXPECT_TRUE(data.empty());
+	r.snapshot();
+	EXPECT_TRUE(r.getValues()->empty());
 
 	r.revert();
-	EXPECT_FALSE(data.empty());
+	EXPECT_FALSE(r.getValues()->empty());
 }

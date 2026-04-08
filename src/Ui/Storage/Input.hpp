@@ -44,7 +44,7 @@ public:
 			COLLECTION_INPUT_SOURCES,
 			COLLECTION_INPUT_LINKMAP
 		}),
-		Revertible(fieldsData, &children)
+		Revertible(*this, &children)
 	{}
 
 	virtual ~Input() = default;

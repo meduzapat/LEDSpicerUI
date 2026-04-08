@@ -41,6 +41,9 @@ public:
 
 	string_view getXmlTag()    const noexcept override { return "group"; }
 	string_view getCssClass() const noexcept override { return "GroupBoxButton"; }
+	CollectionHandler* getCollectionHandler() const noexcept override {
+		return CollectionHandler::getInstance(COLLECTION_GROUP);
+	}
 
 protected:
 

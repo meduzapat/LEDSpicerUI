@@ -70,7 +70,7 @@ TEST(InputMapLinkTest, CreateUniqueIdFromIdField) {
 		{ID,   "myid"},
 		{NAME, string("305") + FIELD_SEPARATOR + "Element P1_BUTTON1"}
 	};
-	InputMapLink link(data, COLLECTION_INPUT_LINKMAP);
+	InputMapLink link(data);
 	EXPECT_EQ("myid", link.createUniqueId());
 }
 
@@ -79,13 +79,13 @@ TEST(InputMapLinkTest, CreatePrettyNameParsesName) {
 		{ID,   "id"},
 		{NAME, string("305") + FIELD_SEPARATOR + "Element P1_BUTTON1"}
 	};
-	InputMapLink link(data, COLLECTION_INPUT_LINKMAP);
+	InputMapLink link(data);
 	EXPECT_NE(string::npos, link.createPrettyName().find("Element P1_BUTTON1"));
 }
 
 TEST(InputMapLinkTest, CssClass) {
 	StringUMap data{{ID, "x"}, {NAME, string("1") + FIELD_SEPARATOR + "Element X"}};
-	InputMapLink link(data, COLLECTION_INPUT_LINKMAP);
+	InputMapLink link(data);
 	EXPECT_EQ("LinkBoxButton", link.getCssClass());
 }
 

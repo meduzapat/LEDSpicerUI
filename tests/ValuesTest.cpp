@@ -69,3 +69,13 @@ TEST_F(ValuesTest, Wipe) {
 TEST_F(ValuesTest, GetValues) {
 	EXPECT_EQ(4, values->getValues()->size());
 }
+
+TEST_F(ValuesTest, Swap) {
+	StringUMap other{{"a", "1"}, {"b", "2"}};
+	Values v2(other);
+	values->swap(v2);
+	EXPECT_EQ("1",        values->getValue("a"));
+	EXPECT_EQ("2",        values->getValue("b"));
+	EXPECT_EQ("TestItem", v2.getValue("name"));
+	EXPECT_EQ("42",       v2.getValue("value"));
+}

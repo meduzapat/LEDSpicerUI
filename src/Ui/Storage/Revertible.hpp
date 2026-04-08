@@ -32,7 +32,7 @@ namespace LEDSpicerUI::Ui::Storage {
  * Pure mixin for objects that participate in the DialogFormHost EDIT lifecycle
  * and need safe cancel semantics when a type-selector combo changes mid-edit.
  *
- * Receives references to the consumer's own fieldsData and optionally its
+ * Receives a reference to the consumer's own values and optionally its
  * children map at construction.
  * Consumers are responsible for calling clearSnap() inside their wipe() and
  * revert() inside their tearDown().
@@ -47,11 +47,11 @@ class Revertible {
 public:
 
 	/**
-	 * @param fields   Reference to the consumer's fieldsData.
+	 * @param fields   Reference to the consumer's values.
 	 * @param children Pointer to the consumer's children map, or nullptr if none.
 	 */
 	Revertible(
-		StringUMap& fields,
+		Values& fields,
 		StringBoxButtonCollectionUMap* children = nullptr
 	) noexcept;
 
@@ -61,7 +61,7 @@ public:
 	 * Moves fields and all child collections into snapshot storage.
 	 * No-op if fields are empty or a snapshot already exists.
 	 */
-	virtual void swap();
+	virtual void snapshot();
 
 	/**
 	 * Restores fields and all child collections from snapshot.
@@ -78,13 +78,13 @@ public:
 protected:
 
 	/// Reference to the consumer's serializable field storage.
-	StringUMap& liveFields;
+	Values& liveFields;
 
 	/// Pointer to the consumer's children map. nullptr = no children.
 	StringBoxButtonCollectionUMap* liveChildren;
 
 	/// Snapshot of liveFields. Empty = no snapshot active.
-	StringUMap snapFields;
+	Values snapFields;
 
 	/// Child collections paired with their snapshot storage.
 	vector<std::pair<BoxButtonCollection*, BoxButtonCollection>> childrenSnaps;

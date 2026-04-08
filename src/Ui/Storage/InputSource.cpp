@@ -25,21 +25,21 @@
 using namespace LEDSpicerUI::Ui::Storage;
 
 InputSource::InputSource(StringUMap& data, const string& ownerId) noexcept :
-	Parent(data, {{COLLECTION_INPUT_MAPS, {}}}),
-	Revertible(fieldsData, &children)
+	Parent(data, {COLLECTION_INPUT_MAPS}),
+	Revertible(*this, &children)
 {
-	setProperty(UID, "src_" + std::to_string(++sourceCounter));
-	setProperty(PID, ownerId);
+	getProperties().setValue(UID, "src_" + std::to_string(++sourceCounter));
+	getProperties().setValue(PID, ownerId);
 	registerDependency(COLLECTION_ELEMENT, COLLECTION_INPUT_MAPS);
 	registerDependency(COLLECTION_GROUP,   COLLECTION_INPUT_MAPS);
 }
 
 const string InputSource::createUniqueId() const noexcept {
-	return Defaults::createCommonUniqueId({getProperty(PID), getValue(SOURCE)});
+	return Defaults::createCommonUniqueId({getProperties().getValue(PID), getValue(SOURCE)});
 }
 
 const string InputSource::createPrettyName() const noexcept {
-	return getProperty(NAME);
+	return getProperties().getValue(NAME);
 }
 
 const string InputSource::createTooltip() const noexcept {
@@ -48,7 +48,7 @@ const string InputSource::createTooltip() const noexcept {
 }
 
 CollectionHandler* InputSource::getCollectionHandler() const noexcept {
-	return CollectionHandler::getInstance(COLLECTION_INPUT_SOURCES + getProperty(PID));
+	return CollectionHandler::getInstance(COLLECTION_INPUT_SOURCES + getProperties().getValue(PID));
 }
 
 void InputSource::wipe() noexcept {

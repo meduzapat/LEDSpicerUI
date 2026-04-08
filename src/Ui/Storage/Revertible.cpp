@@ -25,7 +25,7 @@
 using namespace LEDSpicerUI::Ui::Storage;
 
 Revertible::Revertible(
-	StringUMap& fields,
+	Values& fields,
 	StringBoxButtonCollectionUMap* children
 ) noexcept :
 	liveFields(fields),
@@ -40,29 +40,30 @@ Revertible::~Revertible() {
 	clearSnap();
 }
 
-void Revertible::swap() {
+void Revertible::snapshot() {
 
-	if (liveFields.empty() or not snapFields.empty()) return;
+	if (liveFields.getValues()->empty() or not snapFields.getValues()->empty()) return;
 
 	if (liveChildren) {
 		for (auto& [id, collection] : *liveChildren) {
 			for (auto btn : collection) {
-				if (auto handler{btn->getData()->getCollectionHandler()}; handler) handler->remove(btn->getData());
+				if (auto handler{btn->getData()->getCollectionHandler()}; handler)
+					handler->remove(btn->getData());
 			}
 		}
 	}
 
-	std::swap(liveFields, snapFields);
+	liveFields.swap(snapFields);
 	for (auto& [live, snap] : childrenSnaps)
 		live->swap(snap);
 }
 
 void Revertible::revert() {
 
-	if (snapFields.empty()) return;
+	if (snapFields.getValues()->empty()) return;
 
-	std::swap(liveFields, snapFields);
-	snapFields.clear();
+	liveFields.swap(snapFields);
+	snapFields.wipe();
 	for (auto& [live, snap] : childrenSnaps) {
 		live->swap(snap);
 		snap.wipe();
@@ -71,13 +72,14 @@ void Revertible::revert() {
 	if (liveChildren) {
 		for (auto& [id, collection] : *liveChildren) {
 			for (auto btn : collection)
-				if (auto handler{btn->getData()->getCollectionHandler()}; handler) handler->add(btn->getData());
+				if (auto handler{btn->getData()->getCollectionHandler()}; handler)
+					handler->add(btn->getData());
 		}
 	}
 }
 
 void Revertible::clearSnap() noexcept {
-	snapFields.clear();
+	snapFields.wipe();
 	for (auto& [live, snap] : childrenSnaps)
 		snap.wipe();
 }

@@ -4,12 +4,12 @@ using namespace LEDSpicerUI::Ui::Storage;
 
 const string Restrictor::createPrettyName() const noexcept {
 	string
-		name(fieldsData.at(NAME)),
+		name(getValue(NAME)),
 		r(Defaults::restrictorsInfo.at(name).name);
 	if (Defaults::isIdUser(name, false))
-		r += " Id: " + fieldsData.at(ID);
+		r += " Id: " + getValue(ID);
 	if (Defaults::isSerial(name, false))
-		r += " Port: " + (fieldsData.at(PORT).empty() ? "<autodetect>" : fieldsData.at(PORT));
+		r += " Port: " + getValue(PORT, "<autodetect>");
 	return r;
 }
 

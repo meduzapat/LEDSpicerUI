@@ -131,18 +131,3 @@ TEST_F(InputTest, WipeClearsFields) {
 	rootInput->wipe();
 	EXPECT_TRUE(rootInput->getValues()->empty());
 }
-
-// swap moves fields into snap, revert restores them.
-TEST_F(InputTest, SwapAndRevert) {
-	const StringUMap before(*rootInput->getValues());
-	rootInput->swap();
-	EXPECT_TRUE(rootInput->getValues()->empty());
-	rootInput->revert();
-	EXPECT_EQ(before, *rootInput->getValues());
-}
-
-int main(int argc, char** argv) {
-	auto app = Gtk::Application::create(argc, argv, "org.test");
-	::testing::InitGoogleTest(&argc, argv);
-	return RUN_ALL_TESTS();
-}

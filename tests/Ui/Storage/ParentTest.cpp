@@ -30,18 +30,20 @@ class TestData : public Data {
 
 public:
 
-	TestData(StringUMap& d) : Data(d, "") {}
-	string_view getCssClass() const noexcept override { return ""; }
-	string_view getXmlTag()   const noexcept override { return "item"; }
+	TestData(StringUMap& d) noexcept : Data(d) {}
+	constexpr string_view getCssClass() const noexcept override { return ""; }
+	constexpr string_view getXmlTag()   const noexcept override { return "item"; }
+	CollectionHandler* getCollectionHandler() const noexcept override { return nullptr; }
 };
 
 struct TestParent : Parent {
 
 	TestParent(StringUMap& d, const vector<string>& ids)
-		: Parent(d, "TEST_COLLECTION", ids) {}
+		: Parent(d, ids) {}
 
-	string_view getCssClass() const noexcept override { return ""; }
-	string_view getXmlTag()   const noexcept override { return "parent"; }
+	constexpr string_view getCssClass() const noexcept override { return ""; }
+	constexpr string_view getXmlTag()   const noexcept override { return "parent"; }
+	CollectionHandler* getCollectionHandler() const noexcept override { return nullptr; }
 	using Parent::registerDependency;
 };
 

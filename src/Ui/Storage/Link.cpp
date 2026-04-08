@@ -71,7 +71,7 @@ string_view Link::getXmlTag() const noexcept {
 
 const string Link::toXML() const noexcept {
 	StringUMap values{{linkInfo.key, linkInfo.link->createUniqueId()}};
-	values.insert(fieldsData.begin(), fieldsData.end());
+	values.insert(begin(), end());
 	return createOpeningXML(string(linkInfo.type), values, {}, true);
 }
 

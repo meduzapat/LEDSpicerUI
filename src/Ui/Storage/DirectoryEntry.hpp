@@ -45,7 +45,7 @@ public:
 	 */
 	DirectoryEntry(
 		StringUMap&     data,
-		DirectoryEntry* parent,
+		DirectoryEntry* parent
 	) noexcept;
 
 	virtual ~DirectoryEntry() = default;
@@ -57,6 +57,8 @@ public:
 	string_view getXmlTag()         const noexcept override { return ""; }
 	const string& getName()         const noexcept override;
 	const string& getFsId()         const noexcept override;
+
+	CollectionHandler* getCollectionHandler() const noexcept override { return nullptr; }
 
 	/**
 	 * @return true if this directory contains no items.

@@ -25,7 +25,7 @@
 using namespace LEDSpicerUI::Ui::Storage;
 
 const string Process::createPrettyName() const noexcept {
-	return string("Process: " + fieldsData.at(getPrimaryKey()) + " System: " + fieldsData.at(PARAM_SYSTEM));
+	return string("Process: " + getValue(getPrimaryKey()) + " System: " + getValue(PARAM_SYSTEM));
 }
 
 CollectionHandler* Process::getCollectionHandler() const noexcept {

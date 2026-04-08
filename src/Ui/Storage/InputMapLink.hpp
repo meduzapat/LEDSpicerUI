@@ -42,7 +42,7 @@ public:
 	const string createPrettyName() const noexcept override;
 	const string createTooltip()    const noexcept override;
 	const string createUniqueId()   const noexcept override;
-
+	CollectionHandler* getCollectionHandler() const noexcept override { return nullptr; }
 };
 
 } // namespace

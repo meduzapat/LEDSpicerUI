@@ -29,9 +29,10 @@ using namespace LEDSpicerUI::Constants;
 
 class TargetData : public Data {
 public:
-	TargetData(StringUMap& d) : Data(d, "") {}
+	TargetData(StringUMap& d) : Data(d) {}
 	constexpr string_view getCssClass() const noexcept override { return "TargetClass"; }
 	constexpr string_view getXmlTag()   const noexcept override { return "target"; }
+	CollectionHandler* getCollectionHandler() const noexcept override { return nullptr; }
 };
 
 class LinkTest : public ::testing::Test {

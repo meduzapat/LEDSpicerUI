@@ -87,7 +87,7 @@ public:
 	/**
 	 * @return a copy of the internal data but adding.
 	 */
-	StringUMap copyValues() const noexcept;
+	virtual StringUMap copyValues() const noexcept;
 
 	/**
 	 * Clears all serializable fields.
@@ -100,6 +100,12 @@ public:
 	StringUMap::const_iterator end()    const noexcept { return values.end();    }
 	StringUMap::const_iterator cbegin() const noexcept { return values.cbegin(); }
 	StringUMap::const_iterator cend()   const noexcept { return values.cend();   }
+
+	/**
+	 * Swaps the internal data with another Values object.
+	 * @param other the other Values object to swap with.
+	 */
+	void swap(Values& other) noexcept { std::swap(values, other.values); }
 
 protected:
 

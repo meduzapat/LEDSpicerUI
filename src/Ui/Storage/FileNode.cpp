@@ -32,30 +32,30 @@ FileNode::FileNode(
 	Parent(data, childIds),
 	DirNode(parent)
 {
-	setProperty(FILENAME, fieldsData.count(FILENAME) ? fieldsData.at(FILENAME) : "");
-	setProperty(PID, parent ? parent->getFsId() : "");
-	setProperty(UID, "file_" + std::to_string(++fileCounter));
-	fieldsData.erase(FILENAME);
+	properties.setValue(FILENAME, getValue(FILENAME));
+	properties.setValue(PID, parent ? parent->getFsId() : emptyString);
+	properties.setValue(UID, "f_" + std::to_string(++fileCounter));
+	unSet(FILENAME);
 }
 
 const string FileNode::createUniqueId() const noexcept {
 	return Defaults::createCommonUniqueId({
-		parent ? parent->getFsId() : "",
-		getProperty(FILENAME)
+		parent ? parent->getFsId() : emptyString,
+		properties.getValue(FILENAME)
 	});
 }
 
 const string& FileNode::getName() const noexcept {
-	return getProperty(FILENAME);
+	return properties.getValue(FILENAME);
 }
 
 const string& FileNode::getFsId() const noexcept {
-	return getProperty(UID);
+	return properties.getValue(UID);
 }
 
 const string FileNode::toXML() const noexcept {
 	StringUMap attrs;
-	for (const auto& [k, v] : fieldsData)
+	for (const auto& [k, v] : *getValues())
 		if (shouldSerialize(k, v))
 			attrs.emplace(k, v);
 	string r(XMLHelper::xmlHeader(string(getXmlTag()), attrs));

@@ -59,6 +59,8 @@ public:
 	 */
 	const string toXML() const noexcept override;
 
+	CollectionHandler* getCollectionHandler() const noexcept override { return nullptr; }
+
 protected:
 
 	/// Counter for stable id generation.

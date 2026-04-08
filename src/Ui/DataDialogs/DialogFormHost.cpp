@@ -66,7 +66,7 @@ bool DialogFormHost::handleTypeSwitch(const OrdenableFlowBox* box, const string&
 	// New data or replaced.
 	previousName = newName;
 	// backup
-	static_cast<Storage::Revertible*>(currentData)->swap();
+	static_cast<Storage::Revertible*>(currentData)->snapshot();
 	onEmpty();
 	onSelected();
 	return true;

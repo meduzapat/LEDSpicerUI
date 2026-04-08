@@ -45,7 +45,7 @@ class TestFileNode : public FileNode {
 public:
 
 	TestFileNode(StringUMap& data, DirNode* parent) :
-		FileNode(data, parent, "test", {}) {}
+		FileNode(data, parent, {}) {}
 
 	constexpr string_view getCssClass() const noexcept override { return "test"; }
 	constexpr string_view getXmlTag()   const noexcept override { return "test"; }
@@ -101,7 +101,7 @@ TEST_F(FileNodeTest, PidMatchesParentFsId) {
 TEST_F(FileNodeTest, UidSetAtConstruction) {
 	const string uid(rootFile->getProperties().getValue(UID));
 	EXPECT_FALSE(uid.empty());
-	EXPECT_EQ(0, uid.find("file_"));
+	EXPECT_EQ(0, uid.find("f_"));
 }
 
 // getFsId() is an alias for getProperty(UID).

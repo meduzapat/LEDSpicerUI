@@ -144,7 +144,7 @@ void DialogInput::storeData() {
 	const string id(selectorCombo->get_active_id());
 
 	currentData->setValue(NAME, id);
-	currentData->setProperty(FILENAME, entryInputName->get_text());
+	currentData->getProperties().setValue(FILENAME, entryInputName->get_text());
 
 	if (Defaults::inputHasFlag(id, Defaults::INPUT_HAS_BLINK))
 		currentData->setValue(BLINK, switchInputBlink->get_active() ? "true" : "false");

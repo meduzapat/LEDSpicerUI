@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      TestData.cpp
+ * @file      DataTest.cpp
  * @since     Mar 27, 2026
  * @author    Patricio A. Rossi (MeduZa)
  *
@@ -25,7 +25,7 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-// A simple Data subclass for testing without collection handler.
+// A simple Data subclass without a collection handler.
 class TestData : public Data {
 
 public:
@@ -42,7 +42,7 @@ protected:
 	}
 };
 
-// A Data subclass that registers itself into a collection "t".
+// A Data subclass that registers into collection "t".
 class RegisteringData : public Data {
 
 public:
@@ -61,21 +61,22 @@ protected:
 
 	void SetUp() override {
 		StringUMap d{
-			{"name", "TestItem"},
-			{"type", "button"},
-			{"value", "42"},
+			{"name",    "TestItem"},
+			{"type",    "button"},
+			{"value",   "42"},
 			{"ignored", "yes"}
 		};
 		data = std::make_unique<TestData>(d);
 	}
+
 	void TearDown() override {
 		data.reset();
 		CollectionHandler::purgeAll();
 	}
+
 	std::unique_ptr<TestData> data;
 };
 
-// Test getValue overrides.
 TEST_F(DataTest, GetValue) {
 	EXPECT_EQ("TestItem", data->getValue("name"));
 	EXPECT_EQ("",         data->getValue("nonexistent"));
@@ -83,37 +84,30 @@ TEST_F(DataTest, GetValue) {
 	EXPECT_EQ("yes",      data->getValue("ignored"));
 }
 
-// Test setValue overrides.
 TEST_F(DataTest, SetValue) {
 	data->setValue("key", "value");
-	EXPECT_EQ("value",   data->getValue("key"));
+	EXPECT_EQ("value", data->getValue("key"));
 	data->setValue("key", "NewName");
 	EXPECT_EQ("NewName", data->getValue("key"));
 }
 
 TEST_F(DataTest, UnSetPrimaryKeyRemovesFromCollection) {
-	// 1. Create with two values, one of them is the primary key
 	StringUMap d{{"name", "TestPrimary"}, {"extra", "value"}};
 	RegisteringData item(d);
-
 	auto ch = CollectionHandler::getInstance("t");
-
-	// 2. Register it.
 	ch->add(&item);
 
-	// 3. Delete a NON-primary key value → should stay registered
+	// Non-primary key removal — stays registered.
 	item.unSet("extra");
 	EXPECT_TRUE(ch->isSet(&item));
 	EXPECT_EQ("", item.getValue("extra"));
-	EXPECT_EQ(0, item.getValues()->count("extra"));
+	EXPECT_EQ(0,  item.getValues()->count("extra"));
 
-	// 4. Delete the PRIMARY key value → should unregister
+	// Primary key removal — unregisters.
 	item.unSet("name");
 	EXPECT_FALSE(ch->isSet(&item));
-
-	// 5. Verify the primary key was also removed from the data
 	EXPECT_EQ("", item.getValue("name"));
-	EXPECT_EQ(0, item.getValues()->count("name"));
+	EXPECT_EQ(0,  item.getValues()->count("name"));
 }
 
 TEST_F(DataTest, WipeRemovesFromCollection) {
@@ -121,8 +115,18 @@ TEST_F(DataTest, WipeRemovesFromCollection) {
 	StringUMap d{};
 	RegisteringData item(d);
 	item.setValue("name", "MyItem");
+	ch->add(&item);
 	item.wipe();
 	EXPECT_FALSE(ch->isSet(&item));
+	EXPECT_TRUE(item.getValues()->empty());
+}
+
+// Wipe on an item that was never registered is safe (no crash, no-op).
+TEST_F(DataTest, WipeUnregisteredItemSafe) {
+	StringUMap d{};
+	RegisteringData item(d);
+	item.setValue("name", "Ghost");
+	EXPECT_NO_FATAL_FAILURE(item.wipe());
 	EXPECT_TRUE(item.getValues()->empty());
 }
 
@@ -168,30 +172,58 @@ TEST_F(DataTest, OverwriteProperty) {
 	EXPECT_EQ("updated", data->getProperties().getValue("k"));
 }
 
-// copyValues returns empty when no collection — nothing to check uniqueness against.
+// copyValues returns empty when there is no collection handler.
 TEST_F(DataTest, CopyValuesNoCollection) {
 	EXPECT_TRUE(data->copyValues().empty());
 }
 
-// Primary key change re-keys the registration.
-TEST_F(DataTest, SetValueReplacesOnPrimaryKeyChange) {
-	auto ch = CollectionHandler::getInstance("t");
-	auto d{StringUMap{}};
-	RegisteringData item(d);
-	item.setValue("name", "OldName");
-	item.setValue("name", "NewName");
-	EXPECT_FALSE(ch->isIdSet("OldName"));
-	EXPECT_TRUE(ch->isIdSet("NewName"));
-}
-
-// copyValues finds non-colliding ID without touching the original.
+// copyValues produces a non-colliding ID and leaves the original untouched.
 TEST_F(DataTest, CopyValuesFindsUniqueId) {
 	auto ch = CollectionHandler::getInstance("t");
 	StringUMap d{};
 	RegisteringData item(d);
 	item.setValue("name", "Item");
+	ch->add(&item);
 	auto copy = item.copyValues();
 	ASSERT_FALSE(copy.empty());
 	EXPECT_FALSE(ch->isIdSet(copy.at("name")));
 	EXPECT_EQ("Item", item.getValue("name"));
+}
+
+// syncRegistration re-keys the handler entry when the primary key changes.
+TEST_F(DataTest, SyncRegistrationReKeys) {
+	auto ch = CollectionHandler::getInstance("t");
+	StringUMap d{};
+	RegisteringData item(d);
+	item.setValue("name", "OldName");
+	ch->add(&item);
+	EXPECT_TRUE(ch->isIdSet("OldName"));
+
+	const string oldId{item.createUniqueId()};
+	item.setValue("name", "NewName");
+	item.syncRegistration(oldId);
+
+	EXPECT_FALSE(ch->isIdSet("OldName"));
+	EXPECT_TRUE(ch->isIdSet("NewName"));
+}
+
+// syncRegistration is a no-op when the ID has not changed.
+TEST_F(DataTest, SyncRegistrationNoOpWhenSameId) {
+	auto ch = CollectionHandler::getInstance("t");
+	StringUMap d{};
+	RegisteringData item(d);
+	item.setValue("name", "Name");
+	ch->add(&item);
+	item.syncRegistration(item.createUniqueId());
+	EXPECT_TRUE(ch->isIdSet("Name"));
+}
+
+// syncRegistration with an empty oldId acts as a plain registration.
+TEST_F(DataTest, SyncRegistrationEmptyOldIdRegisters) {
+	auto ch = CollectionHandler::getInstance("t");
+	StringUMap d{};
+	RegisteringData item(d);
+	item.setValue("name", "Fresh");
+	item.syncRegistration("");
+	EXPECT_TRUE(ch->isIdSet("Fresh"));
 }

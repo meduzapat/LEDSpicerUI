@@ -25,10 +25,10 @@
 using namespace LEDSpicerUI::Ui::Storage;
 
 const string RestrictorMap::createPrettyName() const noexcept {
-	string name("Player " + fieldsData.at(PLAYER) + " Joystick " + fieldsData.at(JOYSTICK));
+	string name("Player " + getValue(PLAYER) + " Joystick " + getValue(JOYSTICK));
 	// Split hardware name out of additional info and check for multi.
 	if (not getValue(RESTRICTOR_INTERFACE).empty())
-		name += " [ interface " + fieldsData.at(RESTRICTOR_INTERFACE) + "]";
+		name += " [ interface " + getValue(RESTRICTOR_INTERFACE) + "]";
 	return name;
 }
 
