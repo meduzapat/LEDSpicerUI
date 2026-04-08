@@ -44,7 +44,6 @@ void DialogForm::createItems(StringUMapVector& rawCollection, XMLHelper* values)
 		action = Actions::LOAD;
 		clearForm();
 		currentData = createData(rawItem);
-		currentData->setUp();
 		wireChildrenDialogs();
 		// Sanity check by load and unload, this will sanitize (or error out) the data.
 		retrieveData();
@@ -66,7 +65,6 @@ void DialogForm::createItems(StringUMapVector& rawCollection, XMLHelper* values)
 		addButtons(b);
 		createSubItems(values);
 		disconnectChildrenDialogs();
-		currentData->tearDown();
 	}
 	currentData = nullptr;
 	if (not errors.empty()) {
@@ -112,6 +110,7 @@ LEDSpicerUI::Ui::Storage::Data* DialogForm::createData() noexcept {
 }
 
 void DialogForm::wireChildrenDialogs() noexcept {
+	currentData->setUp();
 	auto parent{dynamic_cast<Storage::Parent*>(currentData)};
 	if (not parent) return;
 	for (auto& [collection, items] : parent->getChildren()) {
@@ -121,10 +120,11 @@ void DialogForm::wireChildrenDialogs() noexcept {
 
 void DialogForm::disconnectChildrenDialogs() noexcept {
 	auto parent{dynamic_cast<Storage::Parent*>(currentData)};
-	if (not parent) return;
-	for (auto& [collection, items] : parent->getChildren()) {
-		dialogsMap.at(collection)->setOwner(nullptr, nullptr);
+	if (parent) {
+		for (auto& [collection, items] : parent->getChildren())
+			dialogsMap.at(collection)->setOwner(nullptr, nullptr);
 	}
+	currentData->tearDown();
 }
 
 void DialogForm::setSignalAdd(Gtk::Button* btnAdd) noexcept {
@@ -198,7 +198,6 @@ void DialogForm::onAddClicked() noexcept {
 	set_title("Add New " + string(getType()));
 	btnApply->set_label("Create");
 	currentData = createData();
-	currentData->setUp();
 	wireChildrenDialogs();
 	// Run Dialog.
 	if (run() == Gtk::ResponseType::RESPONSE_APPLY) {
@@ -212,14 +211,11 @@ void DialogForm::onAddClicked() noexcept {
 		box->add(bBox);
 		afterCreate(bBox);
 		disconnectChildrenDialogs();
-		currentData->tearDown();
 	}
 	// Create voided, destroy form.
 	else {
 		disconnectChildrenDialogs();
-		currentData->tearDown();
 		delete currentData;
-
 	}
 	currentData = nullptr;
 	hide();
@@ -229,7 +225,6 @@ void DialogForm::onEditClicked(Storage::BoxButton& boxButton) noexcept {
 	action = Actions::EDIT;
 	clearForm();
 	currentData = boxButton.getData();
-	currentData->setUp();
 	wireChildrenDialogs();
 	// Set label and title.
 	set_title("Edit " + string(getType()) + " " + currentData->createPrettyName());
@@ -246,7 +241,6 @@ void DialogForm::onEditClicked(Storage::BoxButton& boxButton) noexcept {
 		for (auto childDialog : childDialogs) childDialog->reindex();
 	}
 	disconnectChildrenDialogs();
-	currentData->tearDown();
 	currentData = nullptr;
 	hide();
 }
@@ -254,12 +248,11 @@ void DialogForm::onEditClicked(Storage::BoxButton& boxButton) noexcept {
 void DialogForm::onDelClicked(Storage::BoxButton& boxButton) noexcept {
 
 	currentData = boxButton.getData();
-	currentData->setUp();
-	wireChildrenDialogs();
+//	wireChildrenDialogs();
 	afterDeleteConfirmation(boxButton);
 	Defaults::markDirty();
 	box->remove(boxButton);
-	disconnectChildrenDialogs();
+//	disconnectChildrenDialogs();
 	items->remove(boxButton);
 	currentData = nullptr;
 }
