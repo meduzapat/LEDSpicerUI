@@ -28,7 +28,7 @@ InputSource::InputSource(StringUMap& data, const string& ownerId) noexcept :
 	Parent(data, {COLLECTION_INPUT_MAPS}),
 	Revertible(*this, &children)
 {
-	getProperties().setValue(UID, "src_" + std::to_string(++sourceCounter));
+	getProperties().setValue(UID, "s_" + std::to_string(++sourceCounter));
 	getProperties().setValue(PID, ownerId);
 	registerDependency(COLLECTION_ELEMENT, COLLECTION_INPUT_MAPS);
 	registerDependency(COLLECTION_GROUP,   COLLECTION_INPUT_MAPS);

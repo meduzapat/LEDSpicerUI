@@ -22,6 +22,7 @@
 
 #include "DialogFormHost.hpp"
 #include "Storage/Device.hpp"
+#include "DialogElement.hpp"
 
 #pragma once
 
@@ -42,13 +43,10 @@ public:
 
 	static constexpr string_view noDevice {"Select Device"};
 
-	void load(XMLHelper* values) override;
-	void wireChildren() override;
-	void disconnectChildren() override;
-	Storage::CollectionHandler* getCollectionHandler() const override;
-	void resetForm() noexcept override;
+	void load(XMLHelper* values) noexcept override;
 	void isValid() const override;
-	void storeData() noexcept override;
+	void resetForm()    noexcept override;
+	void storeData()    noexcept override;
 	void retrieveData() noexcept override;
 	const string createUniqueId() const noexcept override;
 
@@ -62,17 +60,13 @@ protected:
 	Gtk::Label*      brief           = nullptr;
 	Gtk::Button*     btnAddElement   = nullptr;
 
-	DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
+	DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept;
 
-	void createSubItems(XMLHelper* values) override;
-
+	void createSubItems(XMLHelper* values) noexcept override;
 	string_view getType() const noexcept override;
-
 	Storage::Data* createData(StringUMap& rawData) noexcept override;
-
-	void onEmpty() override;
-
-	void onSelected() override;
+	void onEmpty() noexcept override;
+	void onSelected() noexcept override;
 };
 
 } // namespace

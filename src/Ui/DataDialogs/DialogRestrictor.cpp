@@ -24,7 +24,7 @@
 
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
-DialogRestrictor::DialogRestrictor(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
+DialogRestrictor::DialogRestrictor(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept:
 	DialogFormHost(obj, builder)
 {
 
@@ -86,10 +86,6 @@ void DialogRestrictor::load(XMLHelper* values) {
 
 void DialogRestrictor::createSubItems(XMLHelper* values) {
 	DialogRestrictorMap::getInstance()->load(values);
-}
-
-LEDSpicerUI::Ui::Storage::CollectionHandler* DialogRestrictor::getCollectionHandler() const {
-	return LEDSpicerUI::Ui::Storage::CollectionHandler::getInstance(COLLECTION_RESTRICTORS);
 }
 
 void DialogRestrictor::resetForm() {

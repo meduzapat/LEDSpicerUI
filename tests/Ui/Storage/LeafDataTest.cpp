@@ -21,13 +21,54 @@
  */
 
 #include <gtest/gtest.h>
+#include "Storage/Element.hpp"
 #include "Storage/RestrictorMap.hpp"
+#include "Storage/InputMap.hpp"
 #include "Storage/InputMapLink.hpp"
 #include "Storage/Process.hpp"
 
 using namespace LEDSpicerUI::Ui::Storage;
 using namespace LEDSpicerUI::Constants;
 using LEDSpicerUI::Defaults;
+
+// Element -------------------------------------------------------------
+
+TEST(ElementTest, CssClass) {
+	StringUMap data{{NAME, "P1_BUTTON1"}};
+	Element e(data);
+	EXPECT_EQ("ElementBoxButton", e.getCssClass());
+}
+
+TEST(ElementTest, XmlTag) {
+	StringUMap data{{NAME, "P1_BUTTON1"}};
+	Element e(data);
+	EXPECT_EQ("element", e.getXmlTag());
+}
+
+TEST(ElementTest, CreatePrettyNamePlain) {
+	StringUMap data{{NAME, "P1_BUTTON1"}};
+	Element e(data);
+	EXPECT_EQ("P1_BUTTON1", e.createPrettyName());
+}
+
+TEST(ElementTest, CreatePrettyNameWithStripDescriptor) {
+	StringUMap data{{NAME, "LED_STRIP"}, {STRIPSIZE, "12"}};
+	Element e(data);
+	e.getProperties().setValue("stripDescriptor", "1");
+	EXPECT_NE(string::npos, e.createPrettyName().find("[12]"));
+}
+
+TEST(ElementTest, BrightnessDefaultNotSerialized) {
+	StringUMap data{{NAME, "P1_BUTTON1"}, {BRIGHTNESS, DEFAULT_BRIGHTNESS}};
+	Element e(data);
+	EXPECT_EQ(string::npos, e.toXML().find(BRIGHTNESS));
+}
+
+TEST(ElementTest, BrightnessNonDefaultSerialized) {
+	StringUMap data{{NAME, "P1_BUTTON1"}, {BRIGHTNESS, "50"}};
+	Element e(data);
+	EXPECT_NE(string::npos, e.toXML().find(BRIGHTNESS));
+}
 
 // RestrictorMap -------------------------------------------------------
 
@@ -61,6 +102,45 @@ TEST(RestrictorMapTest, CssClass) {
 	StringUMap data{{PLAYER, "1"}, {JOYSTICK, "1"}, {RESTRICTOR_INTERFACE, ""}};
 	RestrictorMap r(data);
 	EXPECT_EQ("RestrictorMapBoxButton", r.getCssClass());
+}
+
+// InputMap ------------------------------------------------------------
+
+TEST(InputMapTest, CssClass) {
+	StringUMap targetData{{NAME, "P1_BUTTON1"}};
+	Element target(targetData);
+	StringUMap data{{TRIGGER, "305"}, {TYPE, "Element"}, {TARGET, "P1_BUTTON1"}};
+	InputMap im(data, TARGET, &target);
+	EXPECT_EQ("InputMapBoxButton", im.getCssClass());
+}
+
+TEST(InputMapTest, CreatePrettyName) {
+	StringUMap targetData{{NAME, "P1_BUTTON1"}};
+	Element target(targetData);
+	StringUMap data{{TRIGGER, "305"}, {TYPE, "Element"}, {TARGET, "P1_BUTTON1"}};
+	InputMap im(data, TARGET, &target);
+	const string pretty(im.createPrettyName());
+	EXPECT_NE(string::npos, pretty.find("305"));
+	EXPECT_NE(string::npos, pretty.find("Element"));
+	EXPECT_NE(string::npos, pretty.find("P1_BUTTON1"));
+}
+
+TEST(InputMapTest, CreateUniqueIdUsesPidAndTrigger) {
+	StringUMap targetData{{NAME, "P1_BUTTON1"}};
+	Element target(targetData);
+	StringUMap data{{TRIGGER, "305"}, {TYPE, "Element"}, {TARGET, "P1_BUTTON1"}};
+	InputMap im(data, TARGET, &target);
+	im.getProperties().setValue(PID, "s_1");
+	EXPECT_EQ(Defaults::createCommonUniqueId({"s_1", "305"}), im.createUniqueId());
+}
+
+TEST(InputMapTest, CreateUniqueIdEmptyPidWithoutProperty) {
+	StringUMap targetData{{NAME, "P1_BUTTON1"}};
+	Element target(targetData);
+	StringUMap data{{TRIGGER, "305"}, {TYPE, "Element"}, {TARGET, "P1_BUTTON1"}};
+	InputMap im(data, TARGET, &target);
+	// PID not set — unique ID uses empty string for PID segment.
+	EXPECT_EQ(Defaults::createCommonUniqueId({"", "305"}), im.createUniqueId());
 }
 
 // InputMapLink --------------------------------------------------------

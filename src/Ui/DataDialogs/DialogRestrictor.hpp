@@ -22,6 +22,7 @@
 
 #include "DialogFormHost.hpp"
 #include "Storage/Restrictor.hpp"
+#include "DialogRestrictorMap.hpp"
 
 #pragma once
 
@@ -41,7 +42,6 @@ public:
 	virtual ~DialogRestrictor();
 
 	void load(XMLHelper* values) noexcept override;
-	Storage::CollectionHandler* getCollectionHandler() const override;
 	void resetForm() noexcept override;
 	void isValid() const override;
 	void storeData() noexcept override;
@@ -64,21 +64,17 @@ protected:
 	/// Restrictor ways icon map keyed by Ways enum value.
 	std::unordered_map<Defaults::Ways, Gtk::FlowBoxChild*> waysIcons;
 
-	Gtk::ListStore* idListstore = nullptr;
+	Gtk::ListStore* idListstore      = nullptr;
+	Gtk::Label*     brief            = nullptr;
+	Gtk::Button*    btnAddRestrictorMap = nullptr;
 
-	Gtk::Label* brief = nullptr;
+	DialogRestrictor(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept;
 
-	Gtk::Button* btnAddRestrictorMap = nullptr;
-
-	DialogRestrictor(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
-
-	void createSubItems(XMLHelper* values) override;
+	void createSubItems(XMLHelper* values) noexcept override;
 	string_view getType() const noexcept override;
 	Storage::Data* createData(StringUMap& rawData) noexcept override;
-
-	void onEmpty() override;
-
-	void onSelected() override;
+	void onEmpty() noexcept override;
+	void onSelected() noexcept override;
 };
 
 } // namespace

@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      DialogElement.h
+ * @file      DialogElement.hpp
  * @since     Mar 13, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
@@ -45,7 +45,7 @@ public:
 
 	virtual ~DialogElement() = default;
 
-	void load(XMLHelper* values) override;
+	void load(XMLHelper* values) noexcept override;
 	void clearForm() noexcept override;
 	void isValid() const override;
 	void storeData() noexcept override;
@@ -56,90 +56,78 @@ public:
 	 * Sets the current number of pins.
 	 * @param newSize
 	 */
-	void changeNumberOfPins(const uint16_t newSize);
+	void changeNumberOfPins(const uint16_t newSize) noexcept;
 
 	/**
 	 * Redraw the pin box.
 	 */
-	void drawPins();
+	void drawPins() noexcept;
 
 protected:
 
 	string defaultRGBFormat;
 
 	Gtk::Entry
-		* elementName = nullptr,
-	// Single color.
-		* pin = nullptr,
-	// RGB.
-		* pinR = nullptr,
-		* pinG = nullptr,
-		* pinB = nullptr,
-	// onTime.
-		* timeOn = nullptr,
-	// Multi RGB.
-		* positionsMRGB = nullptr,
-	// Continuous RGB.
-		* positionRGB = nullptr,
-	// LED Strip.
-		* sizeStrip     = nullptr,
+		* elementName   = nullptr,
+		* pin           = nullptr, /// Single color.
+		* pinR          = nullptr,
+		* pinG          = nullptr,
+		* pinB          = nullptr,
+		* timeOn        = nullptr,
+		* positionsMRGB = nullptr, /// Multi RGB.
+		* positionRGB   = nullptr, /// Continuous RGB.
+		* sizeStrip     = nullptr, /// LED Strip.
 		* positionStrip = nullptr;
 
 	/// Number of pins provided by the current hardware.
 	uint16_t numberOfPins = 0;
 
 	/// The tabs to select the different connection modes.
-	Gtk::Notebook* notebookDeviceConnections;
+	Gtk::Notebook* notebookDeviceConnections = nullptr;
 
-	Gtk::ToggleButton* solenoid  = nullptr;
-	Gtk::Button* btnDefaultColor = nullptr;
-	Gtk::FlowBox* pinsBox        = nullptr;
+	Gtk::ToggleButton* solenoid      = nullptr;
+	Gtk::Button*       btnDefaultColor = nullptr;
+	Gtk::FlowBox*      pinsBox        = nullptr;
 
-	// Only used by the UI
-	Gtk::ComboBoxText* elementType = nullptr;
+	Gtk::ComboBoxText* elementType = nullptr; /// Only used by the UI.
 
 	Gtk::Scale* brightness = nullptr;
 
 	Gtk::ComboBox
-		// Device name.
-		* comboBoxDevices  = nullptr,
-		// Continuous RGB.
-		* comboBoxRGBRGB   = nullptr,
-		// LED Strip.
-		* comboBoxRGBStrip = nullptr,
-		// Multi RGB
-		* comboBoxRGBMRGB  = nullptr;
+		* comboBoxDevices  = nullptr, /// Device name.
+		* comboBoxRGBRGB   = nullptr, /// Continuous RGB.
+		* comboBoxRGBStrip = nullptr, /// LED Strip.
+		* comboBoxRGBMRGB  = nullptr; /// Multi RGB.
 
-	DialogElement(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
+	DialogElement(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept;
 
-	void clearFormConditinal(uint8_t flags);
+	void clearFormConditinal(uint8_t flags) noexcept;
 
-	string_view getType() const noexcept override;
+	string_view getType() const noexcept override { return TYPE_ELEMENT; }
 
 	Storage::Data* createData(StringUMap& rawData) noexcept override;
 
-	void addButtons(Storage::BoxButton& boxButton) override;
+	void addButtons(Storage::BoxButton& boxButton) noexcept override;
 
 	/**
 	 * Refresh the list of connectors.
 	 * @param pinsUsage an array of pins with color, element name that owns it.
 	 */
-	void findConnectorTypes(vector<std::pair<string, string>>& pinsUsage);
+	void findConnectorTypes(vector<std::pair<string, string>>& pinsUsage) noexcept;
 
 	/**
-	 * Calculates the number of columns.
+	 * Calculates the number of columns for the pin display.
 	 * @param size
-	 * @return
 	 */
-	void findLargestDivisor(uint16_t size);
+	void findLargestDivisor(uint16_t size) noexcept;
 
-	void drawPinsRGB(vector<Gtk::Label*>& labels);
+	void drawPinsRGB(vector<Gtk::Label*>& labels) noexcept;
 
-	void drawPins(vector<Gtk::Label*>& labels);
+	void drawPins(vector<Gtk::Label*>& labels) noexcept;
 
-	void findElementByPin(uint16_t finder, std::unordered_set<Storage::BoxButton*>& elementsFound);
+	void findElementByPin(uint16_t finder, std::unordered_set<Storage::BoxButton*>& elementsFound) noexcept;
 
-	void onSwitchPage(Gtk::Widget*, uint pageNum);
+	void onSwitchPage(Gtk::Widget*, uint pageNum) noexcept;
 };
 
 } // namespace

@@ -154,7 +154,7 @@ BoxButtonCollection* DialogGroup::elementLinks() const noexcept {
 }
 
 vector<Data*> DialogGroup::expandStrips(Storage::Data* data) {
-	if (data->hasProperty(PROP_EXPAND))
+	if (data->getProperties().isSet(PROP_EXPAND))
 		return static_cast<Storage::Element*>(data)->copyStripChildren();
 	return {data};
 }

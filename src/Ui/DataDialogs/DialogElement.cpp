@@ -24,11 +24,10 @@
 
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
-DialogElement::DialogElement(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
-	DialogForm(obj, builder, COLLECTION_ELEMENT)
+DialogElement::DialogElement(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept :
+	DialogForm(obj, builder)
 {
 
-	dialogsMap.emplace(COLLECTION_ELEMENT, this);
 	// Connect Element Box and buttons.
 	builder->get_widget_derived("BoxElements", box, "BtnDeviceElementUp", "BtnDeviceElementDn");
 	builder->get_widget("BtnApplyElement",     btnApply);
@@ -175,7 +174,7 @@ DialogElement::DialogElement(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 	});
 }
 
-void DialogElement::load(XMLHelper* values) {
+void DialogElement::load(XMLHelper* values) noexcept {
 	createItems(values->getData(Defaults::createCommonUniqueId({ownerData->createUniqueId(), COLLECTION_ELEMENT})), values);
 }
 
@@ -183,7 +182,7 @@ void DialogElement::clearForm() noexcept {
 	clearFormConditinal(false);
 }
 
-void DialogElement::clearFormConditinal(uint8_t flags) {
+void DialogElement::clearFormConditinal(uint8_t flags) noexcept {
 
 	pinsBox->unselect_all();
 
@@ -265,7 +264,7 @@ void DialogElement::isValid() const {
 
 	auto groupHandler = LEDSpicerUI::Ui::Storage::CollectionHandler::getInstance(COLLECTION_GROUP);
 	auto existingGroup = groupHandler->get(name);
-	if (existingGroup && not existingGroup->hasProperty("system")) {
+	if (existingGroup && not existingGroup->getProperties().isSet("system")) {
 		throw Message("Element name '" + name + "' conflicts with existing group.\nNote: Strip elements auto-create groups with the same name.");
 	}
 
@@ -362,7 +361,7 @@ void DialogElement::isValid() const {
 	}
 }
 
-void DialogElement::storeData() {
+void DialogElement::storeData() noexcept {
 
 	string
 		name(elementName->get_text()),
@@ -426,7 +425,7 @@ void DialogElement::storeData() {
 				string oldChildId = children[i]->createUniqueId();
 				children[i]->setValue(NAME, childName);
 				children[i]->setValue(POSITION, std::to_string(position + i));
-				getCollectionHandler()->replace(children[i], oldChildId);
+				currentData->getCollectionHandler()->replace(children[i], oldChildId);
 			}
 			else {
 				// Create new child
@@ -436,7 +435,7 @@ void DialogElement::storeData() {
 				auto child = new Storage::Element(childData);
 				child->getProperties().setValue("strip", code);
 				currentDataE->addStripChild(child);
-				getCollectionHandler()->add(child);
+				currentData->getCollectionHandler()->add(child);
 			}
 		}
 
@@ -484,14 +483,14 @@ void DialogElement::storeData() {
 	// Cleanup if changed from strip to non-strip
 	if (wasStrip && not isStrip) {
 		string code = currentData->getProperties().getValue("stripDescriptor");
-		auto children = getCollectionHandler()->findByProperty("strip", code);
+		auto children = currentData->getCollectionHandler()->findByProperty("strip", code);
 		toDelete.insert(toDelete.end(), children.begin(), children.end());
 		currentData->getProperties().unSet("stripDescriptor");
 		currentData->getProperties().unSet("expandable");
 		currentData->getProperties().unSet("system");
 
 		auto group = groupCollectionHandler->get(oldName);
-		if (group && group->hasProperty("system")) {
+		if (group && group->getProperties().isSet("system")) {
 			groupCollectionHandler->remove(group);
 		}
 	}
@@ -502,7 +501,7 @@ void DialogElement::storeData() {
 	}
 }
 
-void DialogElement::retrieveData() {
+void DialogElement::retrieveData() noexcept {
 
 	// Gets the string position and selects the connection, returns the index.
 	std::function<const int(const string&)> setConnectorSelected = [&](const string& connector) {
@@ -586,11 +585,11 @@ void DialogElement::retrieveData() {
 	brightness->set_value(std::stoi(currentData->getValue(BRIGHTNESS, DEFAULT_BRIGHTNESS)) ?: 100);
 }
 
-string const DialogElement::createUniqueId() const {
+string const DialogElement::createUniqueId() const noexcept {
 	return Defaults::createCommonUniqueId({elementName->get_text()});
 }
 
-void DialogElement::changeNumberOfPins(const uint16_t newSize) {
+void DialogElement::changeNumberOfPins(const uint16_t newSize) noexcept {
 
 	if (not newSize) {
 		numberOfPins = 0;
@@ -627,7 +626,7 @@ void DialogElement::changeNumberOfPins(const uint16_t newSize) {
 	drawPins();
 }
 
-void DialogElement::drawPins() {
+void DialogElement::drawPins() noexcept {
 
 	// Remove pins layout.
 	for (auto child : pinsBox->get_children())
@@ -666,7 +665,7 @@ void DialogElement::drawPins() {
 	pinsBox->show_all();
 }
 
-void DialogElement::drawPinsRGB(vector<Gtk::Label*>& labels) {
+void DialogElement::drawPinsRGB(vector<Gtk::Label*>& labels) noexcept {
 	uint16_t totalLeds(numberOfPins / 3), pin(0);
 	// Get the best size for the box.
 	findLargestDivisor(totalLeds);
@@ -710,29 +709,25 @@ void DialogElement::drawPinsRGB(vector<Gtk::Label*>& labels) {
 	}
 }
 
-void DialogElement::drawPins(vector<Gtk::Label *>& labels) {
+void DialogElement::drawPins(vector<Gtk::Label *>& labels) noexcept {
 	findLargestDivisor(numberOfPins);
 	for (uint16_t pin = 0; pin < numberOfPins; ++pin) {
 		pinsBox->add(*labels[pin]);
 	}
 }
 
-string_view DialogElement::getType() const noexcept {
-	return TYPE_ELEMENT;
-}
-
 LEDSpicerUI::Ui::Storage::Data* DialogElement::createData(StringUMap& rawData) noexcept {
 	return new Storage::Element(rawData);
 }
 
-void DialogElement::addButtons(Storage::BoxButton& boxButton) {
+void DialogElement::addButtons(Storage::BoxButton& boxButton) noexcept {
 	createEditButton(boxButton);
 	createCloneButton(boxButton);
 	createDeleteButton(boxButton);
 	boxButton.show_all();
 }
 
-void DialogElement::findConnectorTypes(vector<std::pair<string, string>>& pinsUsage) {
+void DialogElement::findConnectorTypes(vector<std::pair<string, string>>& pinsUsage) noexcept {
 
 	std::function<void(std::pair<string, string>&, const string&)> storePins = [&](std::pair<string, string>& pair, const string& color) {
 		if (pair.first == color or pair.first == NO_COLOR)
@@ -821,7 +816,7 @@ void DialogElement::findConnectorTypes(vector<std::pair<string, string>>& pinsUs
 	}
 }
 
-void DialogElement::findLargestDivisor(uint16_t size) {
+void DialogElement::findLargestDivisor(uint16_t size) noexcept {
 
 	int bestDivisor = MAX_COLUMNS;
 	// Track smallest remainder for non-perfect division
@@ -852,7 +847,7 @@ void DialogElement::findLargestDivisor(uint16_t size) {
 	pinsBox->set_min_children_per_line(minPerLine);
 }
 
-void DialogElement::findElementByPin(uint16_t finder, std::unordered_set<Storage::BoxButton*>& elementsFound) {
+void DialogElement::findElementByPin(uint16_t finder, std::unordered_set<Storage::BoxButton*>& elementsFound) noexcept {
 	const string connector(std::to_string(finder));
 	for (auto boxButton : *items) {
 		auto data(boxButton->getData());
@@ -921,7 +916,7 @@ void DialogElement::findElementByPin(uint16_t finder, std::unordered_set<Storage
 	}
 }
 
-void DialogElement::onSwitchPage(Gtk::Widget*, uint pageNum) {
+void DialogElement::onSwitchPage(Gtk::Widget*, uint pageNum) noexcept {
 	switch (static_cast<tabIndex>(pageNum)) {
 	case tabIndex::RGB:
 	case tabIndex::sRGB:

@@ -57,6 +57,10 @@ public:
 	 */
 	void clearStripChildren() noexcept;
 
+	CollectionHandler* getCollectionHandler() const noexcept override {
+		return CollectionHandler::getInstance(COLLECTION_ELEMENT);
+	}
+
 	/**
 	 * Attempts to convert any RGB setup into scattered RGB.
 	 * @param data

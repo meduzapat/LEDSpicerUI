@@ -52,6 +52,7 @@ void DialogForm::createItems(StringUMapVector& rawCollection, XMLHelper* values)
 			isValid();
 		}
 		catch (Message& e) {
+			disconnectChildrenDialogs();
 			delete currentData;
 			errors += e.getMessage() + '\n';
 			Defaults::markDirty();
@@ -106,7 +107,8 @@ void DialogForm::reindex() noexcept {
 }
 
 LEDSpicerUI::Ui::Storage::Data* DialogForm::createData() noexcept {
-	return createData(Storage::Data::createEmptyData());
+	auto data{StringUMap{}};
+	return createData(data);
 }
 
 void DialogForm::wireChildrenDialogs() noexcept {

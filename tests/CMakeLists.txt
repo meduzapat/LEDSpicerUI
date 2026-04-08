@@ -33,6 +33,7 @@ macro(add_test_executable TEST_NAME TEST_SRC EXTRA_SRCS EXTRA_LIBS)
 		${EXTRA_LIBS}
 	)
 	add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
+	set_tests_properties(${TEST_NAME} PROPERTIES ENVIRONMENT "GTEST_COLOR=1")
 endmacro()
 
 # Common source files used by multiple tests.
@@ -119,6 +120,18 @@ add_test_executable(BoxButtonTest
 	""
 )
 
+add_test_executable(BoxButtonCollectionTest
+	"Ui/Storage/BoxButtonCollectionTest.cpp"
+	"${COMMON_SRCS};${STORAGE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Storage/CollectionHandler.cpp"
+	""
+)
+
+add_test_executable(CollectionHandlerTest
+	"Ui/Storage/CollectionHandlerTest.cpp"
+	"${STORAGE_BASE_SRCS}"
+	""
+)
+
 add_test_executable(MessageTest
 	"Ui/MessageTest.cpp"
 	"${COMMON_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp"
@@ -169,7 +182,7 @@ add_test_executable(SettingsFileTest
 
 add_test_executable(LeafDataTest
 	"Ui/Storage/LeafDataTest.cpp"
-	"${STORAGE_BASE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Storage/Link.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/RestrictorMap.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/InputMap.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/InputMapLink.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/Process.cpp"
+	"${STORAGE_BASE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Storage/Element.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/Link.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/InputMap.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/RestrictorMap.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/InputMapLink.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/Process.cpp"
 	""
 )
 
@@ -197,6 +210,12 @@ add_test_executable(RestrictorTest
 	""
 )
 
+add_test_executable(InputSourceTest
+	"Ui/Storage/InputSourceTest.cpp"
+	"${COMMON_SRCS};${STORAGE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Storage/CollectionHandler.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/Parent.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/Revertible.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/InputSource.cpp"
+	""
+)
+
 add_test_executable(InputTest
 	"Ui/Storage/InputTest.cpp"
 	"${STORAGE_INPUT_SRCS}"
@@ -207,12 +226,4 @@ add_test_executable(ProfileTest
 	"Ui/Storage/ProfileTest.cpp"
 	"${STORAGE_PROFILE_SRCS}"
 	"${TINYXML2_LIBRARIES}"
-)
-
-set_tests_properties(
-	DefaultsTest DataTest ParentTest RevertibleTest MessageTest XMLHelperTest
-	LeafDataTest LinkTest GroupTest DeviceTest RestrictorTest
-	DirectoryEntryTest FileNodeTest InputTest
-	ConfigFileTest InputFileTest ProjectFileTest SettingsFileTest
-	PROPERTIES ENVIRONMENT "GTEST_COLOR=1"
 )

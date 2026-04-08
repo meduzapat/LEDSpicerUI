@@ -38,8 +38,7 @@ public:
 
 	virtual ~DialogRestrictorMap() = default;
 
-	void load(XMLHelper* values) override;
-	Storage::CollectionHandler* getCollectionHandler() const override;
+	void load(XMLHelper* values) noexcept override;
 	void clearForm() noexcept override;
 	void isValid() const override;
 	void storeData() noexcept override;
@@ -47,47 +46,36 @@ public:
 	const string createUniqueId() const noexcept override;
 
 	/**
-	 * This function will populate the interfaces combobox with values.
-	 * @param currentData the form with data.
+	 * Populates the interfaces combobox from the owner restrictor's available slots.
 	 */
-	void populateInterfacesCombobox();
+	void populateInterfacesCombobox() noexcept;
 
 protected:
 
 	Gtk::Button* btnAdd = nullptr;
 
 	Gtk::ComboBoxText
-		* player    = nullptr,
-		* joystick  = nullptr;
+		* player   = nullptr,
+		* joystick = nullptr;
 	Gtk::ComboBox
 		* interface           = nullptr,
 		* comboBoxRestrictors = nullptr;
 
-	Gtk::ListStore * liststoreRestrictorMapId = nullptr;
+	Gtk::ListStore* liststoreRestrictorMapId = nullptr;
 
 	DialogRestrictorMap(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
 
 	/**
-	 * Checks if the owner restrictor still have available interfaces spaces.
-	 * @return true if there still room.
+	 * Checks if the owner restrictor still has available interface slots.
+	 * @return true if there is still room.
 	 */
-	bool checkAvailableInterfaces() const;
+	bool checkAvailableInterfaces() const noexcept;
 
 	string_view getType() const noexcept override;
-
 	Storage::Data* createData(StringUMap& rawData) noexcept override;
 
-	/**
-	 * After add check if more can be added.
-	 * @param boxButton
-	 */
-	void afterCreate(Storage::BoxButton& boxButton) override;
-
-	/**
-	 * Refresh some fields affected by delete.
-	 * @param boxButton
-	 */
-	virtual void afterDeleteConfirmation(Storage::BoxButton& boxButton);
+	void afterCreate(Storage::BoxButton& boxButton) noexcept override;
+	void afterDeleteConfirmation(Storage::BoxButton& boxButton) noexcept override;
 };
 
 } // namespace

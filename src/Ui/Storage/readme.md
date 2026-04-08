@@ -57,7 +57,7 @@ Values
 ```
 
 `Revertible` is a **pure mixin** — it does not appear in the `Data` inheritance chain.
-It receives a reference to the consumer's own `values` and optionally its `children` map at construction.
+It receives a reference to the consumer itself (`*this`) and optionally its `children` map at construction.
 
 ---
 
@@ -96,8 +96,8 @@ bool   has = data->getProperties().isSet(UID);
 
 ```cpp
 Device::Device(StringUMap& data) noexcept :
-    Parent(data, COLLECTION_DEVICES, {COLLECTION_ELEMENT}),
-    Revertible(values, &children)
+    Parent(data, {COLLECTION_ELEMENT}),
+    Revertible(*this, &children)
 {}
 ```
 
@@ -150,18 +150,18 @@ bool MyData::shouldSerialize(const string& key, const string& value) const noexc
 
 ## 9. Revertible — Snapshot and Restore
 
-`Revertible` is a **pure mixin**. It is not a `Data` subclass. Consumers pass a reference to their own `values` and, optionally, their `children` map at construction:
+`Revertible` is a **pure mixin**. It is not a `Data` subclass. Consumers pass `*this` (as `Values&`) and, optionally, their `children` map at construction:
 
 ```cpp
 Device::Device(StringUMap& data) noexcept :
-    Parent(data, COLLECTION_DEVICES, {COLLECTION_ELEMENT}),
-    Revertible(values, &children)
+    Parent(data, {COLLECTION_ELEMENT}),
+    Revertible(*this, &children)
 {}
 ```
 
 | Method | Effect |
 |--------|--------|
-| `swap()` | Moves `values` and all registered child collections into snapshot storage. No-op if already snapped or `values` is empty. |
+| `snapshot()` | Moves `values` and all registered child collections into snapshot storage. No-op if already snapped or `values` is empty. |
 | `revert()` | Swaps back and wipes orphaned snapshot children. No-op if no snapshot. |
 | `clearSnap()` | Discards snapshot without touching live fields or children. |
 
@@ -244,8 +244,8 @@ string MyData::xmlBody() const noexcept {
 | `Animation` | animation type key | `FILENAME`, `UID`, `PID` | (pending) | Yes — per-file XML |
 | `Profile` | backgroundcolor, … | `FILENAME`, `UID`, `PID` | elements, groups, inputs, animations | Yes — per-file XML |
 | `InputSource` | `source` (hw path) | `UID`, `PID`, `SOURCELESS` | `maps` | Yes — `<maps>` |
-| `InputMap` | trigger, type, target, … | — | — | Yes — `<map>` |
-| `DirectoryEntry` | name (segment only) | `UID` | `contents` | **No** — runtime only |
+| `InputMap` | trigger, type, target, … | `PID` | — | Yes — `<map>` |
+| `DirectoryEntry` | name (segment only) | `UID`, `PID` | `contents` | **No** — runtime only |
 | `Link` | extra attributes | — | — | Yes — self-closing element |
 
 ---
@@ -256,6 +256,7 @@ string MyData::xmlBody() const noexcept {
 |--------|---------------|---------|
 | `getCssClass()` | **Yes** (pure) | CSS class for the `BoxButton`. |
 | `getXmlTag()` | **Yes** (pure) | XML element name. |
+| `getCollectionHandler()` | **Yes** (pure) | Returns the handler this item registers into; `nullptr` for non-registering types. |
 | `createPrettyName()` | Recommended | Human label. Default uses primary key field. |
 | `createTooltip()` | Optional | Hover text. Default `""`. |
 | `createUniqueId()` | Recommended | Stable collection key. Default hashes primary key. |

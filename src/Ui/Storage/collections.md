@@ -1,6 +1,6 @@
 # LEDSpicerUI — Collections System Developer Guide
 
-> **Status:** Work in progress — reflects design as of v0.0.10 / data format 1.1.
+> **Status:** Work in progress — reflects design as of v0.0.13 / data format 1.1.
 
 ---
 
@@ -42,7 +42,7 @@ BoxButton& bb = collection.create(myData); // takes ownership
 collection.remove(bb);                      // deletes BoxButton + Data
 collection.remove(myData);                  // same, by Data pointer
 collection.populateBox(box);                // fills GTK flow box
-collection.reindex(box);                    // re-syncs order to visual order (pointer comparison)
+collection.reindex(box);                    // re-syncs order to visual order
 collection.wipe();                          // deletes all, clears vector
 collection.swap(other);                     // O(1) contents exchange
 ```
@@ -78,6 +78,9 @@ ch->isSet(myData);
 Data* found = ch->get("myId");  // nullptr if not found — always check
 ```
 
+`add()` is idempotent — it silently skips items already registered.
+`remove()` guards against empty or unknown IDs — safe to call unconditionally.
+
 ---
 
 ## 4. Global vs Scoped Collections
@@ -91,7 +94,7 @@ COLLECTION_ELEMENT, COLLECTION_GROUP, COLLECTION_ANIMATIONS, COLLECTION_INPUT
 **Scoped** — valid only within one parent, name = base constant + parent ID:
 
 ```cpp
-string id = COLLECTION_INPUT_SOURCES + inputData->getProperty(UID);
+string id = COLLECTION_INPUT_SOURCES + inputData->getProperties().getValue(UID);
 CollectionHandler::getInstance(id)->add(mySource);
 ```
 
@@ -104,8 +107,8 @@ Scoped collections are created lazily on first `getInstance()` call and persist 
 ## 5. Adding, Removing, and Replacing Items
 
 ```cpp
-ch->add(myData);             // indexes by createUniqueId(); refreshes combos
-ch->remove(myData);          // removes, cascades Links, refreshes combos
+ch->add(myData);             // indexes by createUniqueId(); refreshes combos; no-op if already present
+ch->remove(myData);          // removes, cascades Links, refreshes combos; no-op if not present
 ch->replace(myData, oldId);  // re-keys if ID changed; no cascade
 ```
 
@@ -180,7 +183,7 @@ vector<Data*> v = ch->findByProperty(PID, parentId);
 ## 10. Lifecycle and purgeAll
 
 `CollectionHandler` does not own `Data*` pointers. Correct teardown order:
-1. Destroy all `BoxButtonCollection`s — recursively destroys all `Data`, which call `remove()` during destruction.
+1. Destroy all `BoxButtonCollection`s — recursively destroys all `Data`, which call `unregisterFromCollection()` during destruction.
 2. Call `CollectionHandler::purgeAll()` to clean up the now-empty instances.
 
 Reversing this order leaves dangling pointer calls in `Data` destructors.
@@ -193,11 +196,11 @@ Reversing this order leaves dangling pointer calls in `Data` destructors.
 
 | Method | Effect |
 |--------|--------|
-| `create(Data*)` | Takes ownership, returns `BoxButton&`. |
-| `remove(BoxButton&)` | Deletes `BoxButton` and its `Data`. |
+| `create(Data*)` | Takes ownership, registers to collection, returns `BoxButton&`. |
+| `remove(BoxButton&)` | Deletes `BoxButton` and its `Data`; unregisters from collection. |
 | `remove(Data*)` | Finds and deletes by `operator==`. |
 | `populateBox(box)` | Adds all buttons to a GTK flow box. |
-| `reindex(box)` | Re-syncs order to visual order (pointer comparison). |
+| `reindex(box)` | Re-syncs order to visual order. |
 | `wipe()` | Deletes all, clears vector. |
 | `swap(other)` | O(1) contents exchange; dependency addresses stay valid. |
 | `getSize()` | Number of items. |
@@ -209,8 +212,8 @@ Reversing this order leaves dangling pointer calls in `Data` destructors.
 | Method | Effect |
 |--------|--------|
 | `getInstance(name)` | Returns (or creates) the named instance. |
-| `add(Data*)` | Indexes by `createUniqueId()`; refreshes combos. |
-| `remove(Data*)` | Removes; cascades; refreshes combos. |
+| `add(Data*)` | Indexes by `createUniqueId()`; refreshes combos; no-op if already present. |
+| `remove(Data*)` | Removes; cascades; refreshes combos; no-op if id empty or not present. |
 | `replace(Data*, oldId)` | Re-keys if id changed; no cascade. |
 | `get(id)` | Returns `Data*` or `nullptr`. |
 | `isSet(Data*)` | Existence check by `createUniqueId()`. |

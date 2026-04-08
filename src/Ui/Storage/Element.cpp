@@ -30,7 +30,7 @@ Element::~Element() {
 
 const string Element::createPrettyName() const noexcept {
 	string pname(Data::createPrettyName());
-	if (hasProperty("stripDescriptor")) {
+	if (properties.isSet("stripDescriptor")) {
 		pname += " [" + getValue(STRIPSIZE) + "]";
 	}
 	return pname;
