@@ -110,7 +110,7 @@ add_test_executable(ParentTest
 
 add_test_executable(RevertibleTest
 	"Ui/Storage/RevertibleTest.cpp"
-	"${COMMON_SRCS};${STORAGE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Storage/Revertible.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/CollectionHandler.cpp"
+	"${STORAGE_BASE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Storage/Parent.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/Revertible.cpp;"
 	""
 )
 

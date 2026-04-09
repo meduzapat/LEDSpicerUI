@@ -31,7 +31,6 @@ Revertible::Revertible(
 	liveFields(fields),
 	liveChildren(children)
 {
-	if (not liveChildren) return;
 	for (auto& [id, collection] : *liveChildren)
 		childrenSnaps.emplace_back(&collection, BoxButtonCollection{});
 }
@@ -44,12 +43,10 @@ void Revertible::snapshot() {
 
 	if (liveFields.getValues()->empty() or not snapFields.getValues()->empty()) return;
 
-	if (liveChildren) {
-		for (auto& [id, collection] : *liveChildren) {
-			for (auto btn : collection) {
-				if (auto handler{btn->getData()->getCollectionHandler()}; handler)
-					handler->remove(btn->getData());
-			}
+	for (auto& [id, collection] : *liveChildren) {
+		for (auto btn : collection) {
+			if (auto handler{btn->getData()->getCollectionHandler()}; handler)
+				handler->remove(btn->getData());
 		}
 	}
 
@@ -69,12 +66,10 @@ void Revertible::revert() {
 		snap.wipe();
 	}
 
-	if (liveChildren) {
-		for (auto& [id, collection] : *liveChildren) {
-			for (auto btn : collection)
-				if (auto handler{btn->getData()->getCollectionHandler()}; handler)
-					handler->add(btn->getData());
-		}
+	for (auto& [id, collection] : *liveChildren) {
+		for (auto btn : collection)
+			if (auto handler{btn->getData()->getCollectionHandler()}; handler)
+				handler->add(btn->getData());
 	}
 }
 

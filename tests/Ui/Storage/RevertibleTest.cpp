@@ -21,22 +21,25 @@
  */
 
 #include <gtest/gtest.h>
+#include "Storage/Parent.hpp"
 #include "Storage/Revertible.hpp"
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-class TestRevertible : public LEDSpicerUI::Values, public Revertible {
+class TestRevertible : public Parent, public Revertible {
 
 public:
 
-	TestRevertible(StringUMap& data, StringBoxButtonCollectionUMap* children = nullptr) :
-		Values(data),
-		Revertible(*this, children)
+	TestRevertible(StringUMap& data) :
+		Parent(data, {}),
+		Revertible(*this, &children)
 	{}
 
 	// Expose snap storage for assertions only.
-	const StringUMap* getSnapFields() const noexcept { return snapFields.getValues(); }
-
+	const StringUMap* getSnapFields()         const noexcept { return snapFields.getValues(); }
+	CollectionHandler* getCollectionHandler() const noexcept override { return nullptr; }
+	string_view getCssClass()                 const noexcept override { return "test"; }
+	string_view getXmlTag()                   const noexcept override { return "test"; }
 };
 
 // Fields swap into snap and restore correctly.
@@ -100,30 +103,4 @@ TEST(RevertibleTest, ClearSnapLeavesLiveFields) {
 	EXPECT_TRUE(r.getSnapFields()->empty());
 	// Live fields were swapped out — clearSnap does not restore them.
 	EXPECT_TRUE(r.getValues()->empty());
-}
-
-// nullptr children — construction and swap/revert work without crash.
-TEST(RevertibleTest, NullChildrenSafe) {
-	StringUMap data{{"k", "v"}};
-	TestRevertible r(data, nullptr);
-
-	r.snapshot();
-	r.revert();
-	EXPECT_TRUE(r.getSnapFields()->empty());
-}
-
-// With children map — swap clears it, revert restores it.
-TEST(RevertibleTest, SwapAndRevertWithChildren) {
-	StringUMap data{{"k", "v"}};
-	StringBoxButtonCollectionUMap children;
-	children["A"];
-	children["B"];
-
-	TestRevertible r(data, &children);
-
-	r.snapshot();
-	EXPECT_TRUE(r.getValues()->empty());
-
-	r.revert();
-	EXPECT_FALSE(r.getValues()->empty());
 }
