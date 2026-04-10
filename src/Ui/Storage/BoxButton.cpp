@@ -50,7 +50,7 @@ BoxButton::BoxButton(Data* form) noexcept :
 	auto cssClass{form->getCssClass()};
 	if (not cssClass.empty())
 		get_style_context()->add_class(string(cssClass));
-	updateLabel();
+	sync();
 	show_all();
 }
 
@@ -66,12 +66,10 @@ void BoxButton::packButtonStart(Gtk::Button& button) noexcept {
 	pack_start(button, Gtk::PACK_SHRINK);
 }
 
-void BoxButton::updateLabel() noexcept {
+void BoxButton::sync() noexcept {
 	data->registerToCollection();
 	auto text{data->createTooltip()};
-	if (not text.empty()) {
+	if (not text.empty())
 		label->set_tooltip_text(text);
-	}
-	text = data->createPrettyName();
-	label->set_text(text);
+	label->set_text(data->createPrettyName());
 }

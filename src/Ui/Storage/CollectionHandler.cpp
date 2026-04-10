@@ -56,7 +56,7 @@ size_t CollectionHandler::countByKey(const string& key, const string& value) con
 	return count;
 }
 
-vector<Data*> CollectionHandler::findByProperty(const string& property, const string& value) noexcept {
+vector<Data*> CollectionHandler::findByProperty(const string& property, const string& value) const noexcept {
 	vector<Data*> results;
 	for (const auto& item : collection) {
 		if (item.second->getProperties().getValue(property) == value) {

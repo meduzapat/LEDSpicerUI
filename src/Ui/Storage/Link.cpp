@@ -1,10 +1,10 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
  * @file      Link.cpp
- * @since     Mar 23, 2025
+ * @since     Mar 23, 2026
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -23,7 +23,6 @@
 #include "Link.hpp"
 
 using namespace LEDSpicerUI::Ui::Storage;
-
 
 bool Link::operator==(const Data& other) const noexcept {
 	return Data::operator==(other) or linkInfo.link == &other;
@@ -72,7 +71,7 @@ string_view Link::getXmlTag() const noexcept {
 const string Link::toXML() const noexcept {
 	StringUMap values{{linkInfo.key, linkInfo.link->createUniqueId()}};
 	values.insert(begin(), end());
-	return createOpeningXML(string(linkInfo.type), values, {}, true);
+	return createOpeningXML(string(linkInfo.type), values, true);
 }
 
 void Link::setLinkData(const LinkData& newLinkData) noexcept {

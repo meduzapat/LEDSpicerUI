@@ -73,7 +73,7 @@ const string Data::toXML() const noexcept {
 		if (shouldSerialize(k, v))
 			filtered.emplace(k, v);
 	const string body(xmlBody());
-	string r(createOpeningXML(string(getXmlTag()), filtered, {}, body.empty()));
+	string r(createOpeningXML(string(getXmlTag()), filtered, body.empty()));
 	if (not body.empty())
 		r += body + createClosingXML(string(getXmlTag()));
 	return r;
@@ -101,46 +101,36 @@ void Data::syncRegistration(const string& oldId) noexcept {
 		handler->replace(this, oldId);
 }
 
-string Data::valuesXML(
-	const StringUSet& ignored,
-	const StringUMap& data
-) noexcept {
+string Data::valuesXML(const StringUMap& data) noexcept {
 	string r, el, tab(" ");
 	if (data.size() > 2) {
 		el  = "\n";
 		tab = Defaults::tab();
 	}
-	for (const auto& v : data) {
-		if (ignored.find(v.first) == ignored.end())
-			r += tab + v.first + "=\"" + v.second + "\"" + el;
-	}
+	for (const auto& v : data)
+		r += tab + v.first + "=\"" + v.second + "\"" + el;
 	return r;
 }
 
 string Data::createOpeningXML(
-	const string& node,
+	const string&     node,
 	const StringUMap& data,
-	const StringUSet& ignored,
-	bool empty
+	bool              empty
 ) noexcept {
 	string r(Defaults::tab() + "<" + node);
 	if (data.size() > 2) {
 		r += "\n";
 		Defaults::increaseTab();
-		r += valuesXML(ignored, data);
+		r += valuesXML(data);
 		Defaults::reduceTab();
 		r += Defaults::tab();
 	}
 	else {
-		r += valuesXML(ignored, data);
+		r += valuesXML(data);
 	}
-	if (empty) {
-		r += "/>\n";
-	}
-	else {
-		r += ">\n";
+	r += empty ? "/>\n" : ">\n";
+	if (not empty)
 		Defaults::increaseTab();
-	}
 	return r;
 }
 

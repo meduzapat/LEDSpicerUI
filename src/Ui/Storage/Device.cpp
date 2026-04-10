@@ -36,7 +36,6 @@ const string Device::createPrettyName() const noexcept {
 }
 
 const string Device::createUniqueId() const noexcept {
-	if (getValues()->empty()) return "";
 	return Defaults::createHardwareUniqueId(*getValues());
 }
 

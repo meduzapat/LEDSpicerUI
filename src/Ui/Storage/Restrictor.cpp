@@ -14,7 +14,6 @@ const string Restrictor::createPrettyName() const noexcept {
 }
 
 const string Restrictor::createUniqueId() const noexcept {
-	if (getValues()->empty()) return "";
 	return Defaults::createHardwareUniqueId(*getValues(), false);
 }
 

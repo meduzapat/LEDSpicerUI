@@ -34,15 +34,8 @@ protected:
 	}
 };
 
-// Empty fieldsData returns empty uniqueId.
-TEST_F(DeviceTest, CreateUniqueIdEmptyWhenNoFields) {
-	StringUMap empty;
-	Device d(empty);
-	EXPECT_TRUE(d.createUniqueId().empty());
-}
-
-// Non-empty data returns non-empty uniqueId.
-TEST_F(DeviceTest, CreateUniqueIdNonEmpty) {
+// uniqueId.
+TEST_F(DeviceTest, CreateUniqueId) {
 	StringUMap data{{NAME, "RaspberryPi"}, {ID, "1"}, {PORT, ""}};
 	Device d(data);
 	EXPECT_FALSE(d.createUniqueId().empty());

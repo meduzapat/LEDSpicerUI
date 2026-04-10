@@ -177,14 +177,10 @@ protected:
 
 	/**
 	 * Organizes data vertically or horizontally based on the number of elements.
-	 * @param ignored
 	 * @param data
 	 * @return
 	 */
-	static string valuesXML(
-		const StringUSet& ignored,
-		const StringUMap& data
-	) noexcept;
+	static string valuesXML(const StringUMap& data) noexcept;
 
 	/**
 	 * Based on data it creates a single or multiple node.
@@ -197,7 +193,6 @@ protected:
 	static string createOpeningXML(
 		const string& node,
 		const StringUMap& data,
-		const StringUSet& ignored,
 		bool empty
 	) noexcept;
 

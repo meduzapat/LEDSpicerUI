@@ -237,7 +237,7 @@ void DialogForm::onEditClicked(Storage::BoxButton& boxButton) noexcept {
 		Defaults::markDirty();
 		currentData->wipe();
 		storeData();
-		boxButton.updateLabel();
+		boxButton.sync();
 		for (auto childDialog : childDialogs) childDialog->reindex();
 	}
 	disconnectChildrenDialogs();
@@ -271,5 +271,5 @@ void DialogForm::onCloneClicked(Storage::BoxButton& boxButton) noexcept {
 	addButtons(bBox);
 	box->add(bBox);
 	Defaults::markDirty();
-	bBox.updateLabel();
+	bBox.sync();
 }

@@ -58,6 +58,7 @@ public:
 	bool isEmpty() const noexcept;
 
 	BoxButtonCollection& getContents() noexcept { return contents; }
+	const BoxButtonCollection& getContents() const noexcept { return contents; }
 
 protected:
 

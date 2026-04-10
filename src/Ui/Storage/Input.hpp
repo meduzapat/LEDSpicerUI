@@ -20,7 +20,6 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "XMLHelper.hpp"
 #include "Parent.hpp"
 #include "DirNode.hpp"
 #include "Revertible.hpp"

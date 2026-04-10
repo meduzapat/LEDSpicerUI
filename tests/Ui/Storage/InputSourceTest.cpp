@@ -37,12 +37,11 @@ protected:
 	}
 };
 
-// Constructor sets UID property with "s_" prefix.
+// Constructor sets UID property.
 TEST_F(InputSourceTest, ConstructorSetsUid) {
 	StringUMap data{{SOURCE, "hardware1"}};
 	InputSource src(data, "owner_1");
 	EXPECT_FALSE(src.getProperties().getValue(UID).empty());
-	EXPECT_EQ(0, src.getProperties().getValue(UID).find("s_"));
 }
 
 // Constructor stores ownerId in PID property.

@@ -54,12 +54,14 @@ public:
 
 protected:
 
-	/// Counter for stable UID generation.
-	inline static size_t sourceCounter = 0;
-
 	const string getPrimaryKey() const noexcept override { return SOURCE; }
 
 	bool shouldSerialize(const string& key, const string& value) const noexcept override;
+
+private:
+
+	/// Counter for stable UID generation.
+	inline static size_t sourceCounter = 0;
 
 };
 

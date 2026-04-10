@@ -84,9 +84,10 @@ public:
 	const Data* getData() const noexcept { return data; }
 
 	/**
-	 * Updates it own label that represents in a human way what is stored inside the box.
+	 * Attempts to register data into its collection and refreshes the visual label.
+	 * Call after any change to the underlying data.
 	 */
-	void updateLabel() noexcept;
+	void sync() noexcept;
 
 	/**
 	 * @return The box label.

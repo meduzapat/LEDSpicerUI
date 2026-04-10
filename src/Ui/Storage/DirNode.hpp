@@ -41,7 +41,7 @@ public:
 	/**
 	 * @param dest     Values destination for UID, PID, FILENAME (values or properties).
 	 * @param parent   Parent node. nullptr = root level.
-	 * @param filename This node's name segment. Empty string for dirs (set later via storeData).
+	 * @param filename This node's name segment.
 	 */
 	DirNode(
 		Values&        dest,
@@ -71,11 +71,13 @@ public:
 
 protected:
 
-	/// Shared counter for all node types.
-	inline static size_t nodeCounter = 0;
-
 	/// Parent node. nullptr = root level.
 	DirNode* parent;
+
+private:
+
+	/// Shared counter for all node types.
+	inline static size_t nodeCounter = 0;
 
 	/// Destination storage — values or properties of the owning Data.
 	Values& dest;

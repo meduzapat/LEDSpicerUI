@@ -120,15 +120,6 @@ TEST_F(BoxButtonCollectionTest, RemoveByData) {
 	EXPECT_FALSE(collection.isIdSet("A"));
 }
 
-// remove(Data*) with unknown pointer is safe (no crash).
-TEST_F(BoxButtonCollectionTest, RemoveAbsentDataSafe) {
-	collection.create(makeData("A"));
-	StringUMap d{{NAME, "Ghost"}};
-	TestData ghost(d);
-	EXPECT_NO_FATAL_FAILURE(collection.remove(&ghost));
-	EXPECT_EQ(1u, collection.getSize());
-}
-
 // wipe() empties the collection.
 TEST_F(BoxButtonCollectionTest, WipeClearsAll) {
 	collection.create(makeData("A"));

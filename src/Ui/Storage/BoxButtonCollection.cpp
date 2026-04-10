@@ -67,7 +67,6 @@ void BoxButtonCollection::remove(Data* form) noexcept {
 			return *button->getData() == *form;
 		}
 	)};
-	if (it == items.end()) return;
 	delete *it;
 	items.erase(it);
 }

@@ -21,7 +21,6 @@
  */
 
 #include "Link.hpp"
-#include "CollectionHandler.hpp"
 
 #pragma once
 

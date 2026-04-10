@@ -25,7 +25,7 @@
 using namespace LEDSpicerUI::Ui::Storage;
 
 Element::~Element() {
-	for (auto child : stripChildren) delete child;
+	clearStripChildren();
 }
 
 const string Element::createPrettyName() const noexcept {
@@ -41,6 +41,7 @@ void Element::addStripChild(Element* child) noexcept {
 }
 
 void Element::clearStripChildren() noexcept {
+	for (auto child : stripChildren) delete child;
 	stripChildren.clear();
 }
 
@@ -75,7 +76,7 @@ void Element::convertPositionToRGB(Data* data, const string& position, const str
 
 			break;
 		case 'B':
-			data->setValue(GREEN_PIN, std::to_string(pin++));
+			data->setValue(BLUE_PIN, std::to_string(pin++));
 			break;
 		}
 	}

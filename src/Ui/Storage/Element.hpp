@@ -27,7 +27,9 @@
 namespace LEDSpicerUI::Ui::Storage {
 
 /**
- * LEDSpicerUI::Ui::Storage::ElementForm
+ * LEDSpicerUI::Ui::Storage::Element
+ *
+ * Represents a single element in the device, such as an RGB strip or a single LED.
  */
 class Element: public Data {
 

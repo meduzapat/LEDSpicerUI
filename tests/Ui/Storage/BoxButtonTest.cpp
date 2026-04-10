@@ -77,12 +77,12 @@ TEST_F(BoxButtonTest, GetDataReturnsPointer) {
 	EXPECT_EQ(data, btn.getData());
 }
 
-// updateLabel() reflects createPrettyName().
+// sync() reflects createPrettyName().
 TEST_F(BoxButtonTest, UpdateLabelReflectsPrettyName) {
 	StringUMap d{{"name", "TestLabel"}};
 	auto* data = new TestData(d);
 	BoxButton btn(data);
-	btn.updateLabel();
+	btn.sync();
 	EXPECT_EQ("TestLabel", btn.getLabel()->get_text());
 }
 

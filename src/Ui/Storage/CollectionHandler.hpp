@@ -91,7 +91,7 @@ public:
 	 * @param value Property value.
 	 * @return Vector of matching Data pointers.
 	 */
-	vector<Data*> findByProperty(const string& property, const string& value) noexcept;
+	vector<Data*> findByProperty(const string& property, const string& value) const noexcept;
 
 	/**
 	 * Adds an item to the collection.

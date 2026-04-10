@@ -199,7 +199,7 @@ void DialogSelect::addDisplayButtons(
 				static_cast<Storage::Link*>(boxButton.getData()),
 				request.linkFields
 			);
-			boxButton.updateLabel();
+			boxButton.sync();
 		});
 	}
 

@@ -36,15 +36,8 @@ protected:
 	}
 };
 
-// Empty fieldsData returns empty uniqueId.
-TEST_F(RestrictorTest, CreateUniqueIdEmptyWhenNoFields) {
-	StringUMap empty;
-	Restrictor r(empty);
-	EXPECT_TRUE(r.createUniqueId().empty());
-}
-
-// Non-empty data returns non-empty uniqueId.
-TEST_F(RestrictorTest, CreateUniqueIdNonEmpty) {
+// uniqueId.
+TEST_F(RestrictorTest, CreateUniqueId) {
 	StringUMap data{{NAME, "ServoStik"}, {ID, "1"}, {PORT, ""}};
 	Restrictor r(data);
 	EXPECT_FALSE(r.createUniqueId().empty());
