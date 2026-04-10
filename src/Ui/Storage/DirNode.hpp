@@ -21,6 +21,7 @@
  */
 
 #include "Defaults.hpp"
+#include "Values.hpp"
 
 #pragma once
 
@@ -28,62 +29,56 @@ namespace LEDSpicerUI::Ui::Storage {
 
 /**
  * LEDSpicerUI::Ui::Storage::DirNode
- * Pure structural mixin for objects that live inside a directory tree.
- * Provides parent pointer and recursive path resolution only.
+ * Structural mixin for objects that live inside a directory tree.
+ * Owns the node identity (UID, PID, FILENAME) written into the
+ * provided Values destination at construction.
+ * Provides parent pointer and recursive path resolution.
  */
 class DirNode {
 
 public:
 
 	/**
-	 * @param parent Parent node. nullptr = root level.
+	 * @param dest     Values destination for UID, PID, FILENAME (values or properties).
+	 * @param parent   Parent node. nullptr = root level.
+	 * @param filename This node's name segment. Empty string for dirs (set later via storeData).
 	 */
-	DirNode(DirNode* parent) : parent(parent) {}
+	DirNode(
+		Values&        dest,
+		DirNode*       parent,
+		const string&  filename
+	) noexcept;
 
 	virtual ~DirNode() = default;
 
-	/**
-	 * Returns this node's own name segment.
-	 * @return Name string.
-	 */
-	virtual const string& getName() const noexcept abstract;
+	/// Returns this node's name segment.
+	const string& getName() const noexcept;
 
-	/**
-	 * Returns a stable app-wide identifier for this node.
-	 * @return Stable id string, e.g. "d_1", "f_3".
-	 */
-	virtual const string& getFsId() const noexcept abstract;
+	/// Returns this node's stable runtime id.
+	const string& getFsId() const noexcept;
 
-	/**
-	 * Returns the parent node pointer.
-	 * @return Parent pointer, or nullptr if at root level.
-	 */
+	/// Returns the parent node pointer.
 	DirNode* getParent() const noexcept { return parent; }
 
-	/**
-	 * Returns the full path of the parent.
-	 * Empty string if this node is at root level.
-	 * @return Parent full path string.
-	 */
+	/// Returns the full path of the parent. Empty if at root.
 	string getPath() const noexcept;
 
-	/**
-	 * Returns the full relative path including this node's own name.
-	 * Resolves recursively via the parent chain.
-	 * e.g. root → dir1 → file returns "dir1/file"
-	 * @return Full path string.
-	 */
+	/// Returns the full relative path including this node's name.
 	string getFullPath() const noexcept;
 
-	/**
-	 * @return true if this node is at root level (no parent).
-	 */
+	/// @return true if this node is at root level (no parent).
 	bool isAtRoot() const noexcept { return not parent; }
 
 protected:
 
+	/// Shared counter for all node types.
+	inline static size_t nodeCounter = 0;
+
 	/// Parent node. nullptr = root level.
 	DirNode* parent;
+
+	/// Destination storage — values or properties of the owning Data.
+	Values& dest;
 
 };
 

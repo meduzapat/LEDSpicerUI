@@ -31,18 +31,14 @@ namespace LEDSpicerUI::Ui::Storage {
  * LEDSpicerUI::Ui::Storage::DirectoryEntry
  * Represents a single directory node in the navigator tree.
  * Never serialized — exists only at runtime for navigation.
- * Inherits Data for field storage (NAME) and BoxButton compatibility.
- * Inherits DirNode for parent pointer and path resolution.
+ * Inherits Data for BoxButton compatibility.
+ * Inherits DirNode for node identity and path resolution.
  * TODO: add move support — requires reseating parent pointer on move.
  */
 class DirectoryEntry : public Data, public DirNode {
 
 public:
 
-	/**
-	 * @param data   Must contain NAME (directory segment name).
-	 * @param parent Parent directory node, or nullptr for root-level.
-	 */
 	DirectoryEntry(
 		StringUMap&     data,
 		DirectoryEntry* parent
@@ -53,27 +49,17 @@ public:
 	const string createUniqueId()   const noexcept override;
 	const string createPrettyName() const noexcept override;
 	const string createTooltip()    const noexcept override;
-	string_view  getCssClass()      const noexcept override { return "DirectoryBoxButton"; }
-	string_view getXmlTag()         const noexcept override { return ""; }
-	const string& getName()         const noexcept override;
-	const string& getFsId()         const noexcept override;
+
+	string_view getCssClass() const noexcept override { return "DirectoryBoxButton"; }
+	string_view getXmlTag()   const noexcept override { return ""; }
 
 	CollectionHandler* getCollectionHandler() const noexcept override { return nullptr; }
 
-	/**
-	 * @return true if this directory contains no items.
-	 */
 	bool isEmpty() const noexcept;
 
-	/**
-	 * @return The mutable contents collection for this directory.
-	 */
 	BoxButtonCollection& getContents() noexcept { return contents; }
 
 protected:
-
-	/// Counter for stable id generation.
-	inline static size_t dirCounter = 0;
 
 	/// Items owned by this directory.
 	BoxButtonCollection contents;

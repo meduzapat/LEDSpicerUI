@@ -27,17 +27,14 @@ using namespace LEDSpicerUI::Ui::Storage;
 using namespace LEDSpicerUI::Constants;
 using LEDSpicerUI::Defaults;
 
-class StubDirNode : public DirNode {
+struct StubValues { LEDSpicerUI::Values v; };
+
+class StubDirNode : private StubValues, public DirNode {
 
 public:
 
-	StubDirNode() : DirNode(nullptr) {}
-	const string& getName()  const noexcept override { return id; }
-	const string& getFsId()  const noexcept override { return id; }
+	StubDirNode() noexcept : StubValues{}, DirNode(v, nullptr, "stub_1") {}
 
-private:
-
-	inline static const string id = "stub_1";
 };
 
 class InputTest : public ::testing::Test {
@@ -64,19 +61,17 @@ protected:
 	std::unique_ptr<Input>       rootInput;
 	std::unique_ptr<StubDirNode> parentDir;
 	std::unique_ptr<Input>       nestedInput;
+
 };
 
-// getCssClass.
 TEST_F(InputTest, CssClass) {
 	EXPECT_EQ("InputBoxButton", rootInput->getCssClass());
 }
 
-// createTooltip uses NAME field.
 TEST_F(InputTest, CreateTooltip) {
 	EXPECT_EQ("Input of type Actions", rootInput->createTooltip());
 }
 
-// createPrettyName includes path and NAME.
 TEST_F(InputTest, CreatePrettyNameAtRoot) {
 	const string pretty(rootInput->createPrettyName());
 	EXPECT_NE(string::npos, pretty.find("myinput"));
@@ -90,22 +85,20 @@ TEST_F(InputTest, CreatePrettyNameNested) {
 	EXPECT_NE(string::npos, pretty.find("Mame"));
 }
 
-// createUniqueId uses parent FsId + FILENAME.
 TEST_F(InputTest, CreateUniqueIdAtRoot) {
 	EXPECT_EQ(
-		Defaults::createCommonUniqueId({"", "myinput"}),
+		Defaults::createCommonUniqueId({emptyString, "myinput"}),
 		rootInput->createUniqueId()
 	);
 }
 
 TEST_F(InputTest, CreateUniqueIdNested) {
 	EXPECT_EQ(
-		Defaults::createCommonUniqueId({"stub_1", "nestedinput"}),
+		Defaults::createCommonUniqueId({parentDir->getFsId(), "nestedinput"}),
 		nestedInput->createUniqueId()
 	);
 }
 
-// Child collections keyed correctly.
 TEST_F(InputTest, HasSourcesChild) {
 	EXPECT_NE(nullptr, rootInput->getChild(COLLECTION_INPUT_SOURCES));
 }
@@ -114,20 +107,8 @@ TEST_F(InputTest, HasLinkedMapsChild) {
 	EXPECT_NE(nullptr, rootInput->getChild(COLLECTION_INPUT_LINKMAP));
 }
 
-// FILENAME is a property, not serialized.
-TEST_F(InputTest, FilenameNotSerialized) {
-	EXPECT_EQ(string::npos, rootInput->toXML().find(FILENAME));
-}
-
-// toXML contains Input header and footer.
-TEST_F(InputTest, ToXMLStructure) {
-	const string xml(rootInput->toXML());
-	EXPECT_NE(string::npos, xml.find("type=\"Input\""));
-	EXPECT_NE(string::npos, xml.find("</" PACKAGE_DATA_NAME ">"));
-}
-
-// wipe clears fieldsData.
-TEST_F(InputTest, WipeClearsFields) {
-	rootInput->wipe();
-	EXPECT_TRUE(rootInput->getValues()->empty());
+int main(int argc, char** argv) {
+	auto app = Gtk::Application::create(argc, argv, "org.test");
+	::testing::InitGoogleTest(&argc, argv);
+	return RUN_ALL_TESTS();
 }

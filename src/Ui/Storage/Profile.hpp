@@ -20,7 +20,9 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "FileNode.hpp"
+#include "Parent.hpp"
+#include "DirNode.hpp"
+#include "XMLHelper.hpp"
 
 #pragma once
 
@@ -31,7 +33,7 @@ namespace LEDSpicerUI::Ui::Storage {
  * Represents a single profile configuration file.
  * Owns link collections for elements, groups, inputs and animations.
  */
-class Profile : public FileNode {
+class Profile : public Parent, public DirNode {
 
 public:
 
@@ -39,14 +41,13 @@ public:
 
 	virtual ~Profile() = default;
 
-	string_view getCssClass() const noexcept override { return "ProfileBoxButton"; }
-	string_view getXmlTag()   const noexcept override { return "Profile"; }
+	const string createUniqueId() const noexcept override;
+	string_view getCssClass()     const noexcept override { return "ProfileBoxButton"; }
+	string_view getXmlTag()       const noexcept override { return "Profile"; }
 
 	CollectionHandler* getCollectionHandler() const noexcept override {return CollectionHandler::getInstance(COLLECTION_PROFILES);}
 
 protected:
-
-	const string getPrimaryKey() const noexcept override { return FILENAME; }
 
 	string xmlBody() const noexcept override;
 };

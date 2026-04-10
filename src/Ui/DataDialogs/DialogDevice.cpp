@@ -28,10 +28,11 @@ DialogDevice::DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 	DialogFormHost(obj, builder)
 {
 
-	// Init Elements and register for refresh.
+	// Init Dialgo Elements.
 	DialogElement::buildInstance(builder, "DialogElement");
-
+	// Register its dialogs for refresh.
 	childDialogs.push_back(DialogElement::getInstance());
+	dataTypeToDialogMap
 
 	// Connect Device Box and buttons.
 	builder->get_widget_derived("BoxDevices", box);

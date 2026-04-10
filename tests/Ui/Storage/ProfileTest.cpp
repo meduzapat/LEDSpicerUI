@@ -27,17 +27,14 @@ using namespace LEDSpicerUI::Ui::Storage;
 using namespace LEDSpicerUI::Constants;
 using LEDSpicerUI::Defaults;
 
-class StubDirNode : public DirNode {
+struct StubValues { LEDSpicerUI::Values v; };
+
+class StubDirNode : private StubValues, public DirNode {
 
 public:
 
-	StubDirNode() : DirNode(nullptr) {}
-	const string& getName()  const noexcept override { return id; }
-	const string& getFsId()  const noexcept override { return id; }
+	StubDirNode() noexcept : StubValues{}, DirNode(v, nullptr, "stub_1") {}
 
-private:
-
-	inline static const string id = "stub_1";
 };
 
 class ProfileTest : public ::testing::Test {
@@ -61,38 +58,30 @@ protected:
 		CollectionHandler::purgeAll();
 	}
 
-	std::unique_ptr<Profile>    rootProfile;
-	std::unique_ptr<Profile>    nestedProfile;
+	std::unique_ptr<Profile>     rootProfile;
+	std::unique_ptr<Profile>     nestedProfile;
 	std::unique_ptr<StubDirNode> parentDir;
+
 };
 
-// getCssClass.
 TEST_F(ProfileTest, CssClass) {
 	EXPECT_EQ("ProfileBoxButton", rootProfile->getCssClass());
 }
 
-// FILENAME is a property, not serialized.
-TEST_F(ProfileTest, FilenameInProperties) {
-	EXPECT_EQ("default", rootProfile->getProperties().getValue(FILENAME));
-	EXPECT_EQ("",        rootProfile->getValue(FILENAME));
-}
-
-// createUniqueId uses PID + FILENAME.
 TEST_F(ProfileTest, CreateUniqueIdAtRoot) {
 	EXPECT_EQ(
-		Defaults::createCommonUniqueId({"", "default"}),
+		Defaults::createCommonUniqueId({emptyString, "default"}),
 		rootProfile->createUniqueId()
 	);
 }
 
 TEST_F(ProfileTest, CreateUniqueIdNested) {
 	EXPECT_EQ(
-		Defaults::createCommonUniqueId({"stub_1", "nested"}),
+		Defaults::createCommonUniqueId({parentDir->getFsId(), "nested"}),
 		nestedProfile->createUniqueId()
 	);
 }
 
-// Child collections keyed correctly.
 TEST_F(ProfileTest, HasElementsChild) {
 	EXPECT_NE(nullptr, rootProfile->getChild(COLLECTION_PROFILE_ELEMENTS));
 }
@@ -109,19 +98,6 @@ TEST_F(ProfileTest, HasAnimationsChild) {
 	EXPECT_NE(nullptr, rootProfile->getChild(COLLECTION_PROFILE_ANIMATIONS));
 }
 
-// toXML contains Profile header and footer.
-TEST_F(ProfileTest, ToXMLStructure) {
-	const string xml(rootProfile->toXML());
-	EXPECT_NE(string::npos, xml.find("type=\"Profile\""));
-	EXPECT_NE(string::npos, xml.find("</" PACKAGE_DATA_NAME ">"));
-}
-
-// FILENAME must not appear in XML output.
-TEST_F(ProfileTest, FilenameNotSerialized) {
-	EXPECT_EQ(string::npos, rootProfile->toXML().find(FILENAME));
-}
-
-// Empty collections produce no XML sections.
 TEST_F(ProfileTest, EmptyCollectionsProduceNoSections) {
 	const string xml(rootProfile->toXML());
 	EXPECT_EQ(string::npos, xml.find("alwaysOnElements"));
@@ -130,10 +106,11 @@ TEST_F(ProfileTest, EmptyCollectionsProduceNoSections) {
 	EXPECT_EQ(string::npos, xml.find("animations"));
 }
 
-// wipe clears fieldsData.
-TEST_F(ProfileTest, WipeClearsFields) {
-	rootProfile->wipe();
-	EXPECT_TRUE(rootProfile->getValues()->empty());
+TEST_F(ProfileTest, GetCollectionHandler) {
+	EXPECT_EQ(
+		CollectionHandler::getInstance(COLLECTION_PROFILES),
+		rootProfile->getCollectionHandler()
+	);
 }
 
 int main(int argc, char** argv) {

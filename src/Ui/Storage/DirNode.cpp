@@ -24,8 +24,29 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
+DirNode::DirNode(
+	Values&       dest,
+	DirNode*      parent,
+	const string& filename
+) noexcept :
+	parent(parent),
+	dest(dest)
+{
+	dest.setValue(UID,      std::to_string(++nodeCounter));
+	dest.setValue(PID,      parent ? parent->getFsId() : emptyString);
+	dest.setValue(FILENAME, filename);
+}
+
+const string& DirNode::getName() const noexcept {
+	return dest.getValue(FILENAME);
+}
+
+const string& DirNode::getFsId() const noexcept {
+	return dest.getValue(UID);
+}
+
 string DirNode::getPath() const noexcept {
-	return parent ? parent->getFullPath() : "";
+	return parent ? parent->getFullPath() : emptyString;
 }
 
 string DirNode::getFullPath() const noexcept {

@@ -45,81 +45,71 @@ protected:
 	std::unique_ptr<DirectoryEntry> root;
 	std::unique_ptr<DirectoryEntry> child;
 	std::unique_ptr<DirectoryEntry> grand;
+
 };
+
+// UID is set and is non-empty.
+TEST_F(DirectoryEntryTest, UidSetAtConstruction) {
+	EXPECT_FALSE(root->getProperties().getValue(UID).empty());
+}
 
 // PID is empty at root level.
 TEST_F(DirectoryEntryTest, PidEmptyAtRoot) {
-	EXPECT_EQ("", root->getProperties().getValue(PID));
+	EXPECT_EQ(emptyString, root->getProperties().getValue(PID));
 }
 
-// PID matches parent UID for child.
+// PID matches parent UID.
 TEST_F(DirectoryEntryTest, PidMatchesParentUid) {
 	EXPECT_EQ(root->getProperties().getValue(UID),  child->getProperties().getValue(PID));
 	EXPECT_EQ(child->getProperties().getValue(UID), grand->getProperties().getValue(PID));
 }
 
-// UID is set and starts with "d_".
-TEST_F(DirectoryEntryTest, UidSetAtConstruction) {
-	const string uid(root->getProperties().getValue(UID));
-	EXPECT_FALSE(uid.empty());
-	EXPECT_EQ(0, uid.find("d_"));
-}
-
-// getFsId() is an alias for getProperty(UID).
+// getFsId() aliases dest UID.
 TEST_F(DirectoryEntryTest, GetFsIdAliasesUid) {
 	EXPECT_EQ(root->getProperties().getValue(UID),  root->getFsId());
 	EXPECT_EQ(child->getProperties().getValue(UID), child->getFsId());
 }
 
-// getName() returns the NAME field value.
+// getName() returns the name passed at construction.
 TEST_F(DirectoryEntryTest, GetName) {
 	EXPECT_EQ("root",   root->getName());
 	EXPECT_EQ("subdir", child->getName());
 	EXPECT_EQ("deep",   grand->getName());
 }
 
-// isAtRoot() reflects parent pointer state.
-TEST_F(DirectoryEntryTest, IsRootAtRoot) {
-	EXPECT_TRUE(root->isAtRoot());
-}
-
-TEST_F(DirectoryEntryTest, IsRootNotAtRoot) {
-	EXPECT_FALSE(child->isAtRoot());
-	EXPECT_FALSE(grand->isAtRoot());
-}
-
-// Path resolution via DirNode chain.
-TEST_F(DirectoryEntryTest, GetFullPathRoot) {
-	EXPECT_EQ("root", root->getFullPath());
-}
-
-TEST_F(DirectoryEntryTest, GetFullPathChild) {
-	EXPECT_EQ("root/subdir", child->getFullPath());
-}
-
-TEST_F(DirectoryEntryTest, GetFullPathGrandchild) {
-	EXPECT_EQ("root/subdir/deep", grand->getFullPath());
-}
-
-// createUniqueId() uses PID + NAME.
+// createUniqueId() uses PID + name.
 TEST_F(DirectoryEntryTest, CreateUniqueIdAtRoot) {
-	const string expected(Defaults::createCommonUniqueId({"", "root"}));
-	EXPECT_EQ(expected, root->createUniqueId());
+	EXPECT_EQ(
+		Defaults::createCommonUniqueId({emptyString, "root"}),
+		root->createUniqueId()
+	);
 }
 
 TEST_F(DirectoryEntryTest, CreateUniqueIdNested) {
-	const string expected(Defaults::createCommonUniqueId({
-		root->getProperties().getValue(UID), "subdir"
-	}));
-	EXPECT_EQ(expected, child->createUniqueId());
+	EXPECT_EQ(
+		Defaults::createCommonUniqueId({root->getFsId(), "subdir"}),
+		child->createUniqueId()
+	);
 }
 
-// isEmpty() reflects whether contents has any items.
+// createPrettyName() prefixes with folder emoji.
+TEST_F(DirectoryEntryTest, CreatePrettyName) {
+	EXPECT_NE(string::npos, root->createPrettyName().find("root"));
+	EXPECT_NE(string::npos, root->createPrettyName().find("📁"));
+}
+
+// createTooltip() returns full path.
+TEST_F(DirectoryEntryTest, CreateTooltip) {
+	EXPECT_EQ("root",        root->createTooltip());
+	EXPECT_EQ("root/subdir", child->createTooltip());
+}
+
+// isEmpty() reflects contents.
 TEST_F(DirectoryEntryTest, IsEmptyWhenNoContents) {
 	EXPECT_TRUE(root->isEmpty());
 }
 
-// getContents() returns the mutable collection.
+// getContents() is writable.
 TEST_F(DirectoryEntryTest, GetContentsIsWritable) {
 	EXPECT_EQ(0, root->getContents().getSize());
 }

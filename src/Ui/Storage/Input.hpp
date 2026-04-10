@@ -21,7 +21,8 @@
  */
 
 #include "XMLHelper.hpp"
-#include "FileNode.hpp"
+#include "Parent.hpp"
+#include "DirNode.hpp"
 #include "Revertible.hpp"
 // TODO: wire once DialogInputLinkMaps is reworked.
 //#include "DataDialogs/DialogInputLinkMaps.hpp"
@@ -35,24 +36,30 @@ namespace LEDSpicerUI::Ui::Storage {
  * Represents a single input configuration file.
  * Owns collections of InputSource objects and linked maps.
  */
-class Input : public FileNode, public Revertible {
+class Input : public Parent, public DirNode, public Revertible {
 
 public:
 
 	Input(StringUMap& data, DirNode* parent) noexcept :
-		FileNode(data, parent, vector<string>{
+		Parent(data, vector<string>{
 			COLLECTION_INPUT_SOURCES,
 			COLLECTION_INPUT_LINKMAP
 		}),
+		DirNode(getProperties(), parent, getValue(FILENAME)),
 		Revertible(*this, &children)
 	{}
 
 	virtual ~Input() = default;
 
+	const string createUniqueId()   const noexcept override;
 	string_view getXmlTag()         const noexcept override { return "Input"; }
 	string_view getCssClass()       const noexcept override { return "InputBoxButton"; }
 	const string createPrettyName() const noexcept override;
 	const string createTooltip()    const noexcept override;
+
+	CollectionHandler* getCollectionHandler() const noexcept override {
+		return CollectionHandler::getInstance(COLLECTION_INPUT);
+	}
 
 	void wipe()     noexcept override;
 	void tearDown() noexcept override;

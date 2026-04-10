@@ -63,7 +63,6 @@ add_executable(ledspicerui
 	src/Ui/Storage/Parent.cpp
 	src/Ui/Storage/Revertible.cpp
 	src/Ui/Storage/DirNode.cpp
-	src/Ui/Storage/FileNode.cpp
 	src/Ui/Storage/Selection.cpp
 	src/Ui/Storage/Link.cpp
 	src/Ui/Storage/DirectoryEntry.cpp

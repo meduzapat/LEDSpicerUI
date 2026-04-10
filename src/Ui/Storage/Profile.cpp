@@ -25,17 +25,25 @@
 using namespace LEDSpicerUI::Ui::Storage;
 
 Profile::Profile(StringUMap& data, DirNode* parent) noexcept :
-	FileNode(data, parent, vector<string>{
+	Parent(data, vector<string>{
 		COLLECTION_PROFILE_ELEMENTS,
 		COLLECTION_PROFILE_GROUPS,
 		COLLECTION_PROFILE_INPUTS,
 		COLLECTION_PROFILE_ANIMATIONS
-	})
+	}),
+	DirNode(getProperties(), parent, getValue(FILENAME))
 {
 	registerDependency(COLLECTION_ELEMENT,    COLLECTION_PROFILE_ELEMENTS);
 	registerDependency(COLLECTION_GROUP,      COLLECTION_PROFILE_GROUPS);
 	registerDependency(COLLECTION_INPUT,      COLLECTION_PROFILE_INPUTS);
 	registerDependency(COLLECTION_ANIMATIONS, COLLECTION_PROFILE_ANIMATIONS);
+}
+
+const string Profile::createUniqueId() const noexcept {
+	return Defaults::createCommonUniqueId({
+		not isAtRoot() ? parent->getFsId() : emptyString,
+		getName()
+	});
 }
 
 string Profile::xmlBody() const noexcept {

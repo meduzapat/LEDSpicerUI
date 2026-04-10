@@ -29,33 +29,22 @@ DirectoryEntry::DirectoryEntry(
 	DirectoryEntry* parent
 ) noexcept :
 	Data(data),
-	DirNode(parent)
-{
-	properties.setValue(PID, parent ? parent->getFsId() : "");
-	properties.setValue(UID, "d_" + std::to_string(++dirCounter));
-}
+	DirNode(getProperties(), parent, getValue(NAME))
+{}
 
 const string DirectoryEntry::createUniqueId() const noexcept {
 	return Defaults::createCommonUniqueId({
-		not isAtRoot() ? parent->getFsId() : "",
-		getValue(NAME)
+		not isAtRoot() ? parent->getFsId() : emptyString,
+		getName()
 	});
 }
 
 const string DirectoryEntry::createPrettyName() const noexcept {
-	return "📁 " + getValue(NAME);
+	return "📁 " + getName();
 }
 
 const string DirectoryEntry::createTooltip() const noexcept {
 	return getFullPath();
-}
-
-const string& DirectoryEntry::getName() const noexcept {
-	return getValue(NAME);
-}
-
-const string& DirectoryEntry::getFsId() const noexcept {
-	return properties.getValue(UID);
 }
 
 bool DirectoryEntry::isEmpty() const noexcept {
