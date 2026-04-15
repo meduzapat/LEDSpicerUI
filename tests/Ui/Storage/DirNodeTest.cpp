@@ -71,7 +71,7 @@ TEST_F(DirNodeTest, UidSetAtConstruction) {
 
 // UID is a plain number — no prefix.
 TEST_F(DirNodeTest, UidIsNumeric) {
-	const string uid(rootNode->getProperties().getValue(UID));
+	string uid(rootNode->getProperties().getValue(UID));
 	for (const char c : uid)
 		EXPECT_TRUE(std::isdigit(c));
 }

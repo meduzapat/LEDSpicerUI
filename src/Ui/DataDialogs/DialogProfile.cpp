@@ -24,8 +24,8 @@
 
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
-DialogProfile::DialogProfile(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
-	DialogForm(obj, builder, COLLECTION_PROFILES)
+DialogProfile::DialogProfile(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept :
+	DialogForm(obj, builder)
 {
 
 	// Connect Profile Box and button.
@@ -89,15 +89,11 @@ DialogProfile::DialogProfile(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 //	});
 }
 
-void DialogProfile::load(XMLHelper* values) {
+void DialogProfile::load(XMLHelper* values) noexcept {
 	createItems(values->getData(COLLECTION_PROFILES), values);
 }
 
-LEDSpicerUI::Ui::Storage::CollectionHandler* DialogProfile::getCollectionHandler() const {
-	return LEDSpicerUI::Ui::Storage::CollectionHandler::getInstance(COLLECTION_PROFILES);
-}
-
-void DialogProfile::createSubItems(XMLHelper* values) {
+void DialogProfile::createSubItems(XMLHelper* values) noexcept {
 	auto dialogSelect = DialogSelect::getInstance();
 	dialogSelect->setSettings(alwaysOnElementsSelectSetting);
 	dialogSelect->load(values, COLLECTION_PROFILES);
@@ -148,12 +144,12 @@ void DialogProfile::isValid() const {
 	}
 }
 
-void DialogProfile::storeData() {
+void DialogProfile::storeData() noexcept {
 	currentData->setValue(FILENAME, inputProfileName->get_text());
 	currentData->setValue(BACKGROUND_COLOR, btnProfileBackgroundColor->get_label());
 }
 
-void DialogProfile::retrieveData() {
+void DialogProfile::retrieveData() noexcept {
 	inputProfileName->set_text(currentData->getValue(FILENAME));
 	DialogColors::getInstance()->colorizeButton(
 		btnProfileBackgroundColor,
@@ -161,15 +157,11 @@ void DialogProfile::retrieveData() {
 	);
 }
 
-string const DialogProfile::createUniqueId() const {
+string DialogProfile::createUniqueId() const noexcept {
 	return Defaults::createCommonUniqueId({inputProfileName->get_text()});
 }
 
-string_view DialogProfile::getType() const noexcept {
-	return TYPE_PROFILE;
-}
-
-LEDSpicerUI::Ui::Storage::Data* DialogProfile::createData(StringUMap& rawData) noexcept {
+LEDSpicerUI::Ui::Storage::Data* DialogProfile::createData(StringUMap& rawData) const noexcept {
 	return new Storage::Profile(rawData);
 }
 

@@ -39,12 +39,11 @@ public:
 	virtual ~DialogProcess() = default;
 
 	void load(XMLHelper* values) noexcept override;
-	Storage::CollectionHandler* getCollectionHandler() const override;
-	void clearForm() noexcept override;
 	void isValid() const override;
-	void storeData() noexcept override;
+	void clearForm()   noexcept override;
+	void storeData()   noexcept override;
 	void retrieveData() noexcept override;
-	const string createUniqueId() const noexcept override;
+	string createUniqueId() const noexcept override;
 
 protected:
 
@@ -53,11 +52,11 @@ protected:
 		* inputSystemType  = nullptr,
 		* inputRomPosition = nullptr;
 
-	DialogProcess(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
+	DialogProcess(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept;
 
-	string_view getType() const noexcept override;
+	string_view getType() const noexcept override { return TYPE_MAP; }
 
-	Storage::Data* createData(StringUMap& rawData) noexcept override;
+	Storage::Data* createData(StringUMap& rawData) const noexcept override;
 };
 
 } // namespace

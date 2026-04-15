@@ -42,8 +42,8 @@ public:
 
 	virtual ~Restrictor() = default;
 
-	const string createPrettyName() const noexcept override;
-	const string createUniqueId()   const noexcept override;
+	string createPrettyName() const noexcept override;
+	string createUniqueId()   const noexcept override;
 	string_view getCssClass()       const noexcept override { return "RestrictorBoxButton"; }
 	string_view getXmlTag()         const noexcept override { return "restrictor"; }
 

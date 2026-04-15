@@ -34,15 +34,15 @@ InputSource::InputSource(StringUMap& data, const string& ownerId) noexcept :
 	registerDependency(COLLECTION_GROUP,   COLLECTION_INPUT_MAPS);
 }
 
-const string InputSource::createUniqueId() const noexcept {
+string InputSource::createUniqueId() const noexcept {
 	return Defaults::createCommonUniqueId({getProperties().getValue(PID), getValue(SOURCE)});
 }
 
-const string InputSource::createPrettyName() const noexcept {
+string InputSource::createPrettyName() const noexcept {
 	return getProperties().getValue(NAME);
 }
 
-const string InputSource::createTooltip() const noexcept {
+string InputSource::createTooltip() const noexcept {
 	return "Source " + createPrettyName() + " with "
 		+ std::to_string(children.at(COLLECTION_INPUT_MAPS).getSize()) + " maps";
 }

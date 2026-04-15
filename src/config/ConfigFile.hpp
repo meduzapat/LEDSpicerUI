@@ -78,9 +78,9 @@ public:
 
 	StringUMap getSettings();
 
-	const string getDefaultProfile() const;
+	string getDefaultProfile() const;
 
-	const string getProcessLookupRunEvery() const;
+	string getProcessLookupRunEvery() const;
 
 	static void save(const ConfigData& data);
 
@@ -90,17 +90,17 @@ protected:
 
 	string processLookupRunEvery;
 
-	const string processDevices();
+	string processDevices();
 
-	const string processRestrictors();
+	string processRestrictors();
 
-	const string processProcessLookup();
+	string processProcessLookup();
 
-	const string processElements(tinyxml2::XMLElement* deviceNode, const string& deviceName);
+	string processElements(tinyxml2::XMLElement* deviceNode, const string& deviceName);
 
-	const string processRestrictorMaps(tinyxml2::XMLElement* restrictorNode, const string& restrictorName);
+	string processRestrictorMaps(tinyxml2::XMLElement* restrictorNode, const string& restrictorName);
 
-	const string processGroups();
+	string processGroups();
 };
 
 } // namespace

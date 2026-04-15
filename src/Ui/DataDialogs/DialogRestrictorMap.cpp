@@ -24,9 +24,10 @@
 
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
-DialogRestrictorMap::DialogRestrictorMap(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
-	DialogForm(obj, builder, COLLECTION_RESTRICTOR_MAP)
+DialogRestrictorMap::DialogRestrictorMap(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept :
+	DialogForm(obj, builder)
 {
+
 	// Connect Restrictor Box and buttons.
 	builder->get_widget_derived("BoxRestrictorMappings", box);
 	builder->get_widget("BtnAddRestrictorMap",           btnAdd);
@@ -45,12 +46,8 @@ DialogRestrictorMap::DialogRestrictorMap(BaseObjectType* obj, const Glib::RefPtr
 	liststoreRestrictorMapId = static_cast<Gtk::ListStore*>(builder->get_object("liststoreRestrictorMapId").get());
 }
 
-void DialogRestrictorMap::load(XMLHelper* values) {
+void DialogRestrictorMap::load(XMLHelper* values) noexcept {
 	createItems(values->getData(Defaults::createCommonUniqueId({ownerData->createUniqueId(), COLLECTION_RESTRICTOR_MAP})), values);
-}
-
-LEDSpicerUI::Ui::Storage::CollectionHandler* DialogRestrictorMap::getCollectionHandler() const {
-	return LEDSpicerUI::Ui::Storage::CollectionHandler::getInstance(COLLECTION_RESTRICTOR_MAP);
 }
 
 void DialogRestrictorMap::clearForm() noexcept {
@@ -78,13 +75,13 @@ void DialogRestrictorMap::isValid() const {
 		throw Message("Select a hardware interface.");
 	}
 	if (action != Actions::EDIT or newPlayer != currentData->createUniqueId()) {
-		if (getCollectionHandler()->isIdSet(newPlayer)) {
+		if (currentData->getCollectionHandler()->isIdSet(newPlayer)) {
 			throw Message("That player - joystick combination is already in use.");
 		}
 	}
 }
 
-void DialogRestrictorMap::storeData() {
+void DialogRestrictorMap::storeData() noexcept {
 
 	currentData->setValue(PLAYER,   player->get_active_id());
 	currentData->setValue(JOYSTICK, joystick->get_active_id());
@@ -94,7 +91,7 @@ void DialogRestrictorMap::storeData() {
 	}
 }
 
-void DialogRestrictorMap::retrieveData() {
+void DialogRestrictorMap::retrieveData() noexcept {
 	player->set_active_id(currentData->getValue(PLAYER));
 	joystick->set_active_id(currentData->getValue(JOYSTICK));
 	if (Defaults::isMulti(comboBoxRestrictors->get_active_id())) {
@@ -102,11 +99,11 @@ void DialogRestrictorMap::retrieveData() {
 	}
 }
 
-string const DialogRestrictorMap::createUniqueId() const {
+string const DialogRestrictorMap::createUniqueId() const noexcept {
 	return Defaults::createCommonUniqueId({player->get_active_id(), joystick->get_active_id()});
 }
 
-bool DialogRestrictorMap::checkAvailableInterfaces() const {
+bool DialogRestrictorMap::checkAvailableInterfaces() const noexcept {
 	// Unknown amount due to unknown restrictor.
 	if (Defaults::restrictorsInfo.find(comboBoxRestrictors->get_active_id()) == Defaults::restrictorsInfo.end()) {
 		return true;
@@ -118,15 +115,11 @@ bool DialogRestrictorMap::checkAvailableInterfaces() const {
 	return size < total;
 }
 
-string_view DialogRestrictorMap::getType() const noexcept {
-	return TYPE_RESTRICTOR_MAP;
-}
-
-LEDSpicerUI::Ui::Storage::Data* DialogRestrictorMap::createData(StringUMap& rawData) noexcept {
+LEDSpicerUI::Ui::Storage::Data* DialogRestrictorMap::createData(StringUMap& rawData) const noexcept {
 	return new Storage::RestrictorMap(rawData);
 }
 
-void DialogRestrictorMap::populateInterfacesCombobox() {
+void DialogRestrictorMap::populateInterfacesCombobox() noexcept {
 	string name(comboBoxRestrictors->get_active_id());
 	Defaults::populateComboBoxWithIds(
 		liststoreRestrictorMapId,
@@ -144,12 +137,12 @@ void DialogRestrictorMap::populateInterfacesCombobox() {
 	interface->set_active(0);
 }
 
-void DialogRestrictorMap::afterCreate(Storage::BoxButton&) {
+void DialogRestrictorMap::afterCreate(Storage::BoxButton&) noexcept {
 	// This is necessary to disable the add if needed.
 	btnAdd->set_sensitive(checkAvailableInterfaces());
 }
 
-void DialogRestrictorMap::afterDeleteConfirmation(Storage::BoxButton& boxButton) {
+void DialogRestrictorMap::afterDeleteConfirmation(Storage::BoxButton& boxButton) noexcept {
 	DialogForm::afterDeleteConfirmation(boxButton);
 	// Assume that after deleting we can add a new map
 	btnAdd->set_sensitive(true);

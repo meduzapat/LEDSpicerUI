@@ -24,13 +24,17 @@
 
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
-DialogInputSource::DialogInputSource(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
-	DialogFormHost(obj, builder, COLLECTION_INPUT_SOURCES)
+DialogInputSource::DialogInputSource(
+	BaseObjectType* obj,
+	const Glib::RefPtr<Gtk::Builder>& builder
+) noexcept :
+	DialogFormHost(obj, builder)
 {
+
+	registerChildDialog<DialogInputMap>(builder, "DialogInputMap", COLLECTION_INPUT_MAPS);
 
 	// From Input Dialog — sourceless path.
 	Gtk::Button* btnAdd = nullptr;
-	DataDialogs::DialogInputMap::buildInstance(builder, "DialogInputMap");
 
 	builder->get_widget("ComboBoxInputSource",      selectorCombo);
 	builder->get_widget_derived("BoxInputSources",  box);
@@ -60,25 +64,14 @@ DialogInputSource::DialogInputSource(BaseObjectType* obj, const Glib::RefPtr<Gtk
 	});
 }
 
-DialogInputSource::~DialogInputSource() {
-	delete DataDialogs::DialogInputMap::getInstance();
-}
-
-void DialogInputSource::load(XMLHelper* values) {
+void DialogInputSource::load(XMLHelper* values) noexcept {
 	createItems(
 		values->getData(Defaults::createCommonUniqueId({ownerData->createUniqueId(), COLLECTION_INPUT_SOURCES})),
 		values
 	);
 }
 
-LEDSpicerUI::Ui::Storage::CollectionHandler* DialogInputSource::getCollectionHandler() const {
-	// Collection ID + input ID
-	return Storage::CollectionHandler::getInstance(
-		COLLECTION_INPUT_SOURCES + ownerData->getProperties().getValue(UID)
-	);
-}
-
-void DialogInputSource::resetForm() {
+void DialogInputSource::resetForm() noexcept {
 	if (resolvedSource().empty()) return;
 	btnApply->set_sensitive(true);
 	btnAddMap->set_sensitive(true);
@@ -92,7 +85,7 @@ void DialogInputSource::isValid() const {
 	if (not DialogInputMap::getInstance()->getBox()->getSize()) throw Message("Add at least one map.");
 }
 
-void DialogInputSource::storeData() {
+void DialogInputSource::storeData() noexcept {
 	Glib::ustring
 		id{selectorCombo->get_active_id()},
 		label;
@@ -111,25 +104,25 @@ void DialogInputSource::storeData() {
 	currentData->getProperties().setValue(NAME, label);
 }
 
-void DialogInputSource::retrieveData() {
+void DialogInputSource::retrieveData() noexcept {
 	// sourceless will be handled at activation.
 	if (not Defaults::needSource(comboBoxInputSelectInput->get_active_id())) return;
 
-	const string source(currentData->getValue(SOURCE));
+	string source(currentData->getValue(SOURCE));
 
 	// If setting the id fail because the source do not exists, set other and use entry instead.
 	if (not selectorCombo->set_active_id(source))
 		selectorCombo->get_entry()->set_text(source);
 }
 
-const string DialogInputSource::createUniqueId() const {
+string DialogInputSource::createUniqueId() const noexcept {
 	return Defaults::createCommonUniqueId({
 		ownerData->getProperties().getValue(UID),
 		resolvedSource()
 	});
 }
 
-void DialogInputSource::populateSources(const string& name) {
+void DialogInputSource::populateSources(const string& name) noexcept {
 	if (Defaults::needSource(name)) {
 		if (Defaults::isDevInputListener(name))
 			populateSourcesComboBox(scanEventDevices());
@@ -137,7 +130,10 @@ void DialogInputSource::populateSources(const string& name) {
 	}
 }
 
-void DialogInputSource::setOwner(Storage::BoxButtonCollection* collection, const Storage::Data* owner) {
+void DialogInputSource::setOwner(
+	Storage::BoxButtonCollection* collection,
+	const Storage::Data* owner
+) noexcept {
 	this->ownerData = owner;
 	items = collection;
 	auto s{comboBoxInputSelectInput->get_active_id()};
@@ -149,36 +145,32 @@ void DialogInputSource::setOwner(Storage::BoxButtonCollection* collection, const
 	refreshItems();
 }
 
-void DialogInputSource::createPhantomSource() {
+void DialogInputSource::createPhantomSource() noexcept {
 	// Activate the phantom immediately so the box gets populated.
 	if (items->getSize()) {
-		(*items->begin())->getData()->activate();
+		auto& theOne = *items->begin();
+		currentData = theOne->getData();
+		wireChildrenDialogs();
 		return;
 	}
 	// Otherwise create the phantom source
 	StringUMap rawData;
-	auto phantom = createData(rawData);
-	phantom->setProperty(SOURCELESS, "1");
-	phantom->activate();
-	items->create(phantom);
-	getCollectionHandler()->add(phantom);
+	currentData = createData(rawData);
+	currentData->getProperties().setValue(SOURCELESS, "1");
+	items->create(currentData);
 }
 
-void DialogInputSource::createSubItems(XMLHelper* values) {
+void DialogInputSource::createSubItems(XMLHelper* values) noexcept {
 	DialogInputMap::getInstance()->load(values);
 }
 
-string_view DialogInputSource::getType() const noexcept {
-	return TYPE_INPUT_SOURCE;
-}
-
-LEDSpicerUI::Ui::Storage::Data* DialogInputSource::createData(StringUMap& rawData) noexcept {
+LEDSpicerUI::Ui::Storage::Data* DialogInputSource::createData(StringUMap& rawData) const noexcept {
 	auto is{new Storage::InputSource(rawData, ownerData->getProperties().getValue(UID))};
 	is->getProperties().setValue(PID, ownerData->getProperties().getValue(UID));
 	return is;
 }
 
-StringMap DialogInputSource::scanEventDevices() {
+StringMap DialogInputSource::scanEventDevices() noexcept{
 
 	StringMap devices;
 
@@ -194,7 +186,7 @@ StringMap DialogInputSource::scanEventDevices() {
 		for (const auto& entry : std::filesystem::directory_iterator(dirPath, ec)) {
 			if (ec) break;
 			if (not entry.is_character_file() and not entry.is_symlink()) continue;
-			const string name = entry.path().filename().string();
+			string name = entry.path().filename().string();
 			if (useById and name.find("event") == string::npos) continue;
 			string humanName = readDeviceName(name);
 			devices.emplace(name, humanName.empty() ? name : humanName);
@@ -208,14 +200,14 @@ StringMap DialogInputSource::scanEventDevices() {
 	return devices;
 }
 
-Glib::ustring DialogInputSource::resolvedSource() const {
+Glib::ustring DialogInputSource::resolvedSource() const noexcept {
 	auto id{selectorCombo->get_active_id()};
 	if (id.empty())
 		id = selectorCombo->get_entry()->get_text();
 	return id;
 }
 
-void DialogInputSource::populateSourcesComboBox(const StringMap& sources) {
+void DialogInputSource::populateSourcesComboBox(const StringMap& sources) noexcept {
 
 	auto listStore = static_cast<Gtk::ListStore*>(selectorCombo->get_model().get());
 	listStore->clear();
@@ -240,7 +232,7 @@ void DialogInputSource::populateSourcesComboBox(const StringMap& sources) {
 	selectorCombo->set_active(-1);
 }
 
-string DialogInputSource::readDeviceName(const string& byIdName) {
+string DialogInputSource::readDeviceName(const string& byIdName) noexcept {
 	std::filesystem::path linkPath{DEV_INPUT_BY_ID + byIdName};
 	if (not std::filesystem::exists(linkPath) or not std::filesystem::is_symlink(linkPath))
 		return byIdName;
@@ -259,7 +251,7 @@ string DialogInputSource::readDeviceName(const string& byIdName) {
 	return name;
 }
 
-void DialogInputSource::onEmpty() {
+void DialogInputSource::onEmpty() noexcept {
 	btnApply->set_sensitive(false);
 	btnAddMap->set_sensitive(false);
 }

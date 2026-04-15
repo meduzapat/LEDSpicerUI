@@ -41,7 +41,7 @@ public:
 
 	string_view getXmlTag()         const noexcept override { return "element"; }
 	string_view getCssClass()       const noexcept override { return "ElementBoxButton"; }
-	const string createPrettyName() const noexcept override;
+	string createPrettyName() const noexcept override;
 
 	/**
 	 * Adds a child to the element, this is used for RGB strips.

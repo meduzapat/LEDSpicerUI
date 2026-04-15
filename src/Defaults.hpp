@@ -133,12 +133,15 @@ constexpr const char* COLORFORMAT   = "colorFormat";
 constexpr const char* CHANGE_POINT  = "changePoint";
 constexpr const char* DEFAULT_COLOR = "defaultColor";
 constexpr const char* BRIGHTNESS    = "brightness";
-constexpr const char* PROP_EXPAND   = "expandable";
-constexpr const char* PROP_SYSTEMM  = "system";
-constexpr const char* PROP_STRIP    = "stripDescriptor";
 
 constexpr const char* DEFAULT_BRIGHTNESS = "100";
 constexpr unsigned int DEFAULT_SOLENOID  = 50;
+
+/// Special properties keys.
+constexpr const char* PROP_EXPAND    = "e";
+constexpr const char* PROP_NO_SELECT = "ns";
+constexpr const char* PROP_SYSTEMM   = "s";
+constexpr const char* PROP_STRIP     = "sd";
 
 /// CSS-related constants
 constexpr const char* COLOR_PIN      = "pinSingle";
@@ -192,11 +195,12 @@ constexpr const char* TYPE_RESTRICTOR_MAP = "player mapping";
 #define               TYPE_INPUT            "input"
 #define               TYPE_INPUT_SOURCE     TYPE_INPUT " source"
 #define               TYPE_INPUT_MAP        TYPE_INPUT " " TYPE_MAP
+#define               TYPE_INPUT_LINKMAP    TYPE_INPUT " linked " TYPE_MAP
 #define               TYPE_INPUT_DIR        TYPE_INPUT " " TYPE_DIRECTORY
 constexpr const char* TYPE_ANIMATION      = "animation";
 constexpr const char* TYPE_PROFILE        = "profile";
 
-/// Collection names.
+/// Collection / families — dual-purpose string constants.
 constexpr const char* COLLECTION_DEVICES        = "d";
 constexpr const char* COLLECTION_RESTRICTORS    = "r";
 constexpr const char* COLLECTION_ELEMENT        = "e";
@@ -210,7 +214,7 @@ constexpr const char* COLLECTION_INPUT_LINKMAP  = "i.l";
 constexpr const char* COLLECTION_ANIMATIONS     = "a";
 constexpr const char* COLLECTION_PROFILES       = "pr";
 
-/// Link collection keys.
+/// Link families keys.
 constexpr const char* COLLECTION_GROUP_LINKS         = "g.l";
 constexpr const char* COLLECTION_PROFILE_ELEMENTS    = "pr.e";
 constexpr const char* COLLECTION_PROFILE_GROUPS      = "pr.g";

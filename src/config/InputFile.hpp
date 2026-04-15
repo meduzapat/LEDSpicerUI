@@ -53,7 +53,7 @@ private:
 	 * @param inputName Scoped collection key for this source's maps.
 	 * @return Error string, empty if clean.
 	 */
-	const string processMaps(tinyxml2::XMLElement* mapsNode, const string& inputName) noexcept;
+	string processMaps(tinyxml2::XMLElement* mapsNode, const string& inputName) noexcept;
 
 };
 

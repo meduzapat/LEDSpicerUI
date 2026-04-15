@@ -25,55 +25,49 @@
 using namespace LEDSpicerUI::Ui::Storage;
 
 bool Link::operator==(const Data& other) const noexcept {
-	return Data::operator==(other) or linkInfo.link == &other;
+	return Data::operator==(other) or link == &other;
 }
 
 string_view Link::getCssClass() const noexcept {
-	return linkInfo.link ? linkInfo.link->getCssClass() : "";
+	return link->getCssClass();
 }
 
-const string Link::createPrettyName() const noexcept {
-	return linkInfo.link ? linkInfo.link->createPrettyName() : "";
+string Link::createPrettyName() const noexcept {
+	return link->createPrettyName();
 }
 
-const string Link::createTooltip() const noexcept {
-	return linkInfo.link ? linkInfo.link->createTooltip() : "";
+string Link::createTooltip() const noexcept {
+	return link->createTooltip();
 }
 
-const string Link::createUniqueId() const noexcept {
-	return linkInfo.link ? linkInfo.link->createUniqueId() : "";
+string Link::createUniqueId() const noexcept {
+	return link->createUniqueId();
+}
+
+string_view Link::getXmlTag() const noexcept {
+	return string_view(linkType);
 }
 
 const string& Link::getValue(const string& key) const noexcept {
-	if (key == linkInfo.key) {
-		return linkInfo.link->getValue(getPrimaryKey());
-	}
+	if (key == linkKey)
+		return link->getPrimaryValue();
 	return Data::getValue(key);
 }
 
-string Link::getValue(const string &key, const string &defaultValue) const noexcept {
-	if (key == linkInfo.key) {
-		return linkInfo.link->getValue(getPrimaryKey(), defaultValue);
-	}
+string Link::getValue(const string& key, const string& defaultValue) const noexcept {
+	if (key == linkKey)
+		return link->getPrimaryValue();
 	return Data::getValue(key, defaultValue);
 }
 
 void Link::setValue(const string& key, const string& value) noexcept {
-	// Ignore
-	if (key == linkInfo.key) return;
+	if (key == linkKey)
+		return;
 	Data::setValue(key, value);
 }
 
-string_view Link::getXmlTag() const noexcept {
-	return linkInfo.link ? linkInfo.link->getXmlTag() : "";
-}
-
-const string Link::toXML() const noexcept {
-	StringUMap values{{linkInfo.key, linkInfo.link->createUniqueId()}};
+string Link::toXML() const noexcept {
+	StringUMap values{{linkKey, link->createUniqueId()}};
 	values.insert(begin(), end());
-	return createOpeningXML(string(linkInfo.type), values, true);
-}
-
-void Link::setLinkData(const LinkData& newLinkData) noexcept {
-	linkInfo = std::move(newLinkData);
+	return createOpeningXML(linkType, values, true);
 }

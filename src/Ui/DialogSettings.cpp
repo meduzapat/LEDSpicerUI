@@ -224,7 +224,7 @@ void DialogSettings::setConfigPath(const string& configPath) {
 	labelConfigPath->set_text((isWritable ? "" : "🔒") + configPath);
 }
 
-void DialogSettings::setDataDir(const string &dataDir, bool setFileDataDirSelector) {
+void DialogSettings::setDataDir(string &dataDir, bool setFileDataDirSelector) {
 	if (dataDir.empty()) {
 		this->dataDir = "";
 		fileDataDirSelect->set_current_folder(Glib::get_home_dir());

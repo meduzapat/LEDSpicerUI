@@ -25,8 +25,9 @@
 using namespace LEDSpicerUI::Ui::DataDialogs;
 using namespace LEDSpicerUI::Ui::Storage;
 
-DialogGroup::DialogGroup(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
-	DialogForm(obj, builder)
+DialogGroup::DialogGroup(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept :
+	DialogForm(obj, builder),
+	elementRequest({boxElements, NAME, TYPE_ELEMENT, CollectionHandler::getInstance(COLLECTION_ELEMENT), {}})
 {
 	builder->get_widget_derived("BoxGroups", box);
 	builder->get_widget("BtnApplyGroup",     btnApply);
@@ -45,18 +46,8 @@ DialogGroup::DialogGroup(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& 
 	Gtk::Button* btnAddElements = nullptr;
 	builder->get_widget("BtnAddGroupElements", btnAddElements);
 	btnAddElements->signal_clicked().connect([this]() {
-		DialogSelect::getInstance()->open(
-			{
-				boxElements,z
-				elementLinks(),
-				NAME,
-				TYPE_ELEMENT,
-				COLLECTION_ELEMENT,
-				{},              // no extra link fields.
-				&expandStrips
-			},
-			currentData
-		);
+		DialogSelect::getInstance()->setUp(elementLinks(), elementRequest);
+		DialogSelect::getInstance()->open();
 	});
 
 	// Group name generator dialog.
@@ -82,27 +73,28 @@ DialogGroup::DialogGroup(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& 
 	});
 }
 
-void DialogGroup::load(XMLHelper* values) {
+void DialogGroup::load(XMLHelper* values) noexcept {
 	createItems(values->getData(COLLECTION_GROUP), values);
 }
 
-void DialogGroup::createSubItems(XMLHelper* values) {
-	DialogSelect::getInstance()->load(
-		values,
-		currentData->createUniqueId(),
-		{boxElements, elementLinks(), NAME, TYPE_ELEMENT, COLLECTION_ELEMENT, {}}
-	);
+void DialogGroup::createSubItems(XMLHelper* values) noexcept {
+	DialogSelect::getInstance()->load(values, currentData->createUniqueId());
+}
+
+void DialogGroup::wireChildrenDialogs() noexcept {
+	DialogForm::wireChildrenDialogs();
+	DialogSelect::getInstance()->setRequest(elementRequest);
+	DialogSelect::getInstance()->setDestination(elementLinks());
 }
 
 void DialogGroup::clearForm() noexcept {
 	inputGroupName->set_text("");
 	DialogColors::getInstance()->colorizeButton(btnGroupDefaultColor, NO_COLOR);
-	// Wipe the display box — currentData is not yet set in ADD flow.
 	boxElements->wipe();
 }
 
 void DialogGroup::isValid() const {
-	const string name(createUniqueId());
+	string name(createUniqueId());
 	if (name.empty()) {
 		if (action != Actions::LOAD)
 			inputGroupName->grab_focus();
@@ -121,9 +113,7 @@ void DialogGroup::storeData() noexcept {
 	currentData->setValue(NAME, inputGroupName->get_text());
 	if (not btnGroupDefaultColor->get_label().empty())
 		currentData->setValue(DEFAULT_COLOR, btnGroupDefaultColor->get_label());
-	DialogSelect::getInstance()->reindex(
-		{boxElements, elementLinks(), NAME, TYPE_ELEMENT, COLLECTION_ELEMENT, {}}
-	);
+	DialogSelect::getInstance()->reindex();
 }
 
 void DialogGroup::retrieveData() noexcept {
@@ -132,29 +122,17 @@ void DialogGroup::retrieveData() noexcept {
 		btnGroupDefaultColor,
 		currentData->getValue(DEFAULT_COLOR).empty() ? NO_COLOR : currentData->getValue(DEFAULT_COLOR)
 	);
-	DialogSelect::getInstance()->refresh(
-		{boxElements, elementLinks(), NAME, TYPE_ELEMENT, COLLECTION_ELEMENT, {}}
-	);
+	DialogSelect::getInstance()->refresh();
 }
 
-const string DialogGroup::createUniqueId() const noexcept {
+string DialogGroup::createUniqueId() const noexcept {
 	return Defaults::createCommonUniqueId({inputGroupName->get_text()});
 }
 
-string_view DialogGroup::getType() const noexcept {
-	return TYPE_GROUP;
-}
-
-Data* DialogGroup::createData(StringUMap& rawData) noexcept {
-	return new Storage::Group(rawData);
+Data* DialogGroup::createData(StringUMap& rawData) const noexcept {
+	return new Group(rawData);
 }
 
 BoxButtonCollection* DialogGroup::elementLinks() const noexcept {
-	return static_cast<Storage::Parent*>(currentData)->getChild(COLLECTION_GROUP_LINKS);
-}
-
-vector<Data*> DialogGroup::expandStrips(Storage::Data* data) {
-	if (data->getProperties().isSet(PROP_EXPAND))
-		return static_cast<Storage::Element*>(data)->copyStripChildren();
-	return {data};
+	return static_cast<Parent*>(currentData)->getChild(COLLECTION_GROUP_LINKS);
 }

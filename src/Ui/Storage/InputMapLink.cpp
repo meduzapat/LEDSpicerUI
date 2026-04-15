@@ -24,7 +24,7 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-const string InputMapLink::createTooltip() const noexcept {
+string InputMapLink::createTooltip() const noexcept {
 	string tooltip("This action will start with the ");
 	StringVector txts;
 	// data is trigger(30)type target(31)trigger(30)type target(31)trigger(30)type target
@@ -37,7 +37,7 @@ const string InputMapLink::createTooltip() const noexcept {
 	return tooltip + Defaults::implode(txts, " is detected, will move to ") + " is detected, will start over";
 }
 
-const string InputMapLink::createPrettyName() const noexcept {
+string InputMapLink::createPrettyName() const noexcept {
 	StringVector prettyName;
 	// data is trigger(30)type target(31)trigger(30)type target(31)trigger(30)type target
 	for (const auto& group : Defaults::explode(getValue(NAME), RECORD_SEPARATOR)) {
@@ -48,7 +48,7 @@ const string InputMapLink::createPrettyName() const noexcept {
 	return Defaults::implode(prettyName, " ➡️ ") + " 🔙";
 }
 
-const string InputMapLink::createUniqueId() const noexcept {
+string InputMapLink::createUniqueId() const noexcept {
 	// ID holds the canonical trigger combination key built by DialogInputLinkMaps.
 	return getValue(ID);
 }

@@ -100,7 +100,7 @@ TEST_F(ParentTest, xmlBody_emitsChildrenInOrder) {
 	StringUMap d2{{NAME, "second"}};
 	p.getChild("A")->create(new TestData(d1));
 	p.getChild("A")->create(new TestData(d2));
-	const string xml(p.toXML());
+	string xml(p.toXML());
 	EXPECT_NE(string::npos, xml.find("first"));
 	EXPECT_NE(string::npos, xml.find("second"));
 	EXPECT_LT(xml.find("first"), xml.find("second"));

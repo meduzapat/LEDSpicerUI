@@ -73,7 +73,7 @@ TEST_F(DeviceTest, CssClass) {
 TEST_F(DeviceTest, ToXMLStructure) {
 	StringUMap data{{NAME, "RaspberryPi"}, {ID, "1"}, {PORT, ""}};
 	Device d(data);
-	const string xml(d.toXML());
+	string xml(d.toXML());
 	EXPECT_NE(string::npos, xml.find("<device"));
 	// Empty emits self-closing tag
 	EXPECT_NE(string::npos, xml.find("/>"));

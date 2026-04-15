@@ -37,11 +37,11 @@ public:
 		return instance;
 	}
 
-	static void buildInstance(const Glib::RefPtr<Gtk::Builder>& builder, string_view widgetId) {
+	static void buildInstance(const Glib::RefPtr<Gtk::Builder>& builder, std::string_view widgetId) {
 		if (not instance) {
 			builder->get_widget_derived(widgetId.data(), instance);
 			if (not instance) {
-				throw std::runtime_error("Failed to load widget: " + string(widgetId));
+				throw std::runtime_error("Failed to load widget: " + std::string(widgetId));
 			}
 		}
 	}

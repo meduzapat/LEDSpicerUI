@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      InputMap.hpp
- * @since     Sep 30, 2023
+ * @file      DialogLinkEditor.hpp
+ * @since     Apr 2026
  * @author    Patricio A. Rossi (MeduZa)
  *
  * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
@@ -20,38 +20,48 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Link.hpp"
+#include "DialogColors.hpp"
+#include "Storage/Link.hpp"
 
 #pragma once
 
-namespace LEDSpicerUI::Ui::Storage {
+namespace LEDSpicerUI::Ui::DataDialogs {
 
 /**
- * LEDSpicerUI::Ui::Storage::InputMap
+ * LEDSpicerUI::Ui::DataDialogs::DialogLinkEditor
  *
- * A single input map entry. Extends Link to wrap the target Element or Group
- * so renames and deletes propagate automatically via CollectionHandler.
- * Carries its own extra values: trigger, color, filter, type.
- * Unique ID: sourceID + "_" + trigger + "_" + target name.
- * Source ID is stored as a property by DialogInputMap at creation time.
+ * Generic dialog for editing extra fields on a Link.
  */
-class InputMap : public Link {
+class DialogLinkEditor : public GladeDialog<DialogLinkEditor> {
+
+	friend class Gtk::Builder;
 
 public:
 
-	inline static const string TYPE = "map";
+	virtual ~DialogLinkEditor() = default;
 
-	InputMap(
-		StringUMap&   data,
-		const string& key,
-		Data*         link
-	) noexcept : Link(data, key, TYPE, {}, link) {}
+	/**
+	 * Opens the dialog to edit extra fields on a Link.
+	 * @param link   Link whose fieldsData will be read and written.
+	 */
+	void open(Storage::Link* link) noexcept;
 
-	virtual ~InputMap() = default;
+protected:
 
-	string_view getCssClass() const noexcept override { return "InputMapBoxButton"; }
-	string createUniqueId()   const noexcept override;
-	string createPrettyName() const noexcept override;
+	Gtk::Button* btnApply = nullptr;
+
+	Gtk::Box
+		* boxColor = nullptr,
+		* boxCombo = nullptr;
+
+	Gtk::Label
+		* labelColor = nullptr,
+		* labelCombo = nullptr;
+
+	Gtk::Button*   btnColor    = nullptr;
+	Gtk::ComboBox* comboFilter = nullptr;
+
+	DialogLinkEditor(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept;
 
 };
 

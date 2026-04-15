@@ -50,11 +50,11 @@ public:
 
 	virtual ~Input() = default;
 
-	const string createUniqueId()   const noexcept override;
+	string createUniqueId()   const noexcept override;
 	string_view getXmlTag()         const noexcept override { return "Input"; }
 	string_view getCssClass()       const noexcept override { return "InputBoxButton"; }
-	const string createPrettyName() const noexcept override;
-	const string createTooltip()    const noexcept override;
+	string createPrettyName() const noexcept override;
+	string createTooltip()    const noexcept override;
 
 	CollectionHandler* getCollectionHandler() const noexcept override {
 		return CollectionHandler::getInstance(COLLECTION_INPUT);

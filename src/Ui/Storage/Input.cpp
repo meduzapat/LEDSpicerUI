@@ -24,18 +24,18 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-const string Input::createUniqueId() const noexcept {
+string Input::createUniqueId() const noexcept {
 	return Defaults::createCommonUniqueId({
 		not isAtRoot() ? parent->getFsId() : emptyString,
 		getName()
 	});
 }
 
-const string Input::createPrettyName() const noexcept {
+string Input::createPrettyName() const noexcept {
 	return getFullPath() + " [" + getValue(NAME) + "]";
 }
 
-const string Input::createTooltip() const noexcept {
+string Input::createTooltip() const noexcept {
 	return "Input of type " + getValue(NAME);
 }
 

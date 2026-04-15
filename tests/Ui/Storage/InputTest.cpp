@@ -73,13 +73,13 @@ TEST_F(InputTest, CreateTooltip) {
 }
 
 TEST_F(InputTest, CreatePrettyNameAtRoot) {
-	const string pretty(rootInput->createPrettyName());
+	string pretty(rootInput->createPrettyName());
 	EXPECT_NE(string::npos, pretty.find("myinput"));
 	EXPECT_NE(string::npos, pretty.find("Actions"));
 }
 
 TEST_F(InputTest, CreatePrettyNameNested) {
-	const string pretty(nestedInput->createPrettyName());
+	string pretty(nestedInput->createPrettyName());
 	EXPECT_NE(string::npos, pretty.find("stub_1"));
 	EXPECT_NE(string::npos, pretty.find("nestedinput"));
 	EXPECT_NE(string::npos, pretty.find("Mame"));

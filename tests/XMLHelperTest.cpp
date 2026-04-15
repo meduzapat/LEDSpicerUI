@@ -162,15 +162,15 @@ TEST(XMLHelperTest, XmlHeader) {
 }
 
 TEST(XMLHelperTest, XmlHeaderWithAttrs) {
-	const string header = XMLHelper::xmlHeader("Input", {{NAME, "Mame"}});
+	string header = XMLHelper::xmlHeader("Input", {{NAME, "Mame"}});
 	EXPECT_NE(string::npos, header.find("type=\"Input\""));
 	EXPECT_NE(string::npos, header.find("name=\"Mame\""));
 	EXPECT_NE(string::npos, header.find(">\n"));
 }
 
 TEST(XMLHelperTest, XmlSection) {
-	const string content(Defaults::tab() + "<item/>\n");
-	const string result = XMLHelper::xmlSection("items", content);
+	string content(Defaults::tab() + "<item/>\n");
+	string result = XMLHelper::xmlSection("items", content);
 	EXPECT_NE(string::npos, result.find("<items>"));
 	EXPECT_NE(string::npos, result.find("</items>"));
 	EXPECT_NE(string::npos, result.find(content));
@@ -181,7 +181,7 @@ TEST(XMLHelperTest, XmlSectionEmptySkipped) {
 }
 
 TEST(XMLHelperTest, XmlSectionWithAttrs) {
-	const string result = XMLHelper::xmlSection(
+	string result = XMLHelper::xmlSection(
 		"maps", "<map/>\n", {{"source", "hw1"}}
 	);
 	EXPECT_NE(string::npos, result.find("source=\"hw1\""));
@@ -190,7 +190,7 @@ TEST(XMLHelperTest, XmlSectionWithAttrs) {
 }
 
 TEST(XMLHelperTest, XmlHeaderNoType) {
-	const string header = XMLHelper::xmlHeader("");
+	string header = XMLHelper::xmlHeader("");
 	EXPECT_NE(string::npos, header.find("version=\"" PACKAGE_DATA_VERSION "\""));
 	EXPECT_NE(string::npos, header.find("type=\"\""));
 	EXPECT_NE(string::npos, header.find(">\n"));

@@ -39,7 +39,7 @@ Profile::Profile(StringUMap& data, DirNode* parent) noexcept :
 	registerDependency(COLLECTION_ANIMATIONS, COLLECTION_PROFILE_ANIMATIONS);
 }
 
-const string Profile::createUniqueId() const noexcept {
+string Profile::createUniqueId() const noexcept {
 	return Defaults::createCommonUniqueId({
 		not isAtRoot() ? parent->getFsId() : emptyString,
 		getName()

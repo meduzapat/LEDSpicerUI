@@ -341,7 +341,7 @@ void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {
 		currentProjectName = newProject;
 		Defaults::setSubtitle(currentProjectName);
 		// Resolve from where the config will be read.
-		const string configPath = (Defaults::getMode() == Defaults::Mode::Portable) ?
+		string configPath = (Defaults::getMode() == Defaults::Mode::Portable) ?
 			Defaults::getProjectsDir() + currentProjectName + "/ledspicer.conf" :
 			DialogSettings::getInstance()->getConfigPath();
 

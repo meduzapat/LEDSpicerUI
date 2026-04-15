@@ -39,14 +39,14 @@ public:
 
 	static constexpr string_view noRestrictor {"Select Restrictor"};
 
-	virtual ~DialogRestrictor();
+	virtual ~DialogRestrictor() = default;
 
 	void load(XMLHelper* values) noexcept override;
-	void resetForm() noexcept override;
 	void isValid() const override;
-	void storeData() noexcept override;
+	void resetForm()    noexcept override;
+	void storeData()    noexcept override;
 	void retrieveData() noexcept override;
-	const string createUniqueId() const noexcept override;
+	string createUniqueId() const noexcept override;
 
 protected:
 
@@ -71,8 +71,8 @@ protected:
 	DialogRestrictor(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept;
 
 	void createSubItems(XMLHelper* values) noexcept override;
-	string_view getType() const noexcept override;
-	Storage::Data* createData(StringUMap& rawData) noexcept override;
+	string_view getType() const noexcept override { return TYPE_RESTRICTOR; }
+	Storage::Data* createData(StringUMap& rawData) const noexcept override;
 	void onEmpty() noexcept override;
 	void onSelected() noexcept override;
 };

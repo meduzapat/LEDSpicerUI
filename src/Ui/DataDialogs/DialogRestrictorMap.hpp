@@ -39,11 +39,11 @@ public:
 	virtual ~DialogRestrictorMap() = default;
 
 	void load(XMLHelper* values) noexcept override;
-	void clearForm() noexcept override;
 	void isValid() const override;
-	void storeData() noexcept override;
+	void clearForm()    noexcept override;
+	void storeData()    noexcept override;
 	void retrieveData() noexcept override;
-	const string createUniqueId() const noexcept override;
+	string createUniqueId() const noexcept override;
 
 	/**
 	 * Populates the interfaces combobox from the owner restrictor's available slots.
@@ -63,7 +63,7 @@ protected:
 
 	Gtk::ListStore* liststoreRestrictorMapId = nullptr;
 
-	DialogRestrictorMap(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
+	DialogRestrictorMap(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept;
 
 	/**
 	 * Checks if the owner restrictor still has available interface slots.
@@ -71,8 +71,8 @@ protected:
 	 */
 	bool checkAvailableInterfaces() const noexcept;
 
-	string_view getType() const noexcept override;
-	Storage::Data* createData(StringUMap& rawData) noexcept override;
+	string_view getType() const noexcept override { return TYPE_RESTRICTOR_MAP; }
+	Storage::Data* createData(StringUMap& rawData) const noexcept override;
 
 	void afterCreate(Storage::BoxButton& boxButton) noexcept override;
 	void afterDeleteConfirmation(Storage::BoxButton& boxButton) noexcept override;

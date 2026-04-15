@@ -41,7 +41,7 @@ public:
 
 	virtual ~Profile() = default;
 
-	const string createUniqueId() const noexcept override;
+	string createUniqueId() const noexcept override;
 	string_view getCssClass()     const noexcept override { return "ProfileBoxButton"; }
 	string_view getXmlTag()       const noexcept override { return "Profile"; }
 

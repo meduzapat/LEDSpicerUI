@@ -69,7 +69,7 @@ TEST_F(GroupTest, CssClass) {
 
 // toXML contains group tag and closes correctly.
 TEST_F(GroupTest, ToXMLStructure) {
-	const string xml(group->toXML());
+	string xml(group->toXML());
 	EXPECT_NE(string::npos, xml.find("<group"));
 	// Empty group emits self-closing tag
 	EXPECT_NE(string::npos, xml.find("/>"));

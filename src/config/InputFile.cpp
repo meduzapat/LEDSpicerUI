@@ -32,7 +32,7 @@ InputFile::InputFile(const string& filePath, DirectoryEntry* parent) :
 	string errors;
 
 	/* Base key matches FileData::createUniqueId() for the resulting Input object. */
-	const string baseId(Defaults::createCommonUniqueId({
+	string baseId(Defaults::createCommonUniqueId({
 		parent ? parent->getFsId() : "",
 		filename
 	}));
@@ -67,7 +67,7 @@ InputFile::InputFile(const string& filePath, DirectoryEntry* parent) :
 		Message::displayError("Errors:\n" + errors);
 }
 
-const string InputFile::processMaps(
+string InputFile::processMaps(
 	tinyxml2::XMLElement* mapsNode,
 	const string& inputName
 ) noexcept {

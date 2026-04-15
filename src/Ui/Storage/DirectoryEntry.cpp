@@ -32,18 +32,18 @@ DirectoryEntry::DirectoryEntry(
 	DirNode(getProperties(), parent, getValue(NAME))
 {}
 
-const string DirectoryEntry::createUniqueId() const noexcept {
+string DirectoryEntry::createUniqueId() const noexcept {
 	return Defaults::createCommonUniqueId({
 		not isAtRoot() ? parent->getFsId() : emptyString,
 		getName()
 	});
 }
 
-const string DirectoryEntry::createPrettyName() const noexcept {
+string DirectoryEntry::createPrettyName() const noexcept {
 	return "📁 " + getName();
 }
 
-const string DirectoryEntry::createTooltip() const noexcept {
+string DirectoryEntry::createTooltip() const noexcept {
 	return getFullPath();
 }
 

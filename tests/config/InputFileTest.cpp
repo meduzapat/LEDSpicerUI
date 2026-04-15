@@ -69,14 +69,14 @@ TEST_F(InputFileTest, MultiSourceInputIsLoaded) {
 }
 
 TEST_F(InputFileTest, SourcesAreExtracted) {
-	const string eventName(Defaults::createCommonUniqueId({baseId("inputMulti"), COLLECTION_INPUT_SOURCES}));
+	string eventName(Defaults::createCommonUniqueId({baseId("inputMulti"), COLLECTION_INPUT_SOURCES}));
 
 	EXPECT_EQ("hardware1", inputMulti->getData(eventName)[0]["source"]);
 	EXPECT_EQ("hardware2", inputMulti->getData(eventName)[1]["source"]);
 }
 
 TEST_F(InputFileTest, FirstSourceMapsAreProcessed) {
-	const string mapName(Defaults::createCommonUniqueId({baseId("inputMulti"), "0", COLLECTION_INPUT_MAPS}));
+	string mapName(Defaults::createCommonUniqueId({baseId("inputMulti"), "0", COLLECTION_INPUT_MAPS}));
 
 	auto& maps = inputMulti->getData(mapName);
 	ASSERT_EQ(3, maps.size());
@@ -101,7 +101,7 @@ TEST_F(InputFileTest, FirstSourceMapsAreProcessed) {
 }
 
 TEST_F(InputFileTest, SecondSourceMapsAreProcessed) {
-	const string mapName(Defaults::createCommonUniqueId({baseId("inputMulti"), "1", COLLECTION_INPUT_MAPS}));
+	string mapName(Defaults::createCommonUniqueId({baseId("inputMulti"), "1", COLLECTION_INPUT_MAPS}));
 
 	auto& maps = inputMulti->getData(mapName);
 	ASSERT_EQ(1, maps.size());
@@ -121,7 +121,7 @@ TEST_F(InputFileTest, SingleSourceInputIsLoaded) {
 }
 
 TEST_F(InputFileTest, SingleSourceMapsAreProcessed) {
-	const string mapName(Defaults::createCommonUniqueId({baseId("inputSingle"), "0", COLLECTION_INPUT_MAPS}));
+	string mapName(Defaults::createCommonUniqueId({baseId("inputSingle"), "0", COLLECTION_INPUT_MAPS}));
 
 	auto& maps = inputSingle->getData(mapName);
 	ASSERT_EQ(3, maps.size());

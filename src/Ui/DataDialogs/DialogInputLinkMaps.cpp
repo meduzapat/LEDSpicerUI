@@ -26,11 +26,10 @@ using namespace LEDSpicerUI::Ui::DataDialogs;
 
 StringVector DialogInputLinkMaps::localCollection;
 
-DialogInputLinkMaps::DialogInputLinkMaps(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
-	DialogForm(obj, builder, COLLECTION_INPUT_LINKMAP)
+DialogInputLinkMaps::DialogInputLinkMaps(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept :
+	DialogForm(obj, builder)
 {
 
-//	DialogForm::dialogsMap.emplace(COLLECTION_, this);
 	builder->get_widget_derived("BoxInputLinkedMaps", box);
 	builder->get_widget("BtnApplyInputLinkedMap",     btnApply);
 	// Create link, will open the dialog in edit mode.
@@ -101,16 +100,8 @@ DialogInputLinkMaps::DialogInputLinkMaps(BaseObjectType* obj, const Glib::RefPtr
 	setSignalApply();
 }
 
-DialogInputLinkMaps::~DialogInputLinkMaps() {
-	instance = nullptr;
-}
-
-void DialogInputLinkMaps::load(XMLHelper* values) {
+void DialogInputLinkMaps::load(XMLHelper* values) noexcept {
 	//createItems(values->getData(Defaults::createCommonUniqueId({owner->createUniqueId(), COLLECTION_INPUT_LINKED_MAPS})), values);
-}
-
-LEDSpicerUI::Ui::Storage::CollectionHandler* DialogInputLinkMaps::getCollectionHandler() const {
-	return nullptr;
 }
 
 void DialogInputLinkMaps::clearForm() noexcept {
@@ -124,7 +115,7 @@ void DialogInputLinkMaps::isValid() const {
 	}
 }
 
-void DialogInputLinkMaps::storeData() {
+void DialogInputLinkMaps::storeData() noexcept {
 	/*
 	 * This function will be called to store the sorted linked mappings.
 	 */
@@ -161,7 +152,7 @@ void DialogInputLinkMaps::storeData() {
 	currentData->setValue(ID, newIds);
 }
 
-void DialogInputLinkMaps::retrieveData() {
+void DialogInputLinkMaps::retrieveData() noexcept {
 	// populates the sorting form with a linked map.
 	// data is trigger(30)type target(31)trigger(30)type target(31)trigger(30)type target
 	for (const auto& group : Defaults::explode(currentData->getValue(NAME), RECORD_SEPARATOR)) {
@@ -186,7 +177,7 @@ void DialogInputLinkMaps::retrieveData() {
 	boxInputLinkedMappings->show_all();
 }
 
-const string DialogInputLinkMaps::createUniqueId() const {
+string DialogInputLinkMaps::createUniqueId() const noexcept{
 	StringVector ids;
 	// grab reordered links and store into the linked map object.
 	for (auto child : boxInputLinkedMappings->get_children()) {
@@ -208,24 +199,20 @@ const string DialogInputLinkMaps::createUniqueId() const {
 //		localCollection.push_back(extractIds(bb->getData()));
 //}
 
-string_view DialogInputLinkMaps::getType() const noexcept {
-	return "input Link"; // TYPE_INPUT_MAP
-}
-
-LEDSpicerUI::Ui::Storage::Data* DialogInputLinkMaps::createData(StringUMap& rawData) noexcept {
+LEDSpicerUI::Ui::Storage::Data* DialogInputLinkMaps::createData(StringUMap& rawData) const noexcept {
 	return new Storage::InputMapLink(rawData);
 }
 
-void DialogInputLinkMaps::afterDeleteConfirmation(Storage::BoxButton& boxButton) {
+void DialogInputLinkMaps::afterDeleteConfirmation(Storage::BoxButton& boxButton) noexcept {
 	string idsTxt(extractIds(boxButton.getData()));
 	localCollection.erase(std::remove(localCollection.begin(), localCollection.end(), idsTxt), localCollection.end());
 }
 
-bool DialogInputLinkMaps::isUsed(const string& ids) const {
+bool DialogInputLinkMaps::isUsed(const string& ids) const noexcept {
 	return std::find(localCollection.begin(), localCollection.end(), ids) != localCollection.end();
 }
 
-string DialogInputLinkMaps::extractIds(Storage::Data* data) const {
+string DialogInputLinkMaps::extractIds(Storage::Data* data) const noexcept {
 	StringVector ids;
 	// data is trigger(30)type target(31)trigger(30)type target(31)trigger(30)type target
 	for (const auto& group : Defaults::explode(data->getValue(NAME), RECORD_SEPARATOR)) {

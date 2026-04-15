@@ -44,33 +44,33 @@ public:
 	 * Called when this navigator's panel becomes active.
 	 * Re-wires all consumer dialogs to the remembered current directory.
 	 */
-	void onActivate();
+	void onActivate() noexcept;
 
 	/**
 	 * Enters a directory, making it current and wiring dialogs to its contents.
 	 * @param dir Directory to enter.
 	 */
-	void enterDirectory(Storage::DirectoryEntry* dir);
+	void enterDirectory(Storage::DirectoryEntry* dir) noexcept;
 
 	/**
 	 * Navigates up to the parent directory. Stops silently at root.
 	 */
-	void navigateUp();
+	void navigateUp() noexcept;
 
 	/**
 	 * @return true if currently at root.
 	 */
-	bool isAtRoot() const;
+	bool isAtRoot() const noexcept;
 
 	/**
 	 * @return Currently active directory pointer.
 	 */
-	Storage::DirectoryEntry* getCurrentDir() const;
+	Storage::DirectoryEntry* getCurrentDir() const noexcept;
 
 	/**
 	 * Called to clean up all data.
 	 */
-	virtual void clear() abstract;
+	virtual void clear() noexcept abstract;
 
 protected:
 
@@ -80,14 +80,14 @@ protected:
 	/// Currently active directory. Always valid; starts at rootDir.
 	Storage::DirectoryEntry* currentDir;
 
-	DirectoryNavigator(const Glib::RefPtr<Gtk::Builder>& builder);
+	DirectoryNavigator(const Glib::RefPtr<Gtk::Builder>& builder) noexcept;
 
 	/**
 	 * Wires all consumer dialogs to the given directory's contents and refreshes the view.
 	 * Each specialized navigator implements this for its own dialog set.
 	 * @param dir The directory to wire. Always a valid pointer (root or child).
 	 */
-	virtual void wireDialogs(Storage::DirectoryEntry* dir) abstract;
+	virtual void wireDialogs(Storage::DirectoryEntry* dir) noexcept abstract;
 
 };
 

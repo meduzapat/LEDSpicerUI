@@ -34,7 +34,6 @@ class DialogAnimation: public DialogForm, public SingletonDialog<DialogAnimation
 
 public:
 
-
 	virtual ~DialogAnimation() = default;
 
 	void load(XMLHelper* values) override;
@@ -43,7 +42,7 @@ public:
 	void isValid() const override;
 	void storeData() noexcept override;
 	void retrieveData() noexcept override;
-	const string createUniqueId() const noexcept override;
+	string createUniqueId() const noexcept override;
 
 protected:
 

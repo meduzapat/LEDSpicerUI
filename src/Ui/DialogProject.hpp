@@ -39,8 +39,8 @@ public:
 
 	const string& getProjectName() const;
 
-	void setProjectsDir(const string &projectsDir, bool setFileProjectsDirSelector);
-	void setProjectName(const string &projectName);
+	void setProjectsDir(const string& projectsDir, bool setFileProjectsDirSelector);
+	void setProjectName(const string& projectName);
 
 	/**
 	 * Scans projectsDir for available projects.

@@ -28,90 +28,102 @@ namespace LEDSpicerUI::Ui::Storage {
 
 /**
  * LEDSpicerUI::Ui::Storage::Link
- * Class that links other Data classes as values.
+ * Links a Data object as a value, optionally carrying its own extra fieldsData.
+ * key and type are stable references owned by the caller (e.g. SelectionRequest).
+ * Only the Data pointer changes via setLink().
  */
 class Link : public Data {
 
-	public:
+public:
 
-	/**
-	 * LEDSpicerUI::Ui::Storage::LinkData
-	 * Holds the immutable data required for a Link connection.
-	 */
-	struct LinkData {
-		string
-			type,
-			key;
-		const Data* link;
+	struct LinkField {
 
-		LinkData() = delete;
+		/// Widget types rendered for this field.
+		enum class Widget : uint8_t { COLOR_PICKER, COMBOBOX };
 
-		LinkData(
-			const string& t,
-			const string& k,
-			const Data* l
-		) noexcept : type(t), key(k), link(l) {}
+		const string
+			/// fieldsData key on the Link.
+			key,
+			/// Human label displayed next to the widget.
+			label,
+			/// Value used when the Link has no stored value yet.
+			defaultValue;
 
+		/// Widget to use.
+		const Widget widgetType;
 	};
 
-	using Data::Data;
-
 	/**
-	 * Constructor initializing the Link with existing data and a LinkData struct.
-	 * * @param data Reference to the underlying data map.
-	 * @param linkData The struct containing type, key, and the Data pointer.
+	 * @param data       Extra fields owned by this Link (e.g. DefaultColor).
+	 * @param linkKey    The key used to identify the linked Data (e.g. "name").
+	 * @param linkType   Semantic type used in XML output (e.g. "element").
+	 * @param linkFields Fields editable via DialogLinkEditor; {} if none.
+	 * @param link       The Data object this Link points to.
 	 */
 	Link(
-		StringUMap& data,
-		const LinkData& linkData
-	) noexcept : Data(data), linkInfo(linkData) {}
-
-	/**
-	 * Constructor initializing the Link with individual values.
-	 * @param data Reference to the underlying data map.
-	 * @param type The link type string.
-	 * @param key The link key string.
-	 * @param link Pointer to the Data object to link.
-	 */
-	Link(
-		StringUMap& data,
-		const string& type,
-		const string& key,
-		Data* link
-	) noexcept : Data(data), linkInfo(type, key, link) {}
-
-	bool operator==(const Data& other) const noexcept override;
+		StringUMap&              data,
+		const string&            linkKey,
+		const string&            linkType,
+		const vector<LinkField>& linkFields,
+		const Data*              link
+	) noexcept : Data(data), linkKey(linkKey), linkType(linkType), linkFields(linkFields), link(link) {}
 
 	Link(Link&& other) noexcept :
 		Data(std::move(other)),
-		linkInfo(std::move(other.linkInfo))
+		linkKey(other.linkKey),
+		linkType(other.linkType),
+		linkFields(other.linkFields),
+		link(other.link)
 	{}
 
 	virtual ~Link() = default;
 
-	string_view getCssClass()       const noexcept override;
-	const string createPrettyName() const noexcept override;
-	const string createTooltip()    const noexcept override;
-	const string createUniqueId()   const noexcept override;
-	const string toXML()            const noexcept override;
-	string_view getXmlTag()         const noexcept override;
+	bool operator==(const Data& other) const noexcept override;
+
+	string_view getCssClass()      const noexcept override;
+	string      createPrettyName() const noexcept override;
+	string      createTooltip()    const noexcept override;
+	string      createUniqueId()   const noexcept override;
+	string      toXML()            const noexcept override;
+	string_view getXmlTag()        const noexcept override;
 
 	CollectionHandler* getCollectionHandler() const noexcept override { return nullptr; }
 
+	/**
+	 * @return The collection from where Links can be picked.
+	 */
+	CollectionHandler* getCollectionHandlerSource() const noexcept {
+		return link->getCollectionHandler();
+	}
+
+	/// If key matches linkKey returns link->getPrimaryId(); otherwise delegates to Data.
 	const string& getValue(const string& key)                      const noexcept override;
-	string getValue(const string& key, const string& defaultValue) const noexcept override;
-	void setValue(const string& key, const string& value)                noexcept override;
+	/// If key matches linkKey returns link->getPrimaryId(); otherwise delegates to Data.
+	string        getValue(const string& key, const string& defaultValue) const noexcept override;
+	/// Silently ignores linkKey; all other keys delegate to Data.
+	void          setValue(const string& key, const string& value)       noexcept override;
 
 	/**
-	 * Replaces the internal link information with a new LinkData struct.
-	 * * @param newLinkData The new struct to apply to this Link.
+	 * Replaces the target Data pointer.
+	 * @param newLink The new Data object to point to.
 	 */
-	void setLinkData(const LinkData& newLinkData) noexcept;
+	void setLink(const Data* newLink) noexcept { link = newLink; }
+
+	const vector<LinkField>& getLinkFields() const noexcept { return linkFields; }
 
 protected:
 
-	/// Struct containing the immutable type, key, and Data link pointer.
-	LinkData linkInfo;
+	/// Stable ref to the key that identifies the linked Data in XML (e.g. "name").
+	const string& linkKey;
+
+	/// Stable ref to the semantic type used in XML output (e.g. "element").
+	const string& linkType;
+
+	/// Stable ref to the fields editable via DialogLinkEditor.
+	const vector<LinkField>& linkFields;
+
+	/// The Data object this Link points to.
+	const Data* link;
 };
 
 } // namespace

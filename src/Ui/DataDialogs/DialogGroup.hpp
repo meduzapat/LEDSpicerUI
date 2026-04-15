@@ -32,7 +32,6 @@ namespace LEDSpicerUI::Ui::DataDialogs {
 /**
  * LEDSpicerUI::Ui::DataDialogs::DialogGroup
  * Dialog to create or edit groups.
- * Element links live in Group::children[COLLECTION_GROUP_LINKS].
  */
 class DialogGroup : public DialogForm, public SingletonDialog<DialogGroup> {
 
@@ -44,10 +43,10 @@ public:
 
 	void load(XMLHelper* values) noexcept override;
 	void isValid() const override;
-	void clearForm() noexcept override;
-	void storeData() noexcept override;
+	void clearForm()    noexcept override;
+	void storeData()    noexcept override;
 	void retrieveData() noexcept override;
-	const string createUniqueId() const noexcept override;
+	string createUniqueId() const noexcept override;
 
 protected:
 
@@ -57,25 +56,15 @@ protected:
 	/// Box in this dialog where selected element links are displayed.
 	OrdenableFlowBox* boxElements = nullptr;
 
+	/// Static configuration for the element link selector.
+	const DialogSelect::SelectionRequest elementRequest;
+
 	DialogGroup(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept;
 
 	void createSubItems(XMLHelper* values) noexcept override;
+	void wireChildrenDialogs() noexcept override;
 	string_view getType() const noexcept override;
-	Storage::Data* createData(StringUMap& rawData) noexcept override;
-
-private:
-
-	/**
-	 * Returns the element-link child collection of the current group.
-	 * Only valid while currentData is set (ADD, EDIT, LOAD flows).
-	 */
-	Storage::BoxButtonCollection* elementLinks() const noexcept;
-
-	/**
-	 * Expands strip elements into their individual child pins for the picker.
-	 * Non-strip elements pass through unchanged.
-	 */
-	static vector<Storage::Data*> expandStrips(Storage::Data* data);
+	Storage::Data* createData(StringUMap& rawData) const noexcept override;
 
 };
 

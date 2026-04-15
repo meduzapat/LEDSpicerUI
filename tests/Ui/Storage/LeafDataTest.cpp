@@ -93,7 +93,7 @@ TEST(RestrictorMapTest, CreatePrettyNameWithInterface) {
 TEST(RestrictorMapTest, ToXMLSelfClosing) {
 	StringUMap data{{PLAYER, "1"}, {JOYSTICK, "1"}, {RESTRICTOR_INTERFACE, ""}};
 	RestrictorMap r(data);
-	const string xml(r.toXML());
+	string xml(r.toXML());
 	EXPECT_NE(string::npos, xml.find("<map"));
 	EXPECT_NE(string::npos, xml.find("/>"));
 }
@@ -119,7 +119,7 @@ TEST(InputMapTest, CreatePrettyName) {
 	Element target(targetData);
 	StringUMap data{{TRIGGER, "305"}, {TYPE, "Element"}, {TARGET, "P1_BUTTON1"}};
 	InputMap im(data, TARGET, &target);
-	const string pretty(im.createPrettyName());
+	string pretty(im.createPrettyName());
 	EXPECT_NE(string::npos, pretty.find("305"));
 	EXPECT_NE(string::npos, pretty.find("Element"));
 	EXPECT_NE(string::npos, pretty.find("P1_BUTTON1"));

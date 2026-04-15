@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      DialogLinkEdit.cpp
+ * @file      DialogLinkEditor.cpp
  * @since     Apr 2026
  * @author    Patricio A. Rossi (MeduZa)
  *
@@ -20,11 +20,14 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DialogLinkEdit.hpp"
+#include "DialogLinkEditor.hpp"
 
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
-DialogLinkEdit::DialogLinkEdit(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
+DialogLinkEditor::DialogLinkEditor(
+	BaseObjectType* obj,
+	const Glib::RefPtr<Gtk::Builder>& builder
+) noexcept :
 	GladeDialog(obj, builder)
 {
 	builder->get_widget("BtnApplyLinkEdit",   btnApply);
@@ -35,7 +38,6 @@ DialogLinkEdit::DialogLinkEdit(BaseObjectType* obj, const Glib::RefPtr<Gtk::Buil
 	builder->get_widget("LabelLinkEditCombo", labelCombo);
 	builder->get_widget("ComboLinkEditCombo", comboFilter);
 
-	/* Wire the color button once — the same button is reused across all opens. */
 	DialogColors::getInstance()->activateColorButton(btnColor);
 
 //	btnApply->signal_clicked().connect([this]() {
@@ -43,29 +45,28 @@ DialogLinkEdit::DialogLinkEdit(BaseObjectType* obj, const Glib::RefPtr<Gtk::Buil
 //	});
 }
 
-void DialogLinkEdit::open(Storage::Link* link, const vector<LinkField>& fields) {
+void DialogLinkEditor::open(Storage::Link* link) noexcept {
 
-	/* Hide all slots — show only what this link type needs. */
 	boxColor->hide();
 	boxCombo->hide();
 
-	for (const auto& field : fields) {
+	// Prepare
+	for (const auto& field : link->getLinkFields()) {
 		switch (field.widgetType) {
+		case Storage::Link::LinkField::Widget::COLOR_PICKER:
+			labelColor->set_text(field.label);
+			DialogColors::getInstance()->colorizeButton(
+				btnColor,
+				link->getValue(field.key, field.defaultValue)
+			);
+			boxColor->show();
+			break;
 
-			case LinkField::Widget::COLOR:
-				labelColor->set_text(field.label);
-				DialogColors::getInstance()->colorizeButton(
-					btnColor,
-					link->getValue(field.key, field.defaultValue)
-				);
-				boxColor->show();
-				break;
-
-			case LinkField::Widget::COMBO:
-				labelCombo->set_text(field.label);
-				comboFilter->set_active_id(link->getValue(field.key, field.defaultValue));
-				boxCombo->show();
-				break;
+		case Storage::Link::LinkField::Widget::COMBOBOX:
+			labelCombo->set_text(field.label);
+			comboFilter->set_active_id(link->getValue(field.key, field.defaultValue));
+			boxCombo->show();
+			break;
 		}
 	}
 
@@ -74,13 +75,13 @@ void DialogLinkEdit::open(Storage::Link* link, const vector<LinkField>& fields) 
 		return;
 	}
 
-	/* Write widget values back into the Link's fieldsData. */
-	for (const auto& field : fields) {
+	// Store TODO verify
+	for (const auto& field : link->getLinkFields()) {
 		switch (field.widgetType) {
-			case LinkField::Widget::COLOR:
+			case Storage::Link::LinkField::Widget::COLOR_PICKER:
 				link->setValue(field.key, string(btnColor->get_label()));
 				break;
-			case LinkField::Widget::COMBO:
+			case Storage::Link::LinkField::Widget::COMBOBOX:
 				link->setValue(field.key, string(comboFilter->get_active_id()));
 				break;
 		}

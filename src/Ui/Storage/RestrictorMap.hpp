@@ -39,8 +39,8 @@ public:
 
 	string_view getXmlTag()         const noexcept override { return "map"; }
 	string_view getCssClass()       const noexcept override { return "RestrictorMapBoxButton"; }
-	const string createPrettyName() const noexcept override;
-	const string createUniqueId()   const noexcept override;
+	string createPrettyName() const noexcept override;
+	string createUniqueId()   const noexcept override;
 
 	CollectionHandler* getCollectionHandler() const noexcept override { return CollectionHandler::getInstance(COLLECTION_RESTRICTOR_MAP); }
 

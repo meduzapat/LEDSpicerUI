@@ -62,7 +62,7 @@ StringUMap XMLHelper::processNode(const tinyxml2::XMLElement* node) {
 	const tinyxml2::XMLAttribute* pAttrib = node->FirstAttribute();
 
 	while (pAttrib) {
-		const string value = pAttrib->Value();
+		string value = pAttrib->Value();
 		groupValues.emplace(pAttrib->Name(), value);
 		pAttrib = pAttrib->Next();
 	}

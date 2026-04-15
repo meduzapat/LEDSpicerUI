@@ -2,7 +2,7 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-const string Restrictor::createPrettyName() const noexcept {
+string Restrictor::createPrettyName() const noexcept {
 	string
 		name(getValue(NAME)),
 		r(Defaults::restrictorsInfo.at(name).name);
@@ -13,7 +13,7 @@ const string Restrictor::createPrettyName() const noexcept {
 	return r;
 }
 
-const string Restrictor::createUniqueId() const noexcept {
+string Restrictor::createUniqueId() const noexcept {
 	return Defaults::createHardwareUniqueId(*getValues(), false);
 }
 

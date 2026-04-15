@@ -24,6 +24,8 @@
 
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
+std::unordered_map<string, DialogForm*> DialogForm::familyToDialog;
+
 DialogForm::DialogForm(
 	BaseObjectType* obj,
 	const Glib::RefPtr<Gtk::Builder>& builder
@@ -34,6 +36,8 @@ DialogForm::DialogForm(
 }
 
 DialogForm::~DialogForm() {
+	for (auto child : childDialogs)
+		delete child;
 	delete box;
 }
 
@@ -72,7 +76,10 @@ void DialogForm::createItems(StringUMapVector& rawCollection, XMLHelper* values)
 	}
 }
 
-void DialogForm::setOwner(Storage::BoxButtonCollection* collection, const Storage::Data* owner) noexcept {
+void DialogForm::setOwner(
+	Storage::BoxButtonCollection* collection,
+	Storage::Data* owner
+) noexcept {
 	this->ownerData = owner;
 	items = collection;
 	refreshItems();
@@ -104,7 +111,7 @@ void DialogForm::reindex() noexcept {
 	items->reindex(box);
 }
 
-LEDSpicerUI::Ui::Storage::Data* DialogForm::createData() noexcept {
+LEDSpicerUI::Ui::Storage::Data* DialogForm::createData() const noexcept {
 	auto data{StringUMap{}};
 	return createData(data);
 }
@@ -113,17 +120,15 @@ void DialogForm::wireChildrenDialogs() noexcept {
 	currentData->setUp();
 	auto parent{dynamic_cast<Storage::Parent*>(currentData)};
 	if (not parent) return;
-	for (auto& [collection, items] : parent->getChildren()) {
-		dialogsMap.at(collection)->setOwner(&items, currentData);
-	}
+	for (auto& [family, items] : parent->getChildren())
+		familyToDialog.at(family)->setOwner(&items, currentData);
 }
 
 void DialogForm::disconnectChildrenDialogs() noexcept {
 	auto parent{dynamic_cast<Storage::Parent*>(currentData)};
-	if (parent) {
-		for (auto& [collection, items] : parent->getChildren())
-			dialogsMap.at(collection)->setOwner(nullptr, nullptr);
-	}
+	if (parent)
+		for (auto& [family, items] : parent->getChildren())
+			familyToDialog.at(family)->setOwner(nullptr, nullptr);
 	currentData->tearDown();
 }
 
@@ -148,7 +153,10 @@ void DialogForm::setSignalApply() noexcept {
 	});
 }
 
-void DialogForm::createDeleteButton(Storage::BoxButton& boxButton, bool askConfirmation) noexcept {
+void DialogForm::createDeleteButton(
+	Storage::BoxButton& boxButton,
+	bool askConfirmation
+) noexcept {
 	auto button(Gtk::make_managed<Gtk::Button>());
 	boxButton.pack_start(*button, Gtk::PACK_SHRINK);
 	button->set_image_from_icon_name("user-trash-symbolic", Gtk::ICON_SIZE_BUTTON);

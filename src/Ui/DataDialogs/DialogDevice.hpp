@@ -48,7 +48,7 @@ public:
 	void resetForm()    noexcept override;
 	void storeData()    noexcept override;
 	void retrieveData() noexcept override;
-	const string createUniqueId() const noexcept override;
+	string createUniqueId() const noexcept override;
 
 protected:
 
@@ -63,8 +63,8 @@ protected:
 	DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept;
 
 	void createSubItems(XMLHelper* values) noexcept override;
-	string_view getType() const noexcept override;
-	Storage::Data* createData(StringUMap& rawData) noexcept override;
+	string_view getType() const noexcept override { return TYPE_DEVICE; }
+	Storage::Data* createData(StringUMap& rawData) const noexcept override;
 	void onEmpty() noexcept override;
 	void onSelected() noexcept override;
 };

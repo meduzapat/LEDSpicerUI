@@ -24,7 +24,7 @@
 
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
-DialogDirectory::DialogDirectory(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
+DialogDirectory::DialogDirectory(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept :
 	DialogForm(obj, builder)
 {
 
@@ -37,7 +37,7 @@ DialogDirectory::DialogDirectory(BaseObjectType* obj, const Glib::RefPtr<Gtk::Bu
 	});
 }
 
-void DialogDirectory::setSettings(const SettingRequest& req) {
+void DialogDirectory::setSettings(const SettingRequest& req) noexcept {
 	setting = &req;
 	box     = req.box;
 }
@@ -52,27 +52,27 @@ void DialogDirectory::clearForm() noexcept {
 }
 
 void DialogDirectory::isValid() const {
-	const string name(Defaults::sanitizeFilename(entryDirectoryName->get_text()));
+	string name(Defaults::sanitizeFilename(entryDirectoryName->get_text()));
 	if (name.empty()) {
 		entryDirectoryName->grab_focus();
 		throw Message("Enter a folder name.");
 	}
-	const string uid(createUniqueId());
-	if (getCollectionHandler()->isIdSet(uid)) {
+	string uid(createUniqueId());
+	if (currentData->getCollectionHandler()->isIdSet(uid)) {
 		if (action != Actions::EDIT or currentData->createUniqueId() != uid)
 			throw Message("A folder with this name already exists here.");
 	}
 }
 
-void DialogDirectory::storeData() {
+void DialogDirectory::storeData() noexcept {
 	currentData->setValue(NAME, Defaults::sanitizeFilename(entryDirectoryName->get_text()));
 }
 
-void DialogDirectory::retrieveData() {
+void DialogDirectory::retrieveData() noexcept {
 	entryDirectoryName->set_text(currentData->getValue(NAME));
 }
 
-const string DialogDirectory::createUniqueId() const {
+string DialogDirectory::createUniqueId() const noexcept {
 	return Defaults::createCommonUniqueId({
 		ownerData->getProperties().getValue(PID),
 		Defaults::sanitizeFilename(entryDirectoryName->get_text())
@@ -83,18 +83,14 @@ string_view DialogDirectory::getType() const noexcept {
 	return setting->typeLabel;
 }
 
-LEDSpicerUI::Ui::Storage::CollectionHandler* DialogDirectory::getCollectionHandler() const {
-	return Storage::CollectionHandler::getInstance(setting->collectionName);
-}
-
-LEDSpicerUI::Ui::Storage::Data* DialogDirectory::createData(StringUMap& rawData) noexcept {
+LEDSpicerUI::Ui::Storage::Data* DialogDirectory::createData(StringUMap& rawData) const noexcept {
 	return new Storage::DirectoryEntry(
 		rawData,
-		static_cast<const Storage::DirectoryEntry*>(ownerData)
+		static_cast<Storage::DirectoryEntry*>(ownerData)
 	);
 }
 
-void DialogDirectory::addButtons(Storage::BoxButton& bb) {
+void DialogDirectory::addButtons(Storage::BoxButton& bb) noexcept {
 
 	auto navBtn = Gtk::make_managed<Gtk::Button>();
 	navBtn->set_relief(Gtk::RELIEF_NONE);

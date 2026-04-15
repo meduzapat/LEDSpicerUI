@@ -52,6 +52,7 @@ protected:
 
 	/// Pointer to the moving data object.
 	Data* data;
+
 };
 
 } // namespace

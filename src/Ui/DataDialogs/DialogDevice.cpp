@@ -28,11 +28,8 @@ DialogDevice::DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 	DialogFormHost(obj, builder)
 {
 
-	// Init Dialgo Elements.
-	DialogElement::buildInstance(builder, "DialogElement");
 	// Register its dialogs for refresh.
-	childDialogs.push_back(DialogElement::getInstance());
-	dataTypeToDialogMap
+	registerChildDialog<DialogElement>(builder, "DialogElement", COLLECTION_ELEMENT);
 
 	// Connect Device Box and buttons.
 	builder->get_widget_derived("BoxDevices", box);
@@ -61,7 +58,7 @@ DialogDevice::DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 
 	/* On Number of LEDs is SET apply the changes to the Elements. */
 	spinnerLeds->signal_value_changed().connect([this]() {
-		const string name(selectorCombo->get_active_id());
+		string name(selectorCombo->get_active_id());
 		if (not name.empty() and not Defaults::isVariable(name)) return;
 		btnAddElement->set_sensitive(spinnerLeds->get_value_as_int() > 1);
 		const uint16_t pinsCount(spinnerLeds->get_value_as_int() * 3);
@@ -98,7 +95,7 @@ void DialogDevice::createSubItems(XMLHelper* values) noexcept {
 
 void DialogDevice::resetForm() noexcept {
 
-	const string name{selectorCombo->get_active_id()};
+	string name{selectorCombo->get_active_id()};
 
 	if (Defaults::isIdUser(name))
 		comboBoxId->get_parent()->show();
@@ -162,7 +159,7 @@ void DialogDevice::isValid() const {
 
 void DialogDevice::storeData() noexcept {
 
-	const string name(selectorCombo->get_active_id());
+	string name(selectorCombo->get_active_id());
 
 	currentData->setValue(NAME, name);
 	if (Defaults::isIdUser(name))
@@ -177,7 +174,7 @@ void DialogDevice::storeData() noexcept {
 
 void DialogDevice::retrieveData() noexcept {
 
-	const string name(currentData->getValue(NAME));
+	string name(currentData->getValue(NAME));
 
 	selectorCombo->set_active_id(name);
 	if (Defaults::isIdUser(name))
@@ -194,7 +191,7 @@ void DialogDevice::retrieveData() noexcept {
 	});
 }
 
-const string DialogDevice::createUniqueId() const noexcept {
+string DialogDevice::createUniqueId() const noexcept {
 	return Defaults::createHardwareUniqueId({
 		{NAME, selectorCombo->get_active_id()},
 		{ID,   comboBoxId->get_active_id()},
@@ -202,11 +199,7 @@ const string DialogDevice::createUniqueId() const noexcept {
 	});
 }
 
-string_view DialogDevice::getType() const noexcept {
-	return TYPE_DEVICE;
-}
-
-Storage::Data* DialogDevice::createData(StringUMap& rawData) noexcept {
+LEDSpicerUI::Ui::Storage::Data* DialogDevice::createData(StringUMap& rawData) const noexcept {
 	return new Storage::Device(rawData);
 }
 
@@ -226,7 +219,7 @@ void DialogDevice::onEmpty() noexcept {
 }
 
 void DialogDevice::onSelected() noexcept {
-	const string name{selectorCombo->get_active_id()};
+	string name{selectorCombo->get_active_id()};
 	const uint16_t totalPins(Defaults::devicesInfo.at(name).pins);
 	if (Defaults::isIdUser(name)) {
 		Defaults::populateComboBoxWithIds(

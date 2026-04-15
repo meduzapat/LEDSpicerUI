@@ -117,7 +117,7 @@ TEST_F(InputSourceTest, CreateTooltipReflectsMapCount) {
 	StringUMap data{{SOURCE, "hw1"}};
 	InputSource src(data, "owner_1");
 	src.getProperties().setValue(NAME, "hw1");
-	const string tooltip(src.createTooltip());
+	string tooltip(src.createTooltip());
 	EXPECT_NE(string::npos, tooltip.find("0"));
 }
 

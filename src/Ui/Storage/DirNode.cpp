@@ -50,6 +50,6 @@ string DirNode::getPath() const noexcept {
 }
 
 string DirNode::getFullPath() const noexcept {
-	const string path(getPath());
+	string path(getPath());
 	return path.empty() ? getName() : path + "/" + getName();
 }

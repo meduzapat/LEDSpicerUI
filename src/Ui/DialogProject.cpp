@@ -126,7 +126,7 @@ void DialogProject::scanProjects() {
 	}
 }
 
-void DialogProject::setProjectsDir(const string &projectsDir, bool setFileProjectsDirSelector) {
+void DialogProject::setProjectsDir(const string& projectsDir, bool setFileProjectsDirSelector) {
 	if (projectsDir.empty()) {
 		Defaults::setProjectsDir("");
 		labelProjectsPath->set_text("N/A");
@@ -140,7 +140,7 @@ void DialogProject::setProjectsDir(const string &projectsDir, bool setFileProjec
 	updateBoxProjectActions();
 }
 
-void DialogProject::setProjectName(const string &projectName) {
+void DialogProject::setProjectName(const string& projectName) {
 	// TODO: sanitize
 	this->projectName = projectName;
 	btnApply->set_sensitive(not this->projectName.empty());

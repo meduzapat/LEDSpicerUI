@@ -63,34 +63,34 @@ public:
 	 *
 	 * @return pretty name for the form.
 	 */
-	virtual const string createPrettyName() const noexcept;
+	virtual string createPrettyName() const noexcept;
 
 	/**
 	 * Creates a tooltip.
 	 *
 	 * @return the tooltip text.
 	 */
-	virtual const string createTooltip() const noexcept { return ""; }
+	virtual string createTooltip() const noexcept { return ""; }
 
 	/**
 	 * Creates a unique ID for the form.
 	 *
 	 * @return unique ID out of current data.
 	 */
-	virtual const string createUniqueId() const noexcept;
+	virtual string createUniqueId() const noexcept;
 
 	/**
 	 * Alias of value(primary key)
 	 * @return a string with the primary key value or ""
 	 */
-	const string getPrimaryValue() const noexcept;
+	const string& getPrimaryValue() const noexcept;
 
 	/**
 	 * Serializes this object to XML.
 	 * Default emits flat attributes using getXmlTag().
 	 * @return XML string.
 	 */
-	virtual const string toXML() const noexcept;
+	virtual string toXML() const noexcept;
 
 	/**
 	 * Returns the XML tag name for this data type.
@@ -155,7 +155,7 @@ protected:
 	 *
 	 * @return Field name to use as primary key (default: NAME).
 	 */
-	virtual const string getPrimaryKey() const noexcept { return NAME; }
+	virtual string getPrimaryKey() const noexcept { return NAME; }
 
 	/**
 	 * Controls which fields are included in XML output.
@@ -202,6 +202,10 @@ protected:
 	 */
 	static string createClosingXML(const string& node) noexcept;
 
+	static StringUMap& emptyData() noexcept {
+		static StringUMap data;
+		return data;
+	}
 };
 
 using StringDataMap = std::map<string, Data*>;

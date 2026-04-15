@@ -124,7 +124,7 @@ protected:
 	 * @param dataDir the path to the data directory.
 	 * @param setFileDataDirSelector if true, will update the file selector to match the new path.
 	 */
-	void setDataDir(const string &dataDir, bool setFileDataDirSelector);
+	void setDataDir(string &dataDir, bool setFileDataDirSelector);
 
 
 	/**

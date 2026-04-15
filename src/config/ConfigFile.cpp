@@ -35,15 +35,15 @@ StringUMap ConfigFile::getSettings() {
 	return rootInfo.attributes;
 }
 
-const string ConfigFile::getDefaultProfile() const {
+string ConfigFile::getDefaultProfile() const {
 	return defaultProfile;
 }
 
-const string ConfigFile::getProcessLookupRunEvery() const {
+string ConfigFile::getProcessLookupRunEvery() const {
 	return processLookupRunEvery;
 }
 
-const string ConfigFile::processDevices() {
+string ConfigFile::processDevices() {
 
 	tinyxml2::XMLElement* deviceNode = root->FirstChildElement("devices");
 	if (not deviceNode)
@@ -90,7 +90,7 @@ const string ConfigFile::processDevices() {
 	return errors;
 }
 
-const string ConfigFile::processRestrictors() {
+string ConfigFile::processRestrictors() {
 	tinyxml2::XMLElement* restrictorNode = root->FirstChildElement("restrictors");
 	// Restrictors are optional.
 	if (not restrictorNode)
@@ -133,7 +133,7 @@ const string ConfigFile::processRestrictors() {
 	return errors;
 }
 
-const string ConfigFile::processProcessLookup() {
+string ConfigFile::processProcessLookup() {
 	tinyxml2::XMLElement* plNode = root->FirstChildElement("processLookup");
 	if (not plNode)
 		return "";
@@ -162,7 +162,7 @@ const string ConfigFile::processProcessLookup() {
 	return errors;
 }
 
-const string ConfigFile::processElements(tinyxml2::XMLElement* deviceNode, const string& deviceName) {
+string ConfigFile::processElements(tinyxml2::XMLElement* deviceNode, const string& deviceName) {
 
 	tinyxml2::XMLElement* elementNode {deviceNode->FirstChildElement(TYPE_ELEMENT)};
 	if (not elementNode)
@@ -183,7 +183,7 @@ const string ConfigFile::processElements(tinyxml2::XMLElement* deviceNode, const
 	return errors;
 }
 
-const string ConfigFile::processRestrictorMaps(tinyxml2::XMLElement* restrictorNode, const string& restrictorName) {
+string ConfigFile::processRestrictorMaps(tinyxml2::XMLElement* restrictorNode, const string& restrictorName) {
 	tinyxml2::XMLElement* mapNode {restrictorNode->FirstChildElement("map")};
 	if (not mapNode)
 		return "Missing player map node for " + restrictorName + '\n';
@@ -205,7 +205,7 @@ const string ConfigFile::processRestrictorMaps(tinyxml2::XMLElement* restrictorN
 	return errors;
 }
 
-const string ConfigFile::processGroups() {
+string ConfigFile::processGroups() {
 	StringUMap group;
 	tinyxml2::XMLElement* layoutNode {root->FirstChildElement("layout")};
 	if (not layoutNode)

@@ -20,7 +20,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DialogLinkEdit.hpp"
+#include "DialogLinkEditor.hpp"
 #include "Storage/CollectionHandler.hpp"
 #include "Storage/Selection.hpp"
 
@@ -33,20 +33,11 @@ using LEDSpicerUI::Ui::Storage::BoxButtonCollection;
 
 /**
  * LEDSpicerUI::Ui::DataDialogs::DialogSelect
- *
- * Generic stateless link-selection dialog.
- * Each call is fully self-contained — all context is supplied via SelectionRequest.
- * No state is retained between calls.
- *
- * Usage:
- *   - open()    — lets the user pick from a collection; applies differentially on confirm.
- *   - refresh() — repopulates the parent displayBox from the current destination state.
- *   - reindex() — reorders destination to match the visual order of displayBox.
- *   - load()    — populates destination from XML without user interaction.
- *
- * Buttons per item in displayBox:
- *   - DELETE is always present.
- *   - EDIT is added when linkFields is non-empty; opens DialogLinkEdit.
+ * Generic link-selection dialog.
+ * Configuration is split into two parts:
+ * - setRequest()     — called from wireChildrenDialogs() by the owner dialog.
+ * - setDestination() — called from wireChildrenDialogs() by the owner dialog.
+ * Both must be set before any action method is called.
  */
 class DialogSelect : public GladeDialog<DialogSelect> {
 
@@ -55,85 +46,63 @@ class DialogSelect : public GladeDialog<DialogSelect> {
 public:
 
 	/**
-	 * All context needed for one selection operation.
-	 * Construct at the call site — the dialog holds no reference after
-	 * open() / refresh() / reindex() / load() returns.
+	 * Static configuration for one link type.
+	 * Owned by the owner dialog for its entire lifetime.
 	 */
 	struct SelectionRequest {
 
 		/// Box in the parent dialog where selected items are displayed.
-		OrdenableFlowBox*    displayBox;
+		OrdenableFlowBox* displayBox;
 
-		/// Destination collection that owns the resulting Link objects.
-		BoxButtonCollection* destination;
+		string
+			/// Field name written into each Link (e.g. NAME).
+			linkKey,
+			/// Semantic type label used in XML and Link identity (e.g. "element").
+			linkType;
 
-		/// Field name written into each Link (e.g. NAME).
-		const string         linkKey;
+		/// Collection to populate the picker from.
+		CollectionHandler* sourceCollection;
 
-		/// Semantic type label used in XML and Link identity (e.g. "element").
-		const string         linkType;
-
-		/// CollectionHandler key to source items from (e.g. COLLECTION_ELEMENT).
-		const string         sourceCollectionId;
-
-		/**
-		 * Extra fields editable per Link via DialogLinkEdit.
-		 * Empty  → DELETE button only.
-		 * Non-empty → EDIT + DELETE; EDIT opens DialogLinkEdit with these descriptors.
-		 */
-		const vector<LinkField> linkFields;
-
-		/**
-		 * Optional expander: given a Data*, returns zero or more Data* to show
-		 * in the picker instead of the item itself.
-		 * Use for strip elements that expand into individual pins.
-		 * nullptr = no expansion.
-		 */
-		std::function<vector<Storage::Data*>(Storage::Data*)> expander;
-
+		/// Fields editable per Link via DialogLinkEdit; empty if none.
+		vector<Storage::Link::LinkField> linkFields;
 	};
 
 	virtual ~DialogSelect() = default;
 
 	/**
-	 * Opens the picker for one selection set.
-	 * Pre-selects items already in destination, then applies a differential
-	 * save on confirm: removes deselected Links, adds newly selected ones.
-	 * Closing the window leaves destination unchanged.
-	 *
-	 * @param request   Full context for this selection.
-	 * @param ownerData Data that owns the destination collection.
+	 * Sets the static configuration supplied by the owner dialog.
+	 * @param req Owner-provided request config.
 	 */
-	void open(const SelectionRequest& request, const Storage::Data* ownerData);
+	void setRequest(const SelectionRequest& req) noexcept { request = &req; }
+
+	/**
+	 * Sets the destination collection for the current owner data.
+	 * @param dest Child collection that owns the resulting Link objects.
+	 */
+	void setDestination(BoxButtonCollection* dest) noexcept { destination = dest; }
+
+	/**
+	 * Opens the picker. Pre-selects items already in destination, then
+	 * applies a differential save on confirm.
+	 */
+	void open() noexcept;
 
 	/**
 	 * Repopulates displayBox from the current contents of destination.
-	 * Call from clearForm() and retrieveData() in the parent dialog.
-	 *
-	 * @param request Must supply displayBox and destination.
 	 */
-	void refresh(const SelectionRequest& request);
+	void refresh() noexcept;
 
 	/**
 	 * Reorders destination to match the visual order of displayBox.
-	 *
-	 * @param request Must supply displayBox and destination.
 	 */
-	void reindex(const SelectionRequest& request);
+	void reindex() noexcept;
 
 	/**
 	 * Loads Link items from XML into destination, then refreshes displayBox.
-	 * Errors are accumulated and displayed as a batch.
-	 *
 	 * @param values        XMLHelper carrying the raw data.
 	 * @param ownerUniqueId Unique ID of the owning Data (keys into XMLHelper).
-	 * @param request       Full context for this load.
 	 */
-	void load(
-		XMLHelper*              values,
-		const string&           ownerUniqueId,
-		const SelectionRequest& request
-	);
+	void load(XMLHelper* values, const string& ownerUniqueId) noexcept;
 
 protected:
 
@@ -143,38 +112,34 @@ protected:
 	/// Box inside the picker dialog where all source items are shown.
 	Gtk::FlowBox* pickerBox = nullptr;
 
-	DialogSelect(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
+	DialogSelect(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept;
 
 private:
 
+	/// Static config set by the owner dialog.
+	const SelectionRequest* request = nullptr;
+
+	/// Dynamic destination set by the owner dialog when currentData changes.
+	BoxButtonCollection* destination = nullptr;
+
 	/**
-	 * Fills pickerBox with Selection widgets for all items in sourceCollectionId.
+	 * Fills pickerBox with Selection widgets for all items in sourceCollection.
 	 * Pre-selects items already present in destination.
 	 */
-	void populatePicker(const SelectionRequest& request);
+	void populatePicker() noexcept;
 
 	/**
-	 * Creates one Selection widget inside pickerBox for data.
-	 *
-	 * @param data        Item to make selectable.
-	 * @param destination Used to determine initial selection state.
-	 */
-	void createPickerItem(Storage::Data* data, BoxButtonCollection* destination);
-
-	/**
-	 * Adds DELETE (always) and EDIT (when linkFields non-empty) to a BoxButton.
-	 *
+	 * Adds DELETE (always) and EDIT (when linkFields non-empty) buttons to a BoxButton.
 	 * @param boxButton Target BoxButton in displayBox.
-	 * @param request   Supplies linkFields, displayBox, and destination.
 	 */
-	void addDisplayButtons(Storage::BoxButton& boxButton, const SelectionRequest& request);
+	void addDisplayButtons(Storage::BoxButton& boxButton) noexcept;
 
 	/**
 	 * Creates a Link for target, adds it to destination, adds its BoxButton
 	 * to displayBox with the appropriate buttons.
+	 * @param target The Data object the Link will point to.
 	 */
-	void addLink(Storage::Data* target, const SelectionRequest& request);
-
+	void addLink(Storage::Data* target) noexcept;
 };
 
 } // namespace

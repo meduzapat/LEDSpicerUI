@@ -24,8 +24,8 @@
 
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
-DialogInputMap::DialogInputMap(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
-	DialogForm(obj, builder, COLLECTION_INPUT_MAPS)
+DialogInputMap::DialogInputMap(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept :
+	DialogForm(obj, builder)
 {
 
 	Gtk::Button
@@ -77,11 +77,11 @@ DialogInputMap::DialogInputMap(BaseObjectType* obj, const Glib::RefPtr<Gtk::Buil
 
 }
 
-void DialogInputMap::setNormalBox(const bool flag) {
+void DialogInputMap::setNormalBox(const bool flag) noexcept {
 	box = flag ? boxSourceMaps : boxInputMaps;
 }
 
-void DialogInputMap::load(XMLHelper* values) {
+void DialogInputMap::load(XMLHelper* values) noexcept {
 	createItems(
 		values->getData(Defaults::createCommonUniqueId({ownerData->createUniqueId(), COLLECTION_INPUT_MAPS})),
 		values
@@ -90,19 +90,13 @@ void DialogInputMap::load(XMLHelper* values) {
 
 void DialogInputMap::setOwner(
 	Storage::BoxButtonCollection* collection,
-	const Storage::Data*          owner
-) {
+	Storage::Data* owner
+) noexcept {
 	boxSourceMaps->wipe();
 	boxInputMaps->wipe();
 	// Sourceless inputs route their maps into the input-level BoxInputMaps panel;
-	setNormalBox(not owner->hasProperty(SOURCELESS));
+	setNormalBox(not owner->getProperties().isSet(SOURCELESS));
 	DialogForm::setOwner(collection, owner);
-}
-
-LEDSpicerUI::Ui::Storage::CollectionHandler* DialogInputMap::getCollectionHandler() const {
-	return Storage::CollectionHandler::getInstance(
-		COLLECTION_INPUT_MAPS + ownerData->getProperties().getValue(UID)
-	);
 }
 
 void DialogInputMap::clearForm() noexcept {
@@ -135,14 +129,14 @@ void DialogInputMap::isValid() const {
 	if (inputMapDefaultColor->get_label().empty())
 		throw Message("You need to set a color.");
 
-	const string uid(createUniqueId());
+	string uid(createUniqueId());
 	if (action != Actions::EDIT or currentData->createUniqueId() != uid) {
-		if (getCollectionHandler()->isIdSet(uid))
+		if (currentData->getCollectionHandler()->isIdSet(uid))
 			throw Message("This trigger already exists for this source.");
 	}
 }
 
-void DialogInputMap::storeData() {
+void DialogInputMap::storeData() noexcept {
 	string type, target;
 	Storage::Data* data = nullptr;
 	if (stackElementAndGroup->get_visible_child_name() == "InputTypeElement") {
@@ -164,7 +158,7 @@ void DialogInputMap::storeData() {
 	static_cast<Storage::InputMap*>(currentData)->setLinkData(linkData);
 }
 
-void DialogInputMap::retrieveData() {
+void DialogInputMap::retrieveData() noexcept {
 	if (currentData->getValue(TYPE) == ELEMENT) {
 		stackElementAndGroup->set_visible_child("InputTypeElement");
 		comboBoxInputMapElement->set_active_id(currentData->getValue(TARGET));
@@ -178,18 +172,14 @@ void DialogInputMap::retrieveData() {
 	comboBoxInputMapFilter->set_active_id(currentData->getValue(FILTER));
 }
 
-const string DialogInputMap::createUniqueId() const {
+string DialogInputMap::createUniqueId() const noexcept {
 	return Defaults::createCommonUniqueId({
 		ownerData->getProperties().getValue(UID),
 		inputInputMapTrigger->get_text()
 	});
 }
 
-string_view DialogInputMap::getType() const noexcept {
-	return TYPE_INPUT_MAP;
-}
-
-LEDSpicerUI::Ui::Storage::Data* DialogInputMap::createData(StringUMap& rawData) noexcept {
+LEDSpicerUI::Ui::Storage::Data* DialogInputMap::createData(StringUMap& rawData) const noexcept {
 	string
 		type(rawData.count(TYPE)     ? rawData.at(TYPE)   : ""),
 		target(rawData.count(TARGET) ? rawData.at(TARGET) : "");
@@ -203,6 +193,6 @@ LEDSpicerUI::Ui::Storage::Data* DialogInputMap::createData(StringUMap& rawData) 
 	return im;
 }
 
-bool DialogInputMap::elementFilter(const LEDSpicerUI::Ui::Storage::Data* data) {
+bool DialogInputMap::elementFilter(const LEDSpicerUI::Ui::Storage::Data* data) noexcept {
 	return not data->getProperties().isSet(PROP_EXPAND);
 }

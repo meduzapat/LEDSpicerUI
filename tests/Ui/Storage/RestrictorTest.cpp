@@ -75,7 +75,7 @@ TEST_F(RestrictorTest, CssClass) {
 TEST_F(RestrictorTest, ToXMLStructure) {
 	StringUMap data{{NAME, "ServoStik"}, {ID, "1"}, {PORT, ""}};
 	Restrictor r(data);
-	const string xml(r.toXML());
+	string xml(r.toXML());
 	EXPECT_NE(string::npos, xml.find("<restrictor"));
 	// Empty emits self-closing tag
 	EXPECT_NE(string::npos, xml.find("/>"));

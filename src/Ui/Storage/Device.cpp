@@ -24,7 +24,7 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-const string Device::createPrettyName() const noexcept {
+string Device::createPrettyName() const noexcept {
 	string
 		name{getValue(NAME)},
 		r{Defaults::devicesInfo.at(name).name};
@@ -35,7 +35,7 @@ const string Device::createPrettyName() const noexcept {
 	return r;
 }
 
-const string Device::createUniqueId() const noexcept {
+string Device::createUniqueId() const noexcept {
 	return Defaults::createHardwareUniqueId(*getValues());
 }
 

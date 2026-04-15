@@ -131,7 +131,7 @@ TEST_F(DataTest, WipeUnregisteredItemSafe) {
 }
 
 TEST_F(DataTest, ToXML) {
-	const string xml(data->toXML());
+	string xml(data->toXML());
 	EXPECT_NE(string::npos, xml.find("<test"));
 	EXPECT_NE(string::npos, xml.find("name=\"TestItem\""));
 	EXPECT_NE(string::npos, xml.find("value=\"42\""));
@@ -199,7 +199,7 @@ TEST_F(DataTest, SyncRegistrationReKeys) {
 	ch->add(&item);
 	EXPECT_TRUE(ch->isIdSet("OldName"));
 
-	const string oldId{item.createUniqueId()};
+	string oldId{item.createUniqueId()};
 	item.setValue("name", "NewName");
 	item.syncRegistration(oldId);
 

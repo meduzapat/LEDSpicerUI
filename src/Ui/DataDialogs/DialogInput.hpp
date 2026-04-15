@@ -40,15 +40,14 @@ public:
 	static constexpr const char* BOX_INPUTS = "BoxInputs";
 	static constexpr string_view noInput{"Select Input Type"};
 
-	virtual ~DialogInput();
+	virtual ~DialogInput() = default;
 
-	void load(XMLHelper* values) override;
-	Storage::CollectionHandler* getCollectionHandler() const override;
-	void resetForm() noexcept override;
+	void load(XMLHelper* values) noexcept override;
 	void isValid() const override;
-	void storeData() noexcept override;
+	void resetForm()   noexcept override;
+	void storeData()   noexcept override;
 	void retrieveData() noexcept override;
-	const string createUniqueId() const noexcept override;
+	string createUniqueId() const noexcept override;
 
 protected:
 
@@ -73,15 +72,15 @@ protected:
 	// The box to display linked maps.
 //	OrdenableFlowBox* boxDirectMaps = nullptr;
 
-	DialogInput(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
+	DialogInput(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept;
 
-	void createSubItems(XMLHelper* values) override;
-	string_view getType() const noexcept override;
-	Storage::Data* createData(StringUMap& rawData) noexcept override;
+	void createSubItems(XMLHelper* values) noexcept override;
+	string_view getType() const noexcept override { return TYPE_INPUT; }
+	Storage::Data* createData(StringUMap& rawData) const noexcept override;
 
-	void onEmpty() override;
+	void onEmpty() noexcept override;
 
-	void onSelected() override;
+	void onSelected() noexcept override;
 };
 
 } // namespace

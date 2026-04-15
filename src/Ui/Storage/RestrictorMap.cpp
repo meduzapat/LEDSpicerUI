@@ -24,7 +24,7 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-const string RestrictorMap::createPrettyName() const noexcept {
+string RestrictorMap::createPrettyName() const noexcept {
 	string name("Player " + getValue(PLAYER) + " Joystick " + getValue(JOYSTICK));
 	// Split hardware name out of additional info and check for multi.
 	if (not getValue(RESTRICTOR_INTERFACE).empty())
@@ -32,6 +32,6 @@ const string RestrictorMap::createPrettyName() const noexcept {
 	return name;
 }
 
-const string RestrictorMap::createUniqueId() const noexcept {
+string RestrictorMap::createUniqueId() const noexcept {
 	return Defaults::createCommonUniqueId({getValue(PLAYER), getValue(JOYSTICK)});
 }

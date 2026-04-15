@@ -99,7 +99,7 @@ TEST_F(ProfileTest, HasAnimationsChild) {
 }
 
 TEST_F(ProfileTest, EmptyCollectionsProduceNoSections) {
-	const string xml(rootProfile->toXML());
+	string xml(rootProfile->toXML());
 	EXPECT_EQ(string::npos, xml.find("alwaysOnElements"));
 	EXPECT_EQ(string::npos, xml.find("alwaysOnGroups"));
 	EXPECT_EQ(string::npos, xml.find("inputs"));

@@ -28,7 +28,7 @@ using namespace LEDSpicerUI::Config;
 InputDirectoryNavigator::InputDirectoryNavigator(
 	const Glib::RefPtr<Gtk::Builder>& builder,
 	Gtk::Window* parentWindow
-) :
+) noexcept :
 	DirectoryNavigator(builder),
 	dialogImportInput(DialogImport::Types::INPUT, parentWindow),
 	dirSetting (
@@ -78,7 +78,7 @@ InputDirectoryNavigator::~InputDirectoryNavigator() {
 	delete DataDialogs::DialogInput::getInstance();
 }
 
-void InputDirectoryNavigator::clear() {
+void InputDirectoryNavigator::clear() noexcept {
 	rootDir.wipe();
 //	DataDialogs::DialogInput::getInstance();
 }
@@ -139,7 +139,7 @@ void InputDirectoryNavigator::clear() {
 //	}
 //}
 
-void InputDirectoryNavigator::wireDialogs(Storage::DirectoryEntry* dir) {
+void InputDirectoryNavigator::wireDialogs(Storage::DirectoryEntry* dir) noexcept {
 
 	const bool sensitive(DataDialogs::DialogElement::getInstance()->getCollectionHandler()->getSize());
 

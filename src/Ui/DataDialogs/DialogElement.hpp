@@ -46,11 +46,11 @@ public:
 	virtual ~DialogElement() = default;
 
 	void load(XMLHelper* values) noexcept override;
-	void clearForm() noexcept override;
 	void isValid() const override;
-	void storeData() noexcept override;
+	void clearForm()    noexcept override;
+	void storeData()    noexcept override;
 	void retrieveData() noexcept override;
-	const string createUniqueId() const noexcept override;
+	string createUniqueId() const noexcept override;
 
 	/**
 	 * Sets the current number of pins.
@@ -85,9 +85,9 @@ protected:
 	/// The tabs to select the different connection modes.
 	Gtk::Notebook* notebookDeviceConnections = nullptr;
 
-	Gtk::ToggleButton* solenoid      = nullptr;
+	Gtk::ToggleButton* solenoid        = nullptr;
 	Gtk::Button*       btnDefaultColor = nullptr;
-	Gtk::FlowBox*      pinsBox        = nullptr;
+	Gtk::FlowBox*      pinsBox         = nullptr;
 
 	Gtk::ComboBoxText* elementType = nullptr; /// Only used by the UI.
 
@@ -105,7 +105,7 @@ protected:
 
 	string_view getType() const noexcept override { return TYPE_ELEMENT; }
 
-	Storage::Data* createData(StringUMap& rawData) noexcept override;
+	Storage::Data* createData(StringUMap& rawData) const noexcept override;
 
 	void addButtons(Storage::BoxButton& boxButton) noexcept override;
 

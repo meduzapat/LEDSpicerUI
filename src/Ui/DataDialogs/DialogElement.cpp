@@ -28,8 +28,6 @@ DialogElement::DialogElement(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 	DialogForm(obj, builder)
 {
 
-	dataTypeToDialogMap.emplace(std::type_index(typeid(Storage::Element)), this);
-
 	// Connect Element Box and buttons.
 	builder->get_widget_derived("BoxElements", box, "BtnDeviceElementUp", "BtnDeviceElementDn");
 	builder->get_widget("BtnApplyElement",     btnApply);
@@ -718,7 +716,7 @@ void DialogElement::drawPins(vector<Gtk::Label *>& labels) noexcept {
 	}
 }
 
-LEDSpicerUI::Ui::Storage::Data* DialogElement::createData(StringUMap& rawData) noexcept {
+LEDSpicerUI::Ui::Storage::Data* DialogElement::createData(StringUMap& rawData) const noexcept {
 	return new Storage::Element(rawData);
 }
 
@@ -850,7 +848,7 @@ void DialogElement::findLargestDivisor(uint16_t size) noexcept {
 }
 
 void DialogElement::findElementByPin(uint16_t finder, std::unordered_set<Storage::BoxButton*>& elementsFound) noexcept {
-	const string connector(std::to_string(finder));
+	string connector(std::to_string(finder));
 	for (auto boxButton : *items) {
 		auto data(boxButton->getData());
 		// Single LED.

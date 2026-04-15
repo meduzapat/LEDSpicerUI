@@ -30,11 +30,14 @@ void DialogFormHost::clearForm() noexcept {
 	previousName = "";
 }
 
-bool DialogFormHost::handleTypeSwitch(const OrdenableFlowBox* box, const string& confirmMsg) {
+bool DialogFormHost::handleTypeSwitch(
+	const OrdenableFlowBox* box,
+	const string& confirmMsg
+) noexcept {
 
 	if (selectorCombo->get_active_row_number() == -1) return false;
 
-	const string newName {selectorCombo->get_active_id()};
+	string newName {selectorCombo->get_active_id()};
 
 	// Clean up.
 	if (newName.empty()) {
@@ -53,7 +56,7 @@ bool DialogFormHost::handleTypeSwitch(const OrdenableFlowBox* box, const string&
 	// Refresh.
 	if (previousName == newName) return false;
 
-	const string currentName(currentData->getPrimaryValue());
+	string currentName(currentData->getPrimaryValue());
 
 	// Original data or replaced
 	if (not currentName.empty()) {
@@ -66,7 +69,7 @@ bool DialogFormHost::handleTypeSwitch(const OrdenableFlowBox* box, const string&
 	// New data or replaced.
 	previousName = newName;
 	// backup
-	static_cast<Storage::Revertible*>(currentData)->snapshot();
+	dynamic_cast<Storage::Revertible*>(currentData)->snapshot();
 	onEmpty();
 	onSelected();
 	return true;
@@ -74,7 +77,7 @@ bool DialogFormHost::handleTypeSwitch(const OrdenableFlowBox* box, const string&
 
 void DialogFormHost::markUsed(
 	std::function<bool(const string&)> isAvailable
-) {
+) noexcept {
 	for (auto iter = listStore->children().begin(); iter != listStore->children().end(); ++iter) {
 		Gtk::TreeModel::Row row = *iter;
 		string id;

@@ -28,7 +28,7 @@ Element::~Element() {
 	clearStripChildren();
 }
 
-const string Element::createPrettyName() const noexcept {
+string Element::createPrettyName() const noexcept {
 	string pname(Data::createPrettyName());
 	if (properties.isSet("stripDescriptor")) {
 		pname += " [" + getValue(STRIPSIZE) + "]";
@@ -48,7 +48,7 @@ void Element::clearStripChildren() noexcept {
 void Element::splitRGB(Data* data) noexcept {
 	if (not data->getValue(POSITIONS).empty()) {
 		// Always assume good data.
-		const string position(Defaults::explode(data->getValue(POSITIONS), ',')[0]);
+		string position(Defaults::explode(data->getValue(POSITIONS), ',')[0]);
 		convertPositionToRGB(data, position, data->getValue(COLORFORMAT));
 		return;
 	}

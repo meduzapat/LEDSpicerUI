@@ -46,9 +46,9 @@ public:
 
 	virtual ~DirectoryEntry() = default;
 
-	const string createUniqueId()   const noexcept override;
-	const string createPrettyName() const noexcept override;
-	const string createTooltip()    const noexcept override;
+	string createUniqueId()   const noexcept override;
+	string createPrettyName() const noexcept override;
+	string createTooltip()    const noexcept override;
 
 	string_view getCssClass() const noexcept override { return "DirectoryBoxButton"; }
 	string_view getXmlTag()   const noexcept override { return ""; }

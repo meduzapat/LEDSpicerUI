@@ -43,13 +43,12 @@ public:
 
 	virtual ~DialogInputLinkMaps();
 
-	void load(XMLHelper* values) override;
-	Storage::CollectionHandler* getCollectionHandler() const override;
-	void clearForm() noexcept override;
+	void load(XMLHelper* values) noexcept override;
 	void isValid() const override;
-	void storeData() noexcept override;
+	void clearForm()    noexcept override;
+	void storeData()    noexcept override;
 	void retrieveData() noexcept override;
-	const string createUniqueId() const noexcept override;
+	string createUniqueId() const noexcept override;
 //	void setOwner(Storage::BoxButtonCollection* collection, Storage::Data* owner = nullptr) override;
 
 protected:
@@ -62,31 +61,31 @@ protected:
 
 	Storage::BoxButtonCollection indivitualMaps;
 
-	DialogInputLinkMaps(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
+	DialogInputLinkMaps(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept;
 
-	string_view getType() const noexcept override;
+	string_view getType() const noexcept override { return TYPE_INPUT_LINKMAP; }
 
-	Storage::Data* createData(StringUMap& rawData) noexcept override;
+	Storage::Data* createData(StringUMap& rawData) const noexcept override;
 
 	/**
 	 * To remove used linked maps.
 	 * @param boxButton
 	 */
-	void afterDeleteConfirmation(Storage::BoxButton& boxButton) override;
+	void afterDeleteConfirmation(Storage::BoxButton& boxButton) noexcept override;
 
 	/**
 	 * Checks if a group of IDs is used on the local collection.
 	 * @param id
 	 * @return
 	 */
-	bool isUsed(const string& ids) const;
+	bool isUsed(const string& ids) const noexcept;
 
 	/**
 	 * Extracts the Ids from the link data field.
 	 * @param data
 	 * @return
 	 */
-	string extractIds(Storage::Data* data) const;
+	string extractIds(Storage::Data* data) const noexcept;
 
 };
 

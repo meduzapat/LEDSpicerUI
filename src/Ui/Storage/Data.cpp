@@ -24,15 +24,15 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-const string Data::createPrettyName() const noexcept {
+string Data::createPrettyName() const noexcept {
 	return getPrimaryValue();
 }
 
-const string Data::createUniqueId() const noexcept {
+string Data::createUniqueId() const noexcept {
 	return Defaults::createCommonUniqueId({getPrimaryValue()});
 }
 
-const string Data::getPrimaryValue() const noexcept {
+const string& Data::getPrimaryValue() const noexcept {
 	return getValue(getPrimaryKey());
 }
 
@@ -67,12 +67,12 @@ void Data::unSet(const string& key) noexcept {
 	Values::unSet(key);
 }
 
-const string Data::toXML() const noexcept {
+string Data::toXML() const noexcept {
 	StringUMap filtered;
 	for (const auto& [k, v] : values)
 		if (shouldSerialize(k, v))
 			filtered.emplace(k, v);
-	const string body(xmlBody());
+	string body(xmlBody());
 	string r(createOpeningXML(string(getXmlTag()), filtered, body.empty()));
 	if (not body.empty())
 		r += body + createClosingXML(string(getXmlTag()));
@@ -95,7 +95,7 @@ void Data::syncRegistration(const string& oldId) noexcept {
 	auto handler = getCollectionHandler();
 	if (not handler) return;
 	// ID will never be empty.
-	const string newId{createUniqueId()};
+	string newId{createUniqueId()};
 	// Replace if both IDs are non-empty and different.
 	if (oldId != newId)
 		handler->replace(this, oldId);

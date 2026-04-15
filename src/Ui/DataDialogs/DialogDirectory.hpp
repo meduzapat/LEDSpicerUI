@@ -62,17 +62,14 @@ public:
 	 * Must be called once after buildInstance(), before any setOwner() call.
 	 * @param req SettingRequest owned by the calling navigator.
 	 */
-	void setSettings(const SettingRequest& req);
+	void setSettings(const SettingRequest& req) noexcept;
 
 	void load(XMLHelper* values) noexcept override;
-	void clearForm() noexcept override;
 	void isValid() const override;
-	void storeData() noexcept override;
+	void clearForm()    noexcept override;
+	void storeData()    noexcept override;
 	void retrieveData() noexcept override;
-	const string createUniqueId() const noexcept override;
-	string_view getType() const noexcept override;
-
-	Storage::CollectionHandler* getCollectionHandler() const override;
+	string createUniqueId() const noexcept override;
 
 protected:
 
@@ -82,11 +79,13 @@ protected:
 	/// Directory name input.
 	Gtk::Entry* entryDirectoryName = nullptr;
 
-	DialogDirectory(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
+	DialogDirectory(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept;
 
-	Storage::Data* createData(StringUMap& rawData) noexcept override;
+	Storage::Data* createData(StringUMap& rawData) const noexcept override;
 
-	void addButtons(Storage::BoxButton& boxButton) override;
+	string_view getType() const noexcept override;
+
+	void addButtons(Storage::BoxButton& boxButton) noexcept override;
 
 };
 

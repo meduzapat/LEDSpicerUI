@@ -46,15 +46,15 @@ public:
 	 * Changes the box where the items will be displayed.
 	 * @param flag 1 sources box, 0 input box.
 	 */
-	void setNormalBox(const bool flag);
-	void load(XMLHelper* values) override;
-	void setOwner(Storage::BoxButtonCollection* collection, const Storage::Data* owner) override;
-	Storage::CollectionHandler* getCollectionHandler() const override;
+	void setNormalBox(const bool flag) noexcept;
+	void load(XMLHelper* values) noexcept override;
+	void setOwner(Storage::BoxButtonCollection* collection, Storage::Data* owner) noexcept override;
+
 	void clearForm() noexcept override;
 	void isValid() const override;
 	void storeData() noexcept override;
 	void retrieveData() noexcept override;
-	const string createUniqueId() const noexcept override;
+	string createUniqueId() const noexcept override;
 
 protected:
 
@@ -73,13 +73,13 @@ protected:
 		/// Maps box inside DialogInput — used by sourceless inputs.
 		* boxInputMaps = nullptr;
 
-	DialogInputMap(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
+	DialogInputMap(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept;
 
-	string_view getType() const noexcept override;
+	string_view getType() const noexcept override { return TYPE_INPUT_MAP; }
 
-	Storage::Data* createData(StringUMap& rawData) noexcept override;
+	Storage::Data* createData(StringUMap& rawData) const noexcept override;
 
-	static bool elementFilter(const Storage::Data* data);
+	static bool elementFilter(const Storage::Data* data) noexcept;
 
 };
 

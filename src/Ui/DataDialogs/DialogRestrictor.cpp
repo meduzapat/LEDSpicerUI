@@ -28,8 +28,7 @@ DialogRestrictor::DialogRestrictor(BaseObjectType* obj, const Glib::RefPtr<Gtk::
 	DialogFormHost(obj, builder)
 {
 
-	DataDialogs::DialogRestrictorMap::buildInstance(builder, "DialogRestrictorMap");
-	childDialogs.push_back(DialogRestrictorMap::getInstance());
+	registerChildDialog<DialogRestrictorMap>(builder, "DialogRestrictorMap", COLLECTION_RESTRICTOR_MAP);
 
 	// Connect Restrictor Box and buttons.
 	builder->get_widget_derived("BoxRestrictors", box);
@@ -76,21 +75,17 @@ DialogRestrictor::DialogRestrictor(BaseObjectType* obj, const Glib::RefPtr<Gtk::
 	});
 }
 
-DialogRestrictor::~DialogRestrictor() {
-	delete DataDialogs::DialogRestrictorMap::getInstance();
-}
-
-void DialogRestrictor::load(XMLHelper* values) {
+void DialogRestrictor::load(XMLHelper* values) noexcept {
 	createItems(values->getData(COLLECTION_RESTRICTORS), values);
 }
 
-void DialogRestrictor::createSubItems(XMLHelper* values) {
+void DialogRestrictor::createSubItems(XMLHelper* values) noexcept {
 	DialogRestrictorMap::getInstance()->load(values);
 }
 
-void DialogRestrictor::resetForm() {
+void DialogRestrictor::resetForm() noexcept {
 
-	const string name = selectorCombo->get_active_id();
+	string name = selectorCombo->get_active_id();
 
 	if (name == "UltraStik360") {
 		hasRestrictor->get_parent()->show();
@@ -148,20 +143,22 @@ void DialogRestrictor::isValid() const {
 		checkDupe = (currentData->createUniqueId() != newName);
 	}
 
-	if (Defaults::isIdUser(name, false) and checkDupe and getCollectionHandler()->isIdSet(newName)) {
+	auto ch{currentData->getCollectionHandler()};
+
+	if (Defaults::isIdUser(name, false) and checkDupe and ch->isIdSet(newName)) {
 		throw Message(hardwareName + " ID " + id + " already exists.");
 	}
-	if (Defaults::isSerial(name, false) and checkDupe and getCollectionHandler()->isIdSet(newName)) {
+	if (Defaults::isSerial(name, false) and checkDupe and ch->isIdSet(newName)) {
 		throw Message(hardwareName + " that connects to " + (port.empty() ? "<autodetect>" : port) + " already exists.");
 	}
-	if (checkDupe and getCollectionHandler()->isIdSet(newName)) {
+	if (checkDupe and ch->isIdSet(newName)) {
 		throw Message(hardwareName + " already exists.");
 	}
 }
 
-void DialogRestrictor::storeData() {
+void DialogRestrictor::storeData() noexcept {
 
-	const string name(selectorCombo->get_active_id());
+	string name(selectorCombo->get_active_id());
 
 	currentData->setValue(NAME, name);
 	if (Defaults::isIdUser(name, false)) {
@@ -185,9 +182,9 @@ void DialogRestrictor::storeData() {
 	}
 }
 
-void DialogRestrictor::retrieveData() {
+void DialogRestrictor::retrieveData() noexcept {
 
-	const string name(currentData->getValue(NAME));
+	string name(currentData->getValue(NAME));
 
 	selectorCombo->set_active_id(name);
 
@@ -211,11 +208,11 @@ void DialogRestrictor::retrieveData() {
 	}
 
 	markUsed([this](const string& id) {
-		return getCollectionHandler()->countByKey(NAME, id) < Defaults::restrictorsInfo.at(id).maxIds;
+		return currentData->getCollectionHandler()->countByKey(NAME, id) < Defaults::restrictorsInfo.at(id).maxIds;
 	});
 }
 
-string const DialogRestrictor::createUniqueId() const {
+string const DialogRestrictor::createUniqueId() const noexcept {
 	return Defaults::createHardwareUniqueId({
 		{NAME, selectorCombo->get_active_id()},
 		{ID,   comboBoxId->get_active_id()},
@@ -223,15 +220,11 @@ string const DialogRestrictor::createUniqueId() const {
 	}, false);
 }
 
-string_view DialogRestrictor::getType() const noexcept {
-	return TYPE_RESTRICTOR;
-}
-
-LEDSpicerUI::Ui::Storage::Data* DialogRestrictor::createData(StringUMap& rawData) noexcept {
+LEDSpicerUI::Ui::Storage::Data* DialogRestrictor::createData(StringUMap& rawData) const noexcept {
 	return new Storage::Restrictor(rawData);
 }
 
-void DialogRestrictor::onEmpty() {
+void DialogRestrictor::onEmpty() noexcept {
 	btnAddRestrictorMap->set_sensitive(false);
 	comboBoxId->get_parent()->hide();
 	comboBoxId->set_active_id("");
@@ -259,8 +252,8 @@ void DialogRestrictor::onEmpty() {
 	btnApply->set_sensitive(false);
 }
 
-void DialogRestrictor::onSelected() {
-	const string name = selectorCombo->get_active_id();
+void DialogRestrictor::onSelected() noexcept {
+	string name = selectorCombo->get_active_id();
 	if (Defaults::isIdUser(name, false)) {
 		Defaults::populateComboBoxWithIds(
 			idListstore,

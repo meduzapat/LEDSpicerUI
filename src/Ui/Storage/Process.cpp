@@ -24,7 +24,7 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-const string Process::createPrettyName() const noexcept {
+string Process::createPrettyName() const noexcept {
 	return "Process: " + getValue(getPrimaryKey()) + " System: " + getValue(PARAM_SYSTEM);
 }
 

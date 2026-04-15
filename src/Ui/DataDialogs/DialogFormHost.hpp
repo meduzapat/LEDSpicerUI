@@ -57,12 +57,12 @@ protected:
 	/**
 	 * Called when the type need to be empty.
 	 */
-	virtual void onEmpty() abstract;
+	virtual void onEmpty() noexcept abstract;
 
 	/**
 	 * Called when the type was selected but before resetFrom.
 	 */
-	virtual void onSelected() abstract;
+	virtual void onSelected() noexcept abstract;
 
 	/**
 	 * Verifies and calculate the selection and reacts.
@@ -76,7 +76,7 @@ protected:
 	bool handleTypeSwitch(
 		const OrdenableFlowBox* box,
 		const string& confirmMsg
-	);
+	) noexcept;
 
 	/**
 	 * Marks rows in a liststore as available or unavailable.
@@ -85,13 +85,13 @@ protected:
 	 * @param liststore   The liststore to update.
 	 * @param isAvailable Predicate: receives the row id string, returns true if available.
 	 */
-	void markUsed(std::function<bool(const string&)> isAvailable);
+	void markUsed(std::function<bool(const string&)> isAvailable) noexcept;
 
 	template<typename TMap>
 	void initializeSelector(
 		string_view emptyMsg,
 		const TMap& infoMap
-	) {
+	) noexcept {
 		static_assert(
 			std::is_base_of_v<Defaults::BaseInfo, typename TMap::mapped_type>,
 			"TMap value type must derive from Defaults::BaseInfo"

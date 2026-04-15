@@ -45,8 +45,8 @@ public:
 
 	string_view getXmlTag()         const noexcept override { return "device"; }
 	string_view getCssClass()       const noexcept override { return "DeviceBoxButton"; }
-	const string createPrettyName() const noexcept override;
-	const string createUniqueId()   const noexcept override;
+	string createPrettyName() const noexcept override;
+	string createUniqueId()   const noexcept override;
 
 	CollectionHandler* getCollectionHandler() const noexcept override;
 

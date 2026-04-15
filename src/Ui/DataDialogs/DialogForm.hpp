@@ -20,10 +20,10 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "SingletonDialog.hpp"
 #include "DialogColors.hpp"
 #include "OrdenableFlowBox.hpp"
 #include "Storage/CollectionHandler.hpp"
-#include "SingletonDialog.hpp"
 #include "Storage/Parent.hpp"
 
 #pragma once
@@ -66,7 +66,7 @@ public:
 	 * @param collection
 	 * @param owner
 	 */
-	virtual void setOwner(Storage::BoxButtonCollection* collection, const Storage::Data* owner) noexcept;
+	virtual void setOwner(Storage::BoxButtonCollection* collection, Storage::Data* owner) noexcept;
 
 	/**
 	 * Clear the From leaving it empty for data entry.
@@ -113,7 +113,7 @@ public:
 	 * While a Dialog is open, Data information must be considered stale.
 	 * @return a unique id that identifies the Data inside the form.
 	 */
-	virtual const string createUniqueId() const noexcept abstract;
+	virtual string createUniqueId() const noexcept abstract;
 
 	/**
 	 * Using the box and the items it arrange the items based on the OrdenableFlowBox order.
@@ -139,7 +139,8 @@ protected:
 	/// form action mode.
 	Actions action = Actions::ADD;
 
-	static std::unordered_map<string, DialogForm*> dialogsMap;
+	/// Maps family constants to their child DialogForm.
+	static std::unordered_map<string, DialogForm*> familyToDialog;
 
 	/// Store changes.
 	Gtk::Button* btnApply = nullptr;
@@ -154,7 +155,7 @@ protected:
 	Storage::Data* currentData = nullptr;
 
 	/// The data record that handles this Dialog.
-	const Storage::Data* ownerData = nullptr;
+	Storage::Data* ownerData = nullptr;
 
 	/// Child dialogs to refresh when this dialog is refreshed.
 	vector<DialogForm*> childDialogs;
@@ -164,7 +165,29 @@ protected:
 	 * @param obj
 	 * @param builder
 	 */
-	DialogForm(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept;
+	DialogForm(
+		BaseObjectType* obj,
+		const Glib::RefPtr<Gtk::Builder>& builder
+	) noexcept;
+
+	/**
+	 * Builds a child dialog singleton and registers it for refresh propagation.
+	 * @tparam T the type of the child dialog, it should be a singleton.
+	 * @param builder the builder to build the dialog.
+	 * @param gladeName the name of the dialog in the glade file.
+	 * @param family the family constant of the dialog.
+	 *
+	 */
+	template<typename T>
+	void registerChildDialog(
+		const Glib::RefPtr<Gtk::Builder>& builder,
+		const string& gladeName,
+		const string& family
+	) noexcept {
+		T::buildInstance(builder, gladeName);
+		childDialogs.push_back(T::getInstance());
+		familyToDialog.emplace(family, T::getInstance());
+	}
 
 	/**
 	 * Very similar to ADD but it only uses the form to validate data,
@@ -189,13 +212,13 @@ protected:
 	 * @param rawData this values will be moved into the class.
 	 * @return
 	 */
-	virtual Storage::Data* createData(StringUMap& rawData) noexcept abstract;
+	virtual Storage::Data* createData(StringUMap& rawData) const noexcept abstract;
 
 	/**
 	 * Creates an empty object.
 	 * @return
 	 */
-	virtual Storage::Data* createData() noexcept;
+	virtual Storage::Data* createData() const noexcept;
 
 	/**
 	 * Prepares the owner's sub dialogs.

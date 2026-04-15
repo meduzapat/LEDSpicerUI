@@ -82,7 +82,7 @@ add_executable(ledspicerui
 	src/Ui/DataDialogs/DialogForm.cpp
 	src/Ui/DataDialogs/DialogFormHost.cpp
 	src/Ui/DataDialogs/DialogFileForm.cpp
-	src/Ui/DataDialogs/DialogLinkEdit.cpp
+	src/Ui/DataDialogs/DialogLinkEditor.cpp
 	src/Ui/DataDialogs/DialogSelect.cpp
 	src/Ui/DataDialogs/DialogElement.cpp
 	src/Ui/DataDialogs/DialogGroup.cpp

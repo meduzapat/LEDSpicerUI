@@ -24,32 +24,32 @@
 
 using namespace LEDSpicerUI::Ui;
 
-void DirectoryNavigator::onActivate() {
+void DirectoryNavigator::onActivate() noexcept {
 	wireDialogs(currentDir);
 }
 
-void DirectoryNavigator::enterDirectory(Storage::DirectoryEntry* dir) {
+void DirectoryNavigator::enterDirectory(Storage::DirectoryEntry* dir) noexcept {
 	currentDir = dir;
 	wireDialogs(currentDir);
 }
 
-void DirectoryNavigator::navigateUp() {
+void DirectoryNavigator::navigateUp() noexcept {
 	if (currentDir == &rootDir) return;
 	Storage::DirNode* parent = currentDir->getParent();
 	currentDir = parent ? static_cast<Storage::DirectoryEntry*>(parent) : &rootDir;
 	wireDialogs(currentDir);
 }
 
-bool DirectoryNavigator::isAtRoot() const {
+bool DirectoryNavigator::isAtRoot() const noexcept {
 	return currentDir == &rootDir;
 }
 
-Storage::DirectoryEntry* DirectoryNavigator::getCurrentDir() const {
+Storage::DirectoryEntry* DirectoryNavigator::getCurrentDir() const noexcept {
 	return currentDir;
 }
 
-DirectoryNavigator::DirectoryNavigator(const Glib::RefPtr<Gtk::Builder>& builder) :
-	rootDir(Storage::Data::createEmptyData(), nullptr),
+DirectoryNavigator::DirectoryNavigator(const Glib::RefPtr<Gtk::Builder>& builder) noexcept :
+	rootDir(StringUMap{}, nullptr),
 	currentDir(&rootDir)
 {
 	DataDialogs::DialogDirectory::buildInstance(builder, "DialogDirectory");

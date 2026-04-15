@@ -22,6 +22,7 @@
 
 #include "DialogForm.hpp"
 #include "Storage/Profile.hpp"
+#include "DialogSelect.hpp"
 
 #pragma once
 
@@ -39,13 +40,12 @@ public:
 
 	virtual ~DialogProfile() = default;
 
-	void load(XMLHelper* values) override;
-	Storage::CollectionHandler* getCollectionHandler() const override;
-	void clearForm() noexcept override;
+	void load(XMLHelper* values) noexcept override;
 	void isValid() const override;
-	void storeData() noexcept override;
+	void clearForm()    noexcept override;
+	void storeData()    noexcept override;
 	void retrieveData() noexcept override;
-	const string createUniqueId() const noexcept override;
+	string createUniqueId() const noexcept override;
 
 protected:
 
@@ -85,7 +85,7 @@ protected:
 		/// End transition selector.
 		* btnProfilesAddEndTransitions = nullptr;
 
-	const DialogSelect::SettingRequest alwaysOnElementsSelectSetting {
+	const DialogSelect::SelectionRequest alwaysOnElementsSelectSetting {
 		boxProfileAlwaysOnElements,
 		NAME,
 		TYPE_ELEMENT,
@@ -133,13 +133,13 @@ protected:
 		DialogSelect::BUTTON_DELETER
 	};
 
-	DialogProfile(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
+	DialogProfile(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept;
 
-	void createSubItems(XMLHelper* values) override;
+	void createSubItems(XMLHelper* values) noexcept override;
 
-	string_view getType() const noexcept override;
+	string_view getType() const noexcept override { return TYPE_PROFILE; }
 
-	Storage::Data* createData(StringUMap& rawData) noexcept override;
+	Storage::Data* createData(StringUMap& rawData) const noexcept override;
 
 };
 

@@ -40,11 +40,11 @@ class InputDirectoryNavigator : public DirectoryNavigator {
 
 public:
 
-	InputDirectoryNavigator(const Glib::RefPtr<Gtk::Builder>& builder, Gtk::Window* parentWindow);
+	InputDirectoryNavigator(const Glib::RefPtr<Gtk::Builder>& builder, Gtk::Window* parentWindow) noexcept;
 
 	virtual ~InputDirectoryNavigator();
 
-	void clear() override;
+	void clear() noexcept override;
 
 protected:
 
@@ -65,7 +65,7 @@ protected:
 	/// Section settings for DialogDirectory. References boxInputs — declared after it.
 	const DataDialogs::DialogDirectory::SettingRequest dirSetting;
 
-	void wireDialogs(Storage::DirectoryEntry* dir) override;
+	void wireDialogs(Storage::DirectoryEntry* dir) noexcept override;
 
 };
 

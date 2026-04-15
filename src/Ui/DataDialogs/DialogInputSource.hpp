@@ -46,29 +46,28 @@ public:
 	static constexpr const char* DEV_INPUT_BY_ID = "/dev/input/by-id/";
 	static constexpr const char* SYS_CLASS_INPUT = "/sys/class/input/";
 
-	virtual ~DialogInputSource();
+	virtual ~DialogInputSource() = default;
 
-	void load(XMLHelper* values) override;
-	void setOwner(Storage::BoxButtonCollection* collection, const Storage::Data* owner) override;
-	Storage::CollectionHandler* getCollectionHandler() const override;
-	void resetForm() noexcept override;
+	void load(XMLHelper* values) noexcept override;
+	void setOwner(Storage::BoxButtonCollection* collection, const Storage::Data* owner) noexcept override;
 	void isValid() const override;
-	void storeData() noexcept override;
+	void resetForm()   noexcept override;
+	void storeData()   noexcept override;
 	void retrieveData() noexcept override;
-	const string createUniqueId() const noexcept override;
+	string createUniqueId() const noexcept override;
 
 	/**
 	 * Attempts to populate sources for that input if needed.
 	 * @param name of the input
 	 */
-	void populateSources(const string& name);
+	void populateSources(const string& name) noexcept;
 
 	/**
 	 * Ensures a sourceless InputSource exists for single-source inputs.
 	 * Creates one silently if absent, then wires DialogInputMap to it.
 	 * Safe to call repeatedly, idempotent if sourceless source already exists.
 	 */
-	void createPhantomSource();
+	void createPhantomSource() noexcept;
 
 protected:
 
@@ -78,39 +77,39 @@ protected:
 	/// Controls map-add button accessibility.
 	Gtk::Button* btnAddMap = nullptr;
 
-	DialogInputSource(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
+	DialogInputSource(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept;
 
-	void createSubItems(XMLHelper* values) override;
-	string_view getType() const noexcept override;
-	Storage::Data* createData(StringUMap& rawData) noexcept override;
+	void createSubItems(XMLHelper* values) noexcept override;
+	string_view getType() const noexcept override { return TYPE_INPUT_SOURCE; }
+	Storage::Data* createData(StringUMap& rawData) const noexcept override;
 
 	/**
 	 * Resolves the current source value from combo or manual entry.
 	 * @return The resolved source string.
 	 */
-	Glib::ustring resolvedSource() const;
+	Glib::ustring resolvedSource() const noexcept;
 
 	/**
 	 * @param sources Ordered map of id → display label.
 	 */
-	void populateSourcesComboBox(const StringMap& sources);
+	void populateSourcesComboBox(const StringMap& sources) noexcept;
 
 	/**
 	 * Resolves a device entry to its kernel human-readable name via sysfs.
 	 * @param  byIdName Entry from /dev/input/by-id/ or a plain eventX name.
 	 * @return Kernel name string, or the original name on any failure.
 	 */
-	static string readDeviceName(const string& byIdName);
+	static string readDeviceName(const string& byIdName) noexcept;
 
 	/**
 	 * Scans /dev/input/by-id/ for event devices, falling back to /dev/input/.
 	 * @return Ordered map of id → display label.
 	 */
-	StringMap scanEventDevices();
+	StringMap scanEventDevices() noexcept;
 
-	void onEmpty() override;
+	void onEmpty() noexcept override;
 
-	void onSelected() override {}
+	void onSelected() noexcept override {}
 };
 
 } // namespace

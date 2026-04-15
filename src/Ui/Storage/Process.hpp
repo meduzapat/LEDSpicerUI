@@ -39,13 +39,13 @@ public:
 
 	string_view getXmlTag()         const noexcept override { return "map"; }
 	string_view getCssClass()       const noexcept override { return "ProcessBoxButton"; }
-	const string createPrettyName() const noexcept override;
+	string createPrettyName() const noexcept override;
 
 	CollectionHandler* getCollectionHandler() const noexcept override;
 
 protected:
 
-	const string getPrimaryKey() const noexcept override {return PARAM_PROCESS_NAME;}
+	string getPrimaryKey() const noexcept override {return PARAM_PROCESS_NAME;}
 
 };
 

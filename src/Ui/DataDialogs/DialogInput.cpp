@@ -24,13 +24,15 @@
 
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
-DialogInput::DialogInput(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
-	DialogFileForm(obj, builder, COLLECTION_INPUT)
+DialogInput::DialogInput(
+	BaseObjectType* obj,
+	const Glib::RefPtr<Gtk::Builder>& builder
+) noexcept :
+	DialogFileForm(obj, builder)
 {
 
-	// DataDialogs::DialogInputLinkMaps::buildInstance(builder);
-	DataDialogs::DialogInputSource::buildInstance(builder, "DialogInputSource");
-	childDialogs.push_back(DialogInputSource::getInstance());
+	registerChildDialog<DialogInputSource>(builder, "DialogInputSource", COLLECTION_INPUT_SOURCES);
+//	registerChildDialog<DialogInputLinkMaps>(builder, "DialogInputSource", COLLECTION_INPUT_LINKMAP);
 
 	builder->get_widget("ComboBoxInputSelectInput",   selectorCombo);
 	builder->get_widget_derived("BoxInputs",          box);
@@ -71,28 +73,17 @@ DialogInput::DialogInput(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& 
 	});
 }
 
-DialogInput::~DialogInput() {
-	//	delete DataDialogs::DialogInputLinkMaps::getInstance();
-	delete DataDialogs::DialogInputSource::getInstance();
-}
-
-void DialogInput::load(XMLHelper* values) {
+void DialogInput::load(XMLHelper* values) noexcept {
 	createItems(values->getData(COLLECTION_INPUT), values);
 }
 
-void DialogInput::createSubItems(XMLHelper* values) {
+void DialogInput::createSubItems(XMLHelper* values) noexcept {
 	DialogInputSource::getInstance()->load(values);
 //	DialogInputLinkMaps::getInstance()->load(values);
 }
 
-LEDSpicerUI::Ui::Storage::CollectionHandler* DialogInput::getCollectionHandler() const {
-	return Storage::CollectionHandler::getInstance(
-		COLLECTION_INPUT + ownerData->getProperties().getValue(UID)
-	);
-}
-
-void DialogInput::resetForm() {
-	const string name(selectorCombo->get_active_id());
+void DialogInput::resetForm() noexcept {
+	string name(selectorCombo->get_active_id());
 	bool needSources {Defaults::inputHasFlag(name, Defaults::INPUT_NEEDS_SOURCE)};
 
 	btnAddInputSource->set_sensitive(true);
@@ -116,16 +107,16 @@ void DialogInput::resetForm() {
 
 void DialogInput::isValid() const {
 
-	const string id(selectorCombo->get_active_id());
+	string id(selectorCombo->get_active_id());
 	if (id.empty()) throw Message("Select an input type.");
 
-	const string filename(entryInputName->get_text());
+	string filename(entryInputName->get_text());
 	if (filename.empty()) {
 		if (action != Actions::LOAD) entryInputName->grab_focus();
 		throw Message("Invalid name.");
 	}
 
-	const string uid(createUniqueId());
+	string uid(createUniqueId());
 	if (getCollectionHandler()->isIdSet(uid)) {
 		if (action != Actions::EDIT or currentData->createUniqueId() != uid) {
 			if (action != Actions::LOAD) entryInputName->grab_focus();
@@ -139,9 +130,9 @@ void DialogInput::isValid() const {
 	}
 }
 
-void DialogInput::storeData() {
+void DialogInput::storeData() noexcept {
 
-	const string id(selectorCombo->get_active_id());
+	string id(selectorCombo->get_active_id());
 
 	currentData->setValue(NAME, id);
 	currentData->getProperties().setValue(FILENAME, entryInputName->get_text());
@@ -156,9 +147,9 @@ void DialogInput::storeData() {
 		currentData->setValue(SPEED, comboBoxInputSpeed->get_active_id());
 }
 
-void DialogInput::retrieveData() {
+void DialogInput::retrieveData() noexcept {
 
-	const string name(currentData->getValue(NAME));
+	string name(currentData->getValue(NAME));
 
 	selectorCombo->set_active_id(name);
 	entryInputName->set_text(currentData->getProperties().getValue(FILENAME));
@@ -173,19 +164,15 @@ void DialogInput::retrieveData() {
 		comboBoxInputSpeed->set_active_id(currentData->getValue(SPEED));
 }
 
-const string DialogInput::createUniqueId() const {
+string DialogInput::createUniqueId() const {
 	return Defaults::createCommonUniqueId({currentData->getProperties().getValue(PID), entryInputName->get_text()});
 }
 
-string_view DialogInput::getType() const noexcept {
-	return TYPE_INPUT;
-}
-
-LEDSpicerUI::Ui::Storage::Data* DialogInput::createData(StringUMap& rawData) noexcept {
+LEDSpicerUI::Ui::Storage::Data* DialogInput::createData(StringUMap& rawData) const noexcept {
 	return new Storage::Input(rawData, currentDirectory);
 }
 
-void DialogInput::onEmpty() {
+void DialogInput::onEmpty() noexcept {
 	btnAddInputSource->set_sensitive(false);
 	btnAddInputMap->set_sensitive(false); // sourceless maps.
 	boxInputSourcesBox->hide();
@@ -203,7 +190,7 @@ void DialogInput::onEmpty() {
 	btnApply->set_sensitive(false);
 }
 
-void DialogInput::onSelected() {
+void DialogInput::onSelected() noexcept {
 	auto id{selectorCombo->get_active_id()};
 	const bool needSources {Defaults::inputHasFlag(id, Defaults::INPUT_NEEDS_SOURCE)};
 	if (not needSources)

@@ -24,8 +24,11 @@
 
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
-DialogProcess::DialogProcess(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
-	DialogForm(obj, builder, COLLECTION_PROCESS)
+DialogProcess::DialogProcess(
+	BaseObjectType* obj,
+	const Glib::RefPtr<Gtk::Builder>& builder
+) noexcept :
+	DialogForm(obj, builder)
 {
 
 	// Connect Process Box and buttons.
@@ -44,10 +47,6 @@ DialogProcess::DialogProcess(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 
 void DialogProcess::load(XMLHelper* values) noexcept {
 	createItems(values->getData(COLLECTION_PROCESS), values);
-}
-
-LEDSpicerUI::Ui::Storage::CollectionHandler* DialogProcess::getCollectionHandler() const {
-	return LEDSpicerUI::Ui::Storage::CollectionHandler::getInstance(COLLECTION_PROCESS);
 }
 
 void DialogProcess::clearForm() noexcept {
@@ -82,14 +81,14 @@ void DialogProcess::isValid() const {
 		return;
 
 	// Check new name for existence.
-	if (getCollectionHandler()->isIdSet(name)) {
+	if (currentData->getCollectionHandler()->isIdSet(name)) {
 		if (action != Actions::LOAD)
 			inputProcessName->grab_focus();
 		throw Message("Process " + name + " already registered.");
 	}
 }
 
-void DialogProcess::storeData() {
+void DialogProcess::storeData() noexcept {
 	currentData->setValue(PARAM_PROCESS_NAME, inputProcessName->get_text());
 	currentData->setValue(PARAM_SYSTEM, inputSystemType->get_text());
 	// Not mandatory.
@@ -97,21 +96,17 @@ void DialogProcess::storeData() {
 		currentData->setValue(PARAM_PROCESS_POS, inputRomPosition->get_text());
 }
 
-void DialogProcess::retrieveData() {
+void DialogProcess::retrieveData() noexcept {
 	inputProcessName->set_text(currentData->getValue(PARAM_PROCESS_NAME));
 	inputSystemType->set_text(currentData->getValue(PARAM_SYSTEM));
 	// Assume 0 if not present.
 	inputRomPosition->set_text(currentData->getValue(PARAM_PROCESS_POS, "0"));
 }
 
-string const DialogProcess::createUniqueId() const {
+string DialogProcess::createUniqueId() const noexcept {
 	return inputProcessName->get_text();
 }
 
-string_view DialogProcess::getType() const noexcept {
-	return TYPE_MAP;
-}
-
-LEDSpicerUI::Ui::Storage::Data* DialogProcess::createData(StringUMap& rawData) noexcept {
+LEDSpicerUI::Ui::Storage::Data* DialogProcess::createData(StringUMap& rawData) const noexcept {
 	return new Storage::Process(rawData);
 }
