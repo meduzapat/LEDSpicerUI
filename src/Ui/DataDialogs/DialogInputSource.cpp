@@ -130,10 +130,7 @@ void DialogInputSource::populateSources(const string& name) noexcept {
 	}
 }
 
-void DialogInputSource::setOwner(
-	Storage::BoxButtonCollection* collection,
-	const Storage::Data* owner
-) noexcept {
+void DialogInputSource::setOwner(Storage::BoxButtonCollection* collection, Storage::Data* owner) noexcept {
 	this->ownerData = owner;
 	items = collection;
 	auto s{comboBoxInputSelectInput->get_active_id()};

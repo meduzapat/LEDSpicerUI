@@ -65,6 +65,7 @@ protected:
 	void wireChildrenDialogs() noexcept override;
 	string_view getType() const noexcept override;
 	Storage::Data* createData(StringUMap& rawData) const noexcept override;
+	BoxButtonCollection* elementLinks() const noexcept;
 
 };
 

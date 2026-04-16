@@ -212,7 +212,7 @@ void DialogRestrictor::retrieveData() noexcept {
 	});
 }
 
-string const DialogRestrictor::createUniqueId() const noexcept {
+string DialogRestrictor::createUniqueId() const noexcept {
 	return Defaults::createHardwareUniqueId({
 		{NAME, selectorCombo->get_active_id()},
 		{ID,   comboBoxId->get_active_id()},

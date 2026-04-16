@@ -184,8 +184,7 @@ void DialogSelect::addDisplayButtons(Storage::BoxButton& boxButton) noexcept {
 		btn->set_tooltip_text("Edit");
 		btn->signal_clicked().connect([&boxButton, this]() {
 			DialogLinkEditor::getInstance()->open(
-				static_cast<Storage::Link*>(boxButton.getData()),
-				request->linkFields
+			    static_cast<Storage::Link*>(boxButton.getData())
 			);
 			boxButton.sync();
 		});

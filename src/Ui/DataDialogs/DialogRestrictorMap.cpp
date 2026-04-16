@@ -99,7 +99,7 @@ void DialogRestrictorMap::retrieveData() noexcept {
 	}
 }
 
-string const DialogRestrictorMap::createUniqueId() const noexcept {
+string DialogRestrictorMap::createUniqueId() const noexcept {
 	return Defaults::createCommonUniqueId({player->get_active_id(), joystick->get_active_id()});
 }
 

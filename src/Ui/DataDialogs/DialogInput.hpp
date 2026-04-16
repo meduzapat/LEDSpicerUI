@@ -22,6 +22,7 @@
 
 #include "Storage/Input.hpp"
 #include "DialogFileForm.hpp"
+#include "DialogInputSource.hpp"
 
 #pragma once
 

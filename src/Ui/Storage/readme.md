@@ -6,29 +6,32 @@
 
 ## Table of Contents
 
-1. [Overview](#1-overview)
-2. [Class Hierarchy](#2-class-hierarchy)
-3. [Basic Data Storage — `values`](#3-basic-data-storage--values)
-4. [Runtime Properties — `properties`](#4-runtime-properties--properties)
-5. [Data That Stores Data (Composition)](#5-data-that-stores-data-composition)
-6. [Links — `Link`](#6-links--link)
-7. [Selection — `Selection`](#7-selection--selection)
-8. [Ignoring Fields During XML Serialization](#8-ignoring-fields-during-xml-serialization)
-9. [Revertible — Snapshot and Restore](#9-revertible--snapshot-and-restore)
-10. [Visual and Textual Decoration](#10-visual-and-textual-decoration)
-11. [Ownership — BoxButton and BoxButtonCollection](#11-ownership--boxbutton-and-boxbuttoncollection)
-12. [Use Cases by Concrete Type](#12-use-cases-by-concrete-type)
-13. [Quick Reference — Virtual Methods to Override](#13-quick-reference--virtual-methods-to-override)
+1.  [Overview](#1-overview)
+2.  [Class Hierarchy](#2-class-hierarchy)
+3.  [Values — The Field Store](#3-values--the-field-store)
+4.  [Data — The Config Unit](#4-data--the-config-unit)
+5.  [Runtime Properties](#5-runtime-properties)
+6.  [Data That Stores Data (Composition)](#6-data-that-stores-data-composition)
+7.  [Links — `Link`](#7-links--link)
+8.  [Selection — `Selection`](#8-selection--selection)
+9.  [Ignoring Fields During XML Serialization](#9-ignoring-fields-during-xml-serialization)
+10. [Revertible — Snapshot and Restore](#10-revertible--snapshot-and-restore)
+11. [DirNode — Directory Tree Mixin](#11-dirnode--directory-tree-mixin)
+12. [Visual and Textual Decoration](#12-visual-and-textual-decoration)
+13. [Ownership — BoxButton and BoxButtonCollection](#13-ownership--boxbutton-and-boxbuttoncollection)
+14. [Use Cases by Concrete Type](#14-use-cases-by-concrete-type)
+15. [Quick Reference — Virtual Methods to Override](#15-quick-reference--virtual-methods-to-override)
 
 ---
 
 ## 1. Overview
 
 `Data` is the central storage unit. Every piece of configuration is an instance of a `Data` subclass.
-- `Data` inherits `Values`, which holds the serializable map and all field accessors.
-- `Data` only **holds** values. All display and dialog logic lives elsewhere.
-- Persistent values (serialized to XML) live in `values`.
-- Runtime-only state that must never be serialized lives in `properties`.
+
+- `Values` is the base field store. It holds a `StringUMap` and exposes all field accessors. Both `Data` (via inheritance) and `Data::properties` (as a member) use `Values` directly.
+- `Data` inherits `Values` for its serializable fields and adds identity, XML output, and collection registration.
+- Persistent values (serialized to XML) live in `values` (inherited from `Values`).
+- Runtime-only state lives in `properties` (a `Values` member inside `Data`).
 - A `Data*` is always owned by exactly one `BoxButton`, which is owned by a `BoxButtonCollection`.
 
 ---
@@ -36,61 +39,101 @@
 ## 2. Class Hierarchy
 
 ```
-Values
-└── Data
-    ├── Link               — Wraps a pointer to another Data; delegates identity.
-    ├── Parent             — Adds named child BoxButtonCollection storage.
-    │   ├── Device         (+ Revertible mixin) — Owns an Element collection.
-    │   ├── Restrictor     (+ Revertible mixin) — Owns a RestrictorMap collection.
-    │   ├── InputSource    (+ Revertible mixin) — Owns a maps collection.
-    │   └── FileNode       (+ DirNode mixin)    — File-based items; FILENAME stored as property.
-    │       ├── Input      (+ Revertible mixin)
-    │       ├── Animation  (+ Revertible mixin) [pending]
+Values                         — General-purpose field store. Used directly wherever a plain key-value map is needed.
+└── Data                       — Central config unit. Adds identity, XML, collection registration.
+    ├── Link                   — Wraps a pointer to another Data; delegates identity.
+    │   └── InputMap           — Link with fixed linkKey=TARGET, linkType=TYPE_MAP.
+    ├── Parent                 — Adds named child BoxButtonCollection storage.
+    │   ├── Device             (+ Revertible mixin) — Owns an Element collection.
+    │   ├── Restrictor         (+ Revertible mixin) — Owns a RestrictorMap collection.
+    │   ├── InputSource        (+ Revertible mixin) — Owns a maps collection.
+    │   ├── Group                                   — Owns a Link→Element collection.
+    │   └── FileNode           (+ DirNode mixin)    — File-based items; FILENAME stored as property.
+    │       ├── Input          (+ Revertible mixin)
+    │       ├── Animation      (+ Revertible mixin) [pending]
     │       └── Profile
-    ├── DirNode            — Pure structural mixin; parent pointer + path resolution.
-    │   └── DirectoryEntry — Runtime-only directory node. Never serialized.
-    ├── Group
     ├── Element
-    ├── InputMap
     ├── InputMapLink
-    └── ...
+    └── DirectoryEntry         (+ DirNode mixin) — Runtime-only directory node. Never serialized.
 ```
 
-`Revertible` is a **pure mixin** — it does not appear in the `Data` inheritance chain.
-It receives a reference to the consumer itself (`*this`) and optionally its `children` map at construction.
+**Mixins — not in the `Data` inheritance chain:**
+
+| Mixin | Consumer | Purpose |
+|-------|----------|---------|
+| `Revertible` | `Device`, `Restrictor`, `InputSource`, `Input`, `Animation` | Snapshot + restore of `values` and child collections. |
+| `DirNode` | `FileNode` subclasses, `DirectoryEntry` | Parent pointer, UID/PID/FILENAME written into a `Values` dest. |
 
 ---
 
-## 3. Basic Data Storage — `values`
+## 3. Values — The Field Store
 
-`values` (inherited from `Values`) is a `StringUMap` mapping field names to string values.
-Everything in it is serialized to XML via `toXML()`.
+`Values` (`Values.hpp`) is a standalone class that owns a `StringUMap` and exposes all field accessors. It is not tied to `Data` — any class that needs a plain key-value store can use it directly. Current known consumers:
+
+- **`Data` base** — the serializable field map inherited by every `Data` subclass.
+- **`Data::properties`** — a `Values` member inside every `Data` for runtime-only state.
+- **`DirNode` constructor** — takes a `Values&` destination to write `UID`, `PID`, `FILENAME` into.
+
+### API
+
+```cpp
+values.getValue(key);                  // returns const string& or emptyString
+values.getValue(key, defaultValue);    // returns string
+values.setValue(key, value);
+values.isSet(key);                     // true if key exists
+values.unSet(key);                     // removes key
+values.wipe();                         // clears all entries
+values.getValues();                    // returns const StringUMap*
+values.setValues(other);               // inserts all entries from other
+values.copyValues();                   // returns StringUMap copy
+values.swap(other);                    // O(1) contents exchange
+// Iterators: begin(), end(), cbegin(), cend()
+```
+
+`Values` is default-constructible (empty map) or pre-populated from a `StringUMap&` (which is moved in).
+
+---
+
+## 4. Data — The Config Unit
+
+`Data` inherits `Values` and adds:
+
+- Identity: `createUniqueId()`, `createPrettyName()`, `createTooltip()`, `getPrimaryValue()`
+- XML: `toXML()`, `getXmlTag()`, `xmlBody()`, `shouldSerialize()`
+- Collection: `getCollectionHandler()`, `registerToCollection()`, `unregisterFromCollection()`, `syncRegistration()`
+- Lifecycle: `setUp()`, `tearDown()`, `wipe()`, `unSet()`
+- Properties: `getProperties()` → `Values&`
 
 ```cpp
 data->setValue(NAME, "MyDevice");
 string name = data->getValue(NAME);
 string port = data->getValue(PORT, "auto");  // default if missing
+data->wipe();                                // unregisters from handler, clears values
 ```
 
-**`wipe()`** — unregisters from the collection handler, then clears all fields.
+**`getPrimaryValue()`** returns `getValue(getPrimaryKey())`. The default primary key is `NAME`. Override `getPrimaryKey()` when a subclass uses a different field as its identifier.
+
+**`syncRegistration(oldId)`** — call after manually changing the primary key field. Re-keys the `CollectionHandler` entry without destroying the `BoxButton`.
 
 ---
 
-## 4. Runtime Properties — `properties`
+## 5. Runtime Properties
 
-Properties carry extra information the object needs at runtime but that has no place in the serialized config — stable identifiers, state flags, anything the object needs to track independently of the config values.
+Properties carry runtime-only information that must never be serialized — stable identifiers, state flags, UI-only labels, and anything the object needs independently of the config values.
 
 ```cpp
 data->getProperties().setValue(UID, "file_3");
-string id  = data->getProperties().getValue(UID);
+string id = data->getProperties().getValue(UID);
 bool   has = data->getProperties().isSet(UID);
 ```
 
-> `values` → XML config. `properties` → runtime information.
+`properties` is a `Values` instance — the full `Values` API applies.
+
+> `values` (inherited) → XML config. `properties` (member) → runtime information.
 
 ---
 
-## 5. Data That Stores Data (Composition)
+## 6. Data That Stores Data (Composition)
 
 `Parent` subclasses own child `BoxButtonCollection` members keyed by collection ID. The constructor receives a `vector<string>` of child collection IDs to pre-create.
 
@@ -107,35 +150,71 @@ Child collections are destroyed with the parent, recursively deleting all owned 
 
 ---
 
-## 6. Links — `Link`
+## 7. Links — `Link`
 
-`Link` holds a raw pointer to another `Data` and delegates display and identity to it.
+`Link` wraps a raw pointer to another `Data` (`link`) and delegates display and identity to it. It carries its own `fieldsData` (via inherited `values`) for extra per-link attributes like `color` or `filter`.
+
+`linkKey` and `linkType` are stable `const string&` references — they must be owned by the caller for the lifetime of the `Link` (e.g. stored in `DialogSelect::SelectionRequest`). `linkFields` is a stable `const vector<LinkField>&` reference with the same lifetime requirement.
+
+### Constructor
 
 ```cpp
-StringUMap empty;
-auto* link = new Storage::Link(empty, {"element", "name", targetData});
+StringUMap extra{{COLOR, "Red"}};
+auto* link = new Storage::Link(extra, linkKey, linkType, linkFields, target);
 ```
+
+- `linkKey` — field name used to identify the target in XML (e.g. `NAME`).
+- `linkType` — XML tag name for this link (e.g. `"element"`, `"group"`).
+- `linkFields` — editable extra fields shown in `DialogLinkEditor`; pass `{}` if none.
+- `target` — the `Data` this link points to. May be `nullptr` until set via `setLink()`.
+
+### Methods
 
 | Method | Behaviour |
 |--------|-----------|
-| `getCssClass()` | Delegates to the target. |
-| `createPrettyName()` | Delegates to the target. |
-| `createUniqueId()` | Delegates to the target. |
-| `getValue(key)` | Returns target's value if key matches `linkInfo.key`; otherwise own `values`. |
-| `toXML()` | Emits a self-closing XML element with the target's unique ID as the key attribute, plus any extra values in own `values`. |
-| `operator==` | True if same object identity **or** if compared against the target pointer. |
+| `getCssClass()` | Delegates to `link`. |
+| `createPrettyName()` | Delegates to `link`. |
+| `createUniqueId()` | Delegates to `link`. |
+| `getXmlTag()` | Returns `linkType`. |
+| `getValue(linkKey)` | Returns `link->getPrimaryValue()`. |
+| `getValue(other)` | Returns own `values` entry. |
+| `setValue(linkKey, …)` | Silently ignored — the key is owned by the target. |
+| `setValue(other, …)` | Updates own `values`. |
+| `toXML()` | Self-closing element: tag=`linkType`, key attribute=`linkKey`→`link->createUniqueId()`, plus own `values`. |
+| `operator==` | True if same object identity **or** if compared against the `link` pointer. |
+| `setLink(newLink)` | Replaces the target pointer. |
+| `getLinkFields()` | Returns `const vector<LinkField>&`. |
+| `getCollectionHandlerSource()` | Returns `link->getCollectionHandler()` — the collection the link was picked from. |
+
+### `LinkField`
+
+Describes an extra editable field shown in `DialogLinkEditor`:
+
+```cpp
+struct LinkField {
+    enum class Widget : uint8_t { COLOR_PICKER, COMBOBOX };
+    const string key;           // fieldsData key on the Link.
+    const string label;         // Human label shown in the editor.
+    const string defaultValue;  // Value used when not yet set.
+    const Widget widgetType;
+};
+```
+
+### `InputMap` — Link subclass
+
+`InputMap` extends `Link` with fixed `linkKey = TARGET` and `linkType = TYPE_MAP`. It carries `trigger`, `type`, `color`, `filter` in its own `fieldsData`. Editing is handled by `DialogInputMap`, not `DialogLinkEditor`.
 
 ---
 
-## 7. Selection — `Selection`
+## 8. Selection — `Selection`
 
 Lightweight `Gtk::FlowBoxChild` used exclusively by `DialogSelect`. Holds a `Data*` without owning it. Rebuilt from scratch every time `DialogSelect` opens.
 
 ---
 
-## 8. Ignoring Fields During XML Serialization
+## 9. Ignoring Fields During XML Serialization
 
-Override `shouldSerialize(key, value)` to suppress specific fields from XML output. The base implementation returns `true` for all fields. Prefer local logic inside the override rather than mutating any shared state.
+Override `shouldSerialize(key, value)` to suppress specific fields from XML output. The base implementation returns `true` for all fields.
 
 ```cpp
 bool MyData::shouldSerialize(const string& key, const string& value) const noexcept {
@@ -148,7 +227,7 @@ bool MyData::shouldSerialize(const string& key, const string& value) const noexc
 
 ---
 
-## 9. Revertible — Snapshot and Restore
+## 10. Revertible — Snapshot and Restore
 
 `Revertible` is a **pure mixin**. It is not a `Data` subclass. Consumers pass `*this` (as `Values&`) and, optionally, their `children` map at construction:
 
@@ -182,19 +261,46 @@ void Device::tearDown() noexcept {
 
 ---
 
-## 10. Visual and Textual Decoration
+## 11. DirNode — Directory Tree Mixin
+
+`DirNode` is a **pure mixin** — not a `Data` subclass. It provides parent pointer and recursive path resolution for objects that live inside a directory tree.
+
+The constructor takes a `Values& dest` — the destination where `UID`, `PID`, and `FILENAME` are written. Consumers pass either `values` (for `Values`-inherited fields) or `properties` (for runtime-only identity):
+
+```cpp
+// FileNode subclasses — identity in properties (not serialized):
+DirNode(getProperties(), parent, filename)
+
+// DirectoryEntry — identity in properties (never serialized):
+DirNode(getProperties(), parent, filename)
+```
+
+| Method | Purpose |
+|--------|---------|
+| `getName()` | Returns `FILENAME` from dest. |
+| `getFsId()` | Returns `UID` from dest. |
+| `getParent()` | Returns parent `DirNode*`. |
+| `getPath()` | Full path of the parent. Empty at root. |
+| `getFullPath()` | Full path including this node's name. |
+| `isAtRoot()` | True if no parent. |
+
+`UID` is a monotonically incrementing counter shared across all `DirNode` instances — unique per application run, not persistent.
+
+---
+
+## 12. Visual and Textual Decoration
 
 | Method | Purpose |
 |--------|---------|
 | `getCssClass()` | CSS class applied to the `BoxButton` widget. |
-| `createPrettyName()` | Human label shown on the button. |
+| `createPrettyName()` | Human label shown on the button. Default: `getPrimaryValue()`. |
 | `createTooltip()` | Hover text. Default `""`. |
 
 Call `boxButton.updateLabel()` after any `setValue()` that affects the label.
 
 ---
 
-## 11. Ownership — BoxButton and BoxButtonCollection
+## 13. Ownership — BoxButton and BoxButtonCollection
 
 ```
 BoxButtonCollection
@@ -202,7 +308,7 @@ BoxButtonCollection
      └─ Data*          (heap, owned by BoxButton)
 ```
 
-`create(Data*)` is the only correct way to hand a `Data*` to a collection. Never `delete` a `Data*` that has been passed to `create()`.
+`create(Data*)` is the **only** correct way to hand a `Data*` to a collection. Never `delete` a `Data*` that has been passed to `create()`.
 
 Registration in `CollectionHandler` is driven entirely by `BoxButton`:
 - **Constructor** — calls `registerToCollection()` on the owned `Data`.
@@ -233,37 +339,37 @@ string MyData::xmlBody() const noexcept {
 
 ---
 
-## 12. Use Cases by Concrete Type
+## 14. Use Cases by Concrete Type
 
-| Type | `values` | Properties | Child collections | Serialized |
-|------|----------|------------|-------------------|------------|
+| Type | `values` | `properties` | Child collections | Serialized |
+|------|----------|--------------|-------------------|------------|
 | `Device` | name, port, id, … | — | `elements` | Yes — `<device>` |
 | `Element` | name, pin, position, … | strip descriptor (when strip) | — | Yes — `<element>` |
 | `Group` | name, defaultColor | — | link→Element items | Yes — `<group>` |
 | `Input` | input type key | `FILENAME`, `UID`, `PID` | `sources`, `linkmaps` | Yes — per-file XML |
 | `Animation` | animation type key | `FILENAME`, `UID`, `PID` | (pending) | Yes — per-file XML |
-| `Profile` | backgroundcolor, … | `FILENAME`, `UID`, `PID` | elements, groups, inputs, animations | Yes — per-file XML |
+| `Profile` | backgroundColor | `FILENAME`, `UID`, `PID` | elements, groups, inputs, animations | Yes — per-file XML |
 | `InputSource` | `source` (hw path) | `UID`, `PID`, `SOURCELESS` | `maps` | Yes — `<maps>` |
-| `InputMap` | trigger, type, target, … | `PID` | — | Yes — `<map>` |
-| `DirectoryEntry` | name (segment only) | `UID`, `PID` | `contents` | **No** — runtime only |
-| `Link` | extra attributes | — | — | Yes — self-closing element |
+| `InputMap` | trigger, type, color, filter | `PID` | — | Yes — `<map>` (`linkKey=TARGET`, `linkType=TYPE_MAP`) |
+| `Link` | own fieldsData (e.g. color, filter) | — | — | Yes — self-closing (`linkKey`, `linkType`, `linkFields`) |
+| `DirectoryEntry` | — | `UID`, `PID`, `FILENAME` | `contents` | **No** — runtime only |
 
 ---
 
-## 13. Quick Reference — Virtual Methods to Override
+## 15. Quick Reference — Virtual Methods to Override
 
 | Method | Must override? | Purpose |
 |--------|---------------|---------|
 | `getCssClass()` | **Yes** (pure) | CSS class for the `BoxButton`. |
 | `getXmlTag()` | **Yes** (pure) | XML element name. |
 | `getCollectionHandler()` | **Yes** (pure) | Returns the handler this item registers into; `nullptr` for non-registering types. |
-| `createPrettyName()` | Recommended | Human label. Default uses primary key field. |
+| `createPrettyName()` | Recommended | Human label. Default: `getPrimaryValue()`. |
 | `createTooltip()` | Optional | Hover text. Default `""`. |
-| `createUniqueId()` | Recommended | Stable collection key. Default hashes primary key. |
+| `createUniqueId()` | Recommended | Stable collection key. Default hashes primary key via `getPrimaryValue()`. |
+| `getPrimaryKey()` | When primary key ≠ `NAME` | Drives default `createUniqueId()` and `getPrimaryValue()`. |
 | `xmlBody()` | When has serializable children | Inner XML content. Default `""` (self-closing). |
 | `toXML()` | `FileNode` subclasses only | Full file serialization via `XMLHelper::xmlHeader/Footer`. |
 | `shouldSerialize(key, value)` | When fields need suppression | Return `false` to omit a field from XML. |
 | `wipe()` | When `Revertible` | Call `clearSnap()` then `Data::wipe()`. |
 | `tearDown()` | When `Revertible` | Call `revert()` then `Data::tearDown()`. |
-| `getPrimaryKey()` | When primary key ≠ `name` | Drives default `createUniqueId()`. |
-| `getValue()` | `Link` only | Redirect key lookups to target. |
+| `getValue()` / `setValue()` | `Link` only | Redirect `linkKey` lookups to target; silence writes to `linkKey`. |

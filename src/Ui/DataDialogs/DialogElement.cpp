@@ -585,7 +585,7 @@ void DialogElement::retrieveData() noexcept {
 	brightness->set_value(std::stoi(currentData->getValue(BRIGHTNESS, DEFAULT_BRIGHTNESS)) ?: 100);
 }
 
-string const DialogElement::createUniqueId() const noexcept {
+string DialogElement::createUniqueId() const noexcept {
 	return Defaults::createCommonUniqueId({elementName->get_text()});
 }
 
