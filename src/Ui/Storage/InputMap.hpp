@@ -39,13 +39,8 @@ class InputMap : public Link {
 
 public:
 
-	inline static const string TYPE = "map";
-
-	InputMap(
-		StringUMap&   data,
-		const string& key,
-		Data*         link
-	) noexcept : Link(data, key, TYPE, {}, link) {}
+	InputMap(StringUMap& data, Data* link) noexcept :
+		Link(data, TARGET, TYPE_MAP, {}, link) {}
 
 	virtual ~InputMap() = default;
 

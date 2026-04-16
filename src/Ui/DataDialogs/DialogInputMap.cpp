@@ -154,8 +154,7 @@ void DialogInputMap::storeData() noexcept {
 	currentData->setValue(TYPE,    type);
 	currentData->setValue(COLOR,   inputMapDefaultColor->get_label());
 	currentData->setValue(FILTER,  comboBoxInputMapFilter->get_active_id());
-	Storage::Link::LinkData linkData {type, TARGET, data};
-	static_cast<Storage::InputMap*>(currentData)->setLinkData(linkData);
+	static_cast<Storage::InputMap*>(currentData)->setLink(data);
 }
 
 void DialogInputMap::retrieveData() noexcept {
@@ -180,15 +179,16 @@ string DialogInputMap::createUniqueId() const noexcept {
 }
 
 LEDSpicerUI::Ui::Storage::Data* DialogInputMap::createData(StringUMap& rawData) const noexcept {
-	string
-		type(rawData.count(TYPE)     ? rawData.at(TYPE)   : ""),
-		target(rawData.count(TARGET) ? rawData.at(TARGET) : "");
+	// Target will be deleted by dialog form, no need to clean up.
+	const string
+		type   = rawData.count(TYPE)   ? rawData.at(TYPE)   : "",
+		target = rawData.count(TARGET) ? rawData.at(TARGET) : "";
 
-	auto handler = type == GROUP ?
+	auto* handler = type == GROUP ?
 		Storage::CollectionHandler::getInstance(COLLECTION_GROUP) :
 		Storage::CollectionHandler::getInstance(COLLECTION_ELEMENT);
 
-	auto im = new Storage::InputMap(rawData, TARGET, handler->get(target));
+	auto* im = new Storage::InputMap(rawData, handler->get(target));
 	im->getProperties().setValue(PID, ownerData->getProperties().getValue(UID));
 	return im;
 }

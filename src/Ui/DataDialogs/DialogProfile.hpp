@@ -21,18 +21,20 @@
  */
 
 #include "DialogForm.hpp"
-#include "Storage/Profile.hpp"
 #include "DialogSelect.hpp"
+#include "Storage/Profile.hpp"
 
 #pragma once
 
 namespace LEDSpicerUI::Ui::DataDialogs {
 
 /**
- * LEDSpicerUI::Ui::DialogProfile
+ * LEDSpicerUI::Ui::DataDialogs::DialogProfile
  * Dialog to create or edit profiles.
+ * Profile owns four independent link type selectors (elements, groups,
+ * animations, inputs), each wired to DS immediately before use via setUpSelector().
  */
-class DialogProfile: public DialogForm, public SingletonDialog<DialogProfile> {
+class DialogProfile : public DialogForm, public SingletonDialog<DialogProfile> {
 
 	friend class Gtk::Builder;
 
@@ -40,107 +42,52 @@ public:
 
 	virtual ~DialogProfile() = default;
 
-	void load(XMLHelper* values) noexcept override;
-	void isValid() const override;
-	void clearForm()    noexcept override;
-	void storeData()    noexcept override;
-	void retrieveData() noexcept override;
+	void load(XMLHelper* values)  noexcept override;
+	void isValid()          const override;
+	void clearForm()        noexcept override;
+	void storeData()        noexcept override;
+	void retrieveData()     noexcept override;
 	string createUniqueId() const noexcept override;
 
 protected:
 
-	/// Pointer to the entry for profile name input.
 	Gtk::Entry*  inputProfileName          = nullptr;
-
-	/// Pointer to the button for profile background color.
 	Gtk::Button* btnProfileBackgroundColor = nullptr;
 
-	/// Pointer to the box where different types of elements are displayed.
 	OrdenableFlowBox
-		/// The box where always on elements are displayed.
 		* boxProfileAlwaysOnElements = nullptr,
-		/// The box where always on groups are displayed.
 		* boxProfileAlwaysOnGroups   = nullptr,
-		/// The box where animations are displayed.
 		* boxProfileAnimations       = nullptr,
-		/// The box where inputs are displayed.
-		* boxProfileInputs           = nullptr,
-		/// The box where start transitions are displayed.
-		* boxProfileStartTransitions = nullptr,
-		/// The box where end transitions are displayed.
-		* boxProfileEndTransitions   = nullptr;
+		* boxProfileInputs           = nullptr;
 
-	/// Pointer to the buttons.
 	Gtk::Button
-		/// Always on elements selector button.
-		* btnProfilesAddElements = nullptr,
-		/// Always on group selector.
-		* btnProfilesAddGroups = nullptr,
-		/// Animations selector.
+		* btnProfilesAddElements   = nullptr,
+		* btnProfilesAddGroups     = nullptr,
 		* btnProfilesAddAnimations = nullptr,
-		/// Inputs selector.
-		* btnProfilesAddInputs = nullptr,
-		/// Start transition selector.
-		* btnProfilesAddStartTransitions = nullptr,
-		/// End transition selector.
-		* btnProfilesAddEndTransitions = nullptr;
+		* btnProfilesAddInputs     = nullptr;
 
-	const DialogSelect::SelectionRequest alwaysOnElementsSelectSetting {
-		boxProfileAlwaysOnElements,
-		NAME,
-		TYPE_ELEMENT,
-		COLLECTION_ELEMENT,
-		DialogSelect::BUTTON_COLORER | DialogSelect::BUTTON_DELETER
-	};
-
-	const DialogSelect::SettingRequest alwaysOnGroupsSelectSetting {
-		boxProfileAlwaysOnGroups,
-		NAME,
-		"group",
-		COLLECTION_GROUP,
-		DialogSelect::BUTTON_COLORER | DialogSelect::BUTTON_DELETER
-	};
-
-	const DialogSelect::SettingRequest animationsSelectSetting {
-		boxProfileAnimations,
-		NAME,
-		"animation",
-		COLLECTION_ANIMATIONS,
-		DialogSelect::BUTTON_DELETER
-	};
-
-	const DialogSelect::SettingRequest inputsSelectSetting {
-		boxProfileInputs,
-		NAME,
-		"input",
-		COLLECTION_INPUT,
-		DialogSelect::BUTTON_DELETER
-	};
-
-	const DialogSelect::SettingRequest startTransitionsSelectSetting {
-		boxProfileStartTransitions,
-		NAME,
-		"startTransitions",
-		COLLECTION_ANIMATIONS,
-		DialogSelect::BUTTON_DELETER
-	};
-
-	const DialogSelect::SettingRequest endTransitionsSelectSetting {
-		boxProfileEndTransitions,
-		NAME,
-		"endTransitions",
-		COLLECTION_ANIMATIONS,
-		DialogSelect::BUTTON_DELETER
-	};
+	/// @todo Transition: future struct — name, speed, color, optional group.
 
 	DialogProfile(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept;
 
 	void createSubItems(XMLHelper* values) noexcept override;
-
 	string_view getType() const noexcept override { return TYPE_PROFILE; }
+	Storage::Data* createData(StringUMap& rawData) noexcept override;
 
-	Storage::Data* createData(StringUMap& rawData) const noexcept override;
+private:
 
+	DialogSelect::SelectionRequest
+		alwaysOnElementsRequest,
+		alwaysOnGroupsRequest,
+		animationsRequest,
+		inputsRequest;
+
+	/**
+	 * Wires DialogSelect for one link type immediately before use.
+	 * @param collection Key of the child collection on the current Profile.
+	 * @param req        Configuration for this link type.
+	 */
+	void setUpSelector(const string& collection, const DialogSelect::SelectionRequest& req) noexcept;
 };
 
 } // namespace

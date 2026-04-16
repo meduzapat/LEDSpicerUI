@@ -108,38 +108,37 @@ TEST(RestrictorMapTest, CssClass) {
 
 TEST(InputMapTest, CssClass) {
 	StringUMap targetData{{NAME, "P1_BUTTON1"}};
-	Element target(targetData);
-	StringUMap data{{TRIGGER, "305"}, {TYPE, "Element"}, {TARGET, "P1_BUTTON1"}};
-	InputMap im(data, TARGET, &target);
+	Element    target(targetData);
+	StringUMap data{{TRIGGER, "305"}, {TYPE, ELEMENT}, {TARGET, "P1_BUTTON1"}};
+	InputMap   im(data, &target);
 	EXPECT_EQ("InputMapBoxButton", im.getCssClass());
 }
 
 TEST(InputMapTest, CreatePrettyName) {
 	StringUMap targetData{{NAME, "P1_BUTTON1"}};
-	Element target(targetData);
-	StringUMap data{{TRIGGER, "305"}, {TYPE, "Element"}, {TARGET, "P1_BUTTON1"}};
-	InputMap im(data, TARGET, &target);
-	string pretty(im.createPrettyName());
+	Element    target(targetData);
+	StringUMap data{{TRIGGER, "305"}, {TYPE, ELEMENT}, {TARGET, "P1_BUTTON1"}};
+	InputMap   im(data, &target);
+	string     pretty(im.createPrettyName());
 	EXPECT_NE(string::npos, pretty.find("305"));
-	EXPECT_NE(string::npos, pretty.find("Element"));
+	EXPECT_NE(string::npos, pretty.find(ELEMENT));
 	EXPECT_NE(string::npos, pretty.find("P1_BUTTON1"));
 }
 
 TEST(InputMapTest, CreateUniqueIdUsesPidAndTrigger) {
 	StringUMap targetData{{NAME, "P1_BUTTON1"}};
-	Element target(targetData);
-	StringUMap data{{TRIGGER, "305"}, {TYPE, "Element"}, {TARGET, "P1_BUTTON1"}};
-	InputMap im(data, TARGET, &target);
+	Element    target(targetData);
+	StringUMap data{{TRIGGER, "305"}, {TYPE, ELEMENT}, {TARGET, "P1_BUTTON1"}};
+	InputMap   im(data, &target);
 	im.getProperties().setValue(PID, "s_1");
 	EXPECT_EQ(Defaults::createCommonUniqueId({"s_1", "305"}), im.createUniqueId());
 }
 
 TEST(InputMapTest, CreateUniqueIdEmptyPidWithoutProperty) {
 	StringUMap targetData{{NAME, "P1_BUTTON1"}};
-	Element target(targetData);
-	StringUMap data{{TRIGGER, "305"}, {TYPE, "Element"}, {TARGET, "P1_BUTTON1"}};
-	InputMap im(data, TARGET, &target);
-	// PID not set — unique ID uses empty string for PID segment.
+	Element    target(targetData);
+	StringUMap data{{TRIGGER, "305"}, {TYPE, ELEMENT}, {TARGET, "P1_BUTTON1"}};
+	InputMap   im(data, &target);
 	EXPECT_EQ(Defaults::createCommonUniqueId({"", "305"}), im.createUniqueId());
 }
 

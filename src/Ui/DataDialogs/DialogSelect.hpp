@@ -70,16 +70,15 @@ public:
 	virtual ~DialogSelect() = default;
 
 	/**
-	 * Sets the static configuration supplied by the owner dialog.
-	 * @param req Owner-provided request config.
+	 * Wires the dialog for the next action.
+	 * Must be called before open(), refresh(), reindex(), or load().
+	 * @param dest Destination collection for this action.
+	 * @param req  Static configuration for this link type.
 	 */
-	void setRequest(const SelectionRequest& req) noexcept { request = &req; }
-
-	/**
-	 * Sets the destination collection for the current owner data.
-	 * @param dest Child collection that owns the resulting Link objects.
-	 */
-	void setDestination(BoxButtonCollection* dest) noexcept { destination = dest; }
+	void setUp(BoxButtonCollection* dest, const SelectionRequest& req) noexcept {
+		destination = dest;
+		request     = &req;
+	}
 
 	/**
 	 * Opens the picker. Pre-selects items already in destination, then

@@ -23,70 +23,90 @@
 #include "DialogProfile.hpp"
 
 using namespace LEDSpicerUI::Ui::DataDialogs;
+using namespace LEDSpicerUI::Ui::Storage;
 
 DialogProfile::DialogProfile(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept :
 	DialogForm(obj, builder)
 {
-
-	// Connect Profile Box and button.
 	builder->get_widget_derived("BoxProfiles", box);
 	builder->get_widget("BtnApplyProfile",     btnApply);
 	Gtk::Button* btnAdd = nullptr;
-	builder->get_widget("BtnAddProfile", btnAdd);
+	builder->get_widget("BtnAddProfile",             btnAdd);
+	builder->get_widget("InputProfileName",          inputProfileName);
+	builder->get_widget("BtnProfileBackgroundColor", btnProfileBackgroundColor);
+
 	setSignalAdd(btnAdd);
 	setSignalApply();
 
-	builder->get_widget("InputProfileName",          inputProfileName);
-	builder->get_widget("BtnProfileBackgroundColor", btnProfileBackgroundColor);
 	DialogColors::getInstance()->activateColorButton(btnProfileBackgroundColor);
 
 	// Always on elements selector.
 	builder->get_widget("BtnProfilesAddElements",             btnProfilesAddElements);
 	builder->get_widget_derived("BoxProfileAlwaysOnElements", boxProfileAlwaysOnElements);
-	btnProfilesAddElements->signal_clicked().connect([&]() {
-		DialogSelect::getInstance()->setSettings(alwaysOnElementsSelectSetting);
-		DialogSelect::getInstance()->runSelection();
+	btnProfilesAddElements->signal_clicked().connect([this]() {
+		setUpSelector(COLLECTION_ELEMENT, alwaysOnElementsRequest);
+		DialogSelect::getInstance()->open();
 	});
 
-	// Always on group selector.
+	// Always on groups selector.
 	builder->get_widget("BtnProfilesAddGroups",             btnProfilesAddGroups);
 	builder->get_widget_derived("BoxProfileAlwaysOnGroups", boxProfileAlwaysOnGroups);
-	btnProfilesAddGroups->signal_clicked().connect([&]() {
-		DialogSelect::getInstance()->setSettings(alwaysOnGroupsSelectSetting);
-		DialogSelect::getInstance()->runSelection();
+	btnProfilesAddGroups->signal_clicked().connect([this]() {
+		setUpSelector(COLLECTION_GROUP, alwaysOnGroupsRequest);
+		DialogSelect::getInstance()->open();
 	});
 
 	// Animations selector.
 	builder->get_widget("BtnProfileAddAnimations",      btnProfilesAddAnimations);
 	builder->get_widget_derived("BoxProfileAnimations", boxProfileAnimations);
-	btnProfilesAddAnimations->signal_clicked().connect([&]() {
-		DialogSelect::getInstance()->setSettings(animationsSelectSetting);
-		DialogSelect::getInstance()->runSelection();
+	btnProfilesAddAnimations->signal_clicked().connect([this]() {
+		setUpSelector(COLLECTION_ANIMATIONS, animationsRequest);
+		DialogSelect::getInstance()->open();
 	});
 
 	// Inputs selector.
 	builder->get_widget("BtnProfileAddInputs",      btnProfilesAddInputs);
 	builder->get_widget_derived("BoxProfileInputs", boxProfileInputs);
-	btnProfilesAddInputs->signal_clicked().connect([&]() {
-		DialogSelect::getInstance()->setSettings(inputsSelectSetting);
-		DialogSelect::getInstance()->runSelection();
+	btnProfilesAddInputs->signal_clicked().connect([this]() {
+		setUpSelector(COLLECTION_INPUT, inputsRequest);
+		DialogSelect::getInstance()->open();
 	});
 
-	// Start transition selector.
-//	builder->get_widget("BtnAddStartTransitions",             btnProfilesAddStartTransitions);
-//	builder->get_widget_derived("BoxProfileStartTransitions", boxProfileStartTransitions, "BtnStartTransitionsUp", "BtnStartTransitionsDn");
-//	btnProfilesAddStartTransitions->signal_clicked().connect([&]() {
-//		DialogSelect::getInstance()->setSettings(startTransitionsSelectSetting);
-//		DialogSelect::getInstance()->runSelection();
-//	});
-
-	// End transition selector.
-//	builder->get_widget("BtnAddEndTransitions",             btnProfilesAddEndTransitions);
-//	builder->get_widget_derived("BoxProfileEndTransitions", boxProfileEndTransitions, "BtnEndTransitionsUp", "BtnEndTransitionsDn");
-//	btnProfilesAddEndTransitions->signal_clicked().connect([&]() {
-//		DialogSelect::getInstance()->setSettings(endTransitionsSelectSetting);
-//		DialogSelect::getInstance()->runSelection();
-//	});
+	// Wire SelectionRequests after all boxes are set.
+	alwaysOnElementsRequest = {
+		boxProfileAlwaysOnElements,
+		NAME,
+		TYPE_ELEMENT,
+		CollectionHandler::getInstance(COLLECTION_ELEMENT),
+		{
+			{"color",  "Color",  "", Link::LinkField::Widget::COLOR_PICKER},
+			{"filter", "Filter", "", Link::LinkField::Widget::COMBOBOX}
+		}
+	};
+	alwaysOnGroupsRequest = {
+		boxProfileAlwaysOnGroups,
+		NAME,
+		"group",
+		CollectionHandler::getInstance(COLLECTION_GROUP),
+		{
+			{"color",  "Color",  "", Link::LinkField::Widget::COLOR_PICKER},
+			{"filter", "Filter", "", Link::LinkField::Widget::COMBOBOX}
+		}
+	};
+	animationsRequest = {
+		boxProfileAnimations,
+		NAME,
+		"animation",
+		CollectionHandler::getInstance(COLLECTION_ANIMATIONS),
+		{}
+	};
+	inputsRequest = {
+		boxProfileInputs,
+		NAME,
+		"input",
+		CollectionHandler::getInstance(COLLECTION_INPUT),
+		{}
+	};
 }
 
 void DialogProfile::load(XMLHelper* values) noexcept {
@@ -94,59 +114,66 @@ void DialogProfile::load(XMLHelper* values) noexcept {
 }
 
 void DialogProfile::createSubItems(XMLHelper* values) noexcept {
-	auto dialogSelect = DialogSelect::getInstance();
-	dialogSelect->setSettings(alwaysOnElementsSelectSetting);
-	dialogSelect->load(values, COLLECTION_PROFILES);
-	dialogSelect->setSettings(alwaysOnGroupsSelectSetting);
-	dialogSelect->load(values, COLLECTION_PROFILES);
-	dialogSelect->setSettings(animationsSelectSetting);
-	dialogSelect->load(values, COLLECTION_PROFILES);
-	dialogSelect->setSettings(inputsSelectSetting);
-	dialogSelect->load(values, COLLECTION_PROFILES);
-	dialogSelect->setSettings(startTransitionsSelectSetting);
-	dialogSelect->load(values, COLLECTION_PROFILES);
-	dialogSelect->setSettings(endTransitionsSelectSetting);
-	dialogSelect->load(values, COLLECTION_PROFILES);
+	auto* ds              = DialogSelect::getInstance();
+	const string ownerUid = currentData->createUniqueId();
+
+	setUpSelector(COLLECTION_ELEMENT,    alwaysOnElementsRequest);
+	ds->load(values, ownerUid);
+	setUpSelector(COLLECTION_GROUP,      alwaysOnGroupsRequest);
+	ds->load(values, ownerUid);
+	setUpSelector(COLLECTION_ANIMATIONS, animationsRequest);
+	ds->load(values, ownerUid);
+	setUpSelector(COLLECTION_INPUT,      inputsRequest);
+	ds->load(values, ownerUid);
 }
 
 void DialogProfile::clearForm() noexcept {
 	inputProfileName->set_text("");
 	DialogColors::getInstance()->colorizeButton(btnProfileBackgroundColor, DEFAULT_PROFILE_BACKGROUND_COLOR);
-	// if no group, elements, animations or input disable button add
-	btnProfilesAddElements->set_sensitive(Storage::CollectionHandler::getInstance(COLLECTION_ELEMENT)->getSize());
-	btnProfilesAddGroups->set_sensitive(Storage::CollectionHandler::getInstance(COLLECTION_GROUP)->getSize());
-	btnProfilesAddInputs->set_sensitive(Storage::CollectionHandler::getInstance(COLLECTION_INPUT)->getSize());
 
-	bool animationsSize(Storage::CollectionHandler::getInstance(COLLECTION_ANIMATIONS)->getSize());
-	btnProfilesAddAnimations->set_sensitive(animationsSize);
-	btnProfilesAddStartTransitions->set_sensitive(animationsSize);
-	btnProfilesAddEndTransitions->set_sensitive(animationsSize);
+	boxProfileAlwaysOnElements->wipe();
+	boxProfileAlwaysOnGroups->wipe();
+	boxProfileAnimations->wipe();
+	boxProfileInputs->wipe();
+
+	btnProfilesAddElements->set_sensitive(CollectionHandler::getInstance(COLLECTION_ELEMENT)->getSize());
+	btnProfilesAddGroups->set_sensitive(CollectionHandler::getInstance(COLLECTION_GROUP)->getSize());
+	btnProfilesAddInputs->set_sensitive(CollectionHandler::getInstance(COLLECTION_INPUT)->getSize());
+	bool hasAnimations = CollectionHandler::getInstance(COLLECTION_ANIMATIONS)->getSize();
+	btnProfilesAddAnimations->set_sensitive(hasAnimations);
 }
 
 void DialogProfile::isValid() const {
-	string name(createUniqueId());
+	const string name(createUniqueId());
 	if (name.empty()) {
 		if (action != Actions::LOAD)
 			inputProfileName->grab_focus();
 		throw Message("Invalid profile name.");
 	}
-
-	// If is not edit, or data is not the same, check for dupes.
-	if (getCollectionHandler()->isIdSet(name)) {
+	if (currentData->getCollectionHandler()->isIdSet(name)) {
 		if (action != Actions::EDIT or currentData->createUniqueId() != name) {
 			if (action != Actions::LOAD)
 				inputProfileName->grab_focus();
-			throw Message("Profile with name " + name + " already exist.");
+			throw Message("Profile with name " + name + " already exists.");
 		}
 	}
-	if (btnProfileBackgroundColor->get_label().empty()) {
+	if (btnProfileBackgroundColor->get_label().empty())
 		throw Message("Select a valid background color.");
-	}
 }
 
 void DialogProfile::storeData() noexcept {
-	currentData->setValue(FILENAME, inputProfileName->get_text());
-	currentData->setValue(BACKGROUND_COLOR, btnProfileBackgroundColor->get_label());
+	currentData->setValue(FILENAME,          inputProfileName->get_text());
+	currentData->setValue(BACKGROUND_COLOR,  btnProfileBackgroundColor->get_label());
+
+	auto* ds = DialogSelect::getInstance();
+	setUpSelector(COLLECTION_ELEMENT,    alwaysOnElementsRequest);
+	ds->reindex();
+	setUpSelector(COLLECTION_GROUP,      alwaysOnGroupsRequest);
+	ds->reindex();
+	setUpSelector(COLLECTION_ANIMATIONS, animationsRequest);
+	ds->reindex();
+	setUpSelector(COLLECTION_INPUT,      inputsRequest);
+	ds->reindex();
 }
 
 void DialogProfile::retrieveData() noexcept {
@@ -155,13 +182,32 @@ void DialogProfile::retrieveData() noexcept {
 		btnProfileBackgroundColor,
 		currentData->getValue(BACKGROUND_COLOR)
 	);
+
+	auto* ds = DialogSelect::getInstance();
+	setUpSelector(COLLECTION_ELEMENT,    alwaysOnElementsRequest);
+	ds->refresh();
+	setUpSelector(COLLECTION_GROUP,      alwaysOnGroupsRequest);
+	ds->refresh();
+	setUpSelector(COLLECTION_ANIMATIONS, animationsRequest);
+	ds->refresh();
+	setUpSelector(COLLECTION_INPUT,      inputsRequest);
+	ds->refresh();
 }
 
 string DialogProfile::createUniqueId() const noexcept {
 	return Defaults::createCommonUniqueId({inputProfileName->get_text()});
 }
 
-LEDSpicerUI::Ui::Storage::Data* DialogProfile::createData(StringUMap& rawData) const noexcept {
+Storage::Data* DialogProfile::createData(StringUMap& rawData) noexcept {
 	return new Storage::Profile(rawData);
 }
 
+void DialogProfile::setUpSelector(
+	const string&                        collection,
+	const DialogSelect::SelectionRequest& req
+) noexcept {
+	DialogSelect::getInstance()->setUp(
+		static_cast<Storage::Parent*>(currentData)->getChild(collection),
+		req
+	);
+}

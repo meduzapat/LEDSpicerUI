@@ -83,8 +83,7 @@ void DialogGroup::createSubItems(XMLHelper* values) noexcept {
 
 void DialogGroup::wireChildrenDialogs() noexcept {
 	DialogForm::wireChildrenDialogs();
-	DialogSelect::getInstance()->setRequest(elementRequest);
-	DialogSelect::getInstance()->setDestination(elementLinks());
+	DialogSelect::getInstance()->setUp(elementLinks(), elementRequest);
 }
 
 void DialogGroup::clearForm() noexcept {
