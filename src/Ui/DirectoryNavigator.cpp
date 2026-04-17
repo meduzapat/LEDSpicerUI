@@ -49,7 +49,7 @@ Storage::DirectoryEntry* DirectoryNavigator::getCurrentDir() const noexcept {
 }
 
 DirectoryNavigator::DirectoryNavigator(const Glib::RefPtr<Gtk::Builder>& builder) noexcept :
-	rootDir(StringUMap{}, nullptr),
+	rootDir(rootData, nullptr),
 	currentDir(&rootDir)
 {
 	DataDialogs::DialogDirectory::buildInstance(builder, "DialogDirectory");

@@ -80,9 +80,9 @@ protected:
 	/// The status of the data directory.
 	struct DataDirStatus {
 		bool
-			hasGameData   = false, /// True if gameData.xml is found in the data directory.
-			hasColors     = false, /// True if colors.ini is found in the data directory.
-			hasControls   = false; /// True if controls.ini is found in the data directory.
+			hasGameData = false, /// True if gameData.xml is found in the data directory.
+			hasColors   = false, /// True if colors.ini is found in the data directory.
+			hasControls = false; /// True if controls.ini is found in the data directory.
 		StringVector colorFiles; /// List of color XML files found in the data directory.
 	}
 	dataDirStatus;
@@ -124,8 +124,7 @@ protected:
 	 * @param dataDir the path to the data directory.
 	 * @param setFileDataDirSelector if true, will update the file selector to match the new path.
 	 */
-	void setDataDir(string &dataDir, bool setFileDataDirSelector);
-
+	void setDataDir(const string& dataDir, bool setFileDataDirSelector); // FIX: was string&
 
 	/**
 	 * Updates the data directory status labels based on the current dataDirStatus.

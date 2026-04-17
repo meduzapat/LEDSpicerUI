@@ -32,7 +32,7 @@ namespace LEDSpicerUI::Ui {
  * Base controller for directory-style navigation over a DirNode tree.
  * Owns the root DirectoryEntry and tracks the currently active directory.
  * Subclasses wire their specific consumer dialogs via wireDialogs().
- * Declaration order of rootData/rootDir is critical — rootData must come first.
+ * Declaration order is critical — rootData must be initialized before rootDir.
  */
 class DirectoryNavigator {
 
@@ -57,22 +57,19 @@ public:
 	 */
 	void navigateUp() noexcept;
 
-	/**
-	 * @return true if currently at root.
-	 */
+	/// @return true if currently at root.
 	bool isAtRoot() const noexcept;
 
-	/**
-	 * @return Currently active directory pointer.
-	 */
+	/// @return Currently active directory pointer.
 	Storage::DirectoryEntry* getCurrentDir() const noexcept;
 
-	/**
-	 * Called to clean up all data.
-	 */
+	/// Called to clean up all data.
 	virtual void clear() noexcept abstract;
 
 protected:
+
+	/// Backing data for rootDir — must be declared before rootDir. // FIX: was missing, caused rvalue-to-ref compile error.
+	StringUMap rootData;
 
 	/// Owned root directory entry for this navigator type.
 	Storage::DirectoryEntry rootDir;

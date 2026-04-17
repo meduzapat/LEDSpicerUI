@@ -28,7 +28,7 @@ DialogInput::DialogInput(
 	BaseObjectType* obj,
 	const Glib::RefPtr<Gtk::Builder>& builder
 ) noexcept :
-	DialogFileForm(obj, builder)
+	DialogFormHost(obj, builder)
 {
 
 	registerChildDialog<DialogInputSource>(builder, "DialogInputSource", COLLECTION_INPUT_SOURCES);
@@ -117,7 +117,7 @@ void DialogInput::isValid() const {
 	}
 
 	string uid(createUniqueId());
-	if (getCollectionHandler()->isIdSet(uid)) {
+	if (currentData->getCollectionHandler()->isIdSet(uid)) {
 		if (action != Actions::EDIT or currentData->createUniqueId() != uid) {
 			if (action != Actions::LOAD) entryInputName->grab_focus();
 			throw Message("Name already in use in this directory.");
@@ -164,7 +164,7 @@ void DialogInput::retrieveData() noexcept {
 		comboBoxInputSpeed->set_active_id(currentData->getValue(SPEED));
 }
 
-string DialogInput::createUniqueId() const {
+string DialogInput::createUniqueId() const noexcept {
 	return Defaults::createCommonUniqueId({currentData->getProperties().getValue(PID), entryInputName->get_text()});
 }
 

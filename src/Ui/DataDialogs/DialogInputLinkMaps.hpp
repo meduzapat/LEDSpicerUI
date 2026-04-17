@@ -41,7 +41,7 @@ class DialogInputLinkMaps: public DialogForm, public SingletonDialog<DialogInput
 
 public:
 
-	virtual ~DialogInputLinkMaps();
+	~DialogInputLinkMaps() = default;
 
 	void load(XMLHelper* values) noexcept override;
 	void isValid() const override;

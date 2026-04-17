@@ -80,69 +80,12 @@ InputDirectoryNavigator::~InputDirectoryNavigator() {
 
 void InputDirectoryNavigator::clear() noexcept {
 	rootDir.wipe();
-//	DataDialogs::DialogInput::getInstance();
+	currentDir = &rootDir; // FIX: was missing — currentDir dangled into wiped tree.
 }
-
-//void InputDirectoryNavigator::saveToDisk() {
-//	string inputsPath = getInputsPath();
-//	string backupPath = inputsPath.substr(0, inputsPath.length() - 1) + "_bk/";
-//
-//	// Remove old backup if exists
-//	if (Glib::file_test(backupPath, Glib::FILE_TEST_IS_DIR)) {
-//		removeDirectoryRecursive(backupPath);
-//	}
-//
-//	// Move current → backup
-//	if (Glib::file_test(inputsPath, Glib::FILE_TEST_IS_DIR)) {
-//		if (std::rename(inputsPath.c_str(), backupPath.c_str()) != 0) {
-//			Message::displayError("Failed to create backup of inputs directory");
-//			return;
-//		}
-//	}
-//
-//	// Create fresh directory
-//	g_mkdir_with_parents(inputsPath.c_str(), 0755);
-//
-//	// Create empty directories first
-//	for (const auto& emptyDir : emptyDirs) {
-//		string fullPath = inputsPath + emptyDir;
-//		g_mkdir_with_parents(fullPath.c_str(), 0755);
-//	}
-//
-//	// Save all items
-//	bool success = true;
-//	for (auto bb : inputs) {
-//		auto data = bb->getData();
-//		string filename = data->createUniqueId();
-//		string fullPath = inputsPath + filename + ".xml";
-//
-//		ensureDirectoryExists(fullPath);
-//
-//		try {
-//			string xml = data->toXML();
-//			Glib::file_set_contents(fullPath, xml);
-//		}
-//		catch (const Glib::Error& e) {
-//			Message::displayError("Failed to save " + filename + ": " + e.what());
-//			success = false;
-//		}
-//	}
-//
-//	// Cleanup backup on success, restore on failure
-//	if (success) {
-//		removeDirectoryRecursive(backupPath);
-//	}
-//	else {
-//		removeDirectoryRecursive(inputsPath);
-//		std::rename(backupPath.c_str(), inputsPath.c_str());
-//		Message::displayError("Save failed, restored from backup");
-//	}
-//}
 
 void InputDirectoryNavigator::wireDialogs(Storage::DirectoryEntry* dir) noexcept {
 
-	const bool sensitive(DataDialogs::DialogElement::getInstance()->getCollectionHandler()->getSize());
-
+	const bool sensitive(Storage::CollectionHandler::getInstance(COLLECTION_ELEMENT)->getSize());
 	btnImportInput->set_sensitive(sensitive);
 	btnAddInput->set_sensitive(sensitive);
 
@@ -160,28 +103,36 @@ void InputDirectoryNavigator::wireDialogs(Storage::DirectoryEntry* dir) noexcept
 	// Rebuild breadcrumb.
 	for (auto child : boxBreadcrumb->get_children()) boxBreadcrumb->remove(*child);
 
-	// Walk the parent chain to build segments bottom-up.
 	if (not dir->isAtRoot()) {
+		// Walk the parent chain bottom-up, collecting ancestor buttons.
 		auto node = static_cast<Storage::DirectoryEntry*>(dir->getParent());
 		while (not node->isAtRoot()) {
-			auto btn = Gtk::make_managed<Gtk::Button>(node->getName());
+			auto* btn = Gtk::make_managed<Gtk::Button>(node->getName());
 			btn->get_style_context()->add_class("BreadcrumbButton");
 			btn->signal_clicked().connect([this, node]() {
 				enterDirectory(node);
 			});
-			boxBreadcrumb->pack_start(*btn, Gtk::PACK_SHRINK);
-			auto sep = Gtk::make_managed<Gtk::Label>("/");
+			auto* sep = Gtk::make_managed<Gtk::Label>("/");
 			sep->get_style_context()->add_class("BreadcrumbSeparator");
+
+			// Reorder so each ancestor goes to the front, keeping correct left-to-right order.
+			boxBreadcrumb->pack_start(*btn, Gtk::PACK_SHRINK);
 			boxBreadcrumb->pack_start(*sep, Gtk::PACK_SHRINK);
-			// push to the front
 			boxBreadcrumb->reorder_child(*btn, 0);
 			boxBreadcrumb->reorder_child(*sep, 1);
+
 			node = static_cast<Storage::DirectoryEntry*>(node->getParent());
 		}
 
+		// Separator before the current (non-clickable) label.
+		auto* sep = Gtk::make_managed<Gtk::Label>("/"); // FIX: was missing.
+		sep->get_style_context()->add_class("BreadcrumbSeparator");
+		boxBreadcrumb->pack_end(*sep, Gtk::PACK_SHRINK);
+
+		// Current directory label at the end. // FIX: was pack_start — placed it at position 0.
 		auto* cur = Gtk::make_managed<Gtk::Label>(dir->getName());
 		cur->get_style_context()->add_class("BreadcrumbCurrent");
-		boxBreadcrumb->pack_start(*cur, Gtk::PACK_SHRINK);
+		boxBreadcrumb->pack_end(*cur, Gtk::PACK_SHRINK);
 	}
 
 	boxBreadcrumb->show_all();

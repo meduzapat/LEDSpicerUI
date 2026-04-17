@@ -101,12 +101,12 @@ DialogSettings::DialogSettings(BaseObjectType* obj, const Glib::RefPtr<Gtk::Buil
 	builder->get_widget("LabelConfigPath",   labelConfigPath);
 	builder->get_widget("BtnApplySettings",  btnApply);
 
-	// Binary selection
+	// Binary selection.
 	fileBinary->signal_file_set().connect([this]() {
 		setBinaryPath(fileBinary->get_filename(), false);
 	});
 
-	// Data dir selection
+	// Data dir selection.
 	fileDataDirSelect->signal_file_set().connect([this]() {
 		setDataDir(fileDataDirSelect->get_filename(), false);
 	});
@@ -165,12 +165,14 @@ bool DialogSettings::detectLedspicerVersion() {
 		updateBinaryStatusLabel("");
 		return false;
 	}
+
 	ledspicerVer = Defaults::extractAfter(outputText, "LEDSpicer");
 	if (ledspicerVer.empty()) {
 		Message::displayError("The selected binary does not appear to be ledspicerd.", this);
 		updateBinaryStatusLabel("");
 		return false;
 	}
+
 	auto parts = Defaults::explode(ledspicerVer, ' ');
 	if (parts.size() > 1) ledspicerVer = parts[0];
 	updateBinaryStatusLabel(ledspicerVer);
@@ -203,6 +205,13 @@ void DialogSettings::updateBinaryStatusLabel(const string& version) {
 }
 
 void DialogSettings::setConfigPath(const string& configPath) {
+	// FIX: guard before any I/O — empty path has no label to show.
+	if (configPath.empty()) {
+		this->configPath = "";
+		labelConfigPath->set_text("N/A");
+		return;
+	}
+
 	bool isWritable = false;
 	try {
 		auto file = Gio::File::create_for_path(configPath);
@@ -215,16 +224,13 @@ void DialogSettings::setConfigPath(const string& configPath) {
 	}
 
 	this->configPath = configPath;
-	if (configPath.empty()) {
-		labelConfigPath->set_text("N/A");
-		return;
-	}
-
-
 	labelConfigPath->set_text((isWritable ? "" : "🔒") + configPath);
 }
 
-void DialogSettings::setDataDir(string &dataDir, bool setFileDataDirSelector) {
+void DialogSettings::setDataDir(const string& dataDir, bool setFileDataDirSelector) {
+	// FIX: always reset status first so a cleared dir never shows stale checkmarks.
+	dataDirStatus = {};
+
 	if (dataDir.empty()) {
 		this->dataDir = "";
 		fileDataDirSelect->set_current_folder(Glib::get_home_dir());
@@ -240,13 +246,13 @@ void DialogSettings::setDataDir(string &dataDir, bool setFileDataDirSelector) {
 
 void DialogSettings::updateDataDirLabels() {
 	string status;
-	status += dataDirStatus.hasColors     ? "✅" : "❌";
+	status += dataDirStatus.hasColors               ? "✅" : "❌";
 	status += " colors.ini    ";
-	status += dataDirStatus.hasGameData   ? "✅" : "❌";
+	status += dataDirStatus.hasGameData             ? "✅" : "❌";
 	status += " gameData.xml    ";
-	status += dataDirStatus.hasControls   ? "✅" : "❌";
+	status += dataDirStatus.hasControls             ? "✅" : "❌";
 	status += " controls.ini    ";
-	status += dataDirStatus.colorFiles.empty() ? "❌" : "✅";
+	status += dataDirStatus.colorFiles.empty()      ? "❌" : "✅";
 	status += " Color profiles    ";
 	labelSystemFiles->set_text(status);
 	labelDataPath->set_text(this->dataDir.empty() ? "N/A" : this->dataDir);
@@ -254,8 +260,7 @@ void DialogSettings::updateDataDirLabels() {
 
 void DialogSettings::processDataDir() {
 
-	dataDirStatus = {};
-
+	// dataDirStatus already reset by setDataDir before this call.
 	if (dataDir.empty()) return;
 
 	auto directory = Gio::File::create_for_path(dataDir);

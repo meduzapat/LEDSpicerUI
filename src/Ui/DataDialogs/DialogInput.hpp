@@ -21,7 +21,8 @@
  */
 
 #include "Storage/Input.hpp"
-#include "DialogFileForm.hpp"
+#include "DialogFormHost.hpp"
+#include "DirectoryAware.hpp"
 #include "DialogInputSource.hpp"
 
 #pragma once
@@ -32,7 +33,11 @@ namespace LEDSpicerUI::Ui::DataDialogs {
  * LEDSpicerUI::Ui::DataDialogs::DialogInput
  * Dialog to create and edit Inputs.
  */
-class DialogInput : public DialogFileForm, public SingletonDialog<DialogInput> {
+class DialogInput :
+	public DialogFormHost,
+	public DirectoryAware,
+	public SingletonDialog<DialogInput>
+{
 
 	friend class Gtk::Builder;
 
@@ -44,10 +49,10 @@ public:
 	virtual ~DialogInput() = default;
 
 	void load(XMLHelper* values) noexcept override;
-	void isValid() const override;
-	void resetForm()   noexcept override;
-	void storeData()   noexcept override;
-	void retrieveData() noexcept override;
+	void isValid()         const override;
+	void resetForm()       noexcept override;
+	void storeData()       noexcept override;
+	void retrieveData()    noexcept override;
 	string createUniqueId() const noexcept override;
 
 protected:
@@ -57,6 +62,7 @@ protected:
 	Gtk::Entry*      entryInputName   = nullptr;
 	Gtk::Switch*     switchInputBlink = nullptr;
 	Gtk::SpinButton* spinInputTimes   = nullptr;
+
 	Gtk::Box
 		* boxInputSourcesBox         = nullptr,
 		* boxInputMapsBox            = nullptr,
@@ -70,17 +76,13 @@ protected:
 
 	Gtk::Label* brief = nullptr;
 
-	// The box to display linked maps.
-//	OrdenableFlowBox* boxDirectMaps = nullptr;
-
 	DialogInput(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept;
 
-	void createSubItems(XMLHelper* values) noexcept override;
-	string_view getType() const noexcept override { return TYPE_INPUT; }
+	void createSubItems(XMLHelper* values)         noexcept override;
+	string_view getType()                    const noexcept override { return TYPE_INPUT; }
 	Storage::Data* createData(StringUMap& rawData) const noexcept override;
 
-	void onEmpty() noexcept override;
-
+	void onEmpty()    noexcept override;
 	void onSelected() noexcept override;
 };
 

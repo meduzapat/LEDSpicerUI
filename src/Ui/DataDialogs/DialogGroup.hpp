@@ -63,7 +63,7 @@ protected:
 
 	void createSubItems(XMLHelper* values) noexcept override;
 	void wireChildrenDialogs() noexcept override;
-	string_view getType() const noexcept override;
+	string_view getType() const noexcept override { return TYPE_GROUP; }
 	Storage::Data* createData(StringUMap& rawData) const noexcept override;
 	BoxButtonCollection* elementLinks() const noexcept;
 

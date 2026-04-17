@@ -259,7 +259,7 @@ void DialogRestrictor::onSelected() noexcept {
 			idListstore,
 			Defaults::restrictorsInfo.at(name).maxIds,
 			[=](const string& id) {
-				return getCollectionHandler()->isIdSet(Defaults::createHardwareUniqueId({{NAME, name}, {ID, id}}, false));
+				return currentData->getCollectionHandler()->isIdSet(Defaults::createHardwareUniqueId({{NAME, name}, {ID, id}}, false));
 			},
 			"Restrictor Number",
 			"Hardware #"

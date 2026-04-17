@@ -22,6 +22,7 @@
 
 #include "DialogForm.hpp"
 #include "DialogSelect.hpp"
+#include "DirectoryAware.hpp"
 #include "Storage/Profile.hpp"
 
 #pragma once
@@ -34,7 +35,11 @@ namespace LEDSpicerUI::Ui::DataDialogs {
  * Profile owns four independent link type selectors (elements, groups,
  * animations, inputs), each wired to DS immediately before use via setUpSelector().
  */
-class DialogProfile : public DialogForm, public SingletonDialog<DialogProfile> {
+class DialogProfile :
+	public DialogForm,
+	public DirectoryAware,
+	public SingletonDialog<DialogProfile>
+{
 
 	friend class Gtk::Builder;
 
@@ -66,13 +71,11 @@ protected:
 		* btnProfilesAddAnimations = nullptr,
 		* btnProfilesAddInputs     = nullptr;
 
-	/// @todo Transition: future struct — name, speed, color, optional group.
-
 	DialogProfile(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept;
 
-	void createSubItems(XMLHelper* values) noexcept override;
-	string_view getType() const noexcept override { return TYPE_PROFILE; }
-	Storage::Data* createData(StringUMap& rawData) noexcept override;
+	void createSubItems(XMLHelper* values)         noexcept override;
+	string_view getType()                    const noexcept override { return TYPE_PROFILE; }
+	Storage::Data* createData(StringUMap& rawData) const noexcept override;
 
 private:
 
@@ -87,7 +90,10 @@ private:
 	 * @param collection Key of the child collection on the current Profile.
 	 * @param req        Configuration for this link type.
 	 */
-	void setUpSelector(const string& collection, const DialogSelect::SelectionRequest& req) noexcept;
+	void setUpSelector(
+		const string&                         collection,
+		const DialogSelect::SelectionRequest& req
+	) noexcept;
 };
 
 } // namespace

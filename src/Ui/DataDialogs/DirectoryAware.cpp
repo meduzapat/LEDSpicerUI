@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      DialogFileForm.cpp
- * @since     Feb 25, 2026
+ * @file      DirectoryAware.cpp
+ * @since     Apr 17, 2026
  * @author    Patricio A. Rossi (MeduZa)
  *
  * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
@@ -20,14 +20,20 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DialogFileForm.hpp"
+#include "DirectoryAware.hpp"
 
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
-void DialogFileForm::setCurrentDirectory(Storage::DirectoryEntry* directory) {
+void DirectoryAware::setCurrentDirectory(Storage::DirectoryEntry* directory) noexcept {
 	currentDirectory = directory;
 }
 
-LEDSpicerUI::Ui::Storage::DirectoryEntry* DialogFileForm::getCurrentDirectory() const {
+LEDSpicerUI::Ui::Storage::DirectoryEntry* DirectoryAware::getCurrentDirectory() const noexcept {
 	return currentDirectory;
+}
+
+string DirectoryAware::getFullPath(const string& filename) const noexcept {
+	if (not currentDirectory or currentDirectory->isAtRoot())
+		return filename;
+	return currentDirectory->getFullPath() + "/" + filename;
 }

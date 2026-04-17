@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      DialogFileForm.hpp
- * @since     Feb 25, 2026
+ * @file      DirectoryAware.hpp
+ * @since     Apr 17, 2026
  * @author    Patricio A. Rossi (MeduZa)
  *
  * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
@@ -20,7 +20,6 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DialogFormHost.hpp"
 #include "Storage/DirectoryEntry.hpp"
 
 #pragma once
@@ -28,34 +27,38 @@
 namespace LEDSpicerUI::Ui::DataDialogs {
 
 /**
- * LEDSpicerUI::Ui::DataDialogs::DialogFileForm
- * Intermediate base for dialogs that manage file-based Data objects
+ * LEDSpicerUI::Ui::DataDialogs::DirectoryAware
+ * Pure mixin that  tracks the active directory for file-based dialogs.
+ * Mix into any DialogForm subclass that manages FileNode Data objects
  * (Inputs, Animations, Profiles) stored inside project directories.
- * Tracks the active directory so subclasses know where new items land.
- * Uniqueness checks are delegated to CollectionHandler via createUniqueId().
+ * The navigator sets currentDirectory before opening the dialog.
+ * Not a dialog itself — carries no GTK ancestry.
  */
-class DialogFileForm : public DialogFormHost {
+class DirectoryAware {
 
 public:
 
-	virtual ~DialogFileForm() = default;
+	virtual ~DirectoryAware() = default;
 
 	/**
 	 * Sets the active directory for new item creation.
-	 * Pass nullptr to indicate the root of the type's directory tree.
-	 * @param directory Pointer to the current DirectoryEntry, or nullptr for root.
+	 * @param directory The current DirectoryEntry. nullptr = root.
 	 */
-	void setCurrentDirectory(Storage::DirectoryEntry* directory);
+	void setCurrentDirectory(Storage::DirectoryEntry* directory) noexcept;
 
 	/**
-	 * Returns the current directory, or nullptr if at root.
-	 * @return Current DirectoryEntry pointer.
+	 * @return The active directory, or nullptr if at root.
 	 */
-	Storage::DirectoryEntry* getCurrentDirectory() const;
+	Storage::DirectoryEntry* getCurrentDirectory() const noexcept;
+
+	/**
+	 * Resolves a filename relative to the current directory.
+	 * @param filename Bare filename without path.
+	 * @return Full relative path: "subdir/filename" or "filename" at root.
+	 */
+	string getFullPath(const string& filename) const noexcept;
 
 protected:
-
-	using DialogFormHost::DialogFormHost;
 
 	/// Active directory for new items. nullptr = root.
 	Storage::DirectoryEntry* currentDirectory = nullptr;

@@ -81,7 +81,7 @@ add_executable(ledspicerui
 	src/Ui/Storage/BoxButtonCollection.cpp
 	src/Ui/DataDialogs/DialogForm.cpp
 	src/Ui/DataDialogs/DialogFormHost.cpp
-	src/Ui/DataDialogs/DialogFileForm.cpp
+	src/Ui/DataDialogs/DirectoryAware.cpp
 	src/Ui/DataDialogs/DialogLinkEditor.cpp
 	src/Ui/DataDialogs/DialogSelect.cpp
 	src/Ui/DataDialogs/DialogElement.cpp

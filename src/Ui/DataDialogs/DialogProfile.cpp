@@ -198,12 +198,12 @@ string DialogProfile::createUniqueId() const noexcept {
 	return Defaults::createCommonUniqueId({inputProfileName->get_text()});
 }
 
-Storage::Data* DialogProfile::createData(StringUMap& rawData) noexcept {
-	return new Storage::Profile(rawData);
+LEDSpicerUI::Ui::Storage::Data* DialogProfile::createData(StringUMap& rawData) const noexcept {
+	return new Storage::Profile(rawData, currentDirectory);
 }
 
 void DialogProfile::setUpSelector(
-	const string&                        collection,
+	const string& collection,
 	const DialogSelect::SelectionRequest& req
 ) noexcept {
 	DialogSelect::getInstance()->setUp(
