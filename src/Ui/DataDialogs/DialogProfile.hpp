@@ -65,12 +65,6 @@ protected:
 		* boxProfileAnimations       = nullptr,
 		* boxProfileInputs           = nullptr;
 
-	Gtk::Button
-		* btnProfilesAddElements   = nullptr,
-		* btnProfilesAddGroups     = nullptr,
-		* btnProfilesAddAnimations = nullptr,
-		* btnProfilesAddInputs     = nullptr;
-
 	DialogProfile(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept;
 
 	void createSubItems(XMLHelper* values)         noexcept override;

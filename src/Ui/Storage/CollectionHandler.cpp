@@ -70,6 +70,7 @@ void CollectionHandler::add(Data* item) noexcept {
 	if (isSet(item)) return;
 	collection.emplace(item->createUniqueId(), item);
 	refreshComboBoxes();
+	refreshSensitiveWidgets();
 }
 
 void CollectionHandler::remove(Data* item) noexcept {
@@ -87,6 +88,7 @@ void CollectionHandler::remove(Data* item) noexcept {
 			pending.push_back(dep.onDepletion);
 	}
 	refreshComboBoxes();
+	refreshSensitiveWidgets();
 
 	for (auto& callback : pending) callback();
 }
@@ -141,4 +143,3 @@ void CollectionHandler::refreshComboBoxes() noexcept {
 		refreshComboBox(comboBox);
 	}
 }
-

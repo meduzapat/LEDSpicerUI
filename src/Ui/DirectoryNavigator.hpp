@@ -68,7 +68,7 @@ public:
 
 protected:
 
-	/// Backing data for rootDir — must be declared before rootDir. // FIX: was missing, caused rvalue-to-ref compile error.
+	/// Backing data for rootDir — must be declared before rootDir.
 	StringUMap rootData;
 
 	/// Owned root directory entry for this navigator type.

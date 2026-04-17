@@ -29,12 +29,15 @@ DialogGroup::DialogGroup(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& 
 	DialogForm(obj, builder),
 	elementRequest({boxElements, NAME, TYPE_ELEMENT, CollectionHandler::getInstance(COLLECTION_ELEMENT), {}})
 {
-	builder->get_widget_derived("BoxGroups", box);
-	builder->get_widget("BtnApplyGroup",     btnApply);
-	Gtk::Button* btnAdd = nullptr;
-	builder->get_widget("BtnAddGroup",           btnAdd);
-	builder->get_widget("InputGroupName",        inputGroupName);
-	builder->get_widget("BtnGroupDefaultColor",  btnGroupDefaultColor);
+	Gtk::Button
+		* btnAdd         = nullptr,
+		* btnAddElements = nullptr;
+
+	builder->get_widget_derived("BoxGroups",    box);
+	builder->get_widget("BtnApplyGroup",        btnApply);
+	builder->get_widget("BtnAddGroup",          btnAdd);
+	builder->get_widget("InputGroupName",       inputGroupName);
+	builder->get_widget("BtnGroupDefaultColor", btnGroupDefaultColor);
 	builder->get_widget_derived("BoxGroupElements", boxElements, "BtnGroupElementUp", "BtnGroupElementDn");
 
 	setSignalAdd(btnAdd);
@@ -43,12 +46,13 @@ DialogGroup::DialogGroup(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& 
 	DialogColors::getInstance()->activateColorButton(btnGroupDefaultColor);
 
 	// Element selector button — opens picker with strip-expand support.
-	Gtk::Button* btnAddElements = nullptr;
 	builder->get_widget("BtnAddGroupElements", btnAddElements);
 	btnAddElements->signal_clicked().connect([this]() {
 		DialogSelect::getInstance()->setUp(elementLinks(), elementRequest);
 		DialogSelect::getInstance()->open();
 	});
+
+	CollectionHandler::getInstance(COLLECTION_ELEMENT)->registerSensitivity(btnAdd);
 
 	// Group name generator dialog.
 	Gtk::Dialog* dialogGenerateGroupName = nullptr;

@@ -205,7 +205,7 @@ void DialogSettings::updateBinaryStatusLabel(const string& version) {
 }
 
 void DialogSettings::setConfigPath(const string& configPath) {
-	// FIX: guard before any I/O — empty path has no label to show.
+
 	if (configPath.empty()) {
 		this->configPath = "";
 		labelConfigPath->set_text("N/A");
@@ -228,7 +228,7 @@ void DialogSettings::setConfigPath(const string& configPath) {
 }
 
 void DialogSettings::setDataDir(const string& dataDir, bool setFileDataDirSelector) {
-	// FIX: always reset status first so a cleared dir never shows stale checkmarks.
+
 	dataDirStatus = {};
 
 	if (dataDir.empty()) {

@@ -51,13 +51,9 @@ protected:
 	/// Import input dialog.
 	DialogImport dialogImportInput;
 
-	Gtk::Button
-		* btnHome            = nullptr,
-		* btnNewInputFolder  = nullptr,
-		* btnAddInput        = nullptr,
-		* btnImportInput     = nullptr;
-
 	Gtk::Box* boxBreadcrumb  = nullptr;
+
+	Gtk::Button * btnHome = nullptr;
 
 	/// Display box for input directory contents. Populated by the builder.
 	OrdenableFlowBox* boxInputs = nullptr;

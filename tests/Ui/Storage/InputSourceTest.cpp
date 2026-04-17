@@ -83,7 +83,7 @@ TEST_F(InputSourceTest, CreateUniqueIdEmptySource) {
 TEST_F(InputSourceTest, CollectionHandlerScopedByPid) {
 	StringUMap data{{SOURCE, "hw1"}};
 	InputSource src(data, "owner_1");
-	auto* ch = src.getCollectionHandler();
+	auto ch{src.getCollectionHandler()};
 	ASSERT_NE(nullptr, ch);
 	// A different owner produces a different handler.
 	StringUMap data2{{SOURCE, "hw1"}};

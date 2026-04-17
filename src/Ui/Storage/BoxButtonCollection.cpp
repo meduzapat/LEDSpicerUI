@@ -44,6 +44,7 @@ bool BoxButtonCollection::isIdSet(const string& id) const noexcept {
 BoxButton& BoxButtonCollection::create(Data* form) noexcept {
 	BoxButton* ptr{new BoxButton(form)};
 	items.push_back(ptr);
+	refreshSensitiveWidgets();
 	return *ptr;
 }
 
@@ -57,6 +58,7 @@ void BoxButtonCollection::remove(BoxButton& item) noexcept {
 	)};
 	delete *it;
 	items.erase(it);
+	refreshSensitiveWidgets();
 }
 
 void BoxButtonCollection::remove(Data* form) noexcept {
@@ -69,6 +71,7 @@ void BoxButtonCollection::remove(Data* form) noexcept {
 	)};
 	delete *it;
 	items.erase(it);
+	refreshSensitiveWidgets();
 }
 
 void BoxButtonCollection::swap(BoxButtonCollection& other) noexcept {
@@ -101,4 +104,5 @@ void BoxButtonCollection::reindex(OrdenableFlowBox* box) noexcept {
 void BoxButtonCollection::wipe() noexcept {
 	for (auto item : items) delete item;
 	items.clear();
+	refreshSensitiveWidgets();
 }

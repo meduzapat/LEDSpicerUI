@@ -184,11 +184,12 @@ LEDSpicerUI::Ui::Storage::Data* DialogInputMap::createData(StringUMap& rawData) 
 		type   = rawData.count(TYPE)   ? rawData.at(TYPE)   : "",
 		target = rawData.count(TARGET) ? rawData.at(TARGET) : "";
 
-	auto* handler = type == GROUP ?
+	auto handler{type == GROUP ?
 		Storage::CollectionHandler::getInstance(COLLECTION_GROUP) :
-		Storage::CollectionHandler::getInstance(COLLECTION_ELEMENT);
+		Storage::CollectionHandler::getInstance(COLLECTION_ELEMENT)
+	};
 
-	auto* im = new Storage::InputMap(rawData, handler->get(target));
+	auto im{new Storage::InputMap(rawData, handler->get(target))};
 	im->getProperties().setValue(PID, ownerData->getProperties().getValue(UID));
 	return im;
 }

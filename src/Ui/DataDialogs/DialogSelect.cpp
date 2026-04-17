@@ -58,25 +58,25 @@ void DialogSelect::open() noexcept {
 
 	// Build a fast lookup set of selected target pointers.
 	std::unordered_set<const Storage::Data*> selected;
-	for (auto* flowChild : pickerBox->get_selected_children()) {
-		auto* sel = static_cast<Storage::Selection*>(flowChild->get_child());
+	for (auto flowChild : pickerBox->get_selected_children()) {
+		auto sel{static_cast<Storage::Selection*>(flowChild->get_child())};
 		selected.insert(sel->getData());
 	}
 
 	// Remove deselected Links from destination and displayBox.
 	vector<Storage::BoxButton*> toRemove;
-	for (auto* btn : *destination) {
+	for (auto btn : *destination) {
 		if (not selected.count(btn->getData()))
 			toRemove.push_back(btn);
 	}
-	for (auto* btn : toRemove) {
+	for (auto btn : toRemove) {
 		request->displayBox->remove(*btn);
 		destination->remove(*btn);
 	}
 
 	// Add newly selected items not already in destination.
-	for (auto* flowChild : pickerBox->get_selected_children()) {
-		auto* target = static_cast<Storage::Selection*>(flowChild->get_child())->getData();
+	for (auto flowChild : pickerBox->get_selected_children()) {
+		auto target{static_cast<Storage::Selection*>(flowChild->get_child())->getData()};
 		if (not destination->isSet(target))
 			addLink(target);
 	}
@@ -88,7 +88,7 @@ void DialogSelect::open() noexcept {
 
 void DialogSelect::refresh() noexcept {
 	request->displayBox->wipe();
-	for (auto* btn : *destination)
+	for (auto btn : *destination)
 		request->displayBox->add(*btn);
 	request->displayBox->show_all();
 }
@@ -120,13 +120,13 @@ void DialogSelect::load(XMLHelper* values, const string& ownerUniqueId) noexcept
 				);
 
 			rawItem.erase(request->linkKey);
-			auto* link = new Storage::Link(
+			auto link{new Storage::Link(
 				rawItem,
 				request->linkKey,
 				request->linkType,
 				request->linkFields,
 				target
-			);
+			)};
 			Storage::BoxButton& btn = destination->create(link);
 			addDisplayButtons(btn);
 			request->displayBox->add(btn);
@@ -145,13 +145,13 @@ void DialogSelect::load(XMLHelper* values, const string& ownerUniqueId) noexcept
 
 void DialogSelect::populatePicker() noexcept {
 
-	for (auto* child : pickerBox->get_children())
+	for (auto child : pickerBox->get_children())
 		pickerBox->remove(*child);
 
 	for (const auto& [id, data] : *request->sourceCollection) {
 		if (data->getProperties().getValue(PROP_NO_SELECT).empty()) {
-			auto* selection = Gtk::make_managed<Storage::Selection>(data);
-			auto* flowChild = Gtk::make_managed<Gtk::FlowBoxChild>();
+			auto selection{Gtk::make_managed<Storage::Selection>(data)};
+			auto flowChild{Gtk::make_managed<Gtk::FlowBoxChild>()};
 
 			if (data->getProperties().isSet("system"))
 				selection->get_style_context()->add_class("system");
@@ -178,20 +178,20 @@ void DialogSelect::addDisplayButtons(Storage::BoxButton& boxButton) noexcept {
 
 	// EDIT — only when this link type carries extra fields.
 	if (not request->linkFields.empty()) {
-		auto* btn = Gtk::make_managed<Gtk::Button>();
+		auto btn{Gtk::make_managed<Gtk::Button>()};
 		boxButton.pack_start(*btn, Gtk::PACK_SHRINK);
 		btn->set_image_from_icon_name("emblem-system-symbolic", Gtk::ICON_SIZE_BUTTON);
 		btn->set_tooltip_text("Edit");
 		btn->signal_clicked().connect([&boxButton, this]() {
 			DialogLinkEditor::getInstance()->open(
-			    static_cast<Storage::Link*>(boxButton.getData())
+				static_cast<Storage::Link*>(boxButton.getData())
 			);
 			boxButton.sync();
 		});
 	}
 
-	// DELETE — always present.
-	auto* btn = Gtk::make_managed<Gtk::Button>();
+	// DELETE its always present.
+	auto btn{Gtk::make_managed<Gtk::Button>()};
 	boxButton.pack_start(*btn, Gtk::PACK_SHRINK);
 	btn->set_image_from_icon_name("edit-delete", Gtk::ICON_SIZE_BUTTON);
 	btn->set_tooltip_text("Remove");
@@ -206,13 +206,13 @@ void DialogSelect::addDisplayButtons(Storage::BoxButton& boxButton) noexcept {
 
 void DialogSelect::addLink(Storage::Data* target) noexcept {
 	StringUMap empty;
-	auto* link = new Storage::Link(
+	auto link{new Storage::Link(
 		empty,
 		request->linkKey,
 		request->linkType,
 		request->linkFields,
 		target
-	);
+	)};
 
 	for (const auto& field : request->linkFields)
 		link->setValue(field.key, field.defaultValue);

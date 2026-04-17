@@ -24,4 +24,4 @@ RUN mkdir autotest && \
   cmake --build autotest --parallel 8
 
 # Default command: run tests
-CMD cd autotest && export DISPLAY=:99 && xvfb-run --auto-servernum ctest --output-on-failure
+CMD cd autotest/tests && export DISPLAY=:99 && xvfb-run --auto-servernum ctest --output-on-failure

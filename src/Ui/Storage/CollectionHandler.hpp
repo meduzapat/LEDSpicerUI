@@ -30,7 +30,7 @@ namespace LEDSpicerUI::Ui::Storage {
 /**
  * LEDSpicerUI::Ui::Storage::CollectionHandler
  */
-class CollectionHandler {
+class CollectionHandler : public SensitivityTracker {
 
 public:
 
@@ -39,6 +39,12 @@ public:
 		BoxButtonCollection*  collection;            /// Collection to track.
 		size_t                minSize = 0;           /// Minimum number of items required to keep the owner alive. 0 = no guard.
 		std::function<void()> onDepletion = nullptr; /// Called when collection size drops below minSize.
+	};
+
+	/// Binds a widget's sensitivity to this collection's size.
+	struct SensitivityBinding {
+		Gtk::Widget* widget;
+		size_t       minCount = 1;
 	};
 
 	virtual ~CollectionHandler() = default;
@@ -58,7 +64,7 @@ public:
 	/**
 	 * @return the number of registered items.
 	 */
-	size_t getSize() const noexcept { return collection.size(); }
+	size_t getSize() const noexcept override { return collection.size(); }
 
 	/**
 	 * @param id
@@ -177,6 +183,7 @@ protected:
 	 * Populates comboboxes.
 	 */
 	void refreshComboBoxes() noexcept;
+
 };
 
 } // namespace

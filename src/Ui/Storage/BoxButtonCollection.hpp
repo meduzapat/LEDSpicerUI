@@ -20,6 +20,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "SensitivityTracker.hpp"
 #include "OrdenableFlowBox.hpp"
 #include "BoxButton.hpp"
 
@@ -38,7 +39,7 @@ using BoxButtonVector = vector<BoxButton*>;
  * for adding, removing, renaming, and retrieving items. It also keeps ordering
  * of items.
  */
-class BoxButtonCollection {
+class BoxButtonCollection : public SensitivityTracker {
 
 public:
 
@@ -72,7 +73,7 @@ public:
 	 * Get the size of the collection.
 	 * @return The number of items in the collection.
 	 */
-	size_t getSize() const noexcept { return items.size(); }
+	size_t getSize() const noexcept override { return items.size(); }
 
 	/**
 	 * Checks whether a Data object with the same unique ID is present in the collection.

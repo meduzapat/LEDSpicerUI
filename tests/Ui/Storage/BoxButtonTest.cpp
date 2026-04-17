@@ -50,8 +50,8 @@ protected:
 // Constructor registers the Data into its collection.
 TEST_F(BoxButtonTest, ConstructorRegisters) {
 	StringUMap d{{"name", "Item"}};
-	auto* data = new TestData(d);
-	auto* ch   = CollectionHandler::getInstance("bb_test");
+	auto data{new TestData(d)};
+	auto ch{CollectionHandler::getInstance("bb_test")};
 	EXPECT_FALSE(ch->isSet(data));
 	BoxButton btn(data);
 	EXPECT_TRUE(ch->isSet(data));
@@ -60,8 +60,8 @@ TEST_F(BoxButtonTest, ConstructorRegisters) {
 // Destructor unregisters the Data from its collection.
 TEST_F(BoxButtonTest, DestructorUnregisters) {
 	StringUMap d{{"name", "Item"}};
-	auto* data = new TestData(d);
-	auto* ch   = CollectionHandler::getInstance("bb_test");
+	auto data{new TestData(d)};
+	auto ch{CollectionHandler::getInstance("bb_test")};
 	{
 		BoxButton btn(data);
 		EXPECT_TRUE(ch->isSet(data));
@@ -72,7 +72,7 @@ TEST_F(BoxButtonTest, DestructorUnregisters) {
 // getData() returns the owned pointer.
 TEST_F(BoxButtonTest, GetDataReturnsPointer) {
 	StringUMap d{{"name", "MyItem"}};
-	auto* data = new TestData(d);
+	auto data{new TestData(d)};
 	BoxButton btn(data);
 	EXPECT_EQ(data, btn.getData());
 }
@@ -80,7 +80,7 @@ TEST_F(BoxButtonTest, GetDataReturnsPointer) {
 // sync() reflects createPrettyName().
 TEST_F(BoxButtonTest, UpdateLabelReflectsPrettyName) {
 	StringUMap d{{"name", "TestLabel"}};
-	auto* data = new TestData(d);
+	auto data{new TestData(d)};
 	BoxButton btn(data);
 	btn.sync();
 	EXPECT_EQ("TestLabel", btn.getLabel()->get_text());
@@ -89,7 +89,7 @@ TEST_F(BoxButtonTest, UpdateLabelReflectsPrettyName) {
 // Move constructor nulls the source data pointer.
 TEST_F(BoxButtonTest, MoveConstructorNullsSource) {
 	StringUMap d{{"name", "Mover"}};
-	auto* data = new TestData(d);
+	auto data{new TestData(d)};
 	BoxButton src(data);
 	BoxButton dst(std::move(src));
 	EXPECT_EQ(nullptr, src.getData());
@@ -99,9 +99,9 @@ TEST_F(BoxButtonTest, MoveConstructorNullsSource) {
 // Destroying a moved-from BoxButton does not crash or double-unregister.
 TEST_F(BoxButtonTest, MovedFromDestructionSafe) {
 	StringUMap d{{"name", "Safe"}};
-	auto* data    = new TestData(d);
-	auto* ch      = CollectionHandler::getInstance("bb_test");
-	BoxButton* src = new BoxButton(data);
+	auto data{new TestData(d)};
+	auto ch{CollectionHandler::getInstance("bb_test")};
+	auto src{new BoxButton(data)};
 	BoxButton  dst(std::move(*src));
 	EXPECT_NO_FATAL_FAILURE(delete src);
 	// dst still owns the data and it is still registered.

@@ -44,13 +44,13 @@ protected:
 	BoxButtonCollection collection;
 
 	TestData* makeData(const string& name) {
-		auto* d = new StringUMap{{NAME, name}};
+		auto d{new StringUMap{{NAME, name}}};
 		owned.push_back(d);
 		return new TestData(*d);
 	}
 
 	void TearDown() override {
-		for (auto* d : owned) delete d;
+		for (auto d : owned) delete d;
 		owned.clear();
 	}
 
@@ -89,7 +89,7 @@ TEST_F(BoxButtonCollectionTest, IsIdSetMissesAbsent) {
 
 // isSet finds by Data pointer equality (createUniqueId comparison).
 TEST_F(BoxButtonCollectionTest, IsSetFindsExisting) {
-	auto* data = makeData("A");
+	auto data{makeData("A")};
 	collection.create(data);
 	EXPECT_TRUE(collection.isSet(data));
 }
@@ -112,7 +112,7 @@ TEST_F(BoxButtonCollectionTest, RemoveByBoxButton) {
 
 // remove(Data*) finds and removes by equality.
 TEST_F(BoxButtonCollectionTest, RemoveByData) {
-	auto* data = makeData("A");
+	auto data{makeData("A")};
 	collection.create(data);
 	collection.create(makeData("B"));
 	collection.remove(data);
@@ -151,6 +151,16 @@ TEST_F(BoxButtonCollectionTest, IterationCoversAll) {
 		++count;
 	}
 	EXPECT_EQ(3u, count);
+}
+
+// wipe() drops sensitivity when collection empties.
+TEST_F(BoxButtonCollectionTest, WipeDropsSensitivity) {
+	auto widget{Gtk::manage(new Gtk::Button())};
+	collection.create(makeData("A"));
+	collection.registerSensitivity(widget);
+	EXPECT_TRUE(widget->is_sensitive());  // 1 >= 1
+	collection.wipe();
+	EXPECT_FALSE(widget->is_sensitive()); // 0 < 1
 }
 
 int main(int argc, char** argv) {

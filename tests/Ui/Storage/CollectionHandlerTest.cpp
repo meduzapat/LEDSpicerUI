@@ -178,7 +178,7 @@ TEST_F(CollectionHandlerTest, CascadeRemovesFromDependentCollection) {
 	BoxButtonCollection dependent;
 
 	StringUMap dm{{NAME, "Elem"}};
-	auto* data = new TestData(dm);
+	auto data{new TestData(dm)};
 	ch->add(data);
 	dependent.create(data);     // BoxButton takes ownership; ctor re-adds (idempotent)
 	ch->registerDependency({&dependent});
@@ -196,8 +196,8 @@ TEST_F(CollectionHandlerTest, DepletionCallbackFires) {
 	BoxButtonCollection dependent;
 
 	StringUMap dm1{{NAME, "E1"}}, dm2{{NAME, "E2"}};
-	auto* d1 = new TestData(dm1);
-	auto* d2 = new TestData(dm2);
+	auto d1{new TestData(dm1)};
+	auto d2{new TestData(dm2)};
 	ch->add(d1); ch->add(d2);
 	dependent.create(d1);       // BoxButton owns d1
 	dependent.create(d2);       // BoxButton owns d2
@@ -230,7 +230,7 @@ TEST_F(CollectionHandlerTest, PurgeAllCreatesEmptyInstance) {
 
 // registerComboBox — combo is populated when item is added.
 TEST_F(CollectionHandlerTest, ComboBoxPopulatedOnAdd) {
-	auto* combo = Gtk::manage(new Gtk::ComboBoxText());
+	auto combo{Gtk::manage(new Gtk::ComboBoxText())};
 	ch->registerComboBox(combo);
 	StringUMap d{{NAME, "A"}};
 	TestData item(d);
@@ -244,7 +244,7 @@ TEST_F(CollectionHandlerTest, ReleaseDependencyStopsCascade) {
 	BoxButtonCollection dependent;
 
 	StringUMap dm{{NAME, "E"}};
-	auto* data = new TestData(dm);
+	auto data{new TestData(dm)};
 	ch->add(data);
 	dependent.create(data);
 	ch->registerDependency({&dependent});
@@ -255,6 +255,57 @@ TEST_F(CollectionHandlerTest, ReleaseDependencyStopsCascade) {
 	// Wipe before scope ends: BoxButton dtor unregisters data from ch safely
 	// since the dependency is already released (no re-entrant cascade).
 	dependent.wipe();
+}
+
+// registerSensitivity — widget insensitive when collection empty.
+TEST_F(CollectionHandlerTest, SensitivityInsensitiveWhenEmpty) {
+	auto widget{Gtk::manage(new Gtk::Button())};
+	ch->registerSensitivity(widget);
+	EXPECT_FALSE(widget->is_sensitive());
+}
+
+// registerSensitivity — widget becomes sensitive after add.
+TEST_F(CollectionHandlerTest, SensitivitySensitiveAfterAdd) {
+	auto widget{Gtk::manage(new Gtk::Button())};
+	ch->registerSensitivity(widget);
+	StringUMap d{{NAME, "A"}};
+	TestData item(d);
+	ch->add(&item);
+	EXPECT_TRUE(widget->is_sensitive());
+}
+
+// remove drops sensitivity back when collection empties.
+TEST_F(CollectionHandlerTest, SensitivityInsensitiveAfterRemove) {
+	auto widget{Gtk::manage(new Gtk::Button())};
+	StringUMap d{{NAME, "A"}};
+	TestData item(d);
+	ch->add(&item);
+	ch->registerSensitivity(widget);
+	ch->remove(&item);
+	EXPECT_FALSE(widget->is_sensitive());
+}
+
+// minCount threshold — sensitive only when size >= minCount.
+TEST_F(CollectionHandlerTest, SensitivityRespectsMinCount) {
+	auto widget{Gtk::manage(new Gtk::Button())};
+	ch->registerSensitivity(widget, 2);
+	StringUMap d1{{NAME, "A"}}, d2{{NAME, "B"}};
+	TestData i1(d1), i2(d2);
+	ch->add(&i1);
+	EXPECT_FALSE(widget->is_sensitive()); // 1 < 2
+	ch->add(&i2);
+	EXPECT_TRUE(widget->is_sensitive());  // 2 >= 2
+}
+
+// releaseSensitive — widget no longer tracked after release.
+TEST_F(CollectionHandlerTest, ReleaseSensitiveStopsTracking) {
+	auto widget{Gtk::manage(new Gtk::Button())};
+	ch->registerSensitivity(widget);
+	ch->releaseSensitive(widget);
+	StringUMap d{{NAME, "A"}};
+	TestData item(d);
+	ch->add(&item);
+	EXPECT_FALSE(widget->is_sensitive()); // still insensitive — no longer tracked
 }
 
 int main(int argc, char** argv) {

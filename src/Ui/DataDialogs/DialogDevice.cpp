@@ -147,7 +147,7 @@ void DialogDevice::isValid() const {
 	if (action == Actions::EDIT)
 		checkDupe = (currentData->createUniqueId() != newName);
 
-	auto* ch = currentData->getCollectionHandler();
+	auto ch{currentData->getCollectionHandler()};
 	if (checkDupe and ch->isIdSet(newName)) {
 		if (Defaults::isIdUser(name))
 			throw Message(deviceName + " ID " + id + " already exists");
@@ -155,6 +155,9 @@ void DialogDevice::isValid() const {
 			throw Message(deviceName + " that connects to " + (port.empty() ? "<autodetect>" : port) + " already exists");
 		throw Message(deviceName + " already exists");
 	}
+
+	if (not static_cast<Storage::Parent*>(currentData)->getChild(COLLECTION_ELEMENT)->getSize())
+		throw Message("Add at least one element.");
 }
 
 void DialogDevice::storeData() noexcept {

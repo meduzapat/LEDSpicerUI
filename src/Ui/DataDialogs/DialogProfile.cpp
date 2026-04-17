@@ -28,9 +28,17 @@ using namespace LEDSpicerUI::Ui::Storage;
 DialogProfile::DialogProfile(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept :
 	DialogForm(obj, builder)
 {
-	builder->get_widget_derived("BoxProfiles", box);
-	builder->get_widget("BtnApplyProfile",     btnApply);
-	Gtk::Button* btnAdd = nullptr;
+
+
+	Gtk::Button
+		* btnProfilesAddElements   = nullptr,
+		* btnProfilesAddGroups     = nullptr,
+		* btnProfilesAddAnimations = nullptr,
+		* btnProfilesAddInputs     = nullptr,
+		* btnAdd                   = nullptr;
+
+	builder->get_widget_derived("BoxProfiles",       box);
+	builder->get_widget("BtnApplyProfile",           btnApply);
 	builder->get_widget("BtnAddProfile",             btnAdd);
 	builder->get_widget("InputProfileName",          inputProfileName);
 	builder->get_widget("BtnProfileBackgroundColor", btnProfileBackgroundColor);
@@ -71,6 +79,12 @@ DialogProfile::DialogProfile(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 		setUpSelector(COLLECTION_INPUT, inputsRequest);
 		DialogSelect::getInstance()->open();
 	});
+
+	// Register sensitives.
+	CollectionHandler::getInstance(COLLECTION_ELEMENT    )->registerSensitivity(btnProfilesAddElements);
+	CollectionHandler::getInstance(COLLECTION_GROUP      )->registerSensitivity(btnProfilesAddGroups);
+	CollectionHandler::getInstance(COLLECTION_ANIMATIONS )->registerSensitivity(btnProfilesAddAnimations);
+	CollectionHandler::getInstance(COLLECTION_INPUT      )->registerSensitivity(btnProfilesAddInputs);
 
 	// Wire SelectionRequests after all boxes are set.
 	alwaysOnElementsRequest = {
@@ -114,7 +128,7 @@ void DialogProfile::load(XMLHelper* values) noexcept {
 }
 
 void DialogProfile::createSubItems(XMLHelper* values) noexcept {
-	auto* ds              = DialogSelect::getInstance();
+	auto ds{DialogSelect::getInstance()};
 	const string ownerUid = currentData->createUniqueId();
 
 	setUpSelector(COLLECTION_ELEMENT,    alwaysOnElementsRequest);
@@ -135,12 +149,6 @@ void DialogProfile::clearForm() noexcept {
 	boxProfileAlwaysOnGroups->wipe();
 	boxProfileAnimations->wipe();
 	boxProfileInputs->wipe();
-
-	btnProfilesAddElements->set_sensitive(CollectionHandler::getInstance(COLLECTION_ELEMENT)->getSize());
-	btnProfilesAddGroups->set_sensitive(CollectionHandler::getInstance(COLLECTION_GROUP)->getSize());
-	btnProfilesAddInputs->set_sensitive(CollectionHandler::getInstance(COLLECTION_INPUT)->getSize());
-	bool hasAnimations = CollectionHandler::getInstance(COLLECTION_ANIMATIONS)->getSize();
-	btnProfilesAddAnimations->set_sensitive(hasAnimations);
 }
 
 void DialogProfile::isValid() const {
@@ -165,7 +173,7 @@ void DialogProfile::storeData() noexcept {
 	currentData->setValue(FILENAME,          inputProfileName->get_text());
 	currentData->setValue(BACKGROUND_COLOR,  btnProfileBackgroundColor->get_label());
 
-	auto* ds = DialogSelect::getInstance();
+	auto ds{DialogSelect::getInstance()};
 	setUpSelector(COLLECTION_ELEMENT,    alwaysOnElementsRequest);
 	ds->reindex();
 	setUpSelector(COLLECTION_GROUP,      alwaysOnGroupsRequest);
@@ -183,7 +191,7 @@ void DialogProfile::retrieveData() noexcept {
 		currentData->getValue(BACKGROUND_COLOR)
 	);
 
-	auto* ds = DialogSelect::getInstance();
+	auto ds{DialogSelect::getInstance()};
 	setUpSelector(COLLECTION_ELEMENT,    alwaysOnElementsRequest);
 	ds->refresh();
 	setUpSelector(COLLECTION_GROUP,      alwaysOnGroupsRequest);
