@@ -258,10 +258,10 @@ bool Defaults::isMulti(const string& name) {
 string Defaults::createHardwareUniqueId(const StringUMap& data, bool isDevice) {
 	string name(data.at(NAME));
 	if (Defaults::isIdUser(name, isDevice)) {
-		return (name + FIELD_SEPARATOR + data.at(ID));
+		return (name + FIELD_SEPARATOR + (data.count(ID) ? data.at(ID) : "1"));
 	}
 	if (Defaults::isSerial(name, isDevice)) {
-		return (name + FIELD_SEPARATOR + data.at(PORT));
+		return (name + FIELD_SEPARATOR + (data.count(PORT) ? data.at(PORT) : emptyString));
 	}
 	return name;
 }

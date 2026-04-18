@@ -138,10 +138,11 @@ constexpr const char* DEFAULT_BRIGHTNESS = "100";
 constexpr unsigned int DEFAULT_SOLENOID  = 50;
 
 /// Special properties keys.
-constexpr const char* PROP_EXPAND    = "e";
-constexpr const char* PROP_NO_SELECT = "ns";
-constexpr const char* PROP_SYSTEMM   = "s";
-constexpr const char* PROP_STRIP     = "sd";
+constexpr const char* PROP_EXPAND    = "p.e";
+constexpr const char* PROP_NO_SELECT = "p.ns";
+constexpr const char* PROP_SYSTEM    = "p.s";
+constexpr const char* PROP_STRIP     = "p.sd";
+constexpr const char* PROP_STRIP_UID = "sd"; // strip descriptor UID
 
 /// CSS-related constants
 constexpr const char* COLOR_PIN      = "pinSingle";

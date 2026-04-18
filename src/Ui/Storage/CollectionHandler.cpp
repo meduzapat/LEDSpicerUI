@@ -74,7 +74,6 @@ void CollectionHandler::add(Data* item) noexcept {
 }
 
 void CollectionHandler::remove(Data* item) noexcept {
-
 	auto uid{item->createUniqueId()};
 	if (uid.empty() or not isIdSet(uid)) return;
 

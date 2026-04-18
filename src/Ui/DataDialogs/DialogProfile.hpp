@@ -48,10 +48,10 @@ public:
 	virtual ~DialogProfile() = default;
 
 	void load(XMLHelper* values)  noexcept override;
-	void isValid()          const override;
-	void clearForm()        noexcept override;
-	void storeData()        noexcept override;
-	void retrieveData()     noexcept override;
+	void isValid() const override;
+	void clearForm()    noexcept override;
+	void storeData()    noexcept override;
+	void retrieveData() noexcept override;
 	string createUniqueId() const noexcept override;
 
 protected:
@@ -67,8 +67,8 @@ protected:
 
 	DialogProfile(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept;
 
-	void createSubItems(XMLHelper* values)         noexcept override;
-	string_view getType()                    const noexcept override { return TYPE_PROFILE; }
+	void createSubItems(XMLHelper* values) noexcept override;
+	string_view getType() const noexcept override { return TYPE_PROFILE; }
 	Storage::Data* createData(StringUMap& rawData) const noexcept override;
 
 private:
@@ -85,7 +85,7 @@ private:
 	 * @param req        Configuration for this link type.
 	 */
 	void setUpSelector(
-		const string&                         collection,
+		const string& collection,
 		const DialogSelect::SelectionRequest& req
 	) noexcept;
 };

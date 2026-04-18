@@ -58,7 +58,9 @@ public:
 			/// Field name written into each Link (e.g. NAME).
 			linkKey,
 			/// Semantic type label used in XML and Link identity (e.g. "element").
-			linkType;
+			linkType,
+			/// Collection ID used by this link type.
+			collectionId;
 
 		/// Collection to populate the picker from.
 		CollectionHandler* sourceCollection;
@@ -67,7 +69,7 @@ public:
 		vector<Storage::Link::LinkField> linkFields;
 	};
 
-	virtual ~DialogSelect() = default;
+	virtual ~DialogSelect();
 
 	/**
 	 * Wires the dialog for the next action.

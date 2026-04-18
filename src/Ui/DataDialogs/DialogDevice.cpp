@@ -81,10 +81,6 @@ DialogDevice::DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 	});
 }
 
-DialogDevice::~DialogDevice() {
-	delete DataDialogs::DialogElement::getInstance();
-}
-
 void DialogDevice::load(XMLHelper* values) noexcept {
 	createItems(values->getData(COLLECTION_DEVICES), values);
 }
@@ -155,9 +151,9 @@ void DialogDevice::isValid() const {
 			throw Message(deviceName + " that connects to " + (port.empty() ? "<autodetect>" : port) + " already exists");
 		throw Message(deviceName + " already exists");
 	}
-
-	if (not static_cast<Storage::Parent*>(currentData)->getChild(COLLECTION_ELEMENT)->getSize())
-		throw Message("Add at least one element.");
+	// This is OK for all non LOAD actions.
+//	if (not static_cast<Storage::Parent*>(currentData)->getChild(COLLECTION_ELEMENT)->getSize())
+//		throw Message("Add at least one element.");
 }
 
 void DialogDevice::storeData() noexcept {

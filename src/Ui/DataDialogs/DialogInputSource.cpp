@@ -46,8 +46,6 @@ DialogInputSource::DialogInputSource(
 	setSignalAdd(btnAdd);
 	setSignalApply();
 
-	childDialogs.push_back(DialogInputMap::getInstance());
-
 	selectorCombo->signal_changed().connect([this]() {
 		if (
 			handleTypeSwitch(

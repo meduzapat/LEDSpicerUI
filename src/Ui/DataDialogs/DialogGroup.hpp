@@ -57,16 +57,15 @@ protected:
 	OrdenableFlowBox* boxElements = nullptr;
 
 	/// Static configuration for the element link selector.
-	const DialogSelect::SelectionRequest elementRequest;
+	DialogSelect::SelectionRequest elementRequest;
 
 	DialogGroup(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept;
 
 	void createSubItems(XMLHelper* values) noexcept override;
-	void wireChildrenDialogs() noexcept override;
 	string_view getType() const noexcept override { return TYPE_GROUP; }
 	Storage::Data* createData(StringUMap& rawData) const noexcept override;
-	BoxButtonCollection* elementLinks() const noexcept;
-
+	void wireChildrenDialogs()       noexcept override;
+	void disconnectChildrenDialogs() noexcept override;
 };
 
 } // namespace

@@ -129,10 +129,10 @@ void DialogInput::isValid() const {
 		if (blinks < 0 or blinks > 255) spinInputTimes->set_value(0);
 	}
 
-	if (Defaults::inputHasFlag(id, Defaults::INPUT_NEEDS_SOURCE))
-		if (not DialogInputSource::getInstance()->getBox()->getSize())
-			throw Message("Add at least one source.");
-
+	// This is OK for all non LOAD actions.
+//	if (Defaults::inputHasFlag(id, Defaults::INPUT_NEEDS_SOURCE))
+//		if (not DialogInputSource::getInstance()->getBox()->getSize())
+//			throw Message("Add at least one source.");
 }
 
 void DialogInput::storeData() noexcept {

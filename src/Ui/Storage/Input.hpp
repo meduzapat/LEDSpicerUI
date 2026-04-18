@@ -41,8 +41,8 @@ public:
 
 	Input(StringUMap& data, DirNode* parent) noexcept :
 		Parent(data, vector<string>{
-			COLLECTION_INPUT_SOURCES,
-			COLLECTION_INPUT_LINKMAP
+			COLLECTION_INPUT_SOURCES
+			//COLLECTION_INPUT_LINKMAP
 		}),
 		DirNode(getProperties(), parent, getValue(FILENAME)),
 		Revertible(*this, &children)

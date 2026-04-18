@@ -44,11 +44,18 @@ DialogSelect::DialogSelect(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 	Defaults::setFilter(filterEntry, pickerBox);
 
 	DialogLinkEditor::buildInstance(builder, "DialogLinkEdit");
+
+	signal_show().connect([this]() { populatePicker(); }, true);
+}
+
+DialogSelect::~DialogSelect() {
+	delete DialogLinkEditor::getInstance();
 }
 
 void DialogSelect::open() noexcept {
 
-	show();
+	// Dialog need to be realized in order to allow selections on the pre-existing items.
+	realize();
 	populatePicker();
 
 	if (run() != Gtk::ResponseType::RESPONSE_APPLY) {
@@ -63,7 +70,7 @@ void DialogSelect::open() noexcept {
 		selected.insert(sel->getData());
 	}
 
-	// Remove deselected Links from destination and displayBox.
+	// Remove de-selected Links from destination and displayBox.
 	vector<Storage::BoxButton*> toRemove;
 	for (auto btn : *destination) {
 		if (not selected.count(btn->getData()))
@@ -100,7 +107,7 @@ void DialogSelect::reindex() noexcept {
 void DialogSelect::load(XMLHelper* values, const string& ownerUniqueId) noexcept {
 
 	auto& rawCollection = values->getData(
-		Defaults::createCommonUniqueId({ownerUniqueId, request->linkType})
+		Defaults::createCommonUniqueId({ownerUniqueId, request->collectionId})
 	);
 
 	string location(" while loading " + request->linkType + " for " + ownerUniqueId);

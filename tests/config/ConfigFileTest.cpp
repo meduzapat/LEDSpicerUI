@@ -115,7 +115,7 @@ TEST_F(ConfigFileTest, GroupsAreProcessed) {
 	EXPECT_EQ("STARTS",  groups[2][NAME]);
 	EXPECT_EQ("PLAYER1", groups[3][NAME]);
 
-	string creditsGroupKey = Defaults::createCommonUniqueId({"CREDITS", COLLECTION_GROUP});
+	string creditsGroupKey = Defaults::createCommonUniqueId({"CREDITS", COLLECTION_GROUP_LINKS});
 
 	try {
 		auto& creditElements = configFile->getData(creditsGroupKey);

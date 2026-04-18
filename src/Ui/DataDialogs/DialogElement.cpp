@@ -410,8 +410,9 @@ void DialogElement::storeData() noexcept {
 			code = std::to_string(++lastStripCode);
 			currentData->getProperties().setValue("stripDescriptor", code);
 		}
-		currentData->getProperties().setValue("expandable", "true");
-		currentData->getProperties().setValue("system",     "true");
+		currentData->getProperties().setValue(PROP_EXPAND,    "1");
+		currentData->getProperties().setValue(PROP_SYSTEM,    "1");
+		currentData->getProperties().setValue(PROP_NO_SELECT, "1");
 		auto currentDataE = static_cast<Storage::Element*>(currentData);
 		auto children     = currentDataE->copyStripChildren();
 

@@ -39,7 +39,7 @@ class DialogDevice : public DialogFormHost, public SingletonDialog<DialogDevice>
 
 public:
 
-	virtual ~DialogDevice();
+	virtual ~DialogDevice() = default;
 
 	static constexpr string_view noDevice {"Select Device"};
 

@@ -26,8 +26,7 @@ using namespace LEDSpicerUI::Ui::DataDialogs;
 using namespace LEDSpicerUI::Ui::Storage;
 
 DialogGroup::DialogGroup(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept :
-	DialogForm(obj, builder),
-	elementRequest({boxElements, NAME, TYPE_ELEMENT, CollectionHandler::getInstance(COLLECTION_ELEMENT), {}})
+	DialogForm(obj, builder)
 {
 	Gtk::Button
 		* btnAdd         = nullptr,
@@ -43,12 +42,14 @@ DialogGroup::DialogGroup(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& 
 	setSignalAdd(btnAdd);
 	setSignalApply();
 
+	elementRequest = {boxElements, NAME, TYPE_ELEMENT, COLLECTION_GROUP_LINKS, CollectionHandler::getInstance(COLLECTION_ELEMENT), {}};
+
 	DialogColors::getInstance()->activateColorButton(btnGroupDefaultColor);
 
 	// Element selector button — opens picker with strip-expand support.
 	builder->get_widget("BtnAddGroupElements", btnAddElements);
 	btnAddElements->signal_clicked().connect([this]() {
-		DialogSelect::getInstance()->setUp(elementLinks(), elementRequest);
+		DialogSelect::getInstance()->setUp(currentChildren(COLLECTION_GROUP_LINKS), elementRequest);
 		DialogSelect::getInstance()->open();
 	});
 
@@ -83,11 +84,6 @@ void DialogGroup::load(XMLHelper* values) noexcept {
 
 void DialogGroup::createSubItems(XMLHelper* values) noexcept {
 	DialogSelect::getInstance()->load(values, currentData->createUniqueId());
-}
-
-void DialogGroup::wireChildrenDialogs() noexcept {
-	DialogForm::wireChildrenDialogs();
-	DialogSelect::getInstance()->setUp(elementLinks(), elementRequest);
 }
 
 void DialogGroup::clearForm() noexcept {
@@ -136,6 +132,13 @@ Data* DialogGroup::createData(StringUMap& rawData) const noexcept {
 	return new Group(rawData);
 }
 
-BoxButtonCollection* DialogGroup::elementLinks() const noexcept {
-	return static_cast<Parent*>(currentData)->getChild(COLLECTION_GROUP_LINKS);
+void DialogGroup::wireChildrenDialogs() noexcept {
+	currentData->setUp();
+	DialogSelect::getInstance()->setUp(currentChildren(COLLECTION_GROUP_LINKS), elementRequest);
+	currentChildren(COLLECTION_GROUP_LINKS)->registerSensitivity(btnApply);
+}
+
+void DialogGroup::disconnectChildrenDialogs() noexcept {
+	currentChildren(COLLECTION_GROUP_LINKS)->releaseSensitive(btnApply);
+	currentData->tearDown();
 }

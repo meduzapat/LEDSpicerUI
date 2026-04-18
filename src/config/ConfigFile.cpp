@@ -246,7 +246,7 @@ string ConfigFile::processGroups() {
 
 			elements.push_back(elementAttr);
 		}
-		extractedData.emplace(Defaults::createCommonUniqueId({group[NAME], COLLECTION_GROUP}), std::move(elements));
+		extractedData.emplace(Defaults::createCommonUniqueId({group[NAME], COLLECTION_GROUP_LINKS}), std::move(elements));
 	}
 	extractedData.emplace(COLLECTION_GROUP, std::move(groups));
 	return errors;

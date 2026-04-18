@@ -54,8 +54,6 @@ StringUMap Data::copyValues() const noexcept {
 }
 
 void Data::wipe() noexcept {
-	auto handler = getCollectionHandler();
-	if (handler) handler->remove(this);
 	Values::wipe();
 }
 

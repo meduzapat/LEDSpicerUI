@@ -29,7 +29,6 @@ DialogProfile::DialogProfile(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 	DialogForm(obj, builder)
 {
 
-
 	Gtk::Button
 		* btnProfilesAddElements   = nullptr,
 		* btnProfilesAddGroups     = nullptr,
@@ -91,6 +90,7 @@ DialogProfile::DialogProfile(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 		boxProfileAlwaysOnElements,
 		NAME,
 		TYPE_ELEMENT,
+		COLLECTION_PROFILE_ELEMENTS,
 		CollectionHandler::getInstance(COLLECTION_ELEMENT),
 		{
 			{"color",  "Color",  "", Link::LinkField::Widget::COLOR_PICKER},
@@ -100,7 +100,8 @@ DialogProfile::DialogProfile(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 	alwaysOnGroupsRequest = {
 		boxProfileAlwaysOnGroups,
 		NAME,
-		"group",
+		TYPE_GROUP,
+		COLLECTION_PROFILE_GROUPS,
 		CollectionHandler::getInstance(COLLECTION_GROUP),
 		{
 			{"color",  "Color",  "", Link::LinkField::Widget::COLOR_PICKER},
@@ -110,14 +111,16 @@ DialogProfile::DialogProfile(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 	animationsRequest = {
 		boxProfileAnimations,
 		NAME,
-		"animation",
+		TYPE_ANIMATION,
+		COLLECTION_PROFILE_ANIMATIONS,
 		CollectionHandler::getInstance(COLLECTION_ANIMATIONS),
 		{}
 	};
 	inputsRequest = {
 		boxProfileInputs,
 		NAME,
-		"input",
+		TYPE_INPUT,
+		COLLECTION_PROFILE_INPUTS,
 		CollectionHandler::getInstance(COLLECTION_INPUT),
 		{}
 	};
@@ -214,8 +217,5 @@ void DialogProfile::setUpSelector(
 	const string& collection,
 	const DialogSelect::SelectionRequest& req
 ) noexcept {
-	DialogSelect::getInstance()->setUp(
-		static_cast<Storage::Parent*>(currentData)->getChild(collection),
-		req
-	);
+	DialogSelect::getInstance()->setUp(currentChildren(collection), req);
 }

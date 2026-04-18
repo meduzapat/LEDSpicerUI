@@ -38,7 +38,7 @@ class DirectoryNavigator {
 
 public:
 
-	virtual ~DirectoryNavigator() = default;
+	virtual ~DirectoryNavigator();
 
 	/**
 	 * Called when this navigator's panel becomes active.

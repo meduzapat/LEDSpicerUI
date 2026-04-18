@@ -54,3 +54,7 @@ DirectoryNavigator::DirectoryNavigator(const Glib::RefPtr<Gtk::Builder>& builder
 {
 	DataDialogs::DialogDirectory::buildInstance(builder, "DialogDirectory");
 }
+
+DirectoryNavigator::~DirectoryNavigator() {
+	delete DataDialogs::DialogDirectory::getInstance();
+}

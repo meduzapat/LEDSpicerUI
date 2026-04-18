@@ -304,6 +304,12 @@ protected:
 	 * @param boxButton the button that called clone.
 	 */
 	virtual void onCloneClicked(Storage::BoxButton& boxButton) noexcept;
+
+	/**
+	 * @param family
+	 * @return Returns a child collection of the current data by family key.
+	 */
+	Storage::BoxButtonCollection* currentChildren(const string& family) const noexcept;
 };
 
 } // namespace
