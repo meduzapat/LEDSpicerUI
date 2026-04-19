@@ -63,7 +63,7 @@ DialogColors::DialogColors(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const
 		}
 	});
 
-	Defaults::setFilter(filterEntry, ContainerColorPicker);
+	Defaults::setFilter(filterEntry, ContainerColorPicker, this);
 }
 
 void DialogColors::setColorsFromFile(const string& path) {

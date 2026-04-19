@@ -41,7 +41,7 @@ DialogSelect::DialogSelect(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 	btnSelectAll->signal_clicked().connect(sigc::mem_fun(*pickerBox, &Gtk::FlowBox::select_all));
 	btnSelectNone->signal_clicked().connect(sigc::mem_fun(*pickerBox, &Gtk::FlowBox::unselect_all));
 
-	Defaults::setFilter(filterEntry, pickerBox);
+	Defaults::setFilter(filterEntry, pickerBox, this);
 
 	DialogLinkEditor::buildInstance(builder, "DialogLinkEdit");
 }

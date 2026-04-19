@@ -527,7 +527,7 @@ void Defaults::populateComboBoxWithIds(
 	}
 }
 
-void Defaults::setFilter(Gtk::SearchEntry* filterEntry, Gtk::FlowBox* box) {
+void Defaults::setFilter(Gtk::SearchEntry* filterEntry, Gtk::FlowBox* box, Gtk::Dialog* dialog) {
 	filterEntry->signal_show().connect([filterEntry]() {
 		filterEntry->set_text("");
 	});
@@ -541,6 +541,13 @@ void Defaults::setFilter(Gtk::SearchEntry* filterEntry, Gtk::FlowBox* box) {
 				child->show();
 			else
 				child->hide();
+		}
+	});
+	filterEntry->signal_stop_search().connect([dialog, filterEntry]() {
+		if (filterEntry->get_text().empty()) {
+			dialog->response(Gtk::RESPONSE_CANCEL);
+		} else {
+			filterEntry->set_text("");
 		}
 	});
 }

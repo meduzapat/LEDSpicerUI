@@ -601,8 +601,9 @@ public:
 	 * Handles the filter for a flowbox.
 	 * @param filterEntry
 	 * @param box
+	 * @param dialog The parent dialog, used to cancel the dialog when the filter is empty and the user tries to stop searching.
 	 */
-	static void setFilter(Gtk::SearchEntry* filterEntry, Gtk::FlowBox* box);
+	static void setFilter(Gtk::SearchEntry* filterEntry, Gtk::FlowBox* box, Gtk::Dialog* dialog);
 
 	/**
 	 * Sets the state to ignore Changes.
