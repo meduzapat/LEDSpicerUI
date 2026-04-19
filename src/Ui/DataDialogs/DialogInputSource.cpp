@@ -153,6 +153,7 @@ void DialogInputSource::createPhantomSource() noexcept {
 	currentData = createData(rawData);
 	currentData->getProperties().setValue(SOURCELESS, "1");
 	items->create(currentData);
+	wireChildrenDialogs();
 }
 
 void DialogInputSource::createSubItems(XMLHelper* values) noexcept {

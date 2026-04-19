@@ -137,17 +137,15 @@ void DialogInputMap::isValid() const {
 }
 
 void DialogInputMap::storeData() noexcept {
-	string type, target;
+	string type;
 	Storage::Data* data = nullptr;
 	if (stackElementAndGroup->get_visible_child_name() == "InputTypeElement") {
-		type   = ELEMENT;
-		target = comboBoxInputMapElement->get_active_text();
-		data   = Storage::CollectionHandler::getInstance(COLLECTION_ELEMENT)->get(target);
+		type = ELEMENT;
+		data = Storage::CollectionHandler::getInstance(COLLECTION_ELEMENT)->get(comboBoxInputMapElement->get_active_text());
 	}
 	else {
-		type   = GROUP;
-		target = comboBoxInputMapGroup->get_active_text();
-		data   = Storage::CollectionHandler::getInstance(COLLECTION_GROUP)->get(target);
+		type = GROUP;
+		data = Storage::CollectionHandler::getInstance(COLLECTION_GROUP)->get(comboBoxInputMapGroup->get_active_text());
 	}
 
 	currentData->setValue(TRIGGER, inputInputMapTrigger->get_text());
@@ -181,15 +179,17 @@ string DialogInputMap::createUniqueId() const noexcept {
 LEDSpicerUI::Ui::Storage::Data* DialogInputMap::createData(StringUMap& rawData) const noexcept {
 	// Target will be deleted by dialog form, no need to clean up.
 	const string
-		type   = rawData.count(TYPE)   ? rawData.at(TYPE)   : "",
-		target = rawData.count(TARGET) ? rawData.at(TARGET) : "";
+		type   = rawData.count(TYPE)   ? rawData.at(TYPE)   : emptyString,
+		target = rawData.count(TARGET) ? rawData.at(TARGET) : emptyString;
 
-	auto handler{type == GROUP ?
-		Storage::CollectionHandler::getInstance(COLLECTION_GROUP) :
-		Storage::CollectionHandler::getInstance(COLLECTION_ELEMENT)
+	auto handler{type.empty() ? nullptr : (
+		type == GROUP ?
+			Storage::CollectionHandler::getInstance(COLLECTION_GROUP) :
+			Storage::CollectionHandler::getInstance(COLLECTION_ELEMENT)
+		)
 	};
 
-	auto im{new Storage::InputMap(rawData, handler->get(target))};
+	auto im{new Storage::InputMap(rawData, handler ? handler->get(target) : nullptr)};
 	im->getProperties().setValue(PID, ownerData->getProperties().getValue(UID));
 	return im;
 }

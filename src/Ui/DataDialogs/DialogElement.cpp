@@ -478,7 +478,7 @@ void DialogElement::storeData() noexcept {
 		currentData->setValue(DEFAULT_COLOR, btnDefaultColor->get_label());
 	}
 	currentData->setValue(NAME, name);
-	currentData->setValue(TYPE, elementType->get_active_id() == "0" ? DEFAULT_ELEMENT_TYPE : elementType->get_active_id());
+	currentData->setValue(TYPE, elementType->get_active_id() == "0" ? Glib::ustring(DEFAULT_ELEMENT_TYPE) : elementType->get_active_id());
 	currentData->setValue(BRIGHTNESS, std::to_string(static_cast<uint>(brightness->get_value())));
 
 	// Cleanup if changed from strip to non-strip

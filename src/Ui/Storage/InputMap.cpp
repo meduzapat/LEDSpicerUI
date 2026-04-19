@@ -21,6 +21,7 @@
  */
 
 #include "InputMap.hpp"
+#include "CollectionHandler.hpp"
 
 using namespace LEDSpicerUI::Ui::Storage;
 
@@ -30,4 +31,13 @@ string InputMap::createUniqueId() const noexcept {
 
 string InputMap::createPrettyName() const noexcept {
 	return "[" + getValue(TRIGGER) + "] " + getValue(TYPE) + " " + getValue(TARGET);
+}
+
+CollectionHandler* InputMap::getCollectionHandler() const noexcept {
+	return CollectionHandler::getInstance(
+		Defaults::createCommonUniqueId({
+			getProperties().getValue(PID),
+			COLLECTION_INPUT_MAPS
+		})
+	);
 }

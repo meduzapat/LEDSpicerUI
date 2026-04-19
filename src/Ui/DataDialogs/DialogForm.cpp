@@ -90,8 +90,8 @@ void DialogForm::refreshItems() noexcept {
 	// No items no work to do.
 	if (not items) return;
 	items->populateBox(box);
-	box->show_all();
-	// this will avoid chaining into uninitialized dialogs.
+//	box->show_all(); // already called in populateBox.
+	// Avoid chaining into uninitialized dialogs.
 	if (not currentData) return;
 	for (auto childDialog : childDialogs) childDialog->refreshItems();
 }
@@ -280,4 +280,8 @@ void DialogForm::onCloneClicked(Storage::BoxButton& boxButton) noexcept {
 	box->add(bBox);
 	Defaults::markDirty();
 	bBox.sync();
+}
+
+LEDSpicerUI::Ui::Storage::BoxButtonCollection* DialogForm::currentChildren(const string& family) const noexcept {
+	return static_cast<LEDSpicerUI::Ui::Storage::Parent*>(currentData)->getChild(family);
 }

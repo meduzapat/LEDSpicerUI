@@ -44,8 +44,6 @@ DialogSelect::DialogSelect(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 	Defaults::setFilter(filterEntry, pickerBox);
 
 	DialogLinkEditor::buildInstance(builder, "DialogLinkEdit");
-
-	signal_show().connect([this]() { populatePicker(); }, true);
 }
 
 DialogSelect::~DialogSelect() {
@@ -55,7 +53,7 @@ DialogSelect::~DialogSelect() {
 void DialogSelect::open() noexcept {
 
 	// Dialog need to be realized in order to allow selections on the pre-existing items.
-	realize();
+	show();
 	populatePicker();
 
 	if (run() != Gtk::ResponseType::RESPONSE_APPLY) {

@@ -49,16 +49,16 @@ string ConfigFile::processDevices() {
 	if (not deviceNode)
 		return "Missing Devices section\n";
 
-	deviceNode = deviceNode->FirstChildElement(TYPE_DEVICE);
+	deviceNode = deviceNode->FirstChildElement(TYPE_DEVICE.c_str());
 	if (not deviceNode )
 		return "Empty device section\n";
 
 	string errors, name;
 	StringUMapVector devices;
-	for (; deviceNode; deviceNode = deviceNode->NextSiblingElement(TYPE_DEVICE)) {
+	for (; deviceNode; deviceNode = deviceNode->NextSiblingElement(TYPE_DEVICE.c_str())) {
 		StringUMap deviceAttr = processNode(deviceNode);
 		try {
-			checkAttributes({NAME}, deviceAttr, TYPE_DEVICE);
+			checkAttributes({NAME}, deviceAttr, TYPE_DEVICE.c_str());
 		}
 		catch (Message& e) {
 			errors += e.getMessage() + '\n';
@@ -164,12 +164,12 @@ string ConfigFile::processProcessLookup() {
 
 string ConfigFile::processElements(tinyxml2::XMLElement* deviceNode, const string& deviceName) {
 
-	tinyxml2::XMLElement* elementNode {deviceNode->FirstChildElement(TYPE_ELEMENT)};
+	tinyxml2::XMLElement* elementNode {deviceNode->FirstChildElement(TYPE_ELEMENT.c_str())};
 	if (not elementNode)
 		return "Missing elements node for " + deviceName + '\n';
 	StringUMapVector elements;
 	string errors;
-	for (; elementNode; elementNode = elementNode->NextSiblingElement(TYPE_ELEMENT)) {
+	for (; elementNode; elementNode = elementNode->NextSiblingElement(TYPE_ELEMENT.c_str())) {
 		StringUMap elementAttr = processNode(elementNode);
 		if (elementAttr.find(NAME) == elementAttr.end()) {
 			errors += "Ignored element, Missing element name in " + deviceName + '\n';
@@ -229,7 +229,7 @@ string ConfigFile::processGroups() {
 
 		groups.push_back(group);
 
-		tinyxml2::XMLElement* elementNode = groupNode->FirstChildElement(TYPE_ELEMENT);
+		tinyxml2::XMLElement* elementNode = groupNode->FirstChildElement(TYPE_ELEMENT.c_str());
 
 		if (not elementNode) {
 			errors += "Group " + group[NAME] + " is empty\n";
@@ -237,7 +237,7 @@ string ConfigFile::processGroups() {
 		}
 
 		StringUMapVector elements;
-		for (; elementNode; elementNode = elementNode->NextSiblingElement(TYPE_ELEMENT)) {
+		for (; elementNode; elementNode = elementNode->NextSiblingElement(TYPE_ELEMENT.c_str())) {
 			StringUMap elementAttr = processNode(elementNode);
 			if (group.find(NAME) == group.end()) {
 				errors += "Missing element name in group " + group[NAME] + '\n';

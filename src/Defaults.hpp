@@ -73,158 +73,168 @@ namespace Constants {
 const string emptyString;
 
 /// Separators.
-constexpr char FIELD_SEPARATOR    = 30;  // Record Separator (RS)
-constexpr char RECORD_SEPARATOR   = 31;  // Unit Separator (US)
-constexpr char UNIT_SEPARATOR     = 32;  // Space
-constexpr char ID_SEPARATOR       = ','; // Comma
-constexpr char ID_GROUP_SEPARATOR = '|'; // Pipe
+constexpr char
+	FIELD_SEPARATOR    = 30,  // Record Separator (RS)
+	RECORD_SEPARATOR   = 31,  // Unit Separator (US)
+	UNIT_SEPARATOR     = 32,  // Space
+	ID_SEPARATOR       = ',', // Comma
+	ID_GROUP_SEPARATOR = '|'; // Pipe
 
-/// LEDSpicer configuration file keys.
-constexpr const char* DEFAULT_USERID   = "1000";
-constexpr const char* DEFAULT_GROUPID  = "1000";
-constexpr const char* DEFAULT_PORT     = "16161";
-constexpr const char* DEFAULT_FPS      = "30";
-constexpr const char* DEFAULT_COLORS   = "basicColors";
-constexpr const char* DEFAULT_LOGLEVEL = "Info";
+/// Default values for monochrome devices.
+constexpr float DEFAULT_CHANGE_VALUE = 64.00f;
 
-/// Emitter configuration file keys.
-constexpr const char* DEFAULT_COLORSINFO   = "true";
-constexpr const char* DEFAULT_CRAFTPROFILE = "true";
-constexpr const char* DEFAULT_DATASOURCE   = "file,mame";
-
-/// ProcessLookup configuration file keys.
-constexpr const char* PARAM_MILLISECONDS = "runEvery";
-constexpr const char* PARAM_PROCESS_NAME = "processName";
-constexpr const char* PARAM_PROCESS_POS  = "position";
-constexpr const char* PARAM_SYSTEM       = "system";
-constexpr const char* DEFAULT_RUNEVERY   = "";
-
-/// Profile configuration keys.
-constexpr const char* DEFAULT_PROFILE                  = "default";
-constexpr const char* BACKGROUND_COLOR                 = "backgroundColor";
-constexpr const char* DEFAULT_PROFILE_BACKGROUND_COLOR = "Off";
-
-/// Hardware configuration keys.
-constexpr const char* NAME     = "name";
-constexpr const char* ID       = "boardId";
-constexpr const char* FILENAME = "filename";
-constexpr const char* PORT     = "port";
-constexpr const char* PINS     = "leds";
-constexpr const char* PATH     = "path";
-constexpr const char* FILE_ID  = "FID"; /// To be used with file based data objects.
-constexpr const char* UID      = "UID"; /// Stable self-identifier, set at construction.
-constexpr const char* PID      = "PID"; /// Parent UID, injected by createData() noexcept.
-constexpr const char* SID      = "SID"; /// To be used with anything that has a S in the name.
-constexpr const char* IID      = "IID"; /// To be used with anything that has a I in the name.
-
-constexpr float DEFAULT_CHANGE_VALUE    = 64.00f;
-
-/// Element configuration keys.
-constexpr const char* PIN           = "led";
-constexpr const char* RED_PIN       = "red";
-constexpr const char* GREEN_PIN     = "green";
-constexpr const char* BLUE_PIN      = "blue";
-constexpr const char* SOLENOID      = "solenoid";
-constexpr const char* POSITION      = "position";
-constexpr const char* POSITIONS     = "positions";
-constexpr const char* STRIPSIZE     = "stripSize";
-constexpr const char* TIME_ON       = "timeOn";
-constexpr const char* COLORFORMAT   = "colorFormat";
-constexpr const char* CHANGE_POINT  = "changePoint";
-constexpr const char* DEFAULT_COLOR = "defaultColor";
-constexpr const char* BRIGHTNESS    = "brightness";
-
-constexpr const char* DEFAULT_BRIGHTNESS = "100";
+/// Default millisenconds for solenoids and motors.
 constexpr unsigned int DEFAULT_SOLENOID  = 50;
 
+/// Default speed for GZ40 restrictor.
+constexpr int GZ40_DEFAULT_SPEED = 12;  // Integer
+
+// all strings constants.
+const string
+/// LEDSpicer configuration file keys.
+	DEFAULT_USERID   {"1000"},
+	DEFAULT_GROUPID  {"1000"},
+	DEFAULT_PORT     {"16161"},
+	DEFAULT_FPS      {"30"},
+	DEFAULT_COLORS   {"basicColors"},
+	DEFAULT_LOGLEVEL {"Info"},
+
+/// Emitter configuration file keys.
+	DEFAULT_COLORSINFO   {"true"},
+	DEFAULT_CRAFTPROFILE {"true"},
+	DEFAULT_DATASOURCE   {"file,mame"},
+
+/// ProcessLookup configuration file keys.
+	PARAM_MILLISECONDS {"runEvery"},
+	PARAM_PROCESS_NAME {"processName"},
+	PARAM_PROCESS_POS  {"position"},
+	PARAM_SYSTEM       {"system"},
+	DEFAULT_RUNEVERY   {emptyString},
+
+/// Profile configuration keys.
+	DEFAULT_PROFILE                  {"default"},
+	BACKGROUND_COLOR                 {"backgroundColor"},
+	DEFAULT_PROFILE_BACKGROUND_COLOR {"Off"},
+
+/// Hardware configuration keys.
+	NAME {"name"},
+	ID   {"boardId"},
+	PORT {"port"},
+	PINS {"leds"},
+	PATH {"path"},
+
+/// Special cases.
+	FILENAME {"filename"},
+	UID {"UID"}, /// Stable self-identifier, set at construction.
+	PID {"PID"}, /// Parent UID, injected by createData() noexcept.
+	SID {"SID"}, /// To be used with anything that has a S in the name.
+	IID {"IID"}, /// To be used with anything that has a I in the name.
+
+/// Element configuration keys.
+	PIN           {"led"},
+	RED_PIN       {"red"},
+	GREEN_PIN     {"green"},
+	BLUE_PIN      {"blue"},
+	SOLENOID      {"solenoid"},
+	POSITION      {"position"},
+	POSITIONS     {"positions"},
+	STRIPSIZE     {"stripSize"},
+	TIME_ON       {"timeOn"},
+	COLORFORMAT   {"colorFormat"},
+	CHANGE_POINT  {"changePoint"},
+	DEFAULT_COLOR {"defaultColor"},
+	BRIGHTNESS    {"brightness"},
+
+	DEFAULT_BRIGHTNESS{"100"},
+
 /// Special properties keys.
-constexpr const char* PROP_EXPAND    = "p.e";
-constexpr const char* PROP_NO_SELECT = "p.ns";
-constexpr const char* PROP_SYSTEM    = "p.s";
-constexpr const char* PROP_STRIP     = "p.sd";
-constexpr const char* PROP_STRIP_UID = "sd"; // strip descriptor UID
+	PROP_EXPAND    {"p.e"},
+	PROP_NO_SELECT {"p.ns"},
+	PROP_SYSTEM    {"p.s"},
+	PROP_STRIP     {"p.sd"},
+	PROP_STRIP_UID {"sd"}, // strip descriptor UID
 
 /// CSS-related constants
-constexpr const char* COLOR_PIN      = "pinSingle";
-constexpr const char* COLOR_SOLENOID = "pinSolenoid";
-constexpr const char* COLOR_RED      = "pinRed";
-constexpr const char* COLOR_GREEN    = "pinGreen";
-constexpr const char* COLOR_BLUE     = "pinBlue";
-constexpr const char* COLOR_MULTIPLE = "pinMulti";
-constexpr const char* PIN_LABEL      = "pinLabel";
-constexpr const char* CONNECTOR_BOX  = "connectorBox";
-constexpr const char* NO_COLOR       = "";
+	COLOR_PIN      {"pinSingle"},
+	COLOR_SOLENOID {"pinSolenoid"},
+	COLOR_RED      {"pinRed"},
+	COLOR_GREEN    {"pinGreen"},
+	COLOR_BLUE     {"pinBlue"},
+	COLOR_MULTIPLE {"pinMulti"},
+	PIN_LABEL      {"pinLabel"},
+	CONNECTOR_BOX  {"connectorBox"},
+	NO_COLOR       {emptyString},
 
 /// Restrictor configuration keys.
-constexpr const char* US360_HAS_RESTRICTOR = "hasRestrictor";
-constexpr const char* US360_USE_MOUSE      = "handleMouse";
-constexpr const char* GZ49_WILLIAMS        = "williams";
-constexpr const char* GZ40_SPEED_ON        = "speedOn";
-constexpr const char* GZ40_SPEED_OFF       = "speedOff";
-constexpr int GZ40_DEFAULT_SPEED           = 12;  // Integer
-constexpr const char* RESTRICTOR_INTERFACE = "id";
+	US360_HAS_RESTRICTOR {"hasRestrictor"},
+	US360_USE_MOUSE      {"handleMouse"},
+	GZ49_WILLIAMS        {"williams"},
+	GZ40_SPEED_ON        {"speedOn"},
+	GZ40_SPEED_OFF       {"speedOff"},
+	RESTRICTOR_INTERFACE {"id"},
 
 /// Input mapping configuration keys.
-constexpr const char* LINKED_ITEMS = "linkedTriggers";
-constexpr const char* TRIGGER      = "trigger";
-constexpr const char* TARGET       = "target";
-constexpr const char* TYPE         = "type";
-constexpr const char* COLOR        = "color";
-constexpr const char* FILTER       = "filter";
-constexpr const char* ELEMENT      = "Element";
-constexpr const char* GROUP        = "Group";
-constexpr const char* SOURCE       = "source"; /// input attribute in XML
-constexpr const char* INDEX        = "index";  /// a property positional index.
-constexpr const char* SPEED        = "speed";  /// Input playback speed setting.
-constexpr const char* BLINK        = "blink";  /// Input blink switch.
-constexpr const char* TIMES        = "times";  /// Input repeat count.
-constexpr const char* SOURCELESS   = "sourceless";
+	LINKED_ITEMS {"linkedTriggers"},
+	TRIGGER      {"trigger"},
+	TARGET       {"target"},
+	TYPE         {"type"},
+	COLOR        {"color"},
+	FILTER       {"filter"},
+	ELEMENT      {"Element"},
+	GROUP        {"Group"},
+	SOURCE       {"source"},     /// input attribute in XML
+	INDEX        {"index"},      /// a property positional index.
+	SPEED        {"speed"},      /// Input playback speed setting.
+	BLINK        {"blink"},      /// Input blink switch.
+	TIMES        {"times"},      /// Input repeat count.
+	SOURCELESS   {"sourceless"},
+
 /// UI-related constants.
-constexpr const char* DEFAULT_ELEMENT_TYPE = "9";
-constexpr const char* PLAYER               = "player";
-constexpr const char* JOYSTICK             = "joystick";
+	DEFAULT_ELEMENT_TYPE {"9"},
+	PLAYER   {"player"},
+	JOYSTICK {"joystick"},
 
 /// Types
-#define               TYPE_MAP              "map"
-#define               TYPE_DIRECTORY        "directory"
-constexpr const char* TYPE_DEVICE         = "device";
-constexpr const char* TYPE_RESTRICTOR     = "restrictor";
-constexpr const char* TYPE_ELEMENT        = "element";
-constexpr const char* TYPE_GROUP          = "group";
-constexpr const char* TYPE_PROCESS        = "process";
-constexpr const char* TYPE_RESTRICTOR_MAP = "player mapping";
-#define               TYPE_INPUT            "input"
-#define               TYPE_INPUT_SOURCE     TYPE_INPUT " source"
-#define               TYPE_INPUT_MAP        TYPE_INPUT " " TYPE_MAP
-#define               TYPE_INPUT_LINKMAP    TYPE_INPUT " linked " TYPE_MAP
-#define               TYPE_INPUT_DIR        TYPE_INPUT " " TYPE_DIRECTORY
-constexpr const char* TYPE_ANIMATION      = "animation";
-constexpr const char* TYPE_PROFILE        = "profile";
+	TYPE_MAP             {"map"},
+	TYPE_DIRECTORY       {"directory"},
+	TYPE_DEVICE          {"device"},
+	TYPE_RESTRICTOR      {"restrictor"},
+	TYPE_ELEMENT         {"element"},
+	TYPE_GROUP           {"group"},
+	TYPE_PROCESS         {"process"},
+	TYPE_RESTRICTOR_MAP  {"player mapping"},
+	TYPE_INPUT           {"input"},
+	TYPE_INPUT_SOURCE    {"input source"},
+	TYPE_INPUT_MAP       {"input map"},
+	TYPE_INPUT_LINKMAP   {"input linked map"},
+	TYPE_INPUT_DIR       {"input directory"},
+	TYPE_ANIMATION       {"animation"},
+	TYPE_PROFILE         {"profile"},
 
 /// Collection / families — dual-purpose string constants.
-constexpr const char* COLLECTION_DEVICES        = "d";
-constexpr const char* COLLECTION_RESTRICTORS    = "r";
-constexpr const char* COLLECTION_ELEMENT        = "e";
-constexpr const char* COLLECTION_GROUP          = "g";
-constexpr const char* COLLECTION_PROCESS        = "p";
-constexpr const char* COLLECTION_RESTRICTOR_MAP = "r.m";
-constexpr const char* COLLECTION_INPUT          = "i";
-constexpr const char* COLLECTION_INPUT_SOURCES  = "i.s";
-constexpr const char* COLLECTION_INPUT_MAPS     = "i.m";
-constexpr const char* COLLECTION_INPUT_LINKMAP  = "i.l";
-constexpr const char* COLLECTION_ANIMATIONS     = "a";
-constexpr const char* COLLECTION_PROFILES       = "pr";
+	COLLECTION_DEVICES        {"d"},
+	COLLECTION_RESTRICTORS    {"r"},
+	COLLECTION_ELEMENT        {"e"},
+	COLLECTION_GROUP          {"g"},
+	COLLECTION_PROCESS        {"p"},
+	COLLECTION_RESTRICTOR_MAP {"r.m"},
+	COLLECTION_INPUT          {"i"},
+	COLLECTION_INPUT_SOURCES  {"i.s"},
+	COLLECTION_INPUT_MAPS     {"i.m"},
+	COLLECTION_INPUT_LINKMAP  {"i.l"},
+	COLLECTION_ANIMATIONS     {"a"},
+	COLLECTION_PROFILES       {"pr"},
 
 /// Link families keys.
-constexpr const char* COLLECTION_GROUP_LINKS         = "g.l";
-constexpr const char* COLLECTION_PROFILE_ELEMENTS    = "pr.e";
-constexpr const char* COLLECTION_PROFILE_GROUPS      = "pr.g";
-constexpr const char* COLLECTION_PROFILE_INPUTS      = "pr.i";
-constexpr const char* COLLECTION_PROFILE_ANIMATIONS  = "pr.a";
+	COLLECTION_GROUP_LINKS        {"g.l"},
+	COLLECTION_PROFILE_ELEMENTS   {"pr.e"},
+	COLLECTION_PROFILE_GROUPS     {"pr.g"},
+	COLLECTION_PROFILE_INPUTS     {"pr.i"},
+	COLLECTION_PROFILE_ANIMATIONS {"pr.a"},
 
 /// Directories
-#define               COLLECTION_DIRECTORIES       "directories"
-#define               COLLECTION_INPUT_DIRECTORIES TYPE_INPUT COLLECTION_DIRECTORIES
+	COLLECTION_DIRECTORIES       {"directories"},
+	COLLECTION_INPUT_DIRECTORIES {"input directories"};
 
 } // namespace
 
