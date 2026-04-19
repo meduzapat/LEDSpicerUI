@@ -10,7 +10,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install Dependencies
         run: |
@@ -33,5 +33,4 @@ jobs:
         run: |
           cd target/tests
           cmake --build . --parallel 2
-          export DISPLAY=:99
           xvfb-run --auto-servernum ctest --output-on-failure --no-tests=error
