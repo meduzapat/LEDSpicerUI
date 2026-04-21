@@ -268,6 +268,8 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 
 MainWindow::~MainWindow() {
 
+	Storage::CollectionHandler::purgeAll();
+
 	// Data dialogs.
 	delete DataDialogs::DialogSelect::getInstance();
 	delete DataDialogs::DialogProfile::getInstance();
@@ -278,9 +280,6 @@ MainWindow::~MainWindow() {
 
 	// Miscellaneous dialogs.
 	delete DialogColors::getInstance();
-	Storage::CollectionHandler::purgeAll();
-
-	delete listBoxDataSource;
 }
 
 void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {

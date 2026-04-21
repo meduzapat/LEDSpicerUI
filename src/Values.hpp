@@ -75,7 +75,7 @@ public:
 	/**
 	 * @return a list of stored values
 	 */
-	const StringUMap* getValues() const noexcept;
+	const StringUMap& getValues() const noexcept;
 
 	/**
 	 * Replace values from a map.
@@ -94,12 +94,12 @@ public:
 	 */
 	virtual void wipe() noexcept;
 
-	StringUMap::iterator begin()        noexcept       { return values.begin();  }
-	StringUMap::iterator end()          noexcept       { return values.end();    }
-	StringUMap::const_iterator begin()  const noexcept { return values.begin();  }
-	StringUMap::const_iterator end()    const noexcept { return values.end();    }
-	StringUMap::const_iterator cbegin() const noexcept { return values.cbegin(); }
-	StringUMap::const_iterator cend()   const noexcept { return values.cend();   }
+	auto begin()        noexcept { return values.begin();  }
+	auto end()          noexcept { return values.end();    }
+	auto begin()  const noexcept { return values.begin();  }
+	auto end()    const noexcept { return values.end();    }
+	auto cbegin() const noexcept { return values.cbegin(); }
+	auto cend()   const noexcept { return values.cend();   }
 
 	/**
 	 * Swaps the internal data with another Values object.

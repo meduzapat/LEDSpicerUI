@@ -101,13 +101,13 @@ TEST_F(DataTest, UnSetPrimaryKeyRemovesFromCollection) {
 	item.unSet("extra");
 	EXPECT_TRUE(ch->isSet(&item));
 	EXPECT_EQ("", item.getValue("extra"));
-	EXPECT_EQ(0,  item.getValues()->count("extra"));
+	EXPECT_EQ(0,  item.getValues().count("extra"));
 
 	// Primary key removal — unregisters.
 	item.unSet("name");
 	EXPECT_FALSE(ch->isSet(&item));
 	EXPECT_EQ("", item.getValue("name"));
-	EXPECT_EQ(0,  item.getValues()->count("name"));
+	EXPECT_EQ(0,  item.getValues().count("name"));
 }
 
 TEST_F(DataTest, WipeRemovesFromCollection) {
@@ -118,7 +118,7 @@ TEST_F(DataTest, WipeRemovesFromCollection) {
 	ch->add(&item);
 	item.wipe();
 	EXPECT_FALSE(ch->isSet(&item));
-	EXPECT_TRUE(item.getValues()->empty());
+	EXPECT_TRUE(item.getValues().empty());
 }
 
 // Wipe on an item that was never registered is safe (no crash, no-op).
@@ -127,7 +127,7 @@ TEST_F(DataTest, WipeUnregisteredItemSafe) {
 	RegisteringData item(d);
 	item.setValue("name", "Ghost");
 	EXPECT_NO_FATAL_FAILURE(item.wipe());
-	EXPECT_TRUE(item.getValues()->empty());
+	EXPECT_TRUE(item.getValues().empty());
 }
 
 TEST_F(DataTest, ToXML) {
@@ -139,7 +139,7 @@ TEST_F(DataTest, ToXML) {
 }
 
 TEST_F(DataTest, GetValues) {
-	EXPECT_EQ(4, data->getValues()->size());
+	EXPECT_EQ(4, data->getValues().size());
 }
 
 TEST_F(DataTest, CreatePrettyName) {

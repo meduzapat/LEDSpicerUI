@@ -214,8 +214,8 @@ void DialogInputSource::populateSourcesComboBox(const StringMap& sources) noexce
 	}
 
 	auto row = *(listStore->append());
-	row.set_value(0, string());
-	row.set_value(1, string());
+	row.set_value(0, emptyString);
+	row.set_value(1, emptyString);
 	row.set_value(2, true);
 
 	for (const auto& [id, display] : sources) {

@@ -36,7 +36,7 @@ string Device::createPrettyName() const noexcept {
 }
 
 string Device::createUniqueId() const noexcept {
-	return Defaults::createHardwareUniqueId(*getValues());
+	return Defaults::createHardwareUniqueId(getValues());
 }
 
 CollectionHandler* Device::getCollectionHandler() const noexcept {

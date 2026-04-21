@@ -513,8 +513,8 @@ void Defaults::populateComboBoxWithIds(
 
 	if (not emptyLabel.empty()) {
 		auto row = *(store->append());
-		row.set_value(0, string());
-		row.set_value(1, string(emptyLabel));
+		row.set_value(0, emptyString);
+		row.set_value(1, emptyLabel);
 		row.set_value(2, false);
 	}
 

@@ -20,7 +20,6 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Message.hpp"
 #include "Storage/BoxButtonCollection.hpp"
 
 #pragma once
@@ -54,7 +53,7 @@ public:
 	 * @param collectionName
 	 * @return an instance of that collection.
 	 */
-	static CollectionHandler* getInstance(string_view collectionName) noexcept;
+	static CollectionHandler* getInstance(const string& collectionName) noexcept;
 
 	/**
 	 * Removes and deletes all stored collections.
@@ -131,17 +130,12 @@ public:
 	void refreshComboBox(Gtk::ComboBoxText* comboBox) noexcept;
 
 	/**
-	 * Refresh a single combobox contents with the collection values.
+	 * Refresh a single combobox contents with the collection values,
+	 * excluding items that have any of the given properties set.
 	 * @param comboBox the combobox to refresh.
-	 * @param a filter to use
+	 * @param excludeProperties properties — items with any of these set are skipped.
 	 */
-	void refreshComboBox(Gtk::ComboBoxText* comboBox, const std::function<bool(const Data*)>& filter) noexcept;
-
-	/**
-	 * Register a collection consumer.
-	 * @param destination
-	 */
-	void registerComboBox(Gtk::ComboBoxText* destination) noexcept;
+	void refreshComboBox(Gtk::ComboBoxText* comboBox, const vector<string>&  excludeProperties) noexcept;
 
 	/**
 	 * Removes a collection consumer.
@@ -149,27 +143,18 @@ public:
 	 */
 	void release(BoxButtonCollection* destination) noexcept;
 
-	/**
-	 * Removes a tracked dependency or selection binding.
-	 * @param destination
-	 */
-	void release(Gtk::ComboBoxText* destination) noexcept;
-
-	StringDataMap::iterator begin() noexcept { return collection.begin(); }
-	StringDataMap::iterator end() noexcept { return collection.end(); }
-	StringDataMap::const_iterator begin() const noexcept { return collection.begin(); }
-	StringDataMap::const_iterator end() const noexcept { return collection.end(); }
+	auto begin()       noexcept { return collection.begin(); }
+	auto end()         noexcept { return collection.end();   }
+	auto begin() const noexcept { return collection.begin(); }
+	auto end()   const noexcept { return collection.end();   }
 
 protected:
 
 	/// Stores the collection of items indexed by their unique identifier.
-	StringDataMap collection;
+	StringDataPtrMap collection;
 
 	/// List of collections that keeps references to items in the collection.
 	vector<Dependency> dependencies;
-
-	/// List of selectors.
-	vector<Gtk::ComboBoxText*> comboBoxes;
 
 	/// Keeps collections instances.
 	static std::unordered_map<string, CollectionHandler*> collections;
@@ -178,11 +163,6 @@ protected:
 	 * Avoids instantiation.
 	 */
 	CollectionHandler() = default;
-
-	/**
-	 * Populates comboboxes.
-	 */
-	void refreshComboBoxes() noexcept;
 
 };
 

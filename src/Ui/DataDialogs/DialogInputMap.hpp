@@ -75,11 +75,9 @@ protected:
 
 	DialogInputMap(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept;
 
-	string_view getType() const noexcept override { return TYPE_INPUT_MAP; }
+	const string& getType() const noexcept override { return TYPE_INPUT_MAP; }
 
 	Storage::Data* createData(StringUMap& rawData) const noexcept override;
-
-	static bool elementFilter(const Storage::Data* data) noexcept;
 
 };
 

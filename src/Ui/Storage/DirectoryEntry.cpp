@@ -29,7 +29,7 @@ DirectoryEntry::DirectoryEntry(
 	DirectoryEntry* parent
 ) noexcept :
 	Data(data),
-	DirNode(getProperties(), parent, getValue(NAME))
+	DirNode(getProperties(), parent, getValue(FILENAME))
 {}
 
 string DirectoryEntry::createUniqueId() const noexcept {

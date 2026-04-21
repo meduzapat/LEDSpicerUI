@@ -52,8 +52,8 @@ StringUMap Values::copyValues() const noexcept {
 	return {values};
 }
 
-const StringUMap* Values::getValues() const noexcept {
-	return &values;
+const StringUMap& Values::getValues() const noexcept {
+	return values;
 }
 
 void Values::setValues(const StringUMap& values) noexcept {

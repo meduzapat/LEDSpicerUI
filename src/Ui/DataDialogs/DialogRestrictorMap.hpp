@@ -71,7 +71,7 @@ protected:
 	 */
 	bool checkAvailableInterfaces() const noexcept;
 
-	string_view getType() const noexcept override { return TYPE_RESTRICTOR_MAP; }
+	const string& getType() const noexcept override { return TYPE_RESTRICTOR_MAP; }
 	Storage::Data* createData(StringUMap& rawData) const noexcept override;
 
 	void afterCreate(Storage::BoxButton& boxButton) noexcept override;

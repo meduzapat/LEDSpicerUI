@@ -43,7 +43,9 @@ public:
 	static constexpr const int MAX_COLUMNS = 20;
 	static constexpr const int MIN_COLUMNS = 10;
 
-	virtual ~DialogElement() = default;
+	virtual ~DialogElement() {
+		switchPageConnection.disconnect();
+	};
 
 	void load(XMLHelper* values) noexcept override;
 	void isValid() const override;
@@ -99,11 +101,14 @@ protected:
 		* comboBoxRGBStrip = nullptr, /// LED Strip.
 		* comboBoxRGBMRGB  = nullptr; /// Multi RGB.
 
+	/// Connection for the notebook page switch, needed to disconnect and avoid errors.
+	sigc::connection switchPageConnection;
+
 	DialogElement(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept;
 
 	void clearFormConditinal(uint8_t flags) noexcept;
 
-	string_view getType() const noexcept override { return TYPE_ELEMENT; }
+	const string& getType() const noexcept override { return TYPE_ELEMENT; }
 
 	Storage::Data* createData(StringUMap& rawData) const noexcept override;
 

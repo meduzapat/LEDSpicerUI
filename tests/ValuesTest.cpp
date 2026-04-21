@@ -58,16 +58,16 @@ TEST_F(ValuesTest, SetValue) {
 TEST_F(ValuesTest, UnSet) {
 	values->unSet("name");
 	EXPECT_EQ("", values->getValue("name"));
-	EXPECT_EQ(0,  values->getValues()->count("name"));
+	EXPECT_EQ(0,  values->getValues().count("name"));
 }
 
 TEST_F(ValuesTest, Wipe) {
 	values->wipe();
-	EXPECT_TRUE(values->getValues()->empty());
+	EXPECT_TRUE(values->getValues().empty());
 }
 
 TEST_F(ValuesTest, GetValues) {
-	EXPECT_EQ(4, values->getValues()->size());
+	EXPECT_EQ(4, values->getValues().size());
 }
 
 TEST_F(ValuesTest, Swap) {

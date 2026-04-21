@@ -46,10 +46,8 @@ public:
 	struct SettingRequest {
 		/// Reference to the navigator's own box pointer.
 		OrdenableFlowBox*& box;
-		/// Scoped directory collection Id.
-		string_view collectionId;
 		/// Section type label Fed into getType().
-		string_view typeLabel;
+		const string& typeLabel;
 
 		/// Function to call to enter into a dir, used by BoxButtons
 		std::function<void(Storage::DirectoryEntry*)> enterDir;
@@ -83,7 +81,7 @@ protected:
 
 	Storage::Data* createData(StringUMap& rawData) const noexcept override;
 
-	string_view getType() const noexcept override;
+	const string& getType() const noexcept override;
 
 	void addButtons(Storage::BoxButton& boxButton) noexcept override;
 

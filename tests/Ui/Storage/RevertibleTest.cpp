@@ -32,11 +32,11 @@ public:
 
 	TestRevertible(StringUMap& data) :
 		Parent(data, {}),
-		Revertible(*this, &children)
+		Revertible(*this, children)
 	{}
 
 	// Expose snap storage for assertions only.
-	const StringUMap* getSnapFields()         const noexcept { return snapFields.getValues(); }
+	const StringUMap& getSnapFields()         const noexcept { return snapFields.getValues(); }
 	CollectionHandler* getCollectionHandler() const noexcept override { return nullptr; }
 	string_view getCssClass()                 const noexcept override { return "test"; }
 	string_view getXmlTag()                   const noexcept override { return "test"; }
@@ -49,15 +49,15 @@ TEST(RevertibleTest, SwapAndRevert) {
 
 	TestRevertible r(data);
 
-	EXPECT_TRUE(r.getSnapFields()->empty());
+	EXPECT_TRUE(r.getSnapFields().empty());
 
 	r.snapshot();
-	EXPECT_TRUE(r.getValues()->empty());
-	EXPECT_EQ(*r.getSnapFields(), expected);
+	EXPECT_TRUE(r.getValues().empty());
+	EXPECT_EQ(r.getSnapFields(), expected);
 
 	r.revert();
-	EXPECT_EQ(*r.getValues(), expected);
-	EXPECT_TRUE(r.getSnapFields()->empty());
+	EXPECT_EQ(r.getValues(), expected);
+	EXPECT_TRUE(r.getSnapFields().empty());
 }
 
 // swap() is a no-op when fields are already empty.
@@ -66,7 +66,7 @@ TEST(RevertibleTest, SwapNoOpOnEmptyFields) {
 	TestRevertible r(data);
 
 	r.snapshot();
-	EXPECT_TRUE(r.getSnapFields()->empty());
+	EXPECT_TRUE(r.getSnapFields().empty());
 }
 
 // swap() is a no-op when a snapshot already exists.
@@ -75,11 +75,11 @@ TEST(RevertibleTest, SwapNoOpWhenAlreadySnapped) {
 	TestRevertible r(data);
 
 	r.snapshot();
-	const StringUMap firstSnap{*r.getSnapFields()};
+	const StringUMap firstSnap{r.getSnapFields()};
 	r.setValue("extra", "x");
 	r.snapshot();
 
-	EXPECT_EQ(*r.getSnapFields(), firstSnap);
+	EXPECT_EQ(r.getSnapFields(), firstSnap);
 }
 
 // revert() is a no-op when no snapshot exists.
@@ -89,7 +89,7 @@ TEST(RevertibleTest, RevertNoOpWithoutSnap) {
 	TestRevertible r(data);
 
 	r.revert();
-	EXPECT_EQ(*r.getValues(), expected);
+	EXPECT_EQ(r.getValues(), expected);
 }
 
 // clearSnap() discards snap without touching live fields.
@@ -100,7 +100,7 @@ TEST(RevertibleTest, ClearSnapLeavesLiveFields) {
 	r.snapshot();
 	r.clearSnap();
 
-	EXPECT_TRUE(r.getSnapFields()->empty());
+	EXPECT_TRUE(r.getSnapFields().empty());
 	// Live fields were swapped out — clearSnap does not restore them.
-	EXPECT_TRUE(r.getValues()->empty());
+	EXPECT_TRUE(r.getValues().empty());
 }

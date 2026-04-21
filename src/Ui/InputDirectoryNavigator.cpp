@@ -33,7 +33,6 @@ InputDirectoryNavigator::InputDirectoryNavigator(
 	dialogImportInput(DialogImport::Types::INPUT, parentWindow),
 	dirSetting {
 		boxInputs,
-		COLLECTION_INPUT_DIRECTORIES,
 		TYPE_INPUT_DIR,
 		[this](Storage::DirectoryEntry* dir) { enterDirectory(dir); }
 	}

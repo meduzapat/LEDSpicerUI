@@ -57,6 +57,7 @@ void DialogDirectory::isValid() const {
 		entryDirectoryName->grab_focus();
 		throw Message("Enter a folder name.");
 	}
+
 	string uid(createUniqueId());
 	if (currentData->getCollectionHandler()->isIdSet(uid)) {
 		if (action != Actions::EDIT or currentData->createUniqueId() != uid)
@@ -65,21 +66,21 @@ void DialogDirectory::isValid() const {
 }
 
 void DialogDirectory::storeData() noexcept {
-	currentData->setValue(NAME, Defaults::sanitizeFilename(entryDirectoryName->get_text()));
+	currentData->getProperties().setValue(FILENAME, Defaults::sanitizeFilename(entryDirectoryName->get_text()));
 }
 
 void DialogDirectory::retrieveData() noexcept {
-	entryDirectoryName->set_text(currentData->getValue(NAME));
+	entryDirectoryName->set_text(currentData->getProperties().getValue(FILENAME));
 }
 
 string DialogDirectory::createUniqueId() const noexcept {
 	return Defaults::createCommonUniqueId({
-		ownerData->getProperties().getValue(PID),
+		ownerData->getProperties().getValue(UID),
 		Defaults::sanitizeFilename(entryDirectoryName->get_text())
 	});
 }
 
-string_view DialogDirectory::getType() const noexcept {
+const string& DialogDirectory::getType() const noexcept {
 	return setting->typeLabel;
 }
 

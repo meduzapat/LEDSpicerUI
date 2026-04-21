@@ -49,7 +49,7 @@ TEST(DefaultsTest, IsBetween) {
 
 TEST(DefaultsTest, AddUnitSeparator) {
 	EXPECT_EQ(Defaults::addUnitSeparator("test"), UNIT_SEPARATOR + string("test") + UNIT_SEPARATOR);
-	EXPECT_EQ(Defaults::addUnitSeparator(""), UNIT_SEPARATOR + string() + UNIT_SEPARATOR);
+	EXPECT_EQ(Defaults::addUnitSeparator(emptyString), UNIT_SEPARATOR + emptyString + UNIT_SEPARATOR);
 	EXPECT_EQ(Defaults::addUnitSeparator("a b"), UNIT_SEPARATOR + string("a b") + UNIT_SEPARATOR);
 }
 

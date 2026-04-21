@@ -20,7 +20,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CollectionHandler.hpp"
+#include "BoxButtonCollection.hpp"
 
 #pragma once
 
@@ -38,22 +38,31 @@ namespace LEDSpicerUI::Ui::Storage {
  * revert() inside their tearDown().
  *
  * Lifecycle:
- *   - DialogFormHost calls swap() on type switch — fields and children move into snapshot storage in one pass.
- *   - On APPLY: consumer calls clearSnap() then Data::wipe().
- *   - On CANCEL: consumer calls revert() from tearDown() before Data::tearDown().
+ *   snapshot() — called by DialogFormHost on type switch.
+ *     Children are marked FROZEN in their CollectionHandler (invisible to all
+ *     queries and combos). Fields and child collections are swapped into
+ *     snapshot storage in one pass. No handler removals fire.
+ *
+ *   On CANCEL — consumer calls revert() from tearDown():
+ *     New items (added after the switch) are wiped; their destructors fire
+ *     remove() normally. Old frozen items are unfrozen via unfreeze():
+ *     in-place if still in the map, re-inserted if they were evicted by a
+ *     colliding new item.
+ *
+ *   On APPLY — consumer calls clearSnap() from wipe():
+ *     Frozen snap items are unfrozen then wiped. Their destructors fire
+ *     remove(); the pointer-equality guard in remove() ensures evicted items
+ *     are silently skipped while non-evicted ones cascade-clean their
+ *     remaining dependency references.
  */
 class Revertible {
 
 public:
 
 	/**
-	 * @param fields   Reference to the consumer's values.
-	 * @param children Pointer to the consumer's children map, or nullptr if none.
+	 * @param children Pointer to the consumer's children map for initialization.
 	 */
-	Revertible(
-		Values& fields,
-		StringBoxButtonCollectionUMap* children = nullptr
-	) noexcept;
+	Revertible(Values& fields, StringBoxButtonCollectionUMap& children) noexcept;
 
 	virtual ~Revertible();
 
@@ -81,7 +90,7 @@ protected:
 	Values& liveFields;
 
 	/// Pointer to the consumer's children map. nullptr = no children.
-	StringBoxButtonCollectionUMap* liveChildren;
+	StringBoxButtonCollectionUMap& liveChildren;
 
 	/// Snapshot of liveFields. Empty = no snapshot active.
 	Values snapFields;

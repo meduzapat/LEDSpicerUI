@@ -208,6 +208,6 @@ protected:
 	}
 };
 
-using StringDataMap = std::map<string, Data*>;
+using StringDataPtrMap = std::map<string, Data*>;
 
 } // namespace

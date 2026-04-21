@@ -125,7 +125,7 @@ DialogElement::DialogElement(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 	});
 
 	// When the notebook page changes, remove the values on the other page.
-	notebookDeviceConnections->signal_switch_page().connect(sigc::mem_fun(*this, &DialogElement::onSwitchPage));
+	switchPageConnection = notebookDeviceConnections->signal_switch_page().connect(sigc::mem_fun(*this, &DialogElement::onSwitchPage));
 
 	// Name Generator.
 	Gtk::Dialog* dialogGenerateElementName = nullptr;

@@ -38,7 +38,7 @@ public:
 
 	Device(StringUMap& data) noexcept :
 		Parent(data, {COLLECTION_ELEMENT}),
-		Revertible(*this, &children)
+		Revertible(*this, children)
 	{}
 
 	virtual ~Device() = default;

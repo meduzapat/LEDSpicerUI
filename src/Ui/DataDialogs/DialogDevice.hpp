@@ -41,7 +41,7 @@ public:
 
 	virtual ~DialogDevice() = default;
 
-	static constexpr string_view noDevice {"Select Device"};
+	inline static const string noDevice {"Select Device"};
 
 	void load(XMLHelper* values) noexcept override;
 	void isValid() const override;
@@ -63,7 +63,7 @@ protected:
 	DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept;
 
 	void createSubItems(XMLHelper* values) noexcept override;
-	string_view getType() const noexcept override { return TYPE_DEVICE; }
+	const string& getType() const noexcept override { return TYPE_DEVICE; }
 	Storage::Data* createData(StringUMap& rawData) const noexcept override;
 	void onEmpty() noexcept override;
 	void onSelected() noexcept override;

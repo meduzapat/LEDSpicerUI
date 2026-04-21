@@ -54,7 +54,7 @@ DialogInputMap::DialogInputMap(BaseObjectType* obj, const Glib::RefPtr<Gtk::Buil
 
 	stackElementAndGroup->connect_property_changed("visible-child", [this]() {
 		if (stackElementAndGroup->get_visible_child_name() == "InputTypeElement") {
-			Storage::CollectionHandler::getInstance(COLLECTION_ELEMENT)->refreshComboBox(comboBoxInputMapElement, &DialogInputMap::elementFilter);
+			Storage::CollectionHandler::getInstance(COLLECTION_ELEMENT)->refreshComboBox(comboBoxInputMapElement, {PROP_EXPAND});
 			comboBoxInputMapGroup->set_active(-1);
 		}
 		else {
@@ -100,7 +100,7 @@ void DialogInputMap::setOwner(
 }
 
 void DialogInputMap::clearForm() noexcept {
-	Storage::CollectionHandler::getInstance(COLLECTION_ELEMENT)->refreshComboBox(comboBoxInputMapElement, &DialogInputMap::elementFilter);
+	Storage::CollectionHandler::getInstance(COLLECTION_ELEMENT)->refreshComboBox(comboBoxInputMapElement, {PROP_EXPAND});
 	Storage::CollectionHandler::getInstance(COLLECTION_GROUP)->refreshComboBox(comboBoxInputMapGroup);
 	comboBoxInputMapElement->set_active(-1);
 	comboBoxInputMapGroup->set_active(-1);
@@ -192,8 +192,4 @@ LEDSpicerUI::Ui::Storage::Data* DialogInputMap::createData(StringUMap& rawData) 
 	auto im{new Storage::InputMap(rawData, handler ? handler->get(target) : nullptr)};
 	im->getProperties().setValue(PID, ownerData->getProperties().getValue(UID));
 	return im;
-}
-
-bool DialogInputMap::elementFilter(const LEDSpicerUI::Ui::Storage::Data* data) noexcept {
-	return not data->getProperties().isSet(PROP_EXPAND);
 }

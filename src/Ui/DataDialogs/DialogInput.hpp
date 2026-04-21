@@ -43,8 +43,7 @@ class DialogInput :
 
 public:
 
-	static constexpr const char* BOX_INPUTS = "BoxInputs";
-	static constexpr string_view noInput{"Select Input Type"};
+	inline static const string noInput{"Select Input Type"};
 
 	virtual ~DialogInput() = default;
 
@@ -78,8 +77,8 @@ protected:
 
 	DialogInput(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept;
 
-	void createSubItems(XMLHelper* values)         noexcept override;
-	string_view getType()                    const noexcept override { return TYPE_INPUT; }
+	void createSubItems(XMLHelper* values) noexcept override;
+	const string& getType() const noexcept override { return TYPE_INPUT; }
 	Storage::Data* createData(StringUMap& rawData) const noexcept override;
 
 	void onEmpty()    noexcept override;

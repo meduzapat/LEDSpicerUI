@@ -228,17 +228,6 @@ TEST_F(CollectionHandlerTest, PurgeAllCreatesEmptyInstance) {
 	EXPECT_FALSE(ch->isIdSet("A"));
 }
 
-// registerComboBox — combo is populated when item is added.
-TEST_F(CollectionHandlerTest, ComboBoxPopulatedOnAdd) {
-	auto combo{Gtk::manage(new Gtk::ComboBoxText())};
-	ch->registerComboBox(combo);
-	StringUMap d{{NAME, "A"}};
-	TestData item(d);
-	ch->add(&item);
-	EXPECT_EQ(1, (int)combo->get_model()->children().size());
-	ch->release(combo);
-}
-
 // release(BoxButtonCollection*) removes dependency — no cascade after release.
 TEST_F(CollectionHandlerTest, ReleaseDependencyStopsCascade) {
 	BoxButtonCollection dependent;

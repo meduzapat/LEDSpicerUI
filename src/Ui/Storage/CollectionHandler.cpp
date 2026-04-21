@@ -26,8 +26,8 @@ using namespace LEDSpicerUI::Ui::Storage;
 
 std::unordered_map<string, CollectionHandler*> CollectionHandler::collections;
 
-CollectionHandler* CollectionHandler::getInstance(string_view collectionName) noexcept {
-	auto [it, inserted] = collections.try_emplace(string(collectionName), new CollectionHandler());
+CollectionHandler* CollectionHandler::getInstance(const string& collectionName) noexcept {
+	auto [it, inserted] = collections.try_emplace(collectionName, new CollectionHandler());
 	return it->second;
 }
 
@@ -38,28 +38,33 @@ void CollectionHandler::purgeAll() noexcept {
 }
 
 Data* CollectionHandler::get(const string& id) const noexcept {
-	return (isIdSet(id) ? collection.at(id) : nullptr);
+	auto it{collection.find(id)};
+	if (it == collection.end() or it->second->getProperties().isSet(PROP_FROZEN)) return nullptr;
+	return it->second;
 }
+
 
 bool CollectionHandler::isSet(const Data* item) const noexcept {
 	return isIdSet(item->createUniqueId());
 }
 
 bool CollectionHandler::isIdSet(const string& id) const noexcept {
-	return collection.find(id) != collection.end();
+	auto it = collection.find(id);
+	return it != collection.end() and not it->second->getProperties().isSet(PROP_FROZEN);
 }
 
 size_t CollectionHandler::countByKey(const string& key, const string& value) const noexcept {
-	size_t count = 0;
+	size_t count{0};
 	for (const auto& item : collection)
-		if (item.second->getValue(key) == value) ++count;
+		if (not item.second->getProperties().isSet(PROP_FROZEN) and item.second->getValue(key) == value)
+			++count;
 	return count;
 }
 
 vector<Data*> CollectionHandler::findByProperty(const string& property, const string& value) const noexcept {
 	vector<Data*> results;
 	for (const auto& item : collection) {
-		if (item.second->getProperties().getValue(property) == value) {
+		if (not item.second->getProperties().isSet(PROP_FROZEN) and item.second->getProperties().getValue(property) == value) {
 			results.push_back(item.second);
 		}
 	}
@@ -67,15 +72,36 @@ vector<Data*> CollectionHandler::findByProperty(const string& property, const st
 }
 
 void CollectionHandler::add(Data* item) noexcept {
-	if (isSet(item)) return;
-	collection.emplace(item->createUniqueId(), item);
-	refreshComboBoxes();
+	auto uid{item->createUniqueId()};
+	auto it{collection.find(uid)};
+	// Item exists.
+	if (it != collection.end()) {
+		// Take over replacer.
+		if (item->getProperties().isSet(PROP_FROZEN)) {
+			collection[uid] = item;
+			item->getProperties().unSet(PROP_FROZEN);
+			return;
+		}
+		// Replace existing frozen item.
+		if (it->second->getProperties().isSet(PROP_FROZEN))
+			collection[uid] = item;
+		return;
+	}
+	collection.emplace(uid, item);
+//	refreshComboBoxes();
 	refreshSensitiveWidgets();
 }
 
 void CollectionHandler::remove(Data* item) noexcept {
+	// Item was evicted.
+	if (item->getProperties().isSet(PROP_FROZEN)) {
+		item->getProperties().unSet(PROP_FROZEN);
+		return;
+	}
 	auto uid{item->createUniqueId()};
-	if (uid.empty() or not isIdSet(uid)) return;
+	// Item never registered.
+	if (uid.empty() or not isIdSet(uid))
+		return;
 
 	collection.erase(uid);
 
@@ -86,7 +112,7 @@ void CollectionHandler::remove(Data* item) noexcept {
 		if (dep.minSize and dep.onDepletion and dep.collection->getSize() < dep.minSize)
 			pending.push_back(dep.onDepletion);
 	}
-	refreshComboBoxes();
+//	refreshComboBoxes();
 	refreshSensitiveWidgets();
 
 	for (auto& callback : pending) callback();
@@ -109,17 +135,18 @@ void CollectionHandler::refreshComboBox(Gtk::ComboBoxText* comboBox) noexcept {
 }
 
 void CollectionHandler::refreshComboBox(
-	Gtk::ComboBoxText* comboBox,
-	const std::function<bool(const Data*)>& filter
+	Gtk::ComboBoxText*    comboBox,
+	const vector<string>& excludeProperties
 ) noexcept {
 	comboBox->remove_all();
-	for (const auto& item : collection)
-		if (filter(item.second))
-			comboBox->append(item.second->createUniqueId(), item.second->createPrettyName());
-}
-
-void CollectionHandler::registerComboBox(Gtk::ComboBoxText* destination) noexcept {
-	comboBoxes.push_back(destination);
+	for (const auto& [id, data] : collection) {
+		if (std::none_of(
+			excludeProperties.begin(),
+			excludeProperties.end(),
+			[&data](const string& prop) { return data->getProperties().isSet(prop); }
+		))
+			comboBox->append(data->createUniqueId(), data->createPrettyName());
+	}
 }
 
 void CollectionHandler::release(BoxButtonCollection* destination) noexcept {
@@ -131,14 +158,4 @@ void CollectionHandler::release(BoxButtonCollection* destination) noexcept {
 		}
 	);
 	if (it != dependencies.end()) dependencies.erase(it);
-}
-
-void CollectionHandler::release(Gtk::ComboBoxText* destination) noexcept {
-	comboBoxes.erase(std::find(comboBoxes.begin(), comboBoxes.end(), destination));
-}
-
-void CollectionHandler::refreshComboBoxes() noexcept {
-	for (auto comboBox : comboBoxes) {
-		refreshComboBox(comboBox);
-	}
 }

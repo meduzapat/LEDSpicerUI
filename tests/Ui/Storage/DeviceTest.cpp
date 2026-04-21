@@ -84,7 +84,7 @@ TEST_F(DeviceTest, WipeClearsFields) {
 	StringUMap data{{NAME, "RaspberryPi"}, {ID, "1"}, {PORT, ""}};
 	Device d(data);
 	d.wipe();
-	EXPECT_TRUE(d.getValues()->empty());
+	EXPECT_TRUE(d.getValues().empty());
 }
 
 int main(int argc, char** argv) {

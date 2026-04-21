@@ -29,7 +29,7 @@ BoxButton::BoxButton(Data* form) noexcept :
 	data{form},
 	label{Gtk::make_managed<Gtk::Label>()}
 {
-	form->registerToCollection();
+//	form->registerToCollection();
 	set_valign(Gtk::ALIGN_START);
 	set_vexpand(false);
 	set_margin_top(2);

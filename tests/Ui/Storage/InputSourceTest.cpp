@@ -147,16 +147,16 @@ TEST_F(InputSourceTest, WipeClearsValues) {
 	StringUMap data{{SOURCE, "hw1"}};
 	InputSource src(data, "owner_1");
 	src.wipe();
-	EXPECT_TRUE(src.getValues()->empty());
+	EXPECT_TRUE(src.getValues().empty());
 }
 
 // snapshot / revert round-trip.
 TEST_F(InputSourceTest, SnapshotAndRevert) {
 	StringUMap data{{SOURCE, "hw1"}};
 	InputSource src(data, "owner_1");
-	const StringUMap before(*src.getValues());
+	const StringUMap before(src.getValues());
 	src.snapshot();
-	EXPECT_TRUE(src.getValues()->empty());
+	EXPECT_TRUE(src.getValues().empty());
 	src.revert();
-	EXPECT_EQ(before, *src.getValues());
+	EXPECT_EQ(before, src.getValues());
 }

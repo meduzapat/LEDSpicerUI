@@ -24,15 +24,12 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-Revertible::Revertible(
-	Values& fields,
-	StringBoxButtonCollectionUMap* children
-) noexcept :
+Revertible::Revertible(Values& fields, StringBoxButtonCollectionUMap& children) noexcept :
 	liveFields(fields),
 	liveChildren(children)
 {
-	for (auto& [id, collection] : *liveChildren)
-		childrenSnaps.emplace_back(&collection, BoxButtonCollection{});
+	for (auto& [id, col] : liveChildren)
+		childrenSnaps.emplace_back(&col, BoxButtonCollection{});
 }
 
 Revertible::~Revertible() {
@@ -41,36 +38,33 @@ Revertible::~Revertible() {
 
 void Revertible::snapshot() {
 
-	if (liveFields.getValues()->empty() or not snapFields.getValues()->empty()) return;
+	if (liveFields.getValues().empty() or not snapFields.getValues().empty()) return;
 
-	for (auto& [id, collection] : *liveChildren) {
-		for (auto btn : collection) {
-			if (auto handler{btn->getData()->getCollectionHandler()}; handler)
-				handler->remove(btn->getData());
-		}
-	}
+	for (auto& [id, col] : liveChildren)
+		for (auto btn : col)
+			btn->getData()->getProperties().setValue(PROP_FROZEN, "1");
 
 	liveFields.swap(snapFields);
-	for (auto& [live, snap] : childrenSnaps)
-		live->swap(snap);
+		for (auto& [live, snap] : childrenSnaps)
+			live->swap(snap);
 }
 
 void Revertible::revert() {
 
-	if (snapFields.getValues()->empty()) return;
+	if (snapFields.getValues().empty()) return;
 
 	liveFields.swap(snapFields);
 	snapFields.wipe();
+
 	for (auto& [live, snap] : childrenSnaps) {
 		live->swap(snap);
 		snap.wipe();
 	}
 
-	for (auto& [id, collection] : *liveChildren) {
-		for (auto btn : collection)
-			if (auto handler{btn->getData()->getCollectionHandler()}; handler)
-				handler->add(btn->getData());
-	}
+//	for (auto& [id, collection] : *liveChildren) {
+//		for (auto btn : collection)
+//
+//	}
 }
 
 void Revertible::clearSnap() noexcept {

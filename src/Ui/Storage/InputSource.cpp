@@ -26,7 +26,7 @@ using namespace LEDSpicerUI::Ui::Storage;
 
 InputSource::InputSource(StringUMap& data, const string& ownerId) noexcept :
 	Parent(data, {COLLECTION_INPUT_MAPS}),
-	Revertible(*this, &children)
+	Revertible(*this, children)
 {
 	getProperties().setValue(UID, std::to_string(++sourceCounter));
 	getProperties().setValue(PID, ownerId);

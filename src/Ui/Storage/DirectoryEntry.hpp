@@ -20,7 +20,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "BoxButtonCollection.hpp"
+#include "CollectionHandler.hpp"
 #include "DirNode.hpp"
 
 #pragma once
@@ -53,7 +53,9 @@ public:
 	string_view getCssClass() const noexcept override { return "DirectoryBoxButton"; }
 	string_view getXmlTag()   const noexcept override { return ""; }
 
-	CollectionHandler* getCollectionHandler() const noexcept override { return nullptr; }
+	CollectionHandler* getCollectionHandler() const noexcept override {
+		return CollectionHandler::getInstance(COLLECTION_DIRECTORIES);
+	}
 
 	bool isEmpty() const noexcept;
 

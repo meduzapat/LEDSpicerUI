@@ -38,7 +38,6 @@ DialogForm::DialogForm(
 DialogForm::~DialogForm() {
 	for (auto child : childDialogs)
 		delete child;
-	delete box;
 }
 
 void DialogForm::createItems(StringUMapVector& rawCollection, XMLHelper* values) noexcept {
@@ -72,7 +71,7 @@ void DialogForm::createItems(StringUMapVector& rawCollection, XMLHelper* values)
 	}
 	currentData = nullptr;
 	if (not errors.empty()) {
-		Message::displayError("Errors in " + string(getType()) + ":\n" + errors);
+		Message::displayError("Errors in " + getType() + ":\n" + errors);
 	}
 }
 
@@ -103,7 +102,7 @@ void DialogForm::resetForm() noexcept {
 vector<const StringUMap*> DialogForm::getValues() const noexcept {
 	vector<const StringUMap*> values;
 	for (const auto& b : *items)
-		values.push_back(b->getData()->getValues());
+		values.push_back(&b->getData()->getValues());
 	return values;
 }
 
@@ -203,7 +202,7 @@ void DialogForm::addButtons(Storage::BoxButton& boxButton) noexcept {
 void DialogForm::onAddClicked() noexcept {
 	action = Actions::ADD;
 	clearForm();
-	set_title("Add New " + string(getType()));
+	set_title("Add New " + getType());
 	btnApply->set_label("Create");
 	currentData = createData();
 	wireChildrenDialogs();
@@ -235,7 +234,7 @@ void DialogForm::onEditClicked(Storage::BoxButton& boxButton) noexcept {
 	currentData = boxButton.getData();
 	wireChildrenDialogs();
 	// Set label and title.
-	set_title("Edit " + string(getType()) + " " + currentData->createPrettyName());
+	set_title("Edit " + getType() + " " + currentData->createPrettyName());
 	btnApply->set_label("Save");
 	// Populate form.
 	retrieveData();

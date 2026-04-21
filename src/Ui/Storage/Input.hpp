@@ -45,7 +45,7 @@ public:
 			//COLLECTION_INPUT_LINKMAP
 		}),
 		DirNode(getProperties(), parent, getValue(FILENAME)),
-		Revertible(*this, &children)
+		Revertible(*this, children)
 	{}
 
 	virtual ~Input() = default;

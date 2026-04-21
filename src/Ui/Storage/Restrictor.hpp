@@ -37,7 +37,7 @@ public:
 
 	Restrictor(StringUMap& data) noexcept :
 		Parent(data, {COLLECTION_RESTRICTOR_MAP}),
-		Revertible(*this, &children)
+		Revertible(*this, children)
 	{}
 
 	virtual ~Restrictor() = default;

@@ -37,7 +37,7 @@ class DialogRestrictor : public DialogFormHost, public SingletonDialog<DialogRes
 
 public:
 
-	static constexpr string_view noRestrictor {"Select Restrictor"};
+	inline static const string noRestrictor {"Select Restrictor"};
 
 	virtual ~DialogRestrictor() = default;
 
@@ -71,7 +71,7 @@ protected:
 	DialogRestrictor(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept;
 
 	void createSubItems(XMLHelper* values) noexcept override;
-	string_view getType() const noexcept override { return TYPE_RESTRICTOR; }
+	const string& getType() const noexcept override { return TYPE_RESTRICTOR; }
 	Storage::Data* createData(StringUMap& rawData) const noexcept override;
 	void onEmpty() noexcept override;
 	void onSelected() noexcept override;

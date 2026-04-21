@@ -205,7 +205,7 @@ protected:
 	 * Provides a nice name for the type of data this dialog will create for the dialog.
 	 * @return
 	 */
-	virtual string_view getType() const noexcept abstract;
+	virtual const string& getType() const noexcept abstract;
 
 	/**
 	 * Creates a data object out of raw data.

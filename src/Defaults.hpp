@@ -152,7 +152,8 @@ const string
 	PROP_NO_SELECT {"p.ns"},
 	PROP_SYSTEM    {"p.s"},
 	PROP_STRIP     {"p.sd"},
-	PROP_STRIP_UID {"sd"}, // strip descriptor UID
+	PROP_STRIP_UID {"p.sid"}, // strip descriptor UID
+	PROP_FROZEN    {"p.f"}, // Set in properties while item is snapped
 
 /// CSS-related constants
 	COLOR_PIN      {"pinSingle"},
@@ -233,8 +234,8 @@ const string
 	COLLECTION_PROFILE_ANIMATIONS {"pr.a"},
 
 /// Directories
-	COLLECTION_DIRECTORIES       {"directories"},
-	COLLECTION_INPUT_DIRECTORIES {"input directories"};
+	COLLECTION_DIRECTORIES       {"ds"},
+	COLLECTION_INPUT_DIRECTORIES {"ids"};
 
 } // namespace
 
@@ -280,8 +281,8 @@ public:
 	};
 
 	struct BaseInfo {
-		string_view name;  /// Human-readable display name.
-		string_view brief; /// A brief description of the device.
+		const string name;  /// Human-readable display name.
+		const string brief; /// A brief description of the device.
 	};
 
 	/**

@@ -86,7 +86,7 @@ TEST_F(RestrictorTest, WipeClearsFields) {
 	StringUMap data{{NAME, "ServoStik"}, {ID, "1"}, {PORT, ""}};
 	Restrictor r(data);
 	r.wipe();
-	EXPECT_TRUE(r.getValues()->empty());
+	EXPECT_TRUE(r.getValues().empty());
 }
 
 int main(int argc, char** argv) {

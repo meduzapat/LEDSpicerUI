@@ -89,7 +89,7 @@ protected:
 
 	template<typename TMap>
 	void initializeSelector(
-		string_view emptyMsg,
+		const string& emptyMsg,
 		const TMap& infoMap
 	) noexcept {
 		static_assert(
@@ -99,13 +99,13 @@ protected:
 		if (not listStore)
 			listStore   = static_cast<Gtk::ListStore*>(selectorCombo->get_model().get());
 		auto row = *(listStore->append());
-		row.set_value(0, string());
-		row.set_value(1, string(emptyMsg));
+		row.set_value(0, emptyString);
+		row.set_value(1, emptyMsg);
 		row.set_value(2, false);
 		for (const auto& [id, info] : infoMap) {
 			row = *(listStore->append());
 			row.set_value(0, id);
-			row.set_value(1, string(info.name));
+			row.set_value(1, info.name);
 			row.set_value(2, true);
 		}
 		selectorCombo->set_active(-1);
