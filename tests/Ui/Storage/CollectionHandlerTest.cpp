@@ -191,30 +191,6 @@ TEST_F(CollectionHandlerTest, CascadeRemovesFromDependentCollection) {
 	ch->release(&dependent);    // must come before dependent goes out of scope
 }
 
-// depletion callback fires when size drops below minSize after cascade.
-TEST_F(CollectionHandlerTest, DepletionCallbackFires) {
-	BoxButtonCollection dependent;
-
-	StringUMap dm1{{NAME, "E1"}}, dm2{{NAME, "E2"}};
-	auto d1{new TestData(dm1)};
-	auto d2{new TestData(dm2)};
-	ch->add(d1); ch->add(d2);
-	dependent.create(d1);       // BoxButton owns d1
-	dependent.create(d2);       // BoxButton owns d2
-
-	bool fired = false;
-	ch->registerDependency({&dependent, 2, [&fired]() { fired = true; }});
-
-	EXPECT_FALSE(fired);
-	ch->remove(d1);             // dependent drops to 1 < minSize 2 → callback fires
-	EXPECT_TRUE(fired);
-
-	// Release before dependent is destroyed so BoxButton2's dtor can safely
-	// call unregisterFromCollection without triggering a cascade back into
-	// the collection that is about to be destroyed.
-	ch->release(&dependent);
-}
-
 // purgeAll destroys all instances — the new instance starts empty.
 TEST_F(CollectionHandlerTest, PurgeAllCreatesEmptyInstance) {
 	StringUMap d{{NAME, "A"}};

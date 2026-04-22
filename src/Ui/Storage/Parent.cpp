@@ -59,15 +59,9 @@ const StringBoxButtonCollectionUMap& Parent::getChildren() const noexcept {
 
 void Parent::registerDependency(
 	const string& watchedCollection,
-	const string& targetCollection,
-	size_t        minSize,
-	std::function<void()> onDepletion
-) {
-	CollectionHandler::getInstance(watchedCollection)->registerDependency({
-		&children.at(targetCollection),
-		minSize,
-		std::move(onDepletion)
-	});
+	const string& targetCollection
+) noexcept {
+	CollectionHandler::getInstance(watchedCollection)->registerDependency(&children.at(targetCollection));
 	dependencyRegistry.emplace_back(watchedCollection, targetCollection);
 }
 

@@ -98,15 +98,11 @@ void CollectionHandler::remove(Data* item) noexcept {
 	// Owner of the slot — erase and cascade.
 	collection.erase(it);
 
-	vector<std::function<void()>> pending;
-	for (auto& dep : dependencies) {
-		dep.collection->remove(item);
-		if (dep.minSize and dep.onDepletion and dep.collection->getSize() < dep.minSize)
-			pending.push_back(dep.onDepletion);
+	for (auto dep : dependencies) {
+		if (dep->isSet(item)) dep->remove(item);
 	}
-	refreshSensitiveWidgets();
 
-	for (auto& callback : pending) callback();
+	refreshSensitiveWidgets();
 }
 
 void CollectionHandler::replace(Data* item, const string& oldId) noexcept {
@@ -115,7 +111,7 @@ void CollectionHandler::replace(Data* item, const string& oldId) noexcept {
 	add(item);
 }
 
-void CollectionHandler::registerDependency(const Dependency& dependency) noexcept {
+void CollectionHandler::registerDependency(BoxButtonCollection* dependency) noexcept {
 	dependencies.push_back(dependency);
 }
 
@@ -144,8 +140,8 @@ void CollectionHandler::release(BoxButtonCollection* destination) noexcept {
 	auto it = std::find_if(
 		dependencies.begin(),
 		dependencies.end(),
-		[destination](const Dependency& dep) {
-			return dep.collection == destination;
+		[destination](const BoxButtonCollection* dep) {
+			return dep == destination;
 		}
 	);
 	if (it != dependencies.end()) dependencies.erase(it);

@@ -69,6 +69,7 @@ void BoxButtonCollection::remove(Data* form) noexcept {
 			return *button->getData() == *form;
 		}
 	)};
+
 	delete *it;
 	items.erase(it);
 	refreshSensitiveWidgets();

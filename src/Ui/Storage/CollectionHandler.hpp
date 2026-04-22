@@ -33,13 +33,6 @@ class CollectionHandler : public SensitivityTracker {
 
 public:
 
-	/// Represents a dependency on a collection, with an optional guard to keep the owner alive until the collection is depleted.
-	struct Dependency {
-		BoxButtonCollection*  collection;            /// Collection to track.
-		size_t                minSize = 0;           /// Minimum number of items required to keep the owner alive. 0 = no guard.
-		std::function<void()> onDepletion = nullptr; /// Called when collection size drops below minSize.
-	};
-
 	/// Binds a widget's sensitivity to this collection's size.
 	struct SensitivityBinding {
 		Gtk::Widget* widget;
@@ -121,7 +114,7 @@ public:
 	 * Register a collection dependency to be tracked.
 	 * @param dependency Dependency struct with collection, optional min size and callback.
 	 */
-	void registerDependency(const Dependency& dependency) noexcept;
+	void registerDependency(BoxButtonCollection* dependency) noexcept;
 
 	/**
 	 * Refresh a single combobox contents with the collection values.
@@ -154,7 +147,7 @@ protected:
 	StringDataPtrMap collection;
 
 	/// List of collections that keeps references to items in the collection.
-	vector<Dependency> dependencies;
+	vector<BoxButtonCollection*> dependencies;
 
 	/// Keeps collections instances.
 	static std::unordered_map<string, CollectionHandler*> collections;

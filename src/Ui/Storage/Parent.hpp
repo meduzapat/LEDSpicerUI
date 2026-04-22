@@ -86,17 +86,13 @@ protected:
 
 	/**
 	 * Registers a dependency between a watched collection and a child collection.
-	 * @param watchedCollection The collection ID to watch for changes (e.g. COLLECTION_ELEMENT).
-	 * @param targetCollection The child collection ID to apply the dependency to (must be a key in children).
-	 * @param minSize Minimum size of the watched collection before onDepletion is triggered (default: 0).
-	 * @param onDepletion Optional callback to invoke when the watched collection falls below minSize (default: no-op).
+	 * @param watchedCollection The collection ID to watch for changes.
+	 * @param targetCollection The child collection ID to apply the dependency to.
 	 */
 	void registerDependency(
 		const string& watchedCollection,
-		const string& targetCollection,
-		size_t minSize = 0,
-		std::function<void()> onDepletion = {}
-	);
+		const string& targetCollection
+	) noexcept;
 
 	string xmlBody() const noexcept override;
 };
