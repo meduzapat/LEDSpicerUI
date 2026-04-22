@@ -41,8 +41,20 @@ void Element::addStripChild(Element* child) noexcept {
 }
 
 void Element::clearStripChildren() noexcept {
-	for (auto child : stripChildren) delete child;
+	auto ch{getCollectionHandler()};
+	for (auto child : stripChildren) {
+		ch->remove(child);
+		delete child;
+	}
 	stripChildren.clear();
+}
+
+void Element::deleteExcessStripChildren(size_t keepCount) noexcept {
+	for (size_t i = keepCount; i < stripChildren.size(); ++i) {
+		stripChildren[i]->unregisterFromCollection();
+		delete stripChildren[i];
+	}
+	stripChildren.resize(keepCount);
 }
 
 void Element::splitRGB(Data* data) noexcept {

@@ -367,7 +367,6 @@ void DialogElement::storeData() noexcept {
 		name(elementName->get_text()),
 		oldName(currentData->getValue(NAME));
 
-	vector<Storage::Data*> toDelete;
 	bool
 		isStrip  = false,
 		wasStrip = not currentData->getValue(STRIPSIZE).empty();
@@ -440,10 +439,8 @@ void DialogElement::storeData() noexcept {
 			}
 		}
 
-		// Mark excess children for deletion
-		for (size_t i = size; i < children.size(); ++i) {
-			toDelete.push_back(children[i]);
-		}
+		// Delete excess children (unregisters from collection and trims stripChildren)
+		currentDataE->deleteExcessStripChildren(size);
 
 		currentData->setValue(POSITION,    positionStrip->get_text());
 		currentData->setValue(STRIPSIZE,   sizeStrip->get_text());
@@ -483,9 +480,7 @@ void DialogElement::storeData() noexcept {
 
 	// Cleanup if changed from strip to non-strip
 	if (wasStrip && not isStrip) {
-		string code = currentData->getProperties().getValue("stripDescriptor");
-		auto children = currentData->getCollectionHandler()->findByProperty("strip", code);
-		toDelete.insert(toDelete.end(), children.begin(), children.end());
+		static_cast<Storage::Element*>(currentData)->clearStripChildren();
 		currentData->getProperties().unSet("stripDescriptor");
 		currentData->getProperties().unSet("expandable");
 		currentData->getProperties().unSet("system");
@@ -494,11 +489,6 @@ void DialogElement::storeData() noexcept {
 		if (group && group->getProperties().isSet("system")) {
 			groupCollectionHandler->remove(group);
 		}
-	}
-
-	// Delete marked elements
-	for (auto data : toDelete) {
-		delete data;
 	}
 }
 

@@ -59,6 +59,12 @@ public:
 	 */
 	void clearStripChildren() noexcept;
 
+	/**
+	 * Deletes strip children beyond keepCount, unregistering each from its collection.
+	 * @param keepCount number of leading children to keep
+	 */
+	void deleteExcessStripChildren(size_t keepCount) noexcept;
+
 	CollectionHandler* getCollectionHandler() const noexcept override {
 		return CollectionHandler::getInstance(COLLECTION_ELEMENT);
 	}
