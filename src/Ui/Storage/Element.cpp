@@ -85,3 +85,17 @@ void Element::convertPositionToRGB(Data* data, const string& position, const str
 uint16_t Element::findFirstConnectorIndexByPosition(const string& position) noexcept {
 	return (((std::stod(position) -1) * 3) + 1) - 1;
 }
+
+void Element::freeze() noexcept {
+	Data::freeze();
+	for (auto child : stripChildren)
+		child->getProperties().setValue(PROP_FROZEN, "1");
+}
+
+void Element::unfreeze() noexcept {
+	Data::unfreeze();
+	for (auto child : stripChildren) {
+		child->getProperties().unSet(PROP_FROZEN);
+		child->registerToCollection();
+	}
+}

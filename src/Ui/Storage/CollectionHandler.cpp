@@ -76,43 +76,34 @@ void CollectionHandler::add(Data* item) noexcept {
 	auto it{collection.find(uid)};
 	// Item exists.
 	if (it != collection.end()) {
-		// Take over replacer.
-		if (item->getProperties().isSet(PROP_FROZEN)) {
-			collection[uid] = item;
-			item->getProperties().unSet(PROP_FROZEN);
-			return;
-		}
-		// Replace existing frozen item.
+		// Replace existing frozen item (eviction).
 		if (it->second->getProperties().isSet(PROP_FROZEN))
 			collection[uid] = item;
 		return;
 	}
 	collection.emplace(uid, item);
-//	refreshComboBoxes();
 	refreshSensitiveWidgets();
 }
 
 void CollectionHandler::remove(Data* item) noexcept {
-	// Item was evicted.
-	if (item->getProperties().isSet(PROP_FROZEN)) {
-		item->getProperties().unSet(PROP_FROZEN);
-		return;
-	}
 	auto uid{item->createUniqueId()};
-	// Item never registered.
-	if (uid.empty() or not isIdSet(uid))
-		return;
+	if (uid.empty()) return;
 
-	collection.erase(uid);
+	auto it{collection.find(uid)};
+	if (it == collection.end()) return;
 
-	// Collect depleted callbacks first, fire after iteration.
+	// Evicted — slot belongs to a replacer.
+	if (it->second != item) return;
+
+	// Owner of the slot — erase and cascade.
+	collection.erase(it);
+
 	vector<std::function<void()>> pending;
 	for (auto& dep : dependencies) {
 		dep.collection->remove(item);
 		if (dep.minSize and dep.onDepletion and dep.collection->getSize() < dep.minSize)
 			pending.push_back(dep.onDepletion);
 	}
-//	refreshComboBoxes();
 	refreshSensitiveWidgets();
 
 	for (auto& callback : pending) callback();

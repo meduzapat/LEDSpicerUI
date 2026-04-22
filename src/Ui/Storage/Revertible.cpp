@@ -40,13 +40,15 @@ void Revertible::snapshot() {
 
 	if (liveFields.getValues().empty() or not snapFields.getValues().empty()) return;
 
-	for (auto& [id, col] : liveChildren)
-		for (auto btn : col)
-			btn->getData()->getProperties().setValue(PROP_FROZEN, "1");
+	for (auto& [id, col] : liveChildren) {
+		for (auto btn : col) {
+			btn->getData()->freeze();
+		}
+	}
 
 	liveFields.swap(snapFields);
-		for (auto& [live, snap] : childrenSnaps)
-			live->swap(snap);
+	for (auto& [live, snap] : childrenSnaps)
+		live->swap(snap);
 }
 
 void Revertible::revert() {
@@ -58,13 +60,13 @@ void Revertible::revert() {
 
 	for (auto& [live, snap] : childrenSnaps) {
 		live->swap(snap);
-		snap.wipe();
+		snap.wipe(); // replacers destroyed, their slots erased from handler.
+		for (auto btn : *live) {
+			auto data{btn->getData()};
+			data->unfreeze();
+			data->registerToCollection();
+		}
 	}
-
-//	for (auto& [id, collection] : *liveChildren) {
-//		for (auto btn : collection)
-//
-//	}
 }
 
 void Revertible::clearSnap() noexcept {

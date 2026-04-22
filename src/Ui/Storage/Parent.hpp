@@ -66,12 +66,12 @@ public:
 	const StringBoxButtonCollectionUMap& getChildren() const noexcept;
 
 	/// Iteration support.
-	auto begin()  noexcept       { return children.begin();  }
-	auto end()    noexcept       { return children.end();    }
-	auto begin()  const noexcept { return children.begin();  }
-	auto end()    const noexcept { return children.end();    }
-	auto cbegin() const noexcept { return children.cbegin(); }
-	auto cend()   const noexcept { return children.cend();   }
+	auto begin()           noexcept { return children.begin();  }
+	auto end()             noexcept { return children.end();    }
+	auto begin()     const noexcept { return children.begin();  }
+	auto end()       const noexcept { return children.end();    }
+	auto cbegin()    const noexcept { return children.cbegin(); }
+	auto cend()      const noexcept { return children.cend();   }
 
 	size_t getSize() const noexcept { return children.size();  }
 	bool   empty()   const noexcept { return children.empty(); }

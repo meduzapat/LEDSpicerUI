@@ -32,13 +32,13 @@ class DirectoryEntryTest : public ::testing::Test {
 protected:
 
 	void SetUp() override {
-		StringUMap rootData{{NAME, "root"}};
+		StringUMap rootData{{FILENAME, "root"}};
 		root = std::make_unique<DirectoryEntry>(rootData, nullptr);
 
-		StringUMap childData{{NAME, "subdir"}};
+		StringUMap childData{{FILENAME, "subdir"}};
 		child = std::make_unique<DirectoryEntry>(childData, root.get());
 
-		StringUMap grandData{{NAME, "deep"}};
+		StringUMap grandData{{FILENAME, "deep"}};
 		grand = std::make_unique<DirectoryEntry>(grandData, child.get());
 	}
 
