@@ -68,7 +68,6 @@ bool DialogFormHost::handleTypeSwitch(
 	}
 	// New data or replaced.
 	previousName = newName;
-	// backup
 	dynamic_cast<Storage::Revertible*>(currentData)->snapshot();
 	onEmpty();
 	onSelected();

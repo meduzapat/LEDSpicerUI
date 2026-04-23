@@ -139,11 +139,11 @@ void DialogRestrictor::isValid() const {
 		newName(createUniqueId()),
 		hardwareName("Hardware ");
 	hardwareName += Defaults::restrictorsInfo.at(name).name;
-	if (action == Actions::EDIT) {
-		checkDupe = (currentData->createUniqueId() != newName);
-	}
 
 	auto ch{currentData->getCollectionHandler()};
+	if (action == Actions::EDIT)
+		checkDupe = (ch->get(newName) != currentData);
+
 
 	if (Defaults::isIdUser(name, false) and checkDupe and ch->isIdSet(newName)) {
 		throw Message(hardwareName + " ID " + id + " already exists.");

@@ -38,10 +38,11 @@ namespace LEDSpicerUI::Ui::Storage {
  * revert() inside their tearDown().
  *
  * Lifecycle:
- *   snapshot() — called by DialogFormHost on type switch.
- *     Children are marked FROZEN in their CollectionHandler (invisible to all
- *     queries and combos). Fields and child collections are swapped into
- *     snapshot storage in one pass. No handler removals fire.
+ *   snapshot() — called by DialogFormHost on every type switch.
+ *     If fields are empty or a snapshot already exists (ADD mode; or any second-plus switch in EDIT mode),
+ *     the live child collections are wiped
+ *     instead — items added for the previous discarded type are destroyed and
+
  *
  *   On CANCEL — consumer calls revert() from tearDown():
  *     New items (added after the switch) are wiped; their destructors fire

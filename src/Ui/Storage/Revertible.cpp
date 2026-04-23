@@ -38,7 +38,11 @@ Revertible::~Revertible() {
 
 void Revertible::snapshot() {
 
-	if (liveFields.getValues().empty() or not snapFields.getValues().empty()) return;
+	if (liveFields.getValues().empty() or not snapFields.getValues().empty()) {
+		for (auto& [live, snap] : childrenSnaps)
+			live->wipe();
+		return;
+	}
 
 	for (auto& [id, col] : liveChildren) {
 		for (auto btn : col) {

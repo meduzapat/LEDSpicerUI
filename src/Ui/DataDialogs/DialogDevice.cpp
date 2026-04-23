@@ -140,10 +140,11 @@ void DialogDevice::isValid() const {
 		newName(createUniqueId()),
 		deviceName("Device ");
 	deviceName += Defaults::devicesInfo.at(name).name;
-	if (action == Actions::EDIT)
-		checkDupe = (currentData->createUniqueId() != newName);
 
 	auto ch{currentData->getCollectionHandler()};
+	if (action == Actions::EDIT)
+		checkDupe = (ch->get(newName) != currentData);
+
 	if (checkDupe and ch->isIdSet(newName)) {
 		if (Defaults::isIdUser(name))
 			throw Message(deviceName + " ID " + id + " already exists");
