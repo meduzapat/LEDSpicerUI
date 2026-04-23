@@ -41,11 +41,11 @@ public:
 
 	virtual ~DialogRestrictor() = default;
 
-	void load(XMLHelper* values) noexcept override;
-	void isValid() const override;
-	void resetForm()    noexcept override;
-	void storeData()    noexcept override;
-	void retrieveData() noexcept override;
+	void load(XMLHelper* values)  noexcept override;
+	void resetForm()              noexcept override;
+	void storeData()              noexcept override;
+	void retrieveData()           noexcept override;
+	void isValid()          const          override;
 	string createUniqueId() const noexcept override;
 
 protected:

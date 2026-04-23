@@ -44,11 +44,11 @@ public:
 	inline static const string noDevice {"Select Device"};
 
 	void load(XMLHelper* values)  noexcept override;
-	string createUniqueId() const noexcept override;
-	void isValid()          const          override;
 	void resetForm()              noexcept override;
 	void storeData()              noexcept override;
 	void retrieveData()           noexcept override;
+	void isValid()          const          override;
+	string createUniqueId() const noexcept override;
 
 protected:
 

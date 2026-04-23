@@ -47,13 +47,14 @@ public:
 	 * @param flag 1 sources box, 0 input box.
 	 */
 	void setNormalBox(const bool flag) noexcept;
-	void load(XMLHelper* values) noexcept override;
+
 	void setOwner(Storage::BoxButtonCollection* collection, Storage::Data* owner) noexcept override;
 
-	void clearForm() noexcept override;
-	void isValid() const override;
-	void storeData() noexcept override;
-	void retrieveData() noexcept override;
+	void load(XMLHelper* values)  noexcept override;
+	void clearForm()              noexcept override;
+	void storeData()              noexcept override;
+	void retrieveData()           noexcept override;
+	void isValid()          const          override;
 	string createUniqueId() const noexcept override;
 
 protected:
@@ -61,8 +62,10 @@ protected:
 	Gtk::ComboBoxText
 		* comboBoxInputMapElement = nullptr,
 		* comboBoxInputMapGroup   = nullptr;
+
 	Gtk::ComboBox
 		* comboBoxInputMapFilter  = nullptr;
+
 	Gtk::Entry*  inputInputMapTrigger = nullptr;
 	Gtk::Button* inputMapDefaultColor = nullptr;
 	Gtk::Stack*  stackElementAndGroup = nullptr;

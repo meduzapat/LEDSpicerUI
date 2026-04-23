@@ -20,7 +20,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CollectionHandler.hpp"
+#include "Data.hpp"
 
 #pragma once
 
@@ -37,8 +37,8 @@ public:
 
 	virtual ~InputMapLink() = default;
 
-	string_view getXmlTag()         const noexcept override { return "linkedMap"; }
-	string_view getCssClass()       const noexcept override { return "LinkBoxButton"; }
+	string_view getXmlTag()   const noexcept override { return "linkedMap"; }
+	string_view getCssClass() const noexcept override { return "LinkBoxButton"; }
 	string createPrettyName() const noexcept override;
 	string createTooltip()    const noexcept override;
 	string createUniqueId()   const noexcept override;

@@ -41,9 +41,9 @@ public:
 
 	virtual ~Profile() = default;
 
-	string createUniqueId() const noexcept override;
-	string_view getCssClass()     const noexcept override { return "ProfileBoxButton"; }
-	string_view getXmlTag()       const noexcept override { return "Profile"; }
+	string createUniqueId()   const noexcept override;
+	string_view getCssClass() const noexcept override { return "ProfileBoxButton"; }
+	string_view getXmlTag()   const noexcept override { return "Profile"; }
 
 	CollectionHandler* getCollectionHandler() const noexcept override {
 		return CollectionHandler::getInstance(COLLECTION_PROFILES);

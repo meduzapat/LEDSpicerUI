@@ -48,12 +48,13 @@ public:
 
 	virtual ~DialogInputSource() = default;
 
-	void load(XMLHelper* values) noexcept override;
 	void setOwner(Storage::BoxButtonCollection* collection, Storage::Data* owner) noexcept override;
-	void isValid() const override;
-	void resetForm()   noexcept override;
-	void storeData()   noexcept override;
-	void retrieveData() noexcept override;
+
+	void load(XMLHelper* values)  noexcept override;
+	void resetForm()              noexcept override;
+	void storeData()              noexcept override;
+	void retrieveData()           noexcept override;
+	void isValid()          const          override;
 	string createUniqueId() const noexcept override;
 
 	/**

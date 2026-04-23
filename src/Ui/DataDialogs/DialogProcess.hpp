@@ -38,11 +38,11 @@ public:
 
 	virtual ~DialogProcess() = default;
 
-	void load(XMLHelper* values) noexcept override;
-	void isValid() const override;
-	void clearForm()   noexcept override;
-	void storeData()   noexcept override;
-	void retrieveData() noexcept override;
+	void load(XMLHelper* values)  noexcept override;
+	void clearForm()              noexcept override;
+	void storeData()              noexcept override;
+	void retrieveData()           noexcept override;
+	void isValid()          const          override;
 	string createUniqueId() const noexcept override;
 
 protected:

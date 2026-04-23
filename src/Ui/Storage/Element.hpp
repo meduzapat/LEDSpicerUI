@@ -39,8 +39,8 @@ public:
 
 	virtual ~Element();
 
-	string_view getXmlTag()         const noexcept override { return "element"; }
-	string_view getCssClass()       const noexcept override { return "ElementBoxButton"; }
+	string_view getXmlTag()   const noexcept override { return "element"; }
+	string_view getCssClass() const noexcept override { return "ElementBoxButton"; }
 	string createPrettyName() const noexcept override;
 
 	/**
@@ -88,8 +88,7 @@ public:
 	 */
 	static uint16_t findFirstConnectorIndexByPosition(const string& position) noexcept;
 
-	void freeze() noexcept override;
-
+	void freeze()   noexcept override;
 	void unfreeze() noexcept override;
 
 protected:

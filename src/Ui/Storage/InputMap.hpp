@@ -44,9 +44,10 @@ public:
 
 	virtual ~InputMap() = default;
 
-	string_view getCssClass()                 const noexcept override { return "InputMapBoxButton"; }
-	string createUniqueId()                   const noexcept override;
-	string createPrettyName()                 const noexcept override;
+	string_view getCssClass() const noexcept override { return "InputMapBoxButton"; }
+	string createUniqueId()   const noexcept override;
+	string createPrettyName() const noexcept override;
+
 	CollectionHandler* getCollectionHandler() const noexcept override;
 
 };
