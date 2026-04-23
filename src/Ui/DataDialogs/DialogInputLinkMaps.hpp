@@ -49,7 +49,6 @@ public:
 	void storeData()    noexcept override;
 	void retrieveData() noexcept override;
 	string createUniqueId() const noexcept override;
-//	void setOwner(Storage::BoxButtonCollection* collection, Storage::Data* owner = nullptr) override;
 
 protected:
 

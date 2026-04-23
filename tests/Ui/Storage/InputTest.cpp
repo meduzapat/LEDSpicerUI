@@ -68,6 +68,12 @@ TEST_F(InputTest, CssClass) {
 	EXPECT_EQ("InputBoxButton", rootInput->getCssClass());
 }
 
+TEST_F(InputTest, FilenameNotSerializedToXml) {
+	string xml(rootInput->toXML());
+	EXPECT_EQ(string::npos, xml.find(FILENAME));
+	EXPECT_NE(string::npos, xml.find(NAME));
+}
+
 TEST_F(InputTest, CreateTooltip) {
 	EXPECT_EQ("Input of type Actions", rootInput->createTooltip());
 }

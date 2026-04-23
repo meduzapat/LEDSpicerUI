@@ -4,7 +4,7 @@
  * @since     Feb 6, 2024
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2024 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the

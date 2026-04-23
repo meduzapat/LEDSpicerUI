@@ -129,8 +129,8 @@ void DialogInputSource::populateSources(const string& name) noexcept {
 }
 
 void DialogInputSource::setOwner(Storage::BoxButtonCollection* collection, Storage::Data* owner) noexcept {
-	this->ownerData = owner;
-	items = collection;
+	ownerData = owner;
+	items     = collection;
 	auto s{comboBoxInputSelectInput->get_active_id()};
 	if (not s.empty() and not Defaults::inputHasFlag(
 		s,
@@ -161,9 +161,7 @@ void DialogInputSource::createSubItems(XMLHelper* values) noexcept {
 }
 
 LEDSpicerUI::Ui::Storage::Data* DialogInputSource::createData(StringUMap& rawData) const noexcept {
-	auto is{new Storage::InputSource(rawData, ownerData->getProperties().getValue(UID))};
-	is->getProperties().setValue(PID, ownerData->getProperties().getValue(UID));
-	return is;
+	return new Storage::InputSource(rawData, ownerData->getProperties().getValue(UID));
 }
 
 StringMap DialogInputSource::scanEventDevices() noexcept{

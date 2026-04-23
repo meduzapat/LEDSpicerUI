@@ -64,7 +64,8 @@ void Revertible::revert() {
 
 	for (auto& [live, snap] : childrenSnaps) {
 		live->swap(snap);
-		snap.wipe(); // replacers destroyed, their slots erased from handler.
+		// replacers destroyed, their slots erased from handler.
+		snap.wipe();
 		for (auto btn : *live) {
 			auto data{btn->getData()};
 			data->unfreeze();

@@ -69,6 +69,11 @@ public:
 	virtual void setOwner(Storage::BoxButtonCollection* collection, Storage::Data* owner) noexcept;
 
 	/**
+	 * Unsets the collection and owner, this will make the form unable to store or retrieve data.
+	 */
+	void removeOwner() noexcept;
+
+	/**
 	 * Clear the From leaving it empty for data entry.
 	 */
 	virtual void clearForm() noexcept abstract;

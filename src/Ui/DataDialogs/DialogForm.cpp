@@ -79,9 +79,14 @@ void DialogForm::setOwner(
 	Storage::BoxButtonCollection* collection,
 	Storage::Data* owner
 ) noexcept {
-	this->ownerData = owner;
-	items = collection;
+	ownerData = owner;
+	items     = collection;
 	refreshItems();
+}
+
+void DialogForm::removeOwner() noexcept {
+	ownerData = nullptr;
+	items     = nullptr;
 }
 
 void DialogForm::refreshItems() noexcept {
@@ -127,7 +132,7 @@ void DialogForm::disconnectChildrenDialogs() noexcept {
 	auto parent{dynamic_cast<Storage::Parent*>(currentData)};
 	if (parent)
 		for (auto& [family, items] : parent->getChildren())
-			familyToDialog.at(family)->setOwner(nullptr, nullptr);
+			familyToDialog.at(family)->removeOwner();
 	currentData->tearDown();
 }
 

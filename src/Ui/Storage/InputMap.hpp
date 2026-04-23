@@ -32,7 +32,7 @@ namespace LEDSpicerUI::Ui::Storage {
  * A single input map entry. Extends Link to wrap the target Element or Group
  * so renames and deletes propagate automatically via CollectionHandler.
  * Carries its own extra values: trigger, color, filter, type.
- * Unique ID: sourceID + "_" + trigger + "_" + target name.
+ * Unique ID: sourceID + "_" + trigger (scoped to the owning InputSource).
  * Source ID is stored as a property by DialogInputMap at creation time.
  */
 class InputMap : public Link {

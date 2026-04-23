@@ -52,21 +52,10 @@ DialogInputMap::DialogInputMap(BaseObjectType* obj, const Glib::RefPtr<Gtk::Buil
 	// Activate color button.
 	DialogColors::getInstance()->activateColorButton(inputMapDefaultColor);
 
-	stackElementAndGroup->connect_property_changed("visible-child", [this]() {
-		if (stackElementAndGroup->get_visible_child_name() == "InputTypeElement") {
-			Storage::CollectionHandler::getInstance(COLLECTION_ELEMENT)->refreshComboBox(comboBoxInputMapElement, {PROP_EXPAND});
-			comboBoxInputMapGroup->set_active(-1);
-		}
-		else {
-			Storage::CollectionHandler::getInstance(COLLECTION_GROUP)->refreshComboBox(comboBoxInputMapGroup);
-			comboBoxInputMapElement->set_active(-1);
-		}
-	});
-
 	// When the stack page changes, refresh the relevant combo and clear the other.
 	stackElementAndGroup->connect_property_changed("visible-child", [this]() {
 		if (stackElementAndGroup->get_visible_child_name() == "InputTypeElement") {
-			Storage::CollectionHandler::getInstance(COLLECTION_ELEMENT)->refreshComboBox(comboBoxInputMapElement);
+			Storage::CollectionHandler::getInstance(COLLECTION_ELEMENT)->refreshComboBox(comboBoxInputMapElement, {PROP_EXPAND});
 			comboBoxInputMapGroup->set_active(-1);
 		}
 		else {
