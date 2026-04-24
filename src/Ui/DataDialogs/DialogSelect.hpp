@@ -67,6 +67,10 @@ public:
 
 		/// Fields editable per Link via DialogLinkEdit; empty if none.
 		vector<Storage::Link::LinkField> linkFields;
+
+		/// Minimum number of items that must be selected to enable the Apply button.
+		int minSelection = 1;
+
 	};
 
 	virtual ~DialogSelect();

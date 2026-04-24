@@ -56,10 +56,22 @@ void DialogSelect::open() noexcept {
 	show();
 	populatePicker();
 
+	auto updateApply = [this]() {
+		btnApply->set_sensitive(
+			static_cast<int>(pickerBox->get_selected_children().size()) >= request->minSelection
+		);
+	};
+	updateApply();
+	auto conn = pickerBox->signal_selected_children_changed().connect(updateApply);
+
 	if (run() != Gtk::ResponseType::RESPONSE_APPLY) {
+		conn.disconnect();
+		btnApply->set_sensitive(true);
 		hide();
 		return;
 	}
+	conn.disconnect();
+	btnApply->set_sensitive(true);
 
 	// Build a fast lookup set of selected target pointers.
 	std::unordered_set<const Storage::Data*> selected;
