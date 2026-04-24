@@ -30,8 +30,10 @@ Parent::Parent(
 ) :
 	Data(data)
 {
-	for (const auto& id : childCollectionIds)
+	for (const auto& id : childCollectionIds) {
 		children.emplace(id, BoxButtonCollection{});
+		if (children.size() == 1) primaryChild = &children.at(id);
+	}
 }
 
 Parent::~Parent() {

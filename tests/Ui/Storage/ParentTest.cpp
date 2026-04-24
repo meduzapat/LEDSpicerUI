@@ -69,21 +69,7 @@ TEST_F(ParentTest, getChild_constOverload_returnsPointer) {
 TEST_F(ParentTest, getChildren_returnsAllChildren) {
 	TestParent p(data, {"A", "B"});
 	EXPECT_EQ(p.getChildren().size(), 2u);
-}
-
-TEST_F(ParentTest, getSize_matchesInjectedSize) {
-	TestParent p(data, {"A", "B"});
-	EXPECT_EQ(p.getSize(), 2u);
-}
-
-TEST_F(ParentTest, empty_falseWhenChildrenPresent) {
-	TestParent p(data, {"A", "B"});
-	EXPECT_FALSE(p.empty());
-}
-
-TEST_F(ParentTest, empty_trueWhenNoChildren) {
-	TestParent p(data, {});
-	EXPECT_TRUE(p.empty());
+	EXPECT_EQ(0, p.getSize());
 }
 
 TEST_F(ParentTest, iteration_visitsAllChildren) {
@@ -105,6 +91,18 @@ TEST_F(ParentTest, xmlBody_emitsChildrenInOrder) {
 	EXPECT_NE(string::npos, xml.find("second"));
 	EXPECT_LT(xml.find("first"), xml.find("second"));
 }
+
+TEST_F(ParentTest, testGetSize) {
+	// primary and secondary collections.
+	TestParent p(data, {"A", "B"});
+	StringUMap d1{{NAME, "first"}};
+	StringUMap d2{{NAME, "second"}};
+	p.getChild("A")->create(new TestData(d1));
+	p.getChild("A")->create(new TestData(d2));
+
+	EXPECT_EQ(2, p.getSize());
+}
+
 
 int main(int argc, char** argv) {
 	auto app = Gtk::Application::create(argc, argv, "org.test");

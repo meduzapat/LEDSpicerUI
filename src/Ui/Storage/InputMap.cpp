@@ -30,7 +30,11 @@ string InputMap::createUniqueId() const noexcept {
 }
 
 string InputMap::createPrettyName() const noexcept {
-	return "[" + getValue(TRIGGER) + "] " + getValue(TYPE) + " " + getValue(TARGET);
+	return getValue(TRIGGER) + " → " + getValue(TARGET);
+}
+
+string InputMap::createTooltip() const noexcept {
+	return "Trigger: " + getValue(TRIGGER) + " will activate " +  getValue(TYPE) + getValue(TARGET);
 }
 
 CollectionHandler* InputMap::getCollectionHandler() const noexcept {

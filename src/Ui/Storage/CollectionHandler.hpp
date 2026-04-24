@@ -49,6 +49,13 @@ public:
 	static CollectionHandler* getInstance(const string& collectionName) noexcept;
 
 	/**
+	 * Removes and deletes a collection instance.
+	 * @param collectionName
+	 * @return the removed instance, or nullptr if not found.
+	 */
+	static void removeInstance(const string& collectionName) noexcept;
+
+	/**
 	 * Removes and deletes all stored collections.
 	 */
 	static void purgeAll() noexcept;

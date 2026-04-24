@@ -109,7 +109,7 @@ TEST(RestrictorMapTest, CssClass) {
 TEST(InputMapTest, CssClass) {
 	StringUMap targetData{{NAME, "P1_BUTTON1"}};
 	Element    target(targetData);
-	StringUMap data{{TRIGGER, "305"}, {TYPE, ELEMENT}, {TARGET, "P1_BUTTON1"}};
+	StringUMap data{{TRIGGER, "305"}, {TYPE, ELEMENT}};
 	InputMap   im(data, &target);
 	EXPECT_EQ("InputMapBoxButton", im.getCssClass());
 }
@@ -117,18 +117,16 @@ TEST(InputMapTest, CssClass) {
 TEST(InputMapTest, CreatePrettyName) {
 	StringUMap targetData{{NAME, "P1_BUTTON1"}};
 	Element    target(targetData);
-	StringUMap data{{TRIGGER, "305"}, {TYPE, ELEMENT}, {TARGET, "P1_BUTTON1"}};
+	StringUMap data{{TRIGGER, "305"}, {TYPE, ELEMENT}};
 	InputMap   im(data, &target);
 	string     pretty(im.createPrettyName());
-	EXPECT_NE(string::npos, pretty.find("305"));
-	EXPECT_NE(string::npos, pretty.find(ELEMENT));
-	EXPECT_NE(string::npos, pretty.find("P1_BUTTON1"));
+	EXPECT_EQ("305 → P1_BUTTON1", pretty);
 }
 
 TEST(InputMapTest, CreateUniqueIdUsesPidAndTrigger) {
 	StringUMap targetData{{NAME, "P1_BUTTON1"}};
 	Element    target(targetData);
-	StringUMap data{{TRIGGER, "305"}, {TYPE, ELEMENT}, {TARGET, "P1_BUTTON1"}};
+	StringUMap data{{TRIGGER, "305"}, {TYPE, ELEMENT}};
 	InputMap   im(data, &target);
 	im.getProperties().setValue(PID, "s_1");
 	EXPECT_EQ(Defaults::createCommonUniqueId({"s_1", "305"}), im.createUniqueId());
@@ -137,7 +135,7 @@ TEST(InputMapTest, CreateUniqueIdUsesPidAndTrigger) {
 TEST(InputMapTest, CreateUniqueIdEmptyPidWithoutProperty) {
 	StringUMap targetData{{NAME, "P1_BUTTON1"}};
 	Element    target(targetData);
-	StringUMap data{{TRIGGER, "305"}, {TYPE, ELEMENT}, {TARGET, "P1_BUTTON1"}};
+	StringUMap data{{TRIGGER, "305"}, {TYPE, ELEMENT}};
 	InputMap   im(data, &target);
 	EXPECT_EQ(Defaults::createCommonUniqueId({"", "305"}), im.createUniqueId());
 }

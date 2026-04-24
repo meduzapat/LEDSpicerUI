@@ -94,7 +94,6 @@ void DialogForm::refreshItems() noexcept {
 	// No items no work to do.
 	if (not items) return;
 	items->populateBox(box);
-//	box->show_all(); // already called in populateBox.
 	// Avoid chaining into uninitialized dialogs.
 	if (not currentData) return;
 	for (auto childDialog : childDialogs) childDialog->refreshItems();
@@ -124,15 +123,22 @@ void DialogForm::wireChildrenDialogs() noexcept {
 	currentData->setUp();
 	auto parent{dynamic_cast<Storage::Parent*>(currentData)};
 	if (not parent) return;
-	for (auto& [family, items] : parent->getChildren())
+	for (auto& [family, items] : parent->getChildren()) {
 		familyToDialog.at(family)->setOwner(&items, currentData);
+		// Checks if family exists and sets it as is the one controlling the apply button.
+	}
+
+	if (auto pc{getPrimaryChildCollection()}; pc) pc->registerSensitivity(btnApply);
 }
 
 void DialogForm::disconnectChildrenDialogs() noexcept {
 	auto parent{dynamic_cast<Storage::Parent*>(currentData)};
-	if (parent)
+	if (parent) {
 		for (auto& [family, items] : parent->getChildren())
 			familyToDialog.at(family)->removeOwner();
+
+		if (auto pc{getPrimaryChildCollection()}; pc) pc->releaseSensitive(btnApply);
+	}
 	currentData->tearDown();
 }
 
@@ -286,6 +292,12 @@ void DialogForm::onCloneClicked(Storage::BoxButton& boxButton) noexcept {
 	bBox.sync();
 }
 
-LEDSpicerUI::Ui::Storage::BoxButtonCollection* DialogForm::currentChildren(const string& family) const noexcept {
+LEDSpicerUI::Ui::Storage::BoxButtonCollection* DialogForm::getPrimaryChildCollection() const noexcept {
+	auto p{dynamic_cast<LEDSpicerUI::Ui::Storage::Parent*>(currentData)};
+	if (not p) return nullptr;
+	return p->getPrimaryChild();
+}
+
+LEDSpicerUI::Ui::Storage::BoxButtonCollection* DialogForm::getChildCollection(const string& family) const noexcept {
 	return static_cast<LEDSpicerUI::Ui::Storage::Parent*>(currentData)->getChild(family);
 }

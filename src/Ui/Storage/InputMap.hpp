@@ -47,6 +47,7 @@ public:
 	string_view getCssClass() const noexcept override { return "InputMapBoxButton"; }
 	string createUniqueId()   const noexcept override;
 	string createPrettyName() const noexcept override;
+	string createTooltip()    const noexcept override;
 
 	CollectionHandler* getCollectionHandler() const noexcept override;
 

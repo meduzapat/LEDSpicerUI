@@ -108,7 +108,6 @@ void DialogDevice::resetForm() noexcept {
 		btnAddElement->set_sensitive(true);
 	}
 	brief->set_text(Defaults::devicesInfo.at(name).brief.data());
-	btnApply->set_sensitive(true);
 	DialogForm::resetForm();
 }
 
@@ -152,8 +151,8 @@ void DialogDevice::isValid() const {
 			throw Message(deviceName + " that connects to " + (port.empty() ? "<autodetect>" : port) + " already exists");
 		throw Message(deviceName + " already exists");
 	}
-	// This is OK for all non LOAD actions.
-//	if (not static_cast<Storage::Parent*>(currentData)->getChild(COLLECTION_ELEMENT)->getSize())
+
+//	if (action != Actions::LOAD and not DialogElement::getInstance()->getBox()->getSize())
 //		throw Message("Add at least one element.");
 }
 
@@ -215,7 +214,6 @@ void DialogDevice::onEmpty() noexcept {
 	spinnerLeds->set_value(0.00);
 	spinnerLeds->update();
 	brief->set_text("");
-	btnApply->set_sensitive(false);
 }
 
 void DialogDevice::onSelected() noexcept {

@@ -155,9 +155,9 @@ void DialogRestrictor::isValid() const {
 		throw Message(hardwareName + " already exists.");
 	}
 
-	// This is OK for all non LOAD actions.
-//	if (not static_cast<Storage::Parent*>(currentData)->getChild(COLLECTION_RESTRICTOR_MAP)->getSize())
+//	if (action != Actions::LOAD and not DialogRestrictorMap::getInstance()->getBox()->getSize())
 //		throw Message("Add at least one player mapping.");
+
 }
 
 void DialogRestrictor::storeData() noexcept {

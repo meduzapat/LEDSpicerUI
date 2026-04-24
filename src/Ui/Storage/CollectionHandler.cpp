@@ -31,6 +31,13 @@ CollectionHandler* CollectionHandler::getInstance(const string& collectionName) 
 	return it->second;
 }
 
+void CollectionHandler::removeInstance(const string& collectionName) noexcept {
+	auto it = collections.find(collectionName);
+	if (it == collections.end()) return;
+	delete it->second;
+	collections.erase(it);
+}
+
 void CollectionHandler::purgeAll() noexcept {
 	for (auto& c : collections)
 		delete c.second;
@@ -42,7 +49,6 @@ Data* CollectionHandler::get(const string& id) const noexcept {
 	if (it == collection.end() or it->second->getProperties().isSet(PROP_FROZEN)) return nullptr;
 	return it->second;
 }
-
 
 bool CollectionHandler::isSet(const Data* item) const noexcept {
 	return isIdSet(item->createUniqueId());

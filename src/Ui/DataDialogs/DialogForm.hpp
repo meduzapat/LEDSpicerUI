@@ -226,6 +226,16 @@ protected:
 	virtual Storage::Data* createData() const noexcept;
 
 	/**
+	 * @return Returns a child primary BoxButton collection.
+	 */
+	Storage::BoxButtonCollection* getPrimaryChildCollection() const noexcept;
+
+	/**
+	 * @return Returns a child BoxButton collection by family.
+	 */
+	Storage::BoxButtonCollection* getChildCollection(const string& family) const noexcept;
+
+	/**
 	 * Prepares the owner's sub dialogs.
 	 */
 	virtual void wireChildrenDialogs() noexcept;
@@ -310,11 +320,6 @@ protected:
 	 */
 	virtual void onCloneClicked(Storage::BoxButton& boxButton) noexcept;
 
-	/**
-	 * @param family
-	 * @return Returns a child collection of the current data by family key.
-	 */
-	Storage::BoxButtonCollection* currentChildren(const string& family) const noexcept;
 };
 
 } // namespace

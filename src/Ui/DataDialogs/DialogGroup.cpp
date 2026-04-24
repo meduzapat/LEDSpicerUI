@@ -42,14 +42,21 @@ DialogGroup::DialogGroup(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& 
 	setSignalAdd(btnAdd);
 	setSignalApply();
 
-	elementRequest = {boxElements, NAME, TYPE_ELEMENT, COLLECTION_GROUP_LINKS, CollectionHandler::getInstance(COLLECTION_ELEMENT), {}};
+	elementRequest = {
+		boxElements,
+		NAME,
+		TYPE_ELEMENT,
+		COLLECTION_GROUP_LINKS,
+		CollectionHandler::getInstance(COLLECTION_ELEMENT),
+		{}
+	};
 
 	DialogColors::getInstance()->activateColorButton(btnGroupDefaultColor);
 
 	// Element selector button — opens picker with strip-expand support.
 	builder->get_widget("BtnAddGroupElements", btnAddElements);
 	btnAddElements->signal_clicked().connect([this]() {
-		DialogSelect::getInstance()->setUp(currentChildren(COLLECTION_GROUP_LINKS), elementRequest);
+		DialogSelect::getInstance()->setUp(getPrimaryChildCollection(), elementRequest);
 		DialogSelect::getInstance()->open();
 	});
 
@@ -106,6 +113,9 @@ void DialogGroup::isValid() const {
 			throw Message("Group with name " + name + " already exists.");
 		}
 	}
+
+//	if (action != Actions::LOAD and not boxElements->getSize())
+//		throw Message("Add at least one element.");
 }
 
 void DialogGroup::storeData() noexcept {
@@ -133,12 +143,13 @@ Data* DialogGroup::createData(StringUMap& rawData) const noexcept {
 }
 
 void DialogGroup::wireChildrenDialogs() noexcept {
+	// This is necessary because Group uses DialogSelect and its not registered.
 	currentData->setUp();
-	DialogSelect::getInstance()->setUp(currentChildren(COLLECTION_GROUP_LINKS), elementRequest);
-	currentChildren(COLLECTION_GROUP_LINKS)->registerSensitivity(btnApply);
+	DialogSelect::getInstance()->setUp(getPrimaryChildCollection(), elementRequest);
+	getPrimaryChildCollection()->registerSensitivity(btnApply);
 }
 
 void DialogGroup::disconnectChildrenDialogs() noexcept {
-	currentChildren(COLLECTION_GROUP_LINKS)->releaseSensitive(btnApply);
+	getPrimaryChildCollection()->releaseSensitive(btnApply);
 	currentData->tearDown();
 }

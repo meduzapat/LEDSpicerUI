@@ -217,5 +217,5 @@ void DialogProfile::setUpSelector(
 	const string& collection,
 	const DialogSelect::SelectionRequest& req
 ) noexcept {
-	DialogSelect::getInstance()->setUp(currentChildren(collection), req);
+	DialogSelect::getInstance()->setUp(getChildCollection(collection), req);
 }

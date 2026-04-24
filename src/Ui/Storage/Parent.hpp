@@ -60,6 +60,11 @@ public:
 	const BoxButtonCollection* getChild(const string& collectionId) const noexcept;
 
 	/**
+	 * @return Returns the primary child collection.
+	 */
+	BoxButtonCollection* getPrimaryChild() const noexcept { return primaryChild; }
+
+	/**
 	 * @return Returns the full children map.
 	 */
 	StringBoxButtonCollectionUMap& getChildren() noexcept;
@@ -73,13 +78,18 @@ public:
 	auto cbegin()    const noexcept { return children.cbegin(); }
 	auto cend()      const noexcept { return children.cend();   }
 
-	size_t getSize() const noexcept { return children.size();  }
-	bool   empty()   const noexcept { return children.empty(); }
+	/**
+	 * @return Returns the total number of child items in the primary child.
+	 */
+	virtual size_t getSize() const noexcept { return primaryChild->getSize(); }
 
 protected:
 
 	/// Child collections keyed by collection ID.
 	StringBoxButtonCollectionUMap children;
+
+	/// pointer to the primary child, parent without children is considered invalid.
+	BoxButtonCollection* primaryChild{nullptr};
 
 	/// List of dependencies acting over children, watchedCollection → targetCollection
 	vector<std::pair<string, string>> dependencyRegistry;
