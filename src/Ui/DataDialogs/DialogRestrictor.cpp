@@ -28,7 +28,7 @@ DialogRestrictor::DialogRestrictor(BaseObjectType* obj, const Glib::RefPtr<Gtk::
 	DialogFormHost(obj, builder)
 {
 
-	registerChildDialog<DialogRestrictorMap>(builder, "DialogRestrictorMap", COLLECTION_RESTRICTOR_MAP);
+	registerChildDialog<DialogRestrictorMap>(builder, "DialogRestrictorMap", COLLECTION_RESTRICTOR_MAPS);
 
 	// Connect Restrictor Box and buttons.
 	builder->get_widget_derived("BoxRestrictors", box);

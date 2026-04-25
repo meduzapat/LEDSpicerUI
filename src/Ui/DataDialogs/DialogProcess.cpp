@@ -46,7 +46,7 @@ DialogProcess::DialogProcess(
 }
 
 void DialogProcess::load(XMLHelper* values) noexcept {
-	createItems(values->getData(COLLECTION_PROCESS), values);
+	createItems(values->getData(COLLECTION_PROCESSES), values);
 }
 
 void DialogProcess::clearForm() noexcept {

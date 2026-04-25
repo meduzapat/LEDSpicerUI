@@ -43,7 +43,7 @@ public:
 	string_view getCssClass() const noexcept override { return "GroupBoxButton"; }
 
 	CollectionHandler* getCollectionHandler() const noexcept override {
-		return CollectionHandler::getInstance(COLLECTION_GROUP);
+		return CollectionHandler::getInstance(COLLECTION_GROUPS);
 	}
 
 protected:

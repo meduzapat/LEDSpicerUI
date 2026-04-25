@@ -27,7 +27,7 @@ using namespace LEDSpicerUI::Ui::Storage;
 Group::Group(StringUMap& data) noexcept :
 	Parent(data, {COLLECTION_GROUP_LINKS})
 {
-	registerDependency(COLLECTION_ELEMENT, COLLECTION_GROUP_LINKS);
+	registerDependency(COLLECTION_ELEMENTS, COLLECTION_GROUP_LINKS);
 }
 
 bool Group::shouldSerialize(const string& key, const string& value) const noexcept {

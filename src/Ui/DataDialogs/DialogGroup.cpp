@@ -47,7 +47,7 @@ DialogGroup::DialogGroup(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& 
 		NAME,
 		TYPE_ELEMENT,
 		COLLECTION_GROUP_LINKS,
-		CollectionHandler::getInstance(COLLECTION_ELEMENT),
+		CollectionHandler::getInstance(COLLECTION_ELEMENTS),
 		{}
 	};
 
@@ -60,7 +60,7 @@ DialogGroup::DialogGroup(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& 
 		DialogSelect::getInstance()->open();
 	});
 
-	CollectionHandler::getInstance(COLLECTION_ELEMENT)->registerSensitivity(btnAdd);
+	CollectionHandler::getInstance(COLLECTION_ELEMENTS)->registerSensitivity(btnAdd);
 
 	// Group name generator dialog.
 	Gtk::Dialog* dialogGenerateGroupName = nullptr;
@@ -86,7 +86,7 @@ DialogGroup::DialogGroup(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& 
 }
 
 void DialogGroup::load(XMLHelper* values) noexcept {
-	createItems(values->getData(COLLECTION_GROUP), values);
+	createItems(values->getData(COLLECTION_GROUPS), values);
 }
 
 void DialogGroup::createSubItems(XMLHelper* values) noexcept {

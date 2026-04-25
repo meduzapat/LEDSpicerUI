@@ -29,5 +29,5 @@ string Process::createPrettyName() const noexcept {
 }
 
 CollectionHandler* Process::getCollectionHandler() const noexcept {
-	return CollectionHandler::getInstance(COLLECTION_PROCESS);
+	return CollectionHandler::getInstance(COLLECTION_PROCESSES);
 }

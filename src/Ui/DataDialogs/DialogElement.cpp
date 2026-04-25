@@ -175,7 +175,7 @@ DialogElement::DialogElement(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 }
 
 void DialogElement::load(XMLHelper* values) noexcept {
-	createItems(values->getData(Defaults::createCommonUniqueId({ownerData->createUniqueId(), COLLECTION_ELEMENT})), values);
+	createItems(values->getData(Defaults::createCommonUniqueId({ownerData->createUniqueId(), COLLECTION_ELEMENTS})), values);
 }
 
 void DialogElement::clearForm() noexcept {
@@ -262,7 +262,7 @@ void DialogElement::isValid() const {
 		}
 	}
 
-	auto groupHandler = LEDSpicerUI::Ui::Storage::CollectionHandler::getInstance(COLLECTION_GROUP);
+	auto groupHandler = LEDSpicerUI::Ui::Storage::CollectionHandler::getInstance(COLLECTION_GROUPS);
 	auto existingGroup = groupHandler->get(name);
 	if (existingGroup && not existingGroup->getProperties().isSet("system")) {
 		throw Message("Element name '" + name + "' conflicts with existing group.\nNote: Strip elements auto-create groups with the same name.");
@@ -371,7 +371,7 @@ void DialogElement::storeData() noexcept {
 		isStrip  = false,
 		wasStrip = not currentData->getValue(STRIPSIZE).empty();
 
-	auto groupCollectionHandler(LEDSpicerUI::Ui::Storage::CollectionHandler::getInstance(COLLECTION_GROUP));
+	auto groupCollectionHandler(LEDSpicerUI::Ui::Storage::CollectionHandler::getInstance(COLLECTION_GROUPS));
 
 	switch (static_cast<tabIndex>(notebookDeviceConnections->get_current_page())) {
 	case tabIndex::Single:

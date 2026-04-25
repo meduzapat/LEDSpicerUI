@@ -55,11 +55,11 @@ TEST_F(DeviceTest, CreatePrettyNameIncludesId) {
 	EXPECT_NE(string::npos, d.createPrettyName().find("Id: 2"));
 }
 
-// Child collection keyed as COLLECTION_ELEMENT.
+// Child collection keyed as COLLECTION_ELEMENTS.
 TEST_F(DeviceTest, HasElementChild) {
 	StringUMap data{{NAME, "RaspberryPi"}, {ID, "1"}, {PORT, ""}};
 	Device d(data);
-	EXPECT_NE(nullptr, d.getChild(COLLECTION_ELEMENT));
+	EXPECT_NE(nullptr, d.getChild(COLLECTION_ELEMENTS));
 }
 
 // getCssClass.

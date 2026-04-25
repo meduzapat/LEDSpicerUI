@@ -158,7 +158,7 @@ string ConfigFile::processProcessLookup() {
 		}
 		process.push_back(plAttr);
 	}
-	extractedData.emplace(COLLECTION_PROCESS, std::move(process));
+	extractedData.emplace(COLLECTION_PROCESSES, std::move(process));
 	return errors;
 }
 
@@ -179,7 +179,7 @@ string ConfigFile::processElements(tinyxml2::XMLElement* deviceNode, const strin
 		elementAttr["type"] = Defaults::detectElementType(elementAttr[NAME]);
 		elements.push_back(elementAttr);
 	}
-	extractedData.emplace(Defaults::createCommonUniqueId({deviceName, COLLECTION_ELEMENT}), std::move(elements));
+	extractedData.emplace(Defaults::createCommonUniqueId({deviceName, COLLECTION_ELEMENTS}), std::move(elements));
 	return errors;
 }
 
@@ -201,7 +201,7 @@ string ConfigFile::processRestrictorMaps(tinyxml2::XMLElement* restrictorNode, c
 		}
 		maps.push_back(mapAttr);
 	}
-	extractedData.emplace(Defaults::createCommonUniqueId({restrictorName, COLLECTION_RESTRICTOR_MAP}), std::move(maps));
+	extractedData.emplace(Defaults::createCommonUniqueId({restrictorName, COLLECTION_RESTRICTOR_MAPS}), std::move(maps));
 	return errors;
 }
 
@@ -248,7 +248,7 @@ string ConfigFile::processGroups() {
 		}
 		extractedData.emplace(Defaults::createCommonUniqueId({group[NAME], COLLECTION_GROUP_LINKS}), std::move(elements));
 	}
-	extractedData.emplace(COLLECTION_GROUP, std::move(groups));
+	extractedData.emplace(COLLECTION_GROUPS, std::move(groups));
 	return errors;
 }
 

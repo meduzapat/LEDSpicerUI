@@ -66,7 +66,7 @@ public:
 	void deleteExcessStripChildren(size_t keepCount) noexcept;
 
 	CollectionHandler* getCollectionHandler() const noexcept override {
-		return CollectionHandler::getInstance(COLLECTION_ELEMENT);
+		return CollectionHandler::getInstance(COLLECTION_ELEMENTS);
 	}
 
 	/**

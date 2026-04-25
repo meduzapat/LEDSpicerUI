@@ -33,9 +33,9 @@ Profile::Profile(StringUMap& data, DirNode* parent) noexcept :
 	}),
 	DirNode(getProperties(), parent, getValue(FILENAME))
 {
-	registerDependency(COLLECTION_ELEMENT,    COLLECTION_PROFILE_ELEMENTS);
-	registerDependency(COLLECTION_GROUP,      COLLECTION_PROFILE_GROUPS);
-	registerDependency(COLLECTION_INPUT,      COLLECTION_PROFILE_INPUTS);
+	registerDependency(COLLECTION_ELEMENTS,    COLLECTION_PROFILE_ELEMENTS);
+	registerDependency(COLLECTION_GROUPS,      COLLECTION_PROFILE_GROUPS);
+	registerDependency(COLLECTION_INPUTS,      COLLECTION_PROFILE_INPUTS);
 	registerDependency(COLLECTION_ANIMATIONS, COLLECTION_PROFILE_ANIMATIONS);
 }
 

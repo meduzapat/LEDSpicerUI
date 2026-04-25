@@ -51,10 +51,10 @@ TEST_F(GroupTest, CreateUniqueId) {
 	);
 }
 
-// Child collection is keyed as COLLECTION_GROUP_LINKS not COLLECTION_ELEMENT.
+// Child collection is keyed as COLLECTION_GROUP_LINKS not COLLECTION_ELEMENTS.
 TEST_F(GroupTest, ChildCollectionKeyIsGroupLinks) {
 	EXPECT_NE(nullptr, group->getChild(COLLECTION_GROUP_LINKS));
-	EXPECT_EQ(nullptr, group->getChild(COLLECTION_ELEMENT));
+	EXPECT_EQ(nullptr, group->getChild(COLLECTION_ELEMENTS));
 }
 
 // Child collection starts empty.

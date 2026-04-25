@@ -42,7 +42,7 @@ public:
 	string createPrettyName() const noexcept override;
 	string createUniqueId()   const noexcept override;
 
-	CollectionHandler* getCollectionHandler() const noexcept override { return CollectionHandler::getInstance(COLLECTION_RESTRICTOR_MAP); }
+	CollectionHandler* getCollectionHandler() const noexcept override { return CollectionHandler::getInstance(COLLECTION_RESTRICTOR_MAPS); }
 
 };
 

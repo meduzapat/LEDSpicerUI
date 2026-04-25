@@ -36,7 +36,7 @@ class Restrictor : public Parent, public Revertible {
 public:
 
 	Restrictor(StringUMap& data) noexcept :
-		Parent(data, {COLLECTION_RESTRICTOR_MAP}),
+		Parent(data, {COLLECTION_RESTRICTOR_MAPS}),
 		Revertible(*this, children)
 	{}
 

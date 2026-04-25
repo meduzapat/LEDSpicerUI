@@ -138,13 +138,6 @@ private:
 	 * @param boxButton Target BoxButton in displayBox.
 	 */
 	void addDisplayButtons(Storage::BoxButton& boxButton) noexcept;
-
-	/**
-	 * Creates a Link for target, adds it to destination, adds its BoxButton
-	 * to displayBox with the appropriate buttons.
-	 * @param target The Data object the Link will point to.
-	 */
-	void addLink(Storage::Data* target) noexcept;
 };
 
 } // namespace

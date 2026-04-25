@@ -57,7 +57,7 @@ public:
 	string createTooltip()    const noexcept override;
 
 	CollectionHandler* getCollectionHandler() const noexcept override {
-		return CollectionHandler::getInstance(COLLECTION_INPUT);
+		return CollectionHandler::getInstance(COLLECTION_INPUTS);
 	}
 
 	void wipe()     noexcept override;

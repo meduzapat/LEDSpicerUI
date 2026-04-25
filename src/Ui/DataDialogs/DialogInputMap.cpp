@@ -55,11 +55,11 @@ DialogInputMap::DialogInputMap(BaseObjectType* obj, const Glib::RefPtr<Gtk::Buil
 	// When the stack page changes, refresh the relevant combo and clear the other.
 	stackElementAndGroup->connect_property_changed("visible-child", [this]() {
 		if (stackElementAndGroup->get_visible_child_name() == "InputTypeElement") {
-			Storage::CollectionHandler::getInstance(COLLECTION_ELEMENT)->refreshComboBox(comboBoxInputMapElement, {PROP_EXPAND});
+			Storage::CollectionHandler::getInstance(COLLECTION_ELEMENTS)->refreshComboBox(comboBoxInputMapElement, {PROP_EXPAND});
 			comboBoxInputMapGroup->set_active(-1);
 		}
 		else {
-			Storage::CollectionHandler::getInstance(COLLECTION_GROUP)->refreshComboBox(comboBoxInputMapGroup);
+			Storage::CollectionHandler::getInstance(COLLECTION_GROUPS)->refreshComboBox(comboBoxInputMapGroup);
 			comboBoxInputMapElement->set_active(-1);
 		}
 	});
@@ -89,8 +89,8 @@ void DialogInputMap::setOwner(
 }
 
 void DialogInputMap::clearForm() noexcept {
-	Storage::CollectionHandler::getInstance(COLLECTION_ELEMENT)->refreshComboBox(comboBoxInputMapElement, {PROP_EXPAND});
-	Storage::CollectionHandler::getInstance(COLLECTION_GROUP)->refreshComboBox(comboBoxInputMapGroup);
+	Storage::CollectionHandler::getInstance(COLLECTION_ELEMENTS)->refreshComboBox(comboBoxInputMapElement, {PROP_EXPAND});
+	Storage::CollectionHandler::getInstance(COLLECTION_GROUPS)->refreshComboBox(comboBoxInputMapGroup);
 	comboBoxInputMapElement->set_active(-1);
 	comboBoxInputMapGroup->set_active(-1);
 	inputInputMapTrigger->set_text("");
@@ -130,11 +130,11 @@ void DialogInputMap::storeData() noexcept {
 	Storage::Data* data = nullptr;
 	if (stackElementAndGroup->get_visible_child_name() == "InputTypeElement") {
 		type = ELEMENT;
-		data = Storage::CollectionHandler::getInstance(COLLECTION_ELEMENT)->get(comboBoxInputMapElement->get_active_text());
+		data = Storage::CollectionHandler::getInstance(COLLECTION_ELEMENTS)->get(comboBoxInputMapElement->get_active_text());
 	}
 	else {
 		type = GROUP;
-		data = Storage::CollectionHandler::getInstance(COLLECTION_GROUP)->get(comboBoxInputMapGroup->get_active_text());
+		data = Storage::CollectionHandler::getInstance(COLLECTION_GROUPS)->get(comboBoxInputMapGroup->get_active_text());
 	}
 
 	currentData->setValue(TRIGGER, inputInputMapTrigger->get_text());
@@ -173,8 +173,8 @@ LEDSpicerUI::Ui::Storage::Data* DialogInputMap::createData(StringUMap& rawData) 
 
 	auto handler{type.empty() ? nullptr : (
 		type == GROUP ?
-			Storage::CollectionHandler::getInstance(COLLECTION_GROUP) :
-			Storage::CollectionHandler::getInstance(COLLECTION_ELEMENT)
+			Storage::CollectionHandler::getInstance(COLLECTION_GROUPS) :
+			Storage::CollectionHandler::getInstance(COLLECTION_ELEMENTS)
 		)
 	};
 

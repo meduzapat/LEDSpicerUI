@@ -30,7 +30,7 @@ namespace LEDSpicerUI::Ui::Storage {
  * LEDSpicerUI::Ui::Storage::Parent
  *
  * Mixin for Data subclasses that own one or more child BoxButtonCollections.
- * Children are keyed by collection ID (e.g. COLLECTION_ELEMENT) and injected
+ * Children are keyed by collection ID (e.g. COLLECTION_ELEMENTS) and injected
  * at construction time. Provides uniform access and iteration over all child
  * collections without knowledge of concrete subclass layout.
  */
@@ -53,7 +53,7 @@ public:
 	virtual ~Parent();
 
 	/**
-	 * @param collectionId Collection key (e.g. COLLECTION_ELEMENT).
+	 * @param collectionId Collection key (e.g. COLLECTION_ELEMENTS).
 	 * @return Returns the child collection for the given ID, or nullptr if not found.
 	 */
 	BoxButtonCollection* getChild(const string& collectionId) noexcept;

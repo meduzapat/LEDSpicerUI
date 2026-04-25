@@ -30,8 +30,8 @@ InputSource::InputSource(StringUMap& data, const string& ownerId) noexcept :
 {
 	getProperties().setValue(UID, std::to_string(++sourceCounter));
 	getProperties().setValue(PID, ownerId);
-	registerDependency(COLLECTION_ELEMENT, COLLECTION_INPUT_MAPS);
-	registerDependency(COLLECTION_GROUP,   COLLECTION_INPUT_MAPS);
+	registerDependency(COLLECTION_ELEMENTS, COLLECTION_INPUT_MAPS);
+	registerDependency(COLLECTION_GROUPS,   COLLECTION_INPUT_MAPS);
 }
 
 string InputSource::createUniqueId() const noexcept {

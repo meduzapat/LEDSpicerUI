@@ -71,7 +71,7 @@ void DialogSelect::open() noexcept {
 		return;
 	}
 	conn.disconnect();
-	btnApply->set_sensitive(true);
+//	btnApply->set_sensitive(true);
 
 	// Build a fast lookup set of selected target pointers.
 	std::unordered_set<const Storage::Data*> selected;
@@ -94,8 +94,23 @@ void DialogSelect::open() noexcept {
 	// Add newly selected items not already in destination.
 	for (auto flowChild : pickerBox->get_selected_children()) {
 		auto target{static_cast<Storage::Selection*>(flowChild->get_child())->getData()};
-		if (not destination->isSet(target))
-			addLink(target);
+		if (not destination->isSet(target)) {
+			StringUMap empty;
+			auto link{new Storage::Link(
+				empty,
+				request->linkKey,
+				request->linkType,
+				request->linkFields,
+				target
+			)};
+
+			for (const auto& field : request->linkFields)
+				link->setValue(field.key, field.defaultValue);
+
+			Storage::BoxButton& btn = destination->create(link);
+			addDisplayButtons(btn);
+			request->displayBox->add(btn);
+		}
 	}
 
 	request->displayBox->show_all();
@@ -219,22 +234,4 @@ void DialogSelect::addDisplayButtons(Storage::BoxButton& boxButton) noexcept {
 	});
 
 	boxButton.show_all();
-}
-
-void DialogSelect::addLink(Storage::Data* target) noexcept {
-	StringUMap empty;
-	auto link{new Storage::Link(
-		empty,
-		request->linkKey,
-		request->linkType,
-		request->linkFields,
-		target
-	)};
-
-	for (const auto& field : request->linkFields)
-		link->setValue(field.key, field.defaultValue);
-
-	Storage::BoxButton& btn = destination->create(link);
-	addDisplayButtons(btn);
-	request->displayBox->add(btn);
 }

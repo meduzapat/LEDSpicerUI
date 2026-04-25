@@ -57,11 +57,11 @@ TEST_F(RestrictorTest, CreatePrettyNameIncludesId) {
 	EXPECT_NE(string::npos, r.createPrettyName().find("Id: 3"));
 }
 
-// Child collection keyed as COLLECTION_RESTRICTOR_MAP.
+// Child collection keyed as COLLECTION_RESTRICTOR_MAPS.
 TEST_F(RestrictorTest, HasRestrictorMapChild) {
 	StringUMap data{{NAME, "ServoStik"}, {ID, "1"}, {PORT, ""}};
 	Restrictor r(data);
-	EXPECT_NE(nullptr, r.getChild(COLLECTION_RESTRICTOR_MAP));
+	EXPECT_NE(nullptr, r.getChild(COLLECTION_RESTRICTOR_MAPS));
 }
 
 // getCssClass.

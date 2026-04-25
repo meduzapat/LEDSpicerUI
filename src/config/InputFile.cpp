@@ -61,7 +61,7 @@ InputFile::InputFile(const string& filePath, DirectoryEntry* parent) :
 		);
 	}
 
-	extractedData.emplace(COLLECTION_INPUT, StringUMapVector{input});
+	extractedData.emplace(COLLECTION_INPUTS, StringUMapVector{input});
 
 	if (not errors.empty())
 		Message::displayError("Errors:\n" + errors);

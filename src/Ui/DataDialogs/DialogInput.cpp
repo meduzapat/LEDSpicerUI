@@ -79,7 +79,7 @@ DialogInput::DialogInput(
 }
 
 void DialogInput::load(XMLHelper* values) noexcept {
-	createItems(values->getData(COLLECTION_INPUT), values);
+	createItems(values->getData(COLLECTION_INPUTS), values);
 }
 
 void DialogInput::createSubItems(XMLHelper* values) noexcept {

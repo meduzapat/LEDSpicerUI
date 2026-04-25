@@ -29,7 +29,7 @@ DialogDevice::DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 {
 
 	// Register its dialogs for refresh.
-	registerChildDialog<DialogElement>(builder, "DialogElement", COLLECTION_ELEMENT);
+	registerChildDialog<DialogElement>(builder, "DialogElement", COLLECTION_ELEMENTS);
 
 	// Connect Device Box and buttons.
 	builder->get_widget_derived("BoxDevices", box);

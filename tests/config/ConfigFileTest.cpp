@@ -83,7 +83,7 @@ TEST_F(ConfigFileTest, DevicesAreProcessed) {
 	EXPECT_EQ("1",                devices[2][ID]);
 
 	string deviceId    = Defaults::createHardwareUniqueId({{NAME, "UltimarcPacDrive"}, {ID, "1"}});
-	string elementsKey = Defaults::createCommonUniqueId({deviceId, COLLECTION_ELEMENT});
+	string elementsKey = Defaults::createCommonUniqueId({deviceId, COLLECTION_ELEMENTS});
 
 	try {
 		auto& elements = configFile->getData(elementsKey);
@@ -107,7 +107,7 @@ TEST_F(ConfigFileTest, DevicesAreProcessed) {
 TEST_F(ConfigFileTest, GroupsAreProcessed) {
 	EXPECT_EQ("default", configFile->getDefaultProfile());
 
-	auto& groups = configFile->getData(COLLECTION_GROUP);
+	auto& groups = configFile->getData(COLLECTION_GROUPS);
 	EXPECT_EQ(4, groups.size());
 
 	EXPECT_EQ("All",     groups[0][NAME]);

@@ -37,7 +37,7 @@ class Device : public Parent, public Revertible {
 public:
 
 	Device(StringUMap& data) noexcept :
-		Parent(data, {COLLECTION_ELEMENT}),
+		Parent(data, {COLLECTION_ELEMENTS}),
 		Revertible(*this, children)
 	{}
 

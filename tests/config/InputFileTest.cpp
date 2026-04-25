@@ -53,7 +53,7 @@ protected:
 };
 
 TEST_F(InputFileTest, MultiSourceInputIsLoaded) {
-	auto& inputData = inputMulti->getData(COLLECTION_INPUT);
+	auto& inputData = inputMulti->getData(COLLECTION_INPUTS);
 	ASSERT_FALSE(inputData.empty());
 	ASSERT_FALSE(inputData[0].empty());
 
@@ -114,7 +114,7 @@ TEST_F(InputFileTest, SecondSourceMapsAreProcessed) {
 }
 
 TEST_F(InputFileTest, SingleSourceInputIsLoaded) {
-	auto& inputData = inputSingle->getData(COLLECTION_INPUT);
+	auto& inputData = inputSingle->getData(COLLECTION_INPUTS);
 	ASSERT_FALSE(inputData.empty());
 	EXPECT_EQ("Mame", inputData[0][NAME]);
 	EXPECT_EQ("inputSingle", inputSingle->getFilename());
