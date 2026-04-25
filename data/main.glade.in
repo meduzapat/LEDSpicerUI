@@ -7860,7 +7860,7 @@ Multi will blink the next start</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="BtnAddInputMapLinks">
+                  <object class="GtkButton" id="BtnSelectInputMap">
                     <property name="visible">True</property>
                     <property name="sensitive">False</property>
                     <property name="can-focus">True</property>
