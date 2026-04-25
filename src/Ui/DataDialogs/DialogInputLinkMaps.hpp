@@ -21,7 +21,7 @@
  */
 
 #include "Storage/InputMapLink.hpp"
-#include "Storage/OrdenableFlowBox.hpp"
+#include "OrdenableFlowBox.hpp"
 #include "Storage/CollectionHandler.hpp"
 #include "DialogSelect.hpp"
 

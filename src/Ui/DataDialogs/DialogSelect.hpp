@@ -109,6 +109,12 @@ public:
 	 */
 	void load(XMLHelper* values, const string& ownerUniqueId) noexcept;
 
+	/**
+	 * @param buttons BoxButtonVector to resolve indices for.
+	 * @return Vector with indexes of the found BoxButtons.
+	 */
+	vector<string> getPickerIndices(const Storage::BoxButtonVector& buttons) const noexcept;
+
 protected:
 
 	/// Confirm button inside the picker dialog.

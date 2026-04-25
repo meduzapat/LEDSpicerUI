@@ -235,3 +235,20 @@ void DialogSelect::addDisplayButtons(Storage::BoxButton& boxButton) noexcept {
 
 	boxButton.show_all();
 }
+
+vector<string> DialogSelect::getPickerIndices(const Storage::BoxButtonVector& buttons) const noexcept {
+	vector<string> result;
+	if (!request || buttons.empty()) return result;
+	int pickerIdx = 0;
+	for (const auto& colRec : *request->sourceCollection) {
+		if (colRec.second->getProperties().getValue(PROP_NO_SELECT).empty()) {
+			for (size_t i = 0; i < buttons.size(); ++i)
+				if (*buttons[i]->getData() == *colRec.second) {
+					result.push_back(std::to_string(pickerIdx));
+					break;
+				}
+			++pickerIdx;
+		}
+	}
+	return result;
+}
