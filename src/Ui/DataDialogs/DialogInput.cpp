@@ -32,7 +32,7 @@ DialogInput::DialogInput(
 {
 
 	registerChildDialog<DialogInputSource>(builder, "DialogInputSource", COLLECTION_INPUT_SOURCES);
-//	registerChildDialog<DialogInputLinkMaps>(builder, "DialogInputSource", COLLECTION_INPUT_LINKMAP);
+	registerChildDialog<DialogInputLinkMaps>(builder, "DialogInputLinkMaps", COLLECTION_INPUT_LINKMAP);
 
 	builder->get_widget("ComboBoxInputSelectInput",   selectorCombo);
 	builder->get_widget_derived("BoxInputs",          box);
@@ -52,6 +52,11 @@ DialogInput::DialogInput(
 
 //	builder->get_widget_derived("BoxInputLinkedMaps", boxInputLinkedMaps);
 //	builder->get_widget_derived("BoxInputMaps",       boxDirectMaps);
+//	Gtk::Button* btnCreateInputLinkedMap = nullptr;
+//	builder->get_widget("BtnAddInputLinkedMap", btnCreateInputLinkedMap);
+//	btnCreateInputLinkedMap->signal_clicked().connect([this]() {
+//		Storage::CollectionHandler::getInstance(COLLECTION_INPUT_MAPS)->findByProperty(PID, currentData->getProperties().getValue(PID))->createNew();
+//	});
 
 	setSignalAdd(btnAddInput);
 	setSignalApply();
@@ -129,10 +134,16 @@ void DialogInput::isValid() const {
 		if (blinks < 0 or blinks > 255) spinInputTimes->set_value(0);
 	}
 
-	// This is OK for all non LOAD actions.
-//	if (Defaults::inputHasFlag(id, Defaults::INPUT_NEEDS_SOURCE))
-//		if (not DialogInputSource::getInstance()->getBox()->getSize())
-//			throw Message("Add at least one source.");
+	if (action != Actions::LOAD) {
+		if (Defaults::inputHasFlag(id, Defaults::INPUT_NEEDS_SOURCE)) {
+			if (not DialogInputSource::getInstance()->getBox()->getSize())
+				throw Message("Add at least one source.");
+		}
+		else {
+			if (not DialogInputMap::getInstance()->getBox()->getSize())
+				throw Message("Add at least one map.");
+		}
+	}
 }
 
 void DialogInput::storeData() noexcept {

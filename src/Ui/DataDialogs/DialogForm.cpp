@@ -125,7 +125,6 @@ void DialogForm::wireChildrenDialogs() noexcept {
 	if (not parent) return;
 	for (auto& [family, items] : parent->getChildren()) {
 		familyToDialog.at(family)->setOwner(&items, currentData);
-		// Checks if family exists and sets it as is the one controlling the apply button.
 	}
 
 	if (auto pc{getPrimaryChildCollection()}; pc) pc->registerSensitivity(btnApply);

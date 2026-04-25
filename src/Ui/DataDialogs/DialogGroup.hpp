@@ -56,7 +56,7 @@ protected:
 	/// Box in this dialog where selected element links are displayed.
 	OrdenableFlowBox* boxElements = nullptr;
 
-	/// Static configuration for the element link selector.
+	/// Configuration for the element link selector.
 	DialogSelect::SelectionRequest elementRequest;
 
 	DialogGroup(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept;

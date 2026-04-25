@@ -20,9 +20,10 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DialogForm.hpp"
 #include "Storage/InputMapLink.hpp"
+#include "Storage/OrdenableFlowBox.hpp"
 #include "Storage/CollectionHandler.hpp"
+#include "DialogSelect.hpp"
 
 #pragma once
 
@@ -52,13 +53,12 @@ public:
 
 protected:
 
-	/// Linked maps are per input.
-	static StringVector localCollection;
 
-	/// Where the temporary input mappings will be displayed and sorted.
+
 	OrdenableFlowBox* boxInputLinkedMappings = nullptr;
 
-	Storage::BoxButtonCollection indivitualMaps;
+	/// Configuration for the map link selector.
+	DialogSelect::SelectionRequest mapsRequest;
 
 	DialogInputLinkMaps(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept;
 

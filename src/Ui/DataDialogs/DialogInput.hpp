@@ -24,6 +24,7 @@
 #include "DialogFormHost.hpp"
 #include "DirectoryAware.hpp"
 #include "DialogInputSource.hpp"
+#include "DialogInputLinkMaps.hpp"
 
 #pragma once
 
@@ -74,6 +75,9 @@ protected:
 		* btnAddInput       = nullptr; // Form shooter.
 
 	Gtk::Label* brief = nullptr;
+
+	/// Configuration for the map link selector.
+	DialogSelect::SelectionRequest mapsRequest;
 
 	DialogInput(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept;
 
