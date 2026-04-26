@@ -31,7 +31,7 @@ InputFile::InputFile(const string& filePath, DirectoryEntry* parent) :
 {
 	string errors;
 
-	/* Base key matches FileData::createUniqueId() for the resulting Input object. */
+	// Base key matches FileData::createUniqueId() for the resulting Input object.
 	string baseId(Defaults::createCommonUniqueId({
 		parent ? parent->getFsId() : "",
 		filename

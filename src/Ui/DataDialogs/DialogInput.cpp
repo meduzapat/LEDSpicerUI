@@ -32,7 +32,7 @@ DialogInput::DialogInput(
 {
 
 	registerChildDialog<DialogInputSource>(builder, "DialogInputSource", COLLECTION_INPUT_SOURCES);
-	registerChildDialog<DialogInputLinkMaps>(builder, "DialogInputLinkMaps", COLLECTION_INPUT_LINKMAP);
+	registerChildDialog<DialogInputLinkMaps>(builder, "DialogInputLinkMaps", COLLECTION_INPUT_LINKMAPS);
 
 	builder->get_widget("ComboBoxInputSelectInput",   selectorCombo);
 	builder->get_widget_derived("BoxInputs",          box);
@@ -49,14 +49,6 @@ DialogInput::DialogInput(
 	builder->get_widget("BoxInputCreditsSettings",    boxInputCreditsSettings);
 	builder->get_widget("BoxLinkedElementsAndGroups", boxLinkedElementsAndGroups);
 	builder->get_widget("BriefInput",                 brief);
-
-//	builder->get_widget_derived("BoxInputLinkedMaps", boxInputLinkedMaps);
-//	builder->get_widget_derived("BoxInputMaps",       boxDirectMaps);
-//	Gtk::Button* btnCreateInputLinkedMap = nullptr;
-//	builder->get_widget("BtnAddInputLinkedMap", btnCreateInputLinkedMap);
-//	btnCreateInputLinkedMap->signal_clicked().connect([this]() {
-//		Storage::CollectionHandler::getInstance(COLLECTION_INPUT_MAPS)->findByProperty(PID, currentData->getProperties().getValue(PID))->createNew();
-//	});
 
 	setSignalAdd(btnAddInput);
 	setSignalApply();
@@ -84,7 +76,7 @@ void DialogInput::load(XMLHelper* values) noexcept {
 
 void DialogInput::createSubItems(XMLHelper* values) noexcept {
 	DialogInputSource::getInstance()->load(values);
-//	DialogInputLinkMaps::getInstance()->load(values);
+	DialogInputLinkMaps::getInstance()->load(values);
 }
 
 void DialogInput::resetForm() noexcept {

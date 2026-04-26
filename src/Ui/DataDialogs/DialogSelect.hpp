@@ -110,10 +110,15 @@ public:
 	void load(XMLHelper* values, const string& ownerUniqueId) noexcept;
 
 	/**
-	 * @param buttons BoxButtonVector to resolve indices for.
 	 * @return Vector with indexes of the found BoxButtons.
 	 */
-	vector<string> getPickerIndices(const Storage::BoxButtonVector& buttons) const noexcept;
+	vector<string> getSelectedIndexes() const noexcept;
+
+	/**
+	 * Selects items in the picker by their indexes, then opens the picker.
+	 * @param indexes Vector with indexes of the items to select.
+	 */
+	void selectByIndexes(const vector<string>& indexes) noexcept
 
 protected:
 

@@ -64,9 +64,11 @@ protected:
 	/// Restrictor ways icon map keyed by Ways enum value.
 	std::unordered_map<Defaults::Ways, Gtk::FlowBoxChild*> waysIcons;
 
-	Gtk::ListStore* idListstore      = nullptr;
-	Gtk::Label*     brief            = nullptr;
-	Gtk::Button*    btnAddRestrictorMap = nullptr;
+	Gtk::ListStore* idListstore = nullptr;
+
+	Gtk::Label* brief = nullptr;
+
+	Gtk::Button* btnAddRestrictorMap = nullptr;
 
 	DialogRestrictor(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept;
 

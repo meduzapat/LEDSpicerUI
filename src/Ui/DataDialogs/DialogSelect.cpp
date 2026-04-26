@@ -236,19 +236,51 @@ void DialogSelect::addDisplayButtons(Storage::BoxButton& boxButton) noexcept {
 	boxButton.show_all();
 }
 
-vector<string> DialogSelect::getPickerIndices(const Storage::BoxButtonVector& buttons) const noexcept {
+vector<string> DialogSelect::getSelectedIndexes() const noexcept {
 	vector<string> result;
-	if (!request || buttons.empty()) return result;
+	if (not request or not destination) return result;
 	int pickerIdx = 0;
-	for (const auto& colRec : *request->sourceCollection) {
-		if (colRec.second->getProperties().getValue(PROP_NO_SELECT).empty()) {
-			for (size_t i = 0; i < buttons.size(); ++i)
-				if (*buttons[i]->getData() == *colRec.second) {
-					result.push_back(std::to_string(pickerIdx));
-					break;
-				}
+	for (const auto& [id, data] : *request->sourceCollection) {
+		if (data->getProperties().getValue(PROP_NO_SELECT).empty()) {
+			if (destination->isSet(data))
+				result.push_back(std::to_string(pickerIdx));
 			++pickerIdx;
 		}
 	}
 	return result;
+}
+
+void DialogSelect::selectByIndexes(const vector<string>& indexes) noexcept {
+	if (indexes.empty()) return;
+
+	std::unordered_set<int> targets;
+	for (const auto& s : indexes) {
+		try { targets.insert(std::stoi(s)); }
+		catch (...) {}
+	}
+	if (targets.empty()) return;
+
+	int idx = 0;
+	for (const auto& [id, data] : *request->sourceCollection) {
+		if (data->getProperties().getValue(PROP_NO_SELECT).empty()) {
+			if (targets.count(idx) and not destination->isSet(data)) {
+				StringUMap empty;
+				auto link{new Storage::Link(
+					empty,
+					request->linkKey,
+					request->linkType,
+					request->linkFields,
+					data
+				)};
+				for (const auto& field : request->linkFields)
+					link->setValue(field.key, field.defaultValue);
+				Storage::BoxButton& btn = destination->create(link);
+				addDisplayButtons(btn);
+				request->displayBox->add(btn);
+			}
+			++idx;
+		}
+	}
+	request->displayBox->show_all();
+	Defaults::markDirty();
 }

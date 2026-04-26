@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      DialogInputLinkMap.cpp
+ * @file      DialogInputLinkMaps.cpp
  * @since     Oct 1, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
@@ -24,19 +24,21 @@
 
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
-StringVector DialogInputLinkMaps::localCollection;
-
-DialogInputLinkMaps::DialogInputLinkMaps(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept :
+DialogInputLinkMaps::DialogInputLinkMaps(
+	BaseObjectType* obj,
+	const Glib::RefPtr<Gtk::Builder>& builder
+) noexcept :
 	DialogForm(obj, builder)
 {
 
+	Gtk::Button
+		* btnAdd = nullptr,
+		* btnSelectInputMap = nullptr;
+
 	builder->get_widget_derived("BoxInputLinkedMaps", box);
 	builder->get_widget("BtnApplyInputLinkedMap",     btnApply);
-
-	Gtk::Button* btnAdd = nullptr;
-	builder->get_widget("BtnAddInputLinkedMap", btnAdd);
-
-	// Temporary sorting box.
+	builder->get_widget("BtnAddInputLinkedMap",       btnAdd);
+	builder->get_widget("BtnSelectInputMap",          btnSelectInputMap);
 	builder->get_widget_derived(
 		"BoxInputLinkedMappings",
 		boxInputLinkedMappings,
@@ -44,186 +46,105 @@ DialogInputLinkMaps::DialogInputLinkMaps(BaseObjectType* obj, const Glib::RefPtr
 		"BtnInputMappingDown"
 	);
 
-
 	mapsRequest = {
-			boxInputLinkedMappings,
-			NAME,
-			TYPE_ELEMENT,
-			COLLECTION_GROUP_LINKS,
-			CollectionHandler::getInstance(COLLECTION_TEMP_MAPS),
-			{}
-		};
+		boxInputLinkedMappings,
+		LINKED_ITEMS,
+		TYPE_MAP,
+		LINKED_ITEMS,
+		CollectionHandler::getInstance(COLLECTION_TEMP_MAPS),
+		{},
+		2
+	};
 
-	// Pointer to where the maps are been stored on the input map dialog.
-	OrdenableFlowBox* boxInputMaps = nullptr;
-	builder->get_widget_derived("BoxInputMaps", boxInputMaps);
-
-	/*
-	 * If two or more selected mappings are selected activate the create link button.
-	 */
-	boxInputMaps->signal_selected_children_changed().connect([btnAdd, boxInputMaps]() {
-		btnAdd->set_sensitive(boxInputMaps->get_selected_children().size() >= 2);
-	});
-
-
-	btnAdd->signal_clicked().connect([&, boxInputMaps]() {
-		StringVector
-			linkData,
-			ids;
-		// Extract selected maps.
-		for (auto child : boxInputMaps->get_selected_children()) {
-			// Extract internal data to get ids and linkdata.
-			auto data(static_cast<Storage::BoxButton*>(child->get_child())->getData());
-			ids.push_back(Defaults::addUnitSeparator(data->getValue(TRIGGER)));
-			linkData.emplace_back(Defaults::createCommonUniqueId({
-				data->getValue(TRIGGER),
-				data->getValue(TYPE) + " " + data->getValue(TARGET)
-			}));
-		}
-		boxInputMaps->unselect_all();
-		// ids: (32)4(32)|(32)5(32)|(32)6(32)
-		string idsTxt(Defaults::implode(ids, ID_GROUP_SEPARATOR));
-		// Check if the link exists.
-		if (isUsed(idsTxt)) {
-			Message::displayError("This linked mapping already exists");
-			return;
-		}
-		localCollection.push_back(idsTxt);
-		// Create linked item.
-		StringUMap rawData{
-			{NAME, Defaults::implode(linkData, RECORD_SEPARATOR)},
-			{ID, idsTxt}
-		};
-		auto map  = createData(rawData);
-		Storage::BoxButton& bBox(items->create(map));
-		// Set signals and store.
-		addButtons(bBox);
-		box->add(bBox);
-	});
-
+	setSignalAdd(btnAdd);
 	setSignalApply();
+
+	btnSelectInputMap->signal_clicked().connect([this]() {
+		populateTempMaps();
+		DialogSelect::getInstance()->open();
+	});
+
+}
+
+void DialogInputLinkMaps::setOwner(
+	Storage::BoxButtonCollection* collection,
+	Storage::Data* owner
+) noexcept {
+	DialogForm::setOwner(collection, owner);
+	populateTempMaps();
 }
 
 void DialogInputLinkMaps::load(XMLHelper* values) noexcept {
-	//createItems(values->getData(Defaults::createCommonUniqueId({owner->createUniqueId(), COLLECTION_INPUT_LINKED_MAPS})), values);
+	createItems(
+		values->getData(
+			Defaults::createCommonUniqueId({ownerData->createUniqueId(),
+			COLLECTION_INPUT_LINKMAPS})
+		),
+		values
+	);
 }
 
 void DialogInputLinkMaps::clearForm() noexcept {
+	innerItems.wipe();
 	boxInputLinkedMappings->wipe();
-	indivitualMaps.wipe();
 }
 
 void DialogInputLinkMaps::isValid() const {
-	if (isUsed(createUniqueId())) {
-		throw Message("This linked mapping already exists.");
-	}
+	if (innerItems.getSize() < 2)
+		throw Message("Select at least 2 maps.");
 }
 
 void DialogInputLinkMaps::storeData() noexcept {
-	/*
-	 * This function will be called to store the sorted linked mappings.
-	 */
-	StringVector
-		linkData,
-		ids;
-	string
-		oldIds,
-		newIds;
-	// grab reordered links and store into the linked map object.
-	for (auto child : boxInputLinkedMappings->get_children()) {
-		auto boxChild = static_cast<Gtk::FlowBoxChild*>(child);
-		auto bb = static_cast<Storage::BoxButton*>(boxChild->get_child());
-		// looks like this trigger(30)type target
-		auto newValues(Defaults::explode(bb->getData()->getValue(NAME), FIELD_SEPARATOR));
-		ids.push_back(Defaults::addUnitSeparator(newValues[0]));
-		linkData.push_back(bb->getData()->getValue(NAME));
-	}
-	newIds = Defaults::implode(ids, ID_GROUP_SEPARATOR);
-	ids.clear();
-	// data is trigger(30)type target(31)trigger(30)type target(31)trigger(30)type target
-	for (const auto& group : Defaults::explode(currentData->getValue(NAME), RECORD_SEPARATOR)) {
-		// group is trigger(30)type target
-		const auto parts(Defaults::explode(group, FIELD_SEPARATOR));
-		ids.push_back(Defaults::addUnitSeparator(parts.at(0)));
-	}
-	oldIds = Defaults::implode(ids, ID_GROUP_SEPARATOR);
-
-	// Is always edit
-	std::replace(localCollection.begin(), localCollection.end(), oldIds, newIds);
-
-	currentData->wipe();
-	currentData->setValue(NAME, Defaults::implode(linkData, RECORD_SEPARATOR));
-	currentData->setValue(ID, newIds);
+	const auto indexes(DialogSelect::getInstance()->getSelectedIndexes());
+	currentData->setValue(LINKED_ITEMS, Defaults::implode(indexes, ID_SEPARATOR));
 }
 
 void DialogInputLinkMaps::retrieveData() noexcept {
-	// populates the sorting form with a linked map.
-	// data is trigger(30)type target(31)trigger(30)type target(31)trigger(30)type target
-	for (const auto& group : Defaults::explode(currentData->getValue(NAME), RECORD_SEPARATOR)) {
-		StringUMap rawData{{NAME, group}};
-//		auto form = new Storage::NameOnly(
-//			rawData,
-//			"",
-//			"LinkBoxButton",
-//			[](const StringUMap& data) {
-//				const auto parts(Defaults::explode(data.at(NAME), FIELD_SEPARATOR));
-//				return parts.at(1);
-//			},
-//			// Tool-tip
-//			[](const StringUMap& data) {
-//				const auto parts(Defaults::explode(data.at(NAME), FIELD_SEPARATOR));
-//				return string("Linked map for " + parts.at(1));
-//			}
-//		);
-//		auto& button = indivitualMaps.add(form);
-//		boxInputLinkedMappings->add(button);
-	}
-	boxInputLinkedMappings->show_all();
+	const string& idxStr = currentData->getValue(LINKED_ITEMS);
+	if (idxStr.empty()) return;
+	populateTempMaps();
+	DialogSelect::getInstance()->selectByIndexes(Defaults::explode(idxStr, ID_SEPARATOR));
 }
 
-string DialogInputLinkMaps::createUniqueId() const noexcept{
-	StringVector ids;
-	// grab reordered links and store into the linked map object.
-	for (auto child : boxInputLinkedMappings->get_children()) {
-		auto boxChild = static_cast<Gtk::FlowBoxChild*>(child);
-		auto bb = static_cast<Storage::BoxButton*>(boxChild->get_child());
-		// data is trigger(30)type target
-		auto newValues(Defaults::explode(bb->getData()->getValue(NAME), FIELD_SEPARATOR));
-		ids.push_back(Defaults::addUnitSeparator(newValues[0]));
-	}
-	// ids: (32)4(32)|(32)5(32)|(32)6(32)
-	return Defaults::implode(ids, ID_GROUP_SEPARATOR);
+string DialogInputLinkMaps::createUniqueId() const noexcept {
+	return currentData->createUniqueId();
 }
 
-//void DialogInputLinkMaps::setOwner(Storage::BoxButtonCollection* collection, Storage::Data* owner) {
-//	DialogForm::setOwner(collection, owner);
-//	// When the dialog opens, generate the local collection.
-//	localCollection.clear();
-//	for(auto& bb : *collection)
-//		localCollection.push_back(extractIds(bb->getData()));
-//}
-
-LEDSpicerUI::Ui::Storage::Data* DialogInputLinkMaps::createData(StringUMap& rawData) const noexcept {
+Storage::Data* DialogInputLinkMaps::createData(StringUMap& rawData) const noexcept {
 	return new Storage::InputMapLink(rawData);
 }
 
-void DialogInputLinkMaps::afterDeleteConfirmation(Storage::BoxButton& boxButton) noexcept {
-	string idsTxt(extractIds(boxButton.getData()));
-	localCollection.erase(std::remove(localCollection.begin(), localCollection.end(), idsTxt), localCollection.end());
+void DialogInputLinkMaps::wireChildrenDialogs() noexcept {
+	innerItems.wipe();
+	boxInputLinkedMappings->wipe();
+	currentData->setUp();
+	DialogSelect::getInstance()->setUp(&innerItems, mapsRequest);
+	innerItems.registerSensitivity(btnApply, 2);
 }
 
-bool DialogInputLinkMaps::isUsed(const string& ids) const noexcept {
-	return std::find(localCollection.begin(), localCollection.end(), ids) != localCollection.end();
+void DialogInputLinkMaps::disconnectChildrenDialogs() noexcept {
+	innerItems.releaseSensitive(btnApply);
+	innerItems.wipe();
+	currentData->tearDown();
 }
 
-string DialogInputLinkMaps::extractIds(Storage::Data* data) const noexcept {
-	StringVector ids;
-	// data is trigger(30)type target(31)trigger(30)type target(31)trigger(30)type target
-	for (const auto& group : Defaults::explode(data->getValue(NAME), RECORD_SEPARATOR)) {
-		// group is trigger(30)type target
-		const auto parts(Defaults::explode(group, FIELD_SEPARATOR));
-		ids.push_back(Defaults::addUnitSeparator(parts.at(0)));
-	}
-	// ids: (32)4(32)|(32)5(32)|(32)6(32)
-	return Defaults::implode(ids, ID_GROUP_SEPARATOR);
+void DialogInputLinkMaps::populateTempMaps() noexcept {
+	auto* tempMaps = CollectionHandler::getInstance(COLLECTION_TEMP_MAPS);
+
+	vector<Storage::Data*> toRemove;
+	for (auto& [id, data] : *tempMaps)
+		toRemove.push_back(data);
+	for (auto* data : toRemove)
+		tempMaps->remove(data);
+
+	auto* inputParent = dynamic_cast<Storage::Parent*>(ownerData);
+	if (not inputParent) return;
+	auto* sourcesBBC = inputParent->getChild(COLLECTION_INPUT_SOURCES);
+	if (not sourcesBBC) return;
+
+	for (auto& sourceBB : *sourcesBBC) {
+		auto* source = dynamic_cast<Storage::Parent*>(sourceBB->getData());
+		if (not source) continue;
+		for (auto& mapBB : *source->getPrimaryChild())
+			tempMaps->add(mapBB->getData());
 }

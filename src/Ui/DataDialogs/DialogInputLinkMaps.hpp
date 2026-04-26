@@ -22,21 +22,19 @@
 
 #include "Storage/InputMapLink.hpp"
 #include "OrdenableFlowBox.hpp"
-#include "Storage/CollectionHandler.hpp"
+#include "Storage/BoxButtonCollection.hpp"
 #include "DialogSelect.hpp"
+#include "DialogForm.hpp"
 
 #pragma once
 
 namespace LEDSpicerUI::Ui::DataDialogs {
 
 /**
- * LEDSpicerUI::Ui::DialogInputLinkElements
- * This Dialog handles the linking of maps logic from input dialog, it also provide sorting functionality for linked maps.
- * All the dialog functionality is for the sorting mechanism, that is a FAKE data generator.
- * The real link is created when 2 or more maps are selected in input dialog and the add button is clicked.
- * Is a very simple and a little nasty way to handle the links.
+ * LEDSpicerUI::Ui::DataDialogs::DialogInputLinkMaps
+ * Manages InputMapLink objects for an Input.
  */
-class DialogInputLinkMaps: public DialogForm, public SingletonDialog<DialogInputLinkMaps> {
+class DialogInputLinkMaps : public DialogForm, public SingletonDialog<DialogInputLinkMaps> {
 
 	friend class Gtk::Builder;
 
@@ -50,11 +48,11 @@ public:
 	void retrieveData()           noexcept override;
 	void isValid()          const          override;
 	string createUniqueId() const noexcept override;
+	void setOwner(Storage::BoxButtonCollection* collection, Storage::Data* owner) noexcept override;
 
 protected:
 
-
-
+	/// Ordered display box inside the dialog for the current ILM's map sequence.
 	OrdenableFlowBox* boxInputLinkedMappings = nullptr;
 
 	/// Configuration for the map link selector.
@@ -66,26 +64,17 @@ protected:
 
 	Storage::Data* createData(StringUMap& rawData) const noexcept override;
 
-	/**
-	 * To remove used linked maps.
-	 * @param boxButton
-	 */
-	void afterDeleteConfirmation(Storage::BoxButton& boxButton) noexcept override;
+	void createSubItems(XMLHelper* values) noexcept override;
+
+	void wireChildrenDialogs()       noexcept override;
+
+	void disconnectChildrenDialogs() noexcept override;
 
 	/**
-	 * Checks if a group of IDs is used on the local collection.
-	 * @param id
-	 * @return
+	 * Clears COLLECTION_TEMP_MAPS and repopulates it with all InputMaps
+	 * from all sources of the current ownerData (Input), in source order.
 	 */
-	bool isUsed(const string& ids) const noexcept;
-
-	/**
-	 * Extracts the Ids from the link data field.
-	 * @param data
-	 * @return
-	 */
-	string extractIds(Storage::Data* data) const noexcept;
-
+	void populateTempMaps() noexcept;
 };
 
 } // namespace

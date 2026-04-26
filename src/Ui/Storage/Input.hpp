@@ -23,8 +23,6 @@
 #include "Parent.hpp"
 #include "DirNode.hpp"
 #include "Revertible.hpp"
-// TODO: wire once DialogInputLinkMaps is reworked.
-//#include "DataDialogs/DialogInputLinkMaps.hpp"
 
 #pragma once
 

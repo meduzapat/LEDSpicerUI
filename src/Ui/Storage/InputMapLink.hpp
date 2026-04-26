@@ -20,7 +20,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Data.hpp"
+#include "Parent.hpp"
 
 #pragma once
 
@@ -28,12 +28,15 @@ namespace LEDSpicerUI::Ui::Storage {
 
 /**
  * LEDSpicerUI::Ui::Storage::InputMapLink
+ *
+ * A single linked-map group owned by an Input.
+ * Acts as a Parent whose primary child collection holds Link objects.
  */
-class InputMapLink: public Data {
+class InputMapLink: public Parent {
 
 public:
 
-	using Data::Data;
+	InputMapLink(StringUMap& data, const string& inputPid) noexcept;
 
 	virtual ~InputMapLink() = default;
 
@@ -43,6 +46,18 @@ public:
 	string createTooltip()    const noexcept override;
 	string createUniqueId()   const noexcept override;
 	CollectionHandler* getCollectionHandler() const noexcept override { return nullptr; }
+
+	string createUniqueId()   const noexcept override { return getValue(ILM_ID); }
+
+	CollectionHandler* getCollectionHandler() const noexcept override;
+
+	void wipe() noexcept override;
+
+private:
+
+	/// Per-session counter for stable ILM_ID generation.
+	inline static size_t linkMapCounter = 0;
+
 };
 
 } // namespace

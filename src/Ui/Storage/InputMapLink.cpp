@@ -24,28 +24,40 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-string InputMapLink::createTooltip() const noexcept {
-	string tooltip("This action will start with the ");
-	StringVector txts;
-	// data is trigger(30)type target(31)trigger(30)type target(31)trigger(30)type target
-	for (const auto& group : Defaults::explode(getValue(NAME), RECORD_SEPARATOR)) {
-		// group is trigger(30)type target
-		const auto parts(Defaults::explode(group, FIELD_SEPARATOR));
-		const auto item(Defaults::explode(parts.at(1), ' '));
-		txts.push_back(item[0] + " " + item[1] + ", when the trigger \"" + parts.at(0) + "\"");
-	}
-	return tooltip + Defaults::implode(txts, " is detected, will move to ") + " is detected, will start over";
+
+InputMapLink::InputMapLink(StringUMap& data, const string& inputPid) noexcept :
+	Parent(data, vector<string>{LINKED_ITEMS})
+{
+	getProperties().setValue(PID, inputPid);
+	// Preserve an existing ILM_ID (loaded from XML); otherwise generate a new one.
+	if (getValue(ILM_ID).empty())
+		setValue(ILM_ID, Defaults::createCommonUniqueId({inputPid, std::to_string(++linkMapCounter)}));
 }
 
 string InputMapLink::createPrettyName() const noexcept {
-	StringVector prettyName;
-	// data is trigger(30)type target(31)trigger(30)type target(31)trigger(30)type target
-	for (const auto& group : Defaults::explode(getValue(NAME), RECORD_SEPARATOR)) {
-		// group is trigger(30)type target
-		const auto parts(Defaults::explode(group, FIELD_SEPARATOR));
-		prettyName.push_back(parts.at(1));
-	}
-	return Defaults::implode(prettyName, " ➡️ ") + " 🔙";
+	StringVector names;
+	for (auto btn : *primaryChild)
+		names.push_back(btn->getData()->createPrettyName());
+	return names.empty() ? "Empty" : Defaults::implode(names, " ➡️ ") + " 🔙";
+}
+
+string InputMapLink::createTooltip() const noexcept {
+	for (auto btn : *primaryChild)
+		txts.push_back(btn->getData()->createTooltip());
+	if (txts.empty()) return "No maps linked.";
+	return "Sequence: " + Defaults::implode(txts, " → ");
+}
+
+CollectionHandler* InputMapLink::getCollectionHandler() const noexcept {
+	return CollectionHandler::getInstance(COLLECTION_INPUT_LINKMAPS + getProperties().getValue(PID));
+}
+
+void InputMapLink::wipe() noexcept {
+	// Preserve the stable identity through wipe/storeData cycles.
+	string id(getValue(ILM_ID));
+	Data::wipe();
+	if (not id.empty())
+		setValue(ILM_ID, id);
 }
 
 string InputMapLink::createUniqueId() const noexcept {
