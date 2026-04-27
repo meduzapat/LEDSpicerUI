@@ -40,23 +40,13 @@ public:
 
 	virtual ~InputMapLink() = default;
 
-	string_view getXmlTag()   const noexcept override { return "linkedMap"; }
-	string_view getCssClass() const noexcept override { return "LinkBoxButton"; }
-	string createPrettyName() const noexcept override;
-	string createTooltip()    const noexcept override;
-	string createUniqueId()   const noexcept override;
+	string_view getXmlTag()                   const noexcept override { return emptyString; }
+	string_view getCssClass()                 const noexcept override { return "LinkBoxButton"; }
+	string createPrettyName()                 const noexcept override;
+	string createTooltip()                    const noexcept override;
+	string createUniqueId()                   const noexcept override { return emptyString; }
 	CollectionHandler* getCollectionHandler() const noexcept override { return nullptr; }
-
-	string createUniqueId()   const noexcept override { return getValue(ILM_ID); }
-
-	CollectionHandler* getCollectionHandler() const noexcept override;
-
-	void wipe() noexcept override;
-
-private:
-
-	/// Per-session counter for stable ILM_ID generation.
-	inline static size_t linkMapCounter = 0;
+	string toXML()                            const noexcept override;
 
 };
 

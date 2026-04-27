@@ -31,7 +31,6 @@ InputFile::InputFile(const string& filePath, DirectoryEntry* parent) :
 {
 	string errors;
 
-	// Base key matches FileData::createUniqueId() for the resulting Input object.
 	string baseId(Defaults::createCommonUniqueId({
 		parent ? parent->getFsId() : "",
 		filename
@@ -61,24 +60,47 @@ InputFile::InputFile(const string& filePath, DirectoryEntry* parent) :
 		);
 	}
 
+	processLinkedTriggers(baseId);
+
 	extractedData.emplace(COLLECTION_INPUTS, StringUMapVector{input});
 
 	if (not errors.empty())
 		Message::displayError("Errors:\n" + errors);
 }
 
+void InputFile::processLinkedTriggers(const string& baseId) noexcept {
+	if (not Defaults::hasLinkedMaps(XMLHelper::valueOf(rootInfo.attributes, NAME)))
+		return;
+
+	const string linked{XMLHelper::valueOf(rootInfo.attributes, LINKED_ITEMS)};
+	if (linked.empty())
+		return;
+
+	StringUMapVector imlData;
+	for (const string& chunk : Defaults::explode(linked, '|'))
+		if (not chunk.empty())
+			imlData.push_back({{LINKED_ITEMS, chunk}});
+
+	if (imlData.empty())
+		return;
+
+	extractedData.emplace(
+		Defaults::createCommonUniqueId({baseId, COLLECTION_INPUT_LINKMAPS}),
+		std::move(imlData)
+	);
+}
+
 string InputFile::processMaps(
 	tinyxml2::XMLElement* mapsNode,
 	const string& inputName
 ) noexcept {
-
-	tinyxml2::XMLElement* mapNode = mapsNode->FirstChildElement("map");
+	tinyxml2::XMLElement* mapNode{mapsNode->FirstChildElement("map")};
 	if (not mapNode) return "Missing input map section\n";
 
 	string errors;
 	StringUMapVector maps;
 	for (; mapNode; mapNode = mapNode->NextSiblingElement("map")) {
-		StringUMap mapAttr = processNode(mapNode);
+		StringUMap mapAttr{processNode(mapNode)};
 		try {
 			checkAttributes({TYPE, TARGET, TRIGGER, COLOR, FILTER}, mapAttr, "input map for " + inputName);
 		}
@@ -90,4 +112,8 @@ string InputFile::processMaps(
 	}
 	extractedData.emplace(inputName, maps);
 	return errors;
+}
+
+void InputFile::save(const Ui::Storage::Input& input, const string& filePath) {
+	Glib::file_set_contents(filePath, input.toXML());
 }

@@ -160,3 +160,17 @@ TEST_F(InputFileTest, RootInfoIsPopulated) {
 	EXPECT_FALSE(rootInfo.attributes.empty());
 	EXPECT_EQ("Credits", rootInfo.attributes.at(NAME));
 }
+
+TEST_F(InputFileTest, LinkedTriggersAreExtracted) {
+	string imlKey{Defaults::createCommonUniqueId({baseId("inputMulti"), COLLECTION_INPUT_LINKMAPS})};
+	auto& imlData{inputMulti->getData(imlKey)};
+	ASSERT_EQ(2u, imlData.size());
+	EXPECT_EQ("0,1", imlData[0][LINKED_ITEMS]);
+	EXPECT_EQ("2,3", imlData[1][LINKED_ITEMS]);
+}
+
+TEST_F(InputFileTest, NonLinkedInputHasNoIMLData) {
+	// inputSingle is Mame type — no INPUT_LINKED_MAPS flag.
+	string imlKey{Defaults::createCommonUniqueId({baseId("inputSingle"), COLLECTION_INPUT_LINKMAPS})};
+	EXPECT_TRUE(inputSingle->getData(imlKey).empty());
+}

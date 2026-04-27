@@ -24,14 +24,10 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-
 InputMapLink::InputMapLink(StringUMap& data, const string& inputPid) noexcept :
-	Parent(data, vector<string>{LINKED_ITEMS})
+	Parent(data, vector<string>{COLLECTION_INPUT_MAP_LINKS})
 {
 	getProperties().setValue(PID, inputPid);
-	// Preserve an existing ILM_ID (loaded from XML); otherwise generate a new one.
-	if (getValue(ILM_ID).empty())
-		setValue(ILM_ID, Defaults::createCommonUniqueId({inputPid, std::to_string(++linkMapCounter)}));
 }
 
 string InputMapLink::createPrettyName() const noexcept {
@@ -42,25 +38,24 @@ string InputMapLink::createPrettyName() const noexcept {
 }
 
 string InputMapLink::createTooltip() const noexcept {
+	if (primaryChild->getSize() == 0)
+		return "No maps linked.";
+
+	StringVector parts;
 	for (auto btn : *primaryChild)
-		txts.push_back(btn->getData()->createTooltip());
-	if (txts.empty()) return "No maps linked.";
-	return "Sequence: " + Defaults::implode(txts, " → ");
+		parts.push_back(btn->getData()->createPrettyName());
+
+	return "Starts with " + Defaults::implode(parts, ", ") + " will start over";
 }
 
-CollectionHandler* InputMapLink::getCollectionHandler() const noexcept {
-	return CollectionHandler::getInstance(COLLECTION_INPUT_LINKMAPS + getProperties().getValue(PID));
-}
-
-void InputMapLink::wipe() noexcept {
-	// Preserve the stable identity through wipe/storeData cycles.
-	string id(getValue(ILM_ID));
-	Data::wipe();
-	if (not id.empty())
-		setValue(ILM_ID, id);
-}
-
-string InputMapLink::createUniqueId() const noexcept {
-	// ID holds the canonical trigger combination key built by DialogInputLinkMaps.
-	return getValue(ID);
+string InputMapLink::toXML() const noexcept {
+	auto tempMaps{CollectionHandler::getInstance(COLLECTION_TEMP_MAPS)};
+	StringVector indexes;
+	size_t idx{0};
+	for (const auto& [id, data] : *tempMaps) {
+		if (primaryChild->isSet(data))
+			indexes.push_back(std::to_string(idx));
+		++idx;
+	}
+	return Defaults::implode(indexes, ",");
 }

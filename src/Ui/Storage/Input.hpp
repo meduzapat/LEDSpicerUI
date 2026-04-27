@@ -23,6 +23,7 @@
 #include "Parent.hpp"
 #include "DirNode.hpp"
 #include "Revertible.hpp"
+#include "XMLHelper.hpp"
 
 #pragma once
 
@@ -53,6 +54,7 @@ public:
 	string_view getCssClass() const noexcept override { return "InputBoxButton"; }
 	string createPrettyName() const noexcept override;
 	string createTooltip()    const noexcept override;
+	string toXML()            const noexcept override;
 
 	CollectionHandler* getCollectionHandler() const noexcept override {
 		return CollectionHandler::getInstance(COLLECTION_INPUTS);

@@ -103,9 +103,9 @@ TEST_F(InputTest, HasSourcesChild) {
 	EXPECT_NE(nullptr, rootInput->getChild(COLLECTION_INPUT_SOURCES));
 }
 
-//TEST_F(InputTest, HasLinkedMapsChild) {
-//	EXPECT_NE(nullptr, rootInput->getChild(COLLECTION_INPUT_LINKMAP));
-//}
+TEST_F(InputTest, HasLinkedMapsChild) {
+	EXPECT_NE(nullptr, rootInput->getChild(COLLECTION_INPUT_LINKMAPS));
+}
 
 int main(int argc, char** argv) {
 	auto app = Gtk::Application::create(argc, argv, "org.test");

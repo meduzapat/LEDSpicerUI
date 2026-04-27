@@ -21,6 +21,7 @@
  */
 
 #include "ProjectFile.hpp"
+#include "Storage/Input.hpp"
 
 #pragma once
 
@@ -45,6 +46,13 @@ public:
 
 	virtual ~InputFile() = default;
 
+	/**
+	 * Writes the input data back to an XML file at filePath.
+	 * @param input
+	 * @param filePath
+	 */
+	static void save(const Ui::Storage::Input& input, const string& filePath);
+
 private:
 
 	/**
@@ -55,6 +63,13 @@ private:
 	 */
 	string processMaps(tinyxml2::XMLElement* mapsNode, const string& inputName) noexcept;
 
+	/**
+	 * Splits linkedTriggers root attribute into per-IML index strings
+	 * and stores them in extractedData under COLLECTION_INPUT_LINKMAPS.
+	 * No-op if the input type does not support linked maps or attribute is absent.
+	 * @param baseId Scoped base key for this input.
+	 */
+	void processLinkedTriggers(const string& baseId) noexcept;
 };
 
 } // namespace

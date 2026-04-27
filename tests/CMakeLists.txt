@@ -36,6 +36,8 @@ macro(add_test_executable TEST_NAME TEST_SRC EXTRA_SRCS EXTRA_LIBS)
 	set_tests_properties(${TEST_NAME} PROPERTIES ENVIRONMENT "GTEST_COLOR=1")
 endmacro()
 
+# ─── Source groups ──────────────────────────────────────────────────────────
+
 set(COMMON_SRCS
 	${CMAKE_SOURCE_DIR}/src/Defaults.cpp
 )
@@ -63,13 +65,27 @@ set(STORAGE_DIRNODE_SRCS
 set(STORAGE_INPUT_SRCS
 	${STORAGE_DIRNODE_SRCS}
 	${CMAKE_SOURCE_DIR}/src/Ui/Storage/Revertible.cpp
+	${CMAKE_SOURCE_DIR}/src/Ui/Storage/InputMapLink.cpp
 	${CMAKE_SOURCE_DIR}/src/Ui/Storage/Input.cpp
 )
 
 set(STORAGE_PROFILE_SRCS
 	${STORAGE_DIRNODE_SRCS}
+	${CMAKE_SOURCE_DIR}/src/Ui/Storage/Revertible.cpp
+	${CMAKE_SOURCE_DIR}/src/Ui/Storage/Link.cpp
 	${CMAKE_SOURCE_DIR}/src/Ui/Storage/Profile.cpp
 )
+
+# Shared between ProjectFileTest and InputFileTest.
+set(INPUT_FILE_SRCS
+	${STORAGE_BASE_SRCS}
+	${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp
+	${CMAKE_SOURCE_DIR}/src/XMLHelper.cpp
+	${CMAKE_SOURCE_DIR}/src/Ui/Storage/DirNode.cpp
+	${CMAKE_SOURCE_DIR}/src/config/InputFile.cpp
+)
+
+# ─── Tests ──────────────────────────────────────────────────────────────────
 
 add_test_executable(DefaultsTest
 	"DefaultsTest.cpp"
@@ -85,13 +101,13 @@ add_test_executable(ValuesTest
 
 add_test_executable(DataTest
 	"Ui/Storage/DataTest.cpp"
-	"${COMMON_SRCS};${STORAGE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Storage/CollectionHandler.cpp"
+	"${STORAGE_BASE_SRCS}"
 	""
 )
 
 add_test_executable(ParentTest
 	"Ui/Storage/ParentTest.cpp"
-	"${COMMON_SRCS};${STORAGE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Storage/Parent.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/CollectionHandler.cpp"
+	"${STORAGE_BASE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Storage/Parent.cpp"
 	""
 )
 
@@ -103,13 +119,13 @@ add_test_executable(RevertibleTest
 
 add_test_executable(BoxButtonTest
 	"Ui/Storage/BoxButtonTest.cpp"
-	"${COMMON_SRCS};${STORAGE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Storage/CollectionHandler.cpp"
+	"${STORAGE_BASE_SRCS}"
 	""
 )
 
 add_test_executable(BoxButtonCollectionTest
 	"Ui/Storage/BoxButtonCollectionTest.cpp"
-	"${COMMON_SRCS};${STORAGE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Storage/CollectionHandler.cpp"
+	"${STORAGE_BASE_SRCS}"
 	""
 )
 
@@ -133,43 +149,13 @@ add_test_executable(XMLHelperTest
 
 add_test_executable(DirNodeTest
 	"Ui/Storage/DirNodeTest.cpp"
-	"${COMMON_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp;${STORAGE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Storage/CollectionHandler.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/DirNode.cpp"
+	"${STORAGE_BASE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Storage/DirNode.cpp"
 	""
 )
 
 add_test_executable(DirectoryEntryTest
 	"Ui/Storage/DirectoryEntryTest.cpp"
-	"${COMMON_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp;${STORAGE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Storage/CollectionHandler.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/DirNode.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/DirectoryEntry.cpp"
-	""
-)
-
-add_test_executable(ConfigFileTest
-	"config/ConfigFileTest.cpp"
-	"${COMMON_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp;${CMAKE_SOURCE_DIR}/src/XMLHelper.cpp;${STORAGE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Storage/CollectionHandler.cpp;${CMAKE_SOURCE_DIR}/src/config/ConfigFile.cpp"
-	"${TINYXML2_LIBRARIES}"
-)
-
-add_test_executable(ProjectFileTest
-	"config/ProjectFileTest.cpp"
-	"${STORAGE_BASE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp;${CMAKE_SOURCE_DIR}/src/XMLHelper.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/DirNode.cpp;${CMAKE_SOURCE_DIR}/src/config/InputFile.cpp"
-	"${TINYXML2_LIBRARIES}"
-)
-
-add_test_executable(InputFileTest
-	"config/InputFileTest.cpp"
-	"${STORAGE_BASE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp;${CMAKE_SOURCE_DIR}/src/XMLHelper.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/DirNode.cpp;${CMAKE_SOURCE_DIR}/src/config/InputFile.cpp"
-	"${TINYXML2_LIBRARIES}"
-)
-
-add_test_executable(SettingsFileTest
-	"config/SettingsFileTest.cpp"
-	"${COMMON_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp;${CMAKE_SOURCE_DIR}/src/XMLHelper.cpp;${CMAKE_SOURCE_DIR}/src/config/SettingsFile.cpp"
-	"${TINYXML2_LIBRARIES}"
-)
-
-add_test_executable(LeafDataTest
-	"Ui/Storage/LeafDataTest.cpp"
-	"${STORAGE_BASE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Storage/Element.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/Link.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/InputMap.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/RestrictorMap.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/InputMapLink.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/Process.cpp"
+	"${STORAGE_BASE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Storage/DirNode.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/DirectoryEntry.cpp"
 	""
 )
 
@@ -199,7 +185,13 @@ add_test_executable(RestrictorTest
 
 add_test_executable(InputSourceTest
 	"Ui/Storage/InputSourceTest.cpp"
-	"${COMMON_SRCS};${STORAGE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Storage/CollectionHandler.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/Parent.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/Revertible.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/InputSource.cpp"
+	"${STORAGE_BASE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Storage/Parent.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/Revertible.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/InputSource.cpp"
+	""
+)
+
+add_test_executable(LeafDataTest
+	"Ui/Storage/LeafDataTest.cpp"
+	"${STORAGE_BASE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Storage/Parent.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/Element.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/Link.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/InputMap.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/RestrictorMap.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/InputMapLink.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/Process.cpp"
 	""
 )
 
@@ -212,5 +204,29 @@ add_test_executable(InputTest
 add_test_executable(ProfileTest
 	"Ui/Storage/ProfileTest.cpp"
 	"${STORAGE_PROFILE_SRCS}"
+	"${TINYXML2_LIBRARIES}"
+)
+
+add_test_executable(ConfigFileTest
+	"config/ConfigFileTest.cpp"
+	"${STORAGE_BASE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp;${CMAKE_SOURCE_DIR}/src/XMLHelper.cpp;${CMAKE_SOURCE_DIR}/src/config/ConfigFile.cpp"
+	"${TINYXML2_LIBRARIES}"
+)
+
+add_test_executable(ProjectFileTest
+	"config/ProjectFileTest.cpp"
+	"${INPUT_FILE_SRCS}"
+	"${TINYXML2_LIBRARIES}"
+)
+
+add_test_executable(InputFileTest
+	"config/InputFileTest.cpp"
+	"${INPUT_FILE_SRCS}"
+	"${TINYXML2_LIBRARIES}"
+)
+
+add_test_executable(SettingsFileTest
+	"config/SettingsFileTest.cpp"
+	"${COMMON_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp;${CMAKE_SOURCE_DIR}/src/XMLHelper.cpp;${CMAKE_SOURCE_DIR}/src/config/SettingsFile.cpp"
 	"${TINYXML2_LIBRARIES}"
 )

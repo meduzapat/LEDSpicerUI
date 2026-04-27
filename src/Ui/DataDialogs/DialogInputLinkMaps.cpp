@@ -30,15 +30,14 @@ DialogInputLinkMaps::DialogInputLinkMaps(
 ) noexcept :
 	DialogForm(obj, builder)
 {
-
 	Gtk::Button
-		* btnAdd = nullptr,
+		* btnAdd            = nullptr,
 		* btnSelectInputMap = nullptr;
 
-	builder->get_widget_derived("BoxInputLinkedMaps", box);
-	builder->get_widget("BtnApplyInputLinkedMap",     btnApply);
-	builder->get_widget("BtnAddInputLinkedMap",       btnAdd);
-	builder->get_widget("BtnSelectInputMap",          btnSelectInputMap);
+	builder->get_widget_derived("BoxInputLinkedMaps",  box);
+	builder->get_widget("BtnApplyInputLinkedMap",      btnApply);
+	builder->get_widget("BtnAddInputLinkedMap",        btnAdd);
+	builder->get_widget("BtnSelectInputMap",           btnSelectInputMap);
 	builder->get_widget_derived(
 		"BoxInputLinkedMappings",
 		boxInputLinkedMappings,
@@ -48,9 +47,9 @@ DialogInputLinkMaps::DialogInputLinkMaps(
 
 	mapsRequest = {
 		boxInputLinkedMappings,
-		LINKED_ITEMS,
+		TRIGGER,
 		TYPE_MAP,
-		LINKED_ITEMS,
+		COLLECTION_INPUT_MAP_LINKS,
 		CollectionHandler::getInstance(COLLECTION_TEMP_MAPS),
 		{},
 		2
@@ -59,11 +58,13 @@ DialogInputLinkMaps::DialogInputLinkMaps(
 	setSignalAdd(btnAdd);
 	setSignalApply();
 
+	// BtnAdd only makes sense when the input has at least 2 maps to link.
+	CollectionHandler::getInstance(COLLECTION_TEMP_MAPS)->registerSensitivity(btnAdd, 2);
+
 	btnSelectInputMap->signal_clicked().connect([this]() {
 		populateTempMaps();
 		DialogSelect::getInstance()->open();
 	});
-
 }
 
 void DialogInputLinkMaps::setOwner(
@@ -84,67 +85,69 @@ void DialogInputLinkMaps::load(XMLHelper* values) noexcept {
 	);
 }
 
+void DialogInputLinkMaps::createSubItems(XMLHelper* values) noexcept {
+	const string& idxStr{currentData->getValue(LINKED_ITEMS)};
+	if (idxStr.empty()) return;
+	populateTempMaps();
+	DialogSelect::getInstance()->selectByIndexes(Defaults::explode(idxStr, ','));
+}
+
 void DialogInputLinkMaps::clearForm() noexcept {
-	innerItems.wipe();
 	boxInputLinkedMappings->wipe();
 }
 
 void DialogInputLinkMaps::isValid() const {
-	if (innerItems.getSize() < 2)
+	if (getPrimaryChildCollection()->getSize() < 2)
 		throw Message("Select at least 2 maps.");
 }
 
 void DialogInputLinkMaps::storeData() noexcept {
-	const auto indexes(DialogSelect::getInstance()->getSelectedIndexes());
-	currentData->setValue(LINKED_ITEMS, Defaults::implode(indexes, ID_SEPARATOR));
+	DialogSelect::getInstance()->reindex();
 }
 
 void DialogInputLinkMaps::retrieveData() noexcept {
-	const string& idxStr = currentData->getValue(LINKED_ITEMS);
-	if (idxStr.empty()) return;
-	populateTempMaps();
-	DialogSelect::getInstance()->selectByIndexes(Defaults::explode(idxStr, ID_SEPARATOR));
+	DialogSelect::getInstance()->refresh();
 }
 
 string DialogInputLinkMaps::createUniqueId() const noexcept {
 	return currentData->createUniqueId();
 }
 
-Storage::Data* DialogInputLinkMaps::createData(StringUMap& rawData) const noexcept {
-	return new Storage::InputMapLink(rawData);
+LEDSpicerUI::Ui::Storage::Data* DialogInputLinkMaps::createData(StringUMap& rawData) const noexcept {
+	return new Storage::InputMapLink(rawData, ownerData->getProperties().getValue(UID));
 }
 
 void DialogInputLinkMaps::wireChildrenDialogs() noexcept {
-	innerItems.wipe();
-	boxInputLinkedMappings->wipe();
 	currentData->setUp();
-	DialogSelect::getInstance()->setUp(&innerItems, mapsRequest);
-	innerItems.registerSensitivity(btnApply, 2);
+	DialogSelect::getInstance()->setUp(getPrimaryChildCollection(), mapsRequest);
+	getPrimaryChildCollection()->registerSensitivity(btnApply, 2);
+
+	// On ADD with no pre-existing links, open DS immediately.
+	if (action == Actions::ADD and getPrimaryChildCollection()->getSize() == 0)
+		DialogSelect::getInstance()->open();
 }
 
 void DialogInputLinkMaps::disconnectChildrenDialogs() noexcept {
-	innerItems.releaseSensitive(btnApply);
-	innerItems.wipe();
+	getPrimaryChildCollection()->releaseSensitive(btnApply);
 	currentData->tearDown();
 }
 
 void DialogInputLinkMaps::populateTempMaps() noexcept {
-	auto* tempMaps = CollectionHandler::getInstance(COLLECTION_TEMP_MAPS);
+	auto tempMaps{CollectionHandler::getInstance(COLLECTION_TEMP_MAPS)};
 
 	vector<Storage::Data*> toRemove;
 	for (auto& [id, data] : *tempMaps)
 		toRemove.push_back(data);
-	for (auto* data : toRemove)
+	for (auto data : toRemove)
 		tempMaps->remove(data);
 
-	auto* inputParent = dynamic_cast<Storage::Parent*>(ownerData);
-	if (not inputParent) return;
-	auto* sourcesBBC = inputParent->getChild(COLLECTION_INPUT_SOURCES);
+	auto inputParent{static_cast<Storage::Parent*>(ownerData)};
+	auto sourcesBBC{inputParent->getChild(COLLECTION_INPUT_SOURCES)};
 	if (not sourcesBBC) return;
 
-	for (auto& sourceBB : *sourcesBBC) {
-		auto* source = dynamic_cast<Storage::Parent*>(sourceBB->getData());
-		if (not source) continue;
-		for (auto& mapBB : *source->getPrimaryChild())
+	for (auto sourceBB : *sourcesBBC) {
+		auto source{static_cast<Storage::Parent*>(sourceBB->getData())};
+		for (auto mapBB : *source->getPrimaryChild())
 			tempMaps->add(mapBB->getData());
+	}
 }

@@ -96,12 +96,27 @@ public:
 		return link->getCollectionHandler();
 	}
 
-	/// If key matches linkKey returns link->getPrimaryId(); otherwise delegates to Data.
-	const string& getValue(const string& key)                      const noexcept override;
-	/// If key matches linkKey returns link->getPrimaryId(); otherwise delegates to Data.
-	string        getValue(const string& key, const string& defaultValue) const noexcept override;
-	/// Silently ignores linkKey; all other keys delegate to Data.
-	void          setValue(const string& key, const string& value)       noexcept override;
+	/**
+	 * If key matches linkKey returns link->getPrimaryId(); otherwise delegates to Data.
+	 * @param key
+	 * @return
+	 */
+	const string& getValue(const string& key) const noexcept override;
+
+	/**
+	 * If key matches linkKey returns link->getPrimaryId(); otherwise delegates to Data.
+	 * @param key
+	 * @param defaultValue
+	 * @return
+	 */
+	string getValue(const string& key, const string& defaultValue) const noexcept override;
+
+	/**
+	 * Silently ignores linkKey; all other keys delegate to Data.
+	 * @param key
+	 * @param value
+	 */
+	void setValue(const string& key, const string& value) noexcept override;
 
 	/**
 	 * Replaces the target Data pointer.

@@ -142,28 +142,80 @@ TEST(InputMapTest, CreateUniqueIdEmptyPidWithoutProperty) {
 
 // InputMapLink --------------------------------------------------------
 
-TEST(InputMapLinkTest, CreateUniqueIdFromIdField) {
-	StringUMap data{
-		{ID,   "myid"},
-		{NAME, string("305") + FIELD_SEPARATOR + "Element P1_BUTTON1"}
-	};
-	InputMapLink link(data);
-	EXPECT_EQ("myid", link.createUniqueId());
-}
+class InputMapLinkTest : public ::testing::Test {
 
-TEST(InputMapLinkTest, CreatePrettyNameParsesName) {
-	StringUMap data{
-		{ID,   "id"},
-		{NAME, string("305") + FIELD_SEPARATOR + "Element P1_BUTTON1"}
-	};
-	InputMapLink link(data);
-	EXPECT_NE(string::npos, link.createPrettyName().find("Element P1_BUTTON1"));
-}
+protected:
 
-TEST(InputMapLinkTest, CssClass) {
-	StringUMap data{{ID, "x"}, {NAME, string("1") + FIELD_SEPARATOR + "Element X"}};
-	InputMapLink link(data);
+	void TearDown() override {
+		CollectionHandler::purgeAll();
+	}
+};
+
+TEST_F(InputMapLinkTest, CssClass) {
+	StringUMap data;
+	InputMapLink link(data, "owner_1");
 	EXPECT_EQ("LinkBoxButton", link.getCssClass());
+}
+
+TEST_F(InputMapLinkTest, CreateUniqueIdReturnsEmpty) {
+	StringUMap data;
+	InputMapLink link(data, "owner_1");
+	EXPECT_TRUE(link.createUniqueId().empty());
+}
+
+TEST_F(InputMapLinkTest, CreatePrettyNameNoChildren) {
+	StringUMap data;
+	InputMapLink link(data, "owner_1");
+	EXPECT_EQ("Empty", link.createPrettyName());
+}
+
+TEST_F(InputMapLinkTest, ToXMLNoChildren) {
+	StringUMap data;
+	InputMapLink link(data, "owner_1");
+	EXPECT_TRUE(link.toXML().empty());
+}
+
+TEST_F(InputMapLinkTest, ToXMLWithSingleLink) {
+	StringUMap d{{NAME, "m1"}};
+	Element map(d);
+	CollectionHandler::getInstance(COLLECTION_TEMP_MAPS)->add(&map);
+
+	StringUMap imlData;
+	InputMapLink iml(imlData, "owner_1");
+
+	const string               lKey{NAME};
+	const string               lType{TYPE_MAP};
+	const vector<Link::LinkField> lf{};
+	StringUMap ld;
+	iml.getPrimaryChild()->create(new Link(ld, lKey, lType, lf, &map));
+
+	EXPECT_EQ("0", iml.toXML());
+}
+
+TEST_F(InputMapLinkTest, ToXMLSkipsUnlinkedAndFollowsCollectionOrder) {
+	// std::map iterates alphabetically by key (createUniqueId = NAME).
+	// m1→idx 0, m2→idx 1, m3→idx 2.
+	StringUMap d1{{NAME, "m1"}}, d2{{NAME, "m2"}}, d3{{NAME, "m3"}};
+	Element    map1(d1), map2(d2), map3(d3);
+	auto* tempMaps{CollectionHandler::getInstance(COLLECTION_TEMP_MAPS)};
+	tempMaps->add(&map1);
+	tempMaps->add(&map2);
+	tempMaps->add(&map3);
+
+	StringUMap imlData;
+	InputMapLink iml(imlData, "owner_1");
+
+	const string               lKey{NAME};
+	const string               lType{TYPE_MAP};
+	const vector<Link::LinkField> lf{};
+	StringUMap ld1, ld3;
+
+	// Insert map3 first — output must still follow collection order, not insertion.
+	iml.getPrimaryChild()->create(new Link(ld3, lKey, lType, lf, &map3));
+	iml.getPrimaryChild()->create(new Link(ld1, lKey, lType, lf, &map1));
+
+	// map2 is unlinked — must be absent. Output follows m1(0), m3(2) order.
+	EXPECT_EQ("0,2", iml.toXML());
 }
 
 // Process -------------------------------------------------------------
@@ -191,4 +243,10 @@ TEST(ProcessTest, CssClass) {
 	StringUMap data{{PARAM_PROCESS_NAME, "mame"}, {PARAM_SYSTEM, "Linux"}};
 	Process p(data);
 	EXPECT_EQ("ProcessBoxButton", p.getCssClass());
+}
+
+int main(int argc, char** argv) {
+	auto app = Gtk::Application::create(argc, argv, "org.test");
+	::testing::InitGoogleTest(&argc, argv);
+	return RUN_ALL_TESTS();
 }
