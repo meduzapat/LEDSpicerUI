@@ -145,16 +145,7 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 	Defaults::registerWidget(toggleCraftProfiles);
 	Defaults::registerWidget(comboUseColors);
 	// When the input profiles is active, and the arcade profile is missing, ask for creating an empty arcade profile
-	toggleCraftProfiles->signal_toggled().connect([&]() {
-		bool isActive = toggleCraftProfiles->get_active();
-		comboUseColors->set_sensitive(isActive);
-		if (isActive) {
-			// check if the arcade profile exist.
-//			if (Message::ask("You are using craft profiles option, but the foundation profile for arcades is missing\nDo you want to create an empty arcade profile?") == Gtk::ResponseType::RESPONSE_YES) {
-//				Message::displayInfo("The profile was created");
-//			}
-		}
-	});
+	Defaults::linkToggleToWidget(toggleCraftProfiles, comboUseColors);
 	builder->get_widget_derived("ListBoxDatasource", listBoxDataSource, "BtnDatasourceUp", "BtnDatasourceDown");
 	comboColors->signal_changed().connect([&]() {
 		DialogColors::getInstance()->setColorsFromFile(DialogSettings::getInstance()->getDataDir() + comboColors->get_active_id() + ".xml");

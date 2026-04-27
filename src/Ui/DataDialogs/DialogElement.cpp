@@ -120,8 +120,8 @@ DialogElement::DialogElement(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 		bool active(solenoid->get_active());
 		timeOn->set_sensitive(active);
 		timeOn->set_text("");
-		brightness->set_sensitive(active and not Defaults::isMonochrome(comboBoxDevices->get_active_id()));
-		brightness->set_value(100);
+		brightness->set_sensitive(not active and not Defaults::isMonochrome(comboBoxDevices->get_active_id()));
+		if (active) brightness->set_value(100);
 	});
 
 	// When the notebook page changes, remove the values on the other page.
@@ -179,7 +179,7 @@ void DialogElement::load(XMLHelper* values) noexcept {
 }
 
 void DialogElement::clearForm() noexcept {
-	clearFormConditinal(false);
+	clearFormConditinal(0);
 }
 
 void DialogElement::clearFormConditinal(uint8_t flags) noexcept {
@@ -187,11 +187,14 @@ void DialogElement::clearFormConditinal(uint8_t flags) noexcept {
 	pinsBox->unselect_all();
 
 	// Single pin.
-	if (not flags or (flags & (1 << tabIndex::RGB))) {
+	if (not flags or (flags & (1 << tabIndex::Single))) {
 		pin->set_text("");
 		solenoid->set_active(false);
 		timeOn->set_text("");
 		timeOn->set_sensitive(false);
+		if (flags)
+			// restore it to the device-native sensitivity when switching pages.
+			brightness->set_sensitive(not Defaults::isMonochrome(comboBoxDevices->get_active_id()));
 	}
 
 	// Scattered RGB.
@@ -202,13 +205,13 @@ void DialogElement::clearFormConditinal(uint8_t flags) noexcept {
 	}
 
 	// RGB.
-	if (not flags or (flags & (1 << tabIndex::Strip))) {
+	if (not flags or (flags & (1 << tabIndex::RGB))) {
 		positionRGB->set_text("");
 		comboBoxRGBRGB->set_active_id(defaultRGBFormat);
 	}
 
 	// RGB Strip.
-	if (not flags or (flags & (1 << tabIndex::Single))) {
+	if (not flags or (flags & (1 << tabIndex::Strip))) {
 		positionStrip->set_text("");
 		sizeStrip->set_text("");
 		comboBoxRGBStrip->set_active_id(defaultRGBFormat);

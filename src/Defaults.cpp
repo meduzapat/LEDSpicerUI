@@ -552,6 +552,20 @@ void Defaults::setFilter(Gtk::SearchEntry* filterEntry, Gtk::FlowBox* box, Gtk::
 	});
 }
 
+void Defaults::linkSwitchToWidget(Gtk::Switch* sw, Gtk::Widget* widget) noexcept {
+	sw->property_active().signal_changed().connect([sw, widget]() {
+		widget->set_sensitive(sw->get_active());
+	});
+	widget->set_sensitive(sw->get_active());
+}
+
+void Defaults::linkToggleToWidget(Gtk::ToggleButton* toggle, Gtk::Widget* widget) noexcept {
+	toggle->signal_toggled().connect([toggle, widget]() {
+		widget->set_sensitive(toggle->get_active());
+	});
+	widget->set_sensitive(toggle->get_active());
+}
+
 void Defaults::setIgnoreChanges(bool state) {
 	ignoreChanges = state;
 }

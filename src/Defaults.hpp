@@ -608,6 +608,22 @@ public:
 	static void setFilter(Gtk::SearchEntry* filterEntry, Gtk::FlowBox* box, Gtk::Dialog* dialog);
 
 	/**
+	 * Links a Gtk::Switch to a widget, controlling its sensitivity:
+	 * switch on enables the widget, switch off disables it.
+	 * @param sw the controlling switch.
+	 * @param widget the controlled widget.
+	 */
+	static void linkSwitchToWidget(Gtk::Switch* sw, Gtk::Widget* widget) noexcept;
+
+	/**
+	 * Links a Gtk::ToggleButton to a widget, controlling its sensitivity:
+	 * toggle active enables the widget, inactive disables it.
+	 * @param toggle the controlling toggle button.
+	 * @param widget the controlled widget.
+	 */
+	static void linkToggleToWidget(Gtk::ToggleButton* toggle, Gtk::Widget* widget) noexcept;
+
+	/**
 	 * Sets the state to ignore Changes.
 	 * @param state True to ignore changes, false otherwise.
 	 */

@@ -74,7 +74,7 @@ protected:
 		* inputPortNumber = nullptr,
 		* inputRunEvery   = nullptr;
 
-	Gtk::ToggleButton * toggleCraftProfiles = nullptr;
+	Gtk::ToggleButton* toggleCraftProfiles = nullptr;
 
 	Gtk::SpinButton* inputFPS = nullptr;
 

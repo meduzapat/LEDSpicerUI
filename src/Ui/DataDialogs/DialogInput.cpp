@@ -50,6 +50,7 @@ DialogInput::DialogInput(
 	builder->get_widget("BoxLinkedElementsAndGroups", boxLinkedElementsAndGroups);
 	builder->get_widget("BriefInput",                 brief);
 
+	Defaults::linkSwitchToWidget(switchInputBlink, comboBoxInputSpeed);
 	setSignalAdd(btnAddInput);
 	setSignalApply();
 
@@ -92,7 +93,11 @@ void DialogInput::resetForm() noexcept {
 	btnAddInputMap->set_visible(not needSources);
 	btnAddInputMap->set_sensitive(true);
 
-	comboBoxInputSpeed->get_parent()->set_visible(Defaults::inputHasFlag(name, Defaults::INPUT_HAS_SPEED));
+	if (Defaults::inputHasFlag(name, Defaults::INPUT_HAS_SPEED)) {
+		comboBoxInputSpeed->get_parent()->set_visible(true);
+		// This is automatically handled by the switch, but in this case must be enabled.
+		comboBoxInputSpeed->get_parent()->set_sensitive(true);
+	}
 	spinInputTimes->get_parent()->set_visible(Defaults::inputHasFlag(name, Defaults::INPUT_HAS_TIMES));
 	switchInputBlink->get_parent()->set_visible(Defaults::inputHasFlag(name, Defaults::INPUT_HAS_BLINK));
 	boxInputCreditsSettings->set_visible(Defaults::inputHasFlag(name, Defaults::INPUT_HAS_CREDITS));
