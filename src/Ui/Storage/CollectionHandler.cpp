@@ -115,6 +115,11 @@ void CollectionHandler::replace(Data* item, const string& oldId) noexcept {
 	if (item->createUniqueId() == oldId) return;
 	collection.erase(oldId);
 	add(item);
+	for (auto dep : dependencies) {
+		for (auto btn : *dep) {
+			if (*btn->getData() == *item) btn->sync();
+		}
+	}
 }
 
 void CollectionHandler::registerDependency(BoxButtonCollection* dependency) noexcept {

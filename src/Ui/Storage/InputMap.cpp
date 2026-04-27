@@ -37,6 +37,20 @@ string InputMap::createTooltip() const noexcept {
 	return "Trigger: " + getValue(TRIGGER) + " will activate " +  getValue(TYPE) + getValue(TARGET);
 }
 
+void InputMap::registerToCollection() noexcept {
+	CollectionHandler::getInstance(
+		Defaults::createCommonUniqueId({getProperties().getValue(IID), COLLECTION_INPUT_MAPS})
+	)->add(this);
+	Data::registerToCollection();
+}
+
+void InputMap::unregisterFromCollection() noexcept {
+	Data::unregisterFromCollection();
+	CollectionHandler::getInstance(
+		Defaults::createCommonUniqueId({getProperties().getValue(IID), COLLECTION_INPUT_MAPS})
+	)->remove(this);
+}
+
 CollectionHandler* InputMap::getCollectionHandler() const noexcept {
 	return CollectionHandler::getInstance(
 		Defaults::createCommonUniqueId({

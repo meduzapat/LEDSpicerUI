@@ -48,6 +48,8 @@ public:
 	string createUniqueId()   const noexcept override;
 	string createPrettyName() const noexcept override;
 	string createTooltip()    const noexcept override;
+	void registerToCollection()     noexcept override;
+	void unregisterFromCollection() noexcept override;
 
 	CollectionHandler* getCollectionHandler() const noexcept override;
 

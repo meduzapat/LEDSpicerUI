@@ -129,13 +129,13 @@ public:
 	 * No-op if already registered or if createUniqueId() is empty.
 	 * Normally called when the object is realized, but can be called manually if needed.
 	 */
-	void registerToCollection() noexcept;
+	virtual void registerToCollection() noexcept;
 
 	/**
 	 * Unregisters this item from its collection.
 	 * No-op if not registered or if createUniqueId() is empty.
 	 */
-	void unregisterFromCollection() noexcept;
+	virtual void unregisterFromCollection() noexcept;
 
 	/**
 	 * Synchronizes the item's registration in its CollectionHandler after a primary key change.

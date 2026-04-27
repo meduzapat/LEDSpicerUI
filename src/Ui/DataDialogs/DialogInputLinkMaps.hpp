@@ -64,15 +64,10 @@ namespace LEDSpicerUI::Ui::DataDialogs {
 
 		Storage::Data* createData(StringUMap& rawData) const noexcept override;
 
-		void createSubItems(XMLHelper* values) noexcept override;
-		void wireChildrenDialogs()             noexcept override;
-		void disconnectChildrenDialogs()       noexcept override;
+		void createSubItems(XMLHelper*)  noexcept override;
+		void wireChildrenDialogs()       noexcept override;
+		void disconnectChildrenDialogs() noexcept override;
 
-		/**
-		 * Clears COLLECTION_TEMP_MAPS and repopulates it with all InputMaps
-		 * from all sources of the current ownerData (Input), in source order.
-		 */
-		void populateTempMaps() noexcept;
 	};
 
 	} // namespace

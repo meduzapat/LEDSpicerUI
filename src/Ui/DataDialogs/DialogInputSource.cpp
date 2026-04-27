@@ -129,15 +129,14 @@ void DialogInputSource::populateSources(const string& name) noexcept {
 }
 
 void DialogInputSource::setOwner(Storage::BoxButtonCollection* collection, Storage::Data* owner) noexcept {
-	ownerData = owner;
-	items     = collection;
 	auto s{comboBoxInputSelectInput->get_active_id()};
 	if (not s.empty() and not Defaults::inputHasFlag(
 		s,
 		Defaults::INPUT_NEEDS_SOURCE
 	))
-		createPhantomSource();
-	refreshItems();
+	createPhantomSource();
+	DialogFormHost::setOwner(collection, owner);
+//	refreshItems();
 }
 
 void DialogInputSource::createPhantomSource() noexcept {

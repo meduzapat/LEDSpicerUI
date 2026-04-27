@@ -210,27 +210,37 @@ void DialogForm::addButtons(Storage::BoxButton& boxButton) noexcept {
 }
 
 void DialogForm::onAddClicked() noexcept {
+
+	// Set mode, clear form, set form details.
 	action = Actions::ADD;
 	clearForm();
 	set_title("Add New " + getType());
 	btnApply->set_label("Create");
+
+	// Ask form to create an empty Data, and connect any children dialogs.
 	currentData = createData();
 	wireChildrenDialogs();
+
 	// Run Dialog.
 	if (run() == Gtk::ResponseType::RESPONSE_APPLY) {
-		// This will clean any anomaly.
+
+		// Data realized, wipe any leftover before save.
 		currentData->wipe();
+
+		// Form -> Data.
 		storeData();
 		Defaults::markDirty();
-		// Update UI, trackers, and add buttons.
-		Storage::BoxButton& bBox(items->create(currentData));
-		addButtons(bBox);
-		box->add(bBox);
-		afterCreate(bBox);
+		// Create Button, will set tracker if applicable.
+		Storage::BoxButton& boxButton(items->create(currentData));
+
+		// Add buttons, update UI and call after create callback.
+		addButtons(boxButton);
+		box->add(boxButton);
+		afterCreate(boxButton);
 		disconnectChildrenDialogs();
 	}
-	// Create voided, destroy form.
 	else {
+		// Create voided, destroy temporary data and disconnect children dialogs.
 		disconnectChildrenDialogs();
 		delete currentData;
 	}
@@ -239,22 +249,42 @@ void DialogForm::onAddClicked() noexcept {
 }
 
 void DialogForm::onEditClicked(Storage::BoxButton& boxButton) noexcept {
+
+	// Set mode, clear form, set form details.
 	action = Actions::EDIT;
 	clearForm();
 	currentData = boxButton.getData();
-	wireChildrenDialogs();
-	// Set label and title.
 	set_title("Edit " + getType() + " " + currentData->createPrettyName());
 	btnApply->set_label("Save");
-	// Populate form.
+
+	// Connect any children dialogs.
+	wireChildrenDialogs();
+	// Data -> Form.
 	retrieveData();
+	// Modify the form based on the current Data.
 	resetForm();
+
 	// Run Dialog.
 	if (run() == Gtk::ResponseType::RESPONSE_APPLY) {
+
+		// Edit confirmed.
 		Defaults::markDirty();
+
+		// Store old Id for update tracker.
+		auto oldId{currentData->createUniqueId()};
+
+		// Wipe any leftover.
 		currentData->wipe();
+
+		// Form -> Data.
 		storeData();
+		// Call tracker update.
+		currentData->syncRegistration(oldId);
+
+		// Update UI.
 		boxButton.sync();
+
+		// Sort items based on user input.
 		for (auto childDialog : childDialogs) childDialog->reindex();
 	}
 	disconnectChildrenDialogs();
@@ -264,31 +294,38 @@ void DialogForm::onEditClicked(Storage::BoxButton& boxButton) noexcept {
 
 void DialogForm::onDelClicked(Storage::BoxButton& boxButton) noexcept {
 
+	// Delete started.
 	currentData = boxButton.getData();
-//	wireChildrenDialogs();
+	// Ask confirmation.
 	afterDeleteConfirmation(boxButton);
 	Defaults::markDirty();
+	// Remove from UI.
 	box->remove(boxButton);
-//	disconnectChildrenDialogs();
+	// Remove from collection, this will trigger any tracker and chain delete.
 	items->remove(boxButton);
 	currentData = nullptr;
 }
 
 void DialogForm::onCloneClicked(Storage::BoxButton& boxButton) noexcept {
 
+	// Clone started, set mode, clear form.
 	action = Actions::ADD;
 	clearForm();
 
-	// clone the data.
+	// Clone Data, will return a copy with a different and unique ID.
 	StringUMap values(boxButton.getData()->copyValues());
+
+	// Ask dialog to create a new Data with the cloned values.
 	Storage::Data* tempData{createData(values)};
 
-	// Add item and the box and set buttons.
-	Storage::BoxButton& bBox(items->create(tempData));
-	addButtons(bBox);
-	box->add(bBox);
+	// Create button, will set tracker if applicable.
+	Storage::BoxButton& newBoxButton(items->create(tempData));
 	Defaults::markDirty();
-	bBox.sync();
+
+	// Update UI and call after create callback.
+	addButtons(newBoxButton);
+	box->add(newBoxButton);
+	afterCreate(boxButton);
 }
 
 LEDSpicerUI::Ui::Storage::BoxButtonCollection* DialogForm::getPrimaryChildCollection() const noexcept {

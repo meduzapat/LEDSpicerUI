@@ -51,6 +51,7 @@ DialogInput::DialogInput(
 	builder->get_widget("BriefInput",                 brief);
 
 	Defaults::linkSwitchToWidget(switchInputBlink, comboBoxInputSpeed);
+
 	setSignalAdd(btnAddInput);
 	setSignalApply();
 
@@ -75,6 +76,18 @@ void DialogInput::load(XMLHelper* values) noexcept {
 	createItems(values->getData(COLLECTION_INPUTS), values);
 }
 
+//void DialogForm::setOwner(
+//	Storage::BoxButtonCollection* collection,
+//	Storage::Data* owner
+//) noexcept {
+//	CollectionHandler::getInstance(
+//		Defaults::createCommonUniqueId({
+//			ownerData->getProperties().getValue(UID),
+//			COLLECTION_INPUT_MAPS
+//		})
+//	)->registerSensitivity(btnAddLinkMap, 2);
+//}
+
 void DialogInput::createSubItems(XMLHelper* values) noexcept {
 	DialogInputSource::getInstance()->load(values);
 	DialogInputLinkMaps::getInstance()->load(values);
@@ -92,15 +105,16 @@ void DialogInput::resetForm() noexcept {
 
 	btnAddInputMap->set_visible(not needSources);
 	btnAddInputMap->set_sensitive(true);
+	spinInputTimes->get_parent()->set_visible(Defaults::inputHasFlag(name, Defaults::INPUT_HAS_TIMES));
+	switchInputBlink->get_parent()->set_visible(Defaults::inputHasFlag(name, Defaults::INPUT_HAS_BLINK));
+	boxInputCreditsSettings->set_visible(Defaults::inputHasFlag(name, Defaults::INPUT_HAS_CREDITS));
 
+	// Need to be set after switch blink.
 	if (Defaults::inputHasFlag(name, Defaults::INPUT_HAS_SPEED)) {
 		comboBoxInputSpeed->get_parent()->set_visible(true);
 		// This is automatically handled by the switch, but in this case must be enabled.
 		comboBoxInputSpeed->get_parent()->set_sensitive(true);
 	}
-	spinInputTimes->get_parent()->set_visible(Defaults::inputHasFlag(name, Defaults::INPUT_HAS_TIMES));
-	switchInputBlink->get_parent()->set_visible(Defaults::inputHasFlag(name, Defaults::INPUT_HAS_BLINK));
-	boxInputCreditsSettings->set_visible(Defaults::inputHasFlag(name, Defaults::INPUT_HAS_CREDITS));
 
 	brief->set_text(Defaults::inputInfo.at(name).brief.data());
 	btnApply->set_sensitive(true);
@@ -194,6 +208,7 @@ void DialogInput::onEmpty() noexcept {
 	boxInputCreditsSettings->hide();
 	entryInputName->set_text("");
 	comboBoxInputSpeed->get_parent()->hide();
+	comboBoxInputSpeed->get_parent()->set_sensitive(true);
 	comboBoxInputSpeed->set_active_id("Normal");
 	spinInputTimes->get_parent()->hide();
 	spinInputTimes->set_text("");

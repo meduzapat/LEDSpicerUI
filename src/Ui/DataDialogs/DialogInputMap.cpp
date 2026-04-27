@@ -166,7 +166,7 @@ string DialogInputMap::createUniqueId() const noexcept {
 }
 
 LEDSpicerUI::Ui::Storage::Data* DialogInputMap::createData(StringUMap& rawData) const noexcept {
-	// Target will be deleted by dialog form, no need to clean up.
+
 	const string
 		type   = rawData.count(TYPE)   ? rawData.at(TYPE)   : emptyString,
 		target = rawData.count(TARGET) ? rawData.at(TARGET) : emptyString;
@@ -180,5 +180,6 @@ LEDSpicerUI::Ui::Storage::Data* DialogInputMap::createData(StringUMap& rawData) 
 
 	auto im{new Storage::InputMap(rawData, handler ? handler->get(target) : nullptr)};
 	im->getProperties().setValue(PID, ownerData->getProperties().getValue(UID));
+	im->getProperties().setValue(IID, ownerData->getProperties().getValue(PID));
 	return im;
 }

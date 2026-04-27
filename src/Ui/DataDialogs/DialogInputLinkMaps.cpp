@@ -58,11 +58,15 @@ DialogInputLinkMaps::DialogInputLinkMaps(
 	setSignalAdd(btnAdd);
 	setSignalApply();
 
-	// BtnAdd only makes sense when the input has at least 2 maps to link.
-	CollectionHandler::getInstance(COLLECTION_TEMP_MAPS)->registerSensitivity(btnAdd, 2);
+	mapsRequest.sourceCollection->registerSensitivity(btnApply, 2);
 
 	btnSelectInputMap->signal_clicked().connect([this]() {
-		populateTempMaps();
+		mapsRequest.sourceCollection = CollectionHandler::getInstance(
+			Defaults::createCommonUniqueId({
+				ownerData->getProperties().getValue(UID),
+				COLLECTION_INPUT_MAPS
+			})
+		);
 		DialogSelect::getInstance()->open();
 	});
 }
@@ -72,7 +76,12 @@ void DialogInputLinkMaps::setOwner(
 	Storage::Data* owner
 ) noexcept {
 	DialogForm::setOwner(collection, owner);
-	populateTempMaps();
+	mapsRequest.sourceCollection = CollectionHandler::getInstance(
+		Defaults::createCommonUniqueId({
+			ownerData->getProperties().getValue(UID),
+			COLLECTION_INPUT_MAPS
+		})
+	);
 }
 
 void DialogInputLinkMaps::load(XMLHelper* values) noexcept {
@@ -85,10 +94,15 @@ void DialogInputLinkMaps::load(XMLHelper* values) noexcept {
 	);
 }
 
-void DialogInputLinkMaps::createSubItems(XMLHelper* values) noexcept {
+void DialogInputLinkMaps::createSubItems(XMLHelper*) noexcept {
 	const string& idxStr{currentData->getValue(LINKED_ITEMS)};
 	if (idxStr.empty()) return;
-	populateTempMaps();
+	mapsRequest.sourceCollection = CollectionHandler::getInstance(
+		Defaults::createCommonUniqueId({
+			ownerData->getProperties().getValue(UID),
+			COLLECTION_INPUT_MAPS
+		})
+	);
 	DialogSelect::getInstance()->selectByIndexes(Defaults::explode(idxStr, ','));
 }
 
@@ -130,24 +144,4 @@ void DialogInputLinkMaps::wireChildrenDialogs() noexcept {
 void DialogInputLinkMaps::disconnectChildrenDialogs() noexcept {
 	getPrimaryChildCollection()->releaseSensitive(btnApply);
 	currentData->tearDown();
-}
-
-void DialogInputLinkMaps::populateTempMaps() noexcept {
-	auto tempMaps{CollectionHandler::getInstance(COLLECTION_TEMP_MAPS)};
-
-	vector<Storage::Data*> toRemove;
-	for (auto& [id, data] : *tempMaps)
-		toRemove.push_back(data);
-	for (auto data : toRemove)
-		tempMaps->remove(data);
-
-	auto inputParent{static_cast<Storage::Parent*>(ownerData)};
-	auto sourcesBBC{inputParent->getChild(COLLECTION_INPUT_SOURCES)};
-	if (not sourcesBBC) return;
-
-	for (auto sourceBB : *sourcesBBC) {
-		auto source{static_cast<Storage::Parent*>(sourceBB->getData())};
-		for (auto mapBB : *source->getPrimaryChild())
-			tempMaps->add(mapBB->getData());
-	}
 }

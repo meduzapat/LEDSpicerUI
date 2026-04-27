@@ -29,7 +29,6 @@ BoxButton::BoxButton(Data* form) noexcept :
 	data{form},
 	label{Gtk::make_managed<Gtk::Label>()}
 {
-//	form->registerToCollection();
 	set_valign(Gtk::ALIGN_START);
 	set_vexpand(false);
 	set_margin_top(2);
@@ -50,6 +49,7 @@ BoxButton::BoxButton(Data* form) noexcept :
 	auto cssClass{form->getCssClass()};
 	if (not cssClass.empty())
 		get_style_context()->add_class(string(cssClass));
+	data->registerToCollection();
 	sync();
 	show_all();
 }
@@ -67,7 +67,6 @@ void BoxButton::packButtonStart(Gtk::Button& button) noexcept {
 }
 
 void BoxButton::sync() noexcept {
-	data->registerToCollection();
 	auto text{data->createTooltip()};
 	if (not text.empty())
 		label->set_tooltip_text(text);

@@ -78,25 +78,19 @@ string Data::toXML() const noexcept {
 }
 
 void Data::registerToCollection() noexcept {
-	auto handler = getCollectionHandler();
-	if (handler and not createUniqueId().empty())
+	if (auto handler{getCollectionHandler()}; handler and not createUniqueId().empty())
 		handler->add(this);
 }
 
 void Data::unregisterFromCollection() noexcept {
-	auto handler = getCollectionHandler();
-	if (handler and not createUniqueId().empty())
+	if (auto handler{getCollectionHandler()}; handler and not createUniqueId().empty())
 		handler->remove(this);
 }
 
 void Data::syncRegistration(const string& oldId) noexcept {
-	auto handler = getCollectionHandler();
+	auto handler{getCollectionHandler()};
 	if (not handler) return;
-	// ID will never be empty.
-	string newId{createUniqueId()};
-	// Replace if both IDs are non-empty and different.
-	if (oldId != newId)
-		handler->replace(this, oldId);
+	handler->replace(this, oldId);
 }
 
 string Data::valuesXML(const StringUMap& data) noexcept {
