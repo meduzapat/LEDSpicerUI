@@ -21,6 +21,7 @@
  */
 
 #include "Element.hpp"
+#include "Group.hpp"
 
 using namespace LEDSpicerUI::Ui::Storage;
 
@@ -30,7 +31,7 @@ Element::~Element() {
 
 string Element::createPrettyName() const noexcept {
 	string pname(Data::createPrettyName());
-	if (properties.isSet("stripDescriptor")) {
+	if (properties.isSet(PROP_STRIP_UID)) {
 		pname += " [" + getValue(STRIPSIZE) + "]";
 	}
 	return pname;

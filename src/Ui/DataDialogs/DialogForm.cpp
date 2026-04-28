@@ -325,7 +325,7 @@ void DialogForm::onCloneClicked(Storage::BoxButton& boxButton) noexcept {
 	// Update UI and call after create callback.
 	addButtons(newBoxButton);
 	box->add(newBoxButton);
-	afterCreate(boxButton);
+	afterCreate(newBoxButton);
 }
 
 LEDSpicerUI::Ui::Storage::BoxButtonCollection* DialogForm::getPrimaryChildCollection() const noexcept {

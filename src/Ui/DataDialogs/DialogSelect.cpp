@@ -185,7 +185,7 @@ void DialogSelect::populatePicker() noexcept {
 			auto selection{Gtk::make_managed<Storage::Selection>(data)};
 			auto flowChild{Gtk::make_managed<Gtk::FlowBoxChild>()};
 
-			if (data->getProperties().isSet("system"))
+			if (data->getProperties().isSet(PROP_SYSTEM))
 				selection->get_style_context()->add_class("system");
 
 			selection->signal_clicked().connect([this, flowChild]() {

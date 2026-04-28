@@ -40,6 +40,7 @@ public:
 	/// Tab numbers for elements LED modes.
 	enum tabIndex : uint8_t {RGB, Strip, sRGB, Single, mRGB};
 
+	static constexpr const int ALL_TAB_IDX = 0b11111;
 	static constexpr const int MAX_COLUMNS = 20;
 	static constexpr const int MIN_COLUMNS = 10;
 
@@ -133,6 +134,9 @@ protected:
 	void findElementByPin(uint16_t finder, std::unordered_set<Storage::BoxButton*>& elementsFound) noexcept;
 
 	void onSwitchPage(Gtk::Widget*, uint pageNum) noexcept;
+
+	void onCloneClicked(Storage::BoxButton& boxButton) noexcept override;
+
 };
 
 } // namespace

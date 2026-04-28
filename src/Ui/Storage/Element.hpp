@@ -93,7 +93,7 @@ public:
 
 protected:
 
-	// Owns pseudo children.
+	/// Pseudo children.
 	vector<Element*> stripChildren;
 
 	bool shouldSerialize(const string& key, const string& value) const noexcept override {

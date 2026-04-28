@@ -528,7 +528,7 @@ void Defaults::populateComboBoxWithIds(
 }
 
 void Defaults::setFilter(Gtk::SearchEntry* filterEntry, Gtk::FlowBox* box, Gtk::Dialog* dialog) {
-	filterEntry->signal_show().connect([filterEntry]() {
+	dialog->signal_show().connect([filterEntry]() {
 		filterEntry->set_text("");
 	});
 	filterEntry->signal_changed().connect([filterEntry, box]() {

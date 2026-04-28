@@ -267,7 +267,7 @@ void DialogElement::isValid() const {
 
 	auto groupHandler = LEDSpicerUI::Ui::Storage::CollectionHandler::getInstance(COLLECTION_GROUPS);
 	auto existingGroup = groupHandler->get(name);
-	if (existingGroup && not existingGroup->getProperties().isSet("system")) {
+	if (existingGroup && not existingGroup->getProperties().isSet(PROP_SYSTEM)) {
 		throw Message("Element name '" + name + "' conflicts with existing group.\nNote: Strip elements auto-create groups with the same name.");
 	}
 
@@ -366,6 +366,7 @@ void DialogElement::isValid() const {
 
 void DialogElement::storeData() noexcept {
 
+	auto& props{currentData->getProperties()};
 	string
 		name(elementName->get_text()),
 		oldName(currentData->getValue(NAME));
@@ -400,35 +401,42 @@ void DialogElement::storeData() noexcept {
 		currentData->setValue(COLORFORMAT, comboBoxRGBRGB->get_active_id());
 		break;
 	case tabIndex::Strip: {
+
 		isStrip = true;
 
 		static uint16_t lastStripCode = 0;
-		size_t
+		auto collection{currentData->getCollectionHandler()};
+
+		const size_t
 			position = std::stoi(positionStrip->get_text()),
 			size     = std::stoi(sizeStrip->get_text());
 
-		string code = currentData->getProperties().getValue("stripDescriptor");
+		// Get or create strip code.
+		string code{props.getValue(PROP_STRIP_UID)};
 		if (code.empty()) {
 			code = std::to_string(++lastStripCode);
-			currentData->getProperties().setValue("stripDescriptor", code);
+			props.setValue(PROP_STRIP_UID, code);
 		}
-		currentData->getProperties().setValue(PROP_EXPAND,    "1");
-		currentData->getProperties().setValue(PROP_SYSTEM,    "1");
-		currentData->getProperties().setValue(PROP_NO_SELECT, "1");
+		// Store strip properties.
+		props.setValue(PROP_EXPAND,    "1"); // Expandable into many elements.
+		props.setValue(PROP_SYSTEM,    "1"); // System element with special handling.
+		props.setValue(PROP_NO_SELECT, "1"); // Cannot be consumed in selectable end-points.
+
+		// Upscale, copy children pointers.
 		auto currentDataE = static_cast<Storage::Element*>(currentData);
 		auto children     = currentDataE->copyStripChildren();
 
-		// Update/reuse existing children, create missing ones
+		// Loop size to create/reuse children, this avoids chain reactions.
 		for (size_t i = 0; i < size; ++i) {
-			//string childName = name + "_" + std::to_string(i + 1);
-			string childName = name + std::to_string(i + 1);
+
+			const string childName{name + std::to_string(i + 1)};
 
 			if (i < children.size()) {
 				// Reuse existing child - update name and position
 				string oldChildId = children[i]->createUniqueId();
 				children[i]->setValue(NAME, childName);
 				children[i]->setValue(POSITION, std::to_string(position + i));
-				currentData->getCollectionHandler()->replace(children[i], oldChildId);
+				collection->replace(children[i], oldChildId);
 			}
 			else {
 				// Create new child
@@ -436,9 +444,9 @@ void DialogElement::storeData() noexcept {
 				childData[NAME] = childName;
 				childData[POSITION] = std::to_string(position + i);
 				auto child = new Storage::Element(childData);
-				child->getProperties().setValue("strip", code);
+				child->getProperties().setValue(PROP_STRIP, code);
 				currentDataE->addStripChild(child);
-				currentData->getCollectionHandler()->add(child);
+				collection->add(child);
 			}
 		}
 
@@ -449,19 +457,18 @@ void DialogElement::storeData() noexcept {
 		currentData->setValue(STRIPSIZE,   sizeStrip->get_text());
 		currentData->setValue(COLORFORMAT, comboBoxRGBStrip->get_active_id());
 
-		// System group management
+		// System group management.
 		if (not wasStrip) {
-			// Create new group
+			// Create new group.
 			StringUMap groupData{{"name", name}};
 			auto group = new Storage::Group(groupData);
-			group->getProperties().setValue("system",   "true");
-			group->getProperties().setValue("readOnly", "true");
+			group->getProperties().setValue(PROP_SYSTEM, "1");
 			groupCollectionHandler->add(group);
 		}
 		else if (oldName != name) {
-			// Rename existing group
-			auto group = groupCollectionHandler->get(oldName);
-			if (group && group->getProperties().isSet("system")) {
+			// Rename existing group.
+			auto group{groupCollectionHandler->get(oldName)};
+			if (group->getProperties().isSet(PROP_SYSTEM)) {
 				group->setValue(NAME, name);
 				groupCollectionHandler->replace(group, oldName);
 			}
@@ -484,12 +491,12 @@ void DialogElement::storeData() noexcept {
 	// Cleanup if changed from strip to non-strip
 	if (wasStrip && not isStrip) {
 		static_cast<Storage::Element*>(currentData)->clearStripChildren();
-		currentData->getProperties().unSet("stripDescriptor");
-		currentData->getProperties().unSet("expandable");
-		currentData->getProperties().unSet("system");
+		props.unSet(PROP_STRIP_UID);
+		props.unSet(PROP_EXPAND);
+		props.unSet(PROP_SYSTEM);
 
 		auto group = groupCollectionHandler->get(oldName);
-		if (group && group->getProperties().isSet("system")) {
+		if (group && group->getProperties().isSet(PROP_SYSTEM)) {
 			groupCollectionHandler->remove(group);
 		}
 	}
@@ -512,6 +519,16 @@ void DialogElement::retrieveData() noexcept {
 		return idx;
 	};
 
+	/*
+	Element type is detected from which fieldsData keys are present.
+	Priority order matches mutual exclusivity of the connection types:
+		1. POSITIONS  → mRGB   (multiple positions, CSV)
+		2. STRIPSIZE  → Strip  (position + count)
+		3. POSITION   → RGB    (single position)
+		4. PIN        → Single LED
+		5. SOLENOID   → Single solenoid
+		6. (none)     → Scattered RGB (RED_PIN/GREEN_PIN/BLUE_PIN)
+	*/
 	elementName->set_text(currentData->getValue(NAME));
 
 	// Multi RGB.
@@ -676,10 +693,10 @@ void DialogElement::drawPinsRGB(vector<Gtk::Label*>& labels) noexcept {
 		Gtk::Label* connectorLabel(Gtk::make_managed<Gtk::Label>("LED " + std::to_string(led)));
 		vboxConnector->pack_start(*connectorLabel, Gtk::PACK_SHRINK);
 		// Create container for pins
-		Gtk::HBox* pinsBox = Gtk::manage(new Gtk::HBox(true, 1));
-		vboxConnector->pack_start(*pinsBox, Gtk::PACK_SHRINK);
+		Gtk::HBox* hboxPins = Gtk::manage(new Gtk::HBox(true, 1));
+		vboxConnector->pack_start(*hboxPins, Gtk::PACK_SHRINK);
 		for (uint l = 0; l < 3; ++l) {
-			pinsBox->pack_start(*labels[pin++]);
+			hboxPins->pack_start(*labels[pin++]);
 		}
 	}
 	if (numberOfPins % 3 == 0)
@@ -872,10 +889,10 @@ void DialogElement::findElementByPin(uint16_t finder, std::unordered_set<Storage
 		subject = data->getValue(POSITION);
 		if (not data->getValue(STRIPSIZE).empty()) {
 			uint16_t
-				lastPin(Storage::Element::findFirstConnectorIndexByPosition(data->getValue(STRIPSIZE)) + 2),
-				firstPin(Storage::Element::findFirstConnectorIndexByPosition(subject));
+				firstPin(Storage::Element::findFirstConnectorIndexByPosition(subject)),
+				lastPin{firstPin + std::stoi(data->getValue(STRIPSIZE)) * 3 - 1};
 
-			if (firstPin >= finder and firstPin <= lastPin) {
+			if (finder >= firstPin and finder <= lastPin) {
 				elementsFound.insert(boxButton);
 				continue;
 			}
@@ -924,5 +941,31 @@ void DialogElement::onSwitchPage(Gtk::Widget*, uint pageNum) noexcept {
 		pinsBox->set_selection_mode(Gtk::SELECTION_NONE);
 	}
 	uint8_t exclude = 1 << pageNum;
-	clearFormConditinal(0b11111 & ~exclude);
+	clearFormConditinal(ALL_TAB_IDX & ~exclude);
 };
+
+void DialogElement::onCloneClicked(Storage::BoxButton& boxButton) noexcept {
+
+	// Clone started, set mode, clear form.
+	action = Actions::ADD;
+	clearForm();
+
+	// Clone Data, will return a copy with a different and unique ID.
+	StringUMap values{boxButton.getData()->copyValues()};
+
+	// Create new element from cloned values and populate widgets.
+	currentData = createData(values);
+	retrieveData();
+	currentData->wipe();
+	storeData();
+
+	// Create button, will set tracker if applicable.
+	Storage::BoxButton& newBoxButton{items->create(currentData)};
+	Defaults::markDirty();
+
+	// Update UI and call after create callback.
+	addButtons(newBoxButton);
+	box->add(newBoxButton);
+	afterCreate(newBoxButton);
+	currentData = nullptr;
+}

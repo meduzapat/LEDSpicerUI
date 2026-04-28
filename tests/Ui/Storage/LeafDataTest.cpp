@@ -54,7 +54,7 @@ TEST(ElementTest, CreatePrettyNamePlain) {
 TEST(ElementTest, CreatePrettyNameWithStripDescriptor) {
 	StringUMap data{{NAME, "LED_STRIP"}, {STRIPSIZE, "12"}};
 	Element e(data);
-	e.getProperties().setValue("stripDescriptor", "1");
+	e.getProperties().setValue(PROP_STRIP_UID, "1");
 	EXPECT_NE(string::npos, e.createPrettyName().find("[12]"));
 }
 

@@ -159,6 +159,18 @@ combobox.noRoundRight button.combo,
 	background-image: url("images/elementsBackground.png");
 }
 
+.zoneCanvas.processes {
+	background-image: url("images/processesBackground.png");
+}
+
+.zoneCanvas.colors {
+	background-image: url("images/colorsBackground.png");
+}
+
+.zoneCanvas.animations {
+	background-image: url("images/animationsBackground.png");
+}
+
 /* BoxButton styles for different categories */
 
 .DeviceBoxButton {

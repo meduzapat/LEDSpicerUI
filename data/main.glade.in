@@ -1030,6 +1030,10 @@ If nothing is set, the default is 1000ms.</property>
                                 <property name="activate-on-single-click">False</property>
                               </object>
                             </child>
+                            <style>
+                              <class name="zoneCanvas"/>
+                              <class name="processes"/>
+                            </style>
                           </object>
                         </child>
                       </object>
@@ -1304,6 +1308,10 @@ If nothing is set, the default is 1000ms.</property>
                             <property name="activate-on-single-click">False</property>
                           </object>
                         </child>
+                        <style>
+                          <class name="zoneCanvas"/>
+                          <class name="groups"/>
+                        </style>
                       </object>
                     </child>
                   </object>
@@ -1390,9 +1398,31 @@ If nothing is set, the default is 1000ms.</property>
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <child>
-                  <object class="GtkFlowBox" id="AnimationsBox">
+                  <object class="GtkScrolledWindow">
                     <property name="visible">True</property>
-                    <property name="can-focus">False</property>
+                    <property name="can-focus">True</property>
+                    <property name="hscrollbar-policy">never</property>
+                    <property name="shadow-type">in</property>
+                    <child>
+                      <object class="GtkViewport">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <child>
+                          <object class="GtkFlowBox" id="BoxAnimations">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="valign">start</property>
+                            <property name="homogeneous">True</property>
+                            <property name="selection-mode">none</property>
+                            <property name="activate-on-single-click">False</property>
+                          </object>
+                        </child>
+                        <style>
+                          <class name="zoneCanvas"/>
+                          <class name="animations"/>
+                        </style>
+                      </object>
+                    </child>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -1553,6 +1583,10 @@ If nothing is set, the default is 1000ms.</property>
                                 <property name="activate-on-single-click">False</property>
                               </object>
                             </child>
+                            <style>
+                              <class name="zoneCanvas"/>
+                              <class name="inputs"/>
+                            </style>
                           </object>
                         </child>
                       </object>
@@ -1741,6 +1775,10 @@ If nothing is set, the default is 1000ms.</property>
                                 <property name="activate-on-single-click">False</property>
                               </object>
                             </child>
+                            <style>
+                              <class name="zoneCanvas"/>
+                              <class name="profiles"/>
+                            </style>
                           </object>
                         </child>
                       </object>
@@ -2121,6 +2159,10 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
                     <property name="selection-mode">none</property>
                   </object>
                 </child>
+                <style>
+                  <class name="zoneCanvas"/>
+                  <class name="colors"/>
+                </style>
               </object>
             </child>
           </object>
@@ -2502,10 +2544,6 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
                             <property name="can-focus">False</property>
                             <property name="valign">start</property>
                             <property name="homogeneous">True</property>
-                            <style>
-                              <class name="zoneCanvas"/>
-                              <class name="groups"/>
-                            </style>
                           </object>
                         </child>
                         <style>
