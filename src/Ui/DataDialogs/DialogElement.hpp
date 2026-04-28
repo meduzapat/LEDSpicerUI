@@ -38,9 +38,9 @@ class DialogElement: public DialogForm, public SingletonDialog<DialogElement> {
 public:
 
 	/// Tab numbers for elements LED modes.
-	enum tabIndex : uint8_t {RGB, Strip, sRGB, Single, mRGB};
+	enum tabIndex : uint8_t {RGB, Strip, sRGB, Single, mRGB, TAB_COUNT};
 
-	static constexpr const int ALL_TAB_IDX = 0b11111;
+	static constexpr uint8_t ALL_TAB_IDX = (1 << TAB_COUNT) - 1;
 	static constexpr const int MAX_COLUMNS = 20;
 	static constexpr const int MIN_COLUMNS = 10;
 

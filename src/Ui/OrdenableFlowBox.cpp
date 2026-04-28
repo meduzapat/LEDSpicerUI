@@ -28,24 +28,41 @@ OrdenableFlowBox::OrdenableFlowBox(
 	BaseObjectType* obj,
 	const Glib::RefPtr<Gtk::Builder>& builder,
 	const string& up,
-	const string& dn
+	const string& dn,
+	const string& first,
+	const string& last
 ) : OrdenableFlowBox(obj, builder) {
 	Gtk::Button
-		* btnUp = nullptr,
-		* btnDn = nullptr;
+		* btnUp    = nullptr,
+		* btnDn    = nullptr,
+		* btnFirst = nullptr,
+		* btnLast  = nullptr;
 	builder->get_widget(up, btnUp);
 	builder->get_widget(dn, btnDn);
 
-	signal_selected_children_changed().connect([this, btnUp, btnDn]() {
+	if (not first.empty())
+		builder->get_widget(first, btnFirst);
+	if (not last.empty())
+		builder->get_widget(last, btnLast);
+
+	signal_selected_children_changed().connect([this, btnUp, btnDn, btnFirst, btnLast]() {
 		if (not get_selected_children().size()) {
 			btnUp->set_sensitive(false);
 			btnDn->set_sensitive(false);
+			if (btnFirst)
+				btnFirst->set_sensitive(false);
+			if (btnLast)
+				btnLast->set_sensitive(false);
 			return;
 		}
 
 		size_t index = get_selected_children().at(0)->get_index();
 		btnUp->set_sensitive(index);
 		btnDn->set_sensitive(index != getSize() - 1);
+		if (btnFirst)
+			btnFirst->set_sensitive(index);
+		if (btnLast)
+			btnLast->set_sensitive(index != getSize() - 1);
 	});
 
 	btnUp->signal_clicked().connect([this]() {
@@ -67,6 +84,26 @@ OrdenableFlowBox::OrdenableFlowBox(
 		select_child(*selectedChild);
 		Defaults::markDirty();
 	});
+
+	if (btnFirst)
+		btnFirst->signal_clicked().connect([this]() {
+			auto selectedChild = get_selected_children().at(0);
+			remove(*selectedChild);
+			insert(*selectedChild, 0);
+			unselect_all();
+			select_child(*selectedChild);
+			Defaults::markDirty();
+		});
+
+	if (btnLast)
+		btnLast->signal_clicked().connect([this]() {
+			auto selectedChild = get_selected_children().at(0);
+			remove(*selectedChild);
+			insert(*selectedChild, -1);
+			unselect_all();
+			select_child(*selectedChild);
+			Defaults::markDirty();
+		});
 }
 
 size_t OrdenableFlowBox::getSize() const noexcept {

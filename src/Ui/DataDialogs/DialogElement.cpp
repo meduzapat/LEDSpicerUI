@@ -267,7 +267,7 @@ void DialogElement::isValid() const {
 
 	auto groupHandler = LEDSpicerUI::Ui::Storage::CollectionHandler::getInstance(COLLECTION_GROUPS);
 	auto existingGroup = groupHandler->get(name);
-	if (existingGroup && not existingGroup->getProperties().isSet(PROP_SYSTEM)) {
+	if (existingGroup and not existingGroup->getProperties().isSet(PROP_SYSTEM)) {
 		throw Message("Element name '" + name + "' conflicts with existing group.\nNote: Strip elements auto-create groups with the same name.");
 	}
 
@@ -361,6 +361,9 @@ void DialogElement::isValid() const {
 		if (std::count(positionsMRGB->get_text().begin(), positionsMRGB->get_text().end(), ',') < 2) {
 			throw Message("Missing element positions for element " + name + ", select at least two connectors.");
 		}
+		break;
+	default:
+		throw Message("Internal Error.");
 	}
 }
 
@@ -441,9 +444,9 @@ void DialogElement::storeData() noexcept {
 			else {
 				// Create new child
 				StringUMap childData;
-				childData[NAME] = childName;
+				childData[NAME]     = childName;
 				childData[POSITION] = std::to_string(position + i);
-				auto child = new Storage::Element(childData);
+				auto child{new Storage::Element(childData)};
 				child->getProperties().setValue(PROP_STRIP, code);
 				currentDataE->addStripChild(child);
 				collection->add(child);
@@ -479,6 +482,7 @@ void DialogElement::storeData() noexcept {
 		currentData->setValue(POSITIONS,   positionsMRGB->get_text());
 		currentData->setValue(COLORFORMAT, comboBoxRGBMRGB->get_active_id());
 		break;
+	default: return;
 	}
 
 	if (not btnDefaultColor->get_label().empty()) {
@@ -489,14 +493,15 @@ void DialogElement::storeData() noexcept {
 	currentData->setValue(BRIGHTNESS, std::to_string(static_cast<uint>(brightness->get_value())));
 
 	// Cleanup if changed from strip to non-strip
-	if (wasStrip && not isStrip) {
+	if (wasStrip and not isStrip) {
 		static_cast<Storage::Element*>(currentData)->clearStripChildren();
 		props.unSet(PROP_STRIP_UID);
 		props.unSet(PROP_EXPAND);
 		props.unSet(PROP_SYSTEM);
+		props.unSet(PROP_NO_SELECT);
 
-		auto group = groupCollectionHandler->get(oldName);
-		if (group && group->getProperties().isSet(PROP_SYSTEM)) {
+		auto group{groupCollectionHandler->get(oldName)};
+		if (group and group->getProperties().isSet(PROP_SYSTEM)) {
 			groupCollectionHandler->remove(group);
 		}
 	}
@@ -605,6 +610,7 @@ void DialogElement::changeNumberOfPins(const uint16_t newSize) noexcept {
 	if (not newSize) {
 		numberOfPins = 0;
 		drawPins();
+		return;
 	}
 
 	if (numberOfPins == newSize) return;
@@ -713,10 +719,10 @@ void DialogElement::drawPinsRGB(vector<Gtk::Label*>& labels) noexcept {
 	Gtk::Label* connectorLabel(Gtk::make_managed<Gtk::Label>("Extra"));
 	vboxConnector->pack_start(*connectorLabel, Gtk::PACK_SHRINK);
 	// Create container for pins
-	Gtk::HBox* pinsBox = Gtk::manage(new Gtk::HBox(true, 1));
-	vboxConnector->pack_start(*pinsBox, Gtk::PACK_SHRINK);
+	Gtk::HBox* hboxPins{Gtk::manage(new Gtk::HBox(true, 1))};
+	vboxConnector->pack_start(*hboxPins, Gtk::PACK_SHRINK);
 	for (; pin < numberOfPins; ++pin) {
-		pinsBox->pack_start(*labels[pin]);
+		hboxPins->pack_start(*labels[pin]);
 	}
 }
 
@@ -888,7 +894,7 @@ void DialogElement::findElementByPin(uint16_t finder, std::unordered_set<Storage
 		// RGB Strip.
 		subject = data->getValue(POSITION);
 		if (not data->getValue(STRIPSIZE).empty()) {
-			uint16_t
+			uint
 				firstPin(Storage::Element::findFirstConnectorIndexByPosition(subject)),
 				lastPin{firstPin + std::stoi(data->getValue(STRIPSIZE)) * 3 - 1};
 

@@ -37,7 +37,7 @@ public:
 
 	OrdenableFlowBox(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>&) : Gtk::FlowBox(obj) {}
 
-	OrdenableFlowBox(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder, const string& up, const string& dn);
+	OrdenableFlowBox(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder, const string& up, const string& dn, const string& first = "", const string& last = "");
 
 	virtual ~OrdenableFlowBox() = default;
 
