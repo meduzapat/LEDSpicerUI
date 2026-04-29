@@ -38,16 +38,16 @@ Parent::Parent(
 
 Parent::~Parent() {
 	for (auto& [watched, target] : dependencyRegistry)
-		CollectionHandler::getInstance(watched)->release(&children.at(target));
+		watched->release(target);
 }
 
 BoxButtonCollection* Parent::getChild(const string& collectionId) noexcept {
-	auto it = children.find(collectionId);
+	auto it{children.find(collectionId)};
 	return (it != children.end()) ? &it->second : nullptr;
 }
 
 const BoxButtonCollection* Parent::getChild(const string& collectionId) const noexcept {
-	auto it = children.find(collectionId);
+	auto it{children.find(collectionId)};
 	return (it != children.end()) ? &it->second : nullptr;
 }
 
@@ -61,10 +61,12 @@ const StringBoxButtonCollectionUMap& Parent::getChildren() const noexcept {
 
 void Parent::registerDependency(
 	const string& watchedCollection,
-	const string& targetCollection
+	const string& targetFamily
 ) noexcept {
-	CollectionHandler::getInstance(watchedCollection)->registerDependency(&children.at(targetCollection));
-	dependencyRegistry.emplace_back(watchedCollection, targetCollection);
+	auto ch {CollectionHandler::getInstance(watchedCollection)};
+	auto cf {&children.at(targetFamily)};
+	ch->registerDependency(cf);
+	dependencyRegistry.emplace_back(ch, cf);
 }
 
 string Parent::xmlBody() const noexcept {

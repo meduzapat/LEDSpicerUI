@@ -131,9 +131,9 @@ void DialogSelect::reindex() noexcept {
 
 void DialogSelect::load(XMLHelper* values, const string& ownerUniqueId) noexcept {
 
-	auto& rawCollection = values->getData(
+	auto& rawCollection{values->getData(
 		Defaults::createCommonUniqueId({ownerUniqueId, request->collectionId})
-	);
+	)};
 
 	string location(" while loading " + request->linkType + " for " + ownerUniqueId);
 	string errors;

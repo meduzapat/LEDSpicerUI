@@ -91,18 +91,15 @@ protected:
 	/// pointer to the primary child, parent without children is considered invalid.
 	BoxButtonCollection* primaryChild{nullptr};
 
-	/// List of dependencies acting over children, watchedCollection → targetCollection
-	vector<std::pair<string, string>> dependencyRegistry;
+	/// List of dependencies acting over children, watchedCollection → targetFamily
+	vector<std::pair<CollectionHandler*, BoxButtonCollection*>> dependencyRegistry;
 
 	/**
 	 * Registers a dependency between a watched collection and a child collection.
 	 * @param watchedCollection The collection ID to watch for changes.
-	 * @param targetCollection The child collection ID to apply the dependency to.
+	 * @param targetFamily The child family ID to apply the dependency to.
 	 */
-	void registerDependency(
-		const string& watchedCollection,
-		const string& targetCollection
-	) noexcept;
+	void registerDependency(const string& watchedCollection, const string& targetFamily) noexcept;
 
 	string xmlBody() const noexcept override;
 };

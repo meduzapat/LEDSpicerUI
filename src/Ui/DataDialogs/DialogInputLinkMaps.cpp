@@ -61,12 +61,6 @@ DialogInputLinkMaps::DialogInputLinkMaps(
 	mapsRequest.sourceCollection->registerSensitivity(btnApply, 2);
 
 	btnSelectInputMap->signal_clicked().connect([this]() {
-		mapsRequest.sourceCollection = CollectionHandler::getInstance(
-			Defaults::createCommonUniqueId({
-				ownerData->getProperties().getValue(UID),
-				COLLECTION_INPUT_MAPS
-			})
-		);
 		DialogSelect::getInstance()->open();
 	});
 }
@@ -76,12 +70,7 @@ void DialogInputLinkMaps::setOwner(
 	Storage::Data* owner
 ) noexcept {
 	DialogForm::setOwner(collection, owner);
-	mapsRequest.sourceCollection = CollectionHandler::getInstance(
-		Defaults::createCommonUniqueId({
-			ownerData->getProperties().getValue(UID),
-			COLLECTION_INPUT_MAPS
-		})
-	);
+	mapsRequest.sourceCollection = CollectionHandler::getInstance(COLLECTION_INPUT_MAPS);
 }
 
 void DialogInputLinkMaps::load(XMLHelper* values) noexcept {
@@ -97,12 +86,7 @@ void DialogInputLinkMaps::load(XMLHelper* values) noexcept {
 void DialogInputLinkMaps::createSubItems(XMLHelper*) noexcept {
 	const string& idxStr{currentData->getValue(LINKED_ITEMS)};
 	if (idxStr.empty()) return;
-	mapsRequest.sourceCollection = CollectionHandler::getInstance(
-		Defaults::createCommonUniqueId({
-			ownerData->getProperties().getValue(UID),
-			COLLECTION_INPUT_MAPS
-		})
-	);
+	mapsRequest.sourceCollection = CollectionHandler::getInstance(COLLECTION_INPUT_MAPS);
 	DialogSelect::getInstance()->selectByIndexes(Defaults::explode(idxStr, ','));
 }
 

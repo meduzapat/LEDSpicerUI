@@ -52,6 +52,7 @@ set(STORAGE_SRCS
 set(STORAGE_BASE_SRCS
 	${COMMON_SRCS}
 	${STORAGE_SRCS}
+	${CMAKE_SOURCE_DIR}/src/Ui/Storage/Parent.cpp
 	${CMAKE_SOURCE_DIR}/src/Ui/Storage/CollectionHandler.cpp
 )
 

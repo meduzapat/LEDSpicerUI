@@ -160,8 +160,17 @@ public:
 
 protected:
 
+	/// Back-pointer to the BoxButton that owns this collection, if any.
+	BoxButton* owner = nullptr;
+
 	/// Created items in the dialog.
 	BoxButtonVector items;
+
+	/**
+	 * Sets the owning BoxButton so mutations can propagate sync upward.
+	 * @param boxButton The BoxButton that owns this child collection.
+	 */
+	void setOwner(BoxButton* boxButton) noexcept { owner = boxButton; }
 
 };
 

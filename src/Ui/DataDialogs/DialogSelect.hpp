@@ -54,7 +54,7 @@ public:
 		/// Box in the parent dialog where selected items are displayed.
 		OrdenableFlowBox* displayBox;
 
-		string
+		const string&
 			/// Field name written into each Link (e.g. NAME).
 			linkKey,
 			/// Semantic type label used in XML and Link identity (e.g. "element").

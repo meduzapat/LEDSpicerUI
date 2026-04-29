@@ -21,6 +21,7 @@
  */
 
 #include "BoxButtonCollection.hpp"
+#include "Parent.hpp"
 
 using namespace LEDSpicerUI::Ui::Storage;
 
@@ -42,7 +43,11 @@ bool BoxButtonCollection::isIdSet(const string& id) const noexcept {
 }
 
 BoxButton& BoxButtonCollection::create(Data* form) noexcept {
-	BoxButton* ptr{new BoxButton(form)};
+	auto ptr{new BoxButton(form)};
+	if (auto parent{dynamic_cast<Parent*>(form)}) {
+		for (auto& [id, child] : parent->getChildren())
+			child.setOwner(ptr);
+	}
 	items.push_back(ptr);
 	refreshSensitiveWidgets();
 	return *ptr;
@@ -59,6 +64,8 @@ void BoxButtonCollection::remove(BoxButton& item) noexcept {
 	delete *it;
 	items.erase(it);
 	refreshSensitiveWidgets();
+	// updates owner labels and tooltips
+	if (owner) owner->sync();
 }
 
 void BoxButtonCollection::remove(Data* form) noexcept {
@@ -73,6 +80,8 @@ void BoxButtonCollection::remove(Data* form) noexcept {
 	delete *it;
 	items.erase(it);
 	refreshSensitiveWidgets();
+	// updates owner labels and tooltips
+	if (owner) owner->sync();
 }
 
 void BoxButtonCollection::swap(BoxButtonCollection& other) noexcept {
@@ -106,4 +115,6 @@ void BoxButtonCollection::wipe() noexcept {
 	for (auto item : items) delete item;
 	items.clear();
 	refreshSensitiveWidgets();
+	// updates owner labels and tooltips
+	if (owner) owner->sync();
 }
