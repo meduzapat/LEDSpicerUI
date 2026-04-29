@@ -32,6 +32,8 @@ DialogProfile::DialogProfile(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 		NAME,
 		TYPE_ELEMENT,
 		COLLECTION_PROFILE_ELEMENTS,
+		emptyString,
+		{},
 		CollectionHandler::getInstance(COLLECTION_ELEMENTS),
 		{
 			{"color",  "Color",  "", Link::LinkField::Widget::COLOR_PICKER},
@@ -43,6 +45,8 @@ DialogProfile::DialogProfile(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 		NAME,
 		TYPE_GROUP,
 		COLLECTION_PROFILE_GROUPS,
+		emptyString,
+		{},
 		CollectionHandler::getInstance(COLLECTION_GROUPS),
 		{
 			{"color",  "Color",  "", Link::LinkField::Widget::COLOR_PICKER},
@@ -54,6 +58,8 @@ DialogProfile::DialogProfile(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 		NAME,
 		TYPE_ANIMATION,
 		COLLECTION_PROFILE_ANIMATIONS,
+		emptyString,
+		{},
 		CollectionHandler::getInstance(COLLECTION_ANIMATIONS),
 		{}
 	},
@@ -62,6 +68,8 @@ DialogProfile::DialogProfile(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 		NAME,
 		TYPE_INPUT,
 		COLLECTION_PROFILE_INPUTS,
+		emptyString,
+		{},
 		CollectionHandler::getInstance(COLLECTION_INPUTS),
 		{}
 	}
@@ -139,13 +147,13 @@ void DialogProfile::createSubItems(XMLHelper* values) noexcept {
 	auto ds{DialogSelect::getInstance()};
 	const string ownerUid = currentData->createUniqueId();
 
-	setUpSelector(COLLECTION_ELEMENTS,    alwaysOnElementsRequest);
+	setUpSelector(COLLECTION_ELEMENTS,   alwaysOnElementsRequest);
 	ds->load(values, ownerUid);
-	setUpSelector(COLLECTION_GROUPS,      alwaysOnGroupsRequest);
+	setUpSelector(COLLECTION_GROUPS,     alwaysOnGroupsRequest);
 	ds->load(values, ownerUid);
 	setUpSelector(COLLECTION_ANIMATIONS, animationsRequest);
 	ds->load(values, ownerUid);
-	setUpSelector(COLLECTION_INPUTS,      inputsRequest);
+	setUpSelector(COLLECTION_INPUTS,     inputsRequest);
 	ds->load(values, ownerUid);
 }
 
@@ -182,13 +190,13 @@ void DialogProfile::storeData() noexcept {
 	currentData->setValue(BACKGROUND_COLOR,  btnProfileBackgroundColor->get_label());
 
 	auto ds{DialogSelect::getInstance()};
-	setUpSelector(COLLECTION_ELEMENTS,    alwaysOnElementsRequest);
+	setUpSelector(COLLECTION_ELEMENTS,   alwaysOnElementsRequest);
 	ds->reindex();
-	setUpSelector(COLLECTION_GROUPS,      alwaysOnGroupsRequest);
+	setUpSelector(COLLECTION_GROUPS,     alwaysOnGroupsRequest);
 	ds->reindex();
 	setUpSelector(COLLECTION_ANIMATIONS, animationsRequest);
 	ds->reindex();
-	setUpSelector(COLLECTION_INPUTS,      inputsRequest);
+	setUpSelector(COLLECTION_INPUTS,     inputsRequest);
 	ds->reindex();
 }
 
@@ -200,13 +208,13 @@ void DialogProfile::retrieveData() noexcept {
 	);
 
 	auto ds{DialogSelect::getInstance()};
-	setUpSelector(COLLECTION_ELEMENTS,    alwaysOnElementsRequest);
+	setUpSelector(COLLECTION_ELEMENTS,   alwaysOnElementsRequest);
 	ds->refresh();
-	setUpSelector(COLLECTION_GROUPS,      alwaysOnGroupsRequest);
+	setUpSelector(COLLECTION_GROUPS,     alwaysOnGroupsRequest);
 	ds->refresh();
 	setUpSelector(COLLECTION_ANIMATIONS, animationsRequest);
 	ds->refresh();
-	setUpSelector(COLLECTION_INPUTS,      inputsRequest);
+	setUpSelector(COLLECTION_INPUTS,     inputsRequest);
 	ds->refresh();
 }
 

@@ -2441,6 +2441,30 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
                         <property name="can-focus">False</property>
                         <property name="halign">end</property>
                         <child>
+                          <object class="GtkButton" id="BtnGroupElementFirst">
+                            <property name="visible">True</property>
+                            <property name="sensitive">False</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">True</property>
+                            <child>
+                              <object class="GtkImage">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="icon-name">go-top-symbolic</property>
+                                <property name="use-fallback">True</property>
+                              </object>
+                            </child>
+                            <style>
+                              <class name="noRoundRight"/>
+                            </style>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
                           <object class="GtkButton" id="BtnGroupElementUp">
                             <property name="visible">True</property>
                             <property name="sensitive">False</property>
@@ -2488,6 +2512,30 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
                             <property name="position">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="BtnGroupElementLast">
+                            <property name="visible">True</property>
+                            <property name="sensitive">False</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">True</property>
+                            <child>
+                              <object class="GtkImage">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="icon-name">go-bottom</property>
+                                <property name="use-fallback">True</property>
+                              </object>
+                            </child>
+                            <style>
+                              <class name="noRoundLeft"/>
+                            </style>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">3</property>
                           </packing>
                         </child>
                       </object>
@@ -4614,6 +4662,30 @@ If you have multiple serial devices, avoid using autodetect.</property>
                     <property name="can-focus">False</property>
                     <property name="halign">end</property>
                     <child>
+                      <object class="GtkButton" id="BtnDeviceElementFirst">
+                        <property name="visible">True</property>
+                        <property name="sensitive">False</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">True</property>
+                        <child>
+                          <object class="GtkImage">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="icon-name">go-top-symbolic</property>
+                            <property name="use-fallback">True</property>
+                          </object>
+                        </child>
+                        <style>
+                          <class name="noRoundRight"/>
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
                       <object class="GtkButton" id="BtnDeviceElementUp">
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
@@ -4659,6 +4731,30 @@ If you have multiple serial devices, avoid using autodetect.</property>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
                         <property name="position">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="BtnDeviceElementLast">
+                        <property name="visible">True</property>
+                        <property name="sensitive">False</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">True</property>
+                        <child>
+                          <object class="GtkImage">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="icon-name">go-bottom</property>
+                            <property name="use-fallback">True</property>
+                          </object>
+                        </child>
+                        <style>
+                          <class name="noRoundLeft"/>
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">3</property>
                       </packing>
                     </child>
                   </object>
@@ -7817,98 +7913,15 @@ Multi will blink the next start</property>
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="spacing">2</property>
+                <property name="halign">end</property>
+                <property name="margin-end">5</property>
                 <child>
-                  <object class="GtkBox">
+                  <object class="GtkLabel">
                     <property name="visible">True</property>
+                    <property name="sensitive">False</property>
                     <property name="can-focus">False</property>
-                    <property name="halign">end</property>
-                    <property name="margin-start">15</property>
                     <property name="margin-end">5</property>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="visible">True</property>
-                        <property name="sensitive">False</property>
-                        <property name="can-focus">False</property>
-                        <property name="margin-end">5</property>
-                        <property name="label">Order mappings, top (first) -&gt; down (last)</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkButton" id="BtnInputMappingUp">
-                        <property name="visible">True</property>
-                        <property name="sensitive">False</property>
-                        <property name="can-focus">True</property>
-                        <property name="receives-default">True</property>
-                        <child>
-                          <object class="GtkImage">
-                            <property name="visible">True</property>
-                            <property name="can-focus">False</property>
-                            <property name="icon-name">go-up-symbolic</property>
-                            <property name="use-fallback">True</property>
-                          </object>
-                        </child>
-                        <style>
-                          <class name="noRoundRight"/>
-                        </style>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkButton" id="BtnInputMappingDown">
-                        <property name="visible">True</property>
-                        <property name="sensitive">False</property>
-                        <property name="can-focus">True</property>
-                        <property name="receives-default">True</property>
-                        <child>
-                          <object class="GtkImage">
-                            <property name="visible">True</property>
-                            <property name="can-focus">False</property>
-                            <property name="icon-name">go-down-symbolic</property>
-                            <property name="use-fallback">True</property>
-                          </object>
-                        </child>
-                        <style>
-                          <class name="noRoundLeft"/>
-                        </style>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">3</property>
-                      </packing>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="fill">True</property>
-                    <property name="pack-type">end</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkButton" id="BtnSelectInputMap">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">True</property>
-                    <property name="tooltip-text" translatable="yes">Create Mapping</property>
-                    <child>
-                      <object class="GtkImage">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="icon-name">list-add-symbolic</property>
-                        <property name="use-fallback">True</property>
-                      </object>
-                    </child>
+                    <property name="label">Order maps using top (first) -&gt; down (last)</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -7916,10 +7929,59 @@ Multi will blink the next start</property>
                     <property name="position">1</property>
                   </packing>
                 </child>
+                <child>
+                  <object class="GtkButton" id="BtnInputMappingUp">
+                    <property name="visible">True</property>
+                    <property name="sensitive">False</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
+                    <child>
+                      <object class="GtkImage">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="icon-name">go-up-symbolic</property>
+                        <property name="use-fallback">True</property>
+                      </object>
+                    </child>
+                    <style>
+                      <class name="noRoundRight"/>
+                    </style>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="BtnInputMappingDown">
+                    <property name="visible">True</property>
+                    <property name="sensitive">False</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
+                    <child>
+                      <object class="GtkImage">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="icon-name">go-down-symbolic</property>
+                        <property name="use-fallback">True</property>
+                      </object>
+                    </child>
+                    <style>
+                      <class name="noRoundLeft"/>
+                    </style>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">3</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="expand">True</property>
                 <property name="fill">True</property>
+                <property name="pack-type">end</property>
                 <property name="position">0</property>
                 <property name="secondary">True</property>
                 <property name="non-homogeneous">True</property>
@@ -7945,6 +8007,52 @@ Multi will blink the next start</property>
             <property name="expand">False</property>
             <property name="fill">False</property>
             <property name="position">3</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="spacing">5</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="halign">start</property>
+                <property name="label">Linked input maps</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="BtnSelectInputMap">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="tooltip-text" translatable="yes">Select input maps that you want to be together in a cycle</property>
+                <child>
+                  <object class="GtkImage">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="icon-name">list-add-symbolic</property>
+                    <property name="use-fallback">True</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
           </packing>
         </child>
         <child>
@@ -8410,8 +8518,9 @@ you can set the same trigger multiple time on different maps but only the last o
                       <object class="GtkLabel">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
+                        <property name="tooltip-text" translatable="yes">Create a new Map</property>
                         <property name="halign">start</property>
-                        <property name="label">Mappings</property>
+                        <property name="label">Input trigger Maps</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>

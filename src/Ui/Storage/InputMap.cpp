@@ -38,17 +38,13 @@ string InputMap::createTooltip() const noexcept {
 }
 
 void InputMap::registerToCollection() noexcept {
-	CollectionHandler::getInstance(
-		Defaults::createCommonUniqueId({getProperties().getValue(IID), COLLECTION_INPUT_MAPS})
-	)->add(this);
+	CollectionHandler::getInstance(COLLECTION_INPUT_MAPS)->add(this);
 	Data::registerToCollection();
 }
 
 void InputMap::unregisterFromCollection() noexcept {
 	Data::unregisterFromCollection();
-	CollectionHandler::getInstance(
-		Defaults::createCommonUniqueId({getProperties().getValue(IID), COLLECTION_INPUT_MAPS})
-	)->remove(this);
+	CollectionHandler::getInstance(COLLECTION_INPUT_MAPS)->remove(this);
 }
 
 CollectionHandler* InputMap::getCollectionHandler() const noexcept {

@@ -32,6 +32,8 @@ DialogGroup::DialogGroup(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& 
 		NAME,
 		TYPE_ELEMENT,
 		COLLECTION_GROUP_LINKS,
+		emptyString,
+		{},
 		CollectionHandler::getInstance(COLLECTION_ELEMENTS),
 		{}
 	}
@@ -45,7 +47,14 @@ DialogGroup::DialogGroup(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& 
 	builder->get_widget("BtnAddGroup",          btnAdd);
 	builder->get_widget("InputGroupName",       inputGroupName);
 	builder->get_widget("BtnGroupDefaultColor", btnGroupDefaultColor);
-	builder->get_widget_derived("BoxGroupElements", boxElements, "BtnGroupElementUp", "BtnGroupElementDn");
+	builder->get_widget_derived(
+		"BoxGroupElements",
+		boxElements,
+		"BtnGroupElementUp",
+		"BtnGroupElementDn",
+		"BtnGroupElementFirst",
+		"BtnGroupElementLast"
+	);
 
 	setSignalAdd(btnAdd);
 	setSignalApply();
@@ -57,7 +66,6 @@ DialogGroup::DialogGroup(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& 
 	// Element selector button — opens picker with strip-expand support.
 	builder->get_widget("BtnAddGroupElements", btnAddElements);
 	btnAddElements->signal_clicked().connect([this]() {
-		DialogSelect::getInstance()->setUp(getPrimaryChildCollection(), elementRequest);
 		DialogSelect::getInstance()->open();
 	});
 

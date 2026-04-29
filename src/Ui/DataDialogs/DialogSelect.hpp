@@ -55,12 +55,17 @@ public:
 		OrdenableFlowBox* displayBox;
 
 		const string&
-			/// Field name written into each Link (e.g. NAME).
+			/// Field name written into each Link.
 			linkKey,
-			/// Semantic type label used in XML and Link identity (e.g. "element").
+			/// Semantic type label used in XML and Link identity.
 			linkType,
 			/// Collection ID used by this link type.
-			collectionId;
+			collectionId,
+			/// If set will use prop value to filter the collection.
+			filterProp;
+
+		/// Used when filter is set to get only a reduced set.
+		string filterValue;
 
 		/// Collection to populate the picker from.
 		CollectionHandler* sourceCollection;

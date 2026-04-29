@@ -34,7 +34,10 @@ DialogInputLinkMaps::DialogInputLinkMaps(
 		TRIGGER,
 		TYPE_MAP,
 		COLLECTION_INPUT_MAP_LINKS,
-		CollectionHandler::getInstance(COLLECTION_TEMP_MAPS),
+		// the correct scope for filtering maps per input UID is IID
+		IID,
+		{},
+		CollectionHandler::getInstance(COLLECTION_INPUT_MAPS),
 		{},
 		2
 	}
@@ -72,6 +75,7 @@ void DialogInputLinkMaps::setOwner(
 ) noexcept {
 	DialogForm::setOwner(collection, owner);
 	mapsRequest.sourceCollection = CollectionHandler::getInstance(COLLECTION_INPUT_MAPS);
+	mapsRequest.filterValue      = ownerData->getProperties().getValue(UID);
 }
 
 void DialogInputLinkMaps::load(XMLHelper* values) noexcept {
@@ -88,6 +92,7 @@ void DialogInputLinkMaps::createSubItems(XMLHelper*) noexcept {
 	const string& idxStr{currentData->getValue(LINKED_ITEMS)};
 	if (idxStr.empty()) return;
 	mapsRequest.sourceCollection = CollectionHandler::getInstance(COLLECTION_INPUT_MAPS);
+	mapsRequest.filterValue      = ownerData->getProperties().getValue(UID);
 	DialogSelect::getInstance()->selectByIndexes(Defaults::explode(idxStr, ','));
 }
 

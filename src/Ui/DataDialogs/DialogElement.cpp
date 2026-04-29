@@ -29,7 +29,14 @@ DialogElement::DialogElement(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 {
 
 	// Connect Element Box and buttons.
-	builder->get_widget_derived("BoxElements", box, "BtnDeviceElementUp", "BtnDeviceElementDn");
+	builder->get_widget_derived(
+		"BoxElements",
+		box,
+		"BtnDeviceElementUp",
+		"BtnDeviceElementDn",
+		"BtnDeviceElementFirst",
+		"BtnDeviceElementLast"
+	);
 	builder->get_widget("BtnApplyElement",     btnApply);
 	Gtk::Button* btnAdd = nullptr;
 	builder->get_widget("BtnAddElement", btnAdd);

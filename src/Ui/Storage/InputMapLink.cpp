@@ -50,13 +50,15 @@ string InputMapLink::createTooltip() const noexcept {
 }
 
 string InputMapLink::toXML() const noexcept {
-	auto tempMaps{CollectionHandler::getInstance(COLLECTION_TEMP_MAPS)};
+	const string pid{getProperties().getValue(PID)};
 	StringVector indexes;
 	size_t idx{0};
-	for (const auto& [id, data] : *tempMaps) {
-		if (primaryChild->isSet(data))
-			indexes.push_back(std::to_string(idx));
-		++idx;
+	for (const auto& [id, data] : *CollectionHandler::getInstance(COLLECTION_INPUT_MAPS)) {
+		if (data->getProperties().getValue(PID) == pid) {
+			if (primaryChild->isSet(data))
+				indexes.push_back(std::to_string(idx));
+			++idx;
+		}
 	}
 	return Defaults::implode(indexes, ",");
 }

@@ -182,6 +182,11 @@ void DialogSelect::populatePicker() noexcept {
 
 	for (const auto& [id, data] : *request->sourceCollection) {
 		if (data->getProperties().getValue(PROP_NO_SELECT).empty()) {
+
+			if (not request->filterProp.empty() and
+				data->getProperties().getValue(request->filterProp) != request->filterValue
+			) continue;
+
 			auto selection{Gtk::make_managed<Storage::Selection>(data)};
 			auto flowChild{Gtk::make_managed<Gtk::FlowBoxChild>()};
 
@@ -242,6 +247,9 @@ vector<string> DialogSelect::getSelectedIndexes() const noexcept {
 	int pickerIdx = 0;
 	for (const auto& [id, data] : *request->sourceCollection) {
 		if (data->getProperties().getValue(PROP_NO_SELECT).empty()) {
+			if (not request->filterProp.empty() and
+				data->getProperties().getValue(request->filterProp) != request->filterValue
+			) continue;
 			if (destination->isSet(data))
 				result.push_back(std::to_string(pickerIdx));
 			++pickerIdx;
@@ -263,6 +271,10 @@ void DialogSelect::selectByIndexes(const vector<string>& indexes) noexcept {
 	int idx = 0;
 	for (const auto& [id, data] : *request->sourceCollection) {
 		if (data->getProperties().getValue(PROP_NO_SELECT).empty()) {
+			if (
+				not request->filterProp.empty() and
+				data->getProperties().getValue(request->filterProp) != request->filterValue
+			) continue;
 			if (targets.count(idx) and not destination->isSet(data)) {
 				StringUMap empty;
 				auto link{new Storage::Link(

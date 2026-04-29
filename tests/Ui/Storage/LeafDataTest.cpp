@@ -176,15 +176,17 @@ TEST_F(InputMapLinkTest, ToXMLNoChildren) {
 }
 
 TEST_F(InputMapLinkTest, ToXMLWithSingleLink) {
+
 	StringUMap d{{NAME, "m1"}};
 	Element map(d);
-	CollectionHandler::getInstance(COLLECTION_TEMP_MAPS)->add(&map);
+	map.getProperties().setValue(PID, "owner_1");
+	CollectionHandler::getInstance(COLLECTION_INPUT_MAPS)->add(&map);
 
 	StringUMap imlData;
 	InputMapLink iml(imlData, "owner_1");
 
-	const string               lKey{NAME};
-	const string               lType{TYPE_MAP};
+	const string lKey{NAME};
+	const string lType{TYPE_MAP};
 	const vector<Link::LinkField> lf{};
 	StringUMap ld;
 	iml.getPrimaryChild()->create(new Link(ld, lKey, lType, lf, &map));
@@ -197,16 +199,20 @@ TEST_F(InputMapLinkTest, ToXMLSkipsUnlinkedAndFollowsCollectionOrder) {
 	// m1→idx 0, m2→idx 1, m3→idx 2.
 	StringUMap d1{{NAME, "m1"}}, d2{{NAME, "m2"}}, d3{{NAME, "m3"}};
 	Element    map1(d1), map2(d2), map3(d3);
-	auto* tempMaps{CollectionHandler::getInstance(COLLECTION_TEMP_MAPS)};
+	auto* tempMaps{CollectionHandler::getInstance(COLLECTION_INPUT_MAPS)};
 	tempMaps->add(&map1);
 	tempMaps->add(&map2);
 	tempMaps->add(&map3);
 
+	map1.getProperties().setValue(PID, "owner_1");
+	map2.getProperties().setValue(PID, "owner_1");
+	map3.getProperties().setValue(PID, "owner_1");
+
 	StringUMap imlData;
 	InputMapLink iml(imlData, "owner_1");
 
-	const string               lKey{NAME};
-	const string               lType{TYPE_MAP};
+	const string lKey{NAME};
+	const string lType{TYPE_MAP};
 	const vector<Link::LinkField> lf{};
 	StringUMap ld1, ld3;
 

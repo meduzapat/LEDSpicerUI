@@ -225,7 +225,6 @@ const string
 	COLLECTION_INPUT_LINKMAPS  {"i.l"},
 	COLLECTION_ANIMATIONS      {"a"},
 	COLLECTION_PROFILES        {"pr"},
-	COLLECTION_TEMP_MAPS       {"tm"},
 
 /// Link families keys.
 	COLLECTION_GROUP_LINKS        {"g.l"},
