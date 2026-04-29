@@ -137,6 +137,38 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 		d->hide();
 	});
 
+	// "Support the Project" button inside the About dialog → opens donation dialog.
+	Gtk::Button* btnSupportProject;
+	builder->get_widget("BtnSupportProject", btnSupportProject);
+	btnSupportProject->signal_clicked().connect([builder]() {
+		Gtk::Dialog* donate;
+		builder->get_widget("DialogDonate", donate);
+		donate->run();
+		donate->hide();
+	});
+
+	// "Donate via PayPal" button → opens PayPal in the default browser.
+	Gtk::Button* btnDonatePayPal;
+	builder->get_widget("BtnDonatePayPal", btnDonatePayPal);
+	btnDonatePayPal->signal_clicked().connect([builder]() {
+		g_spawn_command_line_async(
+			"xdg-open https://www.paypal.com/donate/?hosted_button_id=LVNVCXN4NKWP8",
+			nullptr
+		);
+		Gtk::Dialog* donate;
+		builder->get_widget("DialogDonate", donate);
+		donate->hide();
+	});
+
+	// "Close" button for the donation dialog.
+	Gtk::Button* btnDonateClose;
+	builder->get_widget("BtnDonateClose", btnDonateClose);
+	btnDonateClose->signal_clicked().connect([builder]() {
+		Gtk::Dialog* donate;
+		builder->get_widget("DialogDonate", donate);
+		donate->hide();
+	});
+
 	/***********
 	 * Emitter *
 	 ***********/
