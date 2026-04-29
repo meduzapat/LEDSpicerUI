@@ -494,7 +494,7 @@ Author: Patricio A Rossi
                                 <property name="can-focus">False</property>
                                 <property name="halign">start</property>
                                 <property name="valign">center</property>
-                                <property name="label">Random Colors List </property>
+                                <property name="label">Random Colors List</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -506,7 +506,7 @@ Author: Patricio A Rossi
                               <object class="GtkImage">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="tooltip-text">When the Random color is used, it picks a color ramdonly from all the colors available in the Color's file.
+                                <property name="tooltip-text">When the Random color is used, it picks a color randomly from all the colors available in the Color's file.
 You can reduce that list by adding only the colors you want to be used by Random here, you can also add colors more than once to increase the chance of that color to be selected.</property>
                                 <property name="valign">center</property>
                                 <property name="icon-name">help-contents-symbolic</property>
@@ -619,7 +619,7 @@ You can reduce that list by adding only the colors you want to be used by Random
                             <property name="can-focus">True</property>
                             <property name="receives-default">True</property>
                             <property name="tooltip-text">When Craft Profiles is set, emitter will create a profile based on the element and groups name matching the game controllers.
-Note: to use this feature at it best, the elements and groups needs to use standarized names.</property>
+Note: to use this feature at its best, the elements and groups needs to use standardized names.</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -649,12 +649,12 @@ Note: to use this feature at it best, the elements and groups needs to use stand
                               <object class="GtkComboBoxText" id="ComboUseColors">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="tooltip-text">When the use color.ini file is active, and the color.ini file is available, emiter will attempt to use the colors found in colors.ini file to paint the elements colors.
-If strick mode is set, it will only send elements present in colors.ini instead of the detected elements by craft profile.</property>
+                                <property name="tooltip-text">When the use colors.ini file is active, and the colors.ini file is available, emitter will attempt to use the colors found in colors.ini file to paint the elements colors.
+If strict mode is set, it will only send elements present in colors.ini instead of the detected elements by craft profile.</property>
                                 <property name="active-id">Info</property>
                                 <items>
                                   <item id="true" translatable="yes">Yes</item>
-                                  <item id="strict" translatable="yes">Strick Mode</item>
+                                  <item id="strict" translatable="yes">Strict Mode</item>
                                   <item id="false" translatable="yes">No</item>
                                 </items>
                               </object>
@@ -714,7 +714,7 @@ If strick mode is set, it will only send elements present in colors.ini instead 
                                 <property name="can-focus">False</property>
                                 <property name="tooltip-text">This is a list of available game controls information (Joysticks, buttons, etc).
 Each element in the list represents a different source of data.
-The program Emitter will query each source from top to button, until it finds a match to use.
+The program Emitter will query each source from top to bottom, until it finds a match to use.
 You can change the order of the list to prioritize the source.
 Note: MAME may not be available in some systems.</property>
                                 <property name="icon-name">help-contents-symbolic</property>
@@ -754,8 +754,8 @@ Note: MAME may not be available in some systems.</property>
                                         <property name="visible">True</property>
                                         <property name="can-focus">True</property>
                                         <property name="receives-default">False</property>
-                                        <property name="tooltip-text">This Data source uses a pre-generated xml file from Mame!
-Very usefull when MAME does not provide game's data, or when you want to  customize the game data.</property>
+                                        <property name="tooltip-text">This Data source uses a pre-generated xml file from MAME!
+Very useful when MAME does not provide game's data, or when you want to customize the game data.</property>
                                         <property name="halign">start</property>
                                         <property name="draw-indicator">True</property>
                                       </object>
@@ -793,7 +793,7 @@ Very usefull when MAME does not provide game's data, or when you want to  custom
                                         <property name="visible">True</property>
                                         <property name="can-focus">True</property>
                                         <property name="receives-default">False</property>
-                                        <property name="tooltip-text">This Data source will query mame about the current rom to extract the controls information.</property>
+                                        <property name="tooltip-text">This Data source will query MAME about the current rom to extract the controls information.</property>
                                         <property name="halign">start</property>
                                         <property name="draw-indicator">True</property>
                                       </object>
@@ -921,7 +921,7 @@ Very usefull when MAME does not provide game's data, or when you want to  custom
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="halign">start</property>
-                            <property name="label">Proccess Mappings</property>
+                            <property name="label">Process Mappings</property>
                           </object>
                           <packing>
                             <property name="expand">True</property>
@@ -939,7 +939,7 @@ Very usefull when MAME does not provide game's data, or when you want to  custom
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label">Check for proccess every</property>
+                                <property name="label">Check for process every</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -951,7 +951,7 @@ Very usefull when MAME does not provide game's data, or when you want to  custom
                               <object class="GtkEntry" id="InputRunEvery">
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
-                                <property name="tooltip-text">This is the time the pin will receive power, after this time the pin will stop receiving power, this is useful for solenoid to avoid damage, or motors to run for a specific period of time.
+                                <property name="tooltip-text">The time interval in milliseconds between process lookup checks.
 If nothing is set, the default is 1000ms.</property>
                                 <property name="max-length">5</property>
                                 <property name="width-chars">5</property>
@@ -1952,7 +1952,7 @@ If nothing is set, the default is 1000ms.</property>
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="receives-default">True</property>
-            <property name="tooltip-text">About</property>
+            <property name="tooltip-text">Settings</property>
             <child>
               <object class="GtkImage">
                 <property name="visible">True</property>
@@ -2334,7 +2334,7 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
                       <object class="GtkEntry" id="InputGroupName">
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
-                        <property name="tooltip-text">User ID that will own the process, normally is 1000 if you are not sure, leave it 1000 or run the command id to know the ID.</property>
+                        <property name="tooltip-text">The name of the group. Click Generate to create a standardized name compatible with the profile generator.</property>
                       </object>
                       <packing>
                         <property name="expand">True</property>
@@ -2349,7 +2349,7 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="receives-default">True</property>
-                        <property name="tooltip-text">Generates a standarized name to be used with the profile generator.</property>
+                        <property name="tooltip-text">Generates a standardized name to be used with the profile generator.</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -2524,7 +2524,7 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
                               <object class="GtkImage">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="icon-name">go-bottom</property>
+                                <property name="icon-name">go-bottom-symbolic</property>
                                 <property name="use-fallback">True</property>
                               </object>
                             </child>
@@ -2990,7 +2990,7 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="halign">end</property>
-                    <property name="margin-start">71</property>
+                    <property name="margin-start">0</property>
                     <property name="label">Name</property>
                   </object>
                   <packing>
@@ -3003,8 +3003,7 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
                   <object class="GtkEntry" id="InputProfileName">
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
-                    <property name="tooltip-text" translatable="yes">The name for this input</property>
-                    <property name="input-purpose">number</property>
+                    <property name="tooltip-text" translatable="yes">The name for this profile</property>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -4073,7 +4072,7 @@ Autodetected if ledspicerd is detected</property>
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="halign">end</property>
-                            <property name="label">Iteractive Mode</property>
+                            <property name="label">Interactive Mode</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -4082,7 +4081,7 @@ Autodetected if ledspicerd is detected</property>
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkSwitch" id="SwitchSettingsIteractiveMode">
+                          <object class="GtkSwitch" id="SwitchSettingsInteractiveMode">
                             <property name="visible">True</property>
                             <property name="can-focus">True</property>
                             <property name="tooltip-text">if this setting is on, you will be able to test your changes like profiles with animation and inputs, in real hardware sending them to LEDSpicer</property>
@@ -4534,7 +4533,7 @@ Autodetected if ledspicer is installed</property>
                       <object class="GtkScale" id="ScaleDeviceChangePoint">
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
-                        <property name="tooltip-text">In black and white systems this handles the "change point" when OFF became ON</property>
+                        <property name="tooltip-text">In black and white systems this handles the "change point" when OFF becomes ON</property>
                         <property name="valign">center</property>
                         <property name="adjustment">adjustmentChangePoint</property>
                         <property name="round-digits">1</property>
@@ -4742,7 +4741,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                           <object class="GtkImage">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
-                            <property name="icon-name">go-bottom</property>
+                            <property name="icon-name">go-bottom-symbolic</property>
                             <property name="use-fallback">True</property>
                           </object>
                         </child>
@@ -4939,7 +4938,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
               <object class="GtkEntry" id="EntryElementName">
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
-                <property name="tooltip-text">Ex: P1_BUTTON1, P2_JOYSTICT1, LIGHT1</property>
+                <property name="tooltip-text">Ex: P1_BUTTON1, P2_JOYSTICK1, LIGHT1</property>
                 <property name="placeholder-text">Name</property>
               </object>
               <packing>
@@ -4954,7 +4953,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives-default">True</property>
-                <property name="tooltip-text">Generates a standarized name to be used with the profile generator.</property>
+                <property name="tooltip-text">Generates a standardized name to be used with the profile generator.</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -5754,7 +5753,7 @@ Default is 50ms</property>
                   <object class="GtkScale" id="ScaleElementBrightness">
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
-                    <property name="tooltip-text">In black and white systems this handles the "change point" when OFF became ON</property>
+                    <property name="tooltip-text">Controls the brightness level of the element, from 0 (off) to 100 (full brightness).</property>
                     <property name="valign">center</property>
                     <property name="adjustment">adjustmentElementBrightness</property>
                     <property name="show-fill-level">True</property>
@@ -6542,6 +6541,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">True</property>
+                    <property name="tooltip-text">Enables the Williams Sinistar 49-way optical restrictor mode, specific to the original Sinistar arcade game hardware.</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -7281,8 +7281,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                       <object class="GtkEntry" id="EntryInputName">
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
-                        <property name="tooltip-text">One ore more device IDs, comma separated, used in the action.
-You can find the devices ID using inputseeker from the terminal, or by listing the input ls /dev/input/by-id</property>
+                        <property name="tooltip-text">The filename of the input device as it appears in the filesystem (e.g. someGameName).</property>
                       </object>
                       <packing>
                         <property name="expand">True</property>
@@ -7597,7 +7596,7 @@ You can find the devices ID using inputseeker from the terminal, or by listing t
                       <object class="GtkSwitch" id="SwitchInputBlink">
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
-                        <property name="tooltip-text">True (default): the element or group will bink.
+                        <property name="tooltip-text">True (default): the element or group will blink.
 False: the element or group will stay ON.</property>
                         <property name="active">True</property>
                       </object>
@@ -7625,7 +7624,7 @@ False: the element or group will stay ON.</property>
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="halign">end</property>
-                        <property name="label">Blick Times</property>
+                        <property name="label">Blink Times</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
