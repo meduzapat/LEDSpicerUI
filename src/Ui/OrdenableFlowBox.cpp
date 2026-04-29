@@ -49,20 +49,16 @@ OrdenableFlowBox::OrdenableFlowBox(
 		if (not get_selected_children().size()) {
 			btnUp->set_sensitive(false);
 			btnDn->set_sensitive(false);
-			if (btnFirst)
-				btnFirst->set_sensitive(false);
-			if (btnLast)
-				btnLast->set_sensitive(false);
+			if (btnFirst) btnFirst->set_sensitive(false);
+			if (btnLast)  btnLast->set_sensitive(false);
 			return;
 		}
 
 		size_t index = get_selected_children().at(0)->get_index();
 		btnUp->set_sensitive(index);
 		btnDn->set_sensitive(index != getSize() - 1);
-		if (btnFirst)
-			btnFirst->set_sensitive(index);
-		if (btnLast)
-			btnLast->set_sensitive(index != getSize() - 1);
+		if (btnFirst) btnFirst->set_sensitive(index);
+		if (btnLast)  btnLast->set_sensitive(index != getSize() - 1);
 	});
 
 	btnUp->signal_clicked().connect([this]() {
@@ -105,6 +101,7 @@ OrdenableFlowBox::OrdenableFlowBox(
 			select_child(*selectedChild);
 			Defaults::markDirty();
 		});
+	}
 }
 
 size_t OrdenableFlowBox::getSize() const noexcept {

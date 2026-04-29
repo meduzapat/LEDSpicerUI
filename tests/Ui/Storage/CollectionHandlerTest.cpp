@@ -170,6 +170,22 @@ TEST_F(CollectionHandlerTest, FindByProperty) {
 	EXPECT_EQ(&i1, results[0]);
 }
 
+// hasAny returns true when at least one item matches, false when none do.
+TEST_F(CollectionHandlerTest, HasAnyMatchFound) {
+	StringUMap d1{{NAME, "A"}}, d2{{NAME, "B"}};
+	TestData i1(d1), i2(d2);
+	i1.getProperties().setValue(PID, "owner_1");
+	i2.getProperties().setValue(PID, "owner_2");
+	ch->add(&i1); ch->add(&i2);
+	EXPECT_TRUE(ch->hasAny(PID, "owner_1"));
+	EXPECT_FALSE(ch->hasAny(PID, "owner_x"));
+}
+
+// hasAny on empty collection returns false.
+TEST_F(CollectionHandlerTest, HasAnyEmptyCollection) {
+	EXPECT_FALSE(ch->hasAny(PID, "owner_1"));
+}
+
 // cascade — remove from handler cascades to dependent collection.
 // release() MUST be called before dependent is destroyed. In production,
 // Parent::~Parent() always releases before child collections are destroyed,

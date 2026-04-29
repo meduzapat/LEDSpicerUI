@@ -28,6 +28,7 @@ InputMapLink::InputMapLink(StringUMap& data, const string& inputPid) noexcept :
 	Parent(data, vector<string>{COLLECTION_INPUT_MAP_LINKS})
 {
 	getProperties().setValue(PID, inputPid);
+	registerDependency(COLLECTION_INPUT_MAPS, COLLECTION_INPUT_MAP_LINKS);
 }
 
 string InputMapLink::createPrettyName() const noexcept {

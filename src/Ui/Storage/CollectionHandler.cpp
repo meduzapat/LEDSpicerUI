@@ -55,7 +55,7 @@ bool CollectionHandler::isSet(const Data* item) const noexcept {
 }
 
 bool CollectionHandler::isIdSet(const string& id) const noexcept {
-	auto it = collection.find(id);
+	auto it{collection.find(id)};
 	return it != collection.end() and not it->second->getProperties().isSet(PROP_FROZEN);
 }
 
@@ -75,6 +75,13 @@ vector<Data*> CollectionHandler::findByProperty(const string& property, const st
 		}
 	}
 	return results;
+}
+
+bool CollectionHandler::hasAny(const string& property, const string& value) const noexcept {
+	for (const auto& [id, item] : collection)
+		if (not item->getProperties().isSet(PROP_FROZEN) and item->getProperties().getValue(property) == value)
+			return true;
+	return false;
 }
 
 void CollectionHandler::add(Data* item) noexcept {

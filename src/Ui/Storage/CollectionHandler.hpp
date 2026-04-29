@@ -99,6 +99,14 @@ public:
 	vector<Data*> findByProperty(const string& property, const string& value) const noexcept;
 
 	/**
+	 * Returns true if at least one item has the given property set to value.
+	 * Prefer over findByProperty when only existence matters.
+	 * @param property Property name.
+	 * @param value    Property value.
+	 */
+	bool hasAny(const string& property, const string& value) const noexcept;
+
+	/**
 	 * Adds an item to the collection.
 	 * @param item
 	 */
@@ -119,7 +127,7 @@ public:
 
 	/**
 	 * Register a collection dependency to be tracked.
-	 * @param dependency Dependency struct with collection, optional min size and callback.
+	 * @param BoxButtonCollection collection.
 	 */
 	void registerDependency(BoxButtonCollection* dependency) noexcept;
 

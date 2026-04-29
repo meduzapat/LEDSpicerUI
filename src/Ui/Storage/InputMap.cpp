@@ -52,10 +52,5 @@ void InputMap::unregisterFromCollection() noexcept {
 }
 
 CollectionHandler* InputMap::getCollectionHandler() const noexcept {
-	return CollectionHandler::getInstance(
-		Defaults::createCommonUniqueId({
-			getProperties().getValue(PID),
-			COLLECTION_INPUT_MAPS
-		})
-	);
+	return CollectionHandler::getInstance(COLLECTION_INPUT_MAPS);
 }
