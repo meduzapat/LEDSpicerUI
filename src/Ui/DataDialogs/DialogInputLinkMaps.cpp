@@ -28,7 +28,16 @@ DialogInputLinkMaps::DialogInputLinkMaps(
 	BaseObjectType* obj,
 	const Glib::RefPtr<Gtk::Builder>& builder
 ) noexcept :
-	DialogForm(obj, builder)
+	DialogForm(obj, builder),
+	mapsRequest{
+		nullptr,
+		TRIGGER,
+		TYPE_MAP,
+		COLLECTION_INPUT_MAP_LINKS,
+		CollectionHandler::getInstance(COLLECTION_TEMP_MAPS),
+		{},
+		2
+	}
 {
 	Gtk::Button
 		* btnAdd            = nullptr,
@@ -45,15 +54,7 @@ DialogInputLinkMaps::DialogInputLinkMaps(
 		"BtnInputMappingDown"
 	);
 
-	mapsRequest = {
-		boxInputLinkedMappings,
-		TRIGGER,
-		TYPE_MAP,
-		COLLECTION_INPUT_MAP_LINKS,
-		CollectionHandler::getInstance(COLLECTION_TEMP_MAPS),
-		{},
-		2
-	};
+	mapsRequest.displayBox = boxInputLinkedMappings;
 
 	setSignalAdd(btnAdd);
 	setSignalApply();

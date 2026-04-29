@@ -26,7 +26,45 @@ using namespace LEDSpicerUI::Ui::DataDialogs;
 using namespace LEDSpicerUI::Ui::Storage;
 
 DialogProfile::DialogProfile(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept :
-	DialogForm(obj, builder)
+	DialogForm(obj, builder),
+	alwaysOnElementsRequest{
+		nullptr,
+		NAME,
+		TYPE_ELEMENT,
+		COLLECTION_PROFILE_ELEMENTS,
+		CollectionHandler::getInstance(COLLECTION_ELEMENTS),
+		{
+			{"color",  "Color",  "", Link::LinkField::Widget::COLOR_PICKER},
+			{"filter", "Filter", "", Link::LinkField::Widget::COMBOBOX}
+		}
+	},
+	alwaysOnGroupsRequest{
+		nullptr,
+		NAME,
+		TYPE_GROUP,
+		COLLECTION_PROFILE_GROUPS,
+		CollectionHandler::getInstance(COLLECTION_GROUPS),
+		{
+			{"color",  "Color",  "", Link::LinkField::Widget::COLOR_PICKER},
+			{"filter", "Filter", "", Link::LinkField::Widget::COMBOBOX}
+		}
+	},
+	animationsRequest{
+		nullptr,
+		NAME,
+		TYPE_ANIMATION,
+		COLLECTION_PROFILE_ANIMATIONS,
+		CollectionHandler::getInstance(COLLECTION_ANIMATIONS),
+		{}
+	},
+	inputsRequest{
+		nullptr,
+		NAME,
+		TYPE_INPUT,
+		COLLECTION_PROFILE_INPUTS,
+		CollectionHandler::getInstance(COLLECTION_INPUTS),
+		{}
+	}
 {
 
 	Gtk::Button
@@ -79,51 +117,18 @@ DialogProfile::DialogProfile(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 		DialogSelect::getInstance()->open();
 	});
 
-	// Register sensitives.
-	CollectionHandler::getInstance(COLLECTION_ELEMENTS    )->registerSensitivity(btnProfilesAddElements);
-	CollectionHandler::getInstance(COLLECTION_GROUPS      )->registerSensitivity(btnProfilesAddGroups);
-	CollectionHandler::getInstance(COLLECTION_ANIMATIONS )->registerSensitivity(btnProfilesAddAnimations);
-	CollectionHandler::getInstance(COLLECTION_INPUTS      )->registerSensitivity(btnProfilesAddInputs);
+	// Wire displayBox to all requests.
+	alwaysOnElementsRequest.displayBox = boxProfileAlwaysOnElements;
+	alwaysOnGroupsRequest.displayBox   = boxProfileAlwaysOnGroups;
+	animationsRequest.displayBox       = boxProfileAnimations;
+	inputsRequest.displayBox           = boxProfileInputs;
 
-	// Wire SelectionRequests after all boxes are set.
-	alwaysOnElementsRequest = {
-		boxProfileAlwaysOnElements,
-		NAME,
-		TYPE_ELEMENT,
-		COLLECTION_PROFILE_ELEMENTS,
-		CollectionHandler::getInstance(COLLECTION_ELEMENTS),
-		{
-			{"color",  "Color",  "", Link::LinkField::Widget::COLOR_PICKER},
-			{"filter", "Filter", "", Link::LinkField::Widget::COMBOBOX}
-		}
-	};
-	alwaysOnGroupsRequest = {
-		boxProfileAlwaysOnGroups,
-		NAME,
-		TYPE_GROUP,
-		COLLECTION_PROFILE_GROUPS,
-		CollectionHandler::getInstance(COLLECTION_GROUPS),
-		{
-			{"color",  "Color",  "", Link::LinkField::Widget::COLOR_PICKER},
-			{"filter", "Filter", "", Link::LinkField::Widget::COMBOBOX}
-		}
-	};
-	animationsRequest = {
-		boxProfileAnimations,
-		NAME,
-		TYPE_ANIMATION,
-		COLLECTION_PROFILE_ANIMATIONS,
-		CollectionHandler::getInstance(COLLECTION_ANIMATIONS),
-		{}
-	};
-	inputsRequest = {
-		boxProfileInputs,
-		NAME,
-		TYPE_INPUT,
-		COLLECTION_PROFILE_INPUTS,
-		CollectionHandler::getInstance(COLLECTION_INPUTS),
-		{}
-	};
+	// Register sensitives.
+	CollectionHandler::getInstance(COLLECTION_ELEMENTS   )->registerSensitivity(btnProfilesAddElements);
+	CollectionHandler::getInstance(COLLECTION_GROUPS     )->registerSensitivity(btnProfilesAddGroups);
+	CollectionHandler::getInstance(COLLECTION_ANIMATIONS )->registerSensitivity(btnProfilesAddAnimations);
+	CollectionHandler::getInstance(COLLECTION_INPUTS     )->registerSensitivity(btnProfilesAddInputs);
+
 }
 
 void DialogProfile::load(XMLHelper* values) noexcept {

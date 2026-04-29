@@ -76,9 +76,6 @@ protected:
 
 	Gtk::Label* brief = nullptr;
 
-	/// Configuration for the map link selector.
-	DialogSelect::SelectionRequest mapsRequest;
-
 	DialogInput(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept;
 
 	void createSubItems(XMLHelper* values) noexcept override;

@@ -26,7 +26,15 @@ using namespace LEDSpicerUI::Ui::DataDialogs;
 using namespace LEDSpicerUI::Ui::Storage;
 
 DialogGroup::DialogGroup(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept :
-	DialogForm(obj, builder)
+	DialogForm(obj, builder),
+	elementRequest{
+		nullptr,
+		NAME,
+		TYPE_ELEMENT,
+		COLLECTION_GROUP_LINKS,
+		CollectionHandler::getInstance(COLLECTION_ELEMENTS),
+		{}
+	}
 {
 	Gtk::Button
 		* btnAdd         = nullptr,
@@ -42,14 +50,7 @@ DialogGroup::DialogGroup(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& 
 	setSignalAdd(btnAdd);
 	setSignalApply();
 
-	elementRequest = {
-		boxElements,
-		NAME,
-		TYPE_ELEMENT,
-		COLLECTION_GROUP_LINKS,
-		CollectionHandler::getInstance(COLLECTION_ELEMENTS),
-		{}
-	};
+	elementRequest.displayBox = boxElements;
 
 	DialogColors::getInstance()->activateColorButton(btnGroupDefaultColor);
 
