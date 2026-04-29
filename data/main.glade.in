@@ -4085,8 +4085,7 @@ Autodetected if ledspicerd is detected</property>
                           <object class="GtkSwitch" id="SwitchSettingsIteractiveMode">
                             <property name="visible">True</property>
                             <property name="can-focus">True</property>
-                            <property name="tooltip-text">True (default): the element or group will bink.
-False: the element or group will stay ON.</property>
+                            <property name="tooltip-text">if this setting is on, you will be able to test your changes like profiles with animation and inputs, in real hardware sending them to LEDSpicer</property>
                             <property name="active">True</property>
                           </object>
                           <packing>
