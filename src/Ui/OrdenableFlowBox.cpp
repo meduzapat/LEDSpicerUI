@@ -32,18 +32,18 @@ OrdenableFlowBox::OrdenableFlowBox(
 	const string& first,
 	const string& last
 ) : OrdenableFlowBox(obj, builder) {
+
 	Gtk::Button
 		* btnUp    = nullptr,
 		* btnDn    = nullptr,
 		* btnFirst = nullptr,
 		* btnLast  = nullptr;
+
 	builder->get_widget(up, btnUp);
 	builder->get_widget(dn, btnDn);
 
-	if (not first.empty())
-		builder->get_widget(first, btnFirst);
-	if (not last.empty())
-		builder->get_widget(last, btnLast);
+	if (not first.empty()) builder->get_widget(first, btnFirst);
+	if (not last.empty())  builder->get_widget(last, btnLast);
 
 	signal_selected_children_changed().connect([this, btnUp, btnDn, btnFirst, btnLast]() {
 		if (not get_selected_children().size()) {
@@ -85,7 +85,7 @@ OrdenableFlowBox::OrdenableFlowBox(
 		Defaults::markDirty();
 	});
 
-	if (btnFirst)
+	if (btnFirst) {
 		btnFirst->signal_clicked().connect([this]() {
 			auto selectedChild = get_selected_children().at(0);
 			remove(*selectedChild);
@@ -94,8 +94,9 @@ OrdenableFlowBox::OrdenableFlowBox(
 			select_child(*selectedChild);
 			Defaults::markDirty();
 		});
+	}
 
-	if (btnLast)
+	if (btnLast) {
 		btnLast->signal_clicked().connect([this]() {
 			auto selectedChild = get_selected_children().at(0);
 			remove(*selectedChild);
@@ -113,7 +114,7 @@ size_t OrdenableFlowBox::getSize() const noexcept {
 void OrdenableFlowBox::wipe() {
 	for (auto child : get_children()) {
 		auto flowChild = static_cast<Gtk::FlowBoxChild*>(child);
-		if (flowChild && flowChild->get_child()) {
+		if (flowChild->get_child()) {
 			// Remove BoxButton from FlowBoxChild
 			flowChild->remove();
 		}

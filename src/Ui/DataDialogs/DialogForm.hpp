@@ -71,7 +71,7 @@ public:
 	/**
 	 * Unsets the collection and owner, this will make the form unable to store or retrieve data.
 	 */
-	void removeOwner() noexcept;
+	virtual void removeOwner() noexcept;
 
 	/**
 	 * Clear the From leaving it empty for data entry.

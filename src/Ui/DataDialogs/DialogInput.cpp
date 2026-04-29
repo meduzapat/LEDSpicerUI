@@ -76,18 +76,6 @@ void DialogInput::load(XMLHelper* values) noexcept {
 	createItems(values->getData(COLLECTION_INPUTS), values);
 }
 
-//void DialogForm::setOwner(
-//	Storage::BoxButtonCollection* collection,
-//	Storage::Data* owner
-//) noexcept {
-//	CollectionHandler::getInstance(
-//		Defaults::createCommonUniqueId({
-//			ownerData->getProperties().getValue(UID),
-//			COLLECTION_INPUT_MAPS
-//		})
-//	)->registerSensitivity(btnAddLinkMap, 2);
-//}
-
 void DialogInput::createSubItems(XMLHelper* values) noexcept {
 	DialogInputSource::getInstance()->load(values);
 	DialogInputLinkMaps::getInstance()->load(values);
@@ -221,8 +209,8 @@ void DialogInput::onEmpty() noexcept {
 void DialogInput::onSelected() noexcept {
 	auto id{selectorCombo->get_active_id()};
 	const bool needSources {Defaults::inputHasFlag(id, Defaults::INPUT_NEEDS_SOURCE)};
-	if (not needSources)
-		DialogInputSource::getInstance()->createPhantomSource();
-	else
+	if (needSources)
 		DialogInputSource::getInstance()->populateSources(id);
+	else
+		DialogInputSource::getInstance()->createPhantomSource();
 }

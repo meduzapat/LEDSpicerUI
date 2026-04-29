@@ -128,22 +128,20 @@ void DialogInputSource::populateSources(const string& name) noexcept {
 	}
 }
 
-void DialogInputSource::setOwner(Storage::BoxButtonCollection* collection, Storage::Data* owner) noexcept {
-	auto s{comboBoxInputSelectInput->get_active_id()};
-	if (not s.empty() and not Defaults::inputHasFlag(
-		s,
-		Defaults::INPUT_NEEDS_SOURCE
-	))
-	createPhantomSource();
-	DialogFormHost::setOwner(collection, owner);
-//	refreshItems();
+void DialogInputSource::removeOwner() noexcept {
+	// Simulates DialogInputSource::run() on sourceless inputs, to avoid leaving currentData dangling.
+	if (currentData) {
+		disconnectChildrenDialogs();
+		currentData = nullptr;
+	}
+	DialogFormHost::removeOwner();
 }
 
 void DialogInputSource::createPhantomSource() noexcept {
 	// Activate the phantom immediately so the box gets populated.
 	if (items->getSize()) {
-		auto& theOne = *items->begin();
-		currentData = theOne->getData();
+		auto& theOnlyOne = *items->begin();
+		currentData = theOnlyOne->getData();
 		wireChildrenDialogs();
 		return;
 	}

@@ -48,8 +48,7 @@ public:
 
 	virtual ~DialogInputSource() = default;
 
-	void setOwner(Storage::BoxButtonCollection* collection, Storage::Data* owner) noexcept override;
-
+	void removeOwner()            noexcept override;
 	void load(XMLHelper* values)  noexcept override;
 	void resetForm()              noexcept override;
 	void storeData()              noexcept override;
