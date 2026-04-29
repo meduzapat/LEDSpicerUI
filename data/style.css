@@ -144,31 +144,51 @@ combobox.noRoundRight button.combo,
 }
 
 .zoneCanvas.devices {
-	background-image: url("images/devicesBackground.png");
+	background-image: url("images/backgroundDevices.png");
 }
 
 .zoneCanvas.restrictors {
-	background-image: url("images/restrictorsBackground.png");
+	background-image: url("images/backgroundRestrictors.png");
 }
 
 .zoneCanvas.groups {
-	background-image: url("images/groupsBackground.png");
+	background-image: url("images/backgroundGroups.png");
 }
 
 .zoneCanvas.elements {
-	background-image: url("images/elementsBackground.png");
+	background-image: url("images/backgroundElements.png");
 }
 
 .zoneCanvas.processes {
-	background-image: url("images/processesBackground.png");
+	background-image: url("images/backgroundProcesses.png");
 }
 
 .zoneCanvas.colors {
-	background-image: url("images/colorsBackground.png");
+	background-image: url("images/backgroundColors.png");
+}
+
+.zoneCanvas.inputs {
+	background-image: url("images/backgroundInputs.png");
+}
+
+.zoneCanvas.inputsSources {
+	background-image: url("images/backgroundInputsSources.png");
+}
+
+.zoneCanvas.inputsMaps {
+	background-image: url("images/backgroundInputsMaps.png");
+}
+
+.zoneCanvas.inputsLinkMaps {
+	background-image: url("images/backgroundInputsLinkMaps.png");
 }
 
 .zoneCanvas.animations {
-	background-image: url("images/animationsBackground.png");
+	background-image: url("images/backgroundAnimations.png");
+}
+
+.zoneCanvas.profiles {
+	background-image: url("images/backgroundProfiles.png");
 }
 
 /* BoxButton styles for different categories */
