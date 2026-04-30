@@ -61,14 +61,12 @@ DialogInput::DialogInput(
 	listStore = static_cast<Gtk::ListStore*>(selectorCombo->get_model().get());
 
 	selectorCombo->signal_changed().connect([this]() {
-
 		if (handleTypeSwitch(
 			DialogInputSource::getInstance()->getBox(),
 			"Are you sure you want to change the input type? All sources will be lost.")
 		) {
 			resetForm();
 		}
-
 	});
 }
 

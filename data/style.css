@@ -172,15 +172,15 @@ combobox.noRoundRight button.combo,
 }
 
 .zoneCanvas.inputsSources {
-	background-image: url("images/backgroundInputsSources.png");
+	background-image: url("images/backgroundInputSources.png");
 }
 
 .zoneCanvas.inputsMaps {
-	background-image: url("images/backgroundInputsMaps.png");
+	background-image: url("images/backgroundInputMaps.png");
 }
 
 .zoneCanvas.inputsLinkMaps {
-	background-image: url("images/backgroundInputsLinkMaps.png");
+	background-image: url("images/backgroundInputLinkMaps.png");
 }
 
 .zoneCanvas.animations {
