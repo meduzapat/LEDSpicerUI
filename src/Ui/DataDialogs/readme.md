@@ -44,7 +44,7 @@ Gtk::Dialog
 │   ├── DialogSelect
 │   └── DialogColors
 └── DialogForm                    — Base for all data-entry dialogs.
-    ├── DialogFormHost             — Type-selector dialogs. Data must be Revertible.
+    ├── DialogFormHost             — Type-selector dialogs with conversion support.
     │   ├── DialogDevice
     │   ├── DialogRestrictor
     │   ├── DialogInput
@@ -130,7 +130,7 @@ onEditClicked()
   → clearForm() → currentData = boxButton->getData() → activate()
   → oldId = createUniqueId() → retrieveData() → run()
   → [APPLY]  wipe() → storeData() → replace(currentData, oldId) → updateLabel()
-  → [CANCEL] deActivate() restores Revertible snapshot if present
+  → [CANCEL] deActivate() closes dialog; any type conversion already applied is final
   → hide()
 ```
 
@@ -193,34 +193,49 @@ childDialogs.push_back(ChildDialog::getInstance());
 
 ## 10. DialogFormHost — Type-Selector Dialogs
 
-Intermediate base for dialogs driven by a primary type-selector combo. **Data objects managed by these dialogs must inherit `Revertible`** so that a mid-edit type switch can be safely cancelled.
+Intermediate base for dialogs driven by a primary type-selector combo.
 
 **Use when:**
 - A combo determines which child data/UI is shown.
-- Changing the combo must wipe existing child data.
+- Changing the combo must convert or discard existing child data.
 - A confirmation dialog is needed when switching an already-populated type.
 
 | Member | Purpose |
 |--------|---------|
 | `previousName` | Guards against spurious `signal_changed` re-fires. |
 | `handleTypeSwitch()` | Full decision tree for the type-selector combo. |
+| `onConvert()` | Hook called before `onEmpty()` to migrate or discard children. |
 | `markUsed()` | Updates a liststore's availability column via a predicate. |
 
 ### `handleTypeSwitch()` decision order
 
-1. `name` empty → `onEmpty()`, reset `previousName` → return `false`.
+1. `name` empty → `onEmpty()` → return `false`.
 2. `name == previousName` → return `false`.
 3. `previousName` empty (first selection) → `previousName = name`, `onSelected()` → return `false`.
-4. `name != previousName` and box non-empty → ask confirmation; no → revert combo → return `false`.
-5. `currentData->swap()` → `previousName = name` → `onEmpty()` → `onSelected()` → return `true`.
+4. `name != previousName` and box non-empty → show dynamic confirmation; no → revert combo → return `false`.
+5. `onConvert(previousName, name)` → `previousName = name` → `onEmpty()` → `onSelected()` → return `true`.
 
-`swap()` moves `fieldsData` and all registered child collections into snapshot storage. `deActivate()` restores them automatically on cancel.
+**Conversion is immediate and final.** Clicking Cancel after a type switch closes the dialog but does not undo the conversion — the data is already updated.
 
 ```cpp
 selectorCombo->signal_changed().connect([this]() {
-    if (handleTypeSwitch(box, "Change type? All data will be lost."))
+    string newName{selectorCombo->get_active_id()};
+    string msg;
+    // build dynamic warning from previousName / newName...
+    if (handleTypeSwitch(box, msg))
         resetForm();
 });
+```
+
+### `onConvert()` hook
+
+Override in each subclass to migrate or discard children before the UI is cleared. Called with `(fromType, toType)`. Default is a no-op.
+
+```cpp
+void DialogDevice::onConvert(const string& fromType, const string& toType) noexcept {
+    // compute newPins, then:
+    DialogElement::getInstance()->handleLayoutChange(fromType, toType, newPins);
+}
 ```
 
 ### `previousName` rule
@@ -263,7 +278,7 @@ Non-`DialogForm` dialog. Picks items from a pre-existing `CollectionHandler` and
 
 | Situation | Base |
 |-----------|------|
-| Type-selector combo that wipes child data | `DialogFormHost` (Data must be `Revertible`) |
+| Type-selector combo that converts/discards child data | `DialogFormHost` |
 | Manages files in a directory tree | `DialogFileForm` |
 | Picks from existing items | `DialogSelect` |
 | Everything else | `DialogForm` |

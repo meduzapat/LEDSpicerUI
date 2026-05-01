@@ -15,12 +15,11 @@
 7.  [Links — `Link`](#7-links--link)
 8.  [Selection — `Selection`](#8-selection--selection)
 9.  [Ignoring Fields During XML Serialization](#9-ignoring-fields-during-xml-serialization)
-10. [Revertible — Snapshot and Restore](#10-revertible--snapshot-and-restore)
-11. [DirNode — Directory Tree Mixin](#11-dirnode--directory-tree-mixin)
-12. [Visual and Textual Decoration](#12-visual-and-textual-decoration)
-13. [Ownership — BoxButton and BoxButtonCollection](#13-ownership--boxbutton-and-boxbuttoncollection)
-14. [Use Cases by Concrete Type](#14-use-cases-by-concrete-type)
-15. [Quick Reference — Virtual Methods to Override](#15-quick-reference--virtual-methods-to-override)
+10. [DirNode — Directory Tree Mixin](#10-dirnode--directory-tree-mixin)
+11. [Visual and Textual Decoration](#11-visual-and-textual-decoration)
+12. [Ownership — BoxButton and BoxButtonCollection](#12-ownership--boxbutton-and-boxbuttoncollection)
+13. [Use Cases by Concrete Type](#13-use-cases-by-concrete-type)
+14. [Quick Reference — Virtual Methods to Override](#14-quick-reference--virtual-methods-to-override)
 
 ---
 
@@ -44,13 +43,13 @@ Values                         — General-purpose field store. Used directly wh
     ├── Link                   — Wraps a pointer to another Data; delegates identity.
     │   └── InputMap           — Link with fixed linkKey=TARGET, linkType=TYPE_MAP.
     ├── Parent                 — Adds named child BoxButtonCollection storage.
-    │   ├── Device             (+ Revertible mixin) — Owns an Element collection.
-    │   ├── Restrictor         (+ Revertible mixin) — Owns a RestrictorMap collection.
-    │   ├── InputSource        (+ Revertible mixin) — Owns a maps collection.
-    │   ├── Group                                   — Owns a Link→Element collection.
-    │   └── FileNode           (+ DirNode mixin)    — File-based items; FILENAME stored as property.
-    │       ├── Input          (+ Revertible mixin)
-    │       ├── Animation      (+ Revertible mixin) [pending]
+    │   ├── Device             — Owns an Element collection.
+    │   ├── Restrictor         — Owns a RestrictorMap collection.
+    │   ├── InputSource        — Owns a maps collection.
+    │   ├── Group              — Owns a Link→Element collection.
+    │   └── FileNode           (+ DirNode mixin) — File-based items; FILENAME stored as property.
+    │       ├── Input
+    │       ├── Animation      [pending]
     │       └── Profile
     ├── Element
     ├── InputMapLink
@@ -61,7 +60,6 @@ Values                         — General-purpose field store. Used directly wh
 
 | Mixin | Consumer | Purpose |
 |-------|----------|---------|
-| `Revertible` | `Device`, `Restrictor`, `InputSource`, `Input`, `Animation` | Snapshot + restore of `values` and child collections. |
 | `DirNode` | `FileNode` subclasses, `DirectoryEntry` | Parent pointer, UID/PID/FILENAME written into a `Values` dest. |
 
 ---
@@ -139,8 +137,7 @@ bool   has = data->getProperties().isSet(UID);
 
 ```cpp
 Device::Device(StringUMap& data) noexcept :
-    Parent(data, {COLLECTION_ELEMENT}),
-    Revertible(*this, &children)
+    Parent(data, {COLLECTION_ELEMENT})
 {}
 ```
 
@@ -227,41 +224,7 @@ bool MyData::shouldSerialize(const string& key, const string& value) const noexc
 
 ---
 
-## 10. Revertible — Snapshot and Restore
-
-`Revertible` is a **pure mixin**. It is not a `Data` subclass. Consumers pass `*this` (as `Values&`) and, optionally, their `children` map at construction:
-
-```cpp
-Device::Device(StringUMap& data) noexcept :
-    Parent(data, {COLLECTION_ELEMENT}),
-    Revertible(*this, &children)
-{}
-```
-
-| Method | Effect |
-|--------|--------|
-| `snapshot()` | Moves `values` and all registered child collections into snapshot storage. No-op if already snapped or `values` is empty. |
-| `revert()` | Swaps back and wipes orphaned snapshot children. No-op if no snapshot. |
-| `clearSnap()` | Discards snapshot without touching live fields or children. |
-
-**Consumer contract:**
-- Call `clearSnap()` inside `wipe()` **before** `Data::wipe()`.
-- Call `revert()` inside `tearDown()` **before** `Data::tearDown()`.
-
-```cpp
-void Device::wipe() noexcept {
-    clearSnap();
-    Data::wipe();
-}
-void Device::tearDown() noexcept {
-    revert();
-    Data::tearDown();
-}
-```
-
----
-
-## 11. DirNode — Directory Tree Mixin
+## 10. DirNode — Directory Tree Mixin
 
 `DirNode` is a **pure mixin** — not a `Data` subclass. It provides parent pointer and recursive path resolution for objects that live inside a directory tree.
 
@@ -288,7 +251,7 @@ DirNode(getProperties(), parent, filename)
 
 ---
 
-## 12. Visual and Textual Decoration
+## 11. Visual and Textual Decoration
 
 | Method | Purpose |
 |--------|---------|
@@ -300,7 +263,7 @@ Call `boxButton.updateLabel()` after any `setValue()` that affects the label.
 
 ---
 
-## 13. Ownership — BoxButton and BoxButtonCollection
+## 12. Ownership — BoxButton and BoxButtonCollection
 
 ```
 BoxButtonCollection
@@ -339,7 +302,7 @@ string MyData::xmlBody() const noexcept {
 
 ---
 
-## 14. Use Cases by Concrete Type
+## 13. Use Cases by Concrete Type
 
 | Type | `values` | `properties` | Child collections | Serialized |
 |------|----------|--------------|-------------------|------------|
@@ -356,7 +319,7 @@ string MyData::xmlBody() const noexcept {
 
 ---
 
-## 15. Quick Reference — Virtual Methods to Override
+## 14. Quick Reference — Virtual Methods to Override
 
 | Method | Must override? | Purpose |
 |--------|---------------|---------|
@@ -370,6 +333,4 @@ string MyData::xmlBody() const noexcept {
 | `xmlBody()` | When has serializable children | Inner XML content. Default `""` (self-closing). |
 | `toXML()` | `FileNode` subclasses only | Full file serialization via `XMLHelper::xmlHeader/Footer`. |
 | `shouldSerialize(key, value)` | When fields need suppression | Return `false` to omit a field from XML. |
-| `wipe()` | When `Revertible` | Call `clearSnap()` then `Data::wipe()`. |
-| `tearDown()` | When `Revertible` | Call `revert()` then `Data::tearDown()`. |
 | `getValue()` / `setValue()` | `Link` only | Redirect `linkKey` lookups to target; silence writes to `linkKey`. |
