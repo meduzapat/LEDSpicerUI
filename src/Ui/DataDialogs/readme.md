@@ -44,7 +44,7 @@ Gtk::Dialog
 │   ├── DialogSelect
 │   └── DialogColors
 └── DialogForm                    — Base for all data-entry dialogs.
-    ├── DialogFormHost             — Type-selector dialogs with conversion support.
+    ├── DialogFormHost            — Type-selector dialogs with conversion support.
     │   ├── DialogDevice
     │   ├── DialogRestrictor
     │   ├── DialogInput
