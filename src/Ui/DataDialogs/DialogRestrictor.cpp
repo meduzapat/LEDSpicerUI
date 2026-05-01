@@ -277,3 +277,9 @@ void DialogRestrictor::onSelected() noexcept {
 	}
 	DialogRestrictorMap::getInstance()->populateInterfacesCombobox();
 }
+
+void DialogRestrictor::onConvert(const string& fromType, const string& toType) noexcept {
+	const uint8_t newInterfaces = Defaults::restrictorsInfo.at(toType).interfaces;
+	if (Defaults::restrictorsInfo.at(fromType).interfaces > newInterfaces)
+		DialogRestrictorMap::getInstance()->trimToInterfaces(newInterfaces);
+}

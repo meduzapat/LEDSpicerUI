@@ -69,6 +69,16 @@ public:
 	 */
 	void createPhantomSource() noexcept;
 
+	/**
+	 * Sourced → sourceless: collapses all sources into one phantom, discards extras.
+	 */
+	void convertToSourceless() noexcept;
+
+	/**
+	 * Sourceless → sourced: promotes the phantom source to a real named source.
+	 */
+	void convertToSourced() noexcept;
+
 protected:
 
 	/// Input type selector, shared with DialogInput.

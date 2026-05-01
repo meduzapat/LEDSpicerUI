@@ -691,8 +691,7 @@ void DialogElement::drawPins() noexcept {
 	for (auto child : pinsBox->get_children())
 		pinsBox->remove(*child);
 
-	if (not numberOfPins)
-		return;
+	if (not numberOfPins) return;
 
 	std::vector<std::pair<string, string>> pinsUsage(numberOfPins, {NO_COLOR, ""});
 	findConnectorTypes(pinsUsage);
@@ -747,8 +746,7 @@ void DialogElement::drawPinsRGB(vector<Gtk::Label*>& labels) noexcept {
 			hboxPins->pack_start(*labels[pin++]);
 		}
 	}
-	if (numberOfPins % 3 == 0)
-		return;
+	if (numberOfPins % 3 == 0) return;
 
 	// Create box for extra pins.
 	Gtk::VBox* vboxConnector = Gtk::manage(new Gtk::VBox(true));

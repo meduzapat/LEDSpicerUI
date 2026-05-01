@@ -212,3 +212,24 @@ void DialogInput::onSelected() noexcept {
 	else
 		DialogInputSource::getInstance()->createPhantomSource();
 }
+
+void DialogInput::onConvert(const string& fromType, const string& toType) noexcept {
+
+	const bool oldSourced = Defaults::inputHasFlag(fromType, Defaults::INPUT_NEEDS_SOURCE);
+	const bool newSourced = Defaults::inputHasFlag(toType,   Defaults::INPUT_NEEDS_SOURCE);
+
+	if (oldSourced and not newSourced)
+		DialogInputSource::getInstance()->convertToSourceless();
+	else if (not oldSourced and newSourced)
+		DialogInputSource::getInstance()->convertToSourced();
+
+	// Drop fields the new type doesn't support.
+	if (not Defaults::inputHasFlag(toType, Defaults::INPUT_HAS_BLINK))
+		currentData->unSet(BLINK);
+	if (not Defaults::inputHasFlag(toType, Defaults::INPUT_HAS_TIMES))
+		currentData->unSet(TIMES);
+	if (not Defaults::inputHasFlag(toType, Defaults::INPUT_HAS_SPEED))
+		currentData->unSet(SPEED);
+	if (not Defaults::inputHasFlag(toType, Defaults::INPUT_LINKED_MAPS))
+		DialogInputLinkMaps::getInstance()->clearForm();
+}

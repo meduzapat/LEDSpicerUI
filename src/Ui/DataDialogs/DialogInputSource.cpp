@@ -166,6 +166,38 @@ void DialogInputSource::createPhantomSource() noexcept {
 	wireChildrenDialogs();
 }
 
+void DialogInputSource::convertToSourceless() noexcept {
+
+	if (not items->getSize()) return;
+
+	// Convert the first source into the phantom, remove the rest.
+	auto first{(*items->begin())->getData()};
+
+	vector<Storage::BoxButton*> toRemove;
+	for (auto btn : *items) {
+		if (first == btn->getData()) continue;
+		toRemove.push_back(btn);
+	}
+	for (auto btn : toRemove) {
+		box->remove(*btn);
+		items->remove(*btn);
+	}
+
+	first->unSet(SOURCE);
+	first->getProperties().setValue(SOURCELESS, "1");
+	currentData = first;
+	wireChildrenDialogs();
+}
+
+void DialogInputSource::convertToSourced() noexcept {
+
+	if (not items->getSize()) return;
+
+	auto phantom{(*items->begin())->getData()};
+	phantom->getProperties().unSet(SOURCELESS);
+	currentData = phantom;
+}
+
 void DialogInputSource::createSubItems(XMLHelper* values) noexcept {
 	DialogInputMap::getInstance()->load(values);
 }

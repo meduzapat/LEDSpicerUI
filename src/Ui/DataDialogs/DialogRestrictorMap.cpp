@@ -137,6 +137,23 @@ void DialogRestrictorMap::populateInterfacesCombobox() noexcept {
 	interface->set_active(0);
 }
 
+void DialogRestrictorMap::trimToInterfaces(uint8_t maxInterfaces) noexcept {
+	vector<Storage::BoxButton*> toRemove;
+	for (auto btn : *items) {
+		const string& iface = btn->getData()->getValue(RESTRICTOR_INTERFACE);
+		if (not iface.empty() and std::stoi(iface) > maxInterfaces)
+			toRemove.push_back(btn);
+	}
+	string deleted;
+	for (auto btn : toRemove) {
+		deleted += btn->getData()->createPrettyName() + "\n";
+		box->remove(*btn);
+		items->remove(*btn);
+	}
+	if (not deleted.empty())
+		Message::displayInfo("Mappings removed (new restrictor has fewer interfaces):\n" + deleted);
+}
+
 void DialogRestrictorMap::afterCreate(Storage::BoxButton&) noexcept {
 	// This is necessary to disable the add if needed.
 	btnAdd->set_sensitive(checkAvailableInterfaces());
