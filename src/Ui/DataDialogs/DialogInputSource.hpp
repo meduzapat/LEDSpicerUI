@@ -117,9 +117,11 @@ protected:
 	 */
 	StringMap scanEventDevices() noexcept;
 
-	void onEmpty() noexcept override;
-
+	void onEmpty()    noexcept override;
 	void onSelected() noexcept override {}
+
+	void onConvert(const string&, const string&) noexcept override {}
+
 };
 
 } // namespace

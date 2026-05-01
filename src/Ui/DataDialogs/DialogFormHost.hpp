@@ -116,7 +116,7 @@ protected:
 	 * @param fromType
 	 * @param toType
 	 */
-	virtual void onConvert(const string& fromType, const string& toType) noexcept {}
+	virtual void onConvert(const string& fromType, const string& toType) noexcept abstract;
 };
 
 } // namespace

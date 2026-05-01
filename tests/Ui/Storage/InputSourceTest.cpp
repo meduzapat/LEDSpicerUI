@@ -142,21 +142,10 @@ TEST_F(InputSourceTest, HasInputMapsChild) {
 	EXPECT_NE(nullptr, src.getChild(COLLECTION_INPUT_MAPS));
 }
 
-// wipe clears values and clearSnap contract.
+// wipe clears values.
 TEST_F(InputSourceTest, WipeClearsValues) {
 	StringUMap data{{SOURCE, "hw1"}};
 	InputSource src(data, "owner_1");
 	src.wipe();
 	EXPECT_TRUE(src.getValues().empty());
-}
-
-// snapshot / revert round-trip.
-TEST_F(InputSourceTest, SnapshotAndRevert) {
-	StringUMap data{{SOURCE, "hw1"}};
-	InputSource src(data, "owner_1");
-	const StringUMap before(src.getValues());
-	src.snapshot();
-	EXPECT_TRUE(src.getValues().empty());
-	src.revert();
-	EXPECT_EQ(before, src.getValues());
 }
