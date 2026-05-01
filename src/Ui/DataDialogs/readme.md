@@ -1,6 +1,6 @@
 # LEDSpicerUI — Dialog System Developer Guide
 
-> **Status:** Work in progress — reflects design as of v0.0.10 / data format 1.1.
+> **Status:** Work in progress — reflects design as of v0.0.13 / data format 1.1.
 
 ---
 
@@ -44,21 +44,22 @@ Gtk::Dialog
 │   ├── DialogSelect
 │   └── DialogColors
 └── DialogForm                    — Base for all data-entry dialogs.
-    ├── DialogFormHost             — Type-selector dialogs. Data must be Revertible.
+    ├── DialogFormHost            — Type-selector dialogs with conversion support.
     │   ├── DialogDevice
     │   ├── DialogRestrictor
     │   ├── DialogInput
     │   └── DialogInputSource
-    ├── DialogFileForm             — File-based dialogs.
-    │   └── (DialogInput via DialogFormHost)
     ├── DialogProcess
     ├── DialogGroup
     ├── DialogProfile
     ├── DialogDirectory
+    ├── DialogElement
+    ├── DialogRestrictorMap
     ├── DialogInputMap
     └── DialogInputLinkMaps
 
 SingletonDialog<T>  — Mixin providing getInstance() / buildInstance().
+DirectoryAware      — Mixin adding current-directory tracking for file-based dialogs.
 ```
 
 ---
@@ -85,17 +86,30 @@ class MyDialog : public DialogForm, public SingletonDialog<MyDialog> {
 
 | Member | Purpose |
 |--------|---------|
-| `items` | `BoxButtonCollection*` — where created items live. |
-| `ownerData` | `const Data*` — parent context for secondary dialogs. |
-| `currentData` | `Data*` — item being created, edited, or loaded. |
+| `items` | `BoxButtonCollection*` — where created items live. Set by `setOwner()`. |
+| `ownerData` | `Data*` — parent context for secondary dialogs. Set by `setOwner()`. |
+| `currentData` | `Data*` — item currently being created, edited, or loaded. |
 | `box` | `OrdenableFlowBox*` — display box in the UI. |
 | `btnApply` | `Gtk::Button*` — confirm button. |
 | `action` | `Actions` enum — `ADD`, `LOAD`, or `EDIT`. |
 | `childDialogs` | `vector<DialogForm*>` — propagate refresh/reindex. |
+| `familyToDialog` | Static map of collection family → child dialog. Populated via `registerChildDialog()`. |
 
-Constructor responsibilities: retrieve all widget pointers, build child singletons, call `setSignalAdd()` and `setSignalApply()`, wire extra signals. **Never perform live data operations in constructors.**
+Constructor responsibilities: retrieve all widget pointers, build child singletons via `registerChildDialog()`, call `setSignalAdd()` and `setSignalApply()`, wire extra signals. **Never perform live data operations in constructors.**
 
 The Add button almost always **lives in the parent dialog's layout**. The child dialog wires the signal to it during construction. The same button may be `get_widget`-ed by multiple constructors safely.
+
+### Key methods
+
+| Method | Purpose |
+|--------|---------|
+| `setOwner(collection, owner)` | Points `items` and `ownerData` at the active parent; calls `refreshItems()`. |
+| `removeOwner()` | Clears `items` and `ownerData`. |
+| `wireChildrenDialogs()` | Calls `currentData->setUp()` then `setOwner()` on every registered child dialog. |
+| `disconnectChildrenDialogs()` | Calls `removeOwner()` on every registered child dialog. |
+| `registerChildDialog<T>(builder, id, family)` | Builds the child singleton and registers it in `familyToDialog`. |
+| `getPrimaryChildCollection()` | Returns the first child `BoxButtonCollection*`, or `nullptr`. |
+| `getChildCollection(family)` | Returns a specific child collection by family name. |
 
 ---
 
@@ -116,32 +130,43 @@ widgets (fresh)      →  storeData()     →  stale (currentData)
 
 ```
 onAddClicked()
-  → clearForm() → currentData = createData() → activate()
+  → action = ADD → clearForm() → currentData = createData()
+  → wireChildrenDialogs()
   → run()
-  → [APPLY] isValid() → wipe() → storeData()
-           → items->create() → add() → addButtons() → afterCreate()
-  → deActivate() → hide()
+  → [APPLY] currentData->wipe() → storeData() → markDirty()
+            → items->create(currentData) → addButtons() → box->add() → afterCreate()
+            → disconnectChildrenDialogs()
+  → [CANCEL] disconnectChildrenDialogs() → delete currentData
+  → currentData = nullptr → hide()
 ```
 
 ### EDIT
 
 ```
-onEditClicked()
-  → clearForm() → currentData = boxButton->getData() → activate()
-  → oldId = createUniqueId() → retrieveData() → run()
-  → [APPLY]  wipe() → storeData() → replace(currentData, oldId) → updateLabel()
-  → [CANCEL] deActivate() restores Revertible snapshot if present
-  → hide()
+onEditClicked(boxButton)
+  → action = EDIT → clearForm() → currentData = boxButton.getData()
+  → wireChildrenDialogs() → retrieveData() → resetForm()
+  → run()
+  → [APPLY] markDirty() → oldId = createUniqueId()
+            → currentData->wipe() → storeData()
+            → syncRegistration(oldId) → boxButton.sync() → reindex()
+  → disconnectChildrenDialogs() → currentData = nullptr → hide()
 ```
+
+Note: any type conversion done during EDIT via the type-selector combo is **already committed** before APPLY/CANCEL. Cancel closes the dialog without undoing the conversion.
 
 ### LOAD
 
 ```
-createItems()
+createItems(rawCollection, values)
   → for each rawItem:
-      createData(rawItem) → activate() → retrieveData() → isValid()
-      → wipe() → storeData() → items->create() → add() → createSubItems()
-      → deActivate()
+      action = LOAD → clearForm() → currentData = createData(rawItem)
+      → wireChildrenDialogs()
+      → retrieveData() → isValid()          ← errors collected, item skipped on failure
+      → currentData->wipe() → storeData()
+      → items->create(currentData) → addButtons() → createSubItems(values)
+      → disconnectChildrenDialogs()
+  → currentData = nullptr
 ```
 
 ---
@@ -154,13 +179,17 @@ createItems()
 DialogDevice::getInstance()->setOwner(&devices);
 ```
 
-**Secondary** — owned by a `Data`, wired in `activate()`:
+**Secondary** — registered in the parent dialog's constructor via `registerChildDialog()`. `wireChildrenDialogs()` calls `setOwner()` on them automatically when `currentData` is set:
 
 ```cpp
-void MyData::activate() {
-    DialogMyChild::getInstance()->setOwner(&children, this);
-}
+// In parent constructor:
+registerChildDialog<DialogElement>(builder, "DialogElement", COLLECTION_ELEMENTS);
+
+// wireChildrenDialogs() then does automatically:
+DialogElement::getInstance()->setOwner(&currentData->children[COLLECTION_ELEMENTS], currentData);
 ```
+
+`removeOwner()` / `disconnectChildrenDialogs()` tear down the wiring when the dialog closes.
 
 ---
 
@@ -180,12 +209,11 @@ void MyDialog::addButtons(Storage::BoxButton& bb) {
 ## 9. Child Dialogs and Refresh Chains
 
 ```cpp
-// In parent constructor:
-DataDialogs::ChildDialog::buildInstance(builder, "ChildDialog");
-childDialogs.push_back(ChildDialog::getInstance());
+// In parent constructor — builds singleton and registers in familyToDialog:
+registerChildDialog<DialogElement>(builder, "DialogElement", COLLECTION_ELEMENTS);
 ```
 
-`refreshBox()` and `reindex()` propagate down the chain automatically.
+`refreshBox()` and `reindex()` propagate down the `childDialogs` chain automatically.
 
 > **Warning:** `show_all()` overrides any prior `hide()`. Always hide the **outermost** container box for a conditionally-visible section, or set `no-show-all` on the widget.
 
@@ -193,35 +221,75 @@ childDialogs.push_back(ChildDialog::getInstance());
 
 ## 10. DialogFormHost — Type-Selector Dialogs
 
-Intermediate base for dialogs driven by a primary type-selector combo. **Data objects managed by these dialogs must inherit `Revertible`** so that a mid-edit type switch can be safely cancelled.
+Intermediate base for dialogs driven by a primary type-selector combo. Adds type-switching with optional data conversion.
 
 **Use when:**
 - A combo determines which child data/UI is shown.
-- Changing the combo must wipe existing child data.
-- A confirmation dialog is needed when switching an already-populated type.
+- Changing the combo must convert or discard existing child data.
+- A dynamic confirmation is shown when switching an already-populated type.
 
 | Member | Purpose |
 |--------|---------|
 | `previousName` | Guards against spurious `signal_changed` re-fires. |
-| `handleTypeSwitch()` | Full decision tree for the type-selector combo. |
-| `markUsed()` | Updates a liststore's availability column via a predicate. |
+| `selectorCombo` | The primary type-selector combo. |
+| `listStore` | Backing model for `selectorCombo`. |
+| `handleTypeSwitch(box, msg)` | Full decision tree for the type-selector combo. |
+| `onConvert(fromType, toType)` | Override to migrate or discard children before UI clears. |
+| `onEmpty()` | Pure virtual — clear all type-specific UI fields. |
+| `onSelected()` | Pure virtual — prepare UI for the newly selected type. |
+| `markUsed(predicate)` | Updates a liststore's availability column via a predicate. |
+| `initializeSelector(emptyMsg, infoMap)` | Populates `selectorCombo` from a `Defaults::*Info` map. |
 
 ### `handleTypeSwitch()` decision order
 
-1. `name` empty → `onEmpty()`, reset `previousName` → return `false`.
-2. `name == previousName` → return `false`.
-3. `previousName` empty (first selection) → `previousName = name`, `onSelected()` → return `false`.
-4. `name != previousName` and box non-empty → ask confirmation; no → revert combo → return `false`.
-5. `currentData->swap()` → `previousName = name` → `onEmpty()` → `onSelected()` → return `true`.
+1. Row index `-1` → return `false`.
+2. `name` empty → `onEmpty()` → return `false`.
+3. `previousName` empty (first selection) → `previousName = name`, `onSelected()` → return `ADD` only.
+4. `previousName == name` → return `false`.
+5. Data exists and box non-empty → show dynamic confirmation; no → revert combo → return `false`.
+6. `onConvert(previousName, name)` → `previousName = name` → `onEmpty()` → `onSelected()` → return `true`.
 
-`swap()` moves `fieldsData` and all registered child collections into snapshot storage. `deActivate()` restores them automatically on cancel.
+**Conversion is immediate and final.** Cancel closes the dialog but does not undo any conversion — data is already updated.
 
 ```cpp
 selectorCombo->signal_changed().connect([this]() {
-    if (handleTypeSwitch(box, "Change type? All data will be lost."))
+    string newName{selectorCombo->get_active_id()};
+    string msg;
+    if (not newName.empty() and not previousName.empty()) {
+        // build dynamic warning describing consequences...
+        msg = "Are you sure you want to convert \"" + oldInfo.name + "\" into \"" + newInfo.name + "\"?";
+        // append specific warnings (pin loss, profile loss, source collapse, etc.)
+    }
+    if (handleTypeSwitch(DialogChild::getInstance()->getBox(), msg))
         resetForm();
 });
 ```
+
+### `onConvert()` hook
+
+Override in each `DialogFormHost` subclass to migrate or discard children before the UI is cleared. Called with `(fromType, toType)`. Default is a no-op.
+
+| Dialog | `onConvert()` delegates to |
+|--------|---------------------------|
+| `DialogDevice` | `DialogElement::handleLayoutChange(fromType, toType, newPins)` |
+| `DialogRestrictor` | `DialogRestrictorMap::trimToInterfaces(newInterfaces)` |
+| `DialogInput` | `DialogInputSource::convertToSourceless()` or `convertToSourced()` + field cleanup |
+
+### Conversion helpers
+
+**`DialogElement::handleLayoutChange(fromType, toType, newPins)`**
+1. Calls `changeNumberOfPins(newPins)` — removes elements whose pins exceed the new limit.
+2. If `oldInfo.supportStrip && !newInfo.supportStrip` — removes all strip elements.
+3. If `oldInfo.layoutRGB && !newInfo.layoutRGB` — calls `Element::splitRGB()` on surviving elements and clears positional fields (`POSITION`, `POSITIONS`, `COLORFORMAT`).
+
+**`DialogRestrictorMap::trimToInterfaces(maxInterfaces)`**
+- Removes all maps whose `RESTRICTOR_INTERFACE` value exceeds `maxInterfaces`.
+
+**`DialogInputSource::convertToSourceless()`**
+- Keeps the first source, converts it to the phantom (sets `SOURCELESS`, clears `SOURCE`), removes all other sources and their maps.
+
+**`DialogInputSource::convertToSourced()`**
+- Promotes the phantom source to a real source (removes `SOURCELESS` flag). `SOURCE` is left empty for the user to fill in.
 
 ### `previousName` rule
 
@@ -229,7 +297,7 @@ Always set `previousName` **before** any `set_active_id()` that fires `signal_ch
 
 ```cpp
 void MyDialog::retrieveData() {
-    previousName = currentData->getValue(TYPE); // MUST come first
+    previousName = currentData->getValue(NAME); // MUST come first
     selectorCombo->set_active_id(previousName);
 }
 ```
@@ -238,22 +306,20 @@ void MyDialog::retrieveData() {
 
 ## 11. DialogFileForm — File-Based Dialogs
 
-Adds directory tracking for `FileData` subclasses:
+`DirectoryAware` mixin adds current-directory tracking for dialogs that manage file-based `Data` objects (`Input`, `Animation`, `Profile`):
 
 ```cpp
 void setCurrentDirectory(DirectoryEntry* directory);
 DirectoryEntry* getCurrentDirectory() const;
-string getFullPath(const string& filename) const;
-bool isUniqueFilename(const string& filename) const;
 ```
 
-The navigator sets `currentDirectory` before opening. `isUniqueFilename()` scopes the check to the current directory only.
+The directory navigator sets the current directory before opening the dialog. `createUniqueId()` must include the directory path to scope uniqueness correctly.
 
 ---
 
 ## 12. DialogSelect — Picking From Existing Items
 
-Non-`DialogForm` dialog. Picks items from a pre-existing `CollectionHandler` and wraps them in `Link` objects. Configured via `SettingRequest` before opening. The selection list is rebuilt from the collection every open.
+Non-`DialogForm` dialog. Picks items from a pre-existing `CollectionHandler` and wraps them in `Link` objects. Configured via `SelectionRequest` before opening. The selection list is rebuilt from the collection every open.
 
 ---
 
@@ -263,8 +329,8 @@ Non-`DialogForm` dialog. Picks items from a pre-existing `CollectionHandler` and
 
 | Situation | Base |
 |-----------|------|
-| Type-selector combo that wipes child data | `DialogFormHost` (Data must be `Revertible`) |
-| Manages files in a directory tree | `DialogFileForm` |
+| Type-selector combo that converts/discards child data | `DialogFormHost` |
+| Manages files in a directory tree | `DialogForm` + `DirectoryAware` |
 | Picks from existing items | `DialogSelect` |
 | Everything else | `DialogForm` |
 
@@ -275,51 +341,47 @@ class DialogMyThing : public DialogForm, public SingletonDialog<DialogMyThing> {
     friend class Gtk::Builder;
 public:
     virtual ~DialogMyThing() = default;
-    void load(XMLHelper* values) override;
-    Storage::CollectionHandler* getCollectionHandler() const override;
-    void clearForm() override;
-    void isValid() const override;
-    void storeData() override;
-    void retrieveData() override;
-    const string createUniqueId() const override;
+    void load(XMLHelper* values)  noexcept override;
+    void clearForm()              noexcept override;
+    void isValid()          const          override;
+    void storeData()              noexcept override;
+    void retrieveData()           noexcept override;
+    string createUniqueId() const noexcept override;
 protected:
     Gtk::Entry* entryName = nullptr;
-    DialogMyThing(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
-    string_view getType() const override;
-    Storage::Data* createData(StringUMap& rawData) override;
+    DialogMyThing(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept;
+    const string& getType()                   const noexcept override;
+    Storage::Data* createData(StringUMap& rawData) const noexcept override;
 };
 ```
 
 ### 3 — Implement the constructor
 
 ```cpp
-DialogMyThing::DialogMyThing(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) :
+DialogMyThing::DialogMyThing(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept :
     DialogForm(obj, builder)
 {
+    // Register child dialogs first.
+    registerChildDialog<DialogMyChild>(builder, "DialogMyChild", COLLECTION_MY_CHILDREN);
+
     builder->get_widget_derived("BoxMyThings", box);
     builder->get_widget("BtnApplyMyThing", btnApply);
     Gtk::Button* btnAdd = nullptr;
-    builder->get_widget("BtnAddMyThing",   btnAdd);
-    builder->get_widget("EntryName",       entryName);
+    builder->get_widget("BtnAddMyThing", btnAdd);
+    builder->get_widget("EntryName",     entryName);
     setSignalAdd(btnAdd);
     setSignalApply();
 }
 ```
 
-### 4 — Register
-
-**Primary:**
+### 4 — Register as primary dialog
 
 ```cpp
 DataDialogs::DialogMyThing::buildInstance(builder, "DialogMyThing");
 DataDialogs::DialogMyThing::getInstance()->setOwner(&myThings);
 ```
 
-**Secondary (in `MyData::activate()`):**
-
-```cpp
-DataDialogs::DialogMyThing::getInstance()->setOwner(&myThings, this);
-```
+Secondary dialogs self-register via `registerChildDialog()` — no manual `setOwner()` needed for them.
 
 ---
 
@@ -332,29 +394,37 @@ DataDialogs::DialogMyThing::getInstance()->setOwner(&myThings, this);
 | `storeData()` | **Yes** (pure) | Widgets → `currentData`. |
 | `retrieveData()` | **Yes** (pure) | `currentData` → widgets. |
 | `createUniqueId()` | **Yes** (pure) | Build unique ID from widget values. |
-| `getType()` | **Yes** (pure) | Human-readable type name. |
+| `getType()` | **Yes** (pure) | Human-readable type name string ref. |
 | `createData(StringUMap&)` | **Yes** (pure) | Factory for the correct `Data` subclass. |
-| `getCollectionHandler()` | **Yes** (pure) | Return this dialog's `CollectionHandler`. |
 | `load(XMLHelper*)` | **Yes** (pure) | Dispatch raw XML into `createItems()`. |
-| `resetForm()` | When extra state must be cleared | Calls `clearForm()` by default. |
+| `resetForm()` | When extra state must be set after type switch | Calls `refreshItems()` by default. |
 | `addButtons(BoxButton&)` | When non-default buttons needed | Default adds Edit + Delete. |
-| `createSubItems(XMLHelper*)` | When items have nested children | Called per item during `createItems`. |
-| `afterCreate(BoxButton&)` | ADD-only hook | Called after ADD completes. |
+| `createSubItems(XMLHelper*)` | When items have nested children | Called per item during `createItems()`. |
+| `afterCreate(BoxButton&)` | ADD-only hook | Called after ADD completes and button is in the box. |
 | `afterDeleteConfirmation(BoxButton&)` | Pre-delete cleanup | Called before item is removed. |
-| `setOwner(collection, owner)` | When extra wiring needed | Base stores `items` and `ownerData`. |
+| `setOwner(collection, owner)` | When extra wiring needed on activation | Base stores `items` and `ownerData`. |
+| `removeOwner()` | When extra teardown needed | Base clears `items` and `ownerData`. |
+| `wireChildrenDialogs()` | Rarely — only for non-`Parent` data | Base handles `Parent` children automatically. |
+| `onConvert(fromType, toType)` | `DialogFormHost` subclasses with children | Migrate or discard children before `onEmpty()`. |
+| `onEmpty()` | `DialogFormHost` subclasses (pure) | Clear type-specific UI fields. |
+| `onSelected()` | `DialogFormHost` subclasses (pure) | Prepare UI for newly selected type. |
 
 ---
 
 ## 15. Common Pitfalls
 
-### Signal re-fires during `retrieveData()`
+### `previousName` must be set before `set_active_id()`
 
-Always set `previousName` before any `set_active_id()` in `retrieveData()`.
+In `retrieveData()`, always assign `previousName` before calling `selectorCombo->set_active_id()`, otherwise the `signal_changed` fires and `handleTypeSwitch()` misreads the state.
 
 ### `show_all()` overrides `hide()`
 
-Always hide the **outermost** container box for a conditionally-visible section, or set `no-show-all` on the widget.
+Always hide the **outermost** container box for a conditionally-visible section, or set `no-show-all` on the widget in the Glade file.
 
 ### Combo vs entry — resolve to one value
 
-When a dialog has both a combo and a manual entry for the same logical value, merge them into a single resolver helper and drive all signal handlers through it to keep `createUniqueId()` consistent.
+When a dialog has both a combo and a manual entry for the same logical value (e.g. `DialogInputSource`), merge them into a single `resolvedSource()` helper and drive all signal handlers and `createUniqueId()` through it.
+
+### Type conversion is final
+
+`onConvert()` runs before `onEmpty()` and commits changes to the data immediately. There is no undo — Cancel closes the dialog but leaves the converted data in place. Always show a dynamic warning message describing the specific consequences before confirming.

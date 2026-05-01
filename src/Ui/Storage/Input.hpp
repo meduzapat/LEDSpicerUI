@@ -22,7 +22,6 @@
 
 #include "Parent.hpp"
 #include "DirNode.hpp"
-#include "Revertible.hpp"
 #include "XMLHelper.hpp"
 
 #pragma once
@@ -34,7 +33,7 @@ namespace LEDSpicerUI::Ui::Storage {
  * Represents a single input configuration file.
  * Owns collections of InputSource objects and linked maps.
  */
-class Input : public Parent, public DirNode, public Revertible {
+class Input : public Parent, public DirNode {
 
 public:
 
@@ -43,8 +42,7 @@ public:
 			COLLECTION_INPUT_SOURCES,
 			COLLECTION_INPUT_LINKMAPS
 		}),
-		DirNode(getProperties(), parent, getValue(FILENAME)),
-		Revertible(*this, children)
+		DirNode(getProperties(), parent, getValue(FILENAME))
 	{}
 
 	virtual ~Input() = default;
@@ -59,9 +57,6 @@ public:
 	CollectionHandler* getCollectionHandler() const noexcept override {
 		return CollectionHandler::getInstance(COLLECTION_INPUTS);
 	}
-
-	void wipe()     noexcept override;
-	void tearDown() noexcept override;
 
 };
 

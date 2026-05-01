@@ -65,14 +65,12 @@ set(STORAGE_DIRNODE_SRCS
 
 set(STORAGE_INPUT_SRCS
 	${STORAGE_DIRNODE_SRCS}
-	${CMAKE_SOURCE_DIR}/src/Ui/Storage/Revertible.cpp
 	${CMAKE_SOURCE_DIR}/src/Ui/Storage/InputMapLink.cpp
 	${CMAKE_SOURCE_DIR}/src/Ui/Storage/Input.cpp
 )
 
 set(STORAGE_PROFILE_SRCS
 	${STORAGE_DIRNODE_SRCS}
-	${CMAKE_SOURCE_DIR}/src/Ui/Storage/Revertible.cpp
 	${CMAKE_SOURCE_DIR}/src/Ui/Storage/Link.cpp
 	${CMAKE_SOURCE_DIR}/src/Ui/Storage/Profile.cpp
 )
@@ -109,12 +107,6 @@ add_test_executable(DataTest
 add_test_executable(ParentTest
 	"Ui/Storage/ParentTest.cpp"
 	"${STORAGE_BASE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Storage/Parent.cpp"
-	""
-)
-
-add_test_executable(RevertibleTest
-	"Ui/Storage/RevertibleTest.cpp"
-	"${STORAGE_BASE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Storage/Parent.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/Revertible.cpp"
 	""
 )
 
@@ -174,19 +166,19 @@ add_test_executable(GroupTest
 
 add_test_executable(DeviceTest
 	"Ui/Storage/DeviceTest.cpp"
-	"${STORAGE_BASE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Storage/Parent.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/Revertible.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/Device.cpp"
+	"${STORAGE_BASE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Storage/Parent.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/Device.cpp"
 	""
 )
 
 add_test_executable(RestrictorTest
 	"Ui/Storage/RestrictorTest.cpp"
-	"${STORAGE_BASE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Storage/Parent.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/Revertible.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/Restrictor.cpp"
+	"${STORAGE_BASE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Storage/Parent.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/Restrictor.cpp"
 	""
 )
 
 add_test_executable(InputSourceTest
 	"Ui/Storage/InputSourceTest.cpp"
-	"${STORAGE_BASE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Storage/Parent.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/Revertible.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/InputSource.cpp"
+	"${STORAGE_BASE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Storage/Parent.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/InputSource.cpp"
 	""
 )
 

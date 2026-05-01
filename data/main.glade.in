@@ -153,7 +153,7 @@ Author: Patricio A Rossi
             </style>
           </object>
           <packing>
-            <property name="expand">False</property>
+            <property name="expand">True</property>
             <property name="fill">True</property>
             <property name="position">0</property>
           </packing>
@@ -567,6 +567,10 @@ You can reduce that list by adding only the colors you want to be used by Random
                                     <property name="activate-on-single-click">False</property>
                                   </object>
                                 </child>
+                                <style>
+                                  <class name="zoneCanvas"/>
+                                  <class name="colors"/>
+                                </style>
                               </object>
                             </child>
                           </object>
@@ -3192,7 +3196,6 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="halign">end</property>
-                    <property name="margin-start">0</property>
                     <property name="label">Name</property>
                   </object>
                   <packing>
@@ -3456,6 +3459,10 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
                                     <property name="activate-on-single-click">False</property>
                                   </object>
                                 </child>
+                                <style>
+                                  <class name="zoneCanvas"/>
+                                  <class name="animations"/>
+                                </style>
                               </object>
                             </child>
                           </object>
@@ -3542,6 +3549,10 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
                                     <property name="activate-on-single-click">False</property>
                                   </object>
                                 </child>
+                                <style>
+                                  <class name="zoneCanvas"/>
+                                  <class name="inputs"/>
+                                </style>
                               </object>
                             </child>
                           </object>
@@ -3642,6 +3653,10 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
                                     <property name="activate-on-single-click">False</property>
                                   </object>
                                 </child>
+                                <style>
+                                  <class name="zoneCanvas"/>
+                                  <class name="elements"/>
+                                </style>
                               </object>
                             </child>
                           </object>
@@ -3728,6 +3743,10 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
                                     <property name="activate-on-single-click">False</property>
                                   </object>
                                 </child>
+                                <style>
+                                  <class name="zoneCanvas"/>
+                                  <class name="groups"/>
+                                </style>
                               </object>
                             </child>
                           </object>
@@ -5832,6 +5851,10 @@ Default is 50ms</property>
                     <property name="activate-on-single-click">False</property>
                   </object>
                 </child>
+                <style>
+                  <class name="zoneCanvas"/>
+                  <class name="pinLayout"/>
+                </style>
               </object>
             </child>
           </object>
@@ -7092,6 +7115,10 @@ If you have multiple serial devices, avoid using autodetect.</property>
                         </child>
                       </object>
                     </child>
+                    <style>
+                      <class name="zoneCanvas"/>
+                      <class name="playerMappings"/>
+                    </style>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -7577,6 +7604,10 @@ If you have multiple serial devices, avoid using autodetect.</property>
                             <property name="activate-on-single-click">False</property>
                           </object>
                         </child>
+                        <style>
+                          <class name="zoneCanvas"/>
+                          <class name="inputSources"/>
+                        </style>
                       </object>
                     </child>
                   </object>
@@ -7666,6 +7697,10 @@ If you have multiple serial devices, avoid using autodetect.</property>
                             <property name="activate-on-single-click">False</property>
                           </object>
                         </child>
+                        <style>
+                          <class name="zoneCanvas"/>
+                          <class name="inputMaps"/>
+                        </style>
                       </object>
                     </child>
                   </object>
@@ -7755,6 +7790,10 @@ If you have multiple serial devices, avoid using autodetect.</property>
                             <property name="activate-on-single-click">False</property>
                           </object>
                         </child>
+                        <style>
+                          <class name="zoneCanvas"/>
+                          <class name="inputLinkMaps"/>
+                        </style>
                       </object>
                     </child>
                   </object>
@@ -8274,6 +8313,10 @@ Multi will blink the next start</property>
                     <property name="max-children-per-line">1</property>
                   </object>
                 </child>
+                <style>
+                  <class name="zoneCanvas"/>
+                  <class name="inputLinkMaps"/>
+                </style>
               </object>
             </child>
           </object>
@@ -8778,6 +8821,10 @@ you can set the same trigger multiple time on different maps but only the last o
                             <property name="activate-on-single-click">False</property>
                           </object>
                         </child>
+                        <style>
+                          <class name="zoneCanvas"/>
+                          <class name="inputMaps"/>
+                        </style>
                       </object>
                     </child>
                   </object>

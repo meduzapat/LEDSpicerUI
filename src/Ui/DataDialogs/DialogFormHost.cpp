@@ -21,7 +21,6 @@
  */
 
 #include "DialogFormHost.hpp"
-#include "Storage/Revertible.hpp"
 
 using namespace LEDSpicerUI::Ui::DataDialogs;
 
@@ -37,6 +36,7 @@ bool DialogFormHost::handleTypeSwitch(
 
 	if (selectorCombo->get_active_row_number() == -1) return false;
 
+	// Selected name.
 	string newName {selectorCombo->get_active_id()};
 
 	// Clean up.
@@ -56,9 +56,10 @@ bool DialogFormHost::handleTypeSwitch(
 	// Refresh.
 	if (previousName == newName) return false;
 
+	// Current existing name (if any).
 	string currentName(currentData->getPrimaryValue());
 
-	// Original data or replaced
+	// Original data or replaced.
 	if (not currentName.empty()) {
 		// ask to avoid losses.
 		if (box->getSize() and Message::ask(confirmMsg) != Gtk::ResponseType::RESPONSE_YES) {
@@ -66,9 +67,12 @@ bool DialogFormHost::handleTypeSwitch(
 			return false;
 		}
 	}
+
+	// Process conventions.
+	onConvert(previousName, newName);
+
 	// New data or replaced.
 	previousName = newName;
-	dynamic_cast<Storage::Revertible*>(currentData)->snapshot();
 	onEmpty();
 	onSelected();
 	return true;

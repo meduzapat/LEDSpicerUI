@@ -21,7 +21,6 @@
  */
 
 #include "Parent.hpp"
-#include "Revertible.hpp"
 
 #pragma once
 
@@ -33,7 +32,7 @@ namespace LEDSpicerUI::Ui::Storage {
  * Owns the maps belonging to this source.
  * Collection ID is scoped to its parent Input via ownerId.
  */
-class InputSource : public Parent, public Revertible {
+class InputSource : public Parent {
 
 public:
 
@@ -48,9 +47,6 @@ public:
 	string_view getXmlTag()   const noexcept override { return "maps"; }
 
 	CollectionHandler* getCollectionHandler() const noexcept override;
-
-	void wipe()     noexcept override;
-	void tearDown() noexcept override;
 
 protected:
 

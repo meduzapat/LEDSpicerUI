@@ -62,6 +62,14 @@ public:
 	void changeNumberOfPins(const uint16_t newSize) noexcept;
 
 	/**
+	 * Process the hardware conversion.
+	 * @param fromType
+	 * @param toType
+	 * @param newPins
+	 */
+	void handleLayoutChange(const string& fromType, const string& toType, uint16_t newPins) noexcept;
+
+	/**
 	 * Redraw the pin box.
 	 */
 	void drawPins() noexcept;

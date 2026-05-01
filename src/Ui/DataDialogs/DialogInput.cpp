@@ -61,14 +61,12 @@ DialogInput::DialogInput(
 	listStore = static_cast<Gtk::ListStore*>(selectorCombo->get_model().get());
 
 	selectorCombo->signal_changed().connect([this]() {
-
 		if (handleTypeSwitch(
 			DialogInputSource::getInstance()->getBox(),
 			"Are you sure you want to change the input type? All sources will be lost.")
 		) {
 			resetForm();
 		}
-
 	});
 }
 
@@ -213,4 +211,25 @@ void DialogInput::onSelected() noexcept {
 		DialogInputSource::getInstance()->populateSources(id);
 	else
 		DialogInputSource::getInstance()->createPhantomSource();
+}
+
+void DialogInput::onConvert(const string& fromType, const string& toType) noexcept {
+
+	const bool oldSourced = Defaults::inputHasFlag(fromType, Defaults::INPUT_NEEDS_SOURCE);
+	const bool newSourced = Defaults::inputHasFlag(toType,   Defaults::INPUT_NEEDS_SOURCE);
+
+	if (oldSourced and not newSourced)
+		DialogInputSource::getInstance()->convertToSourceless();
+	else if (not oldSourced and newSourced)
+		DialogInputSource::getInstance()->convertToSourced();
+
+	// Drop fields the new type doesn't support.
+	if (not Defaults::inputHasFlag(toType, Defaults::INPUT_HAS_BLINK))
+		currentData->unSet(BLINK);
+	if (not Defaults::inputHasFlag(toType, Defaults::INPUT_HAS_TIMES))
+		currentData->unSet(TIMES);
+	if (not Defaults::inputHasFlag(toType, Defaults::INPUT_HAS_SPEED))
+		currentData->unSet(SPEED);
+	if (not Defaults::inputHasFlag(toType, Defaults::INPUT_LINKED_MAPS))
+		DialogInputLinkMaps::getInstance()->clearForm();
 }

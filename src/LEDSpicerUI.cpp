@@ -44,8 +44,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	// Set CSS styles.
-	auto styleContext = Gtk::StyleContext::create();
-	styleContext->add_provider_for_screen(
+	Gtk::StyleContext::add_provider_for_screen(
 		Gdk::Screen::get_default(),
 		cssProvider,
 		GTK_STYLE_PROVIDER_PRIORITY_APPLICATION

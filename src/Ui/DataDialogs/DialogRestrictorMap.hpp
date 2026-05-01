@@ -50,6 +50,11 @@ public:
 	 */
 	void populateInterfacesCombobox() noexcept;
 
+	/**
+	 * Removes maps assigned to interfaces beyond maxInterfaces.
+	 */
+	void trimToInterfaces(uint8_t maxInterfaces) noexcept;
+
 protected:
 
 	Gtk::Button* btnAdd = nullptr;

@@ -39,16 +39,6 @@ string Input::createTooltip() const noexcept {
 	return "Input of type " + getValue(NAME);
 }
 
-void Input::wipe() noexcept {
-	clearSnap();
-	Data::wipe();
-}
-
-void Input::tearDown() noexcept {
-	revert();
-	Data::tearDown();
-}
-
 string Input::toXML() const noexcept {
 	StringUMap attrs{copyValues()};
 

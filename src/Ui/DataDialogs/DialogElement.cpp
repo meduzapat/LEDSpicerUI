@@ -636,9 +636,8 @@ void DialogElement::changeNumberOfPins(const uint16_t newSize) noexcept {
 			findElementByPin(c, elementsToDelete);
 		// delete elements
 		string deleted;
-		for(auto boxButton : elementsToDelete) {
+		for (auto boxButton : elementsToDelete) {
 			deleted += boxButton->getData()->getValue(NAME) + "\n";
-			// elements doesn't need activation.
 			box->remove(*boxButton);
 			items->remove(*boxButton);
 		}
@@ -650,14 +649,49 @@ void DialogElement::changeNumberOfPins(const uint16_t newSize) noexcept {
 	drawPins();
 }
 
+void DialogElement::handleLayoutChange(const string& fromType, const string& toType, uint16_t newPins) noexcept {
+
+	const auto& oldInfo = Defaults::devicesInfo.at(fromType);
+	const auto& newInfo = Defaults::devicesInfo.at(toType);
+
+	// trim elements beyond new pin count.
+	changeNumberOfPins(newPins);
+
+	//  remove strip elements if new device has no strip support.
+	if (oldInfo.supportStrip and not newInfo.supportStrip) {
+		vector<Storage::BoxButton*> toRemove;
+		for (auto btn : *items)
+			if (not btn->getData()->getValue(STRIPSIZE).empty())
+				toRemove.push_back(btn);
+		string deleted;
+		for (auto btn : toRemove) {
+			deleted += btn->getData()->getValue(NAME) + "\n";
+			box->remove(*btn);
+			items->remove(*btn);
+		}
+		if (not deleted.empty())
+			Message::displayInfo("Strip elements removed (new device does not support strips):\n" + deleted);
+	}
+
+	// convert positional RGB elements to scattered RGB if new device has no RGB layout.
+	if (oldInfo.layoutRGB and not newInfo.layoutRGB) {
+		for (auto btn : *items) {
+			auto* data = btn->getData();
+			Storage::Element::splitRGB(data);
+			data->unSet(POSITION);
+			data->unSet(POSITIONS);
+			data->unSet(COLORFORMAT);
+		}
+	}
+}
+
 void DialogElement::drawPins() noexcept {
 
 	// Remove pins layout.
 	for (auto child : pinsBox->get_children())
 		pinsBox->remove(*child);
 
-	if (not numberOfPins)
-		return;
+	if (not numberOfPins) return;
 
 	std::vector<std::pair<string, string>> pinsUsage(numberOfPins, {NO_COLOR, ""});
 	findConnectorTypes(pinsUsage);
@@ -712,8 +746,7 @@ void DialogElement::drawPinsRGB(vector<Gtk::Label*>& labels) noexcept {
 			hboxPins->pack_start(*labels[pin++]);
 		}
 	}
-	if (numberOfPins % 3 == 0)
-		return;
+	if (numberOfPins % 3 == 0) return;
 
 	// Create box for extra pins.
 	Gtk::VBox* vboxConnector = Gtk::manage(new Gtk::VBox(true));

@@ -25,8 +25,7 @@
 using namespace LEDSpicerUI::Ui::Storage;
 
 InputSource::InputSource(StringUMap& data, const string& ownerId) noexcept :
-	Parent(data, {COLLECTION_INPUT_MAPS}),
-	Revertible(*this, children)
+	Parent(data, {COLLECTION_INPUT_MAPS})
 {
 	getProperties().setValue(UID, std::to_string(++sourceCounter));
 	getProperties().setValue(PID, ownerId);
@@ -49,16 +48,6 @@ string InputSource::createTooltip() const noexcept {
 
 CollectionHandler* InputSource::getCollectionHandler() const noexcept {
 	return CollectionHandler::getInstance(COLLECTION_INPUT_SOURCES + getProperties().getValue(PID));
-}
-
-void InputSource::wipe() noexcept {
-	clearSnap();
-	Data::wipe();
-}
-
-void InputSource::tearDown() noexcept {
-	revert();
-	Data::tearDown();
 }
 
 bool InputSource::shouldSerialize(const string& key, const string& value) const noexcept {

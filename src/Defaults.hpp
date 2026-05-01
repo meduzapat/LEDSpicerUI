@@ -153,7 +153,6 @@ const string
 	PROP_SYSTEM    {"p.s"},
 	PROP_STRIP     {"p.sd"},
 	PROP_STRIP_UID {"p.sid"}, // strip descriptor UID
-	PROP_FROZEN    {"p.f"}, // Set in properties while item is snapped
 
 /// CSS-related constants
 	COLOR_PIN      {"pinSingle"},
