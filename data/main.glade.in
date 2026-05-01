@@ -1981,6 +1981,29 @@ If nothing is set, the default is 1000ms.</property>
           </packing>
         </child>
         <child>
+          <object class="GtkLinkButton" id="BtnDonate">
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
+            <property name="tooltip-text" translatable="yes">Support the Project</property>
+            <property name="relief">none</property>
+            <property name="uri">https://www.paypal.com/donate/?hosted_button_id=LVNVCXN4NKWP8</property>
+            <child>
+              <object class="GtkImage">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="icon-name">emblem-favorite-symbolic</property>
+                <property name="use-fallback">True</property>
+                <property name="icon_size">3</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="pack-type">end</property>
+            <property name="position">3</property>
+          </packing>
+        </child>
+        <child>
           <object class="GtkButton" id="BtnSettings">
             <property name="visible">True</property>
             <property name="can-focus">True</property>
@@ -2040,52 +2063,7 @@ Your support helps keep the project improving</property>
             <property name="can-focus">False</property>
             <property name="layout-style">end</property>
             <child>
-              <object class="GtkLinkButton" id="BtnDonatePayPal">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">True</property>
-                <property name="relief">none</property>
-                <property name="uri">https://www.paypal.com/donate/?hosted_button_id=LVNVCXN4NKWP8</property>
-                <child>
-                  <object class="GtkBox">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="halign">center</property>
-                    <property name="spacing">8</property>
-                    <child>
-                      <object class="GtkImage">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="icon-name">emblem-favorite-symbolic</property>
-                        <property name="icon_size">1</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="label">Donate via PayPal</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-                <property name="secondary">True</property>
-              </packing>
+              <placeholder/>
             </child>
           </object>
           <packing>
