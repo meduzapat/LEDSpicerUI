@@ -46,7 +46,7 @@ void CollectionHandler::purgeAll() noexcept {
 
 Data* CollectionHandler::get(const string& id) const noexcept {
 	auto it{collection.find(id)};
-	if (it == collection.end() or it->second->getProperties().isSet(PROP_FROZEN)) return nullptr;
+	if (it == collection.end()) return nullptr;
 	return it->second;
 }
 
@@ -55,45 +55,34 @@ bool CollectionHandler::isSet(const Data* item) const noexcept {
 }
 
 bool CollectionHandler::isIdSet(const string& id) const noexcept {
-	auto it{collection.find(id)};
-	return it != collection.end() and not it->second->getProperties().isSet(PROP_FROZEN);
+	return collection.find(id) != collection.end();
 }
 
 size_t CollectionHandler::countByKey(const string& key, const string& value) const noexcept {
 	size_t count{0};
 	for (const auto& item : collection)
-		if (not item.second->getProperties().isSet(PROP_FROZEN) and item.second->getValue(key) == value)
-			++count;
+		if (item.second->getValue(key) == value) ++count;
 	return count;
 }
 
 vector<Data*> CollectionHandler::findByProperty(const string& property, const string& value) const noexcept {
 	vector<Data*> results;
-	for (const auto& item : collection) {
-		if (not item.second->getProperties().isSet(PROP_FROZEN) and item.second->getProperties().getValue(property) == value) {
+	for (const auto& item : collection)
+		if (item.second->getProperties().getValue(property) == value)
 			results.push_back(item.second);
-		}
-	}
 	return results;
 }
 
 bool CollectionHandler::hasAny(const string& property, const string& value) const noexcept {
 	for (const auto& [id, item] : collection)
-		if (not item->getProperties().isSet(PROP_FROZEN) and item->getProperties().getValue(property) == value)
+		if (item->getProperties().getValue(property) == value)
 			return true;
 	return false;
 }
 
 void CollectionHandler::add(Data* item) noexcept {
 	auto uid{item->createUniqueId()};
-	auto it{collection.find(uid)};
-	// Item exists.
-	if (it != collection.end()) {
-		// Replace existing frozen item (eviction).
-		if (it->second->getProperties().isSet(PROP_FROZEN))
-			collection[uid] = item;
-		return;
-	}
+	if (collection.count(uid)) return;
 	collection.emplace(uid, item);
 	refreshSensitiveWidgets();
 }
@@ -105,10 +94,6 @@ void CollectionHandler::remove(Data* item) noexcept {
 	auto it{collection.find(uid)};
 	if (it == collection.end()) return;
 
-	// Evicted — slot belongs to a replacer.
-	if (it->second != item) return;
-
-	// Owner of the slot — erase and cascade.
 	collection.erase(it);
 
 	for (auto dep : dependencies) {

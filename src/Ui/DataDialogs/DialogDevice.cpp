@@ -56,7 +56,7 @@ DialogDevice::DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 	// Models.
 	idListstore = static_cast<Gtk::ListStore*>(builder->get_object("liststoreDeviceId").get());
 
-	/* On Number of LEDs is SET apply the changes to the Elements. */
+	// On Number of LEDs is SET apply the changes to the Elements.
 	spinnerLeds->signal_value_changed().connect([this]() {
 		string name(selectorCombo->get_active_id());
 		if (not name.empty() and not Defaults::isVariable(name)) return;
@@ -72,10 +72,21 @@ DialogDevice::DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 	});
 
 	selectorCombo->signal_changed().connect([this]() {
-		if (handleTypeSwitch(
-			DialogElement::getInstance()->getBox(),
-			"Are you sure you want to change the device? All elements will be lost.")
-		) {
+		string newName{selectorCombo->get_active_id()};
+		string msg;
+		if (not newName.empty() and not previousName.empty()) {
+			const auto& newInfo = Defaults::devicesInfo.at(newName);
+			const auto& oldInfo = Defaults::devicesInfo.at(previousName);
+			msg = "Are you sure you want to convert \"" + oldInfo.name + "\" into \"" + newInfo.name + "\"?";
+			if (Defaults::isVariable(newName)) {
+				msg += "\nPin count will be set to the current value to preserve elements.";
+			} else if (newInfo.pins < oldInfo.pins) {
+				msg += "\nElements using pins above " + std::to_string(newInfo.pins) + " will be removed.";
+			}
+			if (oldInfo.layoutRGB != newInfo.layoutRGB)
+				msg += "\nElement types incompatible with the new layout will be converted or removed.";
+		}
+		if (handleTypeSwitch(DialogElement::getInstance()->getBox(), msg)) {
 			resetForm();
 		}
 	});
@@ -236,4 +247,14 @@ void DialogDevice::onSelected() noexcept {
 		spinnerLeds->get_adjustment()->set_upper(totalPins);
 	else
 		DialogElement::getInstance()->changeNumberOfPins(totalPins);
+}
+
+void DialogDevice::onConvert(const string& fromType, const string& toType) noexcept {
+	const auto& newInfo = Defaults::devicesInfo.at(toType);
+	const uint16_t newPins(
+		Defaults::isVariable(toType)
+			? spinnerLeds->get_value_as_int() * (Defaults::devicesInfo.at(fromType).layoutRGB ? 3 : 1)
+			: newInfo.pins
+	);
+	DialogElement::getInstance()->handleLayoutChange(fromType, toType, newPins);
 }

@@ -16,13 +16,3 @@ string Restrictor::createPrettyName() const noexcept {
 string Restrictor::createUniqueId() const noexcept {
 	return Defaults::createHardwareUniqueId(getValues(), false);
 }
-
-void Restrictor::wipe() noexcept {
-	clearSnap();
-	Data::wipe();
-}
-
-void Restrictor::tearDown() noexcept {
-	revert();
-	Data::tearDown();
-}

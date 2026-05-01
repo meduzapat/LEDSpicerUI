@@ -21,7 +21,6 @@
  */
 
 #include "Parent.hpp"
-#include "Revertible.hpp"
 
 #pragma once
 
@@ -32,13 +31,12 @@ namespace LEDSpicerUI::Ui::Storage {
  *
  * Stores a hardware device and its attached elements.
  */
-class Device : public Parent, public Revertible {
+class Device : public Parent {
 
 public:
 
 	Device(StringUMap& data) noexcept :
-		Parent(data, {COLLECTION_ELEMENTS}),
-		Revertible(*this, children)
+		Parent(data, {COLLECTION_ELEMENTS})
 	{}
 
 	virtual ~Device() = default;
@@ -49,9 +47,6 @@ public:
 	string createUniqueId()   const noexcept override;
 
 	CollectionHandler* getCollectionHandler() const noexcept override;
-
-	void wipe()     noexcept override;
-	void tearDown() noexcept override;
 
 };
 

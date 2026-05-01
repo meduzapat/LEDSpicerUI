@@ -42,13 +42,3 @@ string Device::createUniqueId() const noexcept {
 CollectionHandler* Device::getCollectionHandler() const noexcept {
 	return CollectionHandler::getInstance(COLLECTION_DEVICES);
 }
-
-void Device::wipe() noexcept {
-	clearSnap();
-	Data::wipe();
-}
-
-void Device::tearDown() noexcept {
-	revert();
-	Data::tearDown();
-}

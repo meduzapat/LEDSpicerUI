@@ -88,9 +88,6 @@ public:
 	 */
 	static uint16_t findFirstConnectorIndexByPosition(const string& position) noexcept;
 
-	void freeze()   noexcept override;
-	void unfreeze() noexcept override;
-
 protected:
 
 	/// Pseudo children.

@@ -145,16 +145,6 @@ public:
 	 */
 	void syncRegistration(const string& oldId) noexcept;
 
-	/**
-	 * Marks this item as frozen (invisible to CollectionHandler queries).
-	 */
-	virtual void freeze()   noexcept { getProperties().setValue(PROP_FROZEN, "1"); }
-
-	/**
-	 * Unfreezes this item, making it visible to CollectionHandler queries again.
-	 */
-	virtual void unfreeze() noexcept { getProperties().unSet(PROP_FROZEN); }
-
 protected:
 
 	/// Extra property with important information.

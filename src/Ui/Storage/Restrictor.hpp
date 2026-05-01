@@ -21,7 +21,6 @@
  */
 
 #include "Parent.hpp"
-#include "Revertible.hpp"
 
 #pragma once
 
@@ -31,13 +30,12 @@ namespace LEDSpicerUI::Ui::Storage {
  * LEDSpicerUI::Ui::Storage::Restrictor
  * Stores a hardware restrictor and its player mappings.
  */
-class Restrictor : public Parent, public Revertible {
+class Restrictor : public Parent {
 
 public:
 
 	Restrictor(StringUMap& data) noexcept :
-		Parent(data, {COLLECTION_RESTRICTOR_MAPS}),
-		Revertible(*this, children)
+		Parent(data, {COLLECTION_RESTRICTOR_MAPS})
 	{}
 
 	virtual ~Restrictor() = default;
@@ -50,9 +48,6 @@ public:
 	CollectionHandler* getCollectionHandler() const noexcept override {
 		return CollectionHandler::getInstance(COLLECTION_RESTRICTORS);
 	}
-
-	void wipe()     noexcept override;
-	void tearDown() noexcept override;
 
 };
 

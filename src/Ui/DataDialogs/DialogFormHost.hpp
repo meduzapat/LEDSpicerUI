@@ -110,6 +110,13 @@ protected:
 		}
 		selectorCombo->set_active(-1);
 	}
+
+	/**
+	 * Executes when a conversion is requested.
+	 * @param fromType
+	 * @param toType
+	 */
+	virtual void onConvert(const string& fromType, const string& toType) noexcept {}
 };
 
 } // namespace

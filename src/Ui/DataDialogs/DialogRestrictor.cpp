@@ -66,10 +66,16 @@ DialogRestrictor::DialogRestrictor(BaseObjectType* obj, const Glib::RefPtr<Gtk::
 	}
 
 	selectorCombo->signal_changed().connect([this]() {
-		if (handleTypeSwitch(
-			DialogRestrictorMap::getInstance()->getBox(),
-			"Are you sure you want to change the restrictor? All mappings will be lost.")
-		) {
+		string newName{selectorCombo->get_active_id()};
+		string msg;
+		if (not newName.empty() and not previousName.empty()) {
+			const auto& newInfo = Defaults::restrictorsInfo.at(newName);
+			const auto& oldInfo = Defaults::restrictorsInfo.at(previousName);
+			msg = "Are you sure you want to convert \"" + oldInfo.name + "\" into \"" + newInfo.name + "\"?";
+			if (newInfo.interfaces < oldInfo.interfaces)
+				msg += "\nPlayer profiles above " + std::to_string(newInfo.interfaces) + " will be removed.";
+		}
+		if (handleTypeSwitch(DialogRestrictorMap::getInstance()->getBox(), msg)) {
 			resetForm();
 		}
 	});

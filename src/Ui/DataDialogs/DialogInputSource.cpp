@@ -47,12 +47,25 @@ DialogInputSource::DialogInputSource(
 	setSignalApply();
 
 	selectorCombo->signal_changed().connect([this]() {
-		if (
-			handleTypeSwitch(
-				DialogInputMap::getInstance()->getBox(),
-				"Are you sure you want to change the source? All maps will be lost."
-			)
-		) {
+		string newName{selectorCombo->get_active_id()};
+		string msg;
+		if (not newName.empty() and not previousName.empty()) {
+			const auto& newInfo = Defaults::inputInfo.at(newName);
+			const auto& oldInfo = Defaults::inputInfo.at(previousName);
+			msg = "Are you sure you want to convert \"" + oldInfo.name + "\" into \"" + newInfo.name + "\"?";
+			bool oldSourced = Defaults::inputHasFlag(previousName, Defaults::INPUT_NEEDS_SOURCE);
+			bool newSourced = Defaults::inputHasFlag(newName,      Defaults::INPUT_NEEDS_SOURCE);
+			if (oldSourced and not newSourced)
+				msg += "\nExtra sources will be removed. Compatible maps will be moved to the single implicit source.";
+			else if (not oldSourced and newSourced)
+				msg += "\nExisting maps will be attached to a new default source entry.";
+			else if (oldSourced and newSourced)
+				msg += "\nAll sources will be lost.";
+			if (Defaults::inputHasFlag(previousName, Defaults::INPUT_LINKED_MAPS) and
+			    not Defaults::inputHasFlag(newName,   Defaults::INPUT_LINKED_MAPS))
+				msg += "\nLinked maps are not supported and will be removed.";
+		}
+		if (handleTypeSwitch(DialogInputSource::getInstance()->getBox(), msg)) {
 			resetForm();
 		}
 	});
