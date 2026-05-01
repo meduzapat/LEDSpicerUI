@@ -492,30 +492,16 @@ Author: Patricio A Rossi
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
+                                <property name="tooltip-text" translatable="yes">When the Random color is used, it picks a color randomly from all the colors available in the Color's file.
+You can reduce that list by adding only the colors you want to be used by Random here, you can also add colors more than once to increase the chance of that color to be selected.</property>
                                 <property name="halign">start</property>
                                 <property name="valign">center</property>
-                                <property name="label">Random Colors List</property>
+                                <property name="label">Random Colors List ℹ️</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
                                 <property name="fill">True</property>
                                 <property name="position">0</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkImage">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="tooltip-text">When the Random color is used, it picks a color randomly from all the colors available in the Color's file.
-You can reduce that list by adding only the colors you want to be used by Random here, you can also add colors more than once to increase the chance of that color to be selected.</property>
-                                <property name="valign">center</property>
-                                <property name="icon-name">help-contents-symbolic</property>
-                                <property name="use-fallback">True</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">1</property>
                               </packing>
                             </child>
                             <child>
@@ -1931,6 +1917,49 @@ If nothing is set, the default is 1000ms.</property>
           </object>
         </child>
         <child>
+          <object class="GtkButton" id="BtnSaveProject">
+            <property name="visible">True</property>
+            <property name="sensitive">False</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
+            <property name="tooltip-text" translatable="yes">Save Project</property>
+            <child>
+              <object class="GtkImage">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="icon-name">document-save-symbolic</property>
+                <property name="use-fallback">True</property>
+                <property name="icon_size">3</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLinkButton" id="BtnDonate">
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
+            <property name="relief">none</property>
+            <property name="uri">https://www.paypal.com/donate/?hosted_button_id=LVNVCXN4NKWP8</property>
+            <child>
+              <object class="GtkImage">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="icon-name">emblem-favorite-symbolic</property>
+                <property name="use-fallback">True</property>
+                <property name="icon_size">3</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="pack-type">end</property>
+            <property name="position">3</property>
+          </packing>
+        </child>
+        <child>
           <object class="GtkButton" id="BtnAbout">
             <property name="visible">True</property>
             <property name="can-focus">True</property>
@@ -1948,7 +1977,7 @@ If nothing is set, the default is 1000ms.</property>
           </object>
           <packing>
             <property name="pack-type">end</property>
-            <property name="position">3</property>
+            <property name="position">4</property>
           </packing>
         </child>
         <child>
@@ -1962,28 +1991,6 @@ If nothing is set, the default is 1000ms.</property>
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="icon-name">preferences-system-symbolic</property>
-                <property name="use-fallback">True</property>
-                <property name="icon_size">3</property>
-              </object>
-            </child>
-          </object>
-          <packing>
-            <property name="pack-type">end</property>
-            <property name="position">3</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton" id="BtnSaveProject">
-            <property name="visible">True</property>
-            <property name="sensitive">False</property>
-            <property name="can-focus">True</property>
-            <property name="receives-default">True</property>
-            <property name="tooltip-text" translatable="yes">Save Project</property>
-            <child>
-              <object class="GtkImage">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="icon-name">document-save-symbolic</property>
                 <property name="use-fallback">True</property>
                 <property name="icon_size">3</property>
               </object>
@@ -2008,8 +2015,16 @@ If nothing is set, the default is 1000ms.</property>
     <property name="program-name">@PACKAGE_NAME@</property>
     <property name="version">@PACKAGE_VERSION@</property>
     <property name="copyright">@COPYRIGHT@</property>
-    <property name="comments">LEDSpicer UI is a user-friendly interface designed for configuring the LEDSpicer daemon.
-Compatible with version @MINIMUM_COMPATIBILITY@</property>
+    <property name="comments">LEDSpicer UI
+User-friendly interface for configuring the LEDSpicer daemon
+
+Compatible with version @MINIMUM_COMPATIBILITY@
+
+Free and open-source, built in spare time
+Designed to make your setup easier and look better
+
+If you find it useful, consider supporting development
+Your support helps keep the project improving</property>
     <property name="website">@PACKAGE_URL@</property>
     <property name="website-label">Project Page</property>
     <property name="authors">Patricio A Rossi</property>
@@ -2025,177 +2040,18 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
             <property name="can-focus">False</property>
             <property name="layout-style">end</property>
             <child>
-              <object class="GtkButton" id="BtnSupportProject">
+              <object class="GtkLinkButton" id="BtnDonatePayPal">
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives-default">True</property>
+                <property name="relief">none</property>
+                <property name="uri">https://www.paypal.com/donate/?hosted_button_id=LVNVCXN4NKWP8</property>
                 <child>
                   <object class="GtkBox">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
-                    <property name="spacing">6</property>
-                    <child>
-                      <object class="GtkImage">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="icon-name">emblem-favorite-symbolic</property>
-                        <property name="icon_size">1</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="label">Support the Project</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                  </object>
-                </child>
-                <style>
-                  <class name="SupportButton"/>
-                </style>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-                <property name="secondary">True</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">-1</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-  </object>
-  <object class="GtkDialog" id="DialogDonate">
-    <property name="width-request">480</property>
-    <property name="can-focus">False</property>
-    <property name="title">Support LEDSpicerUI</property>
-    <property name="resizable">False</property>
-    <property name="modal">True</property>
-    <property name="window-position">center-on-parent</property>
-    <property name="destroy-with-parent">True</property>
-    <property name="type-hint">dialog</property>
-    <property name="transient-for">MainWindow</property>
-    <child internal-child="vbox">
-      <object class="GtkBox">
-        <property name="visible">True</property>
-        <property name="can-focus">False</property>
-        <property name="orientation">vertical</property>
-        <property name="spacing">0</property>
-        <child>
-          <object class="GtkBox">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="orientation">vertical</property>
-            <property name="spacing">16</property>
-            <property name="margin-top">28</property>
-            <property name="margin-bottom">20</property>
-            <property name="margin-start">32</property>
-            <property name="margin-end">32</property>
-            <property name="halign">center</property>
-            <child>
-              <object class="GtkImage">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="icon-name">emblem-favorite-symbolic</property>
-                <property name="icon_size">6</property>
-                <style>
-                  <class name="DonateHeartIcon"/>
-                </style>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="label">Support LEDSpicerUI Development</property>
-                <property name="justify">center</property>
-                <style>
-                  <class name="DonateTitleLabel"/>
-                </style>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="wrap">True</property>
-                <property name="wrap-mode">word-char</property>
-                <property name="justify">center</property>
-                <property name="max-width-chars">55</property>
-                <property name="label">LEDSpicerUI is free and open-source, crafted with passion in my spare time. If it has brightened your arcade or gaming setup, please consider supporting its development — every contribution keeps the LEDs shining!</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">2</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButtonBox">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="margin-top">4</property>
-            <property name="margin-bottom">8</property>
-            <property name="margin-start">8</property>
-            <property name="margin-end">8</property>
-            <property name="layout-style">end</property>
-            <child>
-              <object class="GtkButton" id="BtnDonateClose">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="label">Close</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="BtnDonatePayPal">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">True</property>
-                <child>
-                  <object class="GtkBox">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="spacing">8</property>
                     <property name="halign">center</property>
+                    <property name="spacing">8</property>
                     <child>
                       <object class="GtkImage">
                         <property name="visible">True</property>
@@ -2223,21 +2079,19 @@ Compatible with version @MINIMUM_COMPATIBILITY@</property>
                     </child>
                   </object>
                 </child>
-                <style>
-                  <class name="DonateButton"/>
-                </style>
               </object>
               <packing>
-                <property name="expand">False</property>
+                <property name="expand">True</property>
                 <property name="fill">True</property>
-                <property name="position">1</property>
+                <property name="position">0</property>
+                <property name="secondary">True</property>
               </packing>
             </child>
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">2</property>
+            <property name="fill">False</property>
+            <property name="position">-1</property>
           </packing>
         </child>
       </object>
@@ -4148,6 +4002,10 @@ Autodetected if ledspicerd is detected</property>
                     <property name="selection-mode">multiple</property>
                   </object>
                 </child>
+                <style>
+                  <class name="zoneCanvas"/>
+                  <class name="select"/>
+                </style>
               </object>
             </child>
           </object>
