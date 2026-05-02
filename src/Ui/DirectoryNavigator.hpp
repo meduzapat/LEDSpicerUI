@@ -86,6 +86,20 @@ protected:
 	 */
 	virtual void wireDialogs(Storage::DirectoryEntry* dir) noexcept abstract;
 
+	/**
+	 * Walks dir recursively, builds a DirectoryEntry tree, and calls loadFile() for each .xml.
+	 * Non-.xml files are silently ignored. A missing or non-directory path is a no-op.
+	 * @param dir Filesystem path to scan.
+	 */
+	void loadFromDisk(const string& dir) noexcept;
+
+	/**
+	 * Loads one file into the given directory node.
+	 * @param filePath Absolute path to the .xml file.
+	 * @param node Directory node that owns the file.
+	 */
+	virtual void loadFile(const string& filePath, Storage::DirectoryEntry* node) noexcept abstract;
+
 };
 
 } // namespace

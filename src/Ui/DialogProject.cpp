@@ -43,7 +43,7 @@ DialogProject::DialogProject(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> con
 
 	// Select project button
 	comboSelectProject->signal_changed().connect([this]() {
-		string name(comboSelectProject->get_active_id());
+		const string name{comboSelectProject->get_active_id()};
 		if (name.empty()) {
 			boxNewProjectName->set_visible(true);
 			inputNewProjectName->set_text("");
@@ -56,8 +56,9 @@ DialogProject::DialogProject(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> con
 	});
 
 	inputNewProjectName->signal_changed().connect([this]() {
-		string text = inputNewProjectName->get_text();
-		string filtered = Defaults::sanitizeFilename(text);
+		string
+			text     = inputNewProjectName->get_text(),
+			filtered = Defaults::sanitizeFilename(text);
 
 		// Remove leading dots
 		while (not filtered.empty() and filtered[0] == '.') {

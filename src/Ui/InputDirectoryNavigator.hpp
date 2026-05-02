@@ -46,6 +46,12 @@ public:
 
 	void clear() noexcept override;
 
+	/**
+	 * Loads all input files from inputsDir into the navigator tree.
+	 * @param inputsDir Filesystem path to the inputs directory.
+	 */
+	void load(const string& inputsDir) noexcept;
+
 protected:
 
 	/// Import input dialog.
@@ -63,6 +69,7 @@ protected:
 
 	void wireDialogs(Storage::DirectoryEntry* dir) noexcept override;
 
+	void loadFile(const string& filePath, Storage::DirectoryEntry* node) noexcept override;
 };
 
 } // namespace

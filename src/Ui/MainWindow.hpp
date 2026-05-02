@@ -65,8 +65,13 @@ public:
 
 protected:
 
-	/// The name of the current project.
-	string currentProjectName;
+	string
+		/// The name of the current project.
+		currentProjectName,
+		/// Path for the config.
+		configPath,
+		/// Path for project files.
+		projectDir;
 
 	Gtk::Entry
 		* inputUserId     = nullptr,

@@ -65,7 +65,7 @@ InputFile::InputFile(const string& filePath, DirectoryEntry* parent) :
 	extractedData.emplace(COLLECTION_INPUTS, StringUMapVector{input});
 
 	if (not errors.empty())
-		Message::displayError("Errors:\n" + errors);
+		throw Message("Errors:\n" + errors);
 }
 
 void InputFile::processLinkedTriggers(const string& baseId) noexcept {

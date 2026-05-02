@@ -316,7 +316,7 @@ void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {
 			DialogProject::getInstance()->hide();
 			return;
 		}
-		string newProject = DialogProject::getInstance()->getProjectName();
+		const string& newProject {DialogProject::getInstance()->getProjectName()};
 		if (newProject == currentProjectName) {
 			// TODO add revert option, instead of warning, ask to reload without saving.
 			Message::displayInfo("Already working on that project", DialogProject::getInstance());
@@ -328,12 +328,19 @@ void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {
 			return;
 		}
 
+		// Set Project and Paths.
 		currentProjectName = newProject;
 		Defaults::setSubtitle(currentProjectName);
 		// Resolve from where the config will be read.
-		string configPath = (Defaults::getMode() == Defaults::Mode::Portable) ?
-			Defaults::getProjectsDir() + currentProjectName + "/ledspicer.conf" :
-			DialogSettings::getInstance()->getConfigPath();
+		projectDir = Defaults::getProjectsDir() + currentProjectName + "/";
+		if (Defaults::getMode() == Defaults::Mode::Portable) {
+			// Stores config in the project dir.
+			configPath = Defaults::getProjectsDir() + CONFIG_FILE;
+		}
+		else {
+			// System wide config.
+			configPath = DialogSettings::getInstance()->getConfigPath();
+		}
 
 		// Wipe random colors and any other color and read config.
 		setColorFile("");
@@ -457,6 +464,15 @@ void MainWindow::readConfigFile(const string& dataFilePath, bool wipe, uint8_t i
 		inputRunEvery->set_text(datafile.getProcessLookupRunEvery());
 	}
 
+	// Load inputs from the inputs/ directory alongside the config file.
+	if (wipe and not projectDir.empty()) {
+		inputNavigator.clear();
+
+		inputNavigator.load(Glib::path_get_dirname(projectDir + INPUT_PATH));
+		// animationNavigator.load(Glib::path_get_dirname(dataFilePath) + "/" + ANIMATION_PATH);  // future
+		// profileNavigator.load(Glib::path_get_dirname(dataFilePath) + "/" + PROFILE_PATH);      // future, must be last
+	}
+
 	// TODO: use registered profiles.
 	comboDefaultProfile->remove_all();
 	for (const auto& item : {datafile.getDefaultProfile()})
@@ -465,11 +481,6 @@ void MainWindow::readConfigFile(const string& dataFilePath, bool wipe, uint8_t i
 	// this will trigger load.
 	comboDefaultProfile->set_active_text(datafile.getDefaultProfile());
 
-	// todo: using default profile load inputs and animations.
-	/*	if (wipe) {
-		inputs.wipe();
-		//DataDialogs::DialogProfile::getInstance()->refreshItems();
-	}*/
 }
 
 void MainWindow::setColorFile(const string& colorFile) {

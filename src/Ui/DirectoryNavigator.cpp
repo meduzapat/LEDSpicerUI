@@ -24,6 +24,10 @@
 
 using namespace LEDSpicerUI::Ui;
 
+DirectoryNavigator::~DirectoryNavigator() {
+	delete DataDialogs::DialogDirectory::getInstance();
+}
+
 void DirectoryNavigator::onActivate() noexcept {
 	wireDialogs(currentDir);
 }
@@ -55,6 +59,33 @@ DirectoryNavigator::DirectoryNavigator(const Glib::RefPtr<Gtk::Builder>& builder
 	DataDialogs::DialogDirectory::buildInstance(builder, "DialogDirectory");
 }
 
-DirectoryNavigator::~DirectoryNavigator() {
-	delete DataDialogs::DialogDirectory::getInstance();
+void DirectoryNavigator::loadFromDisk(const string& dir) noexcept {
+	namespace fs = std::filesystem;
+	std::error_code ec;
+	fs::path root(dir);
+	if (not fs::is_directory(root, ec)) return;
+
+	std::function<void(const fs::path&, Storage::DirectoryEntry*)> walk {
+
+	[&](const fs::path& path, Storage::DirectoryEntry* node) {
+
+		vector<fs::directory_entry> entries;
+
+		for (auto& e : fs::directory_iterator(path, ec)) entries.push_back(e);
+		std::sort(entries.begin(), entries.end());
+
+		for (auto& entry : entries) {
+
+			if (entry.is_directory(ec)) {
+				StringUMap data{{NAME, entry.path().filename().string()}};
+				auto child {new Storage::DirectoryEntry(data, node)};
+				node->getContents().create(child);
+				walk(entry.path(), child);
+			}
+			else if (entry.is_regular_file(ec) and entry.path().extension() == ".xml") {
+				loadFile(entry.path().string(), node);
+			}
+		}
+	}};
+	walk(root, &rootDir);
 }

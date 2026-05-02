@@ -52,9 +52,10 @@ using std::unique_ptr;
 #pragma once
 
 #define XML_FILE_PLAIN ""
-#define INPUT_PATH "inputs/"
+#define INPUT_PATH     "inputs/"
 #define ANIMATION_PATH "animations/"
-#define PROFILE_PATH "profiles/"
+#define PROFILE_PATH   "profiles/"
+#define CONFIG_FILE    "ledspicer.conf"
 
 #define DEFAULT_MESSAGE "This is an auto-generated file by " PACKAGE_STRING "."
 

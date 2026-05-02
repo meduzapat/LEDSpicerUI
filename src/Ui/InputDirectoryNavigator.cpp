@@ -92,6 +92,10 @@ void InputDirectoryNavigator::clear() noexcept {
 	currentDir = &rootDir;
 }
 
+void InputDirectoryNavigator::load(const string& inputsDir) noexcept {
+	loadFromDisk(inputsDir);
+}
+
 void InputDirectoryNavigator::wireDialogs(Storage::DirectoryEntry* dir) noexcept {
 
 	Storage::BoxButtonCollection& contents{dir->getContents()};
@@ -141,4 +145,18 @@ void InputDirectoryNavigator::wireDialogs(Storage::DirectoryEntry* dir) noexcept
 	}
 
 	boxBreadcrumb->show_all();
+}
+
+
+void InputDirectoryNavigator::loadFile(const string& filePath, Storage::DirectoryEntry* node) noexcept {
+	try {
+		InputFile datafile(filePath, node);
+		DataDialogs::DialogInput::getInstance()->setOwner(&node->getContents(), node);
+		DataDialogs::DialogInput::getInstance()->load(&datafile);
+	}
+	catch (Message& e) {
+		Message::displayError(
+			"Skipping " + Glib::path_get_basename(filePath) +
+			":\n" + XMLHelper::cleanError(e.getMessage()));
+	}
 }

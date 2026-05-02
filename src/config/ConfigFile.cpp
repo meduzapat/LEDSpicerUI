@@ -260,7 +260,7 @@ void ConfigFile::save(const ConfigData& data) {
 	if (data.devices.getSize() == 0)
 		throw Message("At least one device is required");
 
-	/* Helper: collect toXML() from a BoxButtonCollection into one string. */
+	// Helper: collect toXML() from a BoxButtonCollection into one string.
 	const auto collect = [](const BoxButtonCollection& col) {
 		string r;
 		for (const auto btn : col)
