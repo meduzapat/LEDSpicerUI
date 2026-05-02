@@ -29,7 +29,7 @@ InputDirectoryNavigator::InputDirectoryNavigator(
 	const Glib::RefPtr<Gtk::Builder>& builder,
 	Gtk::Window* parentWindow
 ) noexcept :
-	DirectoryNavigator(builder),
+	DirectoryNavigator{builder},
 	dialogImportInput(DialogImport::Types::INPUT, parentWindow),
 	dirSetting {
 		boxInputs,

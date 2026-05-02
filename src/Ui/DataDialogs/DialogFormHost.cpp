@@ -62,7 +62,7 @@ bool DialogFormHost::handleTypeSwitch(
 	// Original data or replaced.
 	if (not currentName.empty()) {
 		// ask to avoid losses.
-		if (box->getSize() and Message::ask(confirmMsg) != Gtk::ResponseType::RESPONSE_YES) {
+		if (box->getSize() and Message::ask(confirmMsg, this) != Gtk::ResponseType::RESPONSE_YES) {
 			selectorCombo->set_active_id(previousName);
 			return false;
 		}
