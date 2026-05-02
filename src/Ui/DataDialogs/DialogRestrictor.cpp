@@ -30,6 +30,9 @@ DialogRestrictor::DialogRestrictor(BaseObjectType* obj, const Glib::RefPtr<Gtk::
 
 	registerChildDialog<DialogRestrictorMap>(builder, "DialogRestrictorMap", COLLECTION_RESTRICTOR_MAPS);
 
+	// Register self so child dialogs can resolve the visible host window via familyToDialog.
+	familyToDialog.emplace(COLLECTION_RESTRICTORS, this);
+
 	// Connect Restrictor Box and buttons.
 	builder->get_widget_derived("BoxRestrictors", box);
 	builder->get_widget("BtnApplyRestrictors",    btnApply);

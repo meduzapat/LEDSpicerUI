@@ -31,6 +31,9 @@ DialogDevice::DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 	// Register its dialogs for refresh.
 	registerChildDialog<DialogElement>(builder, "DialogElement", COLLECTION_ELEMENTS);
 
+	// Register self so child dialogs can resolve the visible host window via familyToDialog.
+	familyToDialog.emplace(COLLECTION_DEVICES, this);
+
 	// Connect Device Box and buttons.
 	builder->get_widget_derived("BoxDevices", box);
 	builder->get_widget("BtnApplyDevices",    btnApply);

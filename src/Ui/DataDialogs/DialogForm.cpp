@@ -71,7 +71,7 @@ void DialogForm::createItems(StringUMapVector& rawCollection, XMLHelper* values)
 	}
 	currentData = nullptr;
 	if (not errors.empty()) {
-		Message::displayError("Errors in " + getType() + ":\n" + errors);
+		Message::displayError("Errors in " + getType() + ":\n" + errors, this);
 	}
 }
 
@@ -173,9 +173,10 @@ void DialogForm::createDeleteButton(
 	button->set_tooltip_text("Delete " + boxButton.getData()->createPrettyName());
 	button->signal_clicked().connect([&, askConfirmation]() {
 		if (askConfirmation) {
-			if (Message::ask("Are you sure you want to remove " + boxButton.getData()->createPrettyName() + "?") != Gtk::ResponseType::RESPONSE_YES) {
-				return;
-			}
+			if (Message::ask(
+					"Are you sure you want to remove " +
+					boxButton.getData()->createPrettyName() + "?", this
+				) != Gtk::ResponseType::RESPONSE_YES) return;
 		}
 		onDelClicked(boxButton);
 	});

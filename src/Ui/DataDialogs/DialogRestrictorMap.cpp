@@ -151,7 +151,10 @@ void DialogRestrictorMap::trimToInterfaces(uint8_t maxInterfaces) noexcept {
 		items->remove(*btn);
 	}
 	if (not deleted.empty())
-		Message::displayInfo("Mappings removed (new restrictor has fewer interfaces):\n" + deleted);
+		Message::displayInfo(
+			"Mappings removed (new restrictor has fewer interfaces):\n" + deleted,
+			familyToDialog.at(COLLECTION_RESTRICTORS)
+		);
 }
 
 void DialogRestrictorMap::afterCreate(Storage::BoxButton&) noexcept {

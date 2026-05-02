@@ -642,7 +642,9 @@ void DialogElement::changeNumberOfPins(const uint16_t newSize) noexcept {
 			items->remove(*boxButton);
 		}
 		if (not deleted.empty())
-			Message::displayInfo("Elements being deleted due to resizing:\n" +deleted);
+			Message::displayInfo("Elements being deleted due to resizing:\n" +deleted,
+				familyToDialog.at(COLLECTION_DEVICES)
+			);
 	}
 
 	numberOfPins = newSize;
@@ -670,7 +672,10 @@ void DialogElement::handleLayoutChange(const string& fromType, const string& toT
 			items->remove(*btn);
 		}
 		if (not deleted.empty())
-			Message::displayInfo("Strip elements removed (new device does not support strips):\n" + deleted);
+			Message::displayInfo(
+				"Strip elements removed (new device does not support strips):\n" + deleted,
+				familyToDialog.at(COLLECTION_DEVICES)
+			);
 	}
 
 	// convert positional RGB elements to scattered RGB if new device has no RGB layout.

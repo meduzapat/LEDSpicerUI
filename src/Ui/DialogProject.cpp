@@ -107,7 +107,7 @@ void DialogProject::scanProjects() {
 		enumerator = directory->enumerate_children();
 	}
 	catch (const Glib::Error& e) {
-		Message::displayError(e.what());
+		Message::displayError(e.what(), this);
 	}
 
 	StringVector projects;

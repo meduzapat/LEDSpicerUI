@@ -172,7 +172,7 @@ void DialogSelect::load(XMLHelper* values, const string& ownerUniqueId) noexcept
 	request->displayBox->show_all();
 
 	if (not errors.empty())
-		Message::displayError("Errors loading " + request->linkType + ":\n" + errors);
+		Message::displayError("Errors loading " + request->linkType + ":\n" + errors, this);
 }
 
 void DialogSelect::populatePicker() noexcept {
