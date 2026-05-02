@@ -1924,7 +1924,7 @@ If nothing is set, the default is 1000ms.</property>
           </object>
           <packing>
             <property name="pack-type">end</property>
-            <property name="position">3</property>
+            <property name="position">4</property>
           </packing>
         </child>
         <child>
