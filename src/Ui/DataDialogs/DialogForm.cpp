@@ -81,7 +81,6 @@ void DialogForm::setOwner(
 ) noexcept {
 	ownerData = owner;
 	items     = collection;
-	refreshItems();
 }
 
 void DialogForm::removeOwner() noexcept {
@@ -221,6 +220,7 @@ void DialogForm::onAddClicked() noexcept {
 	// Ask form to create an empty Data, and connect any children dialogs.
 	currentData = createData();
 	wireChildrenDialogs();
+	refreshItems();
 
 	// Run Dialog.
 	if (run() == Gtk::ResponseType::RESPONSE_APPLY) {
@@ -260,6 +260,7 @@ void DialogForm::onEditClicked(Storage::BoxButton& boxButton) noexcept {
 
 	// Connect any children dialogs.
 	wireChildrenDialogs();
+	refreshItems();
 	// Data -> Form.
 	retrieveData();
 	// Modify the form based on the current Data.
