@@ -43,7 +43,7 @@ public:
 	string createUniqueId()   const noexcept override;
 	string createPrettyName() const noexcept override;
 	string createTooltip()    const noexcept override;
-	string_view getCssClass() const noexcept override { return "InputSourceBoxButton"; }
+	string_view getCssClass() const noexcept override { return CSS_INPUT_SOURCE_BOX_BUTTON; }
 	string_view getXmlTag()   const noexcept override { return "maps"; }
 
 	CollectionHandler* getCollectionHandler() const noexcept override;

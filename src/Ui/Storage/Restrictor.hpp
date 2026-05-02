@@ -42,7 +42,7 @@ public:
 
 	string createPrettyName() const noexcept override;
 	string createUniqueId()   const noexcept override;
-	string_view getCssClass() const noexcept override { return "RestrictorBoxButton"; }
+	string_view getCssClass() const noexcept override { return CSS_RESTRICTOR_BOX_BUTTON; }
 	string_view getXmlTag()   const noexcept override { return "restrictor"; }
 
 	CollectionHandler* getCollectionHandler() const noexcept override {

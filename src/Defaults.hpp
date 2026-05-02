@@ -154,15 +154,6 @@ const string
 	PROP_STRIP     {"p.sd"},
 	PROP_STRIP_UID {"p.sid"}, // strip descriptor UID
 
-/// CSS-related constants
-	COLOR_PIN      {"pinSingle"},
-	COLOR_SOLENOID {"pinSolenoid"},
-	COLOR_RED      {"pinRed"},
-	COLOR_GREEN    {"pinGreen"},
-	COLOR_BLUE     {"pinBlue"},
-	COLOR_MULTIPLE {"pinMulti"},
-	PIN_LABEL      {"pinLabel"},
-	CONNECTOR_BOX  {"connectorBox"},
 	NO_COLOR       {emptyString},
 
 /// Restrictor configuration keys.
@@ -238,15 +229,57 @@ const string
 
 } // namespace
 
-// CSS classes
-#define BOX_BACKGROUND_DELETE "BoxBackgroundDelete"
-#define BOX_BACKGROUND_EDIT   "BoxBackgroundEdit"
-#define BOX_BACKGROUND_COPY   "BoxBackgroundCopy"
+// CSS classes — CSS_SUBJECT_INTENTION
 
-// Project Icons
-#define ICON_TRASH "user-trash-symbolic"
-#define ICON_EDIT  "emblem-system-symbolic"
-#define ICON_COPY  "edit-copy-symbolic"
+// Box backgrounds
+#define CSS_BOX_BACKGROUND_DELETE     "BoxBackgroundDelete"
+#define CSS_BOX_BACKGROUND_EDIT       "BoxBackgroundEdit"
+#define CSS_BOX_BACKGROUND_COPY       "BoxBackgroundCopy"
+#define CSS_BACKGROUND_RED            "backgroundRed"
+#define CSS_BACKGROUND_GREEN          "backgroundGreen"
+
+// Breadcrumb
+#define CSS_BREADCRUMB_BUTTON         "BreadcrumbButton"
+#define CSS_BREADCRUMB_SEPARATOR      "BreadcrumbSeparator"
+#define CSS_BREADCRUMB_CURRENT        "BreadcrumbCurrent"
+
+// Color picker
+#define CSS_COLOR_BUTTON              "ColorButton"
+#define CSS_COLOR_PIN                 "pinSingle"
+#define CSS_COLOR_SOLENOID            "pinSolenoid"
+#define CSS_COLOR_RED                 "pinRed"
+#define CSS_COLOR_GREEN               "pinGreen"
+#define CSS_COLOR_BLUE                "pinBlue"
+#define CSS_COLOR_MULTIPLE            "pinMulti"
+
+// Pin / connector
+#define CSS_PIN_LABEL                 "pinLabel"
+#define CSS_BOX_CONNECTOR             "connectorBox"
+
+// Form / layout
+#define CSS_FORM_CONTAINER            "formContainer"
+#define CSS_SYSTEM                    "system"
+
+// Storage box buttons
+#define CSS_BOX_BUTTON                "BoxButton"
+#define CSS_DEVICE_BOX_BUTTON         "DeviceBoxButton"
+#define CSS_DIRECTORY_BOX_BUTTON      "DirectoryBoxButton"
+#define CSS_ELEMENT_BOX_BUTTON        "ElementBoxButton"
+#define CSS_GROUP_BOX_BUTTON          "GroupBoxButton"
+#define CSS_INPUT_BOX_BUTTON          "InputBoxButton"
+#define CSS_INPUT_MAP_BOX_BUTTON      "InputMapBoxButton"
+#define CSS_INPUT_SOURCE_BOX_BUTTON   "InputSourceBoxButton"
+#define CSS_LINK_BOX_BUTTON           "LinkBoxButton"
+#define CSS_PROCESS_BOX_BUTTON        "ProcessBoxButton"
+#define CSS_PROFILE_BOX_BUTTON        "ProfileBoxButton"
+#define CSS_RESTRICTOR_BOX_BUTTON     "RestrictorBoxButton"
+#define CSS_RESTRICTOR_MAP_BOX_BUTTON "RestrictorMapBoxButton"
+
+// Icons — all symbolic
+#define ICON_COPY   "edit-copy-symbolic"
+#define ICON_DELETE "edit-delete-symbolic"
+#define ICON_EDIT   "emblem-system-symbolic"
+#define ICON_TRASH  "user-trash-symbolic"
 
 
 using namespace Constants;

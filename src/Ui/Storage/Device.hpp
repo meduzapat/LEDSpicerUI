@@ -42,7 +42,7 @@ public:
 	virtual ~Device() = default;
 
 	string_view getXmlTag()   const noexcept override { return "device"; }
-	string_view getCssClass() const noexcept override { return "DeviceBoxButton"; }
+	string_view getCssClass() const noexcept override { return CSS_DEVICE_BOX_BUTTON; }
 	string createPrettyName() const noexcept override;
 	string createUniqueId()   const noexcept override;
 

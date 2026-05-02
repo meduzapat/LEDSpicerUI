@@ -40,7 +40,7 @@ public:
 	virtual ~Element();
 
 	string_view getXmlTag()   const noexcept override { return "element"; }
-	string_view getCssClass() const noexcept override { return "ElementBoxButton"; }
+	string_view getCssClass() const noexcept override { return CSS_ELEMENT_BOX_BUTTON; }
 	string createPrettyName() const noexcept override;
 
 	/**

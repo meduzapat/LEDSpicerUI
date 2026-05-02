@@ -50,7 +50,7 @@ public:
 	string createPrettyName() const noexcept override;
 	string createTooltip()    const noexcept override;
 
-	string_view getCssClass() const noexcept override { return "DirectoryBoxButton"; }
+	string_view getCssClass() const noexcept override { return CSS_DIRECTORY_BOX_BUTTON; }
 	string_view getXmlTag()   const noexcept override { return ""; }
 
 	CollectionHandler* getCollectionHandler() const noexcept override {
