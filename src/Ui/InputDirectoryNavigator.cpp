@@ -113,12 +113,12 @@ void InputDirectoryNavigator::wireDialogs(Storage::DirectoryEntry* dir) noexcept
 		auto node = static_cast<Storage::DirectoryEntry*>(dir->getParent());
 		while (not node->isAtRoot()) {
 			auto btn{Gtk::make_managed<Gtk::Button>(node->getName())};
-			btn->get_style_context()->add_class("BreadcrumbButton");
+			btn->get_style_context()->add_class(CSS_BREADCRUMB_BUTTON);
 			btn->signal_clicked().connect([this, node]() {
 				enterDirectory(node);
 			});
 			auto sep{Gtk::make_managed<Gtk::Label>("/")};
-			sep->get_style_context()->add_class("BreadcrumbSeparator");
+			sep->get_style_context()->add_class(CSS_BREADCRUMB_SEPARATOR);
 
 			// Reorder so each ancestor goes to the front, keeping correct left-to-right order.
 			boxBreadcrumb->pack_start(*btn, Gtk::PACK_SHRINK);
@@ -131,12 +131,12 @@ void InputDirectoryNavigator::wireDialogs(Storage::DirectoryEntry* dir) noexcept
 
 		// Separator before the current (non-clickable) label.
 		auto sep{Gtk::make_managed<Gtk::Label>("/")};
-		sep->get_style_context()->add_class("BreadcrumbSeparator");
+		sep->get_style_context()->add_class(CSS_BREADCRUMB_SEPARATOR);
 		boxBreadcrumb->pack_end(*sep, Gtk::PACK_SHRINK);
 
 		// Current directory label at the end.
 		auto cur{Gtk::make_managed<Gtk::Label>(dir->getName())};
-		cur->get_style_context()->add_class("BreadcrumbCurrent");
+		cur->get_style_context()->add_class(CSS_BREADCRUMB_CURRENT);
 		boxBreadcrumb->pack_end(*cur, Gtk::PACK_SHRINK);
 	}
 

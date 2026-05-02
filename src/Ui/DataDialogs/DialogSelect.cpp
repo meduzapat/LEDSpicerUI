@@ -191,7 +191,7 @@ void DialogSelect::populatePicker() noexcept {
 			auto flowChild{Gtk::make_managed<Gtk::FlowBoxChild>()};
 
 			if (data->getProperties().isSet(PROP_SYSTEM))
-				selection->get_style_context()->add_class("system");
+				selection->get_style_context()->add_class(CSS_SYSTEM);
 
 			selection->signal_clicked().connect([this, flowChild]() {
 				if (flowChild->is_selected())
@@ -217,7 +217,7 @@ void DialogSelect::addDisplayButtons(Storage::BoxButton& boxButton) noexcept {
 	if (not request->linkFields.empty()) {
 		auto btn{Gtk::make_managed<Gtk::Button>()};
 		boxButton.pack_start(*btn, Gtk::PACK_SHRINK);
-		btn->set_image_from_icon_name("emblem-system-symbolic", Gtk::ICON_SIZE_BUTTON);
+		btn->set_image_from_icon_name(ICON_EDIT, Gtk::ICON_SIZE_BUTTON);
 		btn->set_tooltip_text("Edit");
 		btn->signal_clicked().connect([&boxButton, this]() {
 			DialogLinkEditor::getInstance()->open(
@@ -230,7 +230,7 @@ void DialogSelect::addDisplayButtons(Storage::BoxButton& boxButton) noexcept {
 	// DELETE its always present.
 	auto btn{Gtk::make_managed<Gtk::Button>()};
 	boxButton.pack_start(*btn, Gtk::PACK_SHRINK);
-	btn->set_image_from_icon_name("edit-delete", Gtk::ICON_SIZE_BUTTON);
+	btn->set_image_from_icon_name(ICON_DELETE, Gtk::ICON_SIZE_BUTTON);
 	btn->set_tooltip_text("Remove");
 	btn->signal_clicked().connect([&boxButton, this]() {
 		Defaults::markDirty();

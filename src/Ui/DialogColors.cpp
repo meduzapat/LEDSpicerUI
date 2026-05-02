@@ -227,14 +227,14 @@ void DialogColors::createColorButton(Gtk::FlowBox* destination, const string& co
 	box->set_margin_bottom(2);
 	box->set_margin_left(2);
 	box->set_margin_right(2);
-	box->get_style_context()->add_class("ColorButton");
+	box->get_style_context()->add_class(CSS_COLOR_BUTTON);
 
 	auto l {Gtk::make_managed<Gtk::Label>(color)};
 	l->get_style_context()->add_class(color);
 
 	// Button delete.
 	auto b {Gtk::make_managed<Gtk::Button>()};
-	b->set_image_from_icon_name("edit-delete", Gtk::ICON_SIZE_BUTTON);
+	b->set_image_from_icon_name(ICON_DELETE, Gtk::ICON_SIZE_BUTTON);
 	b->signal_clicked().connect([box, destination]() {
 		Defaults::markDirty();
 		destination->remove(*box);

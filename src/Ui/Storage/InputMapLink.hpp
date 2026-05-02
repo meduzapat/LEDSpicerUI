@@ -41,7 +41,7 @@ public:
 	virtual ~InputMapLink() = default;
 
 	string_view getXmlTag()   const noexcept override { return emptyString; }
-	string_view getCssClass() const noexcept override { return "LinkBoxButton"; }
+	string_view getCssClass() const noexcept override { return CSS_LINK_BOX_BUTTON; }
 	string createPrettyName() const noexcept override;
 	string createTooltip()    const noexcept override;
 	string createUniqueId()   const noexcept override { return emptyString; }

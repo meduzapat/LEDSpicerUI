@@ -45,9 +45,9 @@ DialogImport::DialogImport(const Types type, Gtk::Window* parent) :
 	filter->add_mime_type("application/xml");
 
 	// Set buttons.
-	add_button("_Cancel", Gtk::ResponseType::RESPONSE_CANCEL)->get_style_context()->add_class("backgroundRed");
+	add_button("_Cancel", Gtk::ResponseType::RESPONSE_CANCEL)->get_style_context()->add_class(CSS_BACKGROUND_RED);
 	btbOk = add_button("_Open",   Gtk::ResponseType::RESPONSE_OK);
-	btbOk->get_style_context()->add_class("backgroundGreen");
+	btbOk->get_style_context()->add_class(CSS_BACKGROUND_GREEN);
 	auto box = get_content_area();
 	switch (type) {
 	case Types::CONFIG:
@@ -74,7 +74,7 @@ void DialogImport::setConfigBox(Gtk::Box* box) {
 	box->add(*Gtk::make_managed<Gtk::Label>("Select what to import"));
 	auto hbox = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::ORIENTATION_HORIZONTAL, 2);
 	box->add(*hbox);
-	hbox->get_style_context()->add_class("formContainer");
+	hbox->get_style_context()->add_class(CSS_FORM_CONTAINER);
 
 	Gtk::ToggleButton
 		* importConfig      = Gtk::make_managed<Gtk::ToggleButton>("Import Config"),

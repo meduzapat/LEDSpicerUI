@@ -49,7 +49,7 @@ public:
 
 	string createUniqueId()   const noexcept override;
 	string_view getXmlTag()   const noexcept override { return "Input"; }
-	string_view getCssClass() const noexcept override { return "InputBoxButton"; }
+	string_view getCssClass() const noexcept override { return CSS_INPUT_BOX_BUTTON; }
 	string createPrettyName() const noexcept override;
 	string createTooltip()    const noexcept override;
 	string toXML()            const noexcept override;

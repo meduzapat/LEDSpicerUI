@@ -45,7 +45,7 @@ BoxButton::BoxButton(Data* form) noexcept :
 	label->set_visible(true);
 	pack_start(*lbox, Gtk::PACK_EXPAND_WIDGET);
 
-	get_style_context()->add_class("BoxButton");
+	get_style_context()->add_class(CSS_BOX_BUTTON);
 	auto cssClass{form->getCssClass()};
 	if (not cssClass.empty())
 		get_style_context()->add_class(string(cssClass));

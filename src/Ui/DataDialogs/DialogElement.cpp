@@ -702,14 +702,14 @@ void DialogElement::drawPins() noexcept {
 	labels.reserve(numberOfPins);
 	for (uint16_t c = 1; c <= numberOfPins; ++c) {
 		Gtk::Label* label(Gtk::make_managed<Gtk::Label>(std::to_string(c)));
-		label->get_style_context()->add_class(PIN_LABEL);
+		label->get_style_context()->add_class(CSS_PIN_LABEL);
 		auto& pinUsage(pinsUsage[c - 1]);
 		string labelTxt("Connector " + std::to_string(c));
 		if (pinUsage.first.empty()) {
 			labelTxt += " is unused";
 		}
 		else {
-			labelTxt += string(" is used by element") + (pinUsage.first == COLOR_MULTIPLE ? "s " : " ");
+			labelTxt += string(" is used by element") + (pinUsage.first == CSS_COLOR_MULTIPLE ? "s " : " ");
 			label->get_style_context()->add_class(std::move(pinUsage.first));
 		}
 		label->set_tooltip_text(labelTxt + std::move(pinUsage.second));
@@ -734,7 +734,7 @@ void DialogElement::drawPinsRGB(vector<Gtk::Label*>& labels) noexcept {
 		Gtk::VBox* vboxConnector = Gtk::manage(new Gtk::VBox(true));
 		pinsBox->add(*vboxConnector);
 		vboxConnector->set_name("boxRGB_" + std::to_string(led));
-		vboxConnector->get_style_context()->add_class(CONNECTOR_BOX);
+		vboxConnector->get_style_context()->add_class(CSS_BOX_CONNECTOR);
 		vboxConnector->set_hexpand(false);
 		vboxConnector->set_vexpand(false);
 		vboxConnector->set_valign(Gtk::ALIGN_START);
@@ -753,7 +753,7 @@ void DialogElement::drawPinsRGB(vector<Gtk::Label*>& labels) noexcept {
 	// Create box for extra pins.
 	Gtk::VBox* vboxConnector = Gtk::manage(new Gtk::VBox(true));
 	pinsBox->add(*vboxConnector);
-	vboxConnector->get_style_context()->add_class(CONNECTOR_BOX);
+	vboxConnector->get_style_context()->add_class(CSS_BOX_CONNECTOR);
 	vboxConnector->set_hexpand(false);
 	vboxConnector->set_vexpand(false);
 	vboxConnector->set_valign(Gtk::ALIGN_START);
@@ -792,7 +792,7 @@ void DialogElement::findConnectorTypes(vector<std::pair<string, string>>& pinsUs
 		if (pair.first == color or pair.first == NO_COLOR)
 			pair.first = color;
 		else
-			pair.first = COLOR_MULTIPLE;
+			pair.first = CSS_COLOR_MULTIPLE;
 	};
 
 	std::function<void(
@@ -813,13 +813,13 @@ void DialogElement::findConnectorTypes(vector<std::pair<string, string>>& pinsUs
 				pair.second = pair.second + " - " + data->getValue(NAME);
 			switch (c) {
 			case 'R':
-				storePins(pair, COLOR_RED);
+				storePins(pair, CSS_COLOR_RED);
 				break;
 			case 'G':
-				storePins(pair, COLOR_GREEN);
+				storePins(pair, CSS_COLOR_GREEN);
 				break;
 			case 'B':
-				storePins(pair, COLOR_BLUE);
+				storePins(pair, CSS_COLOR_BLUE);
 			}
 		}
 	};
@@ -848,28 +848,28 @@ void DialogElement::findConnectorTypes(vector<std::pair<string, string>>& pinsUs
 		// Single.
 		else if (not data->getValue(PIN).empty()) {
 			const uint16_t index(std::stoi(data->getValue(PIN)) - 1);
-			storePins(pinsUsage[index], COLOR_PIN);
+			storePins(pinsUsage[index], CSS_COLOR_PIN);
 			pinsUsage[index].second = data->getValue(NAME);
 		}
 		// Solenoid.
 		else if (not data->getValue(SOLENOID).empty()) {
 			const uint16_t index(std::stoi(data->getValue(SOLENOID)) - 1);
-			storePins(pinsUsage[index], COLOR_SOLENOID);
+			storePins(pinsUsage[index], CSS_COLOR_SOLENOID);
 			pinsUsage[index].second = data->getValue(NAME);
 		}
 		// Scattered RGB
 		else {
 			// Red.
 			uint16_t index(std::stoi(data->getValue(RED_PIN)) - 1);
-			storePins(pinsUsage[index], COLOR_RED);
+			storePins(pinsUsage[index], CSS_COLOR_RED);
 			pinsUsage[index].second = data->getValue(NAME);
 			// Green.
 			index = std::stoi(data->getValue(GREEN_PIN)) - 1;
-			storePins(pinsUsage[index], COLOR_GREEN);
+			storePins(pinsUsage[index], CSS_COLOR_GREEN);
 			pinsUsage[index].second = data->getValue(NAME);
 			// Blue.
 			index = std::stoi(data->getValue(BLUE_PIN)) - 1;
-			storePins(pinsUsage[index], COLOR_BLUE);
+			storePins(pinsUsage[index], CSS_COLOR_BLUE);
 			pinsUsage[index].second = data->getValue(NAME);
 		}
 	}

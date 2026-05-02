@@ -39,7 +39,7 @@ public:
 	virtual ~Group() = default;
 
 	string_view getXmlTag()   const noexcept override { return "group"; }
-	string_view getCssClass() const noexcept override { return "GroupBoxButton"; }
+	string_view getCssClass() const noexcept override { return CSS_GROUP_BOX_BUTTON; }
 
 	CollectionHandler* getCollectionHandler() const noexcept override {
 		return CollectionHandler::getInstance(COLLECTION_GROUPS);

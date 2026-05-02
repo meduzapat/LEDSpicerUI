@@ -44,7 +44,7 @@ public:
 
 	virtual ~InputMap() = default;
 
-	string_view getCssClass() const noexcept override { return "InputMapBoxButton"; }
+	string_view getCssClass() const noexcept override { return CSS_INPUT_MAP_BOX_BUTTON; }
 	string createUniqueId()   const noexcept override;
 	string createPrettyName() const noexcept override;
 	string createTooltip()    const noexcept override;
