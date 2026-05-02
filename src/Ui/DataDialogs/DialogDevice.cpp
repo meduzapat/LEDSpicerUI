@@ -46,7 +46,7 @@ DialogDevice::DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 	builder->get_widget("ComboBoxDevices",        selectorCombo);
 	builder->get_widget("ComboBoxDeviceId",       comboBoxId);
 	builder->get_widget("ScaleDeviceChangePoint", changePoint);
-	builder->get_widget("SpinnerDeviceLeds",      spinnerLeds);
+	builder->get_widget("SpinnerDeviceLeds",      spinnerLeds); // RGB LEDs
 	builder->get_widget("InputDevicePort",        inputDevicePort);
 	builder->get_widget("BriefDevice",            brief);
 	builder->get_widget("BtnAddElement",          btnAddElement);
@@ -64,6 +64,7 @@ DialogDevice::DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 		string name(selectorCombo->get_active_id());
 		if (not name.empty() and not Defaults::isVariable(name)) return;
 		btnAddElement->set_sensitive(spinnerLeds->get_value_as_int() > 1);
+		// Convert LED into 3 Pins.
 		const uint16_t pinsCount(spinnerLeds->get_value_as_int() * 3);
 		if (selectorCombo->get_active_id().empty() or not pinsCount) return;
 		DialogElement::getInstance()->changeNumberOfPins(pinsCount);
@@ -78,12 +79,14 @@ DialogDevice::DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 		string newName{selectorCombo->get_active_id()};
 		string msg;
 		if (not newName.empty() and not previousName.empty()) {
-			const auto& newInfo = Defaults::devicesInfo.at(newName);
-			const auto& oldInfo = Defaults::devicesInfo.at(previousName);
+			const auto
+				& newInfo {Defaults::devicesInfo.at(newName)},
+				& oldInfo {Defaults::devicesInfo.at(previousName)};
 			msg = "Are you sure you want to convert \"" + oldInfo.name + "\" into \"" + newInfo.name + "\"?";
 			if (Defaults::isVariable(newName)) {
 				msg += "\nPin count will be set to the current value to preserve elements.";
-			} else if (newInfo.pins < oldInfo.pins) {
+			}
+			else if (newInfo.pins < oldInfo.pins) {
 				msg += "\nElements using pins above " + std::to_string(newInfo.pins) + " will be removed.";
 			}
 			if (oldInfo.layoutRGB != newInfo.layoutRGB)
@@ -140,7 +143,8 @@ void DialogDevice::isValid() const {
 
 	if (Defaults::isVariable(name)) {
 		string pins(spinnerLeds->get_text());
-		if (not Defaults::isBetween(pins, 1, Defaults::devicesInfo.at(name).pins)) {
+		// LEDs vs Pins, need to divide.
+		if (not Defaults::isBetween(pins, 1, Defaults::devicesInfo.at(name).pins / 3)) {
 			if (action != Actions::LOAD) spinnerLeds->grab_focus();
 			throw Message(
 				"The number of pins need to be between one and the number of pins the device allows ("
@@ -180,7 +184,8 @@ void DialogDevice::storeData() noexcept {
 	if (Defaults::isSerial(name))
 		currentData->setValue(PORT, inputDevicePort->get_text());
 	if (Defaults::isVariable(name))
-		currentData->setValue(PINS, spinnerLeds->get_text());
+		// Store Pins, not LEDs
+		currentData->setValue(PINS, std::to_string(spinnerLeds->get_value_as_int() * 3));
 	if (Defaults::isMonochrome(name))
 		currentData->setValue(CHANGE_POINT, std::to_string(static_cast<uint8_t>(changePoint->get_value())));
 }
@@ -195,7 +200,8 @@ void DialogDevice::retrieveData() noexcept {
 	if (Defaults::isSerial(name))
 		inputDevicePort->set_text(currentData->getValue(PORT));
 	if (Defaults::isVariable(name))
-		spinnerLeds->set_value(std::stod(currentData->getValue(PINS)));
+		// Read Pins, convert to LEDs
+		spinnerLeds->set_value(std::stod(currentData->getValue(PINS)) / 3);
 	if (Defaults::isMonochrome(name))
 		changePoint->set_value(std::stod(currentData->getValue(CHANGE_POINT, std::to_string(DEFAULT_CHANGE_VALUE))));
 
@@ -231,33 +237,57 @@ void DialogDevice::onEmpty() noexcept {
 }
 
 void DialogDevice::onSelected() noexcept {
-	string name{selectorCombo->get_active_id()};
-	const uint16_t totalPins(Defaults::devicesInfo.at(name).pins);
+
+	const string name {selectorCombo->get_active_id()};
+
+	const Defaults::DeviceInfo
+		& oldInfo {Defaults::devicesInfo.at(previousName)},
+		& newInfo {Defaults::devicesInfo.at(name)};
+
+	// Detect variable pins or use device info.
+	const uint16_t
+		// Convert LEDs to Pins for spinner.
+		oldPins   (oldInfo.variable ? spinnerLeds->get_value_as_int() * 3 : oldInfo.pins),
+		newPins   {newInfo.variable ? oldPins : newInfo.pins},
+		totalPins {newInfo.pins};
+
+	const auto makeUid = [name](const std::string& id) {
+		return Defaults::createHardwareUniqueId({{NAME, name}, {ID, id}});
+	};
+
+	auto isUidSet = [this, &makeUid](const std::string& id) -> bool {
+		return currentData->getCollectionHandler()->isIdSet(makeUid(id));
+	};
+
 	if (Defaults::isIdUser(name)) {
+
 		Defaults::populateComboBoxWithIds(
 			idListstore,
 			Defaults::devicesInfo.at(name).maxIds,
-			[this, name](const string& id) {
-				return currentData->getCollectionHandler()->isIdSet(
-					Defaults::createHardwareUniqueId({{NAME, name}, {ID, id}})
-				);
-			},
+			isUidSet,
 			"Device Hardware Number",
 			"Hardware #"
 		);
-	}
-	if (Defaults::isVariable(name))
-		spinnerLeds->get_adjustment()->set_upper(totalPins);
-	else
-		DialogElement::getInstance()->changeNumberOfPins(totalPins);
-}
 
-void DialogDevice::onConvert(const string& fromType, const string& toType) noexcept {
-	const auto& newInfo = Defaults::devicesInfo.at(toType);
-	const uint16_t newPins(
-		Defaults::isVariable(toType)
-			? spinnerLeds->get_value_as_int() * (Defaults::devicesInfo.at(fromType).layoutRGB ? 3 : 1)
-			: newInfo.pins
-	);
-	DialogElement::getInstance()->handleLayoutChange(fromType, toType, newPins);
+	}
+	if (Defaults::isVariable(name)) {
+		// Convert Pins to LEDs
+		spinnerLeds->get_adjustment()->set_upper(totalPins / 3);
+		spinnerLeds->set_value(newPins / 3);
+	}
+	else {
+		DialogElement::getInstance()->changeNumberOfPins(totalPins);
+	}
+	if (Defaults::isIdUser(name)) {
+		// Select first free ID
+		for (uint16_t c = 0; c < newInfo.maxIds; ++c) {
+			std::string id = std::to_string(c + 1);
+			if (!isUidSet(id)) {
+				comboBoxId->set_active_id(std::move(id));
+				break;
+			}
+		}
+	}
+
+	DialogElement::getInstance()->handleLayoutChange(oldInfo, newInfo);
 }

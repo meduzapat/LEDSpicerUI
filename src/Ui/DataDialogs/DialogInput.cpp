@@ -205,31 +205,24 @@ void DialogInput::onEmpty() noexcept {
 }
 
 void DialogInput::onSelected() noexcept {
-	auto id{selectorCombo->get_active_id()};
-	const bool needSources {Defaults::inputHasFlag(id, Defaults::INPUT_NEEDS_SOURCE)};
-	if (needSources)
-		DialogInputSource::getInstance()->populateSources(id);
+	auto name{selectorCombo->get_active_id()};
+	const bool
+//		oldSourced {Defaults::inputHasFlag(previousName, Defaults::INPUT_NEEDS_SOURCE)},
+		newSourced {Defaults::inputHasFlag(name, Defaults::INPUT_NEEDS_SOURCE)};
+
+//	if (oldSourced and not newSourced)
+	if (newSourced)
+		DialogInputSource::getInstance()->populateSources(name);
 	else
 		DialogInputSource::getInstance()->createPhantomSource();
-}
-
-void DialogInput::onConvert(const string& fromType, const string& toType) noexcept {
-
-	const bool oldSourced = Defaults::inputHasFlag(fromType, Defaults::INPUT_NEEDS_SOURCE);
-	const bool newSourced = Defaults::inputHasFlag(toType,   Defaults::INPUT_NEEDS_SOURCE);
-
-	if (oldSourced and not newSourced)
-		DialogInputSource::getInstance()->convertToSourceless();
-	else if (not oldSourced and newSourced)
-		DialogInputSource::getInstance()->convertToSourced();
 
 	// Drop fields the new type doesn't support.
-	if (not Defaults::inputHasFlag(toType, Defaults::INPUT_HAS_BLINK))
+	if (not Defaults::inputHasFlag(name, Defaults::INPUT_HAS_BLINK))
 		currentData->unSet(BLINK);
-	if (not Defaults::inputHasFlag(toType, Defaults::INPUT_HAS_TIMES))
+	if (not Defaults::inputHasFlag(name, Defaults::INPUT_HAS_TIMES))
 		currentData->unSet(TIMES);
-	if (not Defaults::inputHasFlag(toType, Defaults::INPUT_HAS_SPEED))
+	if (not Defaults::inputHasFlag(name, Defaults::INPUT_HAS_SPEED))
 		currentData->unSet(SPEED);
-	if (not Defaults::inputHasFlag(toType, Defaults::INPUT_LINKED_MAPS))
+	if (not Defaults::inputHasFlag(name, Defaults::INPUT_LINKED_MAPS))
 		DialogInputLinkMaps::getInstance()->clearForm();
 }

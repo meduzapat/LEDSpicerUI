@@ -106,7 +106,7 @@ const std::unordered_map<string, Defaults::DeviceInfo> Defaults::devicesInfo = {
 		true,              // Variable number of pins
 		true,              // Layout RGB
 		true,              // Supports RGB strip
-		1000,              // Maximum number of Pins
+		3000,              // Maximum number of Pins
 		Connection::SERIAL // Connection type
 	}},
 	{"RaspberryPi", {
@@ -504,7 +504,7 @@ void Defaults::populateComboBoxWithIds(
 	const string& label
 ) {
 	// clean id combobox.
-	auto children = store->children();
+	auto children {store->children()};
 	std::vector<Gtk::TreeIter> rowsToRemove;
 	for (auto iter = children.begin(); iter != children.end(); ++iter)
 		rowsToRemove.push_back(*iter);
@@ -512,15 +512,15 @@ void Defaults::populateComboBoxWithIds(
 		store->erase(*iter);
 
 	if (not emptyLabel.empty()) {
-		auto row = *(store->append());
+		auto row {*(store->append())};
 		row.set_value(0, emptyString);
 		row.set_value(1, emptyLabel);
 		row.set_value(2, false);
 	}
 
 	for (size_t c = 0; c < max; ++c) {
-		auto row = *(store->append());
-		const auto& id(std::to_string(c + 1));
+		auto row {*(store->append())};
+		const auto& id {std::to_string(c + 1)};
 		row.set_value(0, id);
 		row.set_value(1, label + id);
 		row.set_value(2, not isUsedFn(id));
@@ -546,7 +546,8 @@ void Defaults::setFilter(Gtk::SearchEntry* filterEntry, Gtk::FlowBox* box, Gtk::
 	filterEntry->signal_stop_search().connect([dialog, filterEntry]() {
 		if (filterEntry->get_text().empty()) {
 			dialog->response(Gtk::RESPONSE_CANCEL);
-		} else {
+		}
+		else {
 			filterEntry->set_text("");
 		}
 	});

@@ -69,12 +69,10 @@ bool DialogFormHost::handleTypeSwitch(
 	}
 
 	// Process conventions.
-	onConvert(previousName, newName);
-
-	// New data or replaced.
-	previousName = newName;
 	onEmpty();
 	onSelected();
+	// New data or replaced.
+	previousName = newName;
 	return true;
 }
 

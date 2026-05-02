@@ -120,8 +120,6 @@ protected:
 	void onEmpty()    noexcept override;
 	void onSelected() noexcept override {}
 
-	void onConvert(const string&, const string&) noexcept override {}
-
 };
 
 } // namespace

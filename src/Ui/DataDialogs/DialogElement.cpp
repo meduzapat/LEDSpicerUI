@@ -106,9 +106,9 @@ DialogElement::DialogElement(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 			case tabIndex::sRGB: {
 				// Assuming all hardware is sequential.
 				int first(Storage::Element::findFirstConnectorIndexByPosition(getPosition(selected.at(0))));
-				pinR->set_text(std::to_string(first++));
-				pinG->set_text(std::to_string(first++));
-				pinB->set_text(std::to_string(first));
+				pinR->set_text(std::to_string(++first));
+				pinG->set_text(std::to_string(++first));
+				pinB->set_text(std::to_string(++first));
 				break;
 			}
 			case tabIndex::mRGB: {
@@ -651,13 +651,10 @@ void DialogElement::changeNumberOfPins(const uint16_t newSize) noexcept {
 	drawPins();
 }
 
-void DialogElement::handleLayoutChange(const string& fromType, const string& toType, uint16_t newPins) noexcept {
-
-	const auto& oldInfo = Defaults::devicesInfo.at(fromType);
-	const auto& newInfo = Defaults::devicesInfo.at(toType);
-
-	// trim elements beyond new pin count.
-	changeNumberOfPins(newPins);
+void DialogElement::handleLayoutChange(
+	const Defaults::DeviceInfo& oldInfo,
+	const Defaults::DeviceInfo& newInfo
+) noexcept {
 
 	//  remove strip elements if new device has no strip support.
 	if (oldInfo.supportStrip and not newInfo.supportStrip) {
@@ -678,7 +675,7 @@ void DialogElement::handleLayoutChange(const string& fromType, const string& toT
 			);
 	}
 
-	// convert positional RGB elements to scattered RGB if new device has no RGB layout.
+	// Convert positional RGB elements to scattered RGB if new device has no RGB layout.
 	if (oldInfo.layoutRGB and not newInfo.layoutRGB) {
 		for (auto btn : *items) {
 			auto* data = btn->getData();

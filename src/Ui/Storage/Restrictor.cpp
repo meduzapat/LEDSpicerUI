@@ -9,7 +9,7 @@ string Restrictor::createPrettyName() const noexcept {
 	if (Defaults::isIdUser(name, false))
 		r += " Id: " + getValue(ID);
 	if (Defaults::isSerial(name, false))
-		r += " Port: " + getValue(PORT, "<autodetect>");
+		r += " Port: " + (getValue(PORT).empty() ? "<autodetect>" : getValue(PORT));
 	return r;
 }
 

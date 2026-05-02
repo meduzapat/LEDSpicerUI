@@ -1924,7 +1924,7 @@ If nothing is set, the default is 1000ms.</property>
           </object>
           <packing>
             <property name="pack-type">end</property>
-            <property name="position">4</property>
+            <property name="position">3</property>
           </packing>
         </child>
         <child>
@@ -1974,29 +1974,21 @@ If nothing is set, the default is 1000ms.</property>
   </object>
   <object class="GtkAboutDialog" id="DialogAbout">
     <property name="can-focus">False</property>
-    <property name="resizable">False</property>
-    <property name="modal">True</property>
     <property name="window-position">center-on-parent</property>
-    <property name="destroy-with-parent">True</property>
     <property name="type-hint">dialog</property>
-    <property name="deletable">False</property>
     <property name="transient-for">MainWindow</property>
     <property name="program-name">@PACKAGE_NAME@</property>
     <property name="version">@PACKAGE_VERSION@</property>
-    <property name="copyright">@COPYRIGHT@</property>
-    <property name="comments">LEDSpicer UI
-User-friendly interface for configuring the LEDSpicer daemon
+    <property name="copyright" translatable="yes">@COPYRIGHT@</property>
+    <property name="comments" translatable="yes">User-friendly interface for configuring the LEDSpicer daemon
 
-Compatible with version @MINIMUM_COMPATIBILITY@
-
-Free and open-source, built in spare time
-Designed to make your setup easier and look better
-
-If you find it useful, consider supporting development
-Your support helps keep the project improving</property>
+Compatible with version @MINIMUM_COMPATIBILITY@+</property>
     <property name="website">@PACKAGE_URL@</property>
-    <property name="website-label">Project Page</property>
+    <property name="website-label" translatable="yes">Project Page</property>
     <property name="authors">Patricio A Rossi</property>
+    <property name="documenters">Patricio A Rossi</property>
+    <property name="translator-credits" translatable="yes">Patricio A Rossi</property>
+    <property name="artists">Patricio A Rossi</property>
     <property name="logo">images/ledspicericon.svg</property>
     <property name="license-type">gpl-3-0</property>
     <child internal-child="vbox">
@@ -2008,6 +2000,55 @@ Your support helps keep the project improving</property>
           <object class="GtkButtonBox">
             <property name="can-focus">False</property>
             <property name="layout-style">end</property>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="orientation">vertical</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="label" translatable="yes">&lt;big&gt;&lt;b&gt;Free and open-source&lt;/b&gt;&lt;/big&gt;
+&lt;span weight="light"&gt;Built in spare time for the community.&lt;/span&gt;
+
+&lt;b&gt;Designed to simplify your config and bring your cabinet to life.&lt;/b&gt;
+
+&lt;span foreground="#4a90e2"&gt;Your support fuels the project.&lt;/span&gt;</property>
+                <property name="use-markup">True</property>
+                <property name="justify">center</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="label" translatable="yes">
+&lt;b&gt;Donations supply the coffee that powers the code!&lt;/b&gt;
+</property>
+                <property name="use-markup">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
             <child>
               <object class="GtkLinkButton" id="BtnDonatePayPal">
                 <property name="visible">True</property>
@@ -2052,15 +2093,14 @@ Your support helps keep the project improving</property>
               <packing>
                 <property name="expand">True</property>
                 <property name="fill">True</property>
-                <property name="position">0</property>
-                <property name="secondary">True</property>
+                <property name="position">2</property>
               </packing>
             </child>
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">-1</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
           </packing>
         </child>
       </object>

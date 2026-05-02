@@ -79,7 +79,6 @@ protected:
 	void onEmpty()    noexcept override;
 	void onSelected() noexcept override;
 
-	void onConvert(const string& fromType, const string& toType) noexcept override;
 };
 
 } // namespace

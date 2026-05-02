@@ -31,7 +31,7 @@ string Device::createPrettyName() const noexcept {
 	if (Defaults::isIdUser(name))
 		r += " Id: " + getValue(ID);
 	if (Defaults::isSerial(name))
-		r += " Port: " + getValue(PORT, "<autodetect>");
+		r += " Port: " + (getValue(PORT).empty() ? "<autodetect>" : getValue(PORT));
 	return r;
 }
 

@@ -67,7 +67,10 @@ public:
 	 * @param toType
 	 * @param newPins
 	 */
-	void handleLayoutChange(const string& fromType, const string& toType, uint16_t newPins) noexcept;
+	void handleLayoutChange(
+		const Defaults::DeviceInfo& oldInfo,
+		const Defaults::DeviceInfo& newInfo
+	) noexcept;
 
 	/**
 	 * Redraw the pin box.

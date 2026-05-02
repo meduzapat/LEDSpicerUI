@@ -266,7 +266,7 @@ void DialogRestrictor::onEmpty() noexcept {
 }
 
 void DialogRestrictor::onSelected() noexcept {
-	string name = selectorCombo->get_active_id();
+	const string& name {selectorCombo->get_active_id()};
 	if (Defaults::isIdUser(name, false)) {
 		Defaults::populateComboBoxWithIds(
 			idListstore,
@@ -279,10 +279,8 @@ void DialogRestrictor::onSelected() noexcept {
 		);
 	}
 	DialogRestrictorMap::getInstance()->populateInterfacesCombobox();
-}
 
-void DialogRestrictor::onConvert(const string& fromType, const string& toType) noexcept {
-	const uint8_t newInterfaces = Defaults::restrictorsInfo.at(toType).interfaces;
-	if (Defaults::restrictorsInfo.at(fromType).interfaces > newInterfaces)
+	const uint8_t newInterfaces {Defaults::restrictorsInfo.at(name).interfaces};
+	if (Defaults::restrictorsInfo.at(previousName).interfaces > newInterfaces)
 		DialogRestrictorMap::getInstance()->trimToInterfaces(newInterfaces);
 }
