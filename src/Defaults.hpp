@@ -238,6 +238,17 @@ const string
 
 } // namespace
 
+// CSS classes
+#define BOX_BACKGROUND_DELETE "BoxBackgroundDelete"
+#define BOX_BACKGROUND_EDIT   "BoxBackgroundEdit"
+#define BOX_BACKGROUND_COPY   "BoxBackgroundCopy"
+
+// Project Icons
+#define ICON_TRASH "user-trash-symbolic"
+#define ICON_EDIT  "emblem-system-symbolic"
+#define ICON_COPY  "edit-copy-symbolic"
+
+
 using namespace Constants;
 
 /**
@@ -596,6 +607,18 @@ public:
 		const string& emptyLabel,
 		const string& label
 	);
+
+	/**
+	 * Selects the first available (unused) ID in a combo box.
+	 * @param combo the combo box to update.
+	 * @param max the maximum ID to check.
+	 * @param isUsedFn a function that returns true if the ID is already in use.
+	 */
+	static void selectFirstAvailableId(
+		Gtk::ComboBox* combo,
+		uint max,
+		std::function<bool(const string&)> isUsedFn
+	) noexcept;
 
 	/**
 	 * Handles the filter for a flowbox.

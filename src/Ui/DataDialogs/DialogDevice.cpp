@@ -251,15 +251,17 @@ void DialogDevice::onSelected() noexcept {
 		newPins   {newInfo.variable ? oldPins : newInfo.pins},
 		totalPins {newInfo.pins};
 
-	const auto makeUid = [name](const std::string& id) {
+	const auto makeUid {[name](const std::string& id) {
 		return Defaults::createHardwareUniqueId({{NAME, name}, {ID, id}});
-	};
+	}};
 
-	auto isUidSet = [this, &makeUid](const std::string& id) -> bool {
+	auto isUidSet {[this, &makeUid](const std::string& id) -> bool {
 		return currentData->getCollectionHandler()->isIdSet(makeUid(id));
-	};
+	}};
 
-	if (Defaults::isIdUser(name)) {
+	const bool isIdUser {Defaults::isIdUser(name)};
+
+	if (isIdUser) {
 
 		Defaults::populateComboBoxWithIds(
 			idListstore,
@@ -278,16 +280,9 @@ void DialogDevice::onSelected() noexcept {
 	else {
 		DialogElement::getInstance()->changeNumberOfPins(totalPins);
 	}
-	if (Defaults::isIdUser(name)) {
-		// Select first free ID
-		for (uint16_t c = 0; c < newInfo.maxIds; ++c) {
-			std::string id = std::to_string(c + 1);
-			if (!isUidSet(id)) {
-				comboBoxId->set_active_id(std::move(id));
-				break;
-			}
-		}
-	}
+
+	if (isIdUser)
+		Defaults::selectFirstAvailableId(comboBoxId, newInfo.maxIds, isUidSet);
 
 	DialogElement::getInstance()->handleLayoutChange(oldInfo, newInfo);
 }

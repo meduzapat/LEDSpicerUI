@@ -173,7 +173,7 @@ void DialogColors::resetColorButtons() {
 }
 
 void DialogColors::populateColorBox(Gtk::FlowBox* destination, const StringVector& colors) {
-	for (auto& c : colors)
+	for (const auto& c : colors)
 		createColorButton(destination, c);
 }
 
@@ -220,7 +220,7 @@ string DialogColors::setColors(StringUMap& colors) {
 
 void DialogColors::createColorButton(Gtk::FlowBox* destination, const string& color) {
 
-	auto box = Gtk::make_managed<Gtk::HBox>(false, 2);
+	auto box {Gtk::make_managed<Gtk::HBox>(false, 2)};
 	box->set_valign(Gtk::ALIGN_START);
 	box->set_vexpand(false);
 	box->set_margin_top(2);
@@ -229,11 +229,11 @@ void DialogColors::createColorButton(Gtk::FlowBox* destination, const string& co
 	box->set_margin_right(2);
 	box->get_style_context()->add_class("ColorButton");
 
-	auto l = Gtk::make_managed<Gtk::Label>(color);
+	auto l {Gtk::make_managed<Gtk::Label>(color)};
 	l->get_style_context()->add_class(color);
 
 	// Button delete.
-	auto b = Gtk::make_managed<Gtk::Button>();
+	auto b {Gtk::make_managed<Gtk::Button>()};
 	b->set_image_from_icon_name("edit-delete", Gtk::ICON_SIZE_BUTTON);
 	b->signal_clicked().connect([box, destination]() {
 		Defaults::markDirty();

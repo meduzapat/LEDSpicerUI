@@ -527,6 +527,20 @@ void Defaults::populateComboBoxWithIds(
 	}
 }
 
+void Defaults::selectFirstAvailableId(
+	Gtk::ComboBox* combo,
+	uint max,
+	std::function<bool(const string&)> isUsedFn
+) noexcept {
+	for (uint c = 0; c < max; ++c) {
+		const string id {std::to_string(c + 1)};
+		if (not isUsedFn(id)) {
+			combo->set_active_id(std::move(id));
+			break;
+		}
+	}
+}
+
 void Defaults::setFilter(Gtk::SearchEntry* filterEntry, Gtk::FlowBox* box, Gtk::Dialog* dialog) {
 	dialog->signal_show().connect([filterEntry]() {
 		filterEntry->set_text("");

@@ -267,18 +267,23 @@ void DialogRestrictor::onEmpty() noexcept {
 
 void DialogRestrictor::onSelected() noexcept {
 	const string& name {selectorCombo->get_active_id()};
-	if (Defaults::isIdUser(name, false)) {
+	const auto isUsed {[=](const string& id) {
+		return currentData->getCollectionHandler()->isIdSet(Defaults::createHardwareUniqueId({{NAME, name}, {ID, id}}, false));
+	}};
+	const bool isIdUser {Defaults::isIdUser(name, false)};
+	if (isIdUser) {
 		Defaults::populateComboBoxWithIds(
 			idListstore,
 			Defaults::restrictorsInfo.at(name).maxIds,
-			[=](const string& id) {
-				return currentData->getCollectionHandler()->isIdSet(Defaults::createHardwareUniqueId({{NAME, name}, {ID, id}}, false));
-			},
+			isUsed,
 			"Restrictor Number",
 			"Hardware #"
 		);
 	}
 	DialogRestrictorMap::getInstance()->populateInterfacesCombobox();
+
+	if (isIdUser)
+		Defaults::selectFirstAvailableId(comboBoxId, Defaults::restrictorsInfo.at(name).maxIds, isUsed);
 
 	const uint8_t newInterfaces {Defaults::restrictorsInfo.at(name).interfaces};
 	if (Defaults::restrictorsInfo.at(previousName).interfaces > newInterfaces)
