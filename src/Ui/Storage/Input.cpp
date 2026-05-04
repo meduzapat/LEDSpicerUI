@@ -42,7 +42,7 @@ string Input::createTooltip() const noexcept {
 string Input::toXML() const noexcept {
 	StringUMap attrs{copyValues()};
 
-	auto* imlBBC{getChild(COLLECTION_INPUT_LINKMAPS)};
+	auto imlBBC {getChild(COLLECTION_INPUT_LINKMAPS)};
 	if (Defaults::hasLinkedMaps(getValue(NAME)) and imlBBC->getSize() > 0) {
 		StringVector chunks;
 		for (auto btn : *imlBBC)

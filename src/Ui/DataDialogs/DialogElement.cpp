@@ -678,7 +678,7 @@ void DialogElement::handleLayoutChange(
 	// Convert positional RGB elements to scattered RGB if new device has no RGB layout.
 	if (oldInfo.layoutRGB and not newInfo.layoutRGB) {
 		for (auto btn : *items) {
-			auto* data = btn->getData();
+			auto data {btn->getData()};
 			Storage::Element::splitRGB(data);
 			data->unSet(POSITION);
 			data->unSet(POSITIONS);

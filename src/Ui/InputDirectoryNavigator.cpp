@@ -53,7 +53,7 @@ InputDirectoryNavigator::InputDirectoryNavigator(
 	builder->get_widget("BtnImportInput",     btnImportInput);
 
 	// Register automatic buttons.
-	auto* chEl = Storage::CollectionHandler::getInstance(COLLECTION_ELEMENTS);
+	auto chEl {Storage::CollectionHandler::getInstance(COLLECTION_ELEMENTS)};
 	chEl->registerSensitivity(btnAddInput);
 	chEl->registerSensitivity(btnImportInput);
 

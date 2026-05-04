@@ -199,7 +199,7 @@ TEST_F(InputMapLinkTest, ToXMLSkipsUnlinkedAndFollowsCollectionOrder) {
 	// m1→idx 0, m2→idx 1, m3→idx 2.
 	StringUMap d1{{NAME, "m1"}}, d2{{NAME, "m2"}}, d3{{NAME, "m3"}};
 	Element    map1(d1), map2(d2), map3(d3);
-	auto* tempMaps{CollectionHandler::getInstance(COLLECTION_INPUT_MAPS)};
+	auto tempMaps {CollectionHandler::getInstance(COLLECTION_INPUT_MAPS)};
 	tempMaps->add(&map1);
 	tempMaps->add(&map2);
 	tempMaps->add(&map3);

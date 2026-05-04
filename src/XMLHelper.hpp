@@ -171,6 +171,11 @@ public:
 	StringUMapVector& getData(const string& dataName) noexcept;
 
 	/**
+	 * @return The whole extracted information at loading.
+	 */
+	DataMap& getDataMap() noexcept { return extractedData; }
+
+	/**
 	 * Convert a XML error into human readable text.
 	 *
 	 * @param error A raw error message from XML.
@@ -187,7 +192,7 @@ protected:
 	RootInfo rootInfo;
 
 	/// Populated by derived classes to store extracted XML data by section.
-	std::unordered_map<string, StringUMapVector> extractedData;
+	DataMap extractedData;
 
 	/**
 	 * Processes root node and extracts common attributes.

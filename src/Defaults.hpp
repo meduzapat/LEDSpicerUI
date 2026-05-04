@@ -61,10 +61,11 @@ using std::unique_ptr;
 
 using StringUMap       = std::unordered_map<string, string>;
 using StringMap        = std::map<string, string>;
-using StringUMapVector = vector<StringUMap>;
+using StringUMapVector = std::vector<StringUMap>;
 using StringUSet       = std::unordered_set<string>;
 using StringSet        = std::set<string>;
-using StringVector     = vector<string>;
+using StringVector     = std::vector<string>;
+using DataMap          = std::unordered_map<string, StringUMapVector>;
 
 namespace LEDSpicerUI {
 
