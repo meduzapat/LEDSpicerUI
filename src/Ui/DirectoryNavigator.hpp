@@ -86,19 +86,24 @@ protected:
 	 */
 	virtual void wireDialogs(Storage::DirectoryEntry* dir) noexcept abstract;
 
-	/**
-	 * Walks dir recursively, builds a DirectoryEntry tree, and calls loadFile() for each .xml.
-	 * Non-.xml files are silently ignored. A missing or non-directory path is a no-op.
-	 * @param dir Filesystem path to scan.
-	 */
-	void loadFromDisk(const string& dir) noexcept;
+	/// Flat scan accumulator — populated by process(), consumed by DDir::load().
+	DataMap scanData;
 
 	/**
-	 * Loads one file into the given directory node.
-	 * @param filePath Absolute path to the .xml file.
-	 * @param node Directory node that owns the file.
+	 * Recursively walks absPath, populating scanData with directory entries and
+	 * file data. Directories before files within each level (sorted order).
+	 * @param absPath Absolute filesystem path to scan.
+	 * @param relPath Navigator-relative path prefix for this level (empty = root).
 	 */
-	virtual void loadFile(const string& filePath, Storage::DirectoryEntry* node) noexcept abstract;
+	void process(const string& absPath, const string& relPath) noexcept;
+
+	/**
+	 * Parses one .xml file and returns its extracted DataMap.
+	 * @param filePath Absolute path to the .xml file.
+	 * @param relPath  Navigator-relative directory path containing the file.
+	 * @return DataMap with all data extracted from the file.
+	 */
+	virtual DataMap extractData(const string& filePath, const string& relPath) noexcept abstract;
 
 };
 

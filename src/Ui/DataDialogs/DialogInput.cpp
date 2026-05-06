@@ -71,7 +71,10 @@ DialogInput::DialogInput(
 }
 
 void DialogInput::load(DataMap& values) noexcept {
-	createItems(values[COLLECTION_INPUTS], values);
+	createItems(
+		values[Defaults::createCommonUniqueId({currentDirectory->getFullPath(), COLLECTION_INPUTS})],
+		values
+	);
 }
 
 void DialogInput::createSubItems(DataMap& values) noexcept {
@@ -161,6 +164,8 @@ void DialogInput::storeData() noexcept {
 }
 
 void DialogInput::retrieveData() noexcept {
+
+	currentData->getProperties().setValue(PATH_BASE, currentData->getValue(PATH_BASE));
 
 	string name(currentData->getValue(NAME));
 

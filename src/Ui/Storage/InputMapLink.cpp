@@ -32,10 +32,9 @@ InputMapLink::InputMapLink(StringUMap& data, const string& inputPid) noexcept :
 }
 
 string InputMapLink::createPrettyName() const noexcept {
-	StringVector names;
-	for (auto btn : *primaryChild)
-		names.push_back(btn->getData()->createPrettyName());
-	return names.empty() ? "Empty" : Defaults::implode(names, " ➡️ ") + " 🔙";
+	const auto size {primaryChild->getSize()};
+	if (not size) return "Empty";
+	return "Linked " + std::to_string(size) + " Maps";
 }
 
 string InputMapLink::createTooltip() const noexcept {

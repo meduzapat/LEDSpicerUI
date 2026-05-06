@@ -39,10 +39,10 @@ public:
 
 	/**
 	 * @param filePath Full path to the .xml file on disk.
-	 * @param parent Owning directory node, or nullptr for root level.
+	 * @param relPath  Relative path from the navigator root (empty string for root level).
 	 * @throws Message on parse errors.
 	 */
-	InputFile(const string& filePath, DirectoryEntry* parent);
+	InputFile(const string& filePath, const string& relPath);
 
 	virtual ~InputFile() = default;
 

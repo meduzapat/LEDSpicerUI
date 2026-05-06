@@ -77,7 +77,7 @@ DialogInputSource::DialogInputSource(
 
 void DialogInputSource::load(DataMap& values) noexcept {
 	createItems(
-		values[Defaults::createCommonUniqueId({ownerData->createUniqueId(), COLLECTION_INPUT_SOURCES})],
+		values[Defaults::createCommonUniqueId({ownerData->getProperties().getValue(PATH_BASE), COLLECTION_INPUT_SOURCES})],
 		values
 	);
 }
@@ -93,7 +93,7 @@ void DialogInputSource::isValid() const {
 	if (currentData->getProperties().getValue(SOURCELESS).empty()) {
 		if (resolvedSource().empty()) throw Message("Enter a valid source name.");
 	}
-	if (not DialogInputMap::getInstance()->getBox()->getSize()) throw Message("Add at least one map.");
+	if (action != Actions::LOAD and not DialogInputMap::getInstance()->getBox()->getSize()) throw Message("Add at least one map.");
 }
 
 void DialogInputSource::storeData() noexcept {
@@ -116,6 +116,9 @@ void DialogInputSource::storeData() noexcept {
 }
 
 void DialogInputSource::retrieveData() noexcept {
+
+	currentData->getProperties().setValue(PATH_BASE, currentData->getValue(PATH_BASE));
+
 	// sourceless will be handled at activation.
 	if (not Defaults::needSource(comboBoxInputSelectInput->get_active_id())) return;
 

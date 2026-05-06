@@ -28,7 +28,7 @@ DirectoryEntry::DirectoryEntry(
 	StringUMap&     data,
 	DirectoryEntry* parent
 ) noexcept :
-	Data(data),
+	Parent(data, {COLLECTION_DIRECTORIES}),
 	DirNode(getProperties(), parent, getValue(FILENAME))
 {}
 
@@ -47,6 +47,3 @@ string DirectoryEntry::createTooltip() const noexcept {
 	return getFullPath();
 }
 
-bool DirectoryEntry::isEmpty() const noexcept {
-	return not contents.getSize();
-}

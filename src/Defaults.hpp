@@ -184,8 +184,8 @@ const string
 
 /// UI-related constants.
 	DEFAULT_ELEMENT_TYPE {"9"},
-	PLAYER   {"player"},
-	JOYSTICK {"joystick"},
+	PLAYER               {"player"},
+	JOYSTICK             {"joystick"},
 
 /// Types
 	TYPE_MAP             {"map"},
@@ -225,9 +225,14 @@ const string
 	COLLECTION_PROFILE_INPUTS     {"pr.i"},
 	COLLECTION_PROFILE_ANIMATIONS {"pr.a"},
 	COLLECTION_INPUT_MAP_LINKS    {"i.m.l"},
+
 /// Directories
 	COLLECTION_DIRECTORIES       {"ds"},
-	COLLECTION_INPUT_DIRECTORIES {"ids"};
+	COLLECTION_INPUT_DIRECTORIES {"ids"},
+
+/// Path related.
+	PATH_PARENT {"pp"},
+	PATH_BASE   {"pb"};
 
 } // namespace
 

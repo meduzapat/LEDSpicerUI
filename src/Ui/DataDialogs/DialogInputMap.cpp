@@ -72,7 +72,7 @@ void DialogInputMap::setNormalBox(const bool flag) noexcept {
 
 void DialogInputMap::load(DataMap& values) noexcept {
 	createItems(
-		values[Defaults::createCommonUniqueId({ownerData->createUniqueId(), COLLECTION_INPUT_MAPS})],
+		values[Defaults::createCommonUniqueId({ownerData->getProperties().getValue(PATH_BASE), COLLECTION_INPUT_MAPS})],
 		values
 	);
 }
