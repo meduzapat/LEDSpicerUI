@@ -50,7 +50,7 @@ public:
 
 	void setOwner(Storage::BoxButtonCollection* collection, Storage::Data* owner) noexcept override;
 
-	void load(XMLHelper* values)  noexcept override;
+	void load(DataMap& values)    noexcept override;
 	void clearForm()              noexcept override;
 	void storeData()              noexcept override;
 	void retrieveData()           noexcept override;

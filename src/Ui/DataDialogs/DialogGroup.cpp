@@ -94,11 +94,11 @@ DialogGroup::DialogGroup(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& 
 	});
 }
 
-void DialogGroup::load(XMLHelper* values) noexcept {
-	createItems(values->getData(COLLECTION_GROUPS), values);
+void DialogGroup::load(DataMap& values) noexcept {
+	createItems(values.at(COLLECTION_GROUPS), values);
 }
 
-void DialogGroup::createSubItems(XMLHelper* values) noexcept {
+void DialogGroup::createSubItems(DataMap& values) noexcept {
 	DialogSelect::getInstance()->load(values, currentData->createUniqueId());
 }
 

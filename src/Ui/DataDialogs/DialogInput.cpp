@@ -70,11 +70,11 @@ DialogInput::DialogInput(
 	});
 }
 
-void DialogInput::load(XMLHelper* values) noexcept {
-	createItems(values->getData(COLLECTION_INPUTS), values);
+void DialogInput::load(DataMap& values) noexcept {
+	createItems(values.at(COLLECTION_INPUTS), values);
 }
 
-void DialogInput::createSubItems(XMLHelper* values) noexcept {
+void DialogInput::createSubItems(DataMap& values) noexcept {
 	DialogInputSource::getInstance()->load(values);
 	DialogInputLinkMaps::getInstance()->load(values);
 }

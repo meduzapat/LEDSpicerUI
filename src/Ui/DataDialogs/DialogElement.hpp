@@ -48,7 +48,7 @@ public:
 		switchPageConnection.disconnect();
 	};
 
-	void load(XMLHelper* values)  noexcept override;
+	void load(DataMap& values)    noexcept override;
 	void clearForm()              noexcept override;
 	void storeData()              noexcept override;
 	void retrieveData()           noexcept override;

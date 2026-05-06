@@ -70,9 +70,9 @@ void DialogInputMap::setNormalBox(const bool flag) noexcept {
 	box = flag ? boxSourceMaps : boxInputMaps;
 }
 
-void DialogInputMap::load(XMLHelper* values) noexcept {
+void DialogInputMap::load(DataMap& values) noexcept {
 	createItems(
-		values->getData(Defaults::createCommonUniqueId({ownerData->createUniqueId(), COLLECTION_INPUT_MAPS})),
+		values.at(Defaults::createCommonUniqueId({ownerData->createUniqueId(), COLLECTION_INPUT_MAPS})),
 		values
 	);
 }

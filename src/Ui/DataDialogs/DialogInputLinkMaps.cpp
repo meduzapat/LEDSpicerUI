@@ -78,9 +78,9 @@ void DialogInputLinkMaps::setOwner(
 	mapsRequest.filterValue      = ownerData->getProperties().getValue(UID);
 }
 
-void DialogInputLinkMaps::load(XMLHelper* values) noexcept {
+void DialogInputLinkMaps::load(DataMap& values) noexcept {
 	createItems(
-		values->getData(
+		values.at(
 			Defaults::createCommonUniqueId({ownerData->createUniqueId(),
 			COLLECTION_INPUT_LINKMAPS})
 		),
@@ -88,7 +88,7 @@ void DialogInputLinkMaps::load(XMLHelper* values) noexcept {
 	);
 }
 
-void DialogInputLinkMaps::createSubItems(XMLHelper*) noexcept {
+void DialogInputLinkMaps::createSubItems(DataMap& values) noexcept {
 	const string& idxStr{currentData->getValue(LINKED_ITEMS)};
 	if (idxStr.empty()) return;
 	mapsRequest.sourceCollection = CollectionHandler::getInstance(COLLECTION_INPUT_MAPS);

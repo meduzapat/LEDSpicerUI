@@ -46,8 +46,8 @@ DialogRestrictorMap::DialogRestrictorMap(BaseObjectType* obj, const Glib::RefPtr
 	liststoreRestrictorMapId = static_cast<Gtk::ListStore*>(builder->get_object("liststoreRestrictorMapId").get());
 }
 
-void DialogRestrictorMap::load(XMLHelper* values) noexcept {
-	createItems(values->getData(Defaults::createCommonUniqueId({ownerData->createUniqueId(), COLLECTION_RESTRICTOR_MAPS})), values);
+void DialogRestrictorMap::load(DataMap& values) noexcept {
+	createItems(values.at(Defaults::createCommonUniqueId({ownerData->createUniqueId(), COLLECTION_RESTRICTOR_MAPS})), values);
 }
 
 void DialogRestrictorMap::clearForm() noexcept {

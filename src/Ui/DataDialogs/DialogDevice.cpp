@@ -98,11 +98,11 @@ DialogDevice::DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 	});
 }
 
-void DialogDevice::load(XMLHelper* values) noexcept {
-	createItems(values->getData(COLLECTION_DEVICES), values);
+void DialogDevice::load(DataMap& values) noexcept {
+	createItems(values.at(COLLECTION_DEVICES), values);
 }
 
-void DialogDevice::createSubItems(XMLHelper* values) noexcept {
+void DialogDevice::createSubItems(DataMap& values) noexcept {
 	DialogElement::getInstance()->load(values);
 }
 

@@ -40,7 +40,7 @@ DialogForm::~DialogForm() {
 		delete child;
 }
 
-void DialogForm::createItems(StringUMapVector& rawCollection, XMLHelper* values) noexcept {
+void DialogForm::createItems(StringUMapVector& rawCollection, DataMap& values) noexcept {
 
 	string errors;
 	for (auto& rawItem : rawCollection) {

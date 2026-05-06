@@ -67,7 +67,7 @@ InputDirectoryNavigator::InputDirectoryNavigator(
 			for (const auto& selectedFile : selectedFiles) {
 				try {
 					InputFile datafile(selectedFile, currentDir);
-					DataDialogs::DialogInput::getInstance()->load(&datafile);
+					DataDialogs::DialogInput::getInstance()->load(datafile.getDataMap());
 				}
 				catch (Message& e) {
 					Message::displayError(XMLHelper::cleanError(e.getMessage()));
@@ -152,7 +152,7 @@ void InputDirectoryNavigator::loadFile(const string& filePath, Storage::Director
 	try {
 		InputFile datafile(filePath, node);
 		DataDialogs::DialogInput::getInstance()->setOwner(&node->getContents(), node);
-		DataDialogs::DialogInput::getInstance()->load(&datafile);
+		DataDialogs::DialogInput::getInstance()->load(datafile.getDataMap());
 	}
 	catch (Message& e) {
 		Message::displayError(

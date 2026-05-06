@@ -442,8 +442,8 @@ void MainWindow::readConfigFile(const string& dataFilePath, bool wipe, uint8_t i
 			devices.wipe();
 			groups.wipe();
 		}
-		DataDialogs::DialogDevice::getInstance()->load(&datafile);
-		DataDialogs::DialogGroup::getInstance()->load(&datafile);
+		DataDialogs::DialogDevice::getInstance()->load(datafile.getDataMap());
+		DataDialogs::DialogGroup::getInstance()->load(datafile.getDataMap());
 		// TODO: set default profile
 	}
 
@@ -452,7 +452,7 @@ void MainWindow::readConfigFile(const string& dataFilePath, bool wipe, uint8_t i
 		if (wipe) {
 			restrictors.wipe();
 		}
-		DataDialogs::DialogRestrictor::getInstance()->load(&datafile);
+		DataDialogs::DialogRestrictor::getInstance()->load(datafile.getDataMap());
 	}
 
 	// Load process mappings from config file.
@@ -460,7 +460,7 @@ void MainWindow::readConfigFile(const string& dataFilePath, bool wipe, uint8_t i
 		if (wipe) {
 			processes.wipe();
 		}
-		DataDialogs::DialogProcess::getInstance()->load(&datafile);
+		DataDialogs::DialogProcess::getInstance()->load(datafile.getDataMap());
 		inputRunEvery->set_text(datafile.getProcessLookupRunEvery());
 	}
 

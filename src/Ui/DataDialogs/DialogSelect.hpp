@@ -109,10 +109,10 @@ public:
 
 	/**
 	 * Loads Link items from XML into destination, then refreshes displayBox.
-	 * @param values        XMLHelper carrying the raw data.
-	 * @param ownerUniqueId Unique ID of the owning Data (keys into XMLHelper).
+	 * @param values        DataMap carrying the raw data.
+	 * @param ownerUniqueId Unique ID of the owning Data.
 	 */
-	void load(XMLHelper* values, const string& ownerUniqueId) noexcept;
+	void load(DataMap& values, const string& ownerUniqueId) noexcept;
 
 	/**
 	 * @return Vector with indexes of the found BoxButtons.

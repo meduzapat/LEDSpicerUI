@@ -139,11 +139,11 @@ DialogProfile::DialogProfile(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 
 }
 
-void DialogProfile::load(XMLHelper* values) noexcept {
-	createItems(values->getData(COLLECTION_PROFILES), values);
+void DialogProfile::load(DataMap& values) noexcept {
+	createItems(values.at(COLLECTION_PROFILES), values);
 }
 
-void DialogProfile::createSubItems(XMLHelper* values) noexcept {
+void DialogProfile::createSubItems(DataMap& values) noexcept {
 	auto ds{DialogSelect::getInstance()};
 	const string ownerUid = currentData->createUniqueId();
 

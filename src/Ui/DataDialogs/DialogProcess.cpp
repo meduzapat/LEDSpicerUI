@@ -45,8 +45,8 @@ DialogProcess::DialogProcess(
 	builder->get_widget("InputRomPosition", inputRomPosition);
 }
 
-void DialogProcess::load(XMLHelper* values) noexcept {
-	createItems(values->getData(COLLECTION_PROCESSES), values);
+void DialogProcess::load(DataMap& values) noexcept {
+	createItems(values.at(COLLECTION_PROCESSES), values);
 }
 
 void DialogProcess::clearForm() noexcept {

@@ -47,7 +47,7 @@ public:
 
 	virtual ~DialogProfile() = default;
 
-	void load(XMLHelper* values)  noexcept override;
+	void load(DataMap& values)    noexcept override;
 	void clearForm()              noexcept override;
 	void storeData()              noexcept override;
 	void retrieveData()           noexcept override;
@@ -67,7 +67,7 @@ protected:
 
 	DialogProfile(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept;
 
-	void createSubItems(XMLHelper* values) noexcept override;
+	void createSubItems(DataMap& values) noexcept override;
 	const string& getType() const noexcept override { return TYPE_PROFILE; }
 	Storage::Data* createData(StringUMap& rawData) const noexcept override;
 

@@ -75,9 +75,9 @@ DialogInputSource::DialogInputSource(
 	});
 }
 
-void DialogInputSource::load(XMLHelper* values) noexcept {
+void DialogInputSource::load(DataMap& values) noexcept {
 	createItems(
-		values->getData(Defaults::createCommonUniqueId({ownerData->createUniqueId(), COLLECTION_INPUT_SOURCES})),
+		values.at(Defaults::createCommonUniqueId({ownerData->createUniqueId(), COLLECTION_INPUT_SOURCES})),
 		values
 	);
 }
@@ -198,7 +198,7 @@ void DialogInputSource::convertToSourced() noexcept {
 	currentData = phantom;
 }
 
-void DialogInputSource::createSubItems(XMLHelper* values) noexcept {
+void DialogInputSource::createSubItems(DataMap& values) noexcept {
 	DialogInputMap::getInstance()->load(values);
 }
 

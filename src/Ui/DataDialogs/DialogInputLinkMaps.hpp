@@ -42,7 +42,7 @@ namespace LEDSpicerUI::Ui::DataDialogs {
 
 		~DialogInputLinkMaps() = default;
 
-		void load(XMLHelper* values)  noexcept override;
+		void load(DataMap& values)    noexcept override;
 		void clearForm()              noexcept override;
 		void storeData()              noexcept override;
 		void retrieveData()           noexcept override;
@@ -64,9 +64,9 @@ namespace LEDSpicerUI::Ui::DataDialogs {
 
 		Storage::Data* createData(StringUMap& rawData) const noexcept override;
 
-		void createSubItems(XMLHelper*)  noexcept override;
-		void wireChildrenDialogs()       noexcept override;
-		void disconnectChildrenDialogs() noexcept override;
+		void createSubItems(DataMap& values) noexcept override;
+		void wireChildrenDialogs()           noexcept override;
+		void disconnectChildrenDialogs()     noexcept override;
 
 	};
 

@@ -58,7 +58,7 @@ public:
 	/**
 	 * Load Function.
 	 */
-	virtual void load(XMLHelper* values) noexcept abstract;
+	virtual void load(DataMap& values) noexcept abstract;
 
 	/**
 	 * Sets the collection where the items will be stored and if there is a data owner for this dialog.
@@ -198,13 +198,13 @@ protected:
 	 * Very similar to ADD but it only uses the form to validate data,
 	 * also items are not added to the box.
 	 */
-	void createItems(StringUMapVector& rawCollection, XMLHelper* values) noexcept;
+	void createItems(StringUMapVector& rawCollection, DataMap& values) noexcept;
 
 	/**
 	 * Creates any sub items, called from created items, per item.
 	 * @param values (not used here)
 	 */
-	virtual void createSubItems(XMLHelper*) noexcept {}
+	virtual void createSubItems(DataMap&) noexcept {}
 
 	/**
 	 * Provides a nice name for the type of data this dialog will create for the dialog.
