@@ -99,7 +99,7 @@ DialogDevice::DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 }
 
 void DialogDevice::load(DataMap& values) noexcept {
-	createItems(values.at(COLLECTION_DEVICES), values);
+	createItems(values[COLLECTION_DEVICES], values);
 }
 
 void DialogDevice::createSubItems(DataMap& values) noexcept {

@@ -85,7 +85,7 @@ DialogRestrictor::DialogRestrictor(BaseObjectType* obj, const Glib::RefPtr<Gtk::
 }
 
 void DialogRestrictor::load(DataMap& values) noexcept {
-	createItems(values.at(COLLECTION_RESTRICTORS), values);
+	createItems(values[COLLECTION_RESTRICTORS], values);
 }
 
 void DialogRestrictor::createSubItems(DataMap& values) noexcept {

@@ -131,9 +131,9 @@ void DialogSelect::reindex() noexcept {
 
 void DialogSelect::load(DataMap& values, const string& ownerUniqueId) noexcept {
 
-	auto& rawCollection{values.at(
+	auto& rawCollection{values[
 		Defaults::createCommonUniqueId({ownerUniqueId, request->collectionId})
-	)};
+	]};
 
 	string location(" while loading " + request->linkType + " for " + ownerUniqueId);
 	string errors;

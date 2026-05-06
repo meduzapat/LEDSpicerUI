@@ -71,7 +71,7 @@ DialogInput::DialogInput(
 }
 
 void DialogInput::load(DataMap& values) noexcept {
-	createItems(values.at(COLLECTION_INPUTS), values);
+	createItems(values[COLLECTION_INPUTS], values);
 }
 
 void DialogInput::createSubItems(DataMap& values) noexcept {

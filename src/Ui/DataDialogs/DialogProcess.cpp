@@ -46,7 +46,7 @@ DialogProcess::DialogProcess(
 }
 
 void DialogProcess::load(DataMap& values) noexcept {
-	createItems(values.at(COLLECTION_PROCESSES), values);
+	createItems(values[COLLECTION_PROCESSES], values);
 }
 
 void DialogProcess::clearForm() noexcept {

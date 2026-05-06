@@ -95,7 +95,7 @@ DialogGroup::DialogGroup(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& 
 }
 
 void DialogGroup::load(DataMap& values) noexcept {
-	createItems(values.at(COLLECTION_GROUPS), values);
+	createItems(values[COLLECTION_GROUPS], values);
 }
 
 void DialogGroup::createSubItems(DataMap& values) noexcept {

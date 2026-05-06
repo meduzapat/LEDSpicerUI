@@ -182,7 +182,7 @@ DialogElement::DialogElement(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 }
 
 void DialogElement::load(DataMap& values) noexcept {
-	createItems(values.at(Defaults::createCommonUniqueId({ownerData->createUniqueId(), COLLECTION_ELEMENTS})), values);
+	createItems(values[Defaults::createCommonUniqueId({ownerData->createUniqueId(), COLLECTION_ELEMENTS})], values);
 }
 
 void DialogElement::clearForm() noexcept {

@@ -140,7 +140,7 @@ DialogProfile::DialogProfile(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 }
 
 void DialogProfile::load(DataMap& values) noexcept {
-	createItems(values.at(COLLECTION_PROFILES), values);
+	createItems(values[COLLECTION_PROFILES], values);
 }
 
 void DialogProfile::createSubItems(DataMap& values) noexcept {

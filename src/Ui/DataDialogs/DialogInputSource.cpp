@@ -77,7 +77,7 @@ DialogInputSource::DialogInputSource(
 
 void DialogInputSource::load(DataMap& values) noexcept {
 	createItems(
-		values.at(Defaults::createCommonUniqueId({ownerData->createUniqueId(), COLLECTION_INPUT_SOURCES})),
+		values[Defaults::createCommonUniqueId({ownerData->createUniqueId(), COLLECTION_INPUT_SOURCES})],
 		values
 	);
 }

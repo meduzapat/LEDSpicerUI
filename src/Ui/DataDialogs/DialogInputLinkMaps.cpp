@@ -80,10 +80,10 @@ void DialogInputLinkMaps::setOwner(
 
 void DialogInputLinkMaps::load(DataMap& values) noexcept {
 	createItems(
-		values.at(
+		values[
 			Defaults::createCommonUniqueId({ownerData->createUniqueId(),
 			COLLECTION_INPUT_LINKMAPS})
-		),
+		],
 		values
 	);
 }
