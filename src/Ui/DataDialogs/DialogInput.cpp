@@ -219,7 +219,7 @@ void DialogInput::onSelected() noexcept {
 	if (newSourced)
 		DialogInputSource::getInstance()->populateSources(name);
 	else
-		DialogInputSource::getInstance()->createPhantomSource();
+		DialogInputSource::getInstance()->resolveSourcelessStorage();
 
 	// Drop fields the new type doesn't support.
 	if (not Defaults::inputHasFlag(name, Defaults::INPUT_HAS_BLINK))

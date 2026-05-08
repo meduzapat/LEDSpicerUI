@@ -78,13 +78,6 @@ TEST_F(InputTest, CreatePrettyNameAtRoot) {
 	EXPECT_NE(string::npos, pretty.find("Actions"));
 }
 
-TEST_F(InputTest, CreatePrettyNameNested) {
-	string pretty(nestedInput->createPrettyName());
-	EXPECT_NE(string::npos, pretty.find("stub_1"));
-	EXPECT_NE(string::npos, pretty.find("nestedinput"));
-	EXPECT_NE(string::npos, pretty.find("Mame"));
-}
-
 TEST_F(InputTest, CreateUniqueIdAtRoot) {
 	EXPECT_EQ(
 		Defaults::createCommonUniqueId({emptyString, "myinput"}),

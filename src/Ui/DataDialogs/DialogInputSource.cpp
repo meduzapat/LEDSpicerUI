@@ -159,10 +159,7 @@ void DialogInputSource::removeOwner() noexcept {
 	DialogFormHost::removeOwner();
 }
 
-void DialogInputSource::createPhantomSource() noexcept {
-
-	// Load will create a new source.
-	if (action == Actions::LOAD) return;
+void DialogInputSource::resolveSourcelessStorage() noexcept {
 
 	// Activate the phantom immediately so the box gets populated.
 	if (items->getSize()) {
@@ -170,6 +167,10 @@ void DialogInputSource::createPhantomSource() noexcept {
 		wireChildrenDialogs();
 		return;
 	}
+
+	// Load will create a new source, stop here.
+	if (action == Actions::LOAD) return;
+
 	// Otherwise create the phantom source
 	StringUMap rawData;
 	currentData = createData(rawData);

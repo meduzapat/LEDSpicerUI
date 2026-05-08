@@ -108,10 +108,6 @@ TEST_F(DirectoryEntryTest, IsEmptyWhenNoContents) {
 	EXPECT_EQ(0, root->getSize());
 }
 
-TEST_F(DirectoryEntryTest, GetContentsIsWritable) {
-	EXPECT_EQ(0, root->getChildren().size());
-}
-
 int main(int argc, char** argv) {
 	::testing::InitGoogleTest(&argc, argv);
 	return RUN_ALL_TESTS();

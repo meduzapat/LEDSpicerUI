@@ -68,7 +68,7 @@ public:
 	 * Called from Input when working with sourceless inputs.
 	 * Safe to call repeatedly, idempotent if sourceless source already exists.
 	 */
-	void createPhantomSource() noexcept;
+	void resolveSourcelessStorage() noexcept;
 
 	/**
 	 * Sourced → sourceless: collapses all sources into one phantom, discards extras.
