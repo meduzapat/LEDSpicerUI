@@ -299,5 +299,8 @@ void ConfigFile::save(const ConfigData& data) {
 	Defaults::reduceTab();
 	xmlData += xmlFooter();
 
-	Glib::file_set_contents(data.configPath, xmlData);
+	// DEBUG: display instead of writing — remove when real saving is wired up.
+	debugSave(data.configPath, xmlData);
+//	Glib::file_set_contents(filePath, input.toXML());
+
 }

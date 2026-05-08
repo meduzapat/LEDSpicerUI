@@ -202,3 +202,25 @@ string XMLHelper::cleanError(const string& error) noexcept {
 	Defaults::trim(result);
 	return result;
 }
+
+void XMLHelper::debugSave(const string& filePath, const string& content) noexcept {
+
+	Gtk::Dialog dialog("DEBUG: " + filePath);
+	dialog.set_default_size(700, 500);
+	dialog.set_resizable(true);
+
+	auto* scrolled = Gtk::manage(new Gtk::ScrolledWindow());
+	scrolled->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+	scrolled->set_hexpand(true);
+	scrolled->set_vexpand(true);
+
+	auto* textView = Gtk::manage(new Gtk::TextView());
+	textView->get_buffer()->set_text(content);
+	textView->set_editable(false);
+	textView->set_monospace(true);
+	scrolled->add(*textView);
+
+	dialog.get_content_area()->pack_start(*scrolled, true, true, 0);
+	dialog.show_all();
+	dialog.run();
+}
