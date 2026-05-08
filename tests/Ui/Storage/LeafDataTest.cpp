@@ -179,7 +179,7 @@ TEST_F(InputMapLinkTest, ToXMLWithSingleLink) {
 
 	StringUMap d{{NAME, "m1"}};
 	Element map(d);
-	map.getProperties().setValue(PID, "owner_1");
+	map.getProperties().setValue(IID, "owner_1");
 	CollectionHandler::getInstance(COLLECTION_INPUT_MAPS)->add(&map);
 
 	StringUMap imlData;
@@ -204,9 +204,9 @@ TEST_F(InputMapLinkTest, ToXMLSkipsUnlinkedAndFollowsCollectionOrder) {
 	tempMaps->add(&map2);
 	tempMaps->add(&map3);
 
-	map1.getProperties().setValue(PID, "owner_1");
-	map2.getProperties().setValue(PID, "owner_1");
-	map3.getProperties().setValue(PID, "owner_1");
+	map1.getProperties().setValue(IID, "owner_1");
+	map2.getProperties().setValue(IID, "owner_1");
+	map3.getProperties().setValue(IID, "owner_1");
 
 	StringUMap imlData;
 	InputMapLink iml(imlData, "owner_1");
