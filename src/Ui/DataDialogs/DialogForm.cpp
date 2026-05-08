@@ -64,9 +64,11 @@ void DialogForm::createItems(StringUMapVector& rawCollection, DataMap& values) n
 		currentData->wipe();
 		storeData();
 		// BoxButton will take care for data.
-		Storage::BoxButton& b{items->create(currentData)};
-		addButtons(b);
+		Storage::BoxButton& boxButton{items->create(currentData)};
+		addButtons(boxButton);
 		createSubItems(values);
+		// updates labels and tooltips after children.
+		boxButton.sync();
 		disconnectChildrenDialogs();
 	}
 	currentData = nullptr;

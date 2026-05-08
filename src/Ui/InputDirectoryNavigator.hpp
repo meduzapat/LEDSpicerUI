@@ -57,7 +57,7 @@ protected:
 	/// Import input dialog.
 	DialogImport dialogImportInput;
 
-	Gtk::Box* boxBreadcrumb  = nullptr;
+	Gtk::Box* boxBreadcrumb = nullptr;
 
 	Gtk::Button * btnHome = nullptr;
 

@@ -86,7 +86,9 @@ void DialogInputLinkMaps::load(DataMap& values) noexcept {
 }
 
 void DialogInputLinkMaps::createSubItems(DataMap&) noexcept {
-	const string& idxStr{currentData->getValue(LINKED_ITEMS)};
+	// Temporary value extraction.
+	const string idxStr{currentData->getProperties().getValue(LINKED_ITEMS)};
+	currentData->getProperties().unSet(LINKED_ITEMS);
 	if (idxStr.empty()) return;
 	mapsRequest.sourceCollection = CollectionHandler::getInstance(COLLECTION_INPUT_MAPS);
 	mapsRequest.filterValue      = ownerData->getProperties().getValue(UID);
@@ -98,7 +100,7 @@ void DialogInputLinkMaps::clearForm() noexcept {
 }
 
 void DialogInputLinkMaps::isValid() const {
-	if (getPrimaryChildCollection()->getSize() < 2)
+	if (action != Actions::LOAD and getPrimaryChildCollection()->getSize() < 2)
 		throw Message("Select at least 2 maps.");
 }
 

@@ -29,6 +29,8 @@ InputMapLink::InputMapLink(StringUMap& data, const string& inputPid) noexcept :
 {
 	getProperties().setValue(PID, inputPid);
 	registerDependency(COLLECTION_INPUT_MAPS, COLLECTION_INPUT_MAP_LINKS);
+	// Load data only.
+	getProperties().setValue(LINKED_ITEMS, getValue(LINKED_ITEMS));
 }
 
 string InputMapLink::createPrettyName() const noexcept {
@@ -53,7 +55,7 @@ string InputMapLink::toXML() const noexcept {
 	StringVector indexes;
 	size_t idx{0};
 	for (const auto& [id, data] : *CollectionHandler::getInstance(COLLECTION_INPUT_MAPS)) {
-		if (data->getProperties().getValue(PID) == pid) {
+		if (data->getProperties().getValue(IID) == pid) {
 			if (primaryChild->isSet(data))
 				indexes.push_back(std::to_string(idx));
 			++idx;
