@@ -84,13 +84,13 @@ void DialogInput::createSubItems(DataMap& values) noexcept {
 
 void DialogInput::resetForm() noexcept {
 	string name(selectorCombo->get_active_id());
-	bool needSources {Defaults::inputHasFlag(name, Defaults::INPUT_NEEDS_SOURCE)};
+	bool needSources {Defaults::needSource(name)};
 
 	btnAddInputSource->set_sensitive(true);
 	boxInputSourcesBox->set_visible(needSources);
 	boxInputMapsBox->set_visible(not needSources);
 
-	boxLinkedElementsAndGroups->set_visible(Defaults::inputHasFlag(name, Defaults::INPUT_LINKED_MAPS));
+	boxLinkedElementsAndGroups->set_visible(Defaults::hasLinkedMaps(name));
 
 	btnAddInputMap->set_visible(not needSources);
 	btnAddInputMap->set_sensitive(true);
@@ -135,7 +135,7 @@ void DialogInput::isValid() const {
 	}
 
 	if (action != Actions::LOAD) {
-		if (Defaults::inputHasFlag(id, Defaults::INPUT_NEEDS_SOURCE)) {
+		if (Defaults::needSource(id)) {
 			if (not DialogInputSource::getInstance()->getBox()->getSize())
 				throw Message("Add at least one source.");
 		}
@@ -210,10 +210,10 @@ void DialogInput::onEmpty() noexcept {
 }
 
 void DialogInput::onSelected() noexcept {
-	auto name{selectorCombo->get_active_id()};
+	const auto name{selectorCombo->get_active_id()};
 	const bool
-//		oldSourced {Defaults::inputHasFlag(previousName, Defaults::INPUT_NEEDS_SOURCE)},
-		newSourced {Defaults::inputHasFlag(name, Defaults::INPUT_NEEDS_SOURCE)};
+//		oldSourced {Defaults::needSource(previousName)},
+		newSourced {Defaults::needSource(name)};
 
 //	if (oldSourced and not newSourced)
 	if (newSourced)
@@ -228,6 +228,6 @@ void DialogInput::onSelected() noexcept {
 		currentData->unSet(TIMES);
 	if (not Defaults::inputHasFlag(name, Defaults::INPUT_HAS_SPEED))
 		currentData->unSet(SPEED);
-	if (not Defaults::inputHasFlag(name, Defaults::INPUT_LINKED_MAPS))
+	if (not Defaults::hasLinkedMaps(name))
 		DialogInputLinkMaps::getInstance()->clearForm();
 }

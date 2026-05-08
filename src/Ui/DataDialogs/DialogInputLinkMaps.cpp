@@ -85,7 +85,7 @@ void DialogInputLinkMaps::load(DataMap& values) noexcept {
 	);
 }
 
-void DialogInputLinkMaps::createSubItems(DataMap& values) noexcept {
+void DialogInputLinkMaps::createSubItems(DataMap&) noexcept {
 	const string& idxStr{currentData->getValue(LINKED_ITEMS)};
 	if (idxStr.empty()) return;
 	mapsRequest.sourceCollection = CollectionHandler::getInstance(COLLECTION_INPUT_MAPS);

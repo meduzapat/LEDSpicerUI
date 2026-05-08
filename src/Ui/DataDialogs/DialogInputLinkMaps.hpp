@@ -64,9 +64,9 @@ namespace LEDSpicerUI::Ui::DataDialogs {
 
 		Storage::Data* createData(StringUMap& rawData) const noexcept override;
 
-		void createSubItems(DataMap& values) noexcept override;
-		void wireChildrenDialogs()           noexcept override;
-		void disconnectChildrenDialogs()     noexcept override;
+		void createSubItems(DataMap&)    noexcept override;
+		void wireChildrenDialogs()       noexcept override;
+		void disconnectChildrenDialogs() noexcept override;
 
 	};
 

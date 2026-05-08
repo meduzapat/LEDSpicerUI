@@ -118,7 +118,7 @@ void DialogInputMap::isValid() const {
 	if (inputMapDefaultColor->get_label().empty())
 		throw Message("You need to set a color.");
 
-	string uid(createUniqueId());
+	const string uid(createUniqueId());
 	if (action != Actions::EDIT or currentData->createUniqueId() != uid) {
 		if (currentData->getCollectionHandler()->isIdSet(uid))
 			throw Message("This trigger already exists for this source.");
@@ -145,13 +145,14 @@ void DialogInputMap::storeData() noexcept {
 }
 
 void DialogInputMap::retrieveData() noexcept {
+	const auto& target {currentData->getValue(TARGET)};
 	if (currentData->getValue(TYPE) == ELEMENT) {
 		stackElementAndGroup->set_visible_child("InputTypeElement");
-		comboBoxInputMapElement->set_active_id(currentData->getValue(TARGET));
+		comboBoxInputMapElement->set_active_id(target);
 	}
 	else {
 		stackElementAndGroup->set_visible_child("InputTypeGroup");
-		comboBoxInputMapGroup->set_active_id(currentData->getValue(TARGET));
+		comboBoxInputMapGroup->set_active_id(target);
 	}
 	inputInputMapTrigger->set_text(currentData->getValue(TRIGGER));
 	DialogColors::getInstance()->colorizeButton(inputMapDefaultColor, currentData->getValue(COLOR));

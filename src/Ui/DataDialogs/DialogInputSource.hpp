@@ -65,6 +65,7 @@ public:
 	/**
 	 * Ensures a sourceless InputSource exists for single-source inputs.
 	 * Creates one silently if absent, then wires DialogInputMap to it.
+	 * Called from Input when working with sourceless inputs.
 	 * Safe to call repeatedly, idempotent if sourceless source already exists.
 	 */
 	void createPhantomSource() noexcept;

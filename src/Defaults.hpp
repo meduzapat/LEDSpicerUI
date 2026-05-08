@@ -180,7 +180,7 @@ const string
 	SPEED        {"speed"},      /// Input playback speed setting.
 	BLINK        {"blink"},      /// Input blink switch.
 	TIMES        {"times"},      /// Input repeat count.
-	SOURCELESS   {"sourceless"},
+	SOURCELESS   {"sl"},
 
 /// UI-related constants.
 	DEFAULT_ELEMENT_TYPE {"9"},
