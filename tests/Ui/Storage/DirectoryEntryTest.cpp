@@ -104,14 +104,8 @@ TEST_F(DirectoryEntryTest, CreateTooltip) {
 	EXPECT_EQ("root/subdir", child->createTooltip());
 }
 
-// isEmpty() reflects contents.
 TEST_F(DirectoryEntryTest, IsEmptyWhenNoContents) {
-	EXPECT_TRUE(root->isEmpty());
-}
-
-// getContents() is writable.
-TEST_F(DirectoryEntryTest, GetContentsIsWritable) {
-	EXPECT_EQ(0, root->getContents().getSize());
+	EXPECT_EQ(0, root->getSize());
 }
 
 int main(int argc, char** argv) {

@@ -47,22 +47,25 @@ DialogInputSource::DialogInputSource(
 	setSignalApply();
 
 	selectorCombo->signal_changed().connect([this]() {
-		string newName{selectorCombo->get_active_id()};
+		const string newName{selectorCombo->get_active_id()};
 		string msg;
 		if (not newName.empty() and not previousName.empty()) {
-			const auto& newInfo = Defaults::inputInfo.at(newName);
-			const auto& oldInfo = Defaults::inputInfo.at(previousName);
+			const auto
+				& newInfo = Defaults::inputInfo.at(newName),
+				& oldInfo = Defaults::inputInfo.at(previousName);
+
 			msg = "Are you sure you want to convert \"" + oldInfo.name + "\" into \"" + newInfo.name + "\"?";
-			bool oldSourced = Defaults::inputHasFlag(previousName, Defaults::INPUT_NEEDS_SOURCE);
-			bool newSourced = Defaults::inputHasFlag(newName,      Defaults::INPUT_NEEDS_SOURCE);
+			bool
+				oldSourced {Defaults::needSource(previousName)},
+				newSourced {Defaults::needSource(newName)};
+
 			if (oldSourced and not newSourced)
 				msg += "\nExtra sources will be removed. Compatible maps will be moved to the single implicit source.";
 			else if (not oldSourced and newSourced)
 				msg += "\nExisting maps will be attached to a new default source entry.";
 			else if (oldSourced and newSourced)
 				msg += "\nAll sources will be lost.";
-			if (Defaults::inputHasFlag(previousName, Defaults::INPUT_LINKED_MAPS) and
-			    not Defaults::inputHasFlag(newName,   Defaults::INPUT_LINKED_MAPS))
+			if (Defaults::hasLinkedMaps(previousName) and not Defaults::hasLinkedMaps(newName))
 				msg += "\nLinked maps are not supported and will be removed.";
 		}
 		if (handleTypeSwitch(DialogInputSource::getInstance()->getBox(), msg)) {
@@ -77,7 +80,7 @@ DialogInputSource::DialogInputSource(
 
 void DialogInputSource::load(DataMap& values) noexcept {
 	createItems(
-		values[Defaults::createCommonUniqueId({ownerData->createUniqueId(), COLLECTION_INPUT_SOURCES})],
+		values[Defaults::createCommonUniqueId({ownerData->getProperties().getValue(PATH_BASE), COLLECTION_INPUT_SOURCES})],
 		values
 	);
 }
@@ -89,26 +92,29 @@ void DialogInputSource::resetForm() noexcept {
 }
 
 void DialogInputSource::isValid() const {
-	// no name for sourceless only.
+
+	// Verify the source for non sourceless.
 	if (currentData->getProperties().getValue(SOURCELESS).empty()) {
 		if (resolvedSource().empty()) throw Message("Enter a valid source name.");
 	}
-	if (not DialogInputMap::getInstance()->getBox()->getSize()) throw Message("Add at least one map.");
+
+	if (action != Actions::LOAD and not DialogInputMap::getInstance()->getBox()->getSize())
+		throw Message("Add at least one map.");
 }
 
 void DialogInputSource::storeData() noexcept {
+
 	Glib::ustring
 		id{selectorCombo->get_active_id()},
 		label;
+
 	if (id.empty()) {
 		label = id = selectorCombo->get_entry()->get_text();
 	}
 	else {
-		auto iter = selectorCombo->get_active();
-		if (iter)
-			iter->get_value(1, label);
-		else
-			label = selectorCombo->get_entry()->get_text();
+		// Get nice label from combo.
+		const auto iter {selectorCombo->get_active()};
+		iter->get_value(1, label);
 	}
 	currentData->setValue(SOURCE, id);
 	// Store a human-friendly display label as a UI-only property.
@@ -116,10 +122,13 @@ void DialogInputSource::storeData() noexcept {
 }
 
 void DialogInputSource::retrieveData() noexcept {
-	// sourceless will be handled at activation.
-	if (not Defaults::needSource(comboBoxInputSelectInput->get_active_id())) return;
 
-	string source(currentData->getValue(SOURCE));
+	currentData->getProperties().setValue(PATH_BASE, currentData->getValue(PATH_BASE));
+
+	// sourceless will be handled at activation.
+	if (action == Actions::LOAD and not currentData->getProperties().getValue(SOURCELESS).empty()) return;
+
+	const string& source(currentData->getValue(SOURCE));
 
 	// If setting the id fail because the source do not exists, set other and use entry instead.
 	if (not selectorCombo->set_active_id(source))
@@ -150,14 +159,18 @@ void DialogInputSource::removeOwner() noexcept {
 	DialogFormHost::removeOwner();
 }
 
-void DialogInputSource::createPhantomSource() noexcept {
+void DialogInputSource::resolveSourcelessStorage() noexcept {
+
 	// Activate the phantom immediately so the box gets populated.
 	if (items->getSize()) {
-		auto& theOnlyOne = *items->begin();
-		currentData = theOnlyOne->getData();
+		currentData = (*items->begin())->getData();
 		wireChildrenDialogs();
 		return;
 	}
+
+	// Load will create a new source, stop here.
+	if (action == Actions::LOAD) return;
+
 	// Otherwise create the phantom source
 	StringUMap rawData;
 	currentData = createData(rawData);
@@ -203,7 +216,11 @@ void DialogInputSource::createSubItems(DataMap& values) noexcept {
 }
 
 LEDSpicerUI::Ui::Storage::Data* DialogInputSource::createData(StringUMap& rawData) const noexcept {
-	return new Storage::InputSource(rawData, ownerData->getProperties().getValue(UID));
+	auto is {new Storage::InputSource(rawData, ownerData->getProperties().getValue(UID))};
+	// At load owner is realized and valid (not stale) check if is a sourceless
+	if (action == Actions::LOAD and not Defaults::needSource(ownerData->getValue(NAME)))
+		is->getProperties().setValue(SOURCELESS, "1");
+	return is;
 }
 
 StringMap DialogInputSource::scanEventDevices() noexcept{
@@ -274,10 +291,10 @@ string DialogInputSource::readDeviceName(const string& byIdName) noexcept {
 		return byIdName;
 
 	std::error_code ec;
-	auto target = std::filesystem::read_symlink(linkPath, ec);
+	const auto target {std::filesystem::read_symlink(linkPath, ec)};
 	if (ec) return byIdName;
 
-	std::filesystem::path sysPath{SYS_CLASS_INPUT + target.filename().string() + "/device/name"};
+	const std::filesystem::path sysPath {SYS_CLASS_INPUT + target.filename().string() + "/device/name"};
 	std::ifstream file(sysPath);
 	if (not file) return byIdName;
 

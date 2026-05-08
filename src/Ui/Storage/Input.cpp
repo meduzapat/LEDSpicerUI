@@ -32,7 +32,7 @@ string Input::createUniqueId() const noexcept {
 }
 
 string Input::createPrettyName() const noexcept {
-	return getFullPath() + " [" + getValue(NAME) + "]";
+	return getName() + " [" + getValue(NAME) + "]";
 }
 
 string Input::createTooltip() const noexcept {

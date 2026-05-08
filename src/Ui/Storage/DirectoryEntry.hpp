@@ -20,7 +20,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CollectionHandler.hpp"
+#include "Parent.hpp"
 #include "DirNode.hpp"
 
 #pragma once
@@ -31,11 +31,11 @@ namespace LEDSpicerUI::Ui::Storage {
  * LEDSpicerUI::Ui::Storage::DirectoryEntry
  * Represents a single directory node in the navigator tree.
  * Never serialized — exists only at runtime for navigation.
- * Inherits Data for BoxButton compatibility.
+ * Inherits Parent for child item storage.
  * Inherits DirNode for node identity and path resolution.
  * TODO: add move support — requires reseating parent pointer on move.
  */
-class DirectoryEntry : public Data, public DirNode {
+class DirectoryEntry : public Parent, public DirNode {
 
 public:
 
@@ -56,16 +56,6 @@ public:
 	CollectionHandler* getCollectionHandler() const noexcept override {
 		return CollectionHandler::getInstance(COLLECTION_DIRECTORIES);
 	}
-
-	bool isEmpty() const noexcept;
-
-	BoxButtonCollection& getContents() noexcept { return contents; }
-	const BoxButtonCollection& getContents() const noexcept { return contents; }
-
-protected:
-
-	/// Items owned by this directory.
-	BoxButtonCollection contents;
 
 };
 

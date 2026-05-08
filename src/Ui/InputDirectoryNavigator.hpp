@@ -57,7 +57,7 @@ protected:
 	/// Import input dialog.
 	DialogImport dialogImportInput;
 
-	Gtk::Box* boxBreadcrumb  = nullptr;
+	Gtk::Box* boxBreadcrumb = nullptr;
 
 	Gtk::Button * btnHome = nullptr;
 
@@ -65,11 +65,11 @@ protected:
 	OrdenableFlowBox* boxInputs = nullptr;
 
 	/// Section settings for DialogDirectory. References boxInputs — declared after it.
-	const DataDialogs::DialogDirectory::SettingRequest dirSetting;
+	DataDialogs::DialogDirectory::SettingRequest dirSetting;
 
 	void wireDialogs(Storage::DirectoryEntry* dir) noexcept override;
 
-	void loadFile(const string& filePath, Storage::DirectoryEntry* node) noexcept override;
+	DataMap extractData(const string& filePath, const string& relPath) noexcept override;
 };
 
 } // namespace

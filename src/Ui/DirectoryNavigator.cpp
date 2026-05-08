@@ -59,33 +59,26 @@ DirectoryNavigator::DirectoryNavigator(const Glib::RefPtr<Gtk::Builder>& builder
 	DataDialogs::DialogDirectory::buildInstance(builder, "DialogDirectory");
 }
 
-void DirectoryNavigator::loadFromDisk(const string& dir) noexcept {
+void DirectoryNavigator::process(const string& absPath, const string& relPath) noexcept {
 	namespace fs = std::filesystem;
 	std::error_code ec;
-	fs::path root(dir);
-	if (not fs::is_directory(root, ec)) return;
 
-	std::function<void(const fs::path&, Storage::DirectoryEntry*)> walk {
+	vector<fs::directory_entry> entries;
+	for (auto& e : fs::directory_iterator(absPath, ec)) entries.push_back(e);
+	std::sort(entries.begin(), entries.end());
 
-	[&](const fs::path& path, Storage::DirectoryEntry* node) {
-
-		vector<fs::directory_entry> entries;
-
-		for (auto& e : fs::directory_iterator(path, ec)) entries.push_back(e);
-		std::sort(entries.begin(), entries.end());
-
-		for (auto& entry : entries) {
-
-			if (entry.is_directory(ec)) {
-				StringUMap data{{NAME, entry.path().filename().string()}};
-				auto child {new Storage::DirectoryEntry(data, node)};
-				node->getContents().create(child);
-				walk(entry.path(), child);
-			}
-			else if (entry.is_regular_file(ec) and entry.path().extension() == ".xml") {
-				loadFile(entry.path().string(), node);
-			}
+	for (auto& entry : entries) {
+		if (entry.is_directory(ec)) {
+			string name(entry.path().filename().string());
+			string childRel(relPath.empty() ? name : relPath + "/" + name);
+			scanData[COLLECTION_DIRECTORIES].push_back({{FILENAME, name}, {PATH_PARENT, relPath}});
+			process(entry.path().string(), childRel);
 		}
-	}};
-	walk(root, &rootDir);
+		else if (entry.is_regular_file(ec) and entry.path().extension() == ".xml") {
+			DataMap fileData(extractData(entry.path().string(), relPath));
+			for (auto& [key, vec] : fileData)
+				for (auto& item : vec)
+					scanData[key].push_back(std::move(item));
+		}
+	}
 }

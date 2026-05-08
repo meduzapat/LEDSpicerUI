@@ -21,6 +21,7 @@
  */
 
 #include "DialogForm.hpp"
+#include "DirectoryAware.hpp"
 #include "Storage/DirectoryEntry.hpp"
 
 #pragma once
@@ -51,6 +52,10 @@ public:
 
 		/// Function to call to enter into a dir, used by BoxButtons
 		std::function<void(Storage::DirectoryEntry*)> enterDir;
+
+		/// File-type dialog wired to each directory's primary child on load (e.g. DialogInput).
+		/// nullptr if the navigator has no file dialog.
+		DialogForm* fileDialog = nullptr;
 	};
 
 	virtual ~DialogDirectory() = default;
@@ -62,7 +67,7 @@ public:
 	 */
 	void setSettings(const SettingRequest& req) noexcept;
 
-	void load(DataMap& values)    noexcept override {}
+	void load(DataMap& values)    noexcept override;
 	void clearForm()              noexcept override;
 	void storeData()              noexcept override;
 	void retrieveData()           noexcept override;
@@ -84,6 +89,14 @@ protected:
 	const string& getType() const noexcept override;
 
 	void addButtons(Storage::BoxButton& boxButton) noexcept override;
+
+	void wireChildrenDialogs()    noexcept override;
+	void disconnectChildrenDialogs() noexcept override;
+	void createSubItems(DataMap& values) noexcept override;
+
+private:
+
+	mutable std::unordered_map<string, Storage::DirectoryEntry*> dirByPath;
 
 };
 

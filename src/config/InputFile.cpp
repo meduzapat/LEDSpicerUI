@@ -24,20 +24,16 @@
 
 using namespace LEDSpicerUI::Config;
 
-using LEDSpicerUI::Ui::Storage::DirectoryEntry;
-
-InputFile::InputFile(const string& filePath, DirectoryEntry* parent) :
-	ProjectFile(filePath, "Input", parent)
+InputFile::InputFile(const string& filePath, const string& relPath) :
+	ProjectFile(filePath, "Input", nullptr)
 {
 	string errors;
 
-	string baseId(Defaults::createCommonUniqueId({
-		parent ? parent->getFsId() : "",
-		filename
-	}));
+	string baseId(Defaults::createCommonUniqueId({relPath, filename}));
 
 	StringUMap input(rootInfo.attributes);
-	input[FILENAME] = filename;
+	input[FILENAME]  = filename;
+	input[PATH_BASE] = baseId;
 
 	tinyxml2::XMLElement* mapsNode = getRoot()->FirstChildElement("maps");
 	if (not mapsNode) {
@@ -47,10 +43,13 @@ InputFile::InputFile(const string& filePath, DirectoryEntry* parent) :
 		StringUMapVector mapsSources;
 
 		for (size_t idx = 0; mapsNode; mapsNode = mapsNode->NextSiblingElement("maps"), ++idx) {
-			mapsSources.push_back(processNode(mapsNode));
+			StringUMap source(processNode(mapsNode));
+			string sourceBaseId(Defaults::createCommonUniqueId({baseId, std::to_string(idx)}));
+			source[PATH_BASE] = sourceBaseId;
+			mapsSources.push_back(std::move(source));
 			errors += processMaps(
 				mapsNode,
-				Defaults::createCommonUniqueId({baseId, std::to_string(idx), COLLECTION_INPUT_MAPS})
+				Defaults::createCommonUniqueId({sourceBaseId, COLLECTION_INPUT_MAPS})
 			);
 		}
 
@@ -62,7 +61,10 @@ InputFile::InputFile(const string& filePath, DirectoryEntry* parent) :
 
 	processLinkedTriggers(baseId);
 
-	extractedData.emplace(COLLECTION_INPUTS, StringUMapVector{input});
+	extractedData.emplace(
+		Defaults::createCommonUniqueId({relPath, COLLECTION_INPUTS}),
+		StringUMapVector{input}
+	);
 
 	if (not errors.empty())
 		throw Message("Errors:\n" + errors);

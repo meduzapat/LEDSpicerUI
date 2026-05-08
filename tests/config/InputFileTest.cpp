@@ -31,8 +31,8 @@ class InputFileTest : public ::testing::Test {
 protected:
 
 	void SetUp() override {
-		inputMulti  = std::make_unique<InputFile>(PACKAGE_SAMPLES_DIR "data/" INPUT_PATH "inputMulti.xml",  nullptr);
-		inputSingle = std::make_unique<InputFile>(PACKAGE_SAMPLES_DIR "data/" INPUT_PATH "inputSingle.xml", nullptr);
+		inputMulti  = std::make_unique<InputFile>(PACKAGE_SAMPLES_DIR "data/" INPUT_PATH "inputMulti.xml",  "");
+		inputSingle = std::make_unique<InputFile>(PACKAGE_SAMPLES_DIR "data/" INPUT_PATH "inputSingle.xml", "");
 	}
 
 	void TearDown() override {
@@ -44,16 +44,24 @@ protected:
 	std::unique_ptr<InputFile> inputSingle;
 
 	/*
-	 * Builds the base collection key for a file at root level (nullptr parent).
+	 * Builds the base collection key for a file at root level (empty relPath).
 	 * Matches InputFile::InputFile() → createCommonUniqueId({"", filename}).
 	 */
 	static string baseId(const string& filename) {
 		return Defaults::createCommonUniqueId({"", filename});
 	}
+
+	/*
+	 * Builds the inputs collection key for root-level files.
+	 * Matches InputFile::InputFile() → createCommonUniqueId({"", COLLECTION_INPUTS}).
+	 */
+	static string inputsKey() {
+		return Defaults::createCommonUniqueId({"", COLLECTION_INPUTS});
+	}
 };
 
 TEST_F(InputFileTest, MultiSourceInputIsLoaded) {
-	auto& inputData = inputMulti->getData(COLLECTION_INPUTS);
+	auto& inputData = inputMulti->getData(inputsKey());
 	ASSERT_FALSE(inputData.empty());
 	ASSERT_FALSE(inputData[0].empty());
 
@@ -114,7 +122,7 @@ TEST_F(InputFileTest, SecondSourceMapsAreProcessed) {
 }
 
 TEST_F(InputFileTest, SingleSourceInputIsLoaded) {
-	auto& inputData = inputSingle->getData(COLLECTION_INPUTS);
+	auto& inputData = inputSingle->getData(inputsKey());
 	ASSERT_FALSE(inputData.empty());
 	EXPECT_EQ("Mame", inputData[0][NAME]);
 	EXPECT_EQ("inputSingle", inputSingle->getFilename());
@@ -147,7 +155,7 @@ TEST_F(InputFileTest, SingleSourceMapsAreProcessed) {
 
 TEST_F(InputFileTest, MissingAttributesHandling) {
 	EXPECT_THROW(
-		InputFile(PACKAGE_SAMPLES_DIR "data/" INPUT_PATH "inputMalformed.xml", nullptr),
+		InputFile(PACKAGE_SAMPLES_DIR "data/" INPUT_PATH "inputMalformed.xml", ""),
 		Message
 	);
 }

@@ -39,6 +39,7 @@ InputDirectoryNavigator::InputDirectoryNavigator(
 {
 
 	DataDialogs::DialogInput::buildInstance(builder, "DialogInput");
+	dirSetting.fileDialog = DataDialogs::DialogInput::getInstance();
 
 	Gtk::Button
 		* btnNewInputFolder = nullptr,
@@ -51,6 +52,19 @@ InputDirectoryNavigator::InputDirectoryNavigator(
 	builder->get_widget("BoxInputBreadcrumb", boxBreadcrumb);
 	builder->get_widget("BtnAddInput",        btnAddInput);
 	builder->get_widget("BtnImportInput",     btnImportInput);
+
+	// Sort directories first, then files.
+	boxInputs->set_sort_func([](Gtk::FlowBoxChild* a, Gtk::FlowBoxChild* b) -> int {
+		auto
+			dA {static_cast<Storage::BoxButton*>(a->get_child())->getData()},
+			dB {static_cast<Storage::BoxButton*>(b->get_child())->getData()};
+		const bool
+			aIsDir {dynamic_cast<Storage::DirectoryEntry*>(dA) != nullptr},
+			bIsDir {dynamic_cast<Storage::DirectoryEntry*>(dB) != nullptr};
+		if (aIsDir != bIsDir)
+			return aIsDir ? -1 : 1;
+		return dynamic_cast<Storage::DirNode*>(dA)->getName().compare(dynamic_cast<Storage::DirNode*>(dB)->getName());
+	});
 
 	// Register automatic buttons.
 	auto chEl {Storage::CollectionHandler::getInstance(COLLECTION_ELEMENTS)};
@@ -66,7 +80,7 @@ InputDirectoryNavigator::InputDirectoryNavigator(
 			StringVector selectedFiles(dialogImportInput.get_filenames());
 			for (const auto& selectedFile : selectedFiles) {
 				try {
-					InputFile datafile(selectedFile, currentDir);
+					InputFile datafile(selectedFile, currentDir->getFullPath());
 					DataDialogs::DialogInput::getInstance()->load(datafile.getDataMap());
 				}
 				catch (Message& e) {
@@ -93,18 +107,25 @@ void InputDirectoryNavigator::clear() noexcept {
 }
 
 void InputDirectoryNavigator::load(const string& inputsDir) noexcept {
-	loadFromDisk(inputsDir);
+	scanData.clear();
+	process(inputsDir, "");
+	auto DDir {DataDialogs::DialogDirectory::getInstance()};
+	// Set Input Dialog as secondary.
+	DDir->setSettings(dirSetting);
+	// Set Storage into root
+	DDir->setOwner(rootDir.getPrimaryChild(), &rootDir);
+	DDir->load(scanData);
 }
 
 void InputDirectoryNavigator::wireDialogs(Storage::DirectoryEntry* dir) noexcept {
 
-	Storage::BoxButtonCollection& contents{dir->getContents()};
-
-	// Always configure the section before wiring — fires before any button can be pressed.
 	DataDialogs::DialogDirectory::getInstance()->setSettings(dirSetting);
-	DataDialogs::DialogDirectory::getInstance()->setOwner(&contents, dir);
+	DataDialogs::DialogDirectory::getInstance()->setOwner(dir->getPrimaryChild(), dir);
 
-	DataDialogs::DialogInput::getInstance()->setOwner(&contents, dir);
+	DataDialogs::DialogInput::getInstance()->setOwner(dir->getPrimaryChild(), dir);
+	DataDialogs::DialogInput::getInstance()->setCurrentDirectory(dir);
+
+	DataDialogs::DialogDirectory::getInstance()->refreshItems();
 
 	// Update navigation buttons.
 	btnHome->set_sensitive(not isAtRoot());
@@ -148,15 +169,15 @@ void InputDirectoryNavigator::wireDialogs(Storage::DirectoryEntry* dir) noexcept
 }
 
 
-void InputDirectoryNavigator::loadFile(const string& filePath, Storage::DirectoryEntry* node) noexcept {
+DataMap InputDirectoryNavigator::extractData(const string& filePath, const string& relPath) noexcept {
 	try {
-		InputFile datafile(filePath, node);
-		DataDialogs::DialogInput::getInstance()->setOwner(&node->getContents(), node);
-		DataDialogs::DialogInput::getInstance()->load(datafile.getDataMap());
+		InputFile datafile(filePath, relPath);
+		return datafile.getDataMap();
 	}
 	catch (Message& e) {
 		Message::displayError(
 			"Skipping " + Glib::path_get_basename(filePath) +
 			":\n" + XMLHelper::cleanError(e.getMessage()));
+		return {};
 	}
 }

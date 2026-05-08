@@ -49,8 +49,10 @@ string_view Link::getXmlTag() const noexcept {
 }
 
 const string& Link::getValue(const string& key) const noexcept {
-	if (key == linkKey)
-		return link->getPrimaryValue();
+	if (key == linkKey) {
+		return link ? link->getPrimaryValue() : emptyString;
+	}
+
 	return Data::getValue(key);
 }
 

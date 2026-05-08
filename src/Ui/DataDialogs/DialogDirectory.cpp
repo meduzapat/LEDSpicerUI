@@ -80,11 +80,51 @@ const string& DialogDirectory::getType() const noexcept {
 	return setting->typeLabel;
 }
 
+void DialogDirectory::load(DataMap& values) noexcept {
+
+	// Clean up any cache
+	dirByPath.clear();
+
+	// Set Root
+	auto root{static_cast<Storage::DirectoryEntry*>(ownerData)};
+	dirByPath[""] = root;
+
+	// Point to store in root.
+	setting->fileDialog->setOwner(root->getPrimaryChild(), ownerData);
+	dynamic_cast<DirectoryAware*>(setting->fileDialog)->setCurrentDirectory(root);
+
+	// load root items
+	setting->fileDialog->load(values);
+
+	// load other directories.
+	createItems(values[COLLECTION_DIRECTORIES], values);
+}
+
 LEDSpicerUI::Ui::Storage::Data* DialogDirectory::createData(StringUMap& rawData) const noexcept {
-	return new Storage::DirectoryEntry(
-		rawData,
-		static_cast<Storage::DirectoryEntry*>(ownerData)
-	);
+	auto parent{dirByPath.at(rawData[PATH_PARENT])};
+	auto de{new Storage::DirectoryEntry(rawData, parent)};
+	dirByPath[de->getFullPath()] = de;
+	return de;
+}
+
+void DialogDirectory::wireChildrenDialogs() noexcept {
+	currentData->setUp();
+	auto de{static_cast<Storage::DirectoryEntry*>(currentData)};
+	if (action == Actions::LOAD) {
+		auto parentDE {static_cast<Storage::DirectoryEntry*>(de->getParent())};
+		items = parentDE->getPrimaryChild();
+	}
+	setting->fileDialog->setOwner(de->getPrimaryChild(), currentData);
+	dynamic_cast<DirectoryAware*>(setting->fileDialog)->setCurrentDirectory(de);
+}
+
+void DialogDirectory::disconnectChildrenDialogs() noexcept {
+	setting->fileDialog->removeOwner();
+	currentData->tearDown();
+}
+
+void DialogDirectory::createSubItems(DataMap& values) noexcept {
+	setting->fileDialog->load(values);
 }
 
 void DialogDirectory::addButtons(Storage::BoxButton& bb) noexcept {
@@ -105,4 +145,3 @@ void DialogDirectory::addButtons(Storage::BoxButton& bb) noexcept {
 	// Standard edit/delete buttons.
 	DialogForm::addButtons(bb);
 }
-
