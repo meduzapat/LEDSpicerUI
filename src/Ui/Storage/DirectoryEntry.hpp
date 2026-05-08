@@ -31,7 +31,7 @@ namespace LEDSpicerUI::Ui::Storage {
  * LEDSpicerUI::Ui::Storage::DirectoryEntry
  * Represents a single directory node in the navigator tree.
  * Never serialized — exists only at runtime for navigation.
- * Inherits Parent for child item storage (dirs + inputs share COLLECTION_DIRECTORIES).
+ * Inherits Parent for child item storage.
  * Inherits DirNode for node identity and path resolution.
  * TODO: add move support — requires reseating parent pointer on move.
  */

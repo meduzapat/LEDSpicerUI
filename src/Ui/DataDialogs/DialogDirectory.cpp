@@ -110,6 +110,10 @@ LEDSpicerUI::Ui::Storage::Data* DialogDirectory::createData(StringUMap& rawData)
 void DialogDirectory::wireChildrenDialogs() noexcept {
 	currentData->setUp();
 	auto de{static_cast<Storage::DirectoryEntry*>(currentData)};
+	if (action == Actions::LOAD) {
+		auto parentDE {static_cast<Storage::DirectoryEntry*>(de->getParent())};
+		items = parentDE->getPrimaryChild();
+	}
 	setting->fileDialog->setOwner(de->getPrimaryChild(), currentData);
 	dynamic_cast<DirectoryAware*>(setting->fileDialog)->setCurrentDirectory(de);
 }
