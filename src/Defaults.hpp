@@ -52,9 +52,6 @@ using std::unique_ptr;
 #pragma once
 
 #define XML_FILE_PLAIN ""
-#define INPUT_PATH     "inputs/"
-#define ANIMATION_PATH "animations/"
-#define PROFILE_PATH   "profiles/"
 #define CONFIG_FILE    "ledspicer.conf"
 
 #define DEFAULT_MESSAGE "This is an auto-generated file by " PACKAGE_STRING "."
@@ -71,8 +68,20 @@ namespace LEDSpicerUI {
 
 namespace Constants {
 
-/// Commonly used empty string.
-const string emptyString;
+inline const string
+	/// Commonly used empty string.
+	emptyString,
+	PATH_INPUT     {"inputs/"},
+	PATH_ANIMATION {"animations/"},
+	PATH_PROFILE   {"profiles/"},
+
+	/// Common values used in configs.
+	HUMAN_TRUE   {"True"},
+	HUMAN_FALSE  {"False"},
+	HUMAN_ON     {"On"},
+	HUMAN_OFF    {"Off"},
+	HUMAN_NORMAL {"Nornal"},
+	HUMAN_RANDOM {"Random"};
 
 /// Separators.
 constexpr char
@@ -82,17 +91,20 @@ constexpr char
 	ID_SEPARATOR       = ',', // Comma
 	ID_GROUP_SEPARATOR = '|'; // Pipe
 
+/// The maximum number of attributes in a XML node before cutting into attributes into rows.
+constexpr unsigned int ATTRIBUTES_LIMIT_PER_ROW = 2;
+
 /// Default values for monochrome devices.
 constexpr float DEFAULT_CHANGE_VALUE = 64.00f;
 
-/// Default millisenconds for solenoids and motors.
+/// Default milliseconds for solenoids and motors.
 constexpr unsigned int DEFAULT_SOLENOID  = 50;
 
 /// Default speed for GZ40 restrictor.
 constexpr int GZ40_DEFAULT_SPEED = 12;  // Integer
 
 // all strings constants.
-const string
+inline const string
 /// LEDSpicer configuration file keys.
 	DEFAULT_USERID   {"1000"},
 	DEFAULT_GROUPID  {"1000"},
@@ -102,21 +114,21 @@ const string
 	DEFAULT_LOGLEVEL {"Info"},
 
 /// Emitter configuration file keys.
-	DEFAULT_COLORSINFO   {"true"},
-	DEFAULT_CRAFTPROFILE {"true"},
-	DEFAULT_DATASOURCE   {"file,mame"},
+	& DEFAULT_COLORSINFO   {HUMAN_TRUE},
+	& DEFAULT_CRAFTPROFILE {HUMAN_TRUE},
+	DEFAULT_DATASOURCE     {"file,mame"},
 
 /// ProcessLookup configuration file keys.
 	PARAM_MILLISECONDS {"runEvery"},
 	PARAM_PROCESS_NAME {"processName"},
 	PARAM_PROCESS_POS  {"position"},
 	PARAM_SYSTEM       {"system"},
-	DEFAULT_RUNEVERY   {emptyString},
+	& DEFAULT_RUNEVERY {emptyString},
 
 /// Profile configuration keys.
-	DEFAULT_PROFILE                  {"default"},
-	BACKGROUND_COLOR                 {"backgroundColor"},
-	DEFAULT_PROFILE_BACKGROUND_COLOR {"Off"},
+	DEFAULT_PROFILE  {"default"},
+	BACKGROUND_COLOR {"backgroundColor"},
+	& DEFAULT_PROFILE_BACKGROUND_COLOR {HUMAN_OFF},
 
 /// Hardware configuration keys.
 	NAME {"name"},
@@ -156,7 +168,7 @@ const string
 	PROP_STRIP     {"p.sd"},
 	PROP_STRIP_UID {"p.sid"}, // strip descriptor UID
 
-	NO_COLOR       {emptyString},
+	& NO_COLOR {emptyString},
 
 /// Restrictor configuration keys.
 	US360_HAS_RESTRICTOR {"hasRestrictor"},
@@ -175,17 +187,20 @@ const string
 	FILTER       {"filter"},
 	ELEMENT      {"Element"},
 	GROUP        {"Group"},
-	SOURCE       {"source"},     /// input attribute in XML
-	INDEX        {"index"},      /// a property positional index.
-	SPEED        {"speed"},      /// Input playback speed setting.
-	BLINK        {"blink"},      /// Input blink switch.
-	TIMES        {"times"},      /// Input repeat count.
+	SOURCE       {"source"},
+	SPEED        {"speed"},
+	BLINK        {"blink"},
+	TIMES        {"times"},
 	SOURCELESS   {"sl"},
+	COINS_CREDIT {"coinsPerCredit"},
+	MODE         {"mode"},
+	ONCE         {"once"},
+	ALWAYS_ON    {"alwaysOn"},
 
 /// UI-related constants.
 	DEFAULT_ELEMENT_TYPE {"9"},
-	PLAYER               {"player"},
-	JOYSTICK             {"joystick"},
+	PLAYER   {"player"},
+	JOYSTICK {"joystick"},
 
 /// Types
 	TYPE_MAP             {"map"},
@@ -236,7 +251,7 @@ const string
 
 } // namespace
 
-// CSS classes — CSS_SUBJECT_INTENTION
+// CSS classes.
 
 // Box backgrounds
 #define CSS_BOX_BACKGROUND_DELETE     "BoxBackgroundDelete"

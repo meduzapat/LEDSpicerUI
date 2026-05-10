@@ -183,11 +183,11 @@ void DialogRestrictor::storeData() noexcept {
 	}
 
 	if (name == "UltraStik360") {
-		currentData->setValue(US360_HAS_RESTRICTOR, hasRestrictor->get_active() ? "true" : "false");
-		currentData->setValue(US360_USE_MOUSE,      handleMouse->get_active()   ? "true" : "false");
+		currentData->setValue(US360_HAS_RESTRICTOR, hasRestrictor->get_active() ? HUMAN_TRUE : HUMAN_FALSE);
+		currentData->setValue(US360_USE_MOUSE,      handleMouse->get_active()   ? HUMAN_TRUE : HUMAN_FALSE);
 	}
 	else if (name == "GPWiz49") {
-		currentData->setValue(GZ49_WILLIAMS, williamsMode->get_active() ? "true" : "false");
+		currentData->setValue(GZ49_WILLIAMS, williamsMode->get_active() ? HUMAN_TRUE : HUMAN_FALSE);
 	}
 	else if (name == "GPWiz40RotoX") {
 		currentData->setValue(GZ40_SPEED_ON, std::to_string(static_cast<uint8_t>(speedOn->get_value())));
@@ -209,11 +209,11 @@ void DialogRestrictor::retrieveData() noexcept {
 	}
 
 	if (name == "UltraStik360") {
-		hasRestrictor->set_active(currentData->getValue(US360_HAS_RESTRICTOR) == "true");
-		handleMouse->set_active(currentData->getValue(US360_USE_MOUSE) == "true");
+		hasRestrictor->set_active(currentData->getValue(US360_HAS_RESTRICTOR) == HUMAN_TRUE);
+		handleMouse->set_active(currentData->getValue(US360_USE_MOUSE) == HUMAN_TRUE);
 	}
 	else if (name == "GPWiz49") {
-		williamsMode->set_active(currentData->getValue(GZ49_WILLIAMS) == "true");
+		williamsMode->set_active(currentData->getValue(GZ49_WILLIAMS) == HUMAN_TRUE);
 	}
 	else if (name == "GPWiz40RotoX") {
 		speedOn->set_value(std::stod(currentData->getValue(GZ40_SPEED_ON, std::to_string(GZ40_DEFAULT_SPEED))));

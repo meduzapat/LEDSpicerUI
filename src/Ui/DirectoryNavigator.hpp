@@ -66,6 +66,12 @@ public:
 	/// Called to clean up all data.
 	virtual void clear() noexcept abstract;
 
+	/**
+	 * Saves all items in the tree to disk under projectDir/specialized.
+	 * @param baseDir Root project directory plus the specialized sub directory.
+	 */
+	void save(const string& baseDir) noexcept;
+
 protected:
 
 	/// Backing data for rootDir — must be declared before rootDir.
@@ -77,6 +83,9 @@ protected:
 	/// Currently active directory. Always valid; starts at rootDir.
 	Storage::DirectoryEntry* currentDir;
 
+	/// Flat scan accumulator — populated by process(), consumed by DDir::load().
+	DataMap scanData;
+
 	DirectoryNavigator(const Glib::RefPtr<Gtk::Builder>& builder) noexcept;
 
 	/**
@@ -85,9 +94,6 @@ protected:
 	 * @param dir The directory to wire. Always a valid pointer (root or child).
 	 */
 	virtual void wireDialogs(Storage::DirectoryEntry* dir) noexcept abstract;
-
-	/// Flat scan accumulator — populated by process(), consumed by DDir::load().
-	DataMap scanData;
 
 	/**
 	 * Recursively walks absPath, populating scanData with directory entries and
@@ -104,6 +110,18 @@ protected:
 	 * @return DataMap with all data extracted from the file.
 	 */
 	virtual DataMap extractData(const string& filePath, const string& relPath) noexcept abstract;
+
+	/**
+	 * Writes one item to filePath.
+	 * @param item Data pointer.
+	 * @param filePath Absolute destination path including filename and extension.
+	 */
+	virtual void saveItem(Storage::Data* item, const string& filePath) noexcept abstract;
+
+	/**
+	 * @return The subdirectory path suffix for this navigator.
+	 */
+	virtual const string& getSubDir() const noexcept abstract;
 
 };
 

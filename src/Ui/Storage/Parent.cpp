@@ -71,8 +71,12 @@ void Parent::registerDependency(
 
 string Parent::xmlBody() const noexcept {
 	string r;
-	for (const auto& [id, collection] : children)
-		for (const auto btn : collection)
+	for (const auto& [id, collection] : children) {
+		for (const auto btn : collection) {
+			Defaults::increaseTab();
 			r += btn->getData()->toXML();
+			Defaults::reduceTab();
+		}
+	}
 	return r;
 }

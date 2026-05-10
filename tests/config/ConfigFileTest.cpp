@@ -52,18 +52,19 @@ TEST_F(ConfigFileTest, ProcessLookupRunEveryValue) {
 TEST_F(ConfigFileTest, SettingsAreExtracted) {
 	auto settings = configFile->getSettings();
 
-	EXPECT_EQ("true",        settings["craftProfile"]);
-	EXPECT_EQ("true",        settings["colorsFile"]);
+	EXPECT_EQ(HUMAN_TRUE,    settings["craftProfile"]);
+	EXPECT_EQ(HUMAN_TRUE,    settings["colorsFile"]);
 	EXPECT_EQ("1000",        settings["groupId"]);
 	EXPECT_EQ("Info",        settings["logLevel"]);
 	EXPECT_EQ("1000",        settings["userId"]);
 	EXPECT_EQ("10",          settings["fps"]);
 	EXPECT_EQ("1.1",         settings["version"]);
 	EXPECT_EQ("basicColors", settings["colors"]);
-	EXPECT_EQ("Configuration", settings["type"]);
-	EXPECT_EQ("Red, Blue, Green, Yellow, White, Black", settings["randomColors"]);
 	EXPECT_EQ("file,mame",   settings["dataSource"]);
 	EXPECT_EQ("16161",       settings["port"]);
+
+	EXPECT_EQ("Configuration", settings["type"]);
+	EXPECT_EQ("Red, Blue, Green, Yellow, White, Black", settings["randomColors"]);
 }
 
 TEST_F(ConfigFileTest, DevicesAreProcessed) {

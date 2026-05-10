@@ -167,8 +167,10 @@ protected:
 	 */
 	virtual bool shouldSerialize(
 		const string&,
-		const string&
-	) const noexcept { return true; }
+		const string& value
+	) const noexcept {
+		return not value.empty();
+	}
 
 	/**
 	 * @return Content between opening and closing tag.

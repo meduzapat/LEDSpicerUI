@@ -49,8 +49,10 @@ protected:
 
 	Gtk::Entry
 		* inputProcessName = nullptr,
-		* inputSystemType  = nullptr,
-		* inputRomPosition = nullptr;
+		* inputSystemType  = nullptr;
+
+	Gtk::SpinButton
+		* spinProcessRomPosition = nullptr;
 
 	DialogProcess(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept;
 

@@ -31,8 +31,8 @@ class InputFileTest : public ::testing::Test {
 protected:
 
 	void SetUp() override {
-		inputMulti  = std::make_unique<InputFile>(PACKAGE_SAMPLES_DIR "data/" INPUT_PATH "inputMulti.xml",  "");
-		inputSingle = std::make_unique<InputFile>(PACKAGE_SAMPLES_DIR "data/" INPUT_PATH "inputSingle.xml", "");
+		inputMulti  = std::make_unique<InputFile>(PACKAGE_SAMPLES_DIR "data/" + PATH_INPUT + "inputMulti.xml",  "");
+		inputSingle = std::make_unique<InputFile>(PACKAGE_SAMPLES_DIR "data/" + PATH_INPUT + "inputSingle.xml", "");
 	}
 
 	void TearDown() override {
@@ -65,13 +65,13 @@ TEST_F(InputFileTest, MultiSourceInputIsLoaded) {
 	ASSERT_FALSE(inputData.empty());
 	ASSERT_FALSE(inputData[0].empty());
 
-	EXPECT_EQ("Credits", inputData[0][NAME]);
-	EXPECT_EQ("Normal",  inputData[0]["speed"]);
-	EXPECT_EQ("0,1|2,3", inputData[0]["linkedTriggers"]);
-	EXPECT_EQ("Single",  inputData[0]["mode"]);
-	EXPECT_EQ("True",    inputData[0]["once"]);
-	EXPECT_EQ("False",   inputData[0]["alwaysOn"]);
-	EXPECT_EQ("1",       inputData[0]["coinsPerCredit"]);
+	EXPECT_EQ("Credits",    inputData[0][NAME]);
+	EXPECT_EQ(HUMAN_NORMAL, inputData[0]["speed"]);
+	EXPECT_EQ("0,1|2,3",    inputData[0]["linkedTriggers"]);
+	EXPECT_EQ("Single",     inputData[0]["mode"]);
+	EXPECT_EQ(HUMAN_TRUE,   inputData[0]["once"]);
+	EXPECT_EQ(HUMAN_FALSE,  inputData[0]["alwaysOn"]);
+	EXPECT_EQ("1",          inputData[0]["coinsPerCredit"]);
 
 	EXPECT_EQ("inputMulti", inputMulti->getFilename());
 }
@@ -155,7 +155,7 @@ TEST_F(InputFileTest, SingleSourceMapsAreProcessed) {
 
 TEST_F(InputFileTest, MissingAttributesHandling) {
 	EXPECT_THROW(
-		InputFile(PACKAGE_SAMPLES_DIR "data/" INPUT_PATH "inputMalformed.xml", ""),
+		InputFile(PACKAGE_SAMPLES_DIR "data/" + PATH_INPUT + "inputMalformed.xml", ""),
 		Message
 	);
 }

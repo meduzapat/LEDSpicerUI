@@ -57,11 +57,18 @@ public:
 
 protected:
 
-	Gtk::ComboBox* comboBoxInputSpeed = nullptr;
+	Gtk::ComboBox*     comboBoxInputSpeed       = nullptr;
+	Gtk::ComboBoxText* comboBoxInputCreditsMode = nullptr;
+	Gtk::Entry*        entryInputName           = nullptr;
 
-	Gtk::Entry*      entryInputName   = nullptr;
-	Gtk::Switch*     switchInputBlink = nullptr;
-	Gtk::SpinButton* spinInputTimes   = nullptr;
+	Gtk::Switch
+		* switchInputBlink           = nullptr,
+		* switchInputCreditsOnce     = nullptr,
+		* switchInputCreditsAlwaysOn = nullptr;
+
+	Gtk::SpinButton
+		* spinInputTimes        = nullptr,
+		* spinInputCreditsCoins = nullptr;
 
 	Gtk::Box
 		* boxInputSourcesBox         = nullptr,

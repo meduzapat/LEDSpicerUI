@@ -66,7 +66,7 @@ DialogColors::DialogColors(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const
 	Defaults::setFilter(filterEntry, ContainerColorPicker, this);
 }
 
-void DialogColors::setColorsFromFile(const string& path) {
+void DialogColors::setColorsFromFile(const string& path) noexcept {
 
 	resetColorButtons();
 
@@ -81,16 +81,16 @@ void DialogColors::setColorsFromFile(const string& path) {
 			for (; xmlElement; xmlElement = xmlElement->NextSiblingElement()) {
 				auto colorAttr = colorsXML.processNode(xmlElement);
 				XMLHelper::checkAttributes({NAME, "color"}, colorAttr, "color");
-				if (colorAttr[NAME] == "Random" || colors.find(colorAttr[NAME]) != colors.end())
+				if (colorAttr[NAME] == HUMAN_RANDOM || colors.find(colorAttr[NAME]) != colors.end())
 					continue;
-				colors[colorAttr[NAME]] = colorAttr["color"];
+				colors[colorAttr[NAME]] = colorAttr[COLOR];
 			}
 		}
 	}
 	catch (...) {}
 
 	// Remove current CSS data (if any).
-	auto styleContext = Gtk::StyleContext::create();
+	auto styleContext {Gtk::StyleContext::create()};
 	if (currentProvider.get() != nullptr) {
 		styleContext->remove_provider_for_screen(
 			Gdk::Screen::get_default(),
@@ -99,8 +99,7 @@ void DialogColors::setColorsFromFile(const string& path) {
 	}
 
 	// Set new CSS data (if colors > 0).
-	string c = setColors(colors);
-	if (c.size()) {
+		if (const string c {setColors(colors)}; c.size()) {
 		currentProvider = Gtk::CssProvider::create();
 		currentProvider->load_from_data(c);
 		styleContext->add_provider_for_screen(
@@ -111,32 +110,38 @@ void DialogColors::setColorsFromFile(const string& path) {
 	}
 }
 
-void DialogColors::colorizeButton(Gtk::Button* button, const string& colorName) {
-	string
-		oldClassName = button->get_label(),
-		newClassName = isValidColor(colorName) ? colorName : "";
+void DialogColors::colorizeButton(Gtk::Button* button, const string& colorName) const noexcept {
+
+	const string
+		oldClassName {button->get_label()},
+		newClassName {isValidColor(colorName) ? colorName : NO_COLOR};
+
 	button->set_label(newClassName);
-	auto sc = button->get_style_context();
+
+	auto sc {button->get_style_context()};
 	if (not oldClassName.empty() and sc->has_class(oldClassName))
 		sc->remove_class(oldClassName);
+
 	if (not newClassName.empty())
 		sc->add_class(newClassName);
 }
 
-bool DialogColors::isValidColor(const string& colorName) {
-	if (colorName == "On" or colorName == "Off" or colorName == "Random")
+bool DialogColors::isValidColor(const string& colorName) const noexcept {
+
+	if (colorName == HUMAN_ON or colorName == HUMAN_OFF or colorName == HUMAN_RANDOM)
 		return true;
+
 	for (auto child : ContainerColorPicker->get_children()) {
-		auto c = static_cast<Gtk::FlowBoxChild*>(child);
-		auto b = static_cast<Gtk::Button*>(c->get_child());
-		string t(b->get_label());
+		auto c {static_cast<Gtk::FlowBoxChild*>(child)};
+		auto b {static_cast<Gtk::Button*>(c->get_child())};
+		const string t {b->get_label()};
 		if (colorName == t)
 			return true;
 	}
 	return false;
 }
 
-void DialogColors::activateColorButton(Gtk::Button* button) {
+void DialogColors::activateColorButton(Gtk::Button* button) noexcept {
 	colorButtons.push_back(button);
 	button->signal_clicked().connect([this, button]() {
 		if (run() == Gtk::ResponseType::RESPONSE_OK) {
@@ -147,7 +152,7 @@ void DialogColors::activateColorButton(Gtk::Button* button) {
 	});
 }
 
-void DialogColors::activateColorPicker(Gtk::Button* button, Gtk::FlowBox* destination) {
+void DialogColors::activateColorPicker(Gtk::Button* button, Gtk::FlowBox* destination) noexcept {
 	colorBoxes.push_back(destination);
 	button->signal_clicked().connect([this, destination]() {
 		// Random cannot be used for list.
@@ -163,35 +168,39 @@ void DialogColors::activateColorPicker(Gtk::Button* button, Gtk::FlowBox* destin
 	});
 }
 
-void DialogColors::resetColorButtons() {
+void DialogColors::resetColorButtons() const noexcept {
+
 	for (auto button : colorButtons)
 		if (not button->get_label().empty())
 			colorizeButton(button, "");
+
 	for (auto box : colorBoxes)
 		for (auto c : box->get_children())
 			box->remove(*c);
 }
 
-void DialogColors::populateColorBox(Gtk::FlowBox* destination, const StringVector& colors) {
+void DialogColors::populateColorBox(Gtk::FlowBox* destination, const StringVector& colors) noexcept {
 	for (const auto& c : colors)
 		createColorButton(destination, c);
 }
 
-StringVector DialogColors::getColorBoxValues(Gtk::FlowBox* destination) {
+StringVector DialogColors::getColorBoxValues(Gtk::FlowBox* destination) const noexcept {
 	StringVector r;
 	for (auto child : destination->get_children()) {
-		auto c = static_cast<Gtk::FlowBoxChild*>(child);
-		r.push_back(static_cast<Gtk::Label*>(c->get_child())->get_text());
+		auto c {static_cast<Gtk::FlowBoxChild*>(child)};
+		auto b {static_cast<Gtk::HBox*>(c->get_child())};
+		// 1st child should be the label.
+		r.push_back(static_cast<Gtk::Label*>(b->get_children()[0])->get_label());
 	}
 	return r;
 }
 
-void DialogColors::onColorSelected(Gtk::Button* button) {
+void DialogColors::onColorSelected(Gtk::Button* button) noexcept {
 	selectedColor = button->get_label();
 	response(Gtk::ResponseType::RESPONSE_OK);
 }
 
-string DialogColors::setColors(StringUMap& colors) {
+string DialogColors::setColors(StringUMap& colors) noexcept {
 	// Remove previous buttons.
 	for (auto c : ContainerColorPicker->get_children())
 		ContainerColorPicker->remove(*c);
@@ -199,7 +208,7 @@ string DialogColors::setColors(StringUMap& colors) {
 	string cssData;
 	for (auto& [name, hex] : colors) {
 		// Discard any special color.
-		if (name == "On" or name == "Off" or name == "Random") continue;
+		if (name == HUMAN_ON or name == HUMAN_OFF or name == HUMAN_RANDOM) continue;
 
 		cssData += '.' + name + "{background:#" + hex + ';';
 		if (Defaults::getLuminance(hex) > 0.5) cssData += "color:black;";
@@ -218,7 +227,7 @@ string DialogColors::setColors(StringUMap& colors) {
 	return cssData;
 }
 
-void DialogColors::createColorButton(Gtk::FlowBox* destination, const string& color) {
+void DialogColors::createColorButton(Gtk::FlowBox* destination, const string& color) const noexcept {
 
 	auto box {Gtk::make_managed<Gtk::HBox>(false, 2)};
 	box->set_valign(Gtk::ALIGN_START);

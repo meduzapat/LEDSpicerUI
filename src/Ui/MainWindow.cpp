@@ -107,6 +107,8 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 				processes
 			));
 
+			inputNavigator.save(projectDir + PATH_INPUT);
+
 			Defaults::cleanDirty();
 			Message::displayInfo("Project saved successfully.");
 		}
@@ -144,8 +146,6 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 	builder->get_widget("ComboUseColors",      comboUseColors);
 	Defaults::registerWidget(toggleCraftProfiles);
 	Defaults::registerWidget(comboUseColors);
-	// When the input profiles is active, and the arcade profile is missing, ask for creating an empty arcade profile
-	Defaults::linkToggleToWidget(toggleCraftProfiles, comboUseColors);
 	builder->get_widget_derived("ListBoxDatasource", listBoxDataSource, "BtnDatasourceUp", "BtnDatasourceDown");
 	comboColors->signal_changed().connect([&]() {
 		DialogColors::getInstance()->setColorsFromFile(DialogSettings::getInstance()->getDataDir() + comboColors->get_active_id() + ".xml");
@@ -396,7 +396,7 @@ void MainWindow::setConfiguration(StringUMap& values) {
 
 	// DEFAULT_PROFILE
 	// emitter
-	toggleCraftProfiles->set_active(XMLHelper::valueOf(values, "craftProfile", DEFAULT_CRAFTPROFILE) == "true");
+	toggleCraftProfiles->set_active(XMLHelper::valueOf(values, "craftProfile", DEFAULT_CRAFTPROFILE) == HUMAN_TRUE);
 	comboUseColors->set_active_id(XMLHelper::valueOf(values,   "colorsFile",   DEFAULT_COLORSINFO));
 }
 
@@ -413,12 +413,15 @@ StringUMap MainWindow::ledspicerConfigToXml() const {
 		{"logLevel",     comboLogLevel->get_active_id()},
 		{"colors",       comboColors->get_active_id()},
 		{"dataSource",   Defaults::implode(listBoxDataSource->getCheckedValues(), ',')},
-		{"randomColors", Defaults::implode(DialogColors::getInstance()->getColorBoxValues(boxRandomColors), ',')},
 		// Emitter.
-		{"craftProfile", toggleCraftProfiles->get_active() ? "true" : "false"},
+		{"craftProfile", toggleCraftProfiles->get_active() ? HUMAN_TRUE : HUMAN_FALSE},
 		{"colorsFile",   comboUseColors->get_active_id()},
 
 	};
+
+	if (const auto rc {DialogColors::getInstance()->getColorBoxValues(boxRandomColors)}; not rc.empty())
+		r.emplace("randomColors", Defaults::implode(rc, ','));
+
 	return r;
 }
 
@@ -468,7 +471,7 @@ void MainWindow::readConfigFile(const string& dataFilePath, bool wipe, uint8_t i
 	if (wipe and not projectDir.empty()) {
 		inputNavigator.clear();
 
-		inputNavigator.load(Glib::path_get_dirname(projectDir + INPUT_PATH));
+		inputNavigator.load(Glib::path_get_dirname(projectDir + PATH_INPUT));
 		// animationNavigator.load(Glib::path_get_dirname(dataFilePath) + "/" + ANIMATION_PATH);  // future
 		// profileNavigator.load(Glib::path_get_dirname(dataFilePath) + "/" + PROFILE_PATH);      // future, must be last
 	}

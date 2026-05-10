@@ -117,6 +117,10 @@ void InputDirectoryNavigator::load(const string& inputsDir) noexcept {
 	DDir->load(scanData);
 }
 
+void InputDirectoryNavigator::saveItem(Storage::Data* item, const string& filePath) noexcept {
+	InputFile::save(*static_cast<Storage::Input*>(item), filePath);
+}
+
 void InputDirectoryNavigator::wireDialogs(Storage::DirectoryEntry* dir) noexcept {
 
 	DataDialogs::DialogDirectory::getInstance()->setSettings(dirSetting);

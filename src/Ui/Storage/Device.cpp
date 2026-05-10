@@ -42,3 +42,8 @@ string Device::createUniqueId() const noexcept {
 CollectionHandler* Device::getCollectionHandler() const noexcept {
 	return CollectionHandler::getInstance(COLLECTION_DEVICES);
 }
+
+bool Device::shouldSerialize(const string& key, const string& value) const noexcept {
+	if (key == ID and (value.empty() or value == "1")) return false;
+	return Parent::shouldSerialize(key, value);
+}

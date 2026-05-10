@@ -41,9 +41,13 @@ DialogInput::DialogInput(
 	builder->get_widget("BtnAddInputMap",             btnAddInputMap);
 	builder->get_widget("BtnAddInputSource",          btnAddInputSource);
 	builder->get_widget("ComboBoxInputSpeed",         comboBoxInputSpeed);
+	builder->get_widget("ComboBoxInputCreditsMode",   comboBoxInputCreditsMode);
 	builder->get_widget("EntryInputName",             entryInputName);
 	builder->get_widget("SwitchInputBlink",           switchInputBlink);
 	builder->get_widget("SpinInputTimes",             spinInputTimes);
+	builder->get_widget("SwitchInputCreditsOnce",     switchInputCreditsOnce);
+	builder->get_widget("SwitchInputCreditsAlwaysOn", switchInputCreditsAlwaysOn);
+	builder->get_widget("SpinInputCreditsCoins",      spinInputCreditsCoins);
 	builder->get_widget("BoxInputSourcesBox",         boxInputSourcesBox);
 	builder->get_widget("BoxInputMapsBox",            boxInputMapsBox);
 	builder->get_widget("BoxInputCreditsSettings",    boxInputCreditsSettings);
@@ -83,6 +87,7 @@ void DialogInput::createSubItems(DataMap& values) noexcept {
 }
 
 void DialogInput::resetForm() noexcept {
+
 	string name(selectorCombo->get_active_id());
 	bool needSources {Defaults::needSource(name)};
 
@@ -95,15 +100,14 @@ void DialogInput::resetForm() noexcept {
 	btnAddInputMap->set_visible(not needSources);
 	btnAddInputMap->set_sensitive(true);
 	spinInputTimes->get_parent()->set_visible(Defaults::inputHasFlag(name, Defaults::INPUT_HAS_TIMES));
-	switchInputBlink->get_parent()->set_visible(Defaults::inputHasFlag(name, Defaults::INPUT_HAS_BLINK));
-	boxInputCreditsSettings->set_visible(Defaults::inputHasFlag(name, Defaults::INPUT_HAS_CREDITS));
-
-	// Need to be set after switch blink.
-	if (Defaults::inputHasFlag(name, Defaults::INPUT_HAS_SPEED)) {
-		comboBoxInputSpeed->get_parent()->set_visible(true);
-		// This is automatically handled by the switch, but in this case must be enabled.
-		comboBoxInputSpeed->get_parent()->set_sensitive(true);
+	if (Defaults::inputHasFlag(name, Defaults::INPUT_HAS_BLINK)) {
+		switchInputBlink->get_parent()->set_visible(true);
 	}
+	else {
+		comboBoxInputSpeed->set_sensitive(true);
+	}
+	boxInputCreditsSettings->set_visible(Defaults::inputHasFlag(name, Defaults::INPUT_HAS_CREDITS));
+	comboBoxInputSpeed->get_parent()->set_visible(Defaults::inputHasFlag(name, Defaults::INPUT_HAS_SPEED));
 
 	brief->set_text(Defaults::inputInfo.at(name).brief.data());
 	btnApply->set_sensitive(true);
@@ -134,6 +138,11 @@ void DialogInput::isValid() const {
 		if (blinks < 0 or blinks > 255) spinInputTimes->set_value(0);
 	}
 
+	if (Defaults::inputHasFlag(id, Defaults::INPUT_HAS_CREDITS) and spinInputCreditsCoins->get_value() < 1) {
+		if (action != Actions::LOAD) spinInputCreditsCoins->grab_focus();
+			throw Message("Coins or tokens per credit, need to be more than 0.");
+	}
+
 	if (action != Actions::LOAD) {
 		if (Defaults::needSource(id)) {
 			if (not DialogInputSource::getInstance()->getBox()->getSize())
@@ -154,13 +163,20 @@ void DialogInput::storeData() noexcept {
 	currentData->getProperties().setValue(FILENAME, entryInputName->get_text());
 
 	if (Defaults::inputHasFlag(id, Defaults::INPUT_HAS_BLINK))
-		currentData->setValue(BLINK, switchInputBlink->get_active() ? "true" : "false");
+		currentData->setValue(BLINK, switchInputBlink->get_active() ? HUMAN_TRUE : HUMAN_FALSE);
 
 	if (Defaults::inputHasFlag(id, Defaults::INPUT_HAS_TIMES))
 		currentData->setValue(TIMES, spinInputTimes->get_text());
 
 	if (Defaults::inputHasFlag(id, Defaults::INPUT_HAS_SPEED))
 		currentData->setValue(SPEED, comboBoxInputSpeed->get_active_id());
+
+	if (Defaults::inputHasFlag(id, Defaults::INPUT_HAS_CREDITS)) {
+		currentData->setValue(MODE, comboBoxInputCreditsMode->get_active_text());
+		currentData->setValue(COINS_CREDIT, spinInputCreditsCoins->get_text());
+		currentData->setValue(ONCE, switchInputCreditsOnce->get_active() ? HUMAN_TRUE : HUMAN_FALSE);
+		currentData->setValue(ALWAYS_ON, switchInputCreditsAlwaysOn->get_active() ? HUMAN_TRUE : HUMAN_FALSE);
+	}
 }
 
 void DialogInput::retrieveData() noexcept {
@@ -173,13 +189,20 @@ void DialogInput::retrieveData() noexcept {
 	entryInputName->set_text(currentData->getProperties().getValue(FILENAME));
 
 	if (Defaults::inputHasFlag(name, Defaults::INPUT_HAS_BLINK))
-		switchInputBlink->set_active(currentData->getValue(BLINK) == "true");
+		switchInputBlink->set_active(currentData->getValue(BLINK) == HUMAN_TRUE);
 
 	if (Defaults::inputHasFlag(name, Defaults::INPUT_HAS_TIMES))
 		spinInputTimes->set_text(currentData->getValue(TIMES));
 
 	if (Defaults::inputHasFlag(name, Defaults::INPUT_HAS_SPEED))
 		comboBoxInputSpeed->set_active_id(currentData->getValue(SPEED));
+
+	if (Defaults::inputHasFlag(name, Defaults::INPUT_HAS_CREDITS)) {
+		comboBoxInputCreditsMode->set_active_text(currentData->getValue(MODE));
+		spinInputCreditsCoins->set_value(std::stof(currentData->getValue(COINS_CREDIT)));
+		switchInputCreditsOnce->set_active(currentData->getValue(ONCE) == HUMAN_TRUE);
+		switchInputCreditsAlwaysOn->set_active(currentData->getValue(ALWAYS_ON) == HUMAN_TRUE);
+	}
 }
 
 string DialogInput::createUniqueId() const noexcept {
@@ -198,13 +221,16 @@ void DialogInput::onEmpty() noexcept {
 	boxLinkedElementsAndGroups->hide();
 	boxInputCreditsSettings->hide();
 	entryInputName->set_text("");
-	comboBoxInputSpeed->get_parent()->hide();
-	comboBoxInputSpeed->get_parent()->set_sensitive(true);
-	comboBoxInputSpeed->set_active_id("Normal");
+	comboBoxInputCreditsMode->set_active(0);
 	spinInputTimes->get_parent()->hide();
-	spinInputTimes->set_text("");
+	spinInputTimes->set_value(0.0f);
+	spinInputCreditsCoins->set_value(1.0f);
+	switchInputCreditsOnce->set_active(false);
+	switchInputCreditsAlwaysOn->set_active(false);
 	switchInputBlink->get_parent()->hide();
 	switchInputBlink->set_active(false);
+	comboBoxInputSpeed->get_parent()->hide();
+	comboBoxInputSpeed->set_active_id(HUMAN_NORMAL);
 	brief->set_text("");
 	btnApply->set_sensitive(false);
 }
@@ -228,6 +254,12 @@ void DialogInput::onSelected() noexcept {
 		currentData->unSet(TIMES);
 	if (not Defaults::inputHasFlag(name, Defaults::INPUT_HAS_SPEED))
 		currentData->unSet(SPEED);
+	if (not Defaults::inputHasFlag(name, Defaults::INPUT_HAS_CREDITS)) {
+		currentData->unSet(MODE);
+		currentData->unSet(COINS_CREDIT);
+		currentData->unSet(ONCE);
+		currentData->unSet(ALWAYS_ON);
+	}
 	if (not Defaults::hasLinkedMaps(name))
 		DialogInputLinkMaps::getInstance()->clearForm();
 }

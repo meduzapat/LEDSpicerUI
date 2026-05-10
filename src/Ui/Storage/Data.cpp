@@ -110,7 +110,7 @@ string Data::createOpeningXML(
 	bool              empty
 ) noexcept {
 	string r(Defaults::tab() + "<" + node);
-	if (data.size() > 2) {
+	if (data.size() > ATTRIBUTES_LIMIT_PER_ROW) {
 		r += "\n";
 		Defaults::increaseTab();
 		r += valuesXML(data);

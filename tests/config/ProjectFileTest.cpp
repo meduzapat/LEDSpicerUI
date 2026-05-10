@@ -24,6 +24,7 @@
 #include "config/InputFile.hpp"
 
 using namespace LEDSpicerUI::Config;
+using namespace LEDSpicerUI::Constants;
 
 /**
  * ProjectFileTest
@@ -35,25 +36,25 @@ class ProjectFileTest : public ::testing::Test {};
 
 // Basename is extracted from the full path — no extension, no directory prefix.
 TEST_F(ProjectFileTest, FilenameExtractionSimple) {
-	InputFile input(PACKAGE_SAMPLES_DIR "data/" INPUT_PATH "inputSingle.xml", "");
+	InputFile input(PACKAGE_SAMPLES_DIR "data/" + PATH_INPUT + "inputSingle.xml", "");
 	EXPECT_EQ("inputSingle", input.getFilename());
 
 
 }
 
 TEST_F(ProjectFileTest, FilenameExtractionMulti) {
-	InputFile input(PACKAGE_SAMPLES_DIR "data/" INPUT_PATH "inputMulti.xml", "");
+	InputFile input(PACKAGE_SAMPLES_DIR "data/" + PATH_INPUT + "inputMulti.xml", "");
 	EXPECT_EQ("inputMulti", input.getFilename());
 }
 
 // Extension must be stripped.
 TEST_F(ProjectFileTest, FilenameRemovesExtension) {
-	InputFile input(PACKAGE_SAMPLES_DIR "data/" INPUT_PATH "inputSingle.xml", "");
+	InputFile input(PACKAGE_SAMPLES_DIR "data/" + PATH_INPUT + "inputSingle.xml", "");
 	EXPECT_EQ(string::npos, input.getFilename().find(".xml")) << "Extension should be removed";
 }
 
 // With nullptr parent the file is at root level.
 TEST_F(ProjectFileTest, NullParentReturnsNullptr) {
-	InputFile input(PACKAGE_SAMPLES_DIR "data/" INPUT_PATH "inputSingle.xml", "");
+	InputFile input(PACKAGE_SAMPLES_DIR "data/" + PATH_INPUT + "inputSingle.xml", "");
 	EXPECT_EQ(nullptr, input.getParent());
 }

@@ -40,9 +40,9 @@ DialogProcess::DialogProcess(
 	setSignalApply();
 
 	// Process fields.
-	builder->get_widget("InputProcessName", inputProcessName);
-	builder->get_widget("InputSystemType",  inputSystemType);
-	builder->get_widget("InputRomPosition", inputRomPosition);
+	builder->get_widget("EntryProcessName",       inputProcessName);
+	builder->get_widget("EntryProcessSystemType", inputSystemType);
+	builder->get_widget("SpinProcessRomPosition", spinProcessRomPosition);
 }
 
 void DialogProcess::load(DataMap& values) noexcept {
@@ -52,7 +52,7 @@ void DialogProcess::load(DataMap& values) noexcept {
 void DialogProcess::clearForm() noexcept {
 	inputProcessName->set_text("");
 	inputSystemType->set_text("");
-	inputRomPosition->set_text("0");
+	spinProcessRomPosition->set_text("0");
 }
 
 void DialogProcess::isValid() const {
@@ -69,10 +69,10 @@ void DialogProcess::isValid() const {
 		throw Message("Invalid system type.");
 	}
 
-	string pos(inputRomPosition->get_text());
+	string pos(spinProcessRomPosition->get_text());
 	if (not pos.empty() and not Defaults::isNumber(pos)) {
 		if (action != Actions::LOAD)
-			inputRomPosition->grab_focus();
+			spinProcessRomPosition->grab_focus();
 		throw Message("Position needs to be a number.");
 	}
 
@@ -92,15 +92,15 @@ void DialogProcess::storeData() noexcept {
 	currentData->setValue(PARAM_PROCESS_NAME, inputProcessName->get_text());
 	currentData->setValue(PARAM_SYSTEM, inputSystemType->get_text());
 	// Not mandatory.
-	if (not inputRomPosition->get_text().empty())
-		currentData->setValue(PARAM_PROCESS_POS, inputRomPosition->get_text());
+	if (not spinProcessRomPosition->get_text().empty())
+		currentData->setValue(PARAM_PROCESS_POS, spinProcessRomPosition->get_text());
 }
 
 void DialogProcess::retrieveData() noexcept {
 	inputProcessName->set_text(currentData->getValue(PARAM_PROCESS_NAME));
 	inputSystemType->set_text(currentData->getValue(PARAM_SYSTEM));
 	// Assume 0 if not present.
-	inputRomPosition->set_text(currentData->getValue(PARAM_PROCESS_POS, "0"));
+	spinProcessRomPosition->set_text(currentData->getValue(PARAM_PROCESS_POS, "0"));
 }
 
 string DialogProcess::createUniqueId() const noexcept {

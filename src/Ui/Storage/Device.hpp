@@ -48,6 +48,9 @@ public:
 
 	CollectionHandler* getCollectionHandler() const noexcept override;
 
+protected:
+
+	bool shouldSerialize(const string& key, const string& value) const noexcept override;
 };
 
 } // namespace

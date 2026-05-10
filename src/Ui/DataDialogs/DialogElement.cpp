@@ -106,9 +106,9 @@ DialogElement::DialogElement(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 			case tabIndex::sRGB: {
 				// Assuming all hardware is sequential.
 				int first(Storage::Element::findFirstConnectorIndexByPosition(getPosition(selected.at(0))));
-				pinR->set_text(std::to_string(++first));
-				pinG->set_text(std::to_string(++first));
-				pinB->set_text(std::to_string(++first));
+				pinR->set_value(++first);
+				pinG->set_value(++first);
+				pinB->set_value(++first);
 				break;
 			}
 			case tabIndex::mRGB: {
@@ -126,7 +126,7 @@ DialogElement::DialogElement(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 	solenoid->signal_toggled().connect([&]() {
 		bool active(solenoid->get_active());
 		timeOn->set_sensitive(active);
-		timeOn->set_text("");
+		timeOn->set_value(0.0f);
 		brightness->set_sensitive(not active and not Defaults::isMonochrome(comboBoxDevices->get_active_id()));
 		if (active) brightness->set_value(100);
 	});
@@ -195,9 +195,9 @@ void DialogElement::clearFormConditinal(uint8_t flags) noexcept {
 
 	// Single pin.
 	if (not flags or (flags & (1 << tabIndex::Single))) {
-		pin->set_text("");
+		pin->set_value(0.0f);
 		solenoid->set_active(false);
-		timeOn->set_text("");
+		timeOn->set_value(0.0f);
 		timeOn->set_sensitive(false);
 		if (flags)
 			// restore it to the device-native sensitivity when switching pages.
@@ -206,9 +206,9 @@ void DialogElement::clearFormConditinal(uint8_t flags) noexcept {
 
 	// Scattered RGB.
 	if (not flags or (flags & (1 << tabIndex::sRGB))) {
-		pinR->set_text("");
-		pinG->set_text("");
-		pinB->set_text("");
+		pinR->set_value(0.0f);
+		pinG->set_value(0.0f);
+		pinB->set_value(0.0f);
 	}
 
 	// RGB.
@@ -279,20 +279,19 @@ void DialogElement::isValid() const {
 	}
 
 	// Check for connectors errors.
-	std::function<void(Gtk::Entry*)> checkPin = [&](Gtk::Entry* connector) {
-		string
-			conn(connector->get_text()),
-			name(connector->get_placeholder_text());
+	std::function<void(Gtk::SpinButton*)> checkPin = [&](Gtk::SpinButton* connector) {
+		const auto   conn {connector->get_value_as_int()};
+		const string name {connector->get_name()};
 
 		// Check empty.
-		if (conn.empty()) {
+		if (not conn) {
 			if (action != Actions::LOAD)
 				connector->grab_focus();
 			throw Message("Enter a valid connector number for " + name);
 		}
 
 		// Numeric check and range.
-		if (not Defaults::isBetween(conn, 1, numberOfPins)) {
+		if (conn < 1 or conn > numberOfPins) {
 			if (action != Actions::LOAD)
 				connector->grab_focus();
 			throw Message("The connector for " + name + " must be a number from 1 and " + std::to_string(numberOfPins));
@@ -303,16 +302,12 @@ void DialogElement::isValid() const {
 	case tabIndex::Single:
 
 		// Check for changes, solenoid or pin.
-		if (action != Actions::EDIT or pin->get_text() != currentData->getValue(PIN) + currentData->getValue(SOLENOID)) {
+		if (action != Actions::EDIT or std::to_string(pin->get_value_as_int()) != currentData->getValue(PIN) + currentData->getValue(SOLENOID)) {
 			checkPin(pin);
 		}
 
 		// Check solenoid milliseconds.
-		if (
-			solenoid->get_active()         and
-			not timeOn->get_text().empty() and
-			not Defaults::isNumber(timeOn->get_text())
-		) {
+		if (solenoid->get_active() and timeOn->get_value_as_int() < 1) {
 			if (action != Actions::LOAD)
 				timeOn->grab_focus();
 			throw Message("Enter a valid number of milliseconds for the timer for element " + name + ".");
@@ -323,9 +318,9 @@ void DialogElement::isValid() const {
 	case tabIndex::sRGB: {
 		// Check empty.
 		if (
-			pinR->get_text().empty() or
-			pinG->get_text().empty() or
-			pinB->get_text().empty()
+			not pinR->get_value_as_int() or
+			not pinG->get_value_as_int() or
+			not pinB->get_value_as_int()
 		) {
 			throw Message("Missing connection information for scattered RGB Element " + name + ".");
 		}
@@ -336,11 +331,12 @@ void DialogElement::isValid() const {
 			for (const auto p: {pinR, pinG, pinB}) {
 				if (e == p)
 					continue;
-				if (e->get_text() == p->get_text()) {
+				const auto pVal {p->get_value_as_int()};
+				if (e->get_value_as_int() == pVal) {
 					if (found) {
 						if (action != Actions::LOAD)
 							pin->grab_focus();
-						throw Message("In element " + name + ", the connector " + p->get_text() + " is set more than once in " + p->get_name());
+						throw Message("In element " + name + ", the connector " + std::to_string(pVal) + " is set more than once in " + p->get_name());
 					}
 					found = true;
 				}
@@ -391,20 +387,20 @@ void DialogElement::storeData() noexcept {
 	case tabIndex::Single:
 		// Solenoid.
 		if (solenoid->get_active()) {
-			currentData->setValue(SOLENOID, pin->get_text());
-			if (not timeOn->get_text().empty()) {
-				currentData->setValue(TIME_ON, timeOn->get_text());
+			currentData->setValue(SOLENOID, std::to_string(pin->get_value_as_int()));
+			if (auto t {timeOn->get_value_as_int()}; t > 0) {
+				currentData->setValue(TIME_ON, std::to_string(t));
 			}
 		}
 		// LED.
 		else {
-			currentData->setValue(PIN, pin->get_text());
+			currentData->setValue(PIN, std::to_string(pin->get_value_as_int()));
 		}
 		break;
 	case tabIndex::sRGB:
-		currentData->setValue(RED_PIN,   pinR->get_text());
-		currentData->setValue(GREEN_PIN, pinG->get_text());
-		currentData->setValue(BLUE_PIN,  pinB->get_text());
+		currentData->setValue(RED_PIN,   std::to_string(pinR->get_value_as_int()));
+		currentData->setValue(GREEN_PIN, std::to_string(pinG->get_value_as_int()));
+		currentData->setValue(BLUE_PIN,  std::to_string(pinB->get_value_as_int()));
 		break;
 	case tabIndex::RGB:
 		currentData->setValue(POSITION,    positionRGB->get_text());
@@ -415,7 +411,7 @@ void DialogElement::storeData() noexcept {
 		isStrip = true;
 
 		static uint16_t lastStripCode = 0;
-		auto collection{currentData->getCollectionHandler()};
+		auto collection {currentData->getCollectionHandler()};
 
 		const size_t
 			position = std::stoi(positionStrip->get_text()),
@@ -582,23 +578,23 @@ void DialogElement::retrieveData() noexcept {
 	// Single.
 	else if (not currentData->getValue(PIN).empty()) {
 		notebookDeviceConnections->set_current_page(tabIndex::Single);
-		pin->set_text(currentData->getValue(PIN));
+		pin->set_value(std::stoi(currentData->getValue(PIN)));
 		solenoid->set_active(false);
 	}
 	// Solenoid.
 	else if (not currentData->getValue(SOLENOID).empty()) {
 		notebookDeviceConnections->set_current_page(tabIndex::Single);
-		pin->set_text(currentData->getValue(SOLENOID));
+		pin->set_value(std::stoi(currentData->getValue(SOLENOID)));
 		solenoid->set_active(true);
 		if (not currentData->getValue(TIME_ON).empty())
-			timeOn->set_text(currentData->getValue(TIME_ON));
+			timeOn->set_value(std::stoi(currentData->getValue(TIME_ON)));
 	}
 	// Scattered RGB
 	else {
 		notebookDeviceConnections->set_current_page(tabIndex::sRGB);
-		pinR->set_text(currentData->getValue(RED_PIN));
-		pinG->set_text(currentData->getValue(GREEN_PIN));
-		pinB->set_text(currentData->getValue(BLUE_PIN));
+		pinR->set_value(std::stoi(currentData->getValue(RED_PIN)));
+		pinG->set_value(std::stoi(currentData->getValue(GREEN_PIN)));
+		pinB->set_value(std::stoi(currentData->getValue(BLUE_PIN)));
 	}
 	DialogColors::getInstance()->colorizeButton(
 		btnDefaultColor,

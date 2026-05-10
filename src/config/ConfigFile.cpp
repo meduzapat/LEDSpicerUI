@@ -257,16 +257,17 @@ void ConfigFile::save(const ConfigData& data) {
 	// Validation
 	if (data.defaultProfile.empty())
 		throw Message("Select a default profile in the profile section");
+
 	if (data.devices.getSize() == 0)
 		throw Message("At least one device is required");
 
 	// Helper: collect toXML() from a BoxButtonCollection into one string.
-	const auto collect = [](const BoxButtonCollection& col) {
+	const auto collect {[](const BoxButtonCollection& col) {
 		string r;
 		for (const auto btn : col)
 			r += btn->getData()->toXML();
 		return r;
-	};
+	}};
 
 	// Build XML
 	string xmlData(xmlHeader("Configuration"));
@@ -280,7 +281,9 @@ void ConfigFile::save(const ConfigData& data) {
 		StringUMap plAttrs;
 		if (not data.runEvery.empty())
 			plAttrs.emplace(PARAM_MILLISECONDS, data.runEvery);
+
 		xmlData += xmlSection("processLookup", collect(data.processes), plAttrs);
+		Defaults::reduceTab();
 	}
 
 	// Devices (required)
@@ -301,6 +304,6 @@ void ConfigFile::save(const ConfigData& data) {
 
 	// DEBUG: display instead of writing — remove when real saving is wired up.
 	debugSave(data.configPath, xmlData);
-//	Glib::file_set_contents(filePath, input.toXML());
+//	Glib::file_set_contents(filePath, xmlData);
 
 }

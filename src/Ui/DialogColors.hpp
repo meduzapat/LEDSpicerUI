@@ -40,52 +40,52 @@ public:
 	 * Process a file with colors information and store the colors to be used.
 	 * @param colorsFilename
 	 */
-	void setColorsFromFile(const string& colorsFilename);
+	void setColorsFromFile(const string& colorsFilename) noexcept;
 
 	/**
 	 * Colorize a button with the desired colors class.
 	 * @param button
 	 * @param name
 	 */
-	void colorizeButton(Gtk::Button* button, const string& className);
+	void colorizeButton(Gtk::Button* button, const string& className) const noexcept;
 
 	/**
 	 * Check if the color is on the list of colors.
 	 * @param colorName
 	 * @return
 	 */
-	bool isValidColor(const string& colorName);
+	bool isValidColor(const string& colorName) const noexcept;
 
 	/**
 	 * Converts a button into a color picker for the destination box.
 	 * @param button
 	 * @param destination
 	 */
-	void activateColorPicker(Gtk::Button* button, Gtk::FlowBox* destination);
+	void activateColorPicker(Gtk::Button* button, Gtk::FlowBox* destination) noexcept;
 
 	/**
 	 * Converts a button into a dialog color opener.
 	 * @param button
 	 */
-	void activateColorButton(Gtk::Button* button);
+	void activateColorButton(Gtk::Button* button) noexcept;
 
 	/**
 	 * Set no color for all registered color buttons.
 	 */
-	void resetColorButtons();
+	void resetColorButtons() const noexcept;
 
 	/**
 	 * Fills a flow box with color buttons that can be removed.
 	 * @param destination
 	 * @param colors
 	 */
-	void populateColorBox(Gtk::FlowBox* destination, const StringVector& colors);
+	void populateColorBox(Gtk::FlowBox* destination, const StringVector& colors) noexcept;
 
 	/**
 	 * @param destination
 	 * @return A list of colors from inside a flowbox.
 	 */
-	StringVector getColorBoxValues(Gtk::FlowBox* destination);
+	StringVector getColorBoxValues(Gtk::FlowBox* destination) const noexcept;
 
 protected:
 
@@ -117,21 +117,21 @@ protected:
 	 * Callback when a color is selected from the color picker.
 	 * @param button
 	 */
-	void onColorSelected(Gtk::Button* button);
+	void onColorSelected(Gtk::Button* button) noexcept;
 
 	/**
 	 * Replaces the current colors with a new set it creates CSS classes for every new color.
 	 * @param colors
 	 * @return a CCS string representing the new color set.
 	 */
-	string setColors(StringUMap& colors);
+	string setColors(StringUMap& colors) noexcept;
 
 	/**
 	 * Creates a deletable button with the desired color.
 	 * @param destination
 	 * @param color
 	 */
-	void createColorButton(Gtk::FlowBox* destination, const string& color);
+	void createColorButton(Gtk::FlowBox* destination, const string& color) const noexcept;
 
 };
 

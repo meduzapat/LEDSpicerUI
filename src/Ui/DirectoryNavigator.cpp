@@ -52,6 +52,32 @@ Storage::DirectoryEntry* DirectoryNavigator::getCurrentDir() const noexcept {
 	return currentDir;
 }
 
+void DirectoryNavigator::save(const string& projectDir) noexcept {
+
+	namespace fs = std::filesystem;
+	const string baseDir(projectDir + string(getSubDir()));
+
+	std::function<void(Storage::BoxButtonCollection*)> saveDir =
+	[&](Storage::BoxButtonCollection* col) {
+		for (auto btn : *col) {
+			auto data {btn->getData()};
+			auto node {dynamic_cast<Storage::DirNode*>(data)};
+			if (data->getXmlTag().empty()) {
+				fs::create_directories(baseDir + node->getFullPath());
+				saveDir(static_cast<Storage::DirectoryEntry*>(node)->getPrimaryChild());
+			}
+			else {
+				const string parentPath(node->getPath());
+				if (not parentPath.empty())
+					fs::create_directories(baseDir + parentPath);
+				saveItem(data, baseDir + node->getFullPath() + ".xml");
+			}
+		}
+	};
+
+	saveDir(rootDir.getPrimaryChild());
+}
+
 DirectoryNavigator::DirectoryNavigator(const Glib::RefPtr<Gtk::Builder>& builder) noexcept :
 	rootDir(rootData, nullptr),
 	currentDir(&rootDir)

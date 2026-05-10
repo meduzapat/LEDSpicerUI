@@ -81,13 +81,15 @@ protected:
 
 	string defaultRGBFormat;
 
+	Gtk::SpinButton
+		* timeOn = nullptr,
+		* pin    = nullptr, /// Single color / solenoid.
+		* pinR   = nullptr,
+		* pinG   = nullptr,
+		* pinB   = nullptr;
+
 	Gtk::Entry
 		* elementName   = nullptr,
-		* pin           = nullptr, /// Single color.
-		* pinR          = nullptr,
-		* pinG          = nullptr,
-		* pinB          = nullptr,
-		* timeOn        = nullptr,
 		* positionsMRGB = nullptr, /// Multi RGB.
 		* positionRGB   = nullptr, /// Continuous RGB.
 		* sizeStrip     = nullptr, /// LED Strip.
