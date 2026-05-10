@@ -2114,6 +2114,18 @@ Compatible with version @MINIMUM_COMPATIBILITY@+</property>
                 <property name="position">2</property>
               </packing>
             </child>
+            <child>
+              <object class="GtkLabel" id="LabelAboutBuild">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="label" translatable="yes">build info</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">3</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -4021,13 +4033,13 @@ Autodetected if ledspicerd is detected</property>
                           <object class="GtkBox">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
+                            <property name="tooltip-text" translatable="yes">Select the ledspicerd executable you want to use</property>
                             <property name="spacing">2</property>
                             <child>
                               <object class="GtkLabel">
                                 <property name="width-request">110</property>
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="margin-right">5</property>
                                 <property name="margin-end">5</property>
                                 <property name="label">Binary</property>
                                 <property name="xalign">1</property>
@@ -4042,7 +4054,6 @@ Autodetected if ledspicerd is detected</property>
                               <object class="GtkFileChooserButton" id="FileBinary">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="tooltip-text">Select the ledspicerd executable you want to use</property>
                                 <property name="create-folders">False</property>
                                 <property name="title">Select data directory</property>
                               </object>
@@ -4095,6 +4106,7 @@ Autodetected if ledspicerd is detected</property>
                               <object class="GtkBox">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
+                                <property name="tooltip-text" translatable="yes">if this setting is on, you will be able to test your changes like profiles with animation and inputs, in real hardware sending them to LEDSpicer</property>
                                 <property name="spacing">5</property>
                                 <child>
                                   <object class="GtkLabel">
@@ -4113,7 +4125,6 @@ Autodetected if ledspicerd is detected</property>
                                   <object class="GtkSwitch" id="SwitchSettingsInteractiveMode">
                                     <property name="visible">True</property>
                                     <property name="can-focus">True</property>
-                                    <property name="tooltip-text">if this setting is on, you will be able to test your changes like profiles with animation and inputs, in real hardware sending them to LEDSpicer</property>
                                     <property name="active">True</property>
                                   </object>
                                   <packing>
@@ -4241,7 +4252,6 @@ Autodetected if ledspicer is installed</property>
                                 <property name="width-request">110</property>
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="margin-right">5</property>
                                 <property name="margin-end">5</property>
                                 <property name="label">LEDSpicer Config</property>
                                 <property name="xalign">1</property>
@@ -4305,16 +4315,27 @@ Autodetected if ledspicer is installed</property>
                     <property name="can-focus">False</property>
                     <property name="orientation">vertical</property>
                     <child>
-                      <!-- n-columns=2 n-rows=2 -->
-                      <object class="GtkGrid">
+                      <object class="GtkBox">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="row-spacing">2</property>
-                        <property name="column-spacing">3</property>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="sensitive">False</property>
+                            <property name="can-focus">False</property>
+                            <property name="label" translatable="yes">Theme</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
                         <child>
                           <object class="GtkBox">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
+                            <property name="tooltip-text" translatable="yes">Select the application appearance mode. Use Auto to follow the system theme automatically.</property>
                             <property name="halign">end</property>
                             <child>
                               <object class="GtkLabel">
@@ -4480,27 +4501,11 @@ Autodetected if ledspicer is installed</property>
                             </child>
                           </object>
                           <packing>
-                            <property name="left-attach">1</property>
-                            <property name="top-attach">0</property>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="pack-type">end</property>
+                            <property name="position">1</property>
                           </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLabel">
-                            <property name="visible">True</property>
-                            <property name="sensitive">False</property>
-                            <property name="can-focus">False</property>
-                            <property name="label" translatable="yes">Theme</property>
-                          </object>
-                          <packing>
-                            <property name="left-attach">0</property>
-                            <property name="top-attach">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <placeholder/>
-                        </child>
-                        <child>
-                          <placeholder/>
                         </child>
                       </object>
                       <packing>
@@ -4510,21 +4515,7 @@ Autodetected if ledspicer is installed</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkBox">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <child>
-                          <placeholder/>
-                        </child>
-                        <child>
-                          <placeholder/>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
-                      </packing>
+                      <placeholder/>
                     </child>
                     <child>
                       <placeholder/>
@@ -4565,7 +4556,7 @@ Autodetected if ledspicer is installed</property>
                           <object class="GtkBox">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
-                            <property name="tooltip-text" translatable="yes">If enabled, the project directory will be completely cleaned before saving.</property>
+                            <property name="tooltip-text" translatable="yes">When this option is enabled, the project directory will be cleaned before saving new files.</property>
                             <property name="spacing">5</property>
                             <child>
                               <object class="GtkSwitch" id="SwitchSettingsCleanProjectDir">
@@ -4602,7 +4593,7 @@ Autodetected if ledspicer is installed</property>
                           <object class="GtkBox">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
-                            <property name="tooltip-text" translatable="yes">If enabled, empty directories will be preserved when saving.</property>
+                            <property name="tooltip-text" translatable="yes">When this option is enabled, empty directories will be preserved when saving the project.</property>
                             <property name="spacing">5</property>
                             <child>
                               <object class="GtkSwitch" id="SwitchSettingsPreserveEmptyDir">
@@ -4651,7 +4642,7 @@ Autodetected if ledspicer is installed</property>
                           <object class="GtkBox">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
-                            <property name="tooltip-text" translatable="yes">If enabled, components that fail validation or contain no data will be removed.</property>
+                            <property name="tooltip-text" translatable="yes">When this option is enabled, components that are empty or fail validation checks will be automatically removed.</property>
                             <property name="spacing">5</property>
                             <child>
                               <object class="GtkSwitch" id="SwitchSettingsRemoveInvalidItems">
@@ -4688,7 +4679,7 @@ Autodetected if ledspicer is installed</property>
                           <object class="GtkBox">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
-                            <property name="tooltip-text" translatable="yes">If enabled, a backup of the current project files will be created before saving changes.</property>
+                            <property name="tooltip-text" translatable="yes">When this option is enabled, a backup of the current project files will be created before saving changes.</property>
                             <property name="spacing">5</property>
                             <child>
                               <object class="GtkSwitch" id="SwitchSettingsSaveBackup">
@@ -4726,6 +4717,72 @@ Autodetected if ledspicer is installed</property>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
                         <property name="position">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkBox">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="tooltip-text" translatable="yes">When enabled, generated files will be displayed in a dialog instead of being saved, and the project directory will remain unchanged.</property>
+                            <property name="spacing">5</property>
+                            <child>
+                              <object class="GtkSwitch" id="SwitchSettingsDebugFiles">
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="halign">end</property>
+                                <property name="label">Display files instead of saving</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <placeholder/>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="pack-type">end</property>
+                        <property name="position">3</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="ypad">4</property>
+                        <property name="label" translatable="yes">Development and tweaks</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="pack-type">end</property>
+                        <property name="position">4</property>
                       </packing>
                     </child>
                   </object>

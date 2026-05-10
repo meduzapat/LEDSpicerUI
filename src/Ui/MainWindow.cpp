@@ -134,7 +134,15 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 	// About.
 	btnAbout->signal_clicked().connect([builder]() {
 		Gtk::Dialog* d;
+		Gtk::Label* l;
 		builder->get_widget("DialogAbout", d);
+		builder->get_widget("LabelAboutBuild", l);
+		l->set_text(
+			"Built with: GTK+ " +
+			std::to_string(gtk_get_major_version()) + "." +
+			std::to_string(gtk_get_minor_version()) + "." +
+			std::to_string(gtk_get_micro_version())
+		);
 		d->run();
 		d->hide();
 	});
