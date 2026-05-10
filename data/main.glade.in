@@ -1414,7 +1414,7 @@ If nothing is set, the default is 1000ms.</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="receives-default">True</property>
-                        <property name="tooltip-text" translatable="yes">Import Animation</property>
+                        <property name="tooltip-text" translatable="yes">Import existing LEDSpicer animation files into the current project.</property>
                         <child>
                           <object class="GtkImage">
                             <property name="visible">True</property>
@@ -1608,7 +1608,7 @@ If nothing is set, the default is 1000ms.</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="receives-default">True</property>
-                        <property name="tooltip-text" translatable="yes">Import Input</property>
+                        <property name="tooltip-text" translatable="yes">Import existing LEDSpicer input files into the current project.</property>
                         <child>
                           <object class="GtkImage">
                             <property name="visible">True</property>
@@ -1779,7 +1779,7 @@ If nothing is set, the default is 1000ms.</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="receives-default">True</property>
-                        <property name="tooltip-text" translatable="yes">Import Profile</property>
+                        <property name="tooltip-text" translatable="yes">Import existing LEDSpicer profile files into the current project.</property>
                         <child>
                           <object class="GtkImage">
                             <property name="visible">True</property>
@@ -4515,10 +4515,37 @@ Autodetected if ledspicer is installed</property>
                       </packing>
                     </child>
                     <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
+                      <object class="GtkScrolledWindow">
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="hscrollbar-policy">never</property>
+                        <property name="shadow-type">in</property>
+                        <child>
+                          <object class="GtkViewport">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <child>
+                              <object class="GtkFlowBox" id="BoxSelectTheme">
+                                <property name="width-request">570</property>
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="valign">start</property>
+                                <property name="homogeneous">True</property>
+                                <property name="max-children-per-line">4</property>
+                              </object>
+                            </child>
+                            <style>
+                              <class name="zoneCanvas"/>
+                              <class name="themes"/>
+                            </style>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
                     </child>
                   </object>
                   <packing>
