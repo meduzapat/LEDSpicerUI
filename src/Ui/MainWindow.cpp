@@ -259,6 +259,7 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 
 MainWindow::~MainWindow() {
 
+	inputNavigator.clear();
 	Storage::CollectionHandler::purgeAll();
 
 	// Data dialogs.
