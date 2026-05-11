@@ -104,6 +104,13 @@ public:
 	void setValues(const StringUMap& values) noexcept;
 
 	/**
+	 * Sets the value in key to true
+	 *
+	 * @param key
+	 */
+	void setTrue(const string& key) noexcept { setValue(key, HUMAN_TRUE); }
+
+	/**
 	 * @return a copy of the internal data.
 	 */
 	virtual StringUMap copyValues() const noexcept { return {values}; }

@@ -72,10 +72,19 @@ TEST_F(ValuesTest, GetValues) {
 
 TEST_F(ValuesTest, is) {
 	EXPECT_TRUE(values->is("boolean"));
+	EXPECT_FALSE(values->is("type"));
 }
 
 TEST_F(ValuesTest, isA) {
 	EXPECT_TRUE(values->isA("name", "TestItem"));
+}
+
+TEST_F(ValuesTest, setTrue) {
+	EXPECT_FALSE(values->is("new"));
+	values->setTrue("new");
+	EXPECT_TRUE(values->is("new"));
+	values->unSet("new");
+	EXPECT_FALSE(values->is("new"));
 }
 
 TEST_F(ValuesTest, Swap) {
