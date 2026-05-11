@@ -199,3 +199,11 @@ TEST(XMLHelperTest, CleanError) {
 	string simpleError = "Unable to read the file /xxx/yyy/zzzz.xml";
 	EXPECT_EQ(XMLHelper::cleanError(simpleError), simpleError) << "Simple error should return unchanged";
 }
+
+TEST(XMLHelperTest, GetDataMap) {
+	XMLHelper helper(PACKAGE_SAMPLES_DIR "data/config.xml", "Configuration");
+
+	const DataMap& dataMap = helper.getDataMap();
+
+	EXPECT_TRUE(dataMap.empty()) << "Unpopulated data map should be empty";
+}
