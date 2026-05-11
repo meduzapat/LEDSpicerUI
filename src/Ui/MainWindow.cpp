@@ -23,6 +23,8 @@
 #include "MainWindow.hpp"
 
 using namespace LEDSpicerUI::Ui;
+using namespace Storage;
+using namespace DataDialogs;
 
 MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &builder) :
 	Gtk::ApplicationWindow(obj),
@@ -38,21 +40,21 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 	DialogProject::buildInstance(builder,  "DialogProject");
 
 	// Initialize secondary dialogs.
-	DataDialogs::DialogSelect::buildInstance(builder, "DialogSelect");
+	DialogSelect::buildInstance(builder, "DialogSelect");
 
 	// Initialize Primary Dialogs.
-	DataDialogs::DialogDevice::buildInstance(builder, "DialogDevice");
-	DataDialogs::DialogRestrictor::buildInstance(builder, "DialogRestrictor");
-	DataDialogs::DialogProcess::buildInstance(builder, "DialogProcess");
-	DataDialogs::DialogGroup::buildInstance(builder, "DialogGroup");
-	DataDialogs::DialogProfile::buildInstance(builder, "DialogProfile");
+	DialogDevice::buildInstance(builder,     "DialogDevice");
+	DialogRestrictor::buildInstance(builder, "DialogRestrictor");
+	DialogProcess::buildInstance(builder,    "DialogProcess");
+	DialogGroup::buildInstance(builder,      "DialogGroup");
+	DialogProfile::buildInstance(builder,    "DialogProfile");
 
 	// Connect primary dialogs with the collections.
-	DataDialogs::DialogDevice::getInstance()->setOwner(&devices, nullptr);
-	DataDialogs::DialogRestrictor::getInstance()->setOwner(&restrictors, nullptr);
-	DataDialogs::DialogProcess::getInstance()->setOwner(&processes, nullptr);
-	DataDialogs::DialogGroup::getInstance()->setOwner(&groups, nullptr);
-	DataDialogs::DialogProfile::getInstance()->setOwner(&profiles, nullptr);
+	DialogDevice::getInstance()->setOwner(&devices,         nullptr);
+	DialogRestrictor::getInstance()->setOwner(&restrictors, nullptr);
+	DialogProcess::getInstance()->setOwner(&processes,      nullptr);
+	DialogGroup::getInstance()->setOwner(&groups,           nullptr);
+	DialogProfile::getInstance()->setOwner(&profiles,       nullptr);
 
 	// Setup ledspicer fields.
 	builder->get_widget("InputUserId",     inputUserId);
@@ -100,7 +102,7 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 				DialogSettings::getInstance()->getConfigPath(),
 				comboDefaultProfile->get_active_text().raw(),
 				inputRunEvery->get_text().raw(),
-				ledspicerConfigToXml(),
+				packLedspicerConfig(),
 				devices,
 				restrictors,
 				groups,
@@ -268,15 +270,15 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 MainWindow::~MainWindow() {
 
 	inputNavigator.clear();
-	Storage::CollectionHandler::purgeAll();
+	CollectionHandler::purgeAll();
 
 	// Data dialogs.
-	delete DataDialogs::DialogSelect::getInstance();
-	delete DataDialogs::DialogProfile::getInstance();
-	delete DataDialogs::DialogRestrictor::getInstance();
-	delete DataDialogs::DialogProcess::getInstance();
-	delete DataDialogs::DialogGroup::getInstance();
-	delete DataDialogs::DialogDevice::getInstance();
+	delete DialogSelect::getInstance();
+	delete DialogProfile::getInstance();
+	delete DialogRestrictor::getInstance();
+	delete DialogProcess::getInstance();
+	delete DialogGroup::getInstance();
+	delete DialogDevice::getInstance();
 
 	// Miscellaneous dialogs.
 	delete DialogColors::getInstance();
@@ -374,14 +376,14 @@ void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {
 			// Clear random colors and profile selector.
 			DialogColors::getInstance()->resetColorButtons();
 			comboDefaultProfile->remove_all();
-			StringUMap values;
+			Values values;
 			setConfiguration(values);
 		}
 		// Always refresh all boxes — covers load, new project, and (conditionally) import.
-		DataDialogs::DialogDevice::getInstance()->refreshItems();
-		DataDialogs::DialogGroup::getInstance()->refreshItems();
-		DataDialogs::DialogRestrictor::getInstance()->refreshItems();
-		DataDialogs::DialogProcess::getInstance()->refreshItems();
+		DialogDevice::getInstance()->refreshItems();
+		DialogGroup::getInstance()->refreshItems();
+		DialogRestrictor::getInstance()->refreshItems();
+		DialogProcess::getInstance()->refreshItems();
 		Defaults::cleanDirty();
 		MainTabs->set_current_page(0);
 		MainTabs->set_sensitive(true);
@@ -389,28 +391,28 @@ void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {
 	});
 }
 
-void MainWindow::setConfiguration(StringUMap& values) {
+void MainWindow::setConfiguration(const Values& values) {
 	// ledspicerd
-	inputUserId->set_text(XMLHelper::valueOf(values,        "userId",   DEFAULT_USERID));
-	inputGroupId->set_text(XMLHelper::valueOf(values,       "groupId",  DEFAULT_GROUPID));
-	inputPortNumber->set_text(XMLHelper::valueOf(values,    "port",     DEFAULT_PORT));
-	inputFPS->set_text(XMLHelper::valueOf(values,           "fps",      DEFAULT_FPS));
-	setColorFile(XMLHelper::valueOf(values,                 "colors",   DEFAULT_COLORS));
-	comboLogLevel->set_active_id(XMLHelper::valueOf(values, "logLevel", DEFAULT_LOGLEVEL));
-	listBoxDataSource->sortAndMark(Defaults::explode(XMLHelper::valueOf(values, "dataSource", DEFAULT_DATASOURCE), ','));
-	auto randomColors(Defaults::explode(XMLHelper::valueOf(values, "randomColors", ""), ','));
+	inputUserId->set_text(values.getValue("userId", DEFAULT_USERID));
+	inputGroupId->set_text(values.getValue("groupId", DEFAULT_GROUPID));
+	inputPortNumber->set_text(values.getValue("port", DEFAULT_PORT));
+	inputFPS->set_text(values.getValue("fps", DEFAULT_FPS));
+	setColorFile(values.getValue("colors", DEFAULT_COLORS));
+	comboLogLevel->set_active_id(values.getValue("logLevel", DEFAULT_LOGLEVEL));
+	listBoxDataSource->sortAndMark(Defaults::explode(values.getValue("dataSource", DEFAULT_DATASOURCE), ','));
+	auto randomColors(Defaults::explode(values.getValue("randomColors"), ','));
 	if (not randomColors.empty()) {
 		DialogColors::getInstance()->populateColorBox(boxRandomColors, randomColors);
 	}
 
 	// DEFAULT_PROFILE
 	// emitter
-	toggleCraftProfiles->set_active(XMLHelper::valueOf(values, "craftProfile", DEFAULT_CRAFTPROFILE) == HUMAN_TRUE);
-	comboUseColors->set_active_id(XMLHelper::valueOf(values,   "colorsFile",   DEFAULT_COLORSINFO));
+	toggleCraftProfiles->set_active(values.getValue("craftProfile", DEFAULT_CRAFTPROFILE) == HUMAN_TRUE);
+	comboUseColors->set_active_id(values.getValue("colorsFile", DEFAULT_COLORSINFO));
 }
 
-StringUMap MainWindow::ledspicerConfigToXml() const {
-	StringUMap r {
+Values MainWindow::packLedspicerConfig() const {
+	Values r {
 		// ledspicerd.
 		{"version",      PACKAGE_DATA_VERSION},
 		{"type",         "Configuration"},
@@ -429,7 +431,7 @@ StringUMap MainWindow::ledspicerConfigToXml() const {
 	};
 
 	if (const auto rc {DialogColors::getInstance()->getColorBoxValues(boxRandomColors)}; not rc.empty())
-		r.emplace("randomColors", Defaults::implode(rc, ','));
+		r.setValue("randomColors", Defaults::implode(rc, ','));
 
 	return r;
 }
@@ -454,8 +456,8 @@ void MainWindow::readConfigFile(const string& dataFilePath, bool wipe, uint8_t i
 			devices.wipe();
 			groups.wipe();
 		}
-		DataDialogs::DialogDevice::getInstance()->load(datafile.getDataMap());
-		DataDialogs::DialogGroup::getInstance()->load(datafile.getDataMap());
+		DialogDevice::getInstance()->load(datafile.getDataMap());
+		DialogGroup::getInstance()->load(datafile.getDataMap());
 		// TODO: set default profile
 	}
 
@@ -464,7 +466,7 @@ void MainWindow::readConfigFile(const string& dataFilePath, bool wipe, uint8_t i
 		if (wipe) {
 			restrictors.wipe();
 		}
-		DataDialogs::DialogRestrictor::getInstance()->load(datafile.getDataMap());
+		DialogRestrictor::getInstance()->load(datafile.getDataMap());
 	}
 
 	// Load process mappings from config file.
@@ -472,7 +474,7 @@ void MainWindow::readConfigFile(const string& dataFilePath, bool wipe, uint8_t i
 		if (wipe) {
 			processes.wipe();
 		}
-		DataDialogs::DialogProcess::getInstance()->load(datafile.getDataMap());
+		DialogProcess::getInstance()->load(datafile.getDataMap());
 		inputRunEvery->set_text(datafile.getProcessLookupRunEvery());
 	}
 

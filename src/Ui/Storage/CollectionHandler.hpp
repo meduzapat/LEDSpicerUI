@@ -26,6 +26,8 @@
 
 namespace LEDSpicerUI::Ui::Storage {
 
+using StringDataPtrMap = std::map<string, Data*>;
+
 /**
  * LEDSpicerUI::Ui::Storage::CollectionHandler
  */

@@ -31,8 +31,8 @@ class TestData : public Data {
 public:
 
 	TestData(StringUMap& d) noexcept : Data(d) {}
-	constexpr string_view getCssClass() const noexcept override { return ""; }
-	constexpr string_view getXmlTag()   const noexcept override { return "item"; }
+	const string& getCssClass() const noexcept override { return ""; }
+	const string& getXmlTag()   const noexcept override { return "item"; }
 	CollectionHandler* getCollectionHandler() const noexcept override { return nullptr; }
 };
 
@@ -41,8 +41,8 @@ struct TestParent : Parent {
 	TestParent(StringUMap& d, const vector<string>& ids)
 		: Parent(d, ids) {}
 
-	constexpr string_view getCssClass() const noexcept override { return ""; }
-	constexpr string_view getXmlTag()   const noexcept override { return "parent"; }
+	const string& getCssClass() const noexcept override { return ""; }
+	const string& getXmlTag()   const noexcept override { return "parent"; }
 	CollectionHandler* getCollectionHandler() const noexcept override { return nullptr; }
 	using Parent::registerDependency;
 };

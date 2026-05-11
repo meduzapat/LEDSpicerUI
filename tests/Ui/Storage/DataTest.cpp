@@ -20,20 +20,17 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <gtest/gtest.h>
+#include "MockBasicData.hpp"
 #include "Storage/CollectionHandler.hpp"
 
-using namespace LEDSpicerUI::Ui::Storage;
+using LEDSpicerUI::Test::Mocks::MockBasicData;
 
 // A simple Data subclass without a collection handler.
-class TestData : public Data {
+class TestData : public MockBasicData {
 
 public:
 
-	TestData(StringUMap& data) noexcept : Data(data) {}
-	constexpr string_view getCssClass() const noexcept override { return "test-class"; }
-	constexpr string_view getXmlTag()   const noexcept override { return "test"; }
-	CollectionHandler* getCollectionHandler() const noexcept override { return nullptr; }
+	using MockBasicData::MockBasicData;
 
 protected:
 
@@ -43,16 +40,13 @@ protected:
 };
 
 // A Data subclass that registers into collection "t".
-class RegisteringData : public Data {
+class RegisteringData : public MockBasicData {
 
 public:
 
-	RegisteringData(StringUMap& data) noexcept : Data(data) {}
-	constexpr string_view getCssClass() const noexcept override { return "reg"; }
-	constexpr string_view getXmlTag()   const noexcept override { return "test"; }
-	CollectionHandler* getCollectionHandler() const noexcept override {
-		return CollectionHandler::getInstance("t");
-	}
+	using MockBasicData::MockBasicData;
+
+	CollectionHandler* getCollectionHandler() const noexcept override {return CollectionHandler::getInstance("t");}
 };
 
 class DataTest : public ::testing::Test {
@@ -76,6 +70,48 @@ protected:
 
 	std::unique_ptr<TestData> data;
 };
+
+TEST_F(DataTest, Constructors) {
+
+	// StringUMap got moved
+	StringUMap map{{"name", "TestItem"}, {"type", "button"}, {"value", "42"}};
+	MockBasicData d1(map);
+	// Original map was moved.
+	EXPECT_TRUE(map.empty());
+	// New got data.
+	EXPECT_FALSE(d1.getValues().empty());
+
+	// Values was moved.
+	Values values1{{"key1", "val1"}, {"key2", "val2"}};
+	MockBasicData d2(values1);
+	// Original map was moved.
+	EXPECT_TRUE(values1.getValues().empty());
+	// New got data.
+	EXPECT_FALSE(d2.getValues().empty());
+
+	// 3. Construction from Values&& (move - destructive)
+	Values values2{{"move1", "movedValue"}, {"move2", "another"}};
+	MockBasicData d3(std::move(values2));
+	// Original map was moved.
+	EXPECT_TRUE(values2.getValues().empty());
+	// New got data.
+	EXPECT_FALSE(d3.getValues().empty());
+
+	// 4. Move construction between Data objects
+	MockBasicData d4(std::move(d3));
+	// Original map was moved.
+	EXPECT_TRUE(d3.getValues().empty());
+	// New got data.
+	EXPECT_FALSE(d4.getValues().empty());
+
+	// Move assignment
+	MockBasicData d5();
+	d5 = std::move(d4);
+	// Original map was moved.
+	EXPECT_TRUE(d4.getValues().empty());
+	// New got data.
+	EXPECT_FALSE(d5.getValues().empty());
+}
 
 TEST_F(DataTest, GetValue) {
 	EXPECT_EQ("TestItem", data->getValue("name"));
@@ -131,11 +167,12 @@ TEST_F(DataTest, WipeUnregisteredItemSafe) {
 }
 
 TEST_F(DataTest, ToXML) {
-	string xml(data->toXML());
-	EXPECT_NE(string::npos, xml.find("<test"));
-	EXPECT_NE(string::npos, xml.find("name=\"TestItem\""));
-	EXPECT_NE(string::npos, xml.find("value=\"42\""));
-	EXPECT_EQ(string::npos, xml.find("ignored="));
+	// Note: escape tabs and end lines to get the expected results.
+	const string
+		xml(data->toXML()),
+		// ignored should not be set.
+		expected {"<testTag\n\tname=\"TestItem\"\n\ttype=\"button\"\n\tvalue=\"42\"\n/>\n"};
+	EXPECT_EQ(expected, xml);
 }
 
 TEST_F(DataTest, GetValues) {

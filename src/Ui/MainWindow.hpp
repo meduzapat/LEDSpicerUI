@@ -118,12 +118,12 @@ protected:
 	 * Populates the configuration.
 	 * @param values if empty will use default values.
 	 */
-	void setConfiguration(StringUMap& values);
+	void setConfiguration(const Values& values);
 
 	/**
 	 * @return the generated configuration.
 	 */
-	StringUMap ledspicerConfigToXml() const;
+	Values packLedspicerConfig() const noexcept;
 
 	/**
 	 * Connects Dialogs with buttons.

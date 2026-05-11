@@ -31,8 +31,8 @@ class TestData : public Data {
 public:
 
 	TestData(StringUMap& d) noexcept : Data(d) {}
-	constexpr string_view getCssClass() const noexcept override { return "test"; }
-	constexpr string_view getXmlTag()   const noexcept override { return "test"; }
+	const string& getCssClass() const noexcept override { return "test"; }
+	const string& getXmlTag()   const noexcept override { return "test"; }
 	CollectionHandler* getCollectionHandler() const noexcept override {
 		return CollectionHandler::getInstance("bb_test");
 	}

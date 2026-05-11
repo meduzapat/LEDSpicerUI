@@ -128,7 +128,7 @@ public:
 	 * @param dataName
 	 * @return The stored values for that collection.
 	 */
-	StringUMapVector& getData(const string& dataName) noexcept { return extractedData[dataName]; }
+	DataMap& getData(const string& dataName) noexcept { return extractedData[dataName]; }
 
 	/**
 	 * @return The whole extracted information at loading.

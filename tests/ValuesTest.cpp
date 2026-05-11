@@ -41,6 +41,40 @@ protected:
 	std::unique_ptr<Values> values;
 };
 
+TEST_F(ValuesTest, Constructors) {
+	// Construction from StringUMap (move)
+	StringUMap map1{{"key1", "value1"}, {"key2", "value2"}};
+	Values v1(map1);
+	EXPECT_EQ("value1", v1.getValue("key1"));
+	EXPECT_EQ("value2", v1.getValue("key2"));
+	// original map should be moved-from
+	EXPECT_TRUE(map1.empty());
+
+	// Move construction
+	Values v2(std::move(v1));
+	EXPECT_EQ("value1", v2.getValue("key1"));
+	EXPECT_EQ("value2", v2.getValue("key2"));
+
+	// Initializer list
+	Values v3 {{"key3", "value3"}};
+	EXPECT_EQ("value3", v3.getValue("key3"));
+
+	// Move assignment
+	v3 = std::move(v2);
+	EXPECT_EQ("value1", v3.getValue("key1"));
+	EXPECT_EQ("value2", v3.getValue("key2"));
+	// should not have old data
+	EXPECT_EQ("", v3.getValue("key3"));
+	EXPECT_EQ("", v2.getValue("key1"));
+
+	// Move from other.
+	Values v4 {v3};
+	EXPECT_EQ("value1", v4.getValue("key1"));
+	EXPECT_EQ("value2", v4.getValue("key2"));
+	// should not have old data
+	EXPECT_EQ(emptyString, v3.getValue("key1"));
+}
+
 TEST_F(ValuesTest, GetValue) {
 	EXPECT_EQ("TestItem", values->getValue("name"));
 	EXPECT_EQ("",         values->getValue("nonexistent"));

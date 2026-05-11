@@ -42,7 +42,7 @@ public:
 	{}
 
 	constexpr string_view getCssClass()          const noexcept override { return "test"; }
-	constexpr string_view getXmlTag()            const noexcept override { return "test"; }
+	const string& getXmlTag()            const noexcept override { return "test"; }
 	CollectionHandler*    getCollectionHandler() const noexcept override { return nullptr; }
 
 };

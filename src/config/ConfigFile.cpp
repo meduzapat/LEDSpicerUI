@@ -31,10 +31,6 @@ ConfigFile::ConfigFile(const string& ledspicerconf) : XMLHelper(ledspicerconf, "
 	if (not errors.empty()) Message::displayError("Errors:\n" + errors);
 }
 
-StringUMap ConfigFile::getSettings() {
-	return rootInfo.attributes;
-}
-
 string ConfigFile::getDefaultProfile() const {
 	return defaultProfile;
 }
@@ -56,9 +52,9 @@ string ConfigFile::processDevices() {
 	string errors, name;
 	StringUMapVector devices;
 	for (; deviceNode; deviceNode = deviceNode->NextSiblingElement(TYPE_DEVICE.c_str())) {
-		StringUMap deviceAttr = processNode(deviceNode);
+		const Values deviceAttr {processNode(deviceNode)};
 		try {
-			checkAttributes({NAME}, deviceAttr, TYPE_DEVICE.c_str());
+			checkAttributes({NAME}, deviceAttr.getValues(), TYPE_DEVICE);
 		}
 		catch (Message& e) {
 			errors += e.getMessage() + '\n';
@@ -73,9 +69,9 @@ string ConfigFile::processDevices() {
 		StringUMap data{
 			{NAME, name},
 			// Device ID is no mandatory, and if is missing on a ID device, is assumed 1
-			{ID,   deviceAttr.find(ID)   != deviceAttr.end() ? deviceAttr.at(ID) : "1"},
+			{ID,   deviceAttr.getValue(ID, "1")},
 			// Serial Devices allows empty device serial PORT, that defaults to /dev/ttyUSB0or auto-detects.
-			{PORT, deviceAttr.find(PORT) != deviceAttr.end() ? deviceAttr.at(PORT) : ""}
+			{PORT, deviceAttr.getValue(PORT)}
 		};
 
 		devices.push_back(deviceAttr);

@@ -20,22 +20,14 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <gtest/gtest.h>
-#include "Storage/BoxButtonCollection.hpp"
+#include "MockBasicData.hpp"
 #include "Storage/CollectionHandler.hpp"
 
-using namespace LEDSpicerUI::Ui::Storage;
-using namespace LEDSpicerUI::Constants;
+using namespace LEDSpicerUI;
+using namespace Ui::Storage;
+using namespace Constants;
 
-class TestData : public Data {
 
-public:
-
-	TestData(StringUMap& d) noexcept : Data(d) {}
-	constexpr string_view getCssClass() const noexcept override { return "test"; }
-	constexpr string_view getXmlTag()   const noexcept override { return "test"; }
-	CollectionHandler* getCollectionHandler() const noexcept override { return nullptr; }
-};
 
 class BoxButtonCollectionTest : public ::testing::Test {
 

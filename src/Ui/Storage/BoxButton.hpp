@@ -21,6 +21,7 @@
  */
 
 #include "Data.hpp"
+#include "Defaults.hpp"
 
 #pragma once
 
@@ -38,7 +39,7 @@ public:
 	BoxButton() = delete;
 
 	/**
-	* Creates a new BoxButton object.
+	* Creates a new BoxButton object, will take ownership of Data.
 	* @param form The data to store.
 	*/
 	BoxButton(Data* form) noexcept;

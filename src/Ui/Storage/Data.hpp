@@ -22,6 +22,9 @@
 
 #include "Values.hpp"
 
+// This looks cool.
+#define abstract = 0
+
 #pragma once
 
 namespace LEDSpicerUI::Ui::Storage {
@@ -38,11 +41,11 @@ class Data : public Values {
 
 public:
 
-	/**
-	 * Creates an object pre-populated.
-	 * @param data Iten's data.
-	 */
-	Data(StringUMap& data) noexcept : Values(data) {}
+	using Values::Values;
+
+//	Data(StringUMap& data) noexcept : Values(data) {}
+//	Data(Values& values)   noexcept : Values(values) {}
+//	Data(Values&& values)  noexcept : Values(std::move(values)) {}
 
 	/**
 	 * Compares two Data objects for equality.
@@ -56,7 +59,7 @@ public:
 	/**
 	 * @returns a CSS class that identifies the object and the data.
 	 */
-	virtual constexpr string_view getCssClass() const noexcept abstract;
+	virtual const string& getCssClass() const noexcept abstract;
 
 	/**
 	 * Creates a human readable name for the form.
@@ -70,7 +73,7 @@ public:
 	 *
 	 * @return the tooltip text.
 	 */
-	virtual string createTooltip() const noexcept { return ""; }
+	virtual string createTooltip() const noexcept { return emptyString; }
 
 	/**
 	 * Creates a unique ID for the form.
@@ -97,7 +100,7 @@ public:
 	 * Used by toXML() helpers to emit the correct element name.
 	 * @return XML tag string, e.g. "device", "element", "group".
 	 */
-	virtual string_view getXmlTag() const noexcept abstract;
+	virtual const string& getXmlTag() const noexcept abstract;
 
 	/**
 	 * @return a reference to the internal properties map, allowing direct manipulation.
@@ -155,7 +158,7 @@ protected:
 	 *
 	 * @return Field name to use as primary key (default: NAME).
 	 */
-	virtual string getPrimaryKey() const noexcept { return NAME; }
+	virtual const string& getPrimaryKey() const noexcept { return NAME; }
 
 	/**
 	 * Controls which fields are included in XML output.
@@ -209,7 +212,5 @@ protected:
 		return data;
 	}
 };
-
-using StringDataPtrMap = std::map<string, Data*>;
 
 } // namespace

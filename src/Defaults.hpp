@@ -34,9 +34,6 @@ using std::vector;
 using std::string;
 using std::stringstream;
 
-#include <string_view>
-using std::string_view;
-
 #include <functional>
 
 #include <filesystem>
@@ -46,8 +43,7 @@ using std::string_view;
 #include <memory>
 using std::unique_ptr;
 
-// This looks cool.
-#define abstract = 0
+#include "Values.hpp"
 
 #pragma once
 
@@ -56,32 +52,22 @@ using std::unique_ptr;
 
 #define DEFAULT_MESSAGE "This is an auto-generated file by " PACKAGE_STRING "."
 
-using StringUMap       = std::unordered_map<string, string>;
-using StringMap        = std::map<string, string>;
-using StringUMapVector = std::vector<StringUMap>;
-using StringUSet       = std::unordered_set<string>;
-using StringSet        = std::set<string>;
-using StringVector     = std::vector<string>;
-using DataMap          = std::unordered_map<string, StringUMapVector>;
-
 namespace LEDSpicerUI {
+
+using StringMap    = std::map<string, string>;
+using ValueVector  = std::vector<StringUMap>;
+using StringUSet   = std::unordered_set<string>;
+using StringSet    = std::set<string>;
+using StringVector = std::vector<string>;
+using DataMap      = std::unordered_map<string, ValueVector>;
 
 namespace Constants {
 
 inline const string
 	/// Commonly used empty string.
-	emptyString,
 	PATH_INPUT     {"inputs/"},
 	PATH_ANIMATION {"animations/"},
-	PATH_PROFILE   {"profiles/"},
-
-	/// Common values used in configs.
-	HUMAN_TRUE   {"True"},
-	HUMAN_FALSE  {"False"},
-	HUMAN_ON     {"On"},
-	HUMAN_OFF    {"Off"},
-	HUMAN_NORMAL {"Nornal"},
-	HUMAN_RANDOM {"Random"};
+	PATH_PROFILE   {"profiles/"};
 
 /// Separators.
 constexpr char
@@ -131,7 +117,7 @@ inline const string
 	& DEFAULT_PROFILE_BACKGROUND_COLOR {HUMAN_OFF},
 
 /// Hardware configuration keys.
-	NAME {"name"},
+
 	ID   {"boardId"},
 	PORT {"port"},
 	PINS {"leds"},
