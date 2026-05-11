@@ -209,11 +209,11 @@ void DialogRestrictor::retrieveData() noexcept {
 	}
 
 	if (name == "UltraStik360") {
-		hasRestrictor->set_active(currentData->getValue(US360_HAS_RESTRICTOR) == HUMAN_TRUE);
-		handleMouse->set_active(currentData->getValue(US360_USE_MOUSE) == HUMAN_TRUE);
+		hasRestrictor->set_active(currentData->is(US360_HAS_RESTRICTOR));
+		handleMouse->set_active(currentData->is(US360_USE_MOUSE));
 	}
 	else if (name == "GPWiz49") {
-		williamsMode->set_active(currentData->getValue(GZ49_WILLIAMS) == HUMAN_TRUE);
+		williamsMode->set_active(currentData->is(GZ49_WILLIAMS));
 	}
 	else if (name == "GPWiz40RotoX") {
 		speedOn->set_value(std::stod(currentData->getValue(GZ40_SPEED_ON, std::to_string(GZ40_DEFAULT_SPEED))));

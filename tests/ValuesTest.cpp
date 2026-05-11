@@ -30,7 +30,7 @@ class ValuesTest : public ::testing::Test {
 protected:
 
 	void SetUp() override {
-		StringUMap d{{"name", "TestItem"}, {"type", "button"}, {"value", "42"}, {"ignored", "yes"}};
+		StringUMap d{{"name", "TestItem"}, {"type", "button"}, {"value", "42"}, {"ignored", "yes"}, {"boolean", HUMAN_TRUE}};
 		values = std::make_unique<Values>(d);
 	}
 
@@ -67,7 +67,15 @@ TEST_F(ValuesTest, Wipe) {
 }
 
 TEST_F(ValuesTest, GetValues) {
-	EXPECT_EQ(4, values->getValues().size());
+	EXPECT_EQ(5, values->getValues().size());
+}
+
+TEST_F(ValuesTest, is) {
+	EXPECT_TRUE(values->is("boolean"));
+}
+
+TEST_F(ValuesTest, isA) {
+	EXPECT_TRUE(values->isA("name", "TestItem"));
 }
 
 TEST_F(ValuesTest, Swap) {

@@ -76,9 +76,25 @@ public:
 	virtual void setValue(const string& key, const string& value) noexcept;
 
 	/**
+	 * Compares a value against another value
+	 *
+	 * @param key
+	 * @return true if the stored value in key == value
+	 */
+	bool isA(const string& key, const string& value) const noexcept { return getValue(key) == value; }
+
+	/**
+	 * Verify than a value is "True"
+	 *
+	 * @param key
+	 * @return true if the value == "True"
+	 */
+	bool is(const string& key) const noexcept { return isA(key, HUMAN_TRUE); }
+
+	/**
 	 * @return a list of stored values
 	 */
-	const StringUMap& getValues() const noexcept;
+	const StringUMap& getValues() const noexcept { return values; }
 
 	/**
 	 * Replace values from a map.
@@ -90,7 +106,7 @@ public:
 	/**
 	 * @return a copy of the internal data.
 	 */
-	virtual StringUMap copyValues() const noexcept;
+	virtual StringUMap copyValues() const noexcept { return {values}; }
 
 	/**
 	 * Clears all serializable fields.

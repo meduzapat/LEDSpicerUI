@@ -189,7 +189,7 @@ void DialogInput::retrieveData() noexcept {
 	entryInputName->set_text(currentData->getProperties().getValue(FILENAME));
 
 	if (Defaults::inputHasFlag(name, Defaults::INPUT_HAS_BLINK))
-		switchInputBlink->set_active(currentData->getValue(BLINK) == HUMAN_TRUE);
+		switchInputBlink->set_active(currentData->is(BLINK));
 
 	if (Defaults::inputHasFlag(name, Defaults::INPUT_HAS_TIMES))
 		spinInputTimes->set_text(currentData->getValue(TIMES));
@@ -200,8 +200,8 @@ void DialogInput::retrieveData() noexcept {
 	if (Defaults::inputHasFlag(name, Defaults::INPUT_HAS_CREDITS)) {
 		comboBoxInputCreditsMode->set_active_text(currentData->getValue(MODE));
 		spinInputCreditsCoins->set_value(std::stof(currentData->getValue(COINS_CREDIT)));
-		switchInputCreditsOnce->set_active(currentData->getValue(ONCE) == HUMAN_TRUE);
-		switchInputCreditsAlwaysOn->set_active(currentData->getValue(ALWAYS_ON) == HUMAN_TRUE);
+		switchInputCreditsOnce->set_active(currentData->is(ONCE));
+		switchInputCreditsAlwaysOn->set_active(currentData->is(ALWAYS_ON));
 	}
 }
 

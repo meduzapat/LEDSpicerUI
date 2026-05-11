@@ -48,14 +48,6 @@ void Values::setValue(const string& key, const string& value) noexcept {
 	values[key] = value;
 }
 
-StringUMap Values::copyValues() const noexcept {
-	return {values};
-}
-
-const StringUMap& Values::getValues() const noexcept {
-	return values;
-}
-
 void Values::setValues(const StringUMap& values) noexcept {
 	this->values.insert(values.begin(), values.end());
 }
