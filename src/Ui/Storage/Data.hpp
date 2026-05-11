@@ -43,9 +43,11 @@ public:
 
 	using Values::Values;
 
-//	Data(StringUMap& data) noexcept : Values(data) {}
-//	Data(Values& values)   noexcept : Values(values) {}
-//	Data(Values&& values)  noexcept : Values(std::move(values)) {}
+	Data(Values& other)  noexcept : Values(other) {}
+	Data(Values&& other) noexcept : Values(std::move(other)) {}
+
+	Data(Data&&) noexcept = default;
+	Data& operator=(Data&&) noexcept = default;
 
 	/**
 	 * Compares two Data objects for equality.

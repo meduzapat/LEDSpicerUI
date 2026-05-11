@@ -105,7 +105,7 @@ TEST_F(DataTest, Constructors) {
 	EXPECT_FALSE(d4.getValues().empty());
 
 	// Move assignment
-	MockBasicData d5();
+	MockBasicData d5;
 	d5 = std::move(d4);
 	// Original map was moved.
 	EXPECT_TRUE(d4.getValues().empty());
@@ -227,40 +227,46 @@ TEST_F(DataTest, CopyValuesFindsUniqueId) {
 	EXPECT_EQ("Item", item.getValue("name"));
 }
 
-// syncRegistration re-keys the handler entry when the primary key changes.
-TEST_F(DataTest, SyncRegistrationReKeys) {
-	auto ch = CollectionHandler::getInstance("t");
-	StringUMap d{};
-	RegisteringData item(d);
-	item.setValue("name", "OldName");
-	ch->add(&item);
-	EXPECT_TRUE(ch->isIdSet("OldName"));
+TEST_F(DataTest, CollectionRegistration) {
 
+	auto ch {CollectionHandler::getInstance("t")};
+
+	RegisteringData item{{"name", "Alpha"}};
+
+	// Register adds the item.
+	item.registerToCollection();
+	EXPECT_TRUE(ch->isSet(&item));
+	EXPECT_TRUE(ch->isIdSet("Alpha"));
+
+	// Re-registering an already-registered item is a no-op.
+	item.registerToCollection();
+	EXPECT_EQ(1u, ch->getSize());
+
+	// Unregister removes it.
+	item.unregisterFromCollection();
+	EXPECT_FALSE(ch->isSet(&item));
+
+	// Unregistering again is safe.
+	EXPECT_NO_FATAL_FAILURE(item.unregisterFromCollection());
+
+	// syncRegistration re-keys the entry when the primary key changes.
+	item.setValue("name", "Beta");
+	item.registerToCollection();
 	string oldId{item.createUniqueId()};
-	item.setValue("name", "NewName");
+	item.setValue("name", "Gamma");
+
 	item.syncRegistration(oldId);
+	EXPECT_FALSE(ch->isIdSet("Beta"));
+	EXPECT_TRUE(ch->isIdSet("Gamma"));
 
-	EXPECT_FALSE(ch->isIdSet("OldName"));
-	EXPECT_TRUE(ch->isIdSet("NewName"));
-}
-
-// syncRegistration is a no-op when the ID has not changed.
-TEST_F(DataTest, SyncRegistrationNoOpWhenSameId) {
-	auto ch = CollectionHandler::getInstance("t");
-	StringUMap d{};
-	RegisteringData item(d);
-	item.setValue("name", "Name");
-	ch->add(&item);
+	// syncRegistration is a no-op when the ID has not changed.
 	item.syncRegistration(item.createUniqueId());
-	EXPECT_TRUE(ch->isIdSet("Name"));
-}
+	EXPECT_TRUE(ch->isIdSet("Gamma"));
+	EXPECT_EQ(1u, ch->getSize());
 
-// syncRegistration with an empty oldId acts as a plain registration.
-TEST_F(DataTest, SyncRegistrationEmptyOldIdRegisters) {
-	auto ch = CollectionHandler::getInstance("t");
-	StringUMap d{};
-	RegisteringData item(d);
-	item.setValue("name", "Fresh");
+	// syncRegistration with an empty old ID acts as a plain registration.
+	item.unregisterFromCollection();
+	item.setValue("name", "Delta");
 	item.syncRegistration("");
-	EXPECT_TRUE(ch->isIdSet("Fresh"));
+	EXPECT_TRUE(ch->isIdSet("Delta"));
 }

@@ -88,9 +88,8 @@ void Data::unregisterFromCollection() noexcept {
 }
 
 void Data::syncRegistration(const string& oldId) noexcept {
-	auto handler{getCollectionHandler()};
-	if (not handler) return;
-	handler->replace(this, oldId);
+	if (auto handler{getCollectionHandler()}; handler and not createUniqueId().empty())
+		handler->replace(this, oldId);
 }
 
 string Data::valuesXML(const StringUMap& data) noexcept {
