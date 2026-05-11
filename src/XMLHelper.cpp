@@ -41,54 +41,40 @@ XMLHelper::XMLHelper(const string& fileName, const string& fileType) {
 }
 
 void XMLHelper::processRootNode(const string& expectedType) {
-	rootInfo.attributes = processNode(root);
 
-	rootInfo.version = valueOf(rootInfo.attributes, "version", "");
-	rootInfo.type    = valueOf(rootInfo.attributes, "type",    "");
+	rootInfo = processNode(root);
 
 	// Validate version.
-	if (rootInfo.version.empty() or rootInfo.version != PACKAGE_DATA_VERSION)
+	if (rootInfo.getValue("version") != PACKAGE_DATA_VERSION)
 		throw Message("Invalid data file version, needed " PACKAGE_DATA_VERSION);
 
 	// Validate type.
-	if (not expectedType.empty() and rootInfo.type != expectedType)
+	if (not expectedType.empty() and rootInfo.getValue("type") != expectedType)
 		throw Message("Invalid data file type, needed " + expectedType);
 }
 
-StringUMap XMLHelper::processNode(const tinyxml2::XMLElement* node) {
+Values XMLHelper::processNode(const tinyxml2::XMLElement* node) {
 
-	StringUMap groupValues;
+	Values groupValues;
 
 	const tinyxml2::XMLAttribute* pAttrib = node->FirstAttribute();
 
 	while (pAttrib) {
-		string value = pAttrib->Value();
-		groupValues.emplace(pAttrib->Name(), value);
+		const string value {pAttrib->Value()};
+		groupValues.setValue(pAttrib->Name(), value);
 		pAttrib = pAttrib->Next();
 	}
 
 	return groupValues;
 }
 
-StringUMap XMLHelper::processNode(const string& nodeElement) {
+Values XMLHelper::processNode(const string& nodeElement) const {
 
-	tinyxml2::XMLElement* node = root->FirstChildElement(nodeElement.c_str());
+	tinyxml2::XMLElement* node {root->FirstChildElement(nodeElement.c_str())};
 	if (not node)
 		throw Message("Missing " + nodeElement + " section.");
 
 	return processNode(node);
-}
-
-StringUMap XMLHelper::getSettings() const noexcept {
-	return rootInfo.attributes;
-}
-
-tinyxml2::XMLElement* XMLHelper::getRoot() const noexcept {
-	return root;
-}
-
-const XMLHelper::RootInfo& XMLHelper::getRootInfo() const noexcept {
-	return rootInfo;
 }
 
 void XMLHelper::checkAttributes(
@@ -101,23 +87,8 @@ void XMLHelper::checkAttributes(
 			throw Message("Missing attribute '" + attribute + "' inside " + place);
 }
 
-const string& XMLHelper::valueOf(
-	const StringUMap& values,
-	const string& value
-) noexcept {
-	return (values.find(value) != values.end() ? values.at(value) : emptyString);
-}
-
-string XMLHelper::valueOf(
-	const StringUMap& values,
-	const string& value,
-	string defaultValue
-) noexcept {
-	return (values.find(value) != values.end() ? values.at(value) : defaultValue);
-}
-
 string XMLHelper::xmlHeader(
-	const string& type,
+	const string&     type,
 	const StringUMap& attrs
 ) noexcept {
 	string r;
@@ -163,12 +134,10 @@ string XMLHelper::toXML(const StringUMap& values) noexcept {
 	return r;
 }
 
-StringUMapVector& XMLHelper::getData(const string& dataName) noexcept {
-	return extractedData[dataName];
-}
-
 string XMLHelper::cleanError(const string& error) noexcept {
-	// ex: Unable to read the file /xxx/yyy/zzzz.xml Error=XML_ERROR_MISMATCHED_ELEMENT ErrorID=14 (0xe) Line number=369: XMLElement name=map
+	// ex: Unable to read the file /xxx/yyy/zzzz.xml
+	// Error=XML_ERROR_MISMATCHED_ELEMENT ErrorID=14 (0xe)
+	// Line number=369: XMLElement name=map
 	string result;
 	size_t pos = error.find("Error=");
 	if (pos == std::string::npos)

@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- This is an auto-generated file by LEDSpicerUI 0.0.1.-->
 <LEDSpicer
-	craftProfile="true"
-	colorsFile="true"
+	craftProfile="True"
+	colorsFile="True"
 	colors="basicColors"
 	groupId="1000"
 	logLevel="Info"

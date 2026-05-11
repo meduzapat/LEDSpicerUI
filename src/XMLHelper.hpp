@@ -22,6 +22,7 @@
 
 #include <tinyxml2.h>
 #include "Message.hpp"
+#include "Values.hpp"
 
 #pragma once
 
@@ -35,14 +36,6 @@ using LEDSpicerUI::Ui::Message;
 class XMLHelper : protected tinyxml2::XMLDocument {
 
 public:
-
-	/// Root node information.
-	struct RootInfo {
-		string
-			version,  /// Data format version.
-			type;     /// File type (Configuration, Input, Profile, etc.)
-		StringUMap attributes;  /// All root attributes.
-	};
 
 	/**
 	 * Creates a new XMLHelper object and open the XML file.
@@ -60,7 +53,7 @@ public:
 	 * @return A map with the key pairs.
 	 * @throws Message if an error happen.
 	 */
-	static StringUMap processNode(const tinyxml2::XMLElement* node);
+	static Values processNode(const tinyxml2::XMLElement* node);
 
 	/**
 	 * Reads the attributes from a node by its name on the root.
@@ -69,22 +62,17 @@ public:
 	 * @return A map with the parameters in that node.
 	 * @throws Message if node does not exist or an error happen.
 	 */
-	StringUMap processNode(const string& nodeName);
-
-	/**
-	 * @return Root node attributes.
-	 */
-	StringUMap getSettings() const noexcept;
+	Values processNode(const string& nodeName) const;
 
 	/**
 	 * @return a pointer to the root node.
 	 */
-	tinyxml2::XMLElement* getRoot() const noexcept;
+	tinyxml2::XMLElement* getRoot() const noexcept { return root; }
 
 	/**
 	 * @return Root node information.
 	 */
-	const RootInfo& getRootInfo() const noexcept;
+	const Values& getRootInfo() const noexcept { return rootInfo; }
 
 	/**
 	 * Checks if the map subject have the attributeList elements.
@@ -102,41 +90,12 @@ public:
 	);
 
 	/**
-	 * Returns the value from the map or an empty string if key is missing.
-	 *
-	 * @param values The map to query.
-	 * @param value The key to look up.
-	 * @return The value or empty string.
-	 */
-	static const string& valueOf(
-		const StringUMap& values,
-		const string& value
-	) noexcept;
-
-	/**
-	 * Returns the value from the map or a default string.
-	 *
-	 * @param values The map to query.
-	 * @param value The key to look up.
-	 * @param defaultValue The default value to return if key is missing.
-	 * @return The value or default.
-	 */
-	static string valueOf(
-		const StringUMap& values,
-		const string& value,
-		string defaultValue
-	) noexcept;
-
-	/**
 	 * Generates a complete XML file header with closed root opening tag.
 	 * @param type  File type attribute (Input, Animation, Profile, etc.)
 	 * @param attrs Additional root attributes beyond version and type.
 	 * @return Complete root opening including closing >.
 	 */
-	static string xmlHeader(
-		const string& type,
-		const StringUMap& attrs = {}
-	) noexcept;
+	static string xmlHeader(const string& type, const StringUMap& attrs = {}) noexcept;
 
 	/**
 	 * Wraps content in a named XML section.
@@ -146,8 +105,8 @@ public:
 	 * @param attrs   Optional attributes on the opening tag.
 	 */
 	static string xmlSection(
-		const string& tag,
-		const string& content,
+		const string&     tag,
+		const string&     content,
 		const StringUMap& attrs = {}
 	) noexcept;
 
@@ -165,15 +124,16 @@ public:
 	static string toXML(const StringUMap& values) noexcept;
 
 	/**
+	 * Data may or may not exists, in that case will be created empty.
 	 * @param dataName
 	 * @return The stored values for that collection.
 	 */
-	StringUMapVector& getData(const string& dataName) noexcept;
+	StringUMapVector& getData(const string& dataName) noexcept { return extractedData[dataName]; }
 
 	/**
 	 * @return The whole extracted information at loading.
 	 */
-	DataMap& getDataMap() noexcept { return extractedData; }
+	const DataMap& getDataMap() const noexcept { return extractedData; }
 
 	/**
 	 * Convert a XML error into human readable text.
@@ -189,7 +149,7 @@ protected:
 	tinyxml2::XMLElement* root = nullptr;
 
 	/// Root node information (version, type, attributes).
-	RootInfo rootInfo;
+	Values rootInfo;
 
 	/// Populated by derived classes to store extracted XML data by section.
 	DataMap extractedData;

@@ -26,6 +26,9 @@
 
 namespace LEDSpicerUI {
 
+/**
+ * Wrapper class over a unordered map of strings -> strings to add generic functionality.
+ */
 class Values {
 
 public:
@@ -85,7 +88,7 @@ public:
 	void setValues(const StringUMap& values) noexcept;
 
 	/**
-	 * @return a copy of the internal data but adding.
+	 * @return a copy of the internal data.
 	 */
 	virtual StringUMap copyValues() const noexcept;
 
