@@ -132,6 +132,11 @@ public:
 	const StringUMap& getValues() const noexcept { return values; }
 
 	/**
+	 * @return the number of stored values
+	 */
+	size_t getSize() const noexcept { return values.size(); }
+
+	/**
 	 * Replace values from a map.
 	 *
 	 * @param values
@@ -148,7 +153,7 @@ public:
 	/**
 	 * @return a copy of the internal data.
 	 */
-	virtual StringUMap copyValues() const noexcept { return {values}; }
+	virtual Values copyValues() const noexcept;
 
 	/**
 	 * Clears all serializable fields.

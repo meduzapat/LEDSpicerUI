@@ -107,10 +107,9 @@ public:
 	virtual void retrieveData() noexcept abstract;
 
 	/**
-	 * Returns an array with a list of stored key values values.
-	 * @return
+	 * @return the number of stored values
 	 */
-	vector<const StringUMap*> getValues() const noexcept;
+	size_t getSize() const noexcept { return items->getSize(); }
 
 	/**
 	 * Create an unique using the dialog fields.

@@ -52,6 +52,11 @@ void Values::setValues(const StringUMap& values) noexcept {
 	this->values.insert(values.begin(), values.end());
 }
 
+Values Values::copyValues() const noexcept {
+	StringUMap c {values.begin(), values.end()};
+	return Values {c} ;
+}
+
 void Values::wipe() noexcept {
 	values.clear();
 }

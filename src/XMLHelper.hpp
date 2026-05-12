@@ -22,7 +22,7 @@
 
 #include <tinyxml2.h>
 #include "Message.hpp"
-#include "Values.hpp"
+
 
 #pragma once
 
@@ -79,13 +79,13 @@ public:
 	 * This function ignores other elements.
 	 *
 	 * @param attributeList A list of attributes to check.
-	 * @param subjects A map to check.
+	 * @param subjects to check.
 	 * @param place where will check.
 	 * @throws Message if an attribute is missing.
 	 */
 	static void checkAttributes(
 		const StringVector& attributeList,
-		const StringUMap& subjects,
+		const Values& subjects,
 		const string& place
 	);
 
@@ -95,7 +95,7 @@ public:
 	 * @param attrs Additional root attributes beyond version and type.
 	 * @return Complete root opening including closing >.
 	 */
-	static string xmlHeader(const string& type, const StringUMap& attrs = {}) noexcept;
+	static string xmlHeader(const string& type, const Values& attrs = {}) noexcept;
 
 	/**
 	 * Wraps content in a named XML section.
@@ -107,7 +107,7 @@ public:
 	static string xmlSection(
 		const string&     tag,
 		const string&     content,
-		const StringUMap& attrs = {}
+		const Values& attrs = {}
 	) noexcept;
 
 	/**
@@ -121,14 +121,14 @@ public:
 	 * @param values
 	 * @return
 	 */
-	static string toXML(const StringUMap& values) noexcept;
+	static string toXML(const Values& values) noexcept;
 
 	/**
 	 * Data may or may not exists, in that case will be created empty.
 	 * @param dataName
 	 * @return The stored values for that collection.
 	 */
-	DataMap& getData(const string& dataName) noexcept { return extractedData[dataName]; }
+	ValueVector& getData(const string& dataName) noexcept { return extractedData[dataName]; }
 
 	/**
 	 * @return The whole extracted information at loading.

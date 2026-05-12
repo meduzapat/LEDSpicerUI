@@ -79,17 +79,17 @@ Values XMLHelper::processNode(const string& nodeElement) const {
 
 void XMLHelper::checkAttributes(
 	const StringVector& attributeList,
-	const StringUMap& subjects,
+	const Values& subjects,
 	const string& place
 ) {
 	for (const string& attribute : attributeList)
-		if (subjects.find(attribute) == subjects.end())
+		if (not subjects.isSet(attribute))
 			throw Message("Missing attribute '" + attribute + "' inside " + place);
 }
 
 string XMLHelper::xmlHeader(
-	const string&     type,
-	const StringUMap& attrs
+	const string& type,
+	const Values& attrs
 ) noexcept {
 	string r;
 	r  = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
@@ -109,7 +109,7 @@ string XMLHelper::xmlHeader(
 string XMLHelper::xmlSection(
 	const string& tag,
 	const string& content,
-	const StringUMap& attrs
+	const Values& attrs
 ) noexcept {
 	if (content.empty()) return "";
 	string r(Defaults::tab() + "<" + tag);
@@ -127,7 +127,7 @@ string XMLHelper::xmlFooter() noexcept {
 	return "</" PACKAGE_DATA_NAME ">\n";
 }
 
-string XMLHelper::toXML(const StringUMap& values) noexcept {
+string XMLHelper::toXML(const Values& values) noexcept {
 	string r;
 	for (const auto& v : values)
 		r += Defaults::tab() + v.first + "=\"" + v.second + "\"\n";

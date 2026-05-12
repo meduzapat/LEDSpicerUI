@@ -104,13 +104,6 @@ void DialogForm::resetForm() noexcept {
 	refreshItems();
 }
 
-vector<const StringUMap*> DialogForm::getValues() const noexcept {
-	vector<const StringUMap*> values;
-	for (const auto& b : *items)
-		values.push_back(&b->getData()->getValues());
-	return values;
-}
-
 void DialogForm::reindex() noexcept {
 	items->reindex(box);
 }

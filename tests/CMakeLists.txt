@@ -40,11 +40,11 @@ endmacro()
 # ─── Source groups ──────────────────────────────────────────────────────────
 
 set(COMMON_SRCS
+	${CMAKE_SOURCE_DIR}/src/Values.cpp
 	${CMAKE_SOURCE_DIR}/src/Defaults.cpp
 )
 
 set(STORAGE_SRCS
-	${CMAKE_SOURCE_DIR}/src/Values.cpp
 	${CMAKE_SOURCE_DIR}/src/Ui/Storage/Data.cpp
 	${CMAKE_SOURCE_DIR}/src/Ui/Storage/BoxButton.cpp
 	${CMAKE_SOURCE_DIR}/src/Ui/Storage/BoxButtonCollection.cpp
@@ -95,7 +95,7 @@ add_test_executable(DefaultsTest
 
 add_test_executable(ValuesTest
 	"ValuesTest.cpp"
-	"${COMMON_SRCS};${CMAKE_SOURCE_DIR}/src/Values.cpp"
+	"${COMMON_SRCS};"
 	""
 )
 

@@ -55,7 +55,7 @@ using std::unique_ptr;
 namespace LEDSpicerUI {
 
 using StringMap    = std::map<string, string>;
-using ValueVector  = std::vector<StringUMap>;
+using ValueVector  = std::vector<Values>;
 using StringUSet   = std::unordered_set<string>;
 using StringSet    = std::set<string>;
 using StringVector = std::vector<string>;

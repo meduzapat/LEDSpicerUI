@@ -101,7 +101,7 @@ TEST_F(ValuesTest, Wipe) {
 }
 
 TEST_F(ValuesTest, GetValues) {
-	EXPECT_EQ(5, values->getValues().size());
+	EXPECT_EQ(5, values->getSize());
 }
 
 TEST_F(ValuesTest, is) {

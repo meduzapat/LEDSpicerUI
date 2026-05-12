@@ -176,7 +176,7 @@ TEST_F(DataTest, ToXML) {
 }
 
 TEST_F(DataTest, GetValues) {
-	EXPECT_EQ(4, data->getValues().size());
+	EXPECT_EQ(4, data->getSize());
 }
 
 TEST_F(DataTest, CreatePrettyName) {
@@ -211,7 +211,7 @@ TEST_F(DataTest, OverwriteProperty) {
 
 // copyValues returns empty when there is no collection handler.
 TEST_F(DataTest, CopyValuesNoCollection) {
-	EXPECT_TRUE(data->copyValues().empty());
+	EXPECT_EQ(0u, data->copyValues().getSize());
 }
 
 // copyValues produces a non-colliding ID and leaves the original untouched.
@@ -221,9 +221,9 @@ TEST_F(DataTest, CopyValuesFindsUniqueId) {
 	RegisteringData item(d);
 	item.setValue("name", "Item");
 	ch->add(&item);
-	auto copy = item.copyValues();
-	ASSERT_FALSE(copy.empty());
-	EXPECT_FALSE(ch->isIdSet(copy.at("name")));
+	auto copy {item.copyValues()};
+	ASSERT_FALSE(copy.getSize() == 0);
+	EXPECT_FALSE(ch->isIdSet(copy.getValue("name")));
 	EXPECT_EQ("Item", item.getValue("name"));
 }
 

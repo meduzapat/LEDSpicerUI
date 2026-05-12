@@ -114,7 +114,7 @@ public:
 	 */
 	const Values& getProperties() const noexcept { return properties; }
 
-	StringUMap copyValues() const noexcept override;
+	Values copyValues() const noexcept override;
 
 	void wipe() noexcept override;
 
@@ -187,7 +187,7 @@ protected:
 	 * @param data
 	 * @return
 	 */
-	static string valuesXML(const StringUMap& data) noexcept;
+	static string valuesXML(const Values& data) noexcept;
 
 	/**
 	 * Based on data it creates a single or multiple node.
@@ -199,7 +199,7 @@ protected:
 	 */
 	static string createOpeningXML(
 		const string& node,
-		const StringUMap& data,
+		const Values& data,
 		bool empty
 	) noexcept;
 
@@ -209,8 +209,8 @@ protected:
 	 */
 	static string createClosingXML(const string& node) noexcept;
 
-	static StringUMap& emptyData() noexcept {
-		static StringUMap data;
+	static Values& emptyData() noexcept {
+		static Values data;
 		return data;
 	}
 };

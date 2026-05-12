@@ -23,6 +23,7 @@
 #include "CollectionHandler.hpp"
 
 using namespace LEDSpicerUI::Ui::Storage;
+using LEDSpicerUI::Values;
 
 string Data::createPrettyName() const noexcept {
 	return getPrimaryValue();
@@ -36,11 +37,14 @@ const string& Data::getPrimaryValue() const noexcept {
 	return getValue(getPrimaryKey());
 }
 
-StringUMap Data::copyValues() const noexcept {
-	auto handler = getCollectionHandler();
+Values Data::copyValues() const noexcept {
+
+	auto handler {getCollectionHandler()};
 	if (not handler) return {};
-	string baseId{createUniqueId()};
-	string candidateId;
+
+	string
+		baseId{createUniqueId()},
+		candidateId;
 	uint8_t count{1};
 	do {
 		candidateId = baseId + "_" + std::to_string(count++);
@@ -48,8 +52,8 @@ StringUMap Data::copyValues() const noexcept {
 			baseId += "X";
 		}
 	} while (handler->isIdSet(candidateId));
-	StringUMap copy{Values::copyValues()};
-	copy[getPrimaryKey()] = candidateId;
+	Values copy {Values::copyValues()};
+	copy.setValue(getPrimaryKey(), candidateId);
 	return copy;
 }
 
@@ -66,10 +70,10 @@ void Data::unSet(const string& key) noexcept {
 }
 
 string Data::toXML() const noexcept {
-	StringUMap filtered;
+	Values filtered;
 	for (const auto& [k, v] : values)
 		if (shouldSerialize(k, v))
-			filtered.emplace(k, v);
+			filtered.setValue(k, v);
 	string body(xmlBody());
 	string r(createOpeningXML(string(getXmlTag()), filtered, body.empty()));
 	if (not body.empty())
@@ -92,9 +96,9 @@ void Data::syncRegistration(const string& oldId) noexcept {
 		handler->replace(this, oldId);
 }
 
-string Data::valuesXML(const StringUMap& data) noexcept {
+string Data::valuesXML(const Values& data) noexcept {
 	string r, el, tab(" ");
-	if (data.size() > 2) {
+	if (data.getSize() > 2) {
 		el  = "\n";
 		tab = Defaults::tab();
 	}
@@ -104,12 +108,12 @@ string Data::valuesXML(const StringUMap& data) noexcept {
 }
 
 string Data::createOpeningXML(
-	const string&     node,
-	const StringUMap& data,
-	bool              empty
+	const string& node,
+	const Values& data,
+	bool          empty
 ) noexcept {
 	string r(Defaults::tab() + "<" + node);
-	if (data.size() > ATTRIBUTES_LIMIT_PER_ROW) {
+	if (data.getSize() > ATTRIBUTES_LIMIT_PER_ROW) {
 		r += "\n";
 		Defaults::increaseTab();
 		r += valuesXML(data);

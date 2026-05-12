@@ -28,8 +28,6 @@ using namespace LEDSpicerUI;
 
 // Constructor tests
 TEST(XMLHelperTest, ConstructorErrorHandling) {
-	GTEST_LOG_(INFO) << "Loading " PACKAGE_SAMPLES_DIR << "data/config.xml";
-
 	EXPECT_THROW(XMLHelper helper(PACKAGE_SAMPLES_DIR "data/config.xml",               "InvalidType"), Message);
 	EXPECT_THROW(XMLHelper helper(PACKAGE_SAMPLES_DIR "data/inputs/input.xml",         "InvalidType"), Message);
 	EXPECT_THROW(XMLHelper helper(PACKAGE_SAMPLES_DIR "data/animations/animation.xml", "InvalidType"), Message);
@@ -56,19 +54,19 @@ TEST(XMLHelperTest, ProcessNodeReturnsCorrectMap) {
 
 	auto result = XMLHelper::processNode(helper.getRoot());
 
-	EXPECT_EQ(result.getValues().size(), 12) << "Maps have different sizes";
+	EXPECT_EQ(result.getSize(), 12) << "Maps have different sizes";
 }
 
 TEST(XMLHelperTest, ProcessNodeByName) {
 	XMLHelper helper(PACKAGE_SAMPLES_DIR "data/config.xml", "Configuration");
 
 	// Success case - test 'layout' node under root
-	StringUMap expected = {
+	const Values expected {
 		{"defaultProfile", "default"}
 	};
 	Values nodeParam;
 	EXPECT_NO_THROW(nodeParam = helper.processNode("layout"));
-	EXPECT_EQ(nodeParam.getValues().size(), expected.size())   << "Layout node attribute count mismatch";
+	EXPECT_EQ(nodeParam.getSize(), expected.getSize())         << "Layout node attribute count mismatch";
 	EXPECT_EQ(nodeParam.getValue("defaultProfile"), "default") << "defaultProfile value mismatch";
 
 	// Failure case - nonexistent node
@@ -97,7 +95,7 @@ TEST(XMLHelperTest, GetRootInfo) {
 TEST(XMLHelperTest, CheckAttributes) {
 	// Success case - all attributes present
 	StringVector attributeList = {"name", "type", "id"};
-	StringUMap subjects = {
+	Values subjects {
 		{"name",  "Test"},
 		{"type",  "Button"},
 		{"id",    "1"},
@@ -106,7 +104,7 @@ TEST(XMLHelperTest, CheckAttributes) {
 	EXPECT_NO_THROW(XMLHelper::checkAttributes(attributeList, subjects, "testNode"));
 
 	// Failure case - missing 'type'
-	StringUMap incompleteSubjects = {
+	Values incompleteSubjects {
 		{"name", "Test"},
 		{"id",   "1"}
 	};
@@ -114,46 +112,50 @@ TEST(XMLHelperTest, CheckAttributes) {
 }
 
 TEST(XMLHelperTest, ToXML) {
-	StringUMap values = {
+
+	Values values {
 		{"name", "Test"},
 		{"type", "Button"},
-		{"id", "1"}
+		{"id",   "1"}
 	};
-	string result = XMLHelper::toXML(values);
+	const string result = XMLHelper::toXML(values);
 
 	// Check that all key-value pairs are present (order may vary due to unordered_map)
-	EXPECT_NE(result.find("id=\"1\""), string::npos)        << "Should contain id";
-	EXPECT_NE(result.find("type=\"Button\""), string::npos) << "Should contain type";
-	EXPECT_NE(result.find("name=\"Test\""), string::npos)   << "Should contain name";
+	EXPECT_EQ("id=\"1\"\ntype=\"Button\"\nname=\"Test\"\n", result);
 
 	// Empty map
-	StringUMap emptyValues;
+	Values emptyValues;
 	EXPECT_EQ(XMLHelper::toXML(emptyValues), "") << "Empty map should return empty string";
 }
 
 TEST(XMLHelperTest, XmlHeader) {
-	string header = XMLHelper::xmlHeader("Configuration");
-	EXPECT_NE(string::npos, header.find("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"));
-	EXPECT_NE(string::npos, header.find(DEFAULT_MESSAGE));
-	EXPECT_NE(string::npos, header.find("version=\"" PACKAGE_DATA_VERSION "\""));
-	EXPECT_NE(string::npos, header.find("type=\"Configuration\""));
-	// Root tag must be closed.
-	EXPECT_NE(string::npos, header.find(">\n"));
+
+	const string
+		header = XMLHelper::xmlHeader("Configuration"),
+		result = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+				 "<!-- This is an auto-generated file by " PACKAGE_STRING ". -->\n"
+				 "<LEDSpicer\n\tversion=\"1.1\"\n\ttype=\"Configuration\"\n>\n";
+
+	EXPECT_EQ(header, result);
 }
 
 TEST(XMLHelperTest, XmlHeaderWithAttrs) {
-	string header = XMLHelper::xmlHeader("Input", {{NAME, "Mame"}});
-	EXPECT_NE(string::npos, header.find("type=\"Input\""));
-	EXPECT_NE(string::npos, header.find("name=\"Mame\""));
-	EXPECT_NE(string::npos, header.find(">\n"));
+
+	const string
+		header = XMLHelper::xmlHeader("Input", {{NAME, "Mame"}}),
+		result = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+				 "<!-- This is an auto-generated file by " PACKAGE_STRING ". -->\n"
+				 "<LEDSpicer\n\t\tversion=\"1.1\"\n\t\ttype=\"Input\"\n\t\tname=\"Mame\"\n>\n";
+
+	EXPECT_EQ(header, result);
 }
 
 TEST(XMLHelperTest, XmlSection) {
-	string content(Defaults::tab() + "<item/>\n");
-	string result = XMLHelper::xmlSection("items", content);
-	EXPECT_NE(string::npos, result.find("<items>"));
-	EXPECT_NE(string::npos, result.find("</items>"));
-	EXPECT_NE(string::npos, result.find(content));
+
+	const string
+		content = Defaults::tab() + "<item/>\n",
+		result  = XMLHelper::xmlSection("items", content);
+	EXPECT_EQ("\t\t<items>\n\t\t<item/>\n\t\t</items>\n", result);
 }
 
 TEST(XMLHelperTest, XmlSectionEmptySkipped) {
@@ -161,19 +163,19 @@ TEST(XMLHelperTest, XmlSectionEmptySkipped) {
 }
 
 TEST(XMLHelperTest, XmlSectionWithAttrs) {
-	string result = XMLHelper::xmlSection(
-		"maps", "<map/>\n", {{"source", "hw1"}}
-	);
-	EXPECT_NE(string::npos, result.find("source=\"hw1\""));
-	EXPECT_NE(string::npos, result.find("<maps"));
-	EXPECT_NE(string::npos, result.find("</maps>"));
+
+	const string result = XMLHelper::xmlSection("maps", "<map/>\n", {{"source", "hw1"}});
+	EXPECT_EQ("\t\t<maps source=\"hw1\">\n<map/>\n\t\t</maps>\n", result);
 }
 
 TEST(XMLHelperTest, XmlHeaderNoType) {
-	const string header = XMLHelper::xmlHeader("");
-	EXPECT_NE(string::npos, header.find("version=\"" PACKAGE_DATA_VERSION "\""));
-	EXPECT_NE(string::npos, header.find("type=\"\""));
-	EXPECT_NE(string::npos, header.find(">\n"));
+
+	const string
+		header = XMLHelper::xmlHeader(""),
+		result = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+				 "<!-- This is an auto-generated file by " PACKAGE_STRING ". -->\n"
+				 "<LEDSpicer\n\t\t\tversion=\"1.1\"\n\t\t\ttype=\"\"\n>\n";
+	EXPECT_EQ(header, result);
 }
 
 TEST(XMLHelperTest, XmlFooter) {
@@ -181,29 +183,31 @@ TEST(XMLHelperTest, XmlFooter) {
 }
 
 TEST(XMLHelperTest, GetData) {
+
 	XMLHelper helper(PACKAGE_SAMPLES_DIR "data/config.xml", "Configuration");
-
-	StringUMapVector& data = helper.getData("devices");
-
+	ValueVector& data = helper.getData("devices");
 	EXPECT_TRUE(data.empty()) << "Unpopulated data should return empty vector";
 }
 
 TEST(XMLHelperTest, CleanError) {
-	// Valid error with full details
-	string rawError = "Unable to read the file /xxx/yyy/zzzz.xml Error=XML_ERROR_MISMATCHED_ELEMENT ErrorID=14 (0xe) Line number=369: XMLElement name=map";
-	string expected = "Unable to read the file /xxx/yyy/zzzz.xml\nError: XML_ERROR_MISMATCHED_ELEMENT\nLine: 369\nNode: map";
-	string result = XMLHelper::cleanError(rawError);
-	EXPECT_EQ(result, expected) << "Full error should be cleaned correctly";
 
-	// Simple error with no extra details
-	string simpleError = "Unable to read the file /xxx/yyy/zzzz.xml";
-	EXPECT_EQ(XMLHelper::cleanError(simpleError), simpleError) << "Simple error should return unchanged";
+	const string
+		// Valid error with full details
+		rawError = "Unable to read the file /xxx/yyy/zzzz.xml Error=XML_ERROR_MISMATCHED_ELEMENT ErrorID=14 (0xe) Line number=369: XMLElement name=map",
+		// Simple error with no extra details
+		simpleError = "Unable to read the file /xxx/yyy/zzzz.xml",
+		expected = "Unable to read the file /xxx/yyy/zzzz.xml\nError: XML_ERROR_MISMATCHED_ELEMENT\nLine: 369\nNode: map",
+		// run clean.
+		result1  = XMLHelper::cleanError(rawError),
+		result2  = XMLHelper::cleanError(simpleError);
+
+	EXPECT_EQ(result1, expected) << "Full error should be cleaned correctly";
+	EXPECT_EQ(result2, simpleError) << "Simple error should return unchanged";
 }
 
 TEST(XMLHelperTest, GetDataMap) {
+
 	XMLHelper helper(PACKAGE_SAMPLES_DIR "data/config.xml", "Configuration");
-
 	const DataMap& dataMap = helper.getDataMap();
-
 	EXPECT_TRUE(dataMap.empty()) << "Unpopulated data map should be empty";
 }
