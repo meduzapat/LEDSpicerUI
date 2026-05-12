@@ -22,31 +22,30 @@
 
 #include "MockBasicData.hpp"
 #include "Storage/DirNode.hpp"
-#include "Storage/Data.hpp"
 
 using namespace LEDSpicerUI::Ui::Storage;
 using namespace LEDSpicerUI::Constants;
 using LEDSpicerUI::Test::Mocks::MockBasicData;
 
-// Minimal concrete consumer for testing DirNode in isolation.
+// Minimal concrete class for testing DirNode in isolation.
 class TestNode : public MockBasicData, public DirNode {
 
 public:
 
 	TestNode(Values& data, DirNode* parent, const string& filename) noexcept :
-		Parent(data, {}),
+		MockBasicData(data),
 		DirNode(getProperties(), parent, filename)
 	{}
 };
 
-TEST(DirectoryEntryTest, TestFunctionality) {
+TEST(DirNodeTest, TestFunctionality) {
 
 	Values data;
-	TestNode root {data, nullptr, "root"};
-	TestNode child {data, &root, "child"};
-	TestNode grand {data, &child, "deep"};
+	TestNode root  {data, nullptr, "root"};
+	TestNode child {data, &root,   "child"};
+	TestNode grand {data, &child,  "deep"};
 
-	// UID is set and is non-empty.
+	// UID written and non-empty.
 	EXPECT_FALSE(root.getProperties().getValue(UID).empty());
 
 	// PID is empty at root level.
@@ -56,33 +55,29 @@ TEST(DirectoryEntryTest, TestFunctionality) {
 	EXPECT_EQ(root.getProperties().getValue(UID),  child.getProperties().getValue(PID));
 	EXPECT_EQ(child.getProperties().getValue(UID), grand.getProperties().getValue(PID));
 
-	// getFsId() aliases dest UID.
+	// getFsId() aliases UID.
 	EXPECT_EQ(root.getProperties().getValue(UID),  root.getFsId());
 	EXPECT_EQ(child.getProperties().getValue(UID), child.getFsId());
 
-	// getName() returns the name passed at construction.
-	EXPECT_EQ("root",   root.getName());
-	EXPECT_EQ("subdir", child.getName());
-	EXPECT_EQ("deep",   grand.getName());
+	// getName() returns the filename segment.
+	EXPECT_EQ("root",  root.getName());
+	EXPECT_EQ("child", child.getName());
+	EXPECT_EQ("deep",  grand.getName());
 
-	// createUniqueId() uses PID + name.
-	EXPECT_EQ(Defaults::createCommonUniqueId({emptyString, "root"}), root.createUniqueId());
+	// getParent() and isAtRoot().
+	EXPECT_EQ(nullptr, root.getParent());
+	EXPECT_EQ(&root,   child.getParent());
+	EXPECT_TRUE(root.isAtRoot());
+	EXPECT_FALSE(child.isAtRoot());
 
-	// Create unique Id nested.
-	EXPECT_EQ(Defaults::createCommonUniqueId({root.getFsId(), "subdir"}), child.createUniqueId());
-
-	// createPrettyName() prefixes with folder emoji.
-	EXPECT_NE(string::npos, root.createPrettyName().find("root"));
-	EXPECT_NE(string::npos, root.createPrettyName().find("📁"));
-
-	// createTooltip() returns full path.
-	EXPECT_EQ("root", root.createTooltip());
-	EXPECT_EQ("root/subdir/deep", grand.createTooltip());
+	// getPath() returns the parent's full path.
+	EXPECT_EQ(emptyString,  root.getPath());
+	EXPECT_EQ("root",       child.getPath());
+	EXPECT_EQ("root/child", grand.getPath());
 
 	// getFullPath() includes own name segment.
-	EXPECT_EQ("myfile", root.getFullPath());
-	EXPECT_EQ("subdir/nestedfile", grand.getFullPath());
+	EXPECT_EQ("root",            root.getFullPath());
+	EXPECT_EQ("root/child",      child.getFullPath());
+	EXPECT_EQ("root/child/deep", grand.getFullPath());
 
 }
-
-
