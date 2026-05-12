@@ -24,10 +24,7 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-DirectoryEntry::DirectoryEntry(
-	StringUMap&     data,
-	DirectoryEntry* parent
-) noexcept :
+DirectoryEntry::DirectoryEntry(Values& data, DirectoryEntry* parent) noexcept :
 	Parent(data, {COLLECTION_DIRECTORIES}),
 	DirNode(getProperties(), parent, getValue(FILENAME))
 {}

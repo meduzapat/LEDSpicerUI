@@ -31,7 +31,7 @@ using namespace Constants;
 
 namespace LEDSpicerUI::Test::Mocks {
 
-const string
+inline const string
 	testCss {"testCss"},
 	testTag {"testTag"};
 

@@ -37,10 +37,10 @@ public:
 
 	virtual ~RestrictorMap() = default;
 
-	string_view getXmlTag()   const noexcept override { return "map"; }
-	string_view getCssClass() const noexcept override { return CSS_RESTRICTOR_MAP_BOX_BUTTON; }
-	string createPrettyName() const noexcept override;
-	string createUniqueId()   const noexcept override;
+	const string& getXmlTag()   const noexcept override { return TYPE_MAP; }
+	const string& getCssClass() const noexcept override { return CSS_RESTRICTOR_MAP_BOX_BUTTON; }
+	string createPrettyName()   const noexcept override;
+	string createUniqueId()     const noexcept override;
 
 	CollectionHandler* getCollectionHandler() const noexcept override { return CollectionHandler::getInstance(COLLECTION_RESTRICTOR_MAPS); }
 

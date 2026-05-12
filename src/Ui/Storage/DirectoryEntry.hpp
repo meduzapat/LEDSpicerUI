@@ -39,19 +39,15 @@ class DirectoryEntry : public Parent, public DirNode {
 
 public:
 
-	DirectoryEntry(
-		StringUMap&     data,
-		DirectoryEntry* parent
-	) noexcept;
+	DirectoryEntry(Values& data, DirectoryEntry* parent) noexcept;
 
 	virtual ~DirectoryEntry() = default;
 
-	string createUniqueId()   const noexcept override;
-	string createPrettyName() const noexcept override;
-	string createTooltip()    const noexcept override;
-
-	string_view getCssClass() const noexcept override { return CSS_DIRECTORY_BOX_BUTTON; }
-	string_view getXmlTag()   const noexcept override { return ""; }
+	string createUniqueId()     const noexcept override;
+	string createPrettyName()   const noexcept override;
+	string createTooltip()      const noexcept override;
+	const string& getCssClass() const noexcept override { return CSS_DIRECTORY_BOX_BUTTON; }
+	const string& getXmlTag()   const noexcept override { return emptyString; }
 
 	CollectionHandler* getCollectionHandler() const noexcept override {
 		return CollectionHandler::getInstance(COLLECTION_DIRECTORIES);

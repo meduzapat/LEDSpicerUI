@@ -45,10 +45,7 @@ public:
 	 * @param collectionId the collection id forwarded to Data.
 	 * @param childCollectionIds a lit of collection ID to create the children.
 	 */
-	Parent(
-		StringUMap& data,
-		const vector<string>& childCollectionIds
-	);
+	Parent(Values& data, const vector<string>& childCollectionIds);
 
 	virtual ~Parent();
 
@@ -71,12 +68,12 @@ public:
 	const StringBoxButtonCollectionUMap& getChildren() const noexcept;
 
 	/// Iteration support.
-	auto begin()           noexcept { return children.begin();  }
-	auto end()             noexcept { return children.end();    }
-	auto begin()     const noexcept { return children.begin();  }
-	auto end()       const noexcept { return children.end();    }
-	auto cbegin()    const noexcept { return children.cbegin(); }
-	auto cend()      const noexcept { return children.cend();   }
+	auto begin()        noexcept { return children.begin();  }
+	auto end()          noexcept { return children.end();    }
+	auto begin()  const noexcept { return children.begin();  }
+	auto end()    const noexcept { return children.end();    }
+	auto cbegin() const noexcept { return children.cbegin(); }
+	auto cend()   const noexcept { return children.cend();   }
 
 	/**
 	 * @return Returns the total number of child items in the primary child.

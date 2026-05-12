@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      Device.hpp
- * @since     Feb 26, 2023
+ * @file      MockBasicData.hpp
+ * @since     May 11, 2026
  * @author    Patricio A. Rossi (MeduZa)
  *
  * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
@@ -20,35 +20,30 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Parent.hpp"
+#include "MockBasicData.hpp"
+#include "Storage/CollectionHandler.hpp"
 
 #pragma once
 
-namespace LEDSpicerUI::Ui::Storage {
+using namespace LEDSpicerUI;
+using namespace Ui::Storage;
+using namespace Constants;
+
+namespace LEDSpicerUI::Test::Mocks {
+
+inline const string collection {"bb_test"};
 
 /**
- * LEDSpicerUI::Ui::Storage::Device
- *
- * Stores a hardware device and its attached elements.
+ * A mock class that completes Data with two constants and null collection.
  */
-class Device : public Parent {
+class MockData : public MockBasicData {
 
-public:
+	public:
 
-	Device(Values& data) noexcept : Parent(data, {COLLECTION_ELEMENTS}) {}
+		using MockBasicData::MockBasicData;
 
-	virtual ~Device() = default;
-
-	const string& getXmlTag()   const noexcept override { return TYPE_DEVICE; }
-	const string& getCssClass() const noexcept override { return CSS_DEVICE_BOX_BUTTON; }
-	string createPrettyName()   const noexcept override;
-	string createUniqueId()     const noexcept override;
-
-	CollectionHandler* getCollectionHandler() const noexcept override;
-
-protected:
-
-	bool shouldSerialize(const string& key, const string& value) const noexcept override;
-};
-
-} // namespace
+		CollectionHandler* getCollectionHandler() const noexcept override {
+			return CollectionHandler::getInstance(collection);
+		}
+	};
+}

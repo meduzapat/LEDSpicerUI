@@ -36,21 +36,21 @@ class InputSource : public Parent {
 
 public:
 
-	InputSource(StringUMap& data, const string& ownerId) noexcept;
+	InputSource(Values& data, const string& ownerId) noexcept;
 
 	virtual ~InputSource() = default;
 
-	string createUniqueId()   const noexcept override;
-	string createPrettyName() const noexcept override;
-	string createTooltip()    const noexcept override;
-	string_view getCssClass() const noexcept override { return CSS_INPUT_SOURCE_BOX_BUTTON; }
-	string_view getXmlTag()   const noexcept override { return "maps"; }
+	string createUniqueId()     const noexcept override;
+	string createPrettyName()   const noexcept override;
+	string createTooltip()      const noexcept override;
+	const string& getCssClass() const noexcept override { return CSS_INPUT_SOURCE_BOX_BUTTON; }
+	const string& getXmlTag()   const noexcept override { return TYPE_MAPS; }
 
 	CollectionHandler* getCollectionHandler() const noexcept override;
 
 protected:
 
-	string getPrimaryKey() const noexcept override { return SOURCE; }
+	const string& getPrimaryKey() const noexcept override { return SOURCE; }
 
 	bool shouldSerialize(const string& key, const string& value) const noexcept override;
 

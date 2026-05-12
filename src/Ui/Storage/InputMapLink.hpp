@@ -36,16 +36,16 @@ class InputMapLink: public Parent {
 
 public:
 
-	InputMapLink(StringUMap& data, const string& inputPid) noexcept;
+	InputMapLink(Values& data, const string& inputPid) noexcept;
 
 	virtual ~InputMapLink() = default;
 
-	string_view getXmlTag()   const noexcept override { return emptyString; }
-	string_view getCssClass() const noexcept override { return CSS_LINK_BOX_BUTTON; }
-	string createPrettyName() const noexcept override;
-	string createTooltip()    const noexcept override;
-	string createUniqueId()   const noexcept override { return emptyString; }
-	string toXML()            const noexcept override;
+	const string& getXmlTag()   const noexcept override { return emptyString; }
+	const string& getCssClass() const noexcept override { return CSS_LINK_BOX_BUTTON; }
+	string createPrettyName()   const noexcept override;
+	string createTooltip()      const noexcept override;
+	string createUniqueId()     const noexcept override { return emptyString; }
+	string toXML()              const noexcept override;
 
 	CollectionHandler* getCollectionHandler() const noexcept override { return nullptr; }
 };

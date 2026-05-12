@@ -34,12 +34,14 @@ class Group : public Parent {
 
 public:
 
-	Group(StringUMap& data) noexcept;
+	Group(Values& data) noexcept : Parent(data, {COLLECTION_GROUP_LINKS}) {
+		registerDependency(COLLECTION_ELEMENTS, COLLECTION_GROUP_LINKS);
+	}
 
 	virtual ~Group() = default;
 
-	string_view getXmlTag()   const noexcept override { return "group"; }
-	string_view getCssClass() const noexcept override { return CSS_GROUP_BOX_BUTTON; }
+	const string& getXmlTag()   const noexcept override { return TYPE_GROUP; }
+	const string& getCssClass() const noexcept override { return CSS_GROUP_BOX_BUTTON; }
 
 	CollectionHandler* getCollectionHandler() const noexcept override {
 		return CollectionHandler::getInstance(COLLECTION_GROUPS);

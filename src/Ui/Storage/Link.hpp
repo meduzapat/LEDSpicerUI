@@ -62,7 +62,7 @@ public:
 	 * @param link       The Data object this Link points to.
 	 */
 	Link(
-		StringUMap&              data,
+		Values&                  data,
 		const string&            linkKey,
 		const string&            linkType,
 		const vector<LinkField>& linkFields,
@@ -81,12 +81,12 @@ public:
 
 	bool operator==(const Data& other) const noexcept override;
 
-	string_view getCssClass()      const noexcept override;
-	string      createPrettyName() const noexcept override;
-	string      createTooltip()    const noexcept override;
-	string      createUniqueId()   const noexcept override;
-	string      toXML()            const noexcept override;
-	string_view getXmlTag()        const noexcept override;
+	const string& getCssClass()    const noexcept override;
+	const string& getXmlTag()      const noexcept override;
+	const string& createUniqueId() const noexcept override;
+	string createPrettyName()      const noexcept override;
+	string createTooltip()         const noexcept override;
+	string toXML()                 const noexcept override;
 
 	CollectionHandler* getCollectionHandler() const noexcept override { return nullptr; }
 

@@ -28,8 +28,12 @@ bool Link::operator==(const Data& other) const noexcept {
 	return Data::operator==(other) or link == &other;
 }
 
-string_view Link::getCssClass() const noexcept {
+const string& Link::getCssClass() const noexcept {
 	return link->getCssClass();
+}
+
+const string& Link::createUniqueId() const noexcept {
+	return link->createUniqueId();
 }
 
 string Link::createPrettyName() const noexcept {
@@ -40,12 +44,8 @@ string Link::createTooltip() const noexcept {
 	return link->createTooltip();
 }
 
-string Link::createUniqueId() const noexcept {
-	return link->createUniqueId();
-}
-
-string_view Link::getXmlTag() const noexcept {
-	return string_view(linkType);
+const string& Link::getXmlTag() const noexcept {
+	return linkType;
 }
 
 const string& Link::getValue(const string& key) const noexcept {
@@ -69,7 +69,8 @@ void Link::setValue(const string& key, const string& value) noexcept {
 }
 
 string Link::toXML() const noexcept {
-	StringUMap values{{linkKey, link->createUniqueId()}};
-	values.insert(begin(), end());
-	return createOpeningXML(linkType, values, true);
+
+	Values attrs {{linkKey, link->createUniqueId()}};
+	attrs.setValues(values);
+	return createOpeningXML(linkType, attrs, true);
 }

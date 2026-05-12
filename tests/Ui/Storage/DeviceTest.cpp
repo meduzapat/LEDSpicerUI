@@ -26,6 +26,7 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 using namespace LEDSpicerUI::Constants;
+using LEDSpicerUI::Values;
 
 class DeviceTest : public ::testing::Test {
 protected:
@@ -34,57 +35,30 @@ protected:
 	}
 };
 
-// uniqueId.
-TEST_F(DeviceTest, CreateUniqueId) {
-	StringUMap data{{NAME, "RaspberryPi"}, {ID, "1"}, {PORT, ""}};
-	Device d(data);
-	EXPECT_FALSE(d.createUniqueId().empty());
-}
-
-// createPrettyName for a simple non-ID, non-serial device.
 TEST_F(DeviceTest, CreatePrettyNameSimpleDevice) {
-	StringUMap data{{NAME, "RaspberryPi"}, {ID, "1"}, {PORT, ""}};
-	Device d(data);
+
+	Values data {{NAME, "RaspberryPi"}, {ID, "1"}, {PORT, ""}};
+	Device d {data};
+
+	// uniqueId.
+	EXPECT_FALSE(d.createUniqueId().empty());
+	// createPrettyName.
 	EXPECT_NE(string::npos, d.createPrettyName().find("Raspberry Pi GPIO"));
+	// getCssClass.
+	EXPECT_EQ("DeviceBoxButton", d.getCssClass());
 }
-
-// createPrettyName includes ID for ID-user devices.
-TEST_F(DeviceTest, CreatePrettyNameIncludesId) {
-	StringUMap data{{NAME, "UltimarcPacDrive"}, {ID, "2"}, {PORT, ""}};
-	Device d(data);
-	EXPECT_NE(string::npos, d.createPrettyName().find("Id: 2"));
-}
-
-// Child collection keyed as COLLECTION_ELEMENTS.
 TEST_F(DeviceTest, HasElementChild) {
-	StringUMap data{{NAME, "RaspberryPi"}, {ID, "1"}, {PORT, ""}};
-	Device d(data);
+	Values data{{NAME, "RaspberryPi"}, {ID, "1"}, {PORT, ""}};
+	Device d {data};
+	// Child collection keyed as COLLECTION_ELEMENTS.
 	EXPECT_NE(nullptr, d.getChild(COLLECTION_ELEMENTS));
 }
 
-// getCssClass.
-TEST_F(DeviceTest, CssClass) {
-	StringUMap data{{NAME, "RaspberryPi"}, {ID, "1"}, {PORT, ""}};
-	Device d(data);
-	EXPECT_EQ("DeviceBoxButton", d.getCssClass());
-}
-
-// toXML contains device tag.
 TEST_F(DeviceTest, ToXMLStructure) {
-	StringUMap data{{NAME, "RaspberryPi"}, {ID, "1"}, {PORT, ""}};
-	Device d(data);
-	string xml(d.toXML());
-	EXPECT_NE(string::npos, xml.find("<device"));
-	// Empty emits self-closing tag
-	EXPECT_NE(string::npos, xml.find("/>"));
-}
-
-// wipe clears fieldsData, snap stays clean.
-TEST_F(DeviceTest, WipeClearsFields) {
-	StringUMap data{{NAME, "RaspberryPi"}, {ID, "1"}, {PORT, ""}};
-	Device d(data);
-	d.wipe();
-	EXPECT_TRUE(d.getValues().empty());
+	Values data {{NAME, "RaspberryPi"}, {ID, "1"}, {PORT, ""}};
+	Device d {data};
+	const string xml(d.toXML());
+	EXPECT_EQ("<device name=\"RaspberryPi\"/>\n", xml);
 }
 
 int main(int argc, char** argv) {

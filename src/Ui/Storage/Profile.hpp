@@ -37,21 +37,21 @@ class Profile : public Parent, public DirNode {
 
 public:
 
-	Profile(StringUMap& data, DirNode* parent) noexcept;
+	Profile(Values& data, DirNode* parent) noexcept;
 
 	virtual ~Profile() = default;
 
-	string createUniqueId()   const noexcept override;
-	string_view getCssClass() const noexcept override { return CSS_PROFILE_BOX_BUTTON; }
-	string_view getXmlTag()   const noexcept override { return "Profile"; }
+	string createUniqueId()     const noexcept override;
+	const string& getCssClass() const noexcept override { return CSS_PROFILE_BOX_BUTTON; }
+	const string& getXmlTag()   const noexcept override { return TYPE_PROFILE; }
 
 	CollectionHandler* getCollectionHandler() const noexcept override {
 		return CollectionHandler::getInstance(COLLECTION_PROFILES);
 	}
-
-protected:
-
-	string xmlBody() const noexcept override;
+//
+//protected:
+//
+//	string xmlBody() const noexcept override;
 };
 
 } // namespace

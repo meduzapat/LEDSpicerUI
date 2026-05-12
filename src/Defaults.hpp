@@ -190,6 +190,7 @@ inline const string
 
 /// Types
 	TYPE_MAP             {"map"},
+	TYPE_MAPS            {"maps"},
 	TYPE_DIRECTORY       {"directory"},
 	TYPE_DEVICE          {"device"},
 	TYPE_RESTRICTOR      {"restrictor"},
@@ -233,7 +234,23 @@ inline const string
 
 /// Path related.
 	PATH_PARENT {"pp"},
-	PATH_BASE   {"pb"};
+	PATH_BASE   {"pb"},
+
+// CSS classes.
+/// Storage box buttons
+	CSS_BOX_BUTTON                {"BoxButton"},
+	CSS_DEVICE_BOX_BUTTON         {"DeviceBoxButton"},
+	CSS_DIRECTORY_BOX_BUTTON      {"DirectoryBoxButton"},
+	CSS_ELEMENT_BOX_BUTTON        {"ElementBoxButton"},
+	CSS_GROUP_BOX_BUTTON          {"GroupBoxButton"},
+	CSS_INPUT_BOX_BUTTON          {"InputBoxButton"},
+	CSS_INPUT_MAP_BOX_BUTTON      {"InputMapBoxButton"},
+	CSS_INPUT_SOURCE_BOX_BUTTON   {"InputSourceBoxButton"},
+	CSS_LINK_BOX_BUTTON           {"LinkBoxButton"},
+	CSS_PROCESS_BOX_BUTTON        {"ProcessBoxButton"},
+	CSS_PROFILE_BOX_BUTTON        {"ProfileBoxButton"},
+	CSS_RESTRICTOR_BOX_BUTTON     {"RestrictorBoxButton"},
+	CSS_RESTRICTOR_MAP_BOX_BUTTON {"RestrictorMapBoxButton"};
 
 } // namespace
 
@@ -267,21 +284,6 @@ inline const string
 // Form / layout
 #define CSS_FORM_CONTAINER            "formContainer"
 #define CSS_SYSTEM                    "system"
-
-// Storage box buttons
-#define CSS_BOX_BUTTON                "BoxButton"
-#define CSS_DEVICE_BOX_BUTTON         "DeviceBoxButton"
-#define CSS_DIRECTORY_BOX_BUTTON      "DirectoryBoxButton"
-#define CSS_ELEMENT_BOX_BUTTON        "ElementBoxButton"
-#define CSS_GROUP_BOX_BUTTON          "GroupBoxButton"
-#define CSS_INPUT_BOX_BUTTON          "InputBoxButton"
-#define CSS_INPUT_MAP_BOX_BUTTON      "InputMapBoxButton"
-#define CSS_INPUT_SOURCE_BOX_BUTTON   "InputSourceBoxButton"
-#define CSS_LINK_BOX_BUTTON           "LinkBoxButton"
-#define CSS_PROCESS_BOX_BUTTON        "ProcessBoxButton"
-#define CSS_PROFILE_BOX_BUTTON        "ProfileBoxButton"
-#define CSS_RESTRICTOR_BOX_BUTTON     "RestrictorBoxButton"
-#define CSS_RESTRICTOR_MAP_BOX_BUTTON "RestrictorMapBoxButton"
 
 // Icons — all symbolic
 #define ICON_COPY   "edit-copy-symbolic"

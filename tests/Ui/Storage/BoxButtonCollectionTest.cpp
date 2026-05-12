@@ -26,8 +26,7 @@
 using namespace LEDSpicerUI;
 using namespace Ui::Storage;
 using namespace Constants;
-
-
+using Test::Mocks::MockBasicData;
 
 class BoxButtonCollectionTest : public ::testing::Test {
 
@@ -35,10 +34,10 @@ protected:
 
 	BoxButtonCollection collection;
 
-	TestData* makeData(const string& name) {
-		auto d{new StringUMap{{NAME, name}}};
+	MockBasicData* makeData(const string& name) {
+		auto d{new Values {{NAME, name}}};
 		owned.push_back(d);
-		return new TestData(*d);
+		return new MockBasicData(*d);
 	}
 
 	void TearDown() override {
@@ -46,29 +45,21 @@ protected:
 		owned.clear();
 	}
 
-	vector<StringUMap*> owned;
+	vector<Values*> owned;
 };
 
-// Empty collection reports zero size.
 TEST_F(BoxButtonCollectionTest, EmptySize) {
 	EXPECT_EQ(0u, collection.getSize());
 }
 
-// create() increases size by one and returns a valid reference.
 TEST_F(BoxButtonCollectionTest, CreateIncreasesSize) {
 	collection.create(makeData("A"));
 	EXPECT_EQ(1u, collection.getSize());
-}
-
-// Multiple creates accumulate.
-TEST_F(BoxButtonCollectionTest, MultipleCreates) {
-	collection.create(makeData("A"));
 	collection.create(makeData("B"));
 	collection.create(makeData("C"));
 	EXPECT_EQ(3u, collection.getSize());
 }
 
-// isIdSet finds by unique ID string.
 TEST_F(BoxButtonCollectionTest, IsIdSetFindsExisting) {
 	collection.create(makeData("A"));
 	EXPECT_TRUE(collection.isIdSet("A"));
@@ -79,7 +70,6 @@ TEST_F(BoxButtonCollectionTest, IsIdSetMissesAbsent) {
 	EXPECT_FALSE(collection.isIdSet("B"));
 }
 
-// isSet finds by Data pointer equality (createUniqueId comparison).
 TEST_F(BoxButtonCollectionTest, IsSetFindsExisting) {
 	auto data{makeData("A")};
 	collection.create(data);
@@ -88,12 +78,11 @@ TEST_F(BoxButtonCollectionTest, IsSetFindsExisting) {
 
 TEST_F(BoxButtonCollectionTest, IsSetMissesAbsent) {
 	collection.create(makeData("A"));
-	StringUMap d{{NAME, "B"}};
-	TestData other(d);
+	Values d{{NAME, "B"}};
+	MockBasicData other {d};
 	EXPECT_FALSE(collection.isSet(&other));
 }
 
-// remove(BoxButton&) reduces size and the item is gone.
 TEST_F(BoxButtonCollectionTest, RemoveByBoxButton) {
 	BoxButton& bb = collection.create(makeData("A"));
 	collection.create(makeData("B"));
@@ -102,7 +91,6 @@ TEST_F(BoxButtonCollectionTest, RemoveByBoxButton) {
 	EXPECT_FALSE(collection.isIdSet("A"));
 }
 
-// remove(Data*) finds and removes by equality.
 TEST_F(BoxButtonCollectionTest, RemoveByData) {
 	auto data{makeData("A")};
 	collection.create(data);
@@ -112,7 +100,6 @@ TEST_F(BoxButtonCollectionTest, RemoveByData) {
 	EXPECT_FALSE(collection.isIdSet("A"));
 }
 
-// wipe() empties the collection.
 TEST_F(BoxButtonCollectionTest, WipeClearsAll) {
 	collection.create(makeData("A"));
 	collection.create(makeData("B"));
@@ -132,7 +119,6 @@ TEST_F(BoxButtonCollectionTest, SwapExchangesContents) {
 	EXPECT_EQ(1u, other.getSize());
 }
 
-// Iterators cover all items.
 TEST_F(BoxButtonCollectionTest, IterationCoversAll) {
 	collection.create(makeData("A"));
 	collection.create(makeData("B"));
@@ -145,7 +131,6 @@ TEST_F(BoxButtonCollectionTest, IterationCoversAll) {
 	EXPECT_EQ(3u, count);
 }
 
-// wipe() drops sensitivity when collection empties.
 TEST_F(BoxButtonCollectionTest, WipeDropsSensitivity) {
 	auto widget{Gtk::manage(new Gtk::Button())};
 	collection.create(makeData("A"));

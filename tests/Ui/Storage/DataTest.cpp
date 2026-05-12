@@ -20,10 +20,10 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "MockBasicData.hpp"
+#include "MockData.hpp"
 #include "Storage/CollectionHandler.hpp"
 
-using LEDSpicerUI::Test::Mocks::MockBasicData;
+using namespace LEDSpicerUI::Test::Mocks;
 
 // A simple Data subclass without a collection handler.
 class TestData : public MockBasicData {
@@ -37,16 +37,6 @@ protected:
 	bool shouldSerialize(const string& key, const string&) const noexcept override {
 		return key != "ignored";
 	}
-};
-
-// A Data subclass that registers into collection "t".
-class RegisteringData : public MockBasicData {
-
-public:
-
-	using MockBasicData::MockBasicData;
-
-	CollectionHandler* getCollectionHandler() const noexcept override {return CollectionHandler::getInstance("t");}
 };
 
 class DataTest : public ::testing::Test {
@@ -73,43 +63,33 @@ protected:
 
 TEST_F(DataTest, Constructors) {
 
-	// StringUMap got moved
-	StringUMap map{{"name", "TestItem"}, {"type", "button"}, {"value", "42"}};
-	MockBasicData d1(map);
-	// Original map was moved.
+	// test map was moved.
+	StringUMap map {{"name", "TestItem"}, {"type", "button"}, {"value", "42"}};
+	MockBasicData d1 {map};
 	EXPECT_TRUE(map.empty());
-	// New got data.
-	EXPECT_FALSE(d1.getValues().empty());
+	EXPECT_TRUE(d1.getSize());
 
-	// Values was moved.
-	Values values1{{"key1", "val1"}, {"key2", "val2"}};
-	MockBasicData d2(values1);
-	// Original map was moved.
-	EXPECT_TRUE(values1.getValues().empty());
-	// New got data.
-	EXPECT_FALSE(d2.getValues().empty());
+	// test Values was moved.
+	Values values1 {{"key1", "val1"}, {"key2", "val2"}};
+	MockBasicData d2 {values1};
+	EXPECT_EQ(0u, values1.getSize());
+	EXPECT_TRUE(d2.getSize());
 
-	// 3. Construction from Values&& (move - destructive)
-	Values values2{{"move1", "movedValue"}, {"move2", "another"}};
+	// Construction from Values&&.
+	Values values2 {{"move1", "movedValue"}, {"move2", "another"}};
 	MockBasicData d3(std::move(values2));
-	// Original map was moved.
 	EXPECT_TRUE(values2.getValues().empty());
-	// New got data.
 	EXPECT_FALSE(d3.getValues().empty());
 
-	// 4. Move construction between Data objects
+	// Move construction between Data objects.
 	MockBasicData d4(std::move(d3));
-	// Original map was moved.
 	EXPECT_TRUE(d3.getValues().empty());
-	// New got data.
 	EXPECT_FALSE(d4.getValues().empty());
 
-	// Move assignment
+	// Move assignment.
 	MockBasicData d5;
 	d5 = std::move(d4);
-	// Original map was moved.
 	EXPECT_TRUE(d4.getValues().empty());
-	// New got data.
 	EXPECT_FALSE(d5.getValues().empty());
 }
 
@@ -128,9 +108,10 @@ TEST_F(DataTest, SetValue) {
 }
 
 TEST_F(DataTest, UnSetPrimaryKeyRemovesFromCollection) {
-	StringUMap d{{"name", "TestPrimary"}, {"extra", "value"}};
-	RegisteringData item(d);
-	auto ch = CollectionHandler::getInstance("t");
+
+	Values d {{"name", "TestPrimary"}, {"extra", "value"}};
+	MockData item {d};
+	auto ch {item.getCollectionHandler()};
 	ch->add(&item);
 
 	// Non-primary key removal — stays registered.
@@ -147,9 +128,11 @@ TEST_F(DataTest, UnSetPrimaryKeyRemovesFromCollection) {
 }
 
 TEST_F(DataTest, WipeRemovesFromCollection) {
-	auto ch = CollectionHandler::getInstance("t");
-	StringUMap d{};
-	RegisteringData item(d);
+
+	StringUMap d;
+	MockData item(d);
+	auto ch {item.getCollectionHandler()};
+
 	item.setValue("name", "MyItem");
 	ch->add(&item);
 	item.wipe();
@@ -159,8 +142,10 @@ TEST_F(DataTest, WipeRemovesFromCollection) {
 
 // Wipe on an item that was never registered is safe (no crash, no-op).
 TEST_F(DataTest, WipeUnregisteredItemSafe) {
-	StringUMap d{};
-	RegisteringData item(d);
+
+	StringUMap d;
+	MockData item(d);
+
 	item.setValue("name", "Ghost");
 	EXPECT_NO_FATAL_FAILURE(item.wipe());
 	EXPECT_TRUE(item.getValues().empty());
@@ -214,13 +199,14 @@ TEST_F(DataTest, CopyValuesNoCollection) {
 	EXPECT_EQ(0u, data->copyValues().getSize());
 }
 
-// copyValues produces a non-colliding ID and leaves the original untouched.
 TEST_F(DataTest, CopyValuesFindsUniqueId) {
-	auto ch = CollectionHandler::getInstance("t");
-	StringUMap d{};
-	RegisteringData item(d);
+
+	StringUMap d;
+	MockData item(d);
+	auto ch {item.getCollectionHandler()};
 	item.setValue("name", "Item");
 	ch->add(&item);
+	// Should produce a non-colliding ID.
 	auto copy {item.copyValues()};
 	ASSERT_FALSE(copy.getSize() == 0);
 	EXPECT_FALSE(ch->isIdSet(copy.getValue("name")));
@@ -229,9 +215,8 @@ TEST_F(DataTest, CopyValuesFindsUniqueId) {
 
 TEST_F(DataTest, CollectionRegistration) {
 
-	auto ch {CollectionHandler::getInstance("t")};
-
-	RegisteringData item{{"name", "Alpha"}};
+	MockData item{{"name", "Alpha"}};
+	auto ch {item.getCollectionHandler()};
 
 	// Register adds the item.
 	item.registerToCollection();

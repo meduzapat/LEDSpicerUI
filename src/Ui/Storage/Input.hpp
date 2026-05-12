@@ -37,7 +37,7 @@ class Input : public Parent, public DirNode {
 
 public:
 
-	Input(StringUMap& data, DirNode* parent) noexcept :
+	Input(Values& data, DirNode* parent) noexcept :
 		Parent(data, vector<string>{
 			COLLECTION_INPUT_SOURCES,
 			COLLECTION_INPUT_LINKMAPS
@@ -47,12 +47,12 @@ public:
 
 	virtual ~Input() = default;
 
-	string createUniqueId()   const noexcept override;
-	string_view getXmlTag()   const noexcept override { return "Input"; }
-	string_view getCssClass() const noexcept override { return CSS_INPUT_BOX_BUTTON; }
-	string createPrettyName() const noexcept override;
-	string createTooltip()    const noexcept override;
-	string toXML()            const noexcept override;
+	string createUniqueId()     const noexcept override;
+	const string& getXmlTag()   const noexcept override { return TYPE_INPUT; }
+	const string& getCssClass() const noexcept override { return CSS_INPUT_BOX_BUTTON; }
+	string createPrettyName()   const noexcept override;
+	string createTooltip()      const noexcept override;
+	string toXML()              const noexcept override;
 
 	CollectionHandler* getCollectionHandler() const noexcept override {
 		return CollectionHandler::getInstance(COLLECTION_INPUTS);
