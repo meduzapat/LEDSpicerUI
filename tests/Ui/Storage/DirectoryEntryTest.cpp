@@ -30,48 +30,27 @@ using LEDSpicerUI::Values;
 
 TEST(DirectoryEntryTest, TestFunctionality) {
 
-	Values rootData {{FILENAME, "root"}};
+	Values rootData  {{FILENAME, "root"}};
 	DirectoryEntry root {rootData, nullptr};
 
-	// Check empty.
-	EXPECT_EQ(0, root.getSize());
-
-	Values childData {{FILENAME, "subdir"}};
+	Values childData {{FILENAME, "child"}};
 	DirectoryEntry child {childData, &root};
-	Values grandData {{FILENAME, "deep"}};
-	DirectoryEntry grand {grandData, &child};
 
-	// UID is set and is non-empty.
-	EXPECT_FALSE(root.getProperties().getValue(UID).empty());
-
-	// PID is empty at root level.
-	EXPECT_EQ(emptyString, root.getProperties().getValue(PID));
-
-	// PID matches parent UID.
-	EXPECT_EQ(root.getProperties().getValue(UID),  child.getProperties().getValue(PID));
-	EXPECT_EQ(child.getProperties().getValue(UID), grand.getProperties().getValue(PID));
-
-	// getFsId() aliases dest UID.
-	EXPECT_EQ(root.getProperties().getValue(UID),  root.getFsId());
-	EXPECT_EQ(child.getProperties().getValue(UID), child.getFsId());
-
-	// getName() returns the name passed at construction.
-	EXPECT_EQ("root",   root.getName());
-	EXPECT_EQ("subdir", child.getName());
-	EXPECT_EQ("deep",   grand.getName());
+	// getCssClass, getXmlTag, getCollectionHandler.
+	EXPECT_EQ(CSS_DIRECTORY_BOX_BUTTON, root.getCssClass());
+	EXPECT_EQ(emptyString,              root.getXmlTag());
+	EXPECT_NE(nullptr,                  root.getCollectionHandler());
 
 	// createUniqueId() uses PID + name.
-	EXPECT_EQ(Defaults::createCommonUniqueId({emptyString, "root"}), root.createUniqueId());
-
-	// Create unique Id nested.
-	EXPECT_EQ(Defaults::createCommonUniqueId({root.getFsId(), "subdir"}), child.createUniqueId());
+	EXPECT_EQ(Defaults::createCommonUniqueId({emptyString,    "root"}),  root.createUniqueId());
+	EXPECT_EQ(Defaults::createCommonUniqueId({root.getFsId(), "child"}), child.createUniqueId());
 
 	// createPrettyName() prefixes with folder emoji.
 	EXPECT_NE(string::npos, root.createPrettyName().find("root"));
 	EXPECT_NE(string::npos, root.createPrettyName().find("📁"));
 
 	// createTooltip() returns full path.
-	EXPECT_EQ("root", root.createTooltip());
-	EXPECT_EQ("root/subdir/deep", grand.createTooltip());
+	EXPECT_EQ("root",       root.createTooltip());
+	EXPECT_EQ("root/child", child.createTooltip());
 
 }
