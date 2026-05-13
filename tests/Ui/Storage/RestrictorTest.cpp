@@ -48,12 +48,6 @@ TEST_F(RestrictorTest, TestFunctionality) {
 	EXPECT_EQ(TYPE_RESTRICTOR, r.getXmlTag());
 	EXPECT_EQ(CollectionHandler::getInstance(COLLECTION_RESTRICTORS), r.getCollectionHandler());
 
-	// createPrettyName: basic label, then includes ID when non-default.
-	EXPECT_NE(string::npos, r.createPrettyName().find("ServoStik"));
-	r.setValue(ID, "3");
-	EXPECT_NE(string::npos, r.createPrettyName().find("Id: 3"));
-	r.setValue(ID, "1");
-
 	// createUniqueId: matches hardware identity helper.
 	const Values values {r.copyValues()};
 	EXPECT_EQ(Defaults::createHardwareUniqueId(values, false), r.createUniqueId());

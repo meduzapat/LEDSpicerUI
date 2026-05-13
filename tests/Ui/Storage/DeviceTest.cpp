@@ -48,9 +48,6 @@ TEST_F(DeviceTest, TestFunctionality) {
 	EXPECT_EQ(TYPE_DEVICE,                                      d.getXmlTag());
 	EXPECT_EQ(CollectionHandler::getInstance(COLLECTION_DEVICES), d.getCollectionHandler());
 
-	// createPrettyName: human-readable device label.
-	EXPECT_NE(string::npos, d.createPrettyName().find("Raspberry Pi GPIO"));
-
 	// createUniqueId: matches hardware identity helper.
 	EXPECT_EQ(Defaults::createHardwareUniqueId(d, true), d.createUniqueId());
 

@@ -39,21 +39,28 @@ public:
 	const string& getXmlTag()   const noexcept override { return emptyString; }
 	const string& getCssClass() const noexcept override { return emptyString; }
 	string createUniqueId()     const noexcept override { return emptyString; }
-	CollectionHandler* getCollectionHandler() const noexcept override;
+	CollectionHandler* getCollectionHandler() const noexcept override { return nullptr; }
 };
 
 
 TEST(HardwareTest, TestcreatePrettyName) {
 
-	Values v {{NAME, "HardwareName"}, {ID, "1"}, {PORT, ""}};
+	// Basic device label (non-serial, non-user-ID device).
+	Values v1 {{NAME, "RaspberryPi"}, {ID, "1"}, {PORT, ""}};
+	HardwareMock h1 {v1};
+	EXPECT_NE(string::npos, h1.createPrettyName().find("Raspberry Pi GPIO"));
 
-	HardwareMock h {v}; //{{NAME, "HardwareName"}, {ID, "1"}, {PORT, ""}};
-	// createPrettyName: human-readable device label.
-	EXPECT_EQ("", h.createPrettyName());
+	// User-ID device: includes ID when non-default, omits it when default.
+	Values v2 {{NAME, "ServoStik"}, {ID, "1"}, {PORT, ""}};
+	HardwareMock h2 {v2};
+	EXPECT_NE(string::npos, h2.createPrettyName().find("ServoStik"));
+	EXPECT_EQ(string::npos, h2.createPrettyName().find("Id:"));
+	h2.setValue(ID, "3");
+	EXPECT_NE(string::npos, h2.createPrettyName().find("Id: 3"));
 }
 
-//int main(int argc, char** argv) {
-//	auto app = Gtk::Application::create(argc, argv, "org.test");
-//	::testing::InitGoogleTest(&argc, argv);
-//	return RUN_ALL_TESTS();
-//}
+int main(int argc, char** argv) {
+	auto app = Gtk::Application::create(argc, argv, "org.test");
+	::testing::InitGoogleTest(&argc, argv);
+	return RUN_ALL_TESTS();
+}
