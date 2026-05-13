@@ -30,6 +30,8 @@ Author: Patricio A Rossi
   <!-- interface-authors Patricio A Rossi -->
   <object class="GtkDialog" id="DialogAnimation">
     <property name="can-focus">False</property>
+    <property name="modal">True</property>
+    <property name="destroy-with-parent">True</property>
     <property name="type-hint">dialog</property>
     <child internal-child="vbox">
       <object class="GtkBox">
@@ -2141,7 +2143,9 @@ Compatible with version @MINIMUM_COMPATIBILITY@+</property>
     <property name="height-request">600</property>
     <property name="can-focus">False</property>
     <property name="title">Select Color</property>
+    <property name="modal">True</property>
     <property name="window-position">center-on-parent</property>
+    <property name="destroy-with-parent">True</property>
     <property name="type-hint">dialog</property>
     <property name="transient-for">MainWindow</property>
     <child internal-child="vbox">
@@ -2927,7 +2931,9 @@ Compatible with version @MINIMUM_COMPATIBILITY@+</property>
     <property name="width-request">800</property>
     <property name="height-request">600</property>
     <property name="can-focus">False</property>
+    <property name="modal">True</property>
     <property name="window-position">center-on-parent</property>
+    <property name="destroy-with-parent">True</property>
     <property name="type-hint">dialog</property>
     <property name="transient-for">MainWindow</property>
     <child internal-child="vbox">
@@ -3574,7 +3580,10 @@ Compatible with version @MINIMUM_COMPATIBILITY@+</property>
     <property name="height-request">300</property>
     <property name="can-focus">False</property>
     <property name="title" translatable="yes">Project Selection</property>
+    <property name="resizable">False</property>
+    <property name="modal">True</property>
     <property name="window-position">center-on-parent</property>
+    <property name="destroy-with-parent">True</property>
     <property name="icon-name">document-page-setup</property>
     <property name="type-hint">dialog</property>
     <property name="transient-for">MainWindow</property>
@@ -3604,6 +3613,23 @@ Compatible with version @MINIMUM_COMPATIBILITY@+</property>
           <packing>
             <property name="expand">False</property>
             <property name="fill">False</property>
+            <property name="position">3</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="ypad">7</property>
+            <property name="label" translatable="yes">&lt;b&gt;Open Project&lt;/b&gt;
+
+Choose a project from the list below or create a new project.</property>
+            <property name="use-markup">True</property>
+            <property name="justify">center</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
             <property name="position">0</property>
           </packing>
         </child>
@@ -3687,7 +3713,7 @@ Autodetected if ledspicerd is detected</property>
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">0</property>
+            <property name="position">1</property>
           </packing>
         </child>
         <child>
@@ -3780,7 +3806,7 @@ Autodetected if ledspicerd is detected</property>
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">1</property>
+            <property name="position">3</property>
           </packing>
         </child>
       </object>
@@ -3952,6 +3978,7 @@ Autodetected if ledspicerd is detected</property>
     <property name="title" translatable="yes">Program Settings</property>
     <property name="modal">True</property>
     <property name="window-position">center-on-parent</property>
+    <property name="destroy-with-parent">True</property>
     <property name="icon-name">document-properties</property>
     <property name="type-hint">dialog</property>
     <property name="transient-for">MainWindow</property>
@@ -4093,7 +4120,7 @@ Autodetected if ledspicerd is detected</property>
                               <object class="GtkLabel" id="LabelBinaryStatus">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">example text</property>
+                                <property name="label" translatable="yes">will display info about ledspicerd</property>
                                 <property name="xalign">0.019999999552965164</property>
                               </object>
                               <packing>
@@ -4222,7 +4249,7 @@ Autodetected if ledspicer is installed</property>
                           <object class="GtkLabel" id="LabelSystemFiles">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
-                            <property name="label" translatable="yes">example text</property>
+                            <property name="label" translatable="yes">will display info about found system files</property>
                             <property name="xalign">0.019999999552965164</property>
                           </object>
                           <packing>
