@@ -25,6 +25,7 @@
 #pragma once
 
 #define UI_CONFIG_FILE "ledspicerui.conf"
+#define UI_CONFIG_TYPE "Settings"
 
 namespace LEDSpicerUI::Config {
 
@@ -36,13 +37,7 @@ class SettingsFile : public XMLHelper {
 
 public:
 
-	SettingsFile() = delete;
-
-	/**
-	 * Loads settings from config file.
-	 * @param settingsFile Path to config file.
-	 */
-	SettingsFile(const string& settingsFile);
+	using XMLHelper::XMLHelper;
 
 	virtual ~SettingsFile() = default;
 
@@ -52,7 +47,7 @@ public:
 	 * @param values Settings to save.
 	 * @throws Message on write error.
 	 */
-	static void save(const string& settingsFile, const StringUMap& values);
+	static void save(const string& settingsFile, const Values& values);
 
 	/**
 	 * @return Full path to config file.

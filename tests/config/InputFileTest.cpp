@@ -63,15 +63,15 @@ protected:
 TEST_F(InputFileTest, MultiSourceInputIsLoaded) {
 	auto& inputData = inputMulti->getData(inputsKey());
 	ASSERT_FALSE(inputData.empty());
-	ASSERT_FALSE(inputData[0].empty());
+	ASSERT_NE(0u, inputData[0].getSize());
 
-	EXPECT_EQ("Credits",    inputData[0][NAME]);
-	EXPECT_EQ(HUMAN_NORMAL, inputData[0]["speed"]);
-	EXPECT_EQ("0,1|2,3",    inputData[0]["linkedTriggers"]);
-	EXPECT_EQ("Single",     inputData[0]["mode"]);
-	EXPECT_EQ(HUMAN_TRUE,   inputData[0]["once"]);
-	EXPECT_EQ(HUMAN_FALSE,  inputData[0]["alwaysOn"]);
-	EXPECT_EQ("1",          inputData[0]["coinsPerCredit"]);
+	EXPECT_EQ("Credits",    inputData[0].getValue(NAME));
+	EXPECT_EQ(HUMAN_NORMAL, inputData[0].getValue(SPEED));
+	EXPECT_EQ("0,1|2,3",    inputData[0].getValue(LINKED_ITEMS));
+	EXPECT_EQ("Single",     inputData[0].getValue(MODE));
+	EXPECT_EQ(HUMAN_TRUE,   inputData[0].getValue(ONCE));
+	EXPECT_EQ(HUMAN_FALSE,  inputData[0].getValue(ALWAYS_ON));
+	EXPECT_EQ("1",          inputData[0].getValue(COINS_CREDIT));
 
 	EXPECT_EQ("inputMulti", inputMulti->getFilename());
 }
@@ -79,8 +79,8 @@ TEST_F(InputFileTest, MultiSourceInputIsLoaded) {
 TEST_F(InputFileTest, SourcesAreExtracted) {
 	string eventName(Defaults::createCommonUniqueId({baseId("inputMulti"), COLLECTION_INPUT_SOURCES}));
 
-	EXPECT_EQ("hardware1", inputMulti->getData(eventName)[0]["source"]);
-	EXPECT_EQ("hardware2", inputMulti->getData(eventName)[1]["source"]);
+	EXPECT_EQ("hardware1", inputMulti->getData(eventName)[0].getValue(SOURCE));
+	EXPECT_EQ("hardware2", inputMulti->getData(eventName)[1].getValue(SOURCE));
 }
 
 TEST_F(InputFileTest, FirstSourceMapsAreProcessed) {
@@ -89,23 +89,23 @@ TEST_F(InputFileTest, FirstSourceMapsAreProcessed) {
 	auto& maps = inputMulti->getData(mapName);
 	ASSERT_EQ(3, maps.size());
 
-	EXPECT_EQ("Element", maps[0]["type"]);
-	EXPECT_EQ("P1_COIN", maps[0]["target"]);
-	EXPECT_EQ("309",     maps[0]["trigger"]);
-	EXPECT_EQ("White",   maps[0]["color"]);
-	EXPECT_EQ("Combine", maps[0]["filter"]);
+	EXPECT_EQ("Element", maps[0].getValue(TYPE));
+	EXPECT_EQ("P1_COIN", maps[0].getValue(TARGET));
+	EXPECT_EQ("309",     maps[0].getValue(TRIGGER));
+	EXPECT_EQ("White",   maps[0].getValue(COLOR));
+	EXPECT_EQ("Combine", maps[0].getValue(FILTER));
 
-	EXPECT_EQ("Element",  maps[1]["type"]);
-	EXPECT_EQ("P1_START", maps[1]["target"]);
-	EXPECT_EQ("313",      maps[1]["trigger"]);
-	EXPECT_EQ("Blue",     maps[1]["color"]);
-	EXPECT_EQ("Combine",  maps[1]["filter"]);
+	EXPECT_EQ("Element",  maps[1].getValue(TYPE));
+	EXPECT_EQ("P1_START", maps[1].getValue(TARGET));
+	EXPECT_EQ("313",      maps[1].getValue(TRIGGER));
+	EXPECT_EQ("Blue",     maps[1].getValue(COLOR));
+	EXPECT_EQ("Combine",  maps[1].getValue(FILTER));
 
-	EXPECT_EQ("Element",    maps[2]["type"]);
-	EXPECT_EQ("P1_BUTTON1", maps[2]["target"]);
-	EXPECT_EQ("315",        maps[2]["trigger"]);
-	EXPECT_EQ("Yellow",     maps[2]["color"]);
-	EXPECT_EQ("Normal",     maps[2]["filter"]);
+	EXPECT_EQ("Element",    maps[2].getValue(TYPE));
+	EXPECT_EQ("P1_BUTTON1", maps[2].getValue(TARGET));
+	EXPECT_EQ("315",        maps[2].getValue(TRIGGER));
+	EXPECT_EQ("Yellow",     maps[2].getValue(COLOR));
+	EXPECT_EQ("Normal",     maps[2].getValue(FILTER));
 }
 
 TEST_F(InputFileTest, SecondSourceMapsAreProcessed) {
@@ -114,17 +114,17 @@ TEST_F(InputFileTest, SecondSourceMapsAreProcessed) {
 	auto& maps = inputMulti->getData(mapName);
 	ASSERT_EQ(1, maps.size());
 
-	EXPECT_EQ("Element",  maps[0]["type"]);
-	EXPECT_EQ("P2_START", maps[0]["target"]);
-	EXPECT_EQ("313",      maps[0]["trigger"]);
-	EXPECT_EQ("Red",      maps[0]["color"]);
-	EXPECT_EQ("Combine",  maps[0]["filter"]);
+	EXPECT_EQ("Element",  maps[0].getValue(TYPE));
+	EXPECT_EQ("P2_START", maps[0].getValue(TARGET));
+	EXPECT_EQ("313",      maps[0].getValue(TRIGGER));
+	EXPECT_EQ("Red",      maps[0].getValue(COLOR));
+	EXPECT_EQ("Combine",  maps[0].getValue(FILTER));
 }
 
 TEST_F(InputFileTest, SingleSourceInputIsLoaded) {
 	auto& inputData = inputSingle->getData(inputsKey());
 	ASSERT_FALSE(inputData.empty());
-	EXPECT_EQ("Mame", inputData[0][NAME]);
+	EXPECT_EQ("Mame", inputData[0].getValue(NAME));
 	EXPECT_EQ("inputSingle", inputSingle->getFilename());
 }
 
@@ -134,23 +134,23 @@ TEST_F(InputFileTest, SingleSourceMapsAreProcessed) {
 	auto& maps = inputSingle->getData(mapName);
 	ASSERT_EQ(3, maps.size());
 
-	EXPECT_EQ("Group",        maps[0]["type"]);
-	EXPECT_EQ("player 1",     maps[0]["target"]);
-	EXPECT_EQ("Left_Gun",     maps[0]["trigger"]);
-	EXPECT_EQ("Red",          maps[0]["color"]);
-	EXPECT_EQ("Normal",       maps[0]["filter"]);
+	EXPECT_EQ("Group",        maps[0].getValue(TYPE));
+	EXPECT_EQ("player 1",     maps[0].getValue(TARGET));
+	EXPECT_EQ("Left_Gun",     maps[0].getValue(TRIGGER));
+	EXPECT_EQ("Red",          maps[0].getValue(COLOR));
+	EXPECT_EQ("Normal",       maps[0].getValue(FILTER));
 
-	EXPECT_EQ("Group",        maps[1]["type"]);
-	EXPECT_EQ("player 1",     maps[1]["target"]);
-	EXPECT_EQ("Left_Green",   maps[1]["trigger"]);
-	EXPECT_EQ("Green",        maps[1]["color"]);
-	EXPECT_EQ("Normal",       maps[1]["filter"]);
+	EXPECT_EQ("Group",        maps[1].getValue(TYPE));
+	EXPECT_EQ("player 1",     maps[1].getValue(TARGET));
+	EXPECT_EQ("Left_Green",   maps[1].getValue(TRIGGER));
+	EXPECT_EQ("Green",        maps[1].getValue(COLOR));
+	EXPECT_EQ("Normal",       maps[1].getValue(FILTER));
 
-	EXPECT_EQ("Group",        maps[2]["type"]);
-	EXPECT_EQ("player 1",     maps[2]["target"]);
-	EXPECT_EQ("Left_Flash_1", maps[2]["trigger"]);
-	EXPECT_EQ("Yellow",       maps[2]["color"]);
-	EXPECT_EQ("Combine",      maps[2]["filter"]);
+	EXPECT_EQ("Group",        maps[2].getValue(TYPE));
+	EXPECT_EQ("player 1",     maps[2].getValue(TARGET));
+	EXPECT_EQ("Left_Flash_1", maps[2].getValue(TRIGGER));
+	EXPECT_EQ("Yellow",       maps[2].getValue(COLOR));
+	EXPECT_EQ("Combine",      maps[2].getValue(FILTER));
 }
 
 TEST_F(InputFileTest, MissingAttributesHandling) {
@@ -163,18 +163,18 @@ TEST_F(InputFileTest, MissingAttributesHandling) {
 TEST_F(InputFileTest, RootInfoIsPopulated) {
 	const auto& rootInfo = inputMulti->getRootInfo();
 
-	EXPECT_EQ(PACKAGE_DATA_VERSION, rootInfo.version);
-	EXPECT_EQ("Input",   rootInfo.type);
-	EXPECT_FALSE(rootInfo.attributes.empty());
-	EXPECT_EQ("Credits", rootInfo.attributes.at(NAME));
+	EXPECT_EQ(PACKAGE_DATA_VERSION, rootInfo.getValue("version"));
+	EXPECT_EQ("Input",   rootInfo.getValue("type"));
+	EXPECT_NE(0u,        rootInfo.getSize());
+	EXPECT_EQ("Credits", rootInfo.getValue(NAME));
 }
 
 TEST_F(InputFileTest, LinkedTriggersAreExtracted) {
 	string imlKey{Defaults::createCommonUniqueId({baseId("inputMulti"), COLLECTION_INPUT_LINKMAPS})};
 	auto& imlData{inputMulti->getData(imlKey)};
 	ASSERT_EQ(2u, imlData.size());
-	EXPECT_EQ("0,1", imlData[0][LINKED_ITEMS]);
-	EXPECT_EQ("2,3", imlData[1][LINKED_ITEMS]);
+	EXPECT_EQ("0,1", imlData[0].getValue(LINKED_ITEMS));
+	EXPECT_EQ("2,3", imlData[1].getValue(LINKED_ITEMS));
 }
 
 TEST_F(InputFileTest, NonLinkedInputHasNoIMLData) {

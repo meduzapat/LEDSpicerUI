@@ -31,21 +31,21 @@ InputFile::InputFile(const string& filePath, const string& relPath) :
 
 	string baseId(Defaults::createCommonUniqueId({relPath, filename}));
 
-	StringUMap input(rootInfo.attributes);
-	input[FILENAME]  = filename;
-	input[PATH_BASE] = baseId;
+	Values input {rootInfo.copyValues()};
+	input.setValue(FILENAME, filename);
+	input.setValue(PATH_BASE, baseId);
 
 	tinyxml2::XMLElement* mapsNode = getRoot()->FirstChildElement("maps");
 	if (not mapsNode) {
 		errors += "Missing maps section for input " + filename + '\n';
 	}
 	else {
-		StringUMapVector mapsSources;
+		ValueVector mapsSources;
 
 		for (size_t idx = 0; mapsNode; mapsNode = mapsNode->NextSiblingElement("maps"), ++idx) {
-			StringUMap source(processNode(mapsNode));
+			Values source {processNode(mapsNode)};
 			string sourceBaseId(Defaults::createCommonUniqueId({baseId, std::to_string(idx)}));
-			source[PATH_BASE] = sourceBaseId;
+			source.setValue(PATH_BASE, sourceBaseId);
 			mapsSources.push_back(std::move(source));
 			errors += processMaps(
 				mapsNode,
@@ -61,9 +61,11 @@ InputFile::InputFile(const string& filePath, const string& relPath) :
 
 	processLinkedTriggers(baseId);
 
+	ValueVector inputVec;
+	inputVec.push_back(std::move(input));
 	extractedData.emplace(
 		Defaults::createCommonUniqueId({relPath, COLLECTION_INPUTS}),
-		StringUMapVector{input}
+		std::move(inputVec)
 	);
 
 	if (not errors.empty())
@@ -71,17 +73,17 @@ InputFile::InputFile(const string& filePath, const string& relPath) :
 }
 
 void InputFile::processLinkedTriggers(const string& baseId) noexcept {
-	if (not Defaults::hasLinkedMaps(XMLHelper::valueOf(rootInfo.attributes, NAME)))
+	if (not Defaults::hasLinkedMaps(rootInfo.getValue(NAME)))
 		return;
 
-	const string linked{XMLHelper::valueOf(rootInfo.attributes, LINKED_ITEMS)};
+	const string linked{rootInfo.getValue(LINKED_ITEMS)};
 	if (linked.empty())
 		return;
 
-	StringUMapVector imlData;
+	ValueVector imlData;
 	for (const string& chunk : Defaults::explode(linked, '|'))
 		if (not chunk.empty())
-			imlData.push_back({{LINKED_ITEMS, chunk}});
+			imlData.push_back(Values{{LINKED_ITEMS, chunk}});
 
 	if (imlData.empty())
 		return;
@@ -100,9 +102,9 @@ string InputFile::processMaps(
 	if (not mapNode) return "Missing input map section\n";
 
 	string errors;
-	StringUMapVector maps;
+	ValueVector maps;
 	for (; mapNode; mapNode = mapNode->NextSiblingElement("map")) {
-		StringUMap mapAttr{processNode(mapNode)};
+		Values mapAttr{processNode(mapNode)};
 		try {
 			checkAttributes({TYPE, TARGET, TRIGGER, COLOR, FILTER}, mapAttr, "input map for " + inputName);
 		}
@@ -112,7 +114,7 @@ string InputFile::processMaps(
 		}
 		maps.push_back(std::move(mapAttr));
 	}
-	extractedData.emplace(inputName, maps);
+	extractedData.emplace(inputName, std::move(maps));
 	return errors;
 }
 

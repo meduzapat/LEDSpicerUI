@@ -37,15 +37,15 @@ public:
 
 	virtual ~Process() = default;
 
-	string_view getXmlTag()   const noexcept override { return "map"; }
-	string_view getCssClass() const noexcept override { return CSS_PROCESS_BOX_BUTTON; }
+	const string& getXmlTag()   const noexcept override { return TYPE_MAP; }
+	const string& getCssClass() const noexcept override { return CSS_PROCESS_BOX_BUTTON; }
 	string createPrettyName() const noexcept override;
 
 	CollectionHandler* getCollectionHandler() const noexcept override;
 
 protected:
 
-	string getPrimaryKey() const noexcept override {return PARAM_PROCESS_NAME;}
+	const string& getPrimaryKey() const noexcept override {return PARAM_PROCESS_NAME;}
 
 };
 

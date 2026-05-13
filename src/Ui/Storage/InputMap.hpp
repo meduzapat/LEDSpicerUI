@@ -39,17 +39,17 @@ class InputMap : public Link {
 
 public:
 
-	InputMap(StringUMap& data, Data* link) noexcept :
+	InputMap(Values& data, Data* link) noexcept :
 		Link(data, TARGET, TYPE_MAP, {}, link) {}
 
 	virtual ~InputMap() = default;
 
-	string_view getCssClass() const noexcept override { return CSS_INPUT_MAP_BOX_BUTTON; }
-	string createUniqueId()   const noexcept override;
-	string createPrettyName() const noexcept override;
-	string createTooltip()    const noexcept override;
-	void registerToCollection()     noexcept override;
-	void unregisterFromCollection() noexcept override;
+	const string& getCssClass() const noexcept override { return CSS_INPUT_MAP_BOX_BUTTON; }
+	string createUniqueId()     const noexcept override;
+	string createPrettyName()   const noexcept override;
+	string createTooltip()      const noexcept override;
+	void registerToCollection()       noexcept override;
+	void unregisterFromCollection()   noexcept override;
 
 	CollectionHandler* getCollectionHandler() const noexcept override;
 

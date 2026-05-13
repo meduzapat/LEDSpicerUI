@@ -31,18 +31,6 @@ ConfigFile::ConfigFile(const string& ledspicerconf) : XMLHelper(ledspicerconf, "
 	if (not errors.empty()) Message::displayError("Errors:\n" + errors);
 }
 
-StringUMap ConfigFile::getSettings() {
-	return rootInfo.attributes;
-}
-
-string ConfigFile::getDefaultProfile() const {
-	return defaultProfile;
-}
-
-string ConfigFile::getProcessLookupRunEvery() const {
-	return processLookupRunEvery;
-}
-
 string ConfigFile::processDevices() {
 
 	tinyxml2::XMLElement* deviceNode = root->FirstChildElement("devices");
@@ -54,17 +42,17 @@ string ConfigFile::processDevices() {
 		return "Empty device section\n";
 
 	string errors, name;
-	StringUMapVector devices;
+	ValueVector devices;
 	for (; deviceNode; deviceNode = deviceNode->NextSiblingElement(TYPE_DEVICE.c_str())) {
-		StringUMap deviceAttr = processNode(deviceNode);
+		Values deviceAttr {processNode(deviceNode)};
 		try {
-			checkAttributes({NAME}, deviceAttr, TYPE_DEVICE.c_str());
+			checkAttributes({NAME}, deviceAttr, TYPE_DEVICE);
 		}
 		catch (Message& e) {
 			errors += e.getMessage() + '\n';
 			continue;
 		}
-		name = deviceAttr[NAME];
+		name = deviceAttr.getValue(NAME);
 		if (Defaults::devicesInfo.find(name) == Defaults::devicesInfo.end()) {
 			errors += "Ignored device, unknown type " + name + '\n';
 			continue;
@@ -73,12 +61,12 @@ string ConfigFile::processDevices() {
 		StringUMap data{
 			{NAME, name},
 			// Device ID is no mandatory, and if is missing on a ID device, is assumed 1
-			{ID,   deviceAttr.find(ID)   != deviceAttr.end() ? deviceAttr.at(ID) : "1"},
+			{ID,   deviceAttr.getValue(ID, "1")},
 			// Serial Devices allows empty device serial PORT, that defaults to /dev/ttyUSB0or auto-detects.
-			{PORT, deviceAttr.find(PORT) != deviceAttr.end() ? deviceAttr.at(PORT) : ""}
+			{PORT, deviceAttr.getValue(PORT)}
 		};
 
-		devices.push_back(deviceAttr);
+		devices.push_back(std::move(deviceAttr));
 		string elementErrors(processElements(deviceNode, Defaults::createHardwareUniqueId(data)));
 		errors += (not elementErrors.empty() ? elementErrors  + '\n' : "");
 	}
@@ -101,9 +89,9 @@ string ConfigFile::processRestrictors() {
 		return "";
 
 	string errors, name;
-	StringUMapVector restrictors;
+	ValueVector restrictors;
 	for (; restrictorNode; restrictorNode = restrictorNode->NextSiblingElement("restrictor")) {
-		StringUMap restrictorAttr = processNode(restrictorNode);
+		Values restrictorAttr {processNode(restrictorNode)};
 		try {
 			checkAttributes({NAME}, restrictorAttr, TYPE_DEVICE);
 		}
@@ -111,7 +99,7 @@ string ConfigFile::processRestrictors() {
 			errors += '\n' + e.getMessage();
 			continue;
 		}
-		name = restrictorAttr[NAME];
+		name = restrictorAttr.getValue(NAME);
 		if (Defaults::restrictorsInfo.find(name) == Defaults::restrictorsInfo.end()) {
 			errors += "Ignored restrictor, unknown type " + name + '\n';
 			continue;
@@ -120,12 +108,12 @@ string ConfigFile::processRestrictors() {
 		StringUMap data{
 			{NAME, name},
 			// Restrictor ID is no mandatory, and if is missing on a ID restrictor, is assumed 1
-			{ID,   restrictorAttr.find(ID)   == restrictorAttr.end() ? "1" : restrictorAttr.at(ID)},
+			{ID,   restrictorAttr.getValue(ID,   "1")},
 			// Serial restrictors allows empty port, that defaults to /dev/ttyUSB0 or auto-detects.
-			{PORT, restrictorAttr.find(PORT) == restrictorAttr.end() ? ""  : restrictorAttr.at(PORT)}
+			{PORT, restrictorAttr.getValue(PORT, "")}
 		};
 
-		restrictors.push_back(restrictorAttr);
+		restrictors.push_back(std::move(restrictorAttr));
 		string mapErrors(processRestrictorMaps(restrictorNode, Defaults::createHardwareUniqueId(data, false)));
 		errors += (not mapErrors.empty() ? mapErrors  + '\n' : "");
 	}
@@ -138,15 +126,15 @@ string ConfigFile::processProcessLookup() {
 	if (not plNode)
 		return "";
 
-	StringUMap plAttr = processNode(plNode);
-	processLookupRunEvery = plAttr.find(PARAM_MILLISECONDS) != plAttr.end() ? plAttr.at(PARAM_MILLISECONDS) : "";
+	Values plAttr {processNode(plNode)};
+	rootInfo.setValue(PARAM_MILLISECONDS, plAttr.getValue(PARAM_MILLISECONDS));
 
 	plNode = plNode->FirstChildElement("map");
 	if (not plNode )
 		return "";
 
 	string errors;
-	StringUMapVector process;
+	ValueVector process;
 	for (; plNode; plNode = plNode->NextSiblingElement("map")) {
 		plAttr = processNode(plNode);
 		try {
@@ -156,7 +144,7 @@ string ConfigFile::processProcessLookup() {
 			errors += e.getMessage() + '\n';
 			continue;
 		}
-		process.push_back(plAttr);
+		process.push_back(std::move(plAttr));
 	}
 	extractedData.emplace(COLLECTION_PROCESSES, std::move(process));
 	return errors;
@@ -167,17 +155,17 @@ string ConfigFile::processElements(tinyxml2::XMLElement* deviceNode, const strin
 	tinyxml2::XMLElement* elementNode {deviceNode->FirstChildElement(TYPE_ELEMENT.c_str())};
 	if (not elementNode)
 		return "Missing elements node for " + deviceName + '\n';
-	StringUMapVector elements;
+	ValueVector elements;
 	string errors;
 	for (; elementNode; elementNode = elementNode->NextSiblingElement(TYPE_ELEMENT.c_str())) {
-		StringUMap elementAttr = processNode(elementNode);
-		if (elementAttr.find(NAME) == elementAttr.end()) {
+		Values elementAttr {processNode(elementNode)};
+		if (not elementAttr.isSet(NAME)) {
 			errors += "Ignored element, Missing element name in " + deviceName + '\n';
 			continue;
 		}
 		// Detect type
-		elementAttr["type"] = Defaults::detectElementType(elementAttr[NAME]);
-		elements.push_back(elementAttr);
+		elementAttr.setValue("type", Defaults::detectElementType(elementAttr.getValue(NAME)));
+		elements.push_back(std::move(elementAttr));
 	}
 	extractedData.emplace(Defaults::createCommonUniqueId({deviceName, COLLECTION_ELEMENTS}), std::move(elements));
 	return errors;
@@ -187,11 +175,11 @@ string ConfigFile::processRestrictorMaps(tinyxml2::XMLElement* restrictorNode, c
 	tinyxml2::XMLElement* mapNode {restrictorNode->FirstChildElement("map")};
 	if (not mapNode)
 		return "Missing player map node for " + restrictorName + '\n';
-	StringUMapVector maps;
+	ValueVector maps;
 	string errors;
 	for (; mapNode; mapNode = mapNode->NextSiblingElement("map")) {
 
-		StringUMap mapAttr {processNode(mapNode)};
+		Values mapAttr {processNode(mapNode)};
 		try {
 			checkAttributes({PLAYER, JOYSTICK, RESTRICTOR_INTERFACE}, mapAttr, "restrictor map");
 		}
@@ -199,54 +187,53 @@ string ConfigFile::processRestrictorMaps(tinyxml2::XMLElement* restrictorNode, c
 			errors += '\n' + e.getMessage();
 			continue;
 		}
-		maps.push_back(mapAttr);
+		maps.push_back(std::move(mapAttr));
 	}
 	extractedData.emplace(Defaults::createCommonUniqueId({restrictorName, COLLECTION_RESTRICTOR_MAPS}), std::move(maps));
 	return errors;
 }
 
 string ConfigFile::processGroups() {
-	StringUMap group;
 	tinyxml2::XMLElement* layoutNode {root->FirstChildElement("layout")};
 	if (not layoutNode)
 		throw Message("Missing layout section, no groups\n");
 
 	string errors;
 	// extract default profile.
-	group = processNode(layoutNode);
-	defaultProfile = group["defaultProfile"];
-	group.clear();
+	Values group {processNode(layoutNode)};
+	rootInfo.setValue("defaultProfile", group.getValue("defaultProfile"));
 
 	tinyxml2::XMLElement* groupNode {layoutNode->FirstChildElement("group")};
-	StringUMapVector groups;
+	ValueVector groups;
 	if (groupNode)
 	for (; groupNode; groupNode = groupNode->NextSiblingElement("group")) {
 		group = processNode(groupNode);
-		if (group.find(NAME) == group.end()) {
+		if (not group.isSet(NAME)) {
 			errors += "Missing group name\n";
 			continue;
 		}
 
-		groups.push_back(group);
+		const string groupName {group.getValue(NAME)};
+		groups.push_back(std::move(group));
 
 		tinyxml2::XMLElement* elementNode = groupNode->FirstChildElement(TYPE_ELEMENT.c_str());
 
 		if (not elementNode) {
-			errors += "Group " + group[NAME] + " is empty\n";
+			errors += "Group " + groupName + " is empty\n";
 			continue;
 		}
 
-		StringUMapVector elements;
+		ValueVector elements;
 		for (; elementNode; elementNode = elementNode->NextSiblingElement(TYPE_ELEMENT.c_str())) {
-			StringUMap elementAttr = processNode(elementNode);
-			if (group.find(NAME) == group.end()) {
-				errors += "Missing element name in group " + group[NAME] + '\n';
+			Values elementAttr {processNode(elementNode)};
+			if (not elementAttr.isSet(NAME)) {
+				errors += "Missing element name in group " + groupName + '\n';
 				continue;
 			}
 
-			elements.push_back(elementAttr);
+			elements.push_back(std::move(elementAttr));
 		}
-		extractedData.emplace(Defaults::createCommonUniqueId({group[NAME], COLLECTION_GROUP_LINKS}), std::move(elements));
+		extractedData.emplace(Defaults::createCommonUniqueId({groupName, COLLECTION_GROUP_LINKS}), std::move(elements));
 	}
 	extractedData.emplace(COLLECTION_GROUPS, std::move(groups));
 	return errors;
@@ -278,9 +265,9 @@ void ConfigFile::save(const ConfigData& data) {
 
 	// Process lookup (optional)
 	if (data.processes.getSize()) {
-		StringUMap plAttrs;
+		Values plAttrs;
 		if (not data.runEvery.empty())
-			plAttrs.emplace(PARAM_MILLISECONDS, data.runEvery);
+			plAttrs.setValue(PARAM_MILLISECONDS, data.runEvery);
 
 		xmlData += xmlSection("processLookup", collect(data.processes), plAttrs);
 		Defaults::reduceTab();

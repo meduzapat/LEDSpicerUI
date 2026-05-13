@@ -123,7 +123,7 @@ void DialogRestrictor::resetForm() noexcept {
 	btnApply->set_sensitive(true);
 	// Disable add interface button if there no more interfaces left.
 	btnAddRestrictorMap->set_sensitive(
-		DialogRestrictorMap::getInstance()->getValues().size() < Defaults::restrictorsInfo.at(selectorCombo->get_active_id()).interfaces
+		DialogRestrictorMap::getInstance()->getSize() < Defaults::restrictorsInfo.at(selectorCombo->get_active_id()).interfaces
 	);
 	DialogForm::resetForm();
 }

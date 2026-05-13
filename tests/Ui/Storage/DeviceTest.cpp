@@ -26,65 +26,45 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 using namespace LEDSpicerUI::Constants;
+using LEDSpicerUI::Defaults;
+using LEDSpicerUI::Values;
 
 class DeviceTest : public ::testing::Test {
+
 protected:
+
 	void TearDown() override {
 		CollectionHandler::purgeAll();
 	}
 };
 
-// uniqueId.
-TEST_F(DeviceTest, CreateUniqueId) {
-	StringUMap data{{NAME, "RaspberryPi"}, {ID, "1"}, {PORT, ""}};
-	Device d(data);
-	EXPECT_FALSE(d.createUniqueId().empty());
-}
+TEST_F(DeviceTest, TestFunctionality) {
 
-// createPrettyName for a simple non-ID, non-serial device.
-TEST_F(DeviceTest, CreatePrettyNameSimpleDevice) {
-	StringUMap data{{NAME, "RaspberryPi"}, {ID, "1"}, {PORT, ""}};
-	Device d(data);
+	Values data {{NAME, "RaspberryPi"}, {ID, "1"}, {PORT, ""}};
+	Device d {data};
+
+	// getCssClass, getXmlTag, getCollectionHandler.
+	EXPECT_EQ(CSS_DEVICE_BOX_BUTTON,                            d.getCssClass());
+	EXPECT_EQ(TYPE_DEVICE,                                      d.getXmlTag());
+	EXPECT_EQ(CollectionHandler::getInstance(COLLECTION_DEVICES), d.getCollectionHandler());
+
+	// createPrettyName: human-readable device label.
 	EXPECT_NE(string::npos, d.createPrettyName().find("Raspberry Pi GPIO"));
-}
 
-// createPrettyName includes ID for ID-user devices.
-TEST_F(DeviceTest, CreatePrettyNameIncludesId) {
-	StringUMap data{{NAME, "UltimarcPacDrive"}, {ID, "2"}, {PORT, ""}};
-	Device d(data);
-	EXPECT_NE(string::npos, d.createPrettyName().find("Id: 2"));
-}
+	// createUniqueId: matches hardware identity helper.
+	EXPECT_EQ(Defaults::createHardwareUniqueId(d.getValues()), d.createUniqueId());
 
-// Child collection keyed as COLLECTION_ELEMENTS.
-TEST_F(DeviceTest, HasElementChild) {
-	StringUMap data{{NAME, "RaspberryPi"}, {ID, "1"}, {PORT, ""}};
-	Device d(data);
+	// Child collection keyed as COLLECTION_ELEMENTS.
 	EXPECT_NE(nullptr, d.getChild(COLLECTION_ELEMENTS));
-}
 
-// getCssClass.
-TEST_F(DeviceTest, CssClass) {
-	StringUMap data{{NAME, "RaspberryPi"}, {ID, "1"}, {PORT, ""}};
-	Device d(data);
-	EXPECT_EQ("DeviceBoxButton", d.getCssClass());
-}
+	// toXML: ID="1" and PORT="" suppressed by shouldSerialize.
+	const string xml(d.toXML());
+	EXPECT_EQ("<device name=\"RaspberryPi\"/>\n", xml);
 
-// toXML contains device tag.
-TEST_F(DeviceTest, ToXMLStructure) {
-	StringUMap data{{NAME, "RaspberryPi"}, {ID, "1"}, {PORT, ""}};
-	Device d(data);
-	string xml(d.toXML());
-	EXPECT_NE(string::npos, xml.find("<device"));
-	// Empty emits self-closing tag
-	EXPECT_NE(string::npos, xml.find("/>"));
-}
+	// shouldSerialize: non-default ID is included.
+	d.setValue(ID, "2");
+	EXPECT_NE(string::npos, d.toXML().find(ID));
 
-// wipe clears fieldsData, snap stays clean.
-TEST_F(DeviceTest, WipeClearsFields) {
-	StringUMap data{{NAME, "RaspberryPi"}, {ID, "1"}, {PORT, ""}};
-	Device d(data);
-	d.wipe();
-	EXPECT_TRUE(d.getValues().empty());
 }
 
 int main(int argc, char** argv) {

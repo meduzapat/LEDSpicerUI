@@ -26,121 +26,88 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 using namespace LEDSpicerUI::Constants;
+using LEDSpicerUI::Values;
 
 class TargetData : public Data {
 
 public:
 
-	TargetData(StringUMap& d) : Data(d) {}
-	constexpr string_view getCssClass() const noexcept override { return "TargetClass"; }
-	constexpr string_view getXmlTag()   const noexcept override { return "target"; }
+	TargetData(Values& d) : Data(d) {}
+
+	const string& getCssClass() const noexcept override { static const string s {"TargetClass"}; return s; }
+	const string& getXmlTag()   const noexcept override { static const string s {"target"};      return s; }
 	CollectionHandler* getCollectionHandler() const noexcept override { return nullptr; }
 };
 
 class LinkTest : public ::testing::Test {
-protected:
-	void SetUp() override {
-		StringUMap td{{NAME, "P1_BUTTON1"}};
-		target = std::make_unique<TargetData>(td);
 
-		StringUMap ld{{COLOR, "Red"}, {FILTER, "Normal"}};
-		link = std::make_unique<Link>(ld, linkKey, linkType, linkFields, target.get());
-	}
+protected:
 
 	void TearDown() override {
 		CollectionHandler::purgeAll();
 	}
+};
 
-	// Stable owners — Link holds refs to these.
-	const string                   linkKey    = NAME;
-	const string                   linkType   = "element";
-	const vector<Link::LinkField>  linkFields = {{
+TEST_F(LinkTest, TestFunctionality) {
+
+	Values td {{NAME, "P1_BUTTON1"}};
+	TargetData target {td};
+
+	const string
+		linkKey    = NAME,
+		linkType   = "element";
+
+	const vector<Link::LinkField> linkFields = {{
 		"color", "Default Color", "Red", Link::LinkField::Widget::COLOR_PICKER
 	}};
 
-	std::unique_ptr<TargetData> target;
-	std::unique_ptr<Link>       link;
-};
+	Values ld {{COLOR, "Red"}, {FILTER, "Normal"}};
+	Link link {ld, linkKey, linkType, linkFields, &target};
 
-// Delegates identity to target.
-TEST_F(LinkTest, CssClassDelegatesToTarget) {
-	EXPECT_EQ("TargetClass", link->getCssClass());
-}
+	// getCssClass, getXmlTag, createPrettyName, createUniqueId, createTooltip delegate to target.
+	EXPECT_EQ(target.getCssClass(),      link.getCssClass());
+	EXPECT_EQ("element",                 link.getXmlTag());
+	EXPECT_EQ(target.createPrettyName(), link.createPrettyName());
+	EXPECT_EQ(target.createUniqueId(),   link.createUniqueId());
+	EXPECT_EQ(target.createTooltip(),    link.createTooltip());
 
-TEST_F(LinkTest, CreatePrettyNameDelegatesToTarget) {
-	EXPECT_EQ(target->createPrettyName(), link->createPrettyName());
-}
+	// getCollectionHandler always nullptr; getCollectionHandlerSource routes to target's handler.
+	EXPECT_EQ(nullptr,                       link.getCollectionHandler());
+	EXPECT_EQ(target.getCollectionHandler(), link.getCollectionHandlerSource());
 
-TEST_F(LinkTest, CreateUniqueIdDelegatesToTarget) {
-	EXPECT_EQ(target->createUniqueId(), link->createUniqueId());
-}
+	// getValue: linkKey routes to target primary value; other keys return own fields.
+	EXPECT_EQ(target.getPrimaryValue(), link.getValue(NAME));
+	EXPECT_EQ("Red",                    link.getValue(COLOR));
+	EXPECT_EQ("Normal",                 link.getValue(FILTER));
 
-TEST_F(LinkTest, GetXmlTagDelegatesToTarget) {
-	EXPECT_EQ("element", link->getXmlTag());
-}
+	// setValue: linkKey is silently ignored; own fields update normally.
+	link.setValue(NAME, "SOMETHING_ELSE");
+	EXPECT_EQ(target.createUniqueId(), link.getValue(NAME));
+	link.setValue(COLOR, "Blue");
+	EXPECT_EQ("Blue", link.getValue(COLOR));
 
-// getValue routes linkKey to target's primary value..
-TEST_F(LinkTest, GetValueRoutesLinkKeyToTargetPrimaryValue) {
-	EXPECT_EQ(target->getPrimaryValue(), link->getValue(NAME));
-}
+	// setLink replaces the target pointer.
+	Values td2 {{NAME, "P2_BUTTON1"}};
+	TargetData target2 {td2};
+	link.setLink(&target2);
+	EXPECT_EQ(target2.createUniqueId(), link.createUniqueId());
+	link.setLink(&target);
 
-// getValue for own fields returns link's own fieldsData.
-TEST_F(LinkTest, GetValueReturnsOwnFieldsForOtherKeys) {
-	EXPECT_EQ("Red",    link->getValue(COLOR));
-	EXPECT_EQ("Normal", link->getValue(FILTER));
-}
+	// getLinkFields returns the stable ref.
+	ASSERT_EQ(1u, link.getLinkFields().size());
+	EXPECT_EQ("color", link.getLinkFields()[0].key);
 
-// setValue on linkKey is silently ignored.
-TEST_F(LinkTest, SetValueIgnoresLinkKey) {
-	link->setValue(NAME, "SOMETHING_ELSE");
-	EXPECT_EQ(target->createUniqueId(), link->getValue(NAME));
-}
+	// operator==: same object true, target pointer true, unrelated false.
+	EXPECT_TRUE(link == link);
+	EXPECT_TRUE(link == target);
+	Values td3 {{NAME, "OTHER"}};
+	TargetData other {td3};
+	EXPECT_FALSE(link == other);
 
-// setValue on own fields updates fieldsData.
-TEST_F(LinkTest, SetValueUpdatesOwnFields) {
-	link->setValue(COLOR, "Blue");
-	EXPECT_EQ("Blue", link->getValue(COLOR));
-}
+	// toXML.
+	const string xml(link.toXML());
+	EXPECT_EQ("<element\n\tcolor=\"Blue\"\n\tfilter=\"Normal\"\n\tname=\"P1_BUTTON1\"\n/>\n", xml);
 
-// setLink replaces the target pointer.
-TEST_F(LinkTest, SetLinkReplacesTarget) {
-	StringUMap td2{{NAME, "P2_BUTTON1"}};
-	TargetData target2(td2);
-	link->setLink(&target2);
-	EXPECT_EQ(target2.createUniqueId(), link->createUniqueId());
-}
-
-// getLinkFields returns the stable ref.
-TEST_F(LinkTest, GetLinkFieldsReturnsFields) {
-	ASSERT_EQ(1u, link->getLinkFields().size());
-	EXPECT_EQ("color", link->getLinkFields()[0].key);
-}
-
-// toXML emits self-closing tag with linkType, linkKey, and target's uniqueId.
-TEST_F(LinkTest, ToXMLStructure) {
-	const string xml(link->toXML());
-	EXPECT_NE(string::npos, xml.find("/>"));
-	EXPECT_NE(string::npos, xml.find("element"));
-	EXPECT_NE(string::npos, xml.find(target->createUniqueId()));
-}
-
-// toXML includes own fieldsData.
-TEST_F(LinkTest, ToXMLIncludesOwnFields) {
-	const string xml(link->toXML());
-	EXPECT_NE(string::npos, xml.find("Red"));
-	EXPECT_NE(string::npos, xml.find("Normal"));
-}
-
-// operator== true for same Data and for target pointer.
-TEST_F(LinkTest, OperatorEqualsSelf) {
-	EXPECT_TRUE(*link == *link);
-	EXPECT_TRUE(*link == *target);
-}
-
-TEST_F(LinkTest, OperatorEqualsUnrelatedFalse) {
-	StringUMap td2{{NAME, "OTHER"}};
-	TargetData other(td2);
-	EXPECT_FALSE(*link == other);
 }
 
 int main(int argc, char** argv) {

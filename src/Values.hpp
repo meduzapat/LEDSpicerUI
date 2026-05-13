@@ -20,11 +20,32 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Message.hpp"
+#include <string>
+#include <unordered_map>
+#include <map>
+using std::string;
+using StringUMap = std::unordered_map<string, string>;
 
 #pragma once
 
 namespace LEDSpicerUI {
+
+
+namespace Constants {
+
+/// Common values used in configs.
+inline const string
+	emptyString,
+	NAME         {"name"}, // Generic parameter
+	HUMAN_TRUE   {"True"},
+	HUMAN_FALSE  {"False"},
+	HUMAN_ON     {"On"},
+	HUMAN_OFF    {"Off"},
+	HUMAN_NORMAL {"Normal"},
+	HUMAN_RANDOM {"Random"};
+}
+
+using namespace Constants;
 
 /**
  * Wrapper class over a unordered map of strings -> strings to add generic functionality.
@@ -40,6 +61,20 @@ public:
 	 * @param data Iten's data.
 	 */
 	Values(StringUMap& data) noexcept : values(std::move(data)) {}
+	Values(Values& other)    noexcept : values(std::move(other.values)) {}
+	Values(Values&& other)   noexcept : values(std::move(other.values)) {}
+
+	Values& operator=(Values&& other) noexcept {
+		values = std::move(other.values);
+		return *this;
+	}
+
+	Values(std::initializer_list<std::pair<std::string, std::string>> init)
+		: values(init.begin(), init.end())
+	{}
+
+	Values(const Values&) = delete;
+	Values& operator=(const Values&) = delete;
 
 	virtual ~Values() = default;
 
@@ -97,6 +132,11 @@ public:
 	const StringUMap& getValues() const noexcept { return values; }
 
 	/**
+	 * @return the number of stored values
+	 */
+	size_t getSize() const noexcept { return values.size(); }
+
+	/**
 	 * Replace values from a map.
 	 *
 	 * @param values
@@ -113,7 +153,7 @@ public:
 	/**
 	 * @return a copy of the internal data.
 	 */
-	virtual StringUMap copyValues() const noexcept { return {values}; }
+	virtual Values copyValues() const noexcept;
 
 	/**
 	 * Clears all serializable fields.

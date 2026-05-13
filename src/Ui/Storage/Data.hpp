@@ -22,6 +22,9 @@
 
 #include "Values.hpp"
 
+// This looks cool.
+#define abstract = 0
+
 #pragma once
 
 namespace LEDSpicerUI::Ui::Storage {
@@ -38,11 +41,13 @@ class Data : public Values {
 
 public:
 
-	/**
-	 * Creates an object pre-populated.
-	 * @param data Iten's data.
-	 */
-	Data(StringUMap& data) noexcept : Values(data) {}
+	using Values::Values;
+
+	Data(Values& other)  noexcept : Values(other) {}
+	Data(Values&& other) noexcept : Values(std::move(other)) {}
+
+	Data(Data&&) noexcept = default;
+	Data& operator=(Data&&) noexcept = default;
 
 	/**
 	 * Compares two Data objects for equality.
@@ -56,7 +61,7 @@ public:
 	/**
 	 * @returns a CSS class that identifies the object and the data.
 	 */
-	virtual constexpr string_view getCssClass() const noexcept abstract;
+	virtual const string& getCssClass() const noexcept abstract;
 
 	/**
 	 * Creates a human readable name for the form.
@@ -70,7 +75,7 @@ public:
 	 *
 	 * @return the tooltip text.
 	 */
-	virtual string createTooltip() const noexcept { return ""; }
+	virtual string createTooltip() const noexcept { return emptyString; }
 
 	/**
 	 * Creates a unique ID for the form.
@@ -97,7 +102,7 @@ public:
 	 * Used by toXML() helpers to emit the correct element name.
 	 * @return XML tag string, e.g. "device", "element", "group".
 	 */
-	virtual string_view getXmlTag() const noexcept abstract;
+	virtual const string& getXmlTag() const noexcept abstract;
 
 	/**
 	 * @return a reference to the internal properties map, allowing direct manipulation.
@@ -109,7 +114,7 @@ public:
 	 */
 	const Values& getProperties() const noexcept { return properties; }
 
-	StringUMap copyValues() const noexcept override;
+	Values copyValues() const noexcept override;
 
 	void wipe() noexcept override;
 
@@ -155,7 +160,7 @@ protected:
 	 *
 	 * @return Field name to use as primary key (default: NAME).
 	 */
-	virtual string getPrimaryKey() const noexcept { return NAME; }
+	virtual const string& getPrimaryKey() const noexcept { return NAME; }
 
 	/**
 	 * Controls which fields are included in XML output.
@@ -182,7 +187,7 @@ protected:
 	 * @param data
 	 * @return
 	 */
-	static string valuesXML(const StringUMap& data) noexcept;
+	static string valuesXML(const Values& data) noexcept;
 
 	/**
 	 * Based on data it creates a single or multiple node.
@@ -194,7 +199,7 @@ protected:
 	 */
 	static string createOpeningXML(
 		const string& node,
-		const StringUMap& data,
+		const Values& data,
 		bool empty
 	) noexcept;
 
@@ -204,12 +209,10 @@ protected:
 	 */
 	static string createClosingXML(const string& node) noexcept;
 
-	static StringUMap& emptyData() noexcept {
-		static StringUMap data;
+	static Values& emptyData() noexcept {
+		static Values data;
 		return data;
 	}
 };
-
-using StringDataPtrMap = std::map<string, Data*>;
 
 } // namespace

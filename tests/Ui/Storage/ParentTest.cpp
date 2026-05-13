@@ -20,89 +20,72 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <gtest/gtest.h>
+#include "MockBasicData.hpp"
 #include "Storage/Parent.hpp"
 
 using namespace LEDSpicerUI::Constants;
 using namespace LEDSpicerUI::Ui::Storage;
-
-class TestData : public Data {
-
-public:
-
-	TestData(StringUMap& d) noexcept : Data(d) {}
-	constexpr string_view getCssClass() const noexcept override { return ""; }
-	constexpr string_view getXmlTag()   const noexcept override { return "item"; }
-	CollectionHandler* getCollectionHandler() const noexcept override { return nullptr; }
-};
+using LEDSpicerUI::Values;
+using LEDSpicerUI::Test::Mocks::MockBasicData;
 
 struct TestParent : Parent {
 
-	TestParent(StringUMap& d, const vector<string>& ids)
-		: Parent(d, ids) {}
+	TestParent(Values& d, const vector<string>& ids) : Parent(d, ids) {}
 
-	constexpr string_view getCssClass() const noexcept override { return ""; }
-	constexpr string_view getXmlTag()   const noexcept override { return "parent"; }
+	const string& getCssClass() const noexcept override { static const string s {};        return s; }
+	const string& getXmlTag()   const noexcept override { static const string s {"parent"}; return s; }
 	CollectionHandler* getCollectionHandler() const noexcept override { return nullptr; }
 	using Parent::registerDependency;
 };
 
 struct ParentTest : ::testing::Test {
-	StringUMap data;
+
+	Values data;
+
+	void TearDown() override {
+		CollectionHandler::purgeAll();
+	}
 };
 
-TEST_F(ParentTest, getChild_existingKey_returnsPointer) {
-	TestParent p(data, {"A", "B"});
-	EXPECT_NE(p.getChild("A"), nullptr);
+TEST_F(ParentTest, TestFunctionality) {
+
+	TestParent p {data, {"A", "B"}};
+
+	// getChild: known key returns pointer, missing key returns nullptr.
+	EXPECT_NE(nullptr, p.getChild("A"));
+	EXPECT_EQ(nullptr, p.getChild("MISSING"));
+
+	// const getChild overload.
+	const TestParent& cp {p};
+	EXPECT_NE(nullptr, cp.getChild("A"));
+
+	// getPrimaryChild returns first child.
+	EXPECT_EQ(p.getChild("A"), p.getPrimaryChild());
+
+	// getChildren: full map size; const overload agrees.
+	EXPECT_EQ(2u, p.getChildren().size());
+	EXPECT_EQ(2u, cp.getChildren().size());
+
+	// getSize: 0 initially, counts primary child items after add.
+	EXPECT_EQ(0u, p.getSize());
+	Values d1 {{NAME, "first"}}, d2 {{NAME, "second"}};
+	p.getChild("A")->create(new MockBasicData(d1));
+	p.getChild("A")->create(new MockBasicData(d2));
+	EXPECT_EQ(2u, p.getSize());
+
+	// xmlBody emits primary children in insertion order.
+	const string xml(p.toXML());
+	EXPECT_EQ("<parent>\n\t<testTag name=\"first\"/>\n\t<testTag name=\"second\"/>\n</parent>\n", xml);
+
+	// registerDependency + destructor releases cleanly.
+	{
+		Values depData;
+		TestParent depParent {depData, {"A"}};
+		depParent.registerDependency(COLLECTION_ELEMENTS, "A");
+	}
+	EXPECT_NO_FATAL_FAILURE(CollectionHandler::purgeAll());
+
 }
-
-TEST_F(ParentTest, getChild_missingKey_returnsNull) {
-	TestParent p(data, {"A", "B"});
-	EXPECT_EQ(p.getChild("MISSING"), nullptr);
-}
-
-TEST_F(ParentTest, getChild_constOverload_returnsPointer) {
-	const TestParent p(data, {"A", "B"});
-	EXPECT_NE(p.getChild("A"), nullptr);
-}
-
-TEST_F(ParentTest, getChildren_returnsAllChildren) {
-	TestParent p(data, {"A", "B"});
-	EXPECT_EQ(p.getChildren().size(), 2u);
-	EXPECT_EQ(0, p.getSize());
-}
-
-TEST_F(ParentTest, iteration_visitsAllChildren) {
-	TestParent p(data, {"A", "B"});
-	size_t count = 0;
-	for (auto& _ : p)
-		++count;
-	EXPECT_EQ(count, 2u);
-}
-
-TEST_F(ParentTest, xmlBody_emitsChildrenInOrder) {
-	TestParent p(data, {"A"});
-	StringUMap d1{{NAME, "first"}};
-	StringUMap d2{{NAME, "second"}};
-	p.getChild("A")->create(new TestData(d1));
-	p.getChild("A")->create(new TestData(d2));
-	string xml(p.toXML());
-	EXPECT_NE(string::npos, xml.find("first"));
-	EXPECT_NE(string::npos, xml.find("second"));
-	EXPECT_LT(xml.find("first"), xml.find("second"));
-}
-
-TEST_F(ParentTest, testGetSize) {
-	// primary and secondary collections.
-	TestParent p(data, {"A", "B"});
-	StringUMap d1{{NAME, "first"}};
-	StringUMap d2{{NAME, "second"}};
-	p.getChild("A")->create(new TestData(d1));
-	p.getChild("A")->create(new TestData(d2));
-
-	EXPECT_EQ(2, p.getSize());
-}
-
 
 int main(int argc, char** argv) {
 	auto app = Gtk::Application::create(argc, argv, "org.test");

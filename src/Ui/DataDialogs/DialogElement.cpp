@@ -771,7 +771,7 @@ void DialogElement::drawPins(vector<Gtk::Label *>& labels) noexcept {
 	}
 }
 
-LEDSpicerUI::Ui::Storage::Data* DialogElement::createData(StringUMap& rawData) const noexcept {
+LEDSpicerUI::Ui::Storage::Data* DialogElement::createData(Values& rawData) const noexcept {
 	return new Storage::Element(rawData);
 }
 
@@ -995,7 +995,7 @@ void DialogElement::onCloneClicked(Storage::BoxButton& boxButton) noexcept {
 	clearForm();
 
 	// Clone Data, will return a copy with a different and unique ID.
-	StringUMap values{boxButton.getData()->copyValues()};
+	Values values{boxButton.getData()->copyValues()};
 
 	// Create new element from cloned values and populate widgets.
 	currentData = createData(values);

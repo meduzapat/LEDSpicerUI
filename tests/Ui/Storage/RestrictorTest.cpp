@@ -26,6 +26,8 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 using namespace LEDSpicerUI::Constants;
+using LEDSpicerUI::Defaults;
+using LEDSpicerUI::Values;
 
 class RestrictorTest : public ::testing::Test {
 
@@ -36,57 +38,32 @@ protected:
 	}
 };
 
-// uniqueId.
-TEST_F(RestrictorTest, CreateUniqueId) {
-	StringUMap data{{NAME, "ServoStik"}, {ID, "1"}, {PORT, ""}};
-	Restrictor r(data);
-	EXPECT_FALSE(r.createUniqueId().empty());
-}
+TEST_F(RestrictorTest, TestFunctionality) {
 
-// createPrettyName for a simple restrictor.
-TEST_F(RestrictorTest, CreatePrettyNameSimple) {
-	StringUMap data{{NAME, "ServoStik"}, {ID, "1"}, {PORT, ""}};
-	Restrictor r(data);
+	Values data {{NAME, "ServoStik"}, {ID, "1"}, {PORT, ""}};
+	Restrictor r {data};
+
+	// getCssClass, getXmlTag, getCollectionHandler.
+	EXPECT_EQ(CSS_RESTRICTOR_BOX_BUTTON, r.getCssClass());
+	EXPECT_EQ(TYPE_RESTRICTOR, r.getXmlTag());
+	EXPECT_EQ(CollectionHandler::getInstance(COLLECTION_RESTRICTORS), r.getCollectionHandler());
+
+	// createPrettyName: basic label, then includes ID when non-default.
 	EXPECT_NE(string::npos, r.createPrettyName().find("ServoStik"));
-}
-
-// createPrettyName includes ID for ID-user restrictors.
-TEST_F(RestrictorTest, CreatePrettyNameIncludesId) {
-	StringUMap data{{NAME, "ServoStik"}, {ID, "3"}, {PORT, ""}};
-	Restrictor r(data);
+	r.setValue(ID, "3");
 	EXPECT_NE(string::npos, r.createPrettyName().find("Id: 3"));
-}
+	r.setValue(ID, "1");
 
-// Child collection keyed as COLLECTION_RESTRICTOR_MAPS.
-TEST_F(RestrictorTest, HasRestrictorMapChild) {
-	StringUMap data{{NAME, "ServoStik"}, {ID, "1"}, {PORT, ""}};
-	Restrictor r(data);
+	// createUniqueId: matches hardware identity helper.
+	EXPECT_EQ(Defaults::createHardwareUniqueId(r.getValues(), false), r.createUniqueId());
+
+	// Child collection keyed as COLLECTION_RESTRICTOR_MAPS.
 	EXPECT_NE(nullptr, r.getChild(COLLECTION_RESTRICTOR_MAPS));
-}
 
-// getCssClass.
-TEST_F(RestrictorTest, CssClass) {
-	StringUMap data{{NAME, "ServoStik"}, {ID, "1"}, {PORT, ""}};
-	Restrictor r(data);
-	EXPECT_EQ("RestrictorBoxButton", r.getCssClass());
-}
+	// toXML.
+	const string xml(r.toXML());
+	EXPECT_EQ("<restrictor name=\"ServoStik\" boardId=\"1\"/>\n", xml);
 
-// toXML contains restrictor tag.
-TEST_F(RestrictorTest, ToXMLStructure) {
-	StringUMap data{{NAME, "ServoStik"}, {ID, "1"}, {PORT, ""}};
-	Restrictor r(data);
-	string xml(r.toXML());
-	EXPECT_NE(string::npos, xml.find("<restrictor"));
-	// Empty emits self-closing tag
-	EXPECT_NE(string::npos, xml.find("/>"));
-}
-
-// wipe clears fieldsData.
-TEST_F(RestrictorTest, WipeClearsFields) {
-	StringUMap data{{NAME, "ServoStik"}, {ID, "1"}, {PORT, ""}};
-	Restrictor r(data);
-	r.wipe();
-	EXPECT_TRUE(r.getValues().empty());
 }
 
 int main(int argc, char** argv) {

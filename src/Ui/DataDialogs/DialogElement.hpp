@@ -124,7 +124,7 @@ protected:
 
 	const string& getType() const noexcept override { return TYPE_ELEMENT; }
 
-	Storage::Data* createData(StringUMap& rawData) const noexcept override;
+	Storage::Data* createData(Values& rawData) const noexcept override;
 
 	void addButtons(Storage::BoxButton& boxButton) noexcept override;
 

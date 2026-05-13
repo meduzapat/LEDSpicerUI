@@ -26,14 +26,16 @@
 using namespace LEDSpicerUI::Ui::Storage;
 using namespace LEDSpicerUI::Constants;
 using LEDSpicerUI::Defaults;
+using LEDSpicerUI::Values;
 
-struct StubValues { LEDSpicerUI::Values v; };
+// Private-base trick: ensures Values is initialized before DirNode.
+struct StubValues { Values v; };
 
 class StubDirNode : private StubValues, public DirNode {
 
 public:
 
-	StubDirNode() noexcept : StubValues{}, DirNode(v, nullptr, "stub_1") {}
+	StubDirNode() noexcept : StubValues{}, DirNode(v, nullptr, "stub") {}
 
 };
 
@@ -41,63 +43,44 @@ class InputTest : public ::testing::Test {
 
 protected:
 
-	void SetUp() override {
-		StringUMap rootData{{NAME, "Actions"}, {FILENAME, "myinput"}};
-		rootInput = std::make_unique<Input>(rootData, nullptr);
-
-		parentDir = std::make_unique<StubDirNode>();
-
-		StringUMap nestedData{{NAME, "Mame"}, {FILENAME, "nestedinput"}};
-		nestedInput = std::make_unique<Input>(nestedData, parentDir.get());
-	}
-
 	void TearDown() override {
-		rootInput.reset();
-		nestedInput.reset();
-		parentDir.reset();
 		CollectionHandler::purgeAll();
 	}
-
-	std::unique_ptr<Input>       rootInput;
-	std::unique_ptr<StubDirNode> parentDir;
-	std::unique_ptr<Input>       nestedInput;
-
 };
 
-TEST_F(InputTest, CssClass) {
-	EXPECT_EQ("InputBoxButton", rootInput->getCssClass());
-}
+TEST_F(InputTest, TestFunctionality) {
 
-TEST_F(InputTest, CreateTooltip) {
-	EXPECT_EQ("Input of type Actions", rootInput->createTooltip());
-}
+	Values rootData {{NAME, "Actions"}, {FILENAME, "myinput"}};
+	Input rootInput {rootData, nullptr};
 
-TEST_F(InputTest, CreatePrettyNameAtRoot) {
-	string pretty(rootInput->createPrettyName());
-	EXPECT_NE(string::npos, pretty.find("myinput"));
-	EXPECT_NE(string::npos, pretty.find("Actions"));
-}
+	// getCssClass, getXmlTag, getCollectionHandler.
+	EXPECT_EQ(CSS_INPUT_BOX_BUTTON, rootInput.getCssClass());
+	EXPECT_EQ(TYPE_INPUT,           rootInput.getXmlTag());
+	EXPECT_NE(nullptr,              rootInput.getCollectionHandler());
 
-TEST_F(InputTest, CreateUniqueIdAtRoot) {
-	EXPECT_EQ(
-		Defaults::createCommonUniqueId({emptyString, "myinput"}),
-		rootInput->createUniqueId()
-	);
-}
+	// createTooltip and createPrettyName.
+	EXPECT_EQ("Input of type Actions", rootInput.createTooltip());
+	EXPECT_NE(string::npos, rootInput.createPrettyName().find("myinput"));
+	EXPECT_NE(string::npos, rootInput.createPrettyName().find("Actions"));
 
-TEST_F(InputTest, CreateUniqueIdNested) {
-	EXPECT_EQ(
-		Defaults::createCommonUniqueId({parentDir->getFsId(), "nestedinput"}),
-		nestedInput->createUniqueId()
-	);
-}
+	// createUniqueId at root and nested.
+	EXPECT_EQ(Defaults::createCommonUniqueId({emptyString, "myinput"}), rootInput.createUniqueId());
 
-TEST_F(InputTest, HasSourcesChild) {
-	EXPECT_NE(nullptr, rootInput->getChild(COLLECTION_INPUT_SOURCES));
-}
+	StubDirNode stubDir;
+	Values nestedData {{NAME, "Mame"}, {FILENAME, "nestedinput"}};
+	Input nestedInput {nestedData, &stubDir};
+	EXPECT_EQ(Defaults::createCommonUniqueId({stubDir.getFsId(), "nestedinput"}), nestedInput.createUniqueId());
 
-TEST_F(InputTest, HasLinkedMapsChild) {
-	EXPECT_NE(nullptr, rootInput->getChild(COLLECTION_INPUT_LINKMAPS));
+	// Child collections.
+	EXPECT_NE(nullptr, rootInput.getChild(COLLECTION_INPUT_SOURCES));
+	EXPECT_NE(nullptr, rootInput.getChild(COLLECTION_INPUT_LINKMAPS));
+
+	// toXML.
+	EXPECT_EQ("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+			  "<!-- This is an auto-generated file by " PACKAGE_STRING ". -->\n"
+			  "<LEDSpicer\n\tversion=\"1.1\"\n\ttype=\"input\"\n\tname=\"Actions\"\n\tfilename=\"myinput\"\n>\n</LEDSpicer>\n",
+			  rootInput.toXML());
+
 }
 
 int main(int argc, char** argv) {

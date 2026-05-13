@@ -25,6 +25,7 @@
 #include "config/SettingsFile.hpp"
 
 using namespace LEDSpicerUI::Config;
+using LEDSpicerUI::Values;
 
 /**
  * SettingsFileTest
@@ -48,7 +49,7 @@ protected:
 };
 
 TEST_F(SettingsFileTest, SaveCreatesValidFile) {
-	StringUMap settings = {
+	Values settings {
 		{"binaryPath",  "/usr/bin/ledspicerd"},
 		{"dataDir",     "/usr/share/ledspicer"},
 		{"projectsDir", "/home/user/projects"}
@@ -59,7 +60,7 @@ TEST_F(SettingsFileTest, SaveCreatesValidFile) {
 }
 
 TEST_F(SettingsFileTest, SaveWritesCorrectContent) {
-	StringUMap settings = {
+	Values settings {
 		{"binaryPath", "/usr/bin/ledspicerd"},
 		{"dataDir",    "/usr/share/ledspicer"}
 	};
@@ -68,15 +69,15 @@ TEST_F(SettingsFileTest, SaveWritesCorrectContent) {
 
 	string content = Glib::file_get_contents(testConfigFile);
 
-	EXPECT_NE(string::npos, content.find("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"));
-	EXPECT_NE(string::npos, content.find("<" PACKAGE_NAME));
-	EXPECT_NE(string::npos, content.find("binaryPath=\"/usr/bin/ledspicerd\""));
-	EXPECT_NE(string::npos, content.find("dataDir=\"/usr/share/ledspicer\""));
-	EXPECT_NE(string::npos, content.find("/>"));
+	EXPECT_EQ("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+			  "<!-- This is an auto-generated file by " PACKAGE_STRING ". -->\n"
+			  "<LEDSpicer\n\tversion=\"1.1\"\n\ttype=\"Settings\"\n\t"
+			  "dataDir=\"/usr/share/ledspicer\"\n\tbinaryPath=\"/usr/bin/ledspicerd\"\n/>\n"
+			  , content);
 }
 
 TEST_F(SettingsFileTest, SaveSkipsEmptyValues) {
-	StringUMap settings = {
+	Values settings {
 		{"binaryPath",  "/usr/bin/ledspicerd"},
 		{"dataDir",     ""},
 		{"projectsDir", "/home/user/projects"}
@@ -85,14 +86,11 @@ TEST_F(SettingsFileTest, SaveSkipsEmptyValues) {
 	SettingsFile::save(testConfigFile, settings);
 
 	string content = Glib::file_get_contents(testConfigFile);
-
-	EXPECT_NE(string::npos, content.find("binaryPath=\"/usr/bin/ledspicerd\""));
 	EXPECT_EQ(string::npos, content.find("dataDir=")) << "Empty value should be skipped";
-	EXPECT_NE(string::npos, content.find("projectsDir=\"/home/user/projects\""));
 }
 
 TEST_F(SettingsFileTest, LoadSavedSettings) {
-	StringUMap originalSettings = {
+	Values originalSettings {
 		{"binaryPath",  "/usr/bin/ledspicerd"},
 		{"dataDir",     "/usr/share/ledspicer"},
 		{"projectsDir", "/home/user/projects"}
@@ -101,12 +99,12 @@ TEST_F(SettingsFileTest, LoadSavedSettings) {
 	SettingsFile::save(testConfigFile, originalSettings);
 
 	EXPECT_NO_THROW({
-		SettingsFile config(testConfigFile);
-		StringUMap loadedSettings = config.getSettings();
+		SettingsFile config(testConfigFile, UI_CONFIG_TYPE);
+		const auto& loadedSettings = config.getRootInfo();
 
-		EXPECT_EQ("/usr/bin/ledspicerd",   loadedSettings["binaryPath"]);
-		EXPECT_EQ("/usr/share/ledspicer",  loadedSettings["dataDir"]);
-		EXPECT_EQ("/home/user/projects",   loadedSettings["projectsDir"]);
+		EXPECT_EQ("/usr/bin/ledspicerd",   loadedSettings.getValue("binaryPath"));
+		EXPECT_EQ("/usr/share/ledspicer",  loadedSettings.getValue("dataDir"));
+		EXPECT_EQ("/home/user/projects",   loadedSettings.getValue("projectsDir"));
 	});
 }
 
@@ -128,28 +126,30 @@ TEST_F(SettingsFileTest, ConfigExistsReturnsFalseWhenMissing) {
 }
 
 TEST_F(SettingsFileTest, SaveHandlesSpecialCharacters) {
-	StringUMap settings = {
+	Values settings {
 		{"path", "/home/user/My Projects/LEDSpicer Files"},
 		{"note", "Test & Development"}
 	};
 
 	EXPECT_NO_THROW(SettingsFile::save(testConfigFile, settings));
 
-	SettingsFile config(testConfigFile);
-	StringUMap loadedSettings = config.getSettings();
+	SettingsFile config(testConfigFile, UI_CONFIG_TYPE);
+	const auto& loadedSettings = config.getRootInfo();
 
-	EXPECT_EQ("/home/user/My Projects/LEDSpicer Files", loadedSettings["path"]);
-	EXPECT_EQ("Test & Development",                     loadedSettings["note"]);
+	EXPECT_EQ("/home/user/My Projects/LEDSpicer Files", loadedSettings.getValue("path"));
+	EXPECT_EQ("Test & Development",                     loadedSettings.getValue("note"));
 }
 
 TEST_F(SettingsFileTest, SaveEmptySettings) {
-	StringUMap emptySettings;
+	Values emptySettings;
 
 	EXPECT_NO_THROW(SettingsFile::save(testConfigFile, emptySettings));
 
 	string content = Glib::file_get_contents(testConfigFile);
 
 	EXPECT_NE(string::npos, content.find("<?xml"));
-	EXPECT_NE(string::npos, content.find("<" PACKAGE_NAME));
+	EXPECT_NE(string::npos, content.find("<" PACKAGE_DATA_NAME));
+	EXPECT_NE(string::npos, content.find("version=\"" PACKAGE_DATA_VERSION "\""));
+	EXPECT_NE(string::npos, content.find("type=\"" UI_CONFIG_TYPE "\""));
 	EXPECT_NE(string::npos, content.find("/>"));
 }

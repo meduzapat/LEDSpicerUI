@@ -40,17 +40,19 @@ string Input::createTooltip() const noexcept {
 }
 
 string Input::toXML() const noexcept {
-	StringUMap attrs{values};
+
+	Values attrs;
+	attrs.setValues(values);
 
 	auto imlBBC {getChild(COLLECTION_INPUT_LINKMAPS)};
 	if (Defaults::hasLinkedMaps(getValue(NAME)) and imlBBC->getSize() > 0) {
 		StringVector chunks;
 		for (auto btn : *imlBBC)
 			chunks.push_back(btn->getData()->toXML());
-		attrs.emplace(LINKED_ITEMS, Defaults::implode(chunks, '|'));
+		attrs.setValue(LINKED_ITEMS, Defaults::implode(chunks, '|'));
 	}
 
-	string xml{XMLHelper::xmlHeader("Input", attrs)};
+	string xml {XMLHelper::xmlHeader(TYPE_INPUT, attrs)};
 
 	for (auto btn : *getChild(COLLECTION_INPUT_SOURCES))
 		xml += btn->getData()->toXML();

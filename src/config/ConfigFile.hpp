@@ -42,7 +42,7 @@ public:
 			& configPath,
 			& defaultProfile,
 			& runEvery;
-		const StringUMap& settings;
+		const Values& settings;
 		const BoxButtonCollection
 			& devices,
 			& restrictors,
@@ -53,7 +53,7 @@ public:
 			const string& configPath,
 			const string& defaultProfile,
 			const string& runEvery,
-			const StringUMap& settings,
+			const Values& settings,
 			const BoxButtonCollection& devices,
 			const BoxButtonCollection& restrictors,
 			const BoxButtonCollection& groups,
@@ -76,19 +76,9 @@ public:
 
 	virtual ~ConfigFile() = default;
 
-	StringUMap getSettings();
-
-	string getDefaultProfile() const;
-
-	string getProcessLookupRunEvery() const;
-
 	static void save(const ConfigData& data);
 
 protected:
-
-	string defaultProfile;
-
-	string processLookupRunEvery;
 
 	string processDevices();
 

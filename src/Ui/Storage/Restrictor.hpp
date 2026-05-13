@@ -34,16 +34,16 @@ class Restrictor : public Parent {
 
 public:
 
-	Restrictor(StringUMap& data) noexcept :
+	Restrictor(Values& data) noexcept :
 		Parent(data, {COLLECTION_RESTRICTOR_MAPS})
 	{}
 
 	virtual ~Restrictor() = default;
 
-	string createPrettyName() const noexcept override;
-	string createUniqueId()   const noexcept override;
-	string_view getCssClass() const noexcept override { return CSS_RESTRICTOR_BOX_BUTTON; }
-	string_view getXmlTag()   const noexcept override { return "restrictor"; }
+	string createPrettyName()   const noexcept override;
+	string createUniqueId()     const noexcept override;
+	const string& getCssClass() const noexcept override { return CSS_RESTRICTOR_BOX_BUTTON; }
+	const string& getXmlTag()   const noexcept override { return TYPE_RESTRICTOR; }
 
 	CollectionHandler* getCollectionHandler() const noexcept override {
 		return CollectionHandler::getInstance(COLLECTION_RESTRICTORS);

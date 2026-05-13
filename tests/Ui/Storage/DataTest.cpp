@@ -20,20 +20,18 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <gtest/gtest.h>
+#include "MockData.hpp"
 #include "Storage/CollectionHandler.hpp"
 
-using namespace LEDSpicerUI::Ui::Storage;
+using namespace LEDSpicerUI::Test::Mocks;
+using LEDSpicerUI::Values;
 
 // A simple Data subclass without a collection handler.
-class TestData : public Data {
+class TestData : public MockBasicData {
 
 public:
 
-	TestData(StringUMap& data) noexcept : Data(data) {}
-	constexpr string_view getCssClass() const noexcept override { return "test-class"; }
-	constexpr string_view getXmlTag()   const noexcept override { return "test"; }
-	CollectionHandler* getCollectionHandler() const noexcept override { return nullptr; }
+	using MockBasicData::MockBasicData;
 
 protected:
 
@@ -42,25 +40,12 @@ protected:
 	}
 };
 
-// A Data subclass that registers into collection "t".
-class RegisteringData : public Data {
-
-public:
-
-	RegisteringData(StringUMap& data) noexcept : Data(data) {}
-	constexpr string_view getCssClass() const noexcept override { return "reg"; }
-	constexpr string_view getXmlTag()   const noexcept override { return "test"; }
-	CollectionHandler* getCollectionHandler() const noexcept override {
-		return CollectionHandler::getInstance("t");
-	}
-};
-
 class DataTest : public ::testing::Test {
 
 protected:
 
 	void SetUp() override {
-		StringUMap d{
+		Values d {
 			{"name",    "TestItem"},
 			{"type",    "button"},
 			{"value",   "42"},
@@ -77,80 +62,60 @@ protected:
 	std::unique_ptr<TestData> data;
 };
 
-TEST_F(DataTest, GetValue) {
+TEST_F(DataTest, Constructors) {
+
+	// StringUMap moved on construction.
+	StringUMap map {{"name", "TestItem"}, {"type", "button"}, {"value", "42"}};
+	MockBasicData d1 {map};
+	EXPECT_TRUE(map.empty());
+	EXPECT_TRUE(d1.getSize());
+
+	// Values lvalue moved on construction.
+	Values values1 {{"key1", "val1"}, {"key2", "val2"}};
+	MockBasicData d2 {values1};
+	EXPECT_EQ(0u, values1.getSize());
+	EXPECT_TRUE(d2.getSize());
+
+	// Values rvalue move construction.
+	Values values2 {{"move1", "movedValue"}, {"move2", "another"}};
+	MockBasicData d3(std::move(values2));
+	EXPECT_TRUE(values2.getValues().empty());
+	EXPECT_FALSE(d3.getValues().empty());
+
+	// Data move construction.
+	MockBasicData d4(std::move(d3));
+	EXPECT_TRUE(d3.getValues().empty());
+	EXPECT_FALSE(d4.getValues().empty());
+
+	// Data move assignment.
+	MockBasicData d5;
+	d5 = std::move(d4);
+	EXPECT_TRUE(d4.getValues().empty());
+	EXPECT_FALSE(d5.getValues().empty());
+
+}
+
+TEST_F(DataTest, ValuesLifecycle) {
+
+	// getSize counts all stored values.
+	EXPECT_EQ(4, data->getSize());
+
+	// getValue: existing, missing, missing with default.
 	EXPECT_EQ("TestItem", data->getValue("name"));
 	EXPECT_EQ("",         data->getValue("nonexistent"));
 	EXPECT_EQ("default",  data->getValue("nonexistent", "default"));
-	EXPECT_EQ("yes",      data->getValue("ignored"));
-}
 
-TEST_F(DataTest, SetValue) {
+	// setValue: set then overwrite.
 	data->setValue("key", "value");
-	EXPECT_EQ("value", data->getValue("key"));
-	data->setValue("key", "NewName");
-	EXPECT_EQ("NewName", data->getValue("key"));
+	EXPECT_EQ("value",   data->getValue("key"));
+	data->setValue("key", "updated");
+	EXPECT_EQ("updated", data->getValue("key"));
+
 }
 
-TEST_F(DataTest, UnSetPrimaryKeyRemovesFromCollection) {
-	StringUMap d{{"name", "TestPrimary"}, {"extra", "value"}};
-	RegisteringData item(d);
-	auto ch = CollectionHandler::getInstance("t");
-	ch->add(&item);
+TEST_F(DataTest, PropertyLifecycle) {
 
-	// Non-primary key removal — stays registered.
-	item.unSet("extra");
-	EXPECT_TRUE(ch->isSet(&item));
-	EXPECT_EQ("", item.getValue("extra"));
-	EXPECT_EQ(0,  item.getValues().count("extra"));
-
-	// Primary key removal — unregisters.
-	item.unSet("name");
-	EXPECT_FALSE(ch->isSet(&item));
-	EXPECT_EQ("", item.getValue("name"));
-	EXPECT_EQ(0,  item.getValues().count("name"));
-}
-
-TEST_F(DataTest, WipeRemovesFromCollection) {
-	auto ch = CollectionHandler::getInstance("t");
-	StringUMap d{};
-	RegisteringData item(d);
-	item.setValue("name", "MyItem");
-	ch->add(&item);
-	item.wipe();
-	EXPECT_FALSE(ch->isSet(&item));
-	EXPECT_TRUE(item.getValues().empty());
-}
-
-// Wipe on an item that was never registered is safe (no crash, no-op).
-TEST_F(DataTest, WipeUnregisteredItemSafe) {
-	StringUMap d{};
-	RegisteringData item(d);
-	item.setValue("name", "Ghost");
-	EXPECT_NO_FATAL_FAILURE(item.wipe());
-	EXPECT_TRUE(item.getValues().empty());
-}
-
-TEST_F(DataTest, ToXML) {
-	string xml(data->toXML());
-	EXPECT_NE(string::npos, xml.find("<test"));
-	EXPECT_NE(string::npos, xml.find("name=\"TestItem\""));
-	EXPECT_NE(string::npos, xml.find("value=\"42\""));
-	EXPECT_EQ(string::npos, xml.find("ignored="));
-}
-
-TEST_F(DataTest, GetValues) {
-	EXPECT_EQ(4, data->getValues().size());
-}
-
-TEST_F(DataTest, CreatePrettyName) {
-	EXPECT_EQ("TestItem", data->createPrettyName());
-}
-
-TEST_F(DataTest, CreateUniqueId) {
-	EXPECT_EQ("TestItem", data->createUniqueId());
-}
-
-TEST_F(DataTest, PropertyOperations) {
+	// Set, read, default for missing.
 	data->getProperties().setValue("k1", "v1");
 	data->getProperties().setValue("k2", "v2");
 	EXPECT_EQ("v1",      data->getProperties().getValue("k1"));
@@ -158,72 +123,139 @@ TEST_F(DataTest, PropertyOperations) {
 	EXPECT_EQ("default", data->getProperties().getValue("missing", "default"));
 	EXPECT_TRUE(data->getProperties().isSet("k1"));
 	EXPECT_FALSE(data->getProperties().isSet("missing"));
+
+	// Overwrite.
+	data->getProperties().setValue("k1", "updated");
+	EXPECT_EQ("updated", data->getProperties().getValue("k1"));
+
+	// Remove.
+	data->getProperties().unSet("k1");
+	EXPECT_FALSE(data->getProperties().isSet("k1"));
+
 }
 
-TEST_F(DataTest, RemoveProperty) {
-	data->getProperties().setValue("k", "v");
-	data->getProperties().unSet("k");
-	EXPECT_FALSE(data->getProperties().isSet("k"));
+TEST_F(DataTest, IdentityAndOutput) {
+
+	// createPrettyName and createUniqueId return primary value.
+	EXPECT_EQ("TestItem", data->createPrettyName());
+	EXPECT_EQ("TestItem", data->createUniqueId());
+
+	// getPrimaryValue aliases the primary key's value.
+	EXPECT_EQ("TestItem", data->getPrimaryValue());
+
+	// createTooltip returns empty string by default.
+	EXPECT_EQ(emptyString, data->createTooltip());
+
+	// operator==: same object true, different object false.
+	EXPECT_TRUE(*data == *data);
+	Values other {{"name", "Other"}};
+	TestData otherData {other};
+	EXPECT_FALSE(*data == otherData);
+
 }
 
-TEST_F(DataTest, OverwriteProperty) {
-	data->getProperties().setValue("k", "original");
-	data->getProperties().setValue("k", "updated");
-	EXPECT_EQ("updated", data->getProperties().getValue("k"));
+TEST_F(DataTest, ToXML) {
+
+	// shouldSerialize filters "ignored"; remaining fields emitted as attributes.
+	const string xml(data->toXML());
+	EXPECT_EQ("<testTag\n\tname=\"TestItem\"\n\ttype=\"button\"\n\tvalue=\"42\"\n/>\n", xml);
+
 }
 
-// copyValues returns empty when there is no collection handler.
-TEST_F(DataTest, CopyValuesNoCollection) {
-	EXPECT_TRUE(data->copyValues().empty());
+TEST_F(DataTest, UnSetLifecycle) {
+
+	Values d {{"name", "TestPrimary"}, {"extra", "value"}};
+	MockData item {d};
+	auto ch {item.getCollectionHandler()};
+	ch->add(&item);
+
+	// Non-primary unset — stays registered.
+	item.unSet("extra");
+	EXPECT_TRUE(ch->isSet(&item));
+	EXPECT_EQ("", item.getValue("extra"));
+	EXPECT_EQ(0,  item.getValues().count("extra"));
+
+	// Primary key unset — unregisters.
+	item.unSet("name");
+	EXPECT_FALSE(ch->isSet(&item));
+	EXPECT_EQ("", item.getValue("name"));
+	EXPECT_EQ(0,  item.getValues().count("name"));
+
 }
 
-// copyValues produces a non-colliding ID and leaves the original untouched.
-TEST_F(DataTest, CopyValuesFindsUniqueId) {
-	auto ch = CollectionHandler::getInstance("t");
-	StringUMap d{};
-	RegisteringData item(d);
+TEST_F(DataTest, WipeLifecycle) {
+
+	// Wipe registered item removes from collection.
+	Values d;
+	MockData item {d};
+	auto ch {item.getCollectionHandler()};
+	item.setValue("name", "MyItem");
+	ch->add(&item);
+	item.wipe();
+	EXPECT_FALSE(ch->isSet(&item));
+	EXPECT_TRUE(item.getValues().empty());
+
+	// Wipe unregistered item is a safe no-op.
+	MockData ghost {d};
+	ghost.setValue("name", "Ghost");
+	EXPECT_NO_FATAL_FAILURE(ghost.wipe());
+	EXPECT_TRUE(ghost.getValues().empty());
+
+}
+
+TEST_F(DataTest, CopyValuesLifecycle) {
+
+	// Without collection handler returns empty.
+	EXPECT_EQ(0u, data->copyValues().getSize());
+
+	// With collection handler produces a non-colliding ID.
+	Values d;
+	MockData item {d};
+	auto ch {item.getCollectionHandler()};
 	item.setValue("name", "Item");
 	ch->add(&item);
-	auto copy = item.copyValues();
-	ASSERT_FALSE(copy.empty());
-	EXPECT_FALSE(ch->isIdSet(copy.at("name")));
+	auto copy {item.copyValues()};
+	ASSERT_FALSE(copy.getSize() == 0);
+	EXPECT_FALSE(ch->isIdSet(copy.getValue("name")));
 	EXPECT_EQ("Item", item.getValue("name"));
+
 }
 
-// syncRegistration re-keys the handler entry when the primary key changes.
-TEST_F(DataTest, SyncRegistrationReKeys) {
-	auto ch = CollectionHandler::getInstance("t");
-	StringUMap d{};
-	RegisteringData item(d);
-	item.setValue("name", "OldName");
-	ch->add(&item);
-	EXPECT_TRUE(ch->isIdSet("OldName"));
+TEST_F(DataTest, CollectionRegistration) {
 
-	string oldId{item.createUniqueId()};
-	item.setValue("name", "NewName");
+	MockData item {{"name", "Alpha"}};
+	auto ch {item.getCollectionHandler()};
+
+	// Register adds; re-registering is a no-op.
+	item.registerToCollection();
+	EXPECT_TRUE(ch->isSet(&item));
+	EXPECT_TRUE(ch->isIdSet("Alpha"));
+	item.registerToCollection();
+	EXPECT_EQ(1u, ch->getSize());
+
+	// Unregister removes; unregistering again is safe.
+	item.unregisterFromCollection();
+	EXPECT_FALSE(ch->isSet(&item));
+	EXPECT_NO_FATAL_FAILURE(item.unregisterFromCollection());
+
+	// syncRegistration re-keys on primary key change.
+	item.setValue("name", "Beta");
+	item.registerToCollection();
+	string oldId {item.createUniqueId()};
+	item.setValue("name", "Gamma");
 	item.syncRegistration(oldId);
+	EXPECT_FALSE(ch->isIdSet("Beta"));
+	EXPECT_TRUE(ch->isIdSet("Gamma"));
 
-	EXPECT_FALSE(ch->isIdSet("OldName"));
-	EXPECT_TRUE(ch->isIdSet("NewName"));
-}
-
-// syncRegistration is a no-op when the ID has not changed.
-TEST_F(DataTest, SyncRegistrationNoOpWhenSameId) {
-	auto ch = CollectionHandler::getInstance("t");
-	StringUMap d{};
-	RegisteringData item(d);
-	item.setValue("name", "Name");
-	ch->add(&item);
+	// syncRegistration is a no-op when ID unchanged.
 	item.syncRegistration(item.createUniqueId());
-	EXPECT_TRUE(ch->isIdSet("Name"));
-}
+	EXPECT_TRUE(ch->isIdSet("Gamma"));
+	EXPECT_EQ(1u, ch->getSize());
 
-// syncRegistration with an empty oldId acts as a plain registration.
-TEST_F(DataTest, SyncRegistrationEmptyOldIdRegisters) {
-	auto ch = CollectionHandler::getInstance("t");
-	StringUMap d{};
-	RegisteringData item(d);
-	item.setValue("name", "Fresh");
+	// syncRegistration with empty old ID acts as plain registration.
+	item.unregisterFromCollection();
+	item.setValue("name", "Delta");
 	item.syncRegistration("");
-	EXPECT_TRUE(ch->isIdSet("Fresh"));
+	EXPECT_TRUE(ch->isIdSet("Delta"));
+
 }

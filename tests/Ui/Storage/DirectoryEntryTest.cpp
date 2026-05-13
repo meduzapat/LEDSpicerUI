@@ -26,89 +26,31 @@
 using namespace LEDSpicerUI::Ui::Storage;
 using namespace LEDSpicerUI::Constants;
 using LEDSpicerUI::Defaults;
+using LEDSpicerUI::Values;
 
-class DirectoryEntryTest : public ::testing::Test {
+TEST(DirectoryEntryTest, TestFunctionality) {
 
-protected:
+	Values rootData  {{FILENAME, "root"}};
+	DirectoryEntry root {rootData, nullptr};
 
-	void SetUp() override {
-		StringUMap rootData{{FILENAME, "root"}};
-		root = std::make_unique<DirectoryEntry>(rootData, nullptr);
+	Values childData {{FILENAME, "child"}};
+	DirectoryEntry child {childData, &root};
 
-		StringUMap childData{{FILENAME, "subdir"}};
-		child = std::make_unique<DirectoryEntry>(childData, root.get());
+	// getCssClass, getXmlTag, getCollectionHandler.
+	EXPECT_EQ(CSS_DIRECTORY_BOX_BUTTON, root.getCssClass());
+	EXPECT_EQ(emptyString,              root.getXmlTag());
+	EXPECT_NE(nullptr,                  root.getCollectionHandler());
 
-		StringUMap grandData{{FILENAME, "deep"}};
-		grand = std::make_unique<DirectoryEntry>(grandData, child.get());
-	}
+	// createUniqueId() uses PID + name.
+	EXPECT_EQ(Defaults::createCommonUniqueId({emptyString,    "root"}),  root.createUniqueId());
+	EXPECT_EQ(Defaults::createCommonUniqueId({root.getFsId(), "child"}), child.createUniqueId());
 
-	std::unique_ptr<DirectoryEntry> root;
-	std::unique_ptr<DirectoryEntry> child;
-	std::unique_ptr<DirectoryEntry> grand;
+	// createPrettyName() prefixes with folder emoji.
+	EXPECT_NE(string::npos, root.createPrettyName().find("root"));
+	EXPECT_NE(string::npos, root.createPrettyName().find("📁"));
 
-};
+	// createTooltip() returns full path.
+	EXPECT_EQ("root",       root.createTooltip());
+	EXPECT_EQ("root/child", child.createTooltip());
 
-// UID is set and is non-empty.
-TEST_F(DirectoryEntryTest, UidSetAtConstruction) {
-	EXPECT_FALSE(root->getProperties().getValue(UID).empty());
-}
-
-// PID is empty at root level.
-TEST_F(DirectoryEntryTest, PidEmptyAtRoot) {
-	EXPECT_EQ(emptyString, root->getProperties().getValue(PID));
-}
-
-// PID matches parent UID.
-TEST_F(DirectoryEntryTest, PidMatchesParentUid) {
-	EXPECT_EQ(root->getProperties().getValue(UID),  child->getProperties().getValue(PID));
-	EXPECT_EQ(child->getProperties().getValue(UID), grand->getProperties().getValue(PID));
-}
-
-// getFsId() aliases dest UID.
-TEST_F(DirectoryEntryTest, GetFsIdAliasesUid) {
-	EXPECT_EQ(root->getProperties().getValue(UID),  root->getFsId());
-	EXPECT_EQ(child->getProperties().getValue(UID), child->getFsId());
-}
-
-// getName() returns the name passed at construction.
-TEST_F(DirectoryEntryTest, GetName) {
-	EXPECT_EQ("root",   root->getName());
-	EXPECT_EQ("subdir", child->getName());
-	EXPECT_EQ("deep",   grand->getName());
-}
-
-// createUniqueId() uses PID + name.
-TEST_F(DirectoryEntryTest, CreateUniqueIdAtRoot) {
-	EXPECT_EQ(
-		Defaults::createCommonUniqueId({emptyString, "root"}),
-		root->createUniqueId()
-	);
-}
-
-TEST_F(DirectoryEntryTest, CreateUniqueIdNested) {
-	EXPECT_EQ(
-		Defaults::createCommonUniqueId({root->getFsId(), "subdir"}),
-		child->createUniqueId()
-	);
-}
-
-// createPrettyName() prefixes with folder emoji.
-TEST_F(DirectoryEntryTest, CreatePrettyName) {
-	EXPECT_NE(string::npos, root->createPrettyName().find("root"));
-	EXPECT_NE(string::npos, root->createPrettyName().find("📁"));
-}
-
-// createTooltip() returns full path.
-TEST_F(DirectoryEntryTest, CreateTooltip) {
-	EXPECT_EQ("root",        root->createTooltip());
-	EXPECT_EQ("root/subdir", child->createTooltip());
-}
-
-TEST_F(DirectoryEntryTest, IsEmptyWhenNoContents) {
-	EXPECT_EQ(0, root->getSize());
-}
-
-int main(int argc, char** argv) {
-	::testing::InitGoogleTest(&argc, argv);
-	return RUN_ALL_TESTS();
 }

@@ -47,14 +47,14 @@ bool DialogSettings::loadSettings() {
 	if (not SettingsFile::configExists()) return false;
 
 	try {
-		SettingsFile config(SettingsFile::getConfigFilePath());
-		StringUMap settings = config.getSettings();
+		SettingsFile config(SettingsFile::getConfigFilePath(), UI_CONFIG_TYPE);
+		const auto& settings = config.getRootInfo();
 
-		setBinaryPath(XMLHelper::valueOf(settings, "binaryPath", ""), true);
-		setDataDir(XMLHelper::valueOf(settings, "dataDir", ""), true);
+		setBinaryPath(settings.getValue("binaryPath"), true);
+		setDataDir(settings.getValue("dataDir"), true);
 
 		// Set projects dir, if not set use the default one.
-		string projectsDir = XMLHelper::valueOf(settings, "projectsDir", "");
+		string projectsDir = settings.getValue("projectsDir");
 		Defaults::setProjectsDir(
 			projectsDir.empty() ?
 			Glib::get_user_data_dir() + "/" PACKAGE_NAME "/projects/" :

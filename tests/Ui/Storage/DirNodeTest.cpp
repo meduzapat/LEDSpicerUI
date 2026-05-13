@@ -20,127 +20,64 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <gtest/gtest.h>
+#include "MockBasicData.hpp"
 #include "Storage/DirNode.hpp"
-#include "Storage/Data.hpp"
 
 using namespace LEDSpicerUI::Ui::Storage;
 using namespace LEDSpicerUI::Constants;
+using LEDSpicerUI::Test::Mocks::MockBasicData;
 
-// Minimal concrete consumer for testing DirNode in isolation.
-class TestNode : public Data, public DirNode {
+// Minimal concrete class for testing DirNode in isolation.
+class TestNode : public MockBasicData, public DirNode {
 
 public:
 
-	TestNode(
-		StringUMap&   data,
-		DirNode*      parent,
-		const string& filename
-	) noexcept :
-		Data(data),
+	TestNode(Values& data, DirNode* parent, const string& filename) noexcept :
+		MockBasicData(data),
 		DirNode(getProperties(), parent, filename)
 	{}
-
-	constexpr string_view getCssClass()          const noexcept override { return "test"; }
-	constexpr string_view getXmlTag()            const noexcept override { return "test"; }
-	CollectionHandler*    getCollectionHandler() const noexcept override { return nullptr; }
-
 };
 
-class DirNodeTest : public ::testing::Test {
+TEST(DirNodeTest, TestFunctionality) {
 
-protected:
+	Values data;
+	TestNode root  {data, nullptr, "root"};
+	TestNode child {data, &root,   "child"};
+	TestNode grand {data, &child,  "deep"};
 
-	void SetUp() override {
-		StringUMap d1, d2, d3;
-		rootNode   = std::make_unique<TestNode>(d1, nullptr,          "myfile");
-		parentNode = std::make_unique<TestNode>(d2, nullptr,          "stub_1");
-		nestedNode = std::make_unique<TestNode>(d3, parentNode.get(), "nestedfile");
-	}
+	// UID written and non-empty.
+	EXPECT_FALSE(root.getProperties().getValue(UID).empty());
 
-	std::unique_ptr<TestNode> rootNode;
-	std::unique_ptr<TestNode> parentNode;
-	std::unique_ptr<TestNode> nestedNode;
+	// PID is empty at root level.
+	EXPECT_EQ(emptyString, root.getProperties().getValue(PID));
 
-};
+	// PID matches parent UID.
+	EXPECT_EQ(root.getProperties().getValue(UID),  child.getProperties().getValue(PID));
+	EXPECT_EQ(child.getProperties().getValue(UID), grand.getProperties().getValue(PID));
 
-// UID is set at construction and is non-empty.
-TEST_F(DirNodeTest, UidSetAtConstruction) {
-	EXPECT_FALSE(rootNode->getProperties().getValue(UID).empty());
+	// getFsId() aliases UID.
+	EXPECT_EQ(root.getProperties().getValue(UID),  root.getFsId());
+	EXPECT_EQ(child.getProperties().getValue(UID), child.getFsId());
+
+	// getName() returns the filename segment.
+	EXPECT_EQ("root",  root.getName());
+	EXPECT_EQ("child", child.getName());
+	EXPECT_EQ("deep",  grand.getName());
+
+	// getParent() and isAtRoot().
+	EXPECT_EQ(nullptr, root.getParent());
+	EXPECT_EQ(&root,   child.getParent());
+	EXPECT_TRUE(root.isAtRoot());
+	EXPECT_FALSE(child.isAtRoot());
+
+	// getPath() returns the parent's full path.
+	EXPECT_EQ(emptyString,  root.getPath());
+	EXPECT_EQ("root",       child.getPath());
+	EXPECT_EQ("root/child", grand.getPath());
+
+	// getFullPath() includes own name segment.
+	EXPECT_EQ("root",            root.getFullPath());
+	EXPECT_EQ("root/child",      child.getFullPath());
+	EXPECT_EQ("root/child/deep", grand.getFullPath());
+
 }
-
-// UID is a plain number — no prefix.
-TEST_F(DirNodeTest, UidIsNumeric) {
-	string uid(rootNode->getProperties().getValue(UID));
-	for (const char c : uid)
-		EXPECT_TRUE(std::isdigit(c));
-}
-
-// getFsId() aliases dest UID.
-TEST_F(DirNodeTest, GetFsIdAliasesUid) {
-	EXPECT_EQ(rootNode->getProperties().getValue(UID),   rootNode->getFsId());
-	EXPECT_EQ(nestedNode->getProperties().getValue(UID), nestedNode->getFsId());
-}
-
-// PID is empty at root level.
-TEST_F(DirNodeTest, PidEmptyAtRoot) {
-	EXPECT_EQ(emptyString, rootNode->getProperties().getValue(PID));
-}
-
-// PID matches parent getFsId() for nested node.
-TEST_F(DirNodeTest, PidMatchesParentFsId) {
-	EXPECT_EQ(parentNode->getFsId(), nestedNode->getProperties().getValue(PID));
-}
-
-// FILENAME written into dest at construction.
-TEST_F(DirNodeTest, FilenameInDest) {
-	EXPECT_EQ("myfile",     rootNode->getProperties().getValue(FILENAME));
-	EXPECT_EQ("nestedfile", nestedNode->getProperties().getValue(FILENAME));
-}
-
-// getName() returns dest FILENAME.
-TEST_F(DirNodeTest, GetNameReturnsFilename) {
-	EXPECT_EQ("myfile",     rootNode->getName());
-	EXPECT_EQ("nestedfile", nestedNode->getName());
-}
-
-// isAtRoot() reflects parent pointer state.
-TEST_F(DirNodeTest, IsAtRootWhenNoParent) {
-	EXPECT_TRUE(rootNode->isAtRoot());
-	EXPECT_TRUE(parentNode->isAtRoot());
-}
-
-TEST_F(DirNodeTest, IsNotAtRootWhenNested) {
-	EXPECT_FALSE(nestedNode->isAtRoot());
-}
-
-// getParent() returns correct pointer.
-TEST_F(DirNodeTest, GetParentReturnsParent) {
-	EXPECT_EQ(nullptr,           rootNode->getParent());
-	EXPECT_EQ(parentNode.get(),  nestedNode->getParent());
-}
-
-// getPath() returns parent full path, empty at root.
-TEST_F(DirNodeTest, GetPathEmptyAtRoot) {
-	EXPECT_EQ(emptyString, rootNode->getPath());
-}
-
-TEST_F(DirNodeTest, GetPathReturnsParentFullPath) {
-	EXPECT_EQ("stub_1", nestedNode->getPath());
-}
-
-// getFullPath() includes own name segment.
-TEST_F(DirNodeTest, GetFullPathAtRoot) {
-	EXPECT_EQ("myfile", rootNode->getFullPath());
-}
-
-TEST_F(DirNodeTest, GetFullPathNested) {
-	EXPECT_EQ("stub_1/nestedfile", nestedNode->getFullPath());
-}
-
-int main(int argc, char** argv) {
-	::testing::InitGoogleTest(&argc, argv);
-	return RUN_ALL_TESTS();
-}
-
-

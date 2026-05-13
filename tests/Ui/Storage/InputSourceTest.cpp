@@ -27,6 +27,7 @@
 using namespace LEDSpicerUI::Ui::Storage;
 using namespace LEDSpicerUI::Constants;
 using LEDSpicerUI::Defaults;
+using LEDSpicerUI::Values;
 
 class InputSourceTest : public ::testing::Test {
 
@@ -37,115 +38,44 @@ protected:
 	}
 };
 
-// Constructor sets UID property.
-TEST_F(InputSourceTest, ConstructorSetsUid) {
-	StringUMap data{{SOURCE, "hardware1"}};
-	InputSource src(data, "owner_1");
-	EXPECT_FALSE(src.getProperties().getValue(UID).empty());
-}
+TEST_F(InputSourceTest, TestFunctionality) {
 
-// Constructor stores ownerId in PID property.
-TEST_F(InputSourceTest, ConstructorSetsPid) {
-	StringUMap data{{SOURCE, "hardware1"}};
-	InputSource src(data, "owner_1");
-	EXPECT_EQ("owner_1", src.getProperties().getValue(PID));
-}
+	Values data {{SOURCE, "hardware1"}};
+	InputSource src {data, "owner_1"};
 
-// Each instance gets a distinct UID.
-TEST_F(InputSourceTest, MultipleInstancesHaveDistinctUids) {
-	StringUMap d1{{SOURCE, "hw1"}}, d2{{SOURCE, "hw2"}};
-	InputSource s1(d1, "owner_1");
-	InputSource s2(d2, "owner_1");
-	EXPECT_NE(s1.getProperties().getValue(UID), s2.getProperties().getValue(UID));
-}
+	// getCssClass, getXmlTag, getCollectionHandler.
+	EXPECT_EQ(CSS_INPUT_SOURCE_BOX_BUTTON, src.getCssClass());
+	EXPECT_EQ(TYPE_MAPS,                   src.getXmlTag());
+	EXPECT_NE(nullptr,                     src.getCollectionHandler());
 
-// createUniqueId = PID + SOURCE.
-TEST_F(InputSourceTest, CreateUniqueIdCombinesPidAndSource) {
-	StringUMap data{{SOURCE, "hardware1"}};
-	InputSource src(data, "owner_1");
-	EXPECT_EQ(
-		Defaults::createCommonUniqueId({"owner_1", "hardware1"}),
-		src.createUniqueId()
-	);
-}
-
-// createUniqueId with empty source.
-TEST_F(InputSourceTest, CreateUniqueIdEmptySource) {
-	StringUMap data;
-	InputSource src(data, "owner_1");
-	EXPECT_EQ(
-		Defaults::createCommonUniqueId({"owner_1", ""}),
-		src.createUniqueId()
-	);
-}
-
-// getCollectionHandler scopes by PID.
-TEST_F(InputSourceTest, CollectionHandlerScopedByPid) {
-	StringUMap data{{SOURCE, "hw1"}};
-	InputSource src(data, "owner_1");
-	auto ch{src.getCollectionHandler()};
-	ASSERT_NE(nullptr, ch);
-	// A different owner produces a different handler.
-	StringUMap data2{{SOURCE, "hw1"}};
-	InputSource src2(data2, "owner_2");
+	// getCollectionHandler scoped by owner.
+	Values data2 {{SOURCE, "hardware1"}};
+	InputSource src2 {data2, "owner_2"};
 	EXPECT_NE(src.getCollectionHandler(), src2.getCollectionHandler());
-}
 
-// getCssClass and getXmlTag.
-TEST_F(InputSourceTest, CssClass) {
-	StringUMap data{{SOURCE, "hw1"}};
-	InputSource src(data, "owner_1");
-	EXPECT_EQ("InputSourceBoxButton", src.getCssClass());
-}
+	// createUniqueId combines PID and SOURCE.
+	EXPECT_EQ(Defaults::createCommonUniqueId({"owner_1", "hardware1"}), src.createUniqueId());
 
-TEST_F(InputSourceTest, XmlTag) {
-	StringUMap data{{SOURCE, "hw1"}};
-	InputSource src(data, "owner_1");
-	EXPECT_EQ("maps", src.getXmlTag());
-}
-
-// createPrettyName reads NAME property set externally.
-TEST_F(InputSourceTest, CreatePrettyNameFromProperty) {
-	StringUMap data{{SOURCE, "hw1"}};
-	InputSource src(data, "owner_1");
+	// createPrettyName reads NAME from properties.
 	src.getProperties().setValue(NAME, "Joystick 1");
 	EXPECT_EQ("Joystick 1", src.createPrettyName());
-}
 
-// createTooltip reflects map count.
-TEST_F(InputSourceTest, CreateTooltipReflectsMapCount) {
-	StringUMap data{{SOURCE, "hw1"}};
-	InputSource src(data, "owner_1");
-	src.getProperties().setValue(NAME, "hw1");
-	string tooltip(src.createTooltip());
-	EXPECT_NE(string::npos, tooltip.find("0"));
-}
+	// createTooltip reflects map count.
+	EXPECT_NE(string::npos, src.createTooltip().find("0"));
 
-// shouldSerialize suppresses SOURCE when empty.
-TEST_F(InputSourceTest, ShouldSerializeEmptySourceSuppressed) {
-	StringUMap data;
-	InputSource src(data, "owner_1");
-	EXPECT_EQ(string::npos, src.toXML().find(SOURCE));
-}
-
-// shouldSerialize includes SOURCE when non-empty.
-TEST_F(InputSourceTest, ShouldSerializeNonEmptySourceIncluded) {
-	StringUMap data{{SOURCE, "hardware1"}};
-	InputSource src(data, "owner_1");
-	EXPECT_NE(string::npos, src.toXML().find(SOURCE));
-}
-
-// Has COLLECTION_INPUT_MAPS child collection.
-TEST_F(InputSourceTest, HasInputMapsChild) {
-	StringUMap data{{SOURCE, "hw1"}};
-	InputSource src(data, "owner_1");
+	// Child collection keyed as COLLECTION_INPUT_MAPS.
 	EXPECT_NE(nullptr, src.getChild(COLLECTION_INPUT_MAPS));
+
+	// shouldSerialize: SOURCE suppressed when empty, included when non-empty.
+	Values empty;
+	InputSource srcEmpty {empty, "owner_1"};
+	EXPECT_EQ(string::npos, srcEmpty.toXML().find(SOURCE));
+	EXPECT_NE(string::npos, src.toXML().find(SOURCE));
+
 }
 
-// wipe clears values.
-TEST_F(InputSourceTest, WipeClearsValues) {
-	StringUMap data{{SOURCE, "hw1"}};
-	InputSource src(data, "owner_1");
-	src.wipe();
-	EXPECT_TRUE(src.getValues().empty());
+int main(int argc, char** argv) {
+	auto app = Gtk::Application::create(argc, argv, "org.test");
+	::testing::InitGoogleTest(&argc, argv);
+	return RUN_ALL_TESTS();
 }

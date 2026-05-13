@@ -24,7 +24,7 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-InputMapLink::InputMapLink(StringUMap& data, const string& inputPid) noexcept :
+InputMapLink::InputMapLink(Values& data, const string& inputPid) noexcept :
 	Parent(data, vector<string>{COLLECTION_INPUT_MAP_LINKS})
 {
 	getProperties().setValue(PID, inputPid);

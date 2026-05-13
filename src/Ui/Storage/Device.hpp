@@ -35,16 +35,14 @@ class Device : public Parent {
 
 public:
 
-	Device(StringUMap& data) noexcept :
-		Parent(data, {COLLECTION_ELEMENTS})
-	{}
+	Device(Values& data) noexcept : Parent(data, {COLLECTION_ELEMENTS}) {}
 
 	virtual ~Device() = default;
 
-	string_view getXmlTag()   const noexcept override { return "device"; }
-	string_view getCssClass() const noexcept override { return CSS_DEVICE_BOX_BUTTON; }
-	string createPrettyName() const noexcept override;
-	string createUniqueId()   const noexcept override;
+	const string& getXmlTag()   const noexcept override { return TYPE_DEVICE; }
+	const string& getCssClass() const noexcept override { return CSS_DEVICE_BOX_BUTTON; }
+	string createPrettyName()   const noexcept override;
+	string createUniqueId()     const noexcept override;
 
 	CollectionHandler* getCollectionHandler() const noexcept override;
 

@@ -24,10 +24,6 @@
 
 using namespace LEDSpicerUI::Config;
 
-SettingsFile::SettingsFile(const string& settingsFile) : XMLHelper(settingsFile, XML_FILE_PLAIN) {
-	rootInfo.attributes = processNode(root);
-}
-
 string SettingsFile::getConfigFilePath() {
 	return Glib::get_user_config_dir() + "/" PACKAGE_NAME "/" UI_CONFIG_FILE;
 }
@@ -44,21 +40,20 @@ void SettingsFile::ensureConfigDir() {
 	}
 }
 
-void SettingsFile::save(const string& settingsFile, const StringUMap& values) {
+void SettingsFile::save(const string& settingsFile, const Values& values) {
 	ensureConfigDir();
 
-	// Settings file is self-closing, no version/type (UI config, not data file)
 	string xmlData;
 	xmlData  = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
 	xmlData += "<!-- " DEFAULT_MESSAGE " -->\n";
-	xmlData += "<" PACKAGE_NAME "\n";
+	xmlData += "<" PACKAGE_DATA_NAME "\n";
 
 	Defaults::increaseTab();
-	for (const auto& [key, value] : values) {
-		if (not value.empty()) {
+	xmlData += Defaults::tab() + "version=\"" PACKAGE_DATA_VERSION "\"\n";
+	xmlData += Defaults::tab() + "type=\"" UI_CONFIG_TYPE "\"\n";
+	for (const auto& [key, value] : values)
+		if (not value.empty())
 			xmlData += Defaults::tab() + key + "=\"" + value + "\"\n";
-		}
-	}
 	Defaults::reduceTab();
 
 	xmlData += "/>\n";

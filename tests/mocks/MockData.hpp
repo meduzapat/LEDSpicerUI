@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      Group.cpp
- * @since     Mar 16, 2023
+ * @file      MockBasicData.hpp
+ * @since     May 11, 2026
  * @author    Patricio A. Rossi (MeduZa)
  *
  * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
@@ -20,10 +20,30 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Group.hpp"
+#include "MockBasicData.hpp"
+#include "Storage/CollectionHandler.hpp"
 
-using namespace LEDSpicerUI::Ui::Storage;
+#pragma once
 
-bool Group::shouldSerialize(const string& key, const string& value) const noexcept {
-	return Data::shouldSerialize(key, value);
+using namespace LEDSpicerUI;
+using namespace Ui::Storage;
+using namespace Constants;
+
+namespace LEDSpicerUI::Test::Mocks {
+
+inline const string collection {"bb_test"};
+
+/**
+ * A mock class that completes Data with two constants and null collection.
+ */
+class MockData : public MockBasicData {
+
+	public:
+
+		using MockBasicData::MockBasicData;
+
+		CollectionHandler* getCollectionHandler() const noexcept override {
+			return CollectionHandler::getInstance(collection);
+		}
+	};
 }

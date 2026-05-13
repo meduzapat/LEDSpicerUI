@@ -20,23 +20,12 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <gtest/gtest.h>
+#include "MockData.hpp"
 #include "Storage/BoxButton.hpp"
 #include "Storage/CollectionHandler.hpp"
 
 using namespace LEDSpicerUI::Ui::Storage;
-
-class TestData : public Data {
-
-public:
-
-	TestData(StringUMap& d) noexcept : Data(d) {}
-	constexpr string_view getCssClass() const noexcept override { return "test"; }
-	constexpr string_view getXmlTag()   const noexcept override { return "test"; }
-	CollectionHandler* getCollectionHandler() const noexcept override {
-		return CollectionHandler::getInstance("bb_test");
-	}
-};
+using LEDSpicerUI::Test::Mocks::MockData;
 
 class BoxButtonTest : public ::testing::Test {
 
@@ -47,65 +36,56 @@ protected:
 	}
 };
 
-// Constructor registers the Data into its collection.
-TEST_F(BoxButtonTest, ConstructorRegisters) {
-	StringUMap d{{"name", "Item"}};
-	auto data{new TestData(d)};
-	auto ch{CollectionHandler::getInstance("bb_test")};
+TEST_F(BoxButtonTest, TestFunctionality) {
+
+	Values d {{"name", "Item"}};
+	auto data {new MockData {d}};
+	auto ch {data->getCollectionHandler()};
 	EXPECT_FALSE(ch->isSet(data));
-	BoxButton btn(data);
+
+	// Constructor registers; getData; sync reflects createPrettyName.
+	BoxButton btn {data};
 	EXPECT_TRUE(ch->isSet(data));
-}
-
-// Destructor unregisters the Data from its collection.
-TEST_F(BoxButtonTest, DestructorUnregisters) {
-	StringUMap d{{"name", "Item"}};
-	auto data{new TestData(d)};
-	auto ch{CollectionHandler::getInstance("bb_test")};
-	{
-		BoxButton btn(data);
-		EXPECT_TRUE(ch->isSet(data));
-	}
-	EXPECT_FALSE(ch->isIdSet("Item"));
-}
-
-// getData() returns the owned pointer.
-TEST_F(BoxButtonTest, GetDataReturnsPointer) {
-	StringUMap d{{"name", "MyItem"}};
-	auto data{new TestData(d)};
-	BoxButton btn(data);
 	EXPECT_EQ(data, btn.getData());
-}
-
-// sync() reflects createPrettyName().
-TEST_F(BoxButtonTest, UpdateLabelReflectsPrettyName) {
-	StringUMap d{{"name", "TestLabel"}};
-	auto data{new TestData(d)};
-	BoxButton btn(data);
+	EXPECT_EQ("Item", btn.getLabel()->get_text());
+	data->setValue("name", "Item2");
 	btn.sync();
-	EXPECT_EQ("TestLabel", btn.getLabel()->get_text());
+	EXPECT_EQ("Item2", btn.getLabel()->get_text());
+	ch->replace(data, "Item");
+
+	// getData() const overload.
+	const BoxButton& cbtn {btn};
+	EXPECT_EQ(data, cbtn.getData());
+
+	// operator==: identity — same object true, different object false.
+	Values d2 {{"name", "Other"}};
+	auto data2 {new MockData {d2}};
+	BoxButton btn2 {data2};
+	EXPECT_TRUE(btn  == btn);
+	EXPECT_FALSE(btn == btn2);
+
+	// Destructor unregisters both items.
+
 }
 
-// Move constructor nulls the source data pointer.
-TEST_F(BoxButtonTest, MoveConstructorNullsSource) {
-	StringUMap d{{"name", "Mover"}};
-	auto data{new TestData(d)};
-	BoxButton src(data);
-	BoxButton dst(std::move(src));
+TEST_F(BoxButtonTest, MoveLifecycle) {
+
+	// Move constructor nulls the source data pointer.
+	Values d {{"name", "Item"}};
+	auto data {new MockData {d}};
+	BoxButton src {data};
+	BoxButton dst {std::move(src)};
 	EXPECT_EQ(nullptr, src.getData());
 	EXPECT_EQ(data,    dst.getData());
-}
 
-// Destroying a moved-from BoxButton does not crash or double-unregister.
-TEST_F(BoxButtonTest, MovedFromDestructionSafe) {
-	StringUMap d{{"name", "Safe"}};
-	auto data{new TestData(d)};
-	auto ch{CollectionHandler::getInstance("bb_test")};
-	auto src{new BoxButton(data)};
-	BoxButton  dst(std::move(*src));
-	EXPECT_NO_FATAL_FAILURE(delete src);
-	// dst still owns the data and it is still registered.
-	EXPECT_TRUE(ch->isSet(data));
+	// Destroying a moved-from BoxButton is safe and does not double-unregister.
+	Values d2 {{"name", "Item2"}};
+	auto data2 {new MockData {d2}};
+	auto* heapSrc {new BoxButton {data2}};
+	BoxButton heapDst {std::move(*heapSrc)};
+	EXPECT_NO_FATAL_FAILURE(delete heapSrc);
+	EXPECT_TRUE(data2->getCollectionHandler()->isSet(data2));
+
 }
 
 int main(int argc, char** argv) {

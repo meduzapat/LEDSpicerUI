@@ -26,8 +26,10 @@
 using namespace LEDSpicerUI::Ui::Storage;
 using namespace LEDSpicerUI::Constants;
 using LEDSpicerUI::Defaults;
+using LEDSpicerUI::Values;
 
-struct StubValues { LEDSpicerUI::Values v; };
+// Private-base trick: ensures Values is initialized before DirNode.
+struct StubValues { Values v; };
 
 class StubDirNode : private StubValues, public DirNode {
 
@@ -41,76 +43,40 @@ class ProfileTest : public ::testing::Test {
 
 protected:
 
-	void SetUp() override {
-		StringUMap rootData{{FILENAME, "default"}, {BACKGROUND_COLOR, "Off"}};
-		rootProfile = std::make_unique<Profile>(rootData, nullptr);
-
-		parentDir = std::make_unique<StubDirNode>();
-
-		StringUMap nestedData{{FILENAME, "nested"}, {BACKGROUND_COLOR, "Red"}};
-		nestedProfile = std::make_unique<Profile>(nestedData, parentDir.get());
-	}
-
 	void TearDown() override {
-		rootProfile.reset();
-		nestedProfile.reset();
-		parentDir.reset();
 		CollectionHandler::purgeAll();
 	}
-
-	std::unique_ptr<Profile>     rootProfile;
-	std::unique_ptr<Profile>     nestedProfile;
-	std::unique_ptr<StubDirNode> parentDir;
-
 };
 
-TEST_F(ProfileTest, CssClass) {
-	EXPECT_EQ("ProfileBoxButton", rootProfile->getCssClass());
-}
+TEST_F(ProfileTest, TestFunctionality) {
 
-TEST_F(ProfileTest, CreateUniqueIdAtRoot) {
-	EXPECT_EQ(
-		Defaults::createCommonUniqueId({emptyString, "default"}),
-		rootProfile->createUniqueId()
-	);
-}
+	Values rootData   {{FILENAME, "default"}, {BACKGROUND_COLOR, "Off"}};
+	Profile rootProfile {rootData, nullptr};
 
-TEST_F(ProfileTest, CreateUniqueIdNested) {
-	EXPECT_EQ(
-		Defaults::createCommonUniqueId({parentDir->getFsId(), "nested"}),
-		nestedProfile->createUniqueId()
-	);
-}
+	StubDirNode parentDir;
 
-TEST_F(ProfileTest, HasElementsChild) {
-	EXPECT_NE(nullptr, rootProfile->getChild(COLLECTION_PROFILE_ELEMENTS));
-}
+	Values nestedData {{FILENAME, "nested"}, {BACKGROUND_COLOR, "Red"}};
+	Profile nestedProfile {nestedData, &parentDir};
 
-TEST_F(ProfileTest, HasGroupsChild) {
-	EXPECT_NE(nullptr, rootProfile->getChild(COLLECTION_PROFILE_GROUPS));
-}
+	// getCssClass, getXmlTag, getCollectionHandler.
+	EXPECT_EQ(CSS_PROFILE_BOX_BUTTON, rootProfile.getCssClass());
+	EXPECT_EQ(TYPE_PROFILE,           rootProfile.getXmlTag());
+	EXPECT_NE(nullptr,                rootProfile.getCollectionHandler());
 
-TEST_F(ProfileTest, HasInputsChild) {
-	EXPECT_NE(nullptr, rootProfile->getChild(COLLECTION_PROFILE_INPUTS));
-}
+	// createUniqueId at root and nested.
+	EXPECT_EQ(Defaults::createCommonUniqueId({emptyString,          "default"}), rootProfile.createUniqueId());
+	EXPECT_EQ(Defaults::createCommonUniqueId({parentDir.getFsId(),  "nested"}),  nestedProfile.createUniqueId());
 
-TEST_F(ProfileTest, HasAnimationsChild) {
-	EXPECT_NE(nullptr, rootProfile->getChild(COLLECTION_PROFILE_ANIMATIONS));
-}
+	// Child collections.
+	EXPECT_NE(nullptr, rootProfile.getChild(COLLECTION_PROFILE_ELEMENTS));
+	EXPECT_NE(nullptr, rootProfile.getChild(COLLECTION_PROFILE_GROUPS));
+	EXPECT_NE(nullptr, rootProfile.getChild(COLLECTION_PROFILE_INPUTS));
+	EXPECT_NE(nullptr, rootProfile.getChild(COLLECTION_PROFILE_ANIMATIONS));
 
-TEST_F(ProfileTest, EmptyCollectionsProduceNoSections) {
-	string xml(rootProfile->toXML());
-	EXPECT_EQ(string::npos, xml.find("alwaysOnElements"));
-	EXPECT_EQ(string::npos, xml.find("alwaysOnGroups"));
-	EXPECT_EQ(string::npos, xml.find("inputs"));
-	EXPECT_EQ(string::npos, xml.find("animations"));
-}
+	// toXML.
+	const string xml(rootProfile.toXML());
+	EXPECT_EQ("<profile filename=\"default\" backgroundColor=\"Off\"/>\n", xml);
 
-TEST_F(ProfileTest, GetCollectionHandler) {
-	EXPECT_EQ(
-		CollectionHandler::getInstance(COLLECTION_PROFILES),
-		rootProfile->getCollectionHandler()
-	);
 }
 
 int main(int argc, char** argv) {

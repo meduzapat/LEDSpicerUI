@@ -26,53 +26,35 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 using namespace LEDSpicerUI::Constants;
-using LEDSpicerUI::Defaults;
+using LEDSpicerUI::Values;
 
 class GroupTest : public ::testing::Test {
+
 protected:
-	void SetUp() override {
-		StringUMap d{{NAME, "CONTROLS"}, {DEFAULT_COLOR, ""}};
-		group = std::make_unique<Group>(d);
-	}
 
 	void TearDown() override {
-		group.reset();
 		CollectionHandler::purgeAll();
 	}
-
-	std::unique_ptr<Group> group;
 };
 
-// createUniqueId uses NAME.
-TEST_F(GroupTest, CreateUniqueId) {
-	EXPECT_EQ(
-		Defaults::createCommonUniqueId({"CONTROLS"}),
-		group->createUniqueId()
-	);
-}
+TEST_F(GroupTest, TestFunctionality) {
 
-// Child collection is keyed as COLLECTION_GROUP_LINKS not COLLECTION_ELEMENTS.
-TEST_F(GroupTest, ChildCollectionKeyIsGroupLinks) {
-	EXPECT_NE(nullptr, group->getChild(COLLECTION_GROUP_LINKS));
-	EXPECT_EQ(nullptr, group->getChild(COLLECTION_ELEMENTS));
-}
+	Values d {{NAME, "CONTROLS"}, {DEFAULT_COLOR, ""}};
+	Group group {d};
 
-// Child collection starts empty.
-TEST_F(GroupTest, ChildCollectionStartsEmpty) {
-	EXPECT_EQ(0u, group->getChild(COLLECTION_GROUP_LINKS)->getSize());
-}
+	// getCssClass, getXmlTag, getCollectionHandler.
+	EXPECT_EQ(CSS_GROUP_BOX_BUTTON, group.getCssClass());
+	EXPECT_EQ(TYPE_GROUP,           group.getXmlTag());
+	EXPECT_NE(nullptr,              group.getCollectionHandler());
 
-// getCssClass.
-TEST_F(GroupTest, CssClass) {
-	EXPECT_EQ("GroupBoxButton", group->getCssClass());
-}
+	// Child collection keyed as COLLECTION_GROUP_LINKS, not COLLECTION_ELEMENTS.
+	EXPECT_NE(nullptr, group.getChild(COLLECTION_GROUP_LINKS));
+	EXPECT_EQ(nullptr, group.getChild(COLLECTION_ELEMENTS));
 
-// toXML contains group tag and closes correctly.
-TEST_F(GroupTest, ToXMLStructure) {
-	string xml(group->toXML());
-	EXPECT_NE(string::npos, xml.find("<group"));
-	// Empty group emits self-closing tag
-	EXPECT_NE(string::npos, xml.find("/>"));
+	// toXML emits group tag.
+	const string xml(group.toXML());
+	EXPECT_EQ("<group name=\"CONTROLS\"/>\n", xml);
+
 }
 
 int main(int argc, char** argv) {

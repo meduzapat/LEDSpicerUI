@@ -41,60 +41,56 @@ protected:
 	std::unique_ptr<ConfigFile> configFile;
 };
 
-TEST_F(ConfigFileTest, DefaultProfileIsExtracted) {
-	EXPECT_EQ("default", configFile->getDefaultProfile());
-}
+TEST_F(ConfigFileTest, SettingsLifecycle) {
 
-TEST_F(ConfigFileTest, ProcessLookupRunEveryValue) {
-	EXPECT_EQ("500", configFile->getProcessLookupRunEvery());
-}
+	const string expectedColors {"Red, Blue, Green, Yellow, White, Black"};
+	const auto& settings = configFile->getRootInfo();
+	EXPECT_EQ("default",       settings.getValue("defaultProfile"));
+	EXPECT_EQ("500",           settings.getValue(PARAM_MILLISECONDS));
+	EXPECT_EQ(HUMAN_TRUE,      settings.getValue("craftProfile"));
+	EXPECT_EQ(HUMAN_TRUE,      settings.getValue("colorsFile"));
+	EXPECT_EQ("1000",          settings.getValue("groupId"));
+	EXPECT_EQ("Info",          settings.getValue("logLevel"));
+	EXPECT_EQ("1000",          settings.getValue("userId"));
+	EXPECT_EQ("10",            settings.getValue("fps"));
+	EXPECT_EQ("1.1",           settings.getValue("version"));
+	EXPECT_EQ("basicColors",   settings.getValue("colors"));
+	EXPECT_EQ("file,mame",     settings.getValue("dataSource"));
+	EXPECT_EQ("16161",         settings.getValue("port"));
+	EXPECT_EQ("Configuration", settings.getValue("type"));
+	EXPECT_EQ(expectedColors,  settings.getValue("randomColors"));
 
-TEST_F(ConfigFileTest, SettingsAreExtracted) {
-	auto settings = configFile->getSettings();
-
-	EXPECT_EQ(HUMAN_TRUE,    settings["craftProfile"]);
-	EXPECT_EQ(HUMAN_TRUE,    settings["colorsFile"]);
-	EXPECT_EQ("1000",        settings["groupId"]);
-	EXPECT_EQ("Info",        settings["logLevel"]);
-	EXPECT_EQ("1000",        settings["userId"]);
-	EXPECT_EQ("10",          settings["fps"]);
-	EXPECT_EQ("1.1",         settings["version"]);
-	EXPECT_EQ("basicColors", settings["colors"]);
-	EXPECT_EQ("file,mame",   settings["dataSource"]);
-	EXPECT_EQ("16161",       settings["port"]);
-
-	EXPECT_EQ("Configuration", settings["type"]);
-	EXPECT_EQ("Red, Blue, Green, Yellow, White, Black", settings["randomColors"]);
 }
 
 TEST_F(ConfigFileTest, DevicesAreProcessed) {
-	auto& devices = configFile->getData(COLLECTION_DEVICES);
 
+	auto& devices = configFile->getData(COLLECTION_DEVICES);
 	EXPECT_EQ(3, devices.size());
 
-	EXPECT_EQ("UltimarcPacDrive", devices[0][NAME]);
-	EXPECT_EQ("1",                devices[0][ID]);
-	EXPECT_EQ("121",              devices[0]["changePoint"]);
+	EXPECT_EQ("UltimarcPacDrive", devices[0].getValue(NAME));
+	EXPECT_EQ("1",                devices[0].getValue(ID));
+	EXPECT_EQ("121",              devices[0].getValue("changePoint"));
 
-	EXPECT_EQ("UltimarcPacDrive", devices[1][NAME]);
-	EXPECT_EQ("2",                devices[1][ID]);
-	EXPECT_EQ("64",               devices[1]["changePoint"]);
+	EXPECT_EQ("UltimarcPacDrive", devices[1].getValue(NAME));
+	EXPECT_EQ("2",                devices[1].getValue(ID));
+	EXPECT_EQ("64",               devices[1].getValue("changePoint"));
 
-	EXPECT_EQ("UltimarcUltimate", devices[2][NAME]);
-	EXPECT_EQ("1",                devices[2][ID]);
+	EXPECT_EQ("UltimarcUltimate", devices[2].getValue(NAME));
+	EXPECT_EQ("1",                devices[2].getValue(ID));
 
-	string deviceId    = Defaults::createHardwareUniqueId({{NAME, "UltimarcPacDrive"}, {ID, "1"}});
-	string elementsKey = Defaults::createCommonUniqueId({deviceId, COLLECTION_ELEMENTS});
+	const string
+		deviceId    = Defaults::createHardwareUniqueId({{NAME, "UltimarcPacDrive"}, {ID, "1"}}),
+		elementsKey = Defaults::createCommonUniqueId({deviceId, COLLECTION_ELEMENTS});
 
 	try {
 		auto& elements = configFile->getData(elementsKey);
 		EXPECT_FALSE(elements.empty());
 		bool foundP1Button1 = false;
 		for (const auto& element : elements) {
-			if (element.at(NAME) == "P1_BUTTON1") {
+			if (element.getValue(NAME) == "P1_BUTTON1") {
 				foundP1Button1 = true;
-				EXPECT_EQ("1", element.at("type"));
-				EXPECT_EQ("2", element.at("led"));
+				EXPECT_EQ("1", element.getValue("type"));
+				EXPECT_EQ("2", element.getValue("led"));
 				break;
 			}
 		}
@@ -103,18 +99,18 @@ TEST_F(ConfigFileTest, DevicesAreProcessed) {
 	catch (const std::exception& e) {
 		FAIL() << "Failed to access elements with key: " << elementsKey << ", error: " << e.what();
 	}
+
 }
 
 TEST_F(ConfigFileTest, GroupsAreProcessed) {
-	EXPECT_EQ("default", configFile->getDefaultProfile());
 
 	auto& groups = configFile->getData(COLLECTION_GROUPS);
 	EXPECT_EQ(4, groups.size());
 
-	EXPECT_EQ("All",     groups[0][NAME]);
-	EXPECT_EQ("CREDITS", groups[1][NAME]);
-	EXPECT_EQ("STARTS",  groups[2][NAME]);
-	EXPECT_EQ("PLAYER1", groups[3][NAME]);
+	EXPECT_EQ("All",     groups[0].getValue(NAME));
+	EXPECT_EQ("CREDITS", groups[1].getValue(NAME));
+	EXPECT_EQ("STARTS",  groups[2].getValue(NAME));
+	EXPECT_EQ("PLAYER1", groups[3].getValue(NAME));
 
 	string creditsGroupKey = Defaults::createCommonUniqueId({"CREDITS", COLLECTION_GROUP_LINKS});
 
@@ -122,11 +118,31 @@ TEST_F(ConfigFileTest, GroupsAreProcessed) {
 		auto& creditElements = configFile->getData(creditsGroupKey);
 		EXPECT_EQ(3, creditElements.size());
 
-		EXPECT_EQ("P1_CREDIT", creditElements[0][NAME]);
-		EXPECT_EQ("P2_CREDIT", creditElements[1][NAME]);
-		EXPECT_EQ("P3_CREDIT", creditElements[2][NAME]);
+		EXPECT_EQ("P1_CREDIT", creditElements[0].getValue(NAME));
+		EXPECT_EQ("P2_CREDIT", creditElements[1].getValue(NAME));
+		EXPECT_EQ("P3_CREDIT", creditElements[2].getValue(NAME));
 	}
 	catch (const std::exception& e) {
 		FAIL() << "Failed to access group elements with key: " << creditsGroupKey << ", error: " << e.what();
 	}
+
+}
+
+TEST_F(ConfigFileTest, ProcessesAreProcessed) {
+
+	auto& processes = configFile->getData(COLLECTION_PROCESSES);
+	EXPECT_EQ(2u, processes.size());
+
+	EXPECT_EQ("test",   processes[0].getValue(PARAM_PROCESS_NAME));
+	EXPECT_EQ("arcade", processes[0].getValue(PARAM_SYSTEM));
+
+	EXPECT_EQ("gedit",  processes[1].getValue(PARAM_PROCESS_NAME));
+	EXPECT_EQ("arcade", processes[1].getValue(PARAM_SYSTEM));
+
+}
+
+int main(int argc, char** argv) {
+	auto app = Gtk::Application::create(argc, argv, "org.test");
+	::testing::InitGoogleTest(&argc, argv);
+	return RUN_ALL_TESTS();
 }

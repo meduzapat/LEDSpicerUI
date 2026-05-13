@@ -10,6 +10,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 include_directories(
 	${CMAKE_SOURCE_DIR}/src
 	${CMAKE_SOURCE_DIR}/src/Ui
+	${CMAKE_SOURCE_DIR}/tests/mocks
 	${CMAKE_SOURCE_DIR}/tests/Ui
 	${GTKMM30_INCLUDE_DIRS}
 	${TINYXML2_INCLUDE_DIRS}
@@ -36,14 +37,14 @@ macro(add_test_executable TEST_NAME TEST_SRC EXTRA_SRCS EXTRA_LIBS)
 	set_tests_properties(${TEST_NAME} PROPERTIES ENVIRONMENT "GTEST_COLOR=1")
 endmacro()
 
-# ─── Source groups ──────────────────────────────────────────────────────────
+# Source groups
 
 set(COMMON_SRCS
+	${CMAKE_SOURCE_DIR}/src/Values.cpp
 	${CMAKE_SOURCE_DIR}/src/Defaults.cpp
 )
 
 set(STORAGE_SRCS
-	${CMAKE_SOURCE_DIR}/src/Values.cpp
 	${CMAKE_SOURCE_DIR}/src/Ui/Storage/Data.cpp
 	${CMAKE_SOURCE_DIR}/src/Ui/Storage/BoxButton.cpp
 	${CMAKE_SOURCE_DIR}/src/Ui/Storage/BoxButtonCollection.cpp
@@ -94,7 +95,7 @@ add_test_executable(DefaultsTest
 
 add_test_executable(ValuesTest
 	"ValuesTest.cpp"
-	"${COMMON_SRCS};${CMAKE_SOURCE_DIR}/src/Values.cpp"
+	"${COMMON_SRCS};"
 	""
 )
 

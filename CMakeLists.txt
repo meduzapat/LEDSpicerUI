@@ -46,9 +46,9 @@ else()
 endif()
 
 add_executable(ledspicerui
+	src/Values.cpp
 	src/Defaults.cpp
 	src/XMLHelper.cpp
-	src/Values.cpp
 	src/config/SettingsFile.cpp
 	src/config/ConfigFile.cpp
 	src/config/InputFile.cpp

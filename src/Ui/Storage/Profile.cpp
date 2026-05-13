@@ -24,7 +24,7 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-Profile::Profile(StringUMap& data, DirNode* parent) noexcept :
+Profile::Profile(Values& data, DirNode* parent) noexcept :
 	Parent(data, vector<string>{
 		COLLECTION_PROFILE_ELEMENTS,
 		COLLECTION_PROFILE_GROUPS,
@@ -33,9 +33,9 @@ Profile::Profile(StringUMap& data, DirNode* parent) noexcept :
 	}),
 	DirNode(getProperties(), parent, getValue(FILENAME))
 {
-	registerDependency(COLLECTION_ELEMENTS,    COLLECTION_PROFILE_ELEMENTS);
-	registerDependency(COLLECTION_GROUPS,      COLLECTION_PROFILE_GROUPS);
-	registerDependency(COLLECTION_INPUTS,      COLLECTION_PROFILE_INPUTS);
+	registerDependency(COLLECTION_ELEMENTS,   COLLECTION_PROFILE_ELEMENTS);
+	registerDependency(COLLECTION_GROUPS,     COLLECTION_PROFILE_GROUPS);
+	registerDependency(COLLECTION_INPUTS,     COLLECTION_PROFILE_INPUTS);
 	registerDependency(COLLECTION_ANIMATIONS, COLLECTION_PROFILE_ANIMATIONS);
 }
 
@@ -46,21 +46,21 @@ string Profile::createUniqueId() const noexcept {
 	});
 }
 
-string Profile::xmlBody() const noexcept {
-	string r;
-	const auto emit = [&](const string& tag, const string& key) {
-		const auto& col = children.at(key);
-		if (col.getSize() == 0) return;
-		r += XMLHelper::xmlSection(tag, [&]{
-			string s;
-			for (const auto& e : col)
-				s += e->getData()->toXML();
-			return s;
-		}());
-	};
-	emit("alwaysOnElements", COLLECTION_PROFILE_ELEMENTS);
-	emit("alwaysOnGroups",   COLLECTION_PROFILE_GROUPS);
-	emit("inputs",           COLLECTION_PROFILE_INPUTS);
-	emit("animations",       COLLECTION_PROFILE_ANIMATIONS);
-	return r;
-}
+//string Profile::xmlBody() const noexcept {
+//	string r;
+//	const auto emit = [&](const string& tag, const string& key) {
+//		const auto& col = children.at(key);
+//		if (col.getSize() == 0) return;
+//		r += XMLHelper::xmlSection(tag, [&]{
+//			string s;
+//			for (const auto& e : col)
+//				s += e->getData()->toXML();
+//			return s;
+//		}());
+//	};
+//	emit("alwaysOnElements", COLLECTION_PROFILE_ELEMENTS);
+//	emit("alwaysOnGroups",   COLLECTION_PROFILE_GROUPS);
+//	emit("inputs",           COLLECTION_PROFILE_INPUTS);
+//	emit("animations",       COLLECTION_PROFILE_ANIMATIONS);
+//	return r;
+//}

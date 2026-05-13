@@ -20,22 +20,13 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <gtest/gtest.h>
-#include "Storage/BoxButtonCollection.hpp"
+#include "MockBasicData.hpp"
 #include "Storage/CollectionHandler.hpp"
 
-using namespace LEDSpicerUI::Ui::Storage;
-using namespace LEDSpicerUI::Constants;
-
-class TestData : public Data {
-
-public:
-
-	TestData(StringUMap& d) noexcept : Data(d) {}
-	constexpr string_view getCssClass() const noexcept override { return "test"; }
-	constexpr string_view getXmlTag()   const noexcept override { return "test"; }
-	CollectionHandler* getCollectionHandler() const noexcept override { return nullptr; }
-};
+using namespace LEDSpicerUI;
+using namespace Ui::Storage;
+using namespace Constants;
+using Test::Mocks::MockBasicData;
 
 class BoxButtonCollectionTest : public ::testing::Test {
 
@@ -43,10 +34,10 @@ protected:
 
 	BoxButtonCollection collection;
 
-	TestData* makeData(const string& name) {
-		auto d{new StringUMap{{NAME, name}}};
+	MockBasicData* makeData(const string& name) {
+		auto d {new Values {{NAME, name}}};
 		owned.push_back(d);
-		return new TestData(*d);
+		return new MockBasicData(*d);
 	}
 
 	void TearDown() override {
@@ -54,113 +45,101 @@ protected:
 		owned.clear();
 	}
 
-	vector<StringUMap*> owned;
+	vector<Values*> owned;
 };
 
-// Empty collection reports zero size.
-TEST_F(BoxButtonCollectionTest, EmptySize) {
+TEST_F(BoxButtonCollectionTest, ItemLifecycle) {
+
+	// Empty on construction.
 	EXPECT_EQ(0u, collection.getSize());
-}
 
-// create() increases size by one and returns a valid reference.
-TEST_F(BoxButtonCollectionTest, CreateIncreasesSize) {
-	collection.create(makeData("A"));
-	EXPECT_EQ(1u, collection.getSize());
-}
+	// create increases size; isSet and isIdSet find existing items.
+	auto* dataA {makeData("A")};
+	BoxButton& bbA {collection.create(dataA)};
+	EXPECT_EQ(1u,   collection.getSize());
+	EXPECT_TRUE(collection.isSet(dataA));
+	EXPECT_TRUE(collection.isIdSet("A"));
 
-// Multiple creates accumulate.
-TEST_F(BoxButtonCollectionTest, MultipleCreates) {
-	collection.create(makeData("A"));
 	collection.create(makeData("B"));
 	collection.create(makeData("C"));
 	EXPECT_EQ(3u, collection.getSize());
-}
 
-// isIdSet finds by unique ID string.
-TEST_F(BoxButtonCollectionTest, IsIdSetFindsExisting) {
-	collection.create(makeData("A"));
-	EXPECT_TRUE(collection.isIdSet("A"));
-}
-
-TEST_F(BoxButtonCollectionTest, IsIdSetMissesAbsent) {
-	collection.create(makeData("A"));
-	EXPECT_FALSE(collection.isIdSet("B"));
-}
-
-// isSet finds by Data pointer equality (createUniqueId comparison).
-TEST_F(BoxButtonCollectionTest, IsSetFindsExisting) {
-	auto data{makeData("A")};
-	collection.create(data);
-	EXPECT_TRUE(collection.isSet(data));
-}
-
-TEST_F(BoxButtonCollectionTest, IsSetMissesAbsent) {
-	collection.create(makeData("A"));
-	StringUMap d{{NAME, "B"}};
-	TestData other(d);
+	// isSet and isIdSet miss absent items.
+	Values dOther {{NAME, "Z"}};
+	MockBasicData other {dOther};
 	EXPECT_FALSE(collection.isSet(&other));
-}
+	EXPECT_FALSE(collection.isIdSet("Z"));
 
-// remove(BoxButton&) reduces size and the item is gone.
-TEST_F(BoxButtonCollectionTest, RemoveByBoxButton) {
-	BoxButton& bb = collection.create(makeData("A"));
-	collection.create(makeData("B"));
-	collection.remove(bb);
-	EXPECT_EQ(1u, collection.getSize());
+	// Non-const iteration covers all items.
+	size_t count {0};
+	for (auto& _ : collection) ++count;
+	EXPECT_EQ(3u, count);
+
+	// Const iteration covers all items.
+	count = 0;
+	const BoxButtonCollection& coll {collection};
+	for (const auto& _ : coll) ++count;
+	EXPECT_EQ(3u, count);
+
+	// remove by BoxButton reference.
+	collection.remove(bbA);
+	EXPECT_EQ(2u,    collection.getSize());
 	EXPECT_FALSE(collection.isIdSet("A"));
-}
 
-// remove(Data*) finds and removes by equality.
-TEST_F(BoxButtonCollectionTest, RemoveByData) {
-	auto data{makeData("A")};
-	collection.create(data);
-	collection.create(makeData("B"));
-	collection.remove(data);
+	// remove by Data pointer.
+	auto* dataB {collection.begin()[0]->getData()};
+	collection.remove(dataB);
 	EXPECT_EQ(1u, collection.getSize());
-	EXPECT_FALSE(collection.isIdSet("A"));
+
 }
 
-// wipe() empties the collection.
-TEST_F(BoxButtonCollectionTest, WipeClearsAll) {
-	collection.create(makeData("A"));
-	collection.create(makeData("B"));
-	collection.wipe();
-	EXPECT_EQ(0u, collection.getSize());
-}
+TEST_F(BoxButtonCollectionTest, SwapLifecycle) {
 
-// swap() exchanges contents between two collections.
-TEST_F(BoxButtonCollectionTest, SwapExchangesContents) {
 	BoxButtonCollection other;
 	collection.create(makeData("A"));
 	other.create(makeData("B"));
+
 	collection.swap(other);
+
 	EXPECT_TRUE(collection.isIdSet("B"));
 	EXPECT_TRUE(other.isIdSet("A"));
 	EXPECT_EQ(1u, collection.getSize());
 	EXPECT_EQ(1u, other.getSize());
+
 }
 
-// Iterators cover all items.
-TEST_F(BoxButtonCollectionTest, IterationCoversAll) {
-	collection.create(makeData("A"));
-	collection.create(makeData("B"));
-	collection.create(makeData("C"));
-	size_t count = 0;
-	for (auto& bb : collection) {
-		static_cast<void>(bb);
-		++count;
-	}
-	EXPECT_EQ(3u, count);
-}
+TEST_F(BoxButtonCollectionTest, SensitivityLifecycle) {
 
-// wipe() drops sensitivity when collection empties.
-TEST_F(BoxButtonCollectionTest, WipeDropsSensitivity) {
-	auto widget{Gtk::manage(new Gtk::Button())};
+	auto* widget {Gtk::manage(new Gtk::Button())};
 	collection.create(makeData("A"));
 	collection.registerSensitivity(widget);
-	EXPECT_TRUE(widget->is_sensitive());  // 1 >= 1
+	EXPECT_TRUE(widget->is_sensitive());  // 1 >= minCount(1)
+
 	collection.wipe();
-	EXPECT_FALSE(widget->is_sensitive()); // 0 < 1
+	EXPECT_EQ(0u,  collection.getSize());
+	EXPECT_FALSE(widget->is_sensitive()); // 0 < minCount(1)
+
+}
+
+TEST_F(BoxButtonCollectionTest, MoveLifecycle) {
+
+	// Move constructor: items transfer, source becomes empty.
+	BoxButtonCollection src;
+	src.create(makeData("X"));
+	src.create(makeData("Y"));
+	BoxButtonCollection dst {std::move(src)};
+	EXPECT_EQ(0u, src.getSize());
+	EXPECT_EQ(2u, dst.getSize());
+	EXPECT_TRUE(dst.isIdSet("X"));
+	EXPECT_TRUE(dst.isIdSet("Y"));
+
+	// Move assignment into empty collection: items transfer.
+	BoxButtonCollection dst2;
+	dst2 = std::move(dst);
+	EXPECT_EQ(0u, dst.getSize());
+	EXPECT_EQ(2u, dst2.getSize());
+	EXPECT_TRUE(dst2.isIdSet("X"));
+
 }
 
 int main(int argc, char** argv) {

@@ -24,12 +24,7 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-Parent::Parent(
-	StringUMap& data,
-	const vector<string>& childCollectionIds
-) :
-	Data(data)
-{
+Parent::Parent(Values& data, const vector<string>& childCollectionIds) : Data(data) {
 	for (const auto& id : childCollectionIds) {
 		children.emplace(id, BoxButtonCollection{});
 		if (children.size() == 1) primaryChild = &children.at(id);

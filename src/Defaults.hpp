@@ -34,9 +34,6 @@ using std::vector;
 using std::string;
 using std::stringstream;
 
-#include <string_view>
-using std::string_view;
-
 #include <functional>
 
 #include <filesystem>
@@ -46,8 +43,7 @@ using std::string_view;
 #include <memory>
 using std::unique_ptr;
 
-// This looks cool.
-#define abstract = 0
+#include "Values.hpp"
 
 #pragma once
 
@@ -56,32 +52,22 @@ using std::unique_ptr;
 
 #define DEFAULT_MESSAGE "This is an auto-generated file by " PACKAGE_STRING "."
 
-using StringUMap       = std::unordered_map<string, string>;
-using StringMap        = std::map<string, string>;
-using StringUMapVector = std::vector<StringUMap>;
-using StringUSet       = std::unordered_set<string>;
-using StringSet        = std::set<string>;
-using StringVector     = std::vector<string>;
-using DataMap          = std::unordered_map<string, StringUMapVector>;
-
 namespace LEDSpicerUI {
+
+using StringMap    = std::map<string, string>;
+using ValueVector  = std::vector<Values>;
+using StringUSet   = std::unordered_set<string>;
+using StringSet    = std::set<string>;
+using StringVector = std::vector<string>;
+using DataMap      = std::unordered_map<string, ValueVector>;
 
 namespace Constants {
 
 inline const string
 	/// Commonly used empty string.
-	emptyString,
 	PATH_INPUT     {"inputs/"},
 	PATH_ANIMATION {"animations/"},
-	PATH_PROFILE   {"profiles/"},
-
-	/// Common values used in configs.
-	HUMAN_TRUE   {"True"},
-	HUMAN_FALSE  {"False"},
-	HUMAN_ON     {"On"},
-	HUMAN_OFF    {"Off"},
-	HUMAN_NORMAL {"Nornal"},
-	HUMAN_RANDOM {"Random"};
+	PATH_PROFILE   {"profiles/"};
 
 /// Separators.
 constexpr char
@@ -131,7 +117,7 @@ inline const string
 	& DEFAULT_PROFILE_BACKGROUND_COLOR {HUMAN_OFF},
 
 /// Hardware configuration keys.
-	NAME {"name"},
+
 	ID   {"boardId"},
 	PORT {"port"},
 	PINS {"leds"},
@@ -204,6 +190,7 @@ inline const string
 
 /// Types
 	TYPE_MAP             {"map"},
+	TYPE_MAPS            {"maps"},
 	TYPE_DIRECTORY       {"directory"},
 	TYPE_DEVICE          {"device"},
 	TYPE_RESTRICTOR      {"restrictor"},
@@ -247,7 +234,23 @@ inline const string
 
 /// Path related.
 	PATH_PARENT {"pp"},
-	PATH_BASE   {"pb"};
+	PATH_BASE   {"pb"},
+
+// CSS classes.
+/// Storage box buttons
+	CSS_BOX_BUTTON                {"BoxButton"},
+	CSS_DEVICE_BOX_BUTTON         {"DeviceBoxButton"},
+	CSS_DIRECTORY_BOX_BUTTON      {"DirectoryBoxButton"},
+	CSS_ELEMENT_BOX_BUTTON        {"ElementBoxButton"},
+	CSS_GROUP_BOX_BUTTON          {"GroupBoxButton"},
+	CSS_INPUT_BOX_BUTTON          {"InputBoxButton"},
+	CSS_INPUT_MAP_BOX_BUTTON      {"InputMapBoxButton"},
+	CSS_INPUT_SOURCE_BOX_BUTTON   {"InputSourceBoxButton"},
+	CSS_LINK_BOX_BUTTON           {"LinkBoxButton"},
+	CSS_PROCESS_BOX_BUTTON        {"ProcessBoxButton"},
+	CSS_PROFILE_BOX_BUTTON        {"ProfileBoxButton"},
+	CSS_RESTRICTOR_BOX_BUTTON     {"RestrictorBoxButton"},
+	CSS_RESTRICTOR_MAP_BOX_BUTTON {"RestrictorMapBoxButton"};
 
 } // namespace
 
@@ -281,21 +284,6 @@ inline const string
 // Form / layout
 #define CSS_FORM_CONTAINER            "formContainer"
 #define CSS_SYSTEM                    "system"
-
-// Storage box buttons
-#define CSS_BOX_BUTTON                "BoxButton"
-#define CSS_DEVICE_BOX_BUTTON         "DeviceBoxButton"
-#define CSS_DIRECTORY_BOX_BUTTON      "DirectoryBoxButton"
-#define CSS_ELEMENT_BOX_BUTTON        "ElementBoxButton"
-#define CSS_GROUP_BOX_BUTTON          "GroupBoxButton"
-#define CSS_INPUT_BOX_BUTTON          "InputBoxButton"
-#define CSS_INPUT_MAP_BOX_BUTTON      "InputMapBoxButton"
-#define CSS_INPUT_SOURCE_BOX_BUTTON   "InputSourceBoxButton"
-#define CSS_LINK_BOX_BUTTON           "LinkBoxButton"
-#define CSS_PROCESS_BOX_BUTTON        "ProcessBoxButton"
-#define CSS_PROFILE_BOX_BUTTON        "ProfileBoxButton"
-#define CSS_RESTRICTOR_BOX_BUTTON     "RestrictorBoxButton"
-#define CSS_RESTRICTOR_MAP_BOX_BUTTON "RestrictorMapBoxButton"
 
 // Icons — all symbolic
 #define ICON_COPY   "edit-copy-symbolic"
