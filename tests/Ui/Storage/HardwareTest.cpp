@@ -32,7 +32,7 @@ class HardwareMock : public Hardware {
 
 public:
 
-	using Hardware::Hardware;
+	HardwareMock(Values& data) noexcept : Hardware(data, {}) {}
 
 	virtual ~HardwareMock() = default;
 
