@@ -40,7 +40,7 @@ DialogForm::~DialogForm() {
 		delete child;
 }
 
-void DialogForm::createItems(StringUMapVector& rawCollection, DataMap& values) noexcept {
+void DialogForm::createItems(ValueVector& rawCollection, DataMap& values) noexcept {
 
 	string errors;
 	for (auto& rawItem : rawCollection) {
@@ -109,7 +109,7 @@ void DialogForm::reindex() noexcept {
 }
 
 LEDSpicerUI::Ui::Storage::Data* DialogForm::createData() const noexcept {
-	auto data{StringUMap{}};
+	Values data;
 	return createData(data);
 }
 

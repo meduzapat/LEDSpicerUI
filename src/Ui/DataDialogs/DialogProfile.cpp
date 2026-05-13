@@ -222,7 +222,7 @@ string DialogProfile::createUniqueId() const noexcept {
 	return Defaults::createCommonUniqueId({inputProfileName->get_text()});
 }
 
-LEDSpicerUI::Ui::Storage::Data* DialogProfile::createData(StringUMap& rawData) const noexcept {
+LEDSpicerUI::Ui::Storage::Data* DialogProfile::createData(Values& rawData) const noexcept {
 	return new Storage::Profile(rawData, currentDirectory);
 }
 

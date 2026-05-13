@@ -440,7 +440,7 @@ public:
 	 * @param fieldsData
 	 * @return
 	 */
-	static string createHardwareUniqueId(const StringUMap& fieldsData, bool isDevice = true);
+	static string createHardwareUniqueId(const Values& fieldsData, bool isDevice = true);
 
 	/**
 	 * For most data fields that uses one or more strings this will just work.

@@ -58,16 +58,9 @@ string ConfigFile::processDevices() {
 			continue;
 		}
 		// Create Unique ID.
-		StringUMap data{
-			{NAME, name},
-			// Device ID is no mandatory, and if is missing on a ID device, is assumed 1
-			{ID,   deviceAttr.getValue(ID, "1")},
-			// Serial Devices allows empty device serial PORT, that defaults to /dev/ttyUSB0or auto-detects.
-			{PORT, deviceAttr.getValue(PORT)}
-		};
-
+		const string id {Defaults::createHardwareUniqueId(deviceAttr)};
 		devices.push_back(std::move(deviceAttr));
-		string elementErrors(processElements(deviceNode, Defaults::createHardwareUniqueId(data)));
+		string elementErrors(processElements(deviceNode, id));
 		errors += (not elementErrors.empty() ? elementErrors  + '\n' : "");
 	}
 	extractedData.emplace(COLLECTION_DEVICES, std::move(devices));
@@ -105,16 +98,10 @@ string ConfigFile::processRestrictors() {
 			continue;
 		}
 		// Create Unique ID.
-		StringUMap data{
-			{NAME, name},
-			// Restrictor ID is no mandatory, and if is missing on a ID restrictor, is assumed 1
-			{ID,   restrictorAttr.getValue(ID,   "1")},
-			// Serial restrictors allows empty port, that defaults to /dev/ttyUSB0 or auto-detects.
-			{PORT, restrictorAttr.getValue(PORT, "")}
-		};
+		const string id {Defaults::createHardwareUniqueId(restrictorAttr, false)};
 
 		restrictors.push_back(std::move(restrictorAttr));
-		string mapErrors(processRestrictorMaps(restrictorNode, Defaults::createHardwareUniqueId(data, false)));
+		string mapErrors(processRestrictorMaps(restrictorNode, id));
 		errors += (not mapErrors.empty() ? mapErrors  + '\n' : "");
 	}
 	extractedData.emplace(COLLECTION_RESTRICTORS, std::move(restrictors));

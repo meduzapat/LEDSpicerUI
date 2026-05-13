@@ -100,8 +100,8 @@ void DialogDirectory::load(DataMap& values) noexcept {
 	createItems(values[COLLECTION_DIRECTORIES], values);
 }
 
-LEDSpicerUI::Ui::Storage::Data* DialogDirectory::createData(StringUMap& rawData) const noexcept {
-	auto parent{dirByPath.at(rawData[PATH_PARENT])};
+LEDSpicerUI::Ui::Storage::Data* DialogDirectory::createData(Values& rawData) const noexcept {
+	auto parent {dirByPath.at(rawData.getValue(PATH_PARENT))};
 	auto de{new Storage::DirectoryEntry(rawData, parent)};
 	dirByPath[de->getFullPath()] = de;
 	return de;

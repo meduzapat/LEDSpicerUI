@@ -233,7 +233,7 @@ string DialogRestrictor::createUniqueId() const noexcept {
 	}, false);
 }
 
-LEDSpicerUI::Ui::Storage::Data* DialogRestrictor::createData(StringUMap& rawData) const noexcept {
+LEDSpicerUI::Ui::Storage::Data* DialogRestrictor::createData(Values& rawData) const noexcept {
 	return new Storage::Restrictor(rawData);
 }
 

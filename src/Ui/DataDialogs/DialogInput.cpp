@@ -209,7 +209,7 @@ string DialogInput::createUniqueId() const noexcept {
 	return Defaults::createCommonUniqueId({currentData->getProperties().getValue(PID), entryInputName->get_text()});
 }
 
-LEDSpicerUI::Ui::Storage::Data* DialogInput::createData(StringUMap& rawData) const noexcept {
+LEDSpicerUI::Ui::Storage::Data* DialogInput::createData(Values& rawData) const noexcept {
 	return new Storage::Input(rawData, currentDirectory);
 }
 

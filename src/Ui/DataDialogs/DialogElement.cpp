@@ -446,9 +446,10 @@ void DialogElement::storeData() noexcept {
 			}
 			else {
 				// Create new child
-				StringUMap childData;
-				childData[NAME]     = childName;
-				childData[POSITION] = std::to_string(position + i);
+				Values childData {
+					{NAME,     childName},
+					{POSITION, std::to_string(position + i)}
+				};
 				auto child{new Storage::Element(childData)};
 				child->getProperties().setValue(PROP_STRIP, code);
 				currentDataE->addStripChild(child);
@@ -466,7 +467,7 @@ void DialogElement::storeData() noexcept {
 		// System group management.
 		if (not wasStrip) {
 			// Create new group.
-			StringUMap groupData{{"name", name}};
+			Values groupData {{NAME, name}};
 			auto group = new Storage::Group(groupData);
 			group->getProperties().setValue(PROP_SYSTEM, "1");
 			groupCollectionHandler->add(group);

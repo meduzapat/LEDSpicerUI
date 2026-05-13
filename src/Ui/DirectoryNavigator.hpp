@@ -75,7 +75,7 @@ public:
 protected:
 
 	/// Backing data for rootDir — must be declared before rootDir.
-	StringUMap rootData;
+	Values rootData;
 
 	/// Owned root directory entry for this navigator type.
 	Storage::DirectoryEntry rootDir;

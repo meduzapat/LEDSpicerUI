@@ -108,7 +108,7 @@ void OrdenableListBox::sortAndMark(StringVector values) {
 	}
 }
 
-StringVector OrdenableListBox::getCheckedValues() {
+LEDSpicerUI::StringVector OrdenableListBox::getCheckedValues() {
 	StringVector values;
 	for (auto child : get_children()) {
 		auto boxChild(static_cast<Gtk::ListBoxRow*>(child));

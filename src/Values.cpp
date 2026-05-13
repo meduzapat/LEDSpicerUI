@@ -53,8 +53,7 @@ void Values::setValues(const StringUMap& values) noexcept {
 }
 
 Values Values::copyValues() const noexcept {
-	StringUMap c {values.begin(), values.end()};
-	return Values {c} ;
+	return Values(values.begin(), values.end());
 }
 
 void Values::wipe() noexcept {

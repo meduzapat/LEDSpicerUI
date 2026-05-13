@@ -20,7 +20,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Parent.hpp"
+#include "Hardware.hpp"
 
 #pragma once
 
@@ -31,17 +31,16 @@ namespace LEDSpicerUI::Ui::Storage {
  *
  * Stores a hardware device and its attached elements.
  */
-class Device : public Parent {
+class Device : public Hardware {
 
 public:
 
-	Device(Values& data) noexcept : Parent(data, {COLLECTION_ELEMENTS}) {}
+	Device(Values& data) noexcept : Hardware(data, {COLLECTION_ELEMENTS}) {}
 
 	virtual ~Device() = default;
 
 	const string& getXmlTag()   const noexcept override { return TYPE_DEVICE; }
 	const string& getCssClass() const noexcept override { return CSS_DEVICE_BOX_BUTTON; }
-	string createPrettyName()   const noexcept override;
 	string createUniqueId()     const noexcept override;
 
 	CollectionHandler* getCollectionHandler() const noexcept override;

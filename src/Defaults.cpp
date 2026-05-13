@@ -255,13 +255,13 @@ bool Defaults::isMulti(const string& name) {
 	return (restrictorsInfo.at(name).interfaces > 1);
 }
 
-string Defaults::createHardwareUniqueId(const StringUMap& data, bool isDevice) {
-	string name(data.at(NAME));
+string Defaults::createHardwareUniqueId(const Values& data, bool isDevice) {
+	const string& name {data.getValue(NAME)};
 	if (Defaults::isIdUser(name, isDevice)) {
-		return (name + FIELD_SEPARATOR + (data.count(ID) ? data.at(ID) : "1"));
+		return (name + FIELD_SEPARATOR + data.getValue(ID, "1"));
 	}
 	if (Defaults::isSerial(name, isDevice)) {
-		return (name + FIELD_SEPARATOR + (data.count(PORT) ? data.at(PORT) : emptyString));
+		return (name + FIELD_SEPARATOR + data.getValue(PORT));
 	}
 	return name;
 }

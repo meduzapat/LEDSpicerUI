@@ -197,7 +197,7 @@ protected:
 	 * Very similar to ADD but it only uses the form to validate data,
 	 * also items are not added to the box.
 	 */
-	void createItems(StringUMapVector& rawCollection, DataMap& values) noexcept;
+	void createItems(ValueVector& rawCollection, DataMap& values) noexcept;
 
 	/**
 	 * Creates any sub items, called from created items, per item.
@@ -216,7 +216,7 @@ protected:
 	 * @param rawData this values will be moved into the class.
 	 * @return
 	 */
-	virtual Storage::Data* createData(StringUMap& rawData) const noexcept abstract;
+	virtual Storage::Data* createData(Values& rawData) const noexcept abstract;
 
 	/**
 	 * Creates an empty object.

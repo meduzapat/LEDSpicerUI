@@ -116,7 +116,7 @@ string DialogInputLinkMaps::createUniqueId() const noexcept {
 	return currentData->createUniqueId();
 }
 
-LEDSpicerUI::Ui::Storage::Data* DialogInputLinkMaps::createData(StringUMap& rawData) const noexcept {
+LEDSpicerUI::Ui::Storage::Data* DialogInputLinkMaps::createData(Values& rawData) const noexcept {
 	return new Storage::InputMapLink(rawData, ownerData->getProperties().getValue(UID));
 }
 

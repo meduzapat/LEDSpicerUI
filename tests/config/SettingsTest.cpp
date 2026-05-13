@@ -32,21 +32,21 @@ static const StringUMap MOCK_FULL_MAP = {
 	{"binaryPath",        "/usr/bin/ledspicerd"},
 	{"dataDir",           "/usr/share/ledspicer/"},
 	{"projectsDir",       "/home/user/projects/"},
-	{"interactiveMode",   "false"},
-	{"themeStyle",        "dark"},
-	{"cleanProjectDir",   "true"},
-	{"preserveEmptyDir",  "true"},
-	{"removeInvalidItems","true"},
-	{"saveBackup",        "false"},
-	{"debugFiles",        "true"},
+	{"interactiveMode",   HUMAN_FALSE},
+	{"themeStyle",        "Dark"},
+	{"cleanProjectDir",   HUMAN_TRUE},
+	{"preserveEmptyDir",  HUMAN_TRUE},
+	{"removeInvalidItems",HUMAN_TRUE},
+	{"saveBackup",        HUMAN_FALSE},
+	{"debugFiles",        HUMAN_TRUE},
 };
 
 // Mock data with only a subset of keys — simulates a partial or legacy saved file.
 static const StringUMap MOCK_PARTIAL_MAP = {
-	{"binaryPath", "/usr/bin/ledspicerd"},
-	{"themeStyle", "light"},
-	{"cleanProjectDir", "true"},
-	{"saveBackup", "false"},
+	{"binaryPath",      "/usr/bin/ledspicerd"},
+	{"themeStyle",      "Light"},
+	{"cleanProjectDir", HUMAN_TRUE},
+	{"saveBackup",      HUMAN_FALSE},
 };
 
 class SettingsTest : public ::testing::Test {

@@ -88,7 +88,7 @@ void Settings::setDebugFiles(bool value) noexcept {
 	values[DEBUG_FILES] = value ? HUMAN_TRUE : HUMAN_FALSE;
 }
 
-void Settings::load(const StringUMap& valuesmap) noexcept {
+void Settings::load(const Values& valuesmap) noexcept {
 
 
 
@@ -114,7 +114,7 @@ void Settings::load(const StringUMap& valuesmap) noexcept {
 	updateMode();
 }
 
-StringUMap Settings::toMap() const noexcept {
+LEDSpicerUI::Values Settings::toMap() const noexcept {
 	return {
 		{"binaryPath",        binaryPath},
 		{"dataDir",           dataDir},

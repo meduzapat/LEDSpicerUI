@@ -218,7 +218,7 @@ string DialogDevice::createUniqueId() const noexcept {
 	});
 }
 
-LEDSpicerUI::Ui::Storage::Data* DialogDevice::createData(StringUMap& rawData) const noexcept {
+LEDSpicerUI::Ui::Storage::Data* DialogDevice::createData(Values& rawData) const noexcept {
 	return new Storage::Device(rawData);
 }
 

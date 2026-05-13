@@ -20,7 +20,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Parent.hpp"
+#include "Hardware.hpp"
 
 #pragma once
 
@@ -30,18 +30,17 @@ namespace LEDSpicerUI::Ui::Storage {
  * LEDSpicerUI::Ui::Storage::Restrictor
  * Stores a hardware restrictor and its player mappings.
  */
-class Restrictor : public Parent {
+class Restrictor : public Hardware {
 
 public:
 
 	Restrictor(Values& data) noexcept :
-		Parent(data, {COLLECTION_RESTRICTOR_MAPS})
+		Hardware(data, {COLLECTION_RESTRICTOR_MAPS})
 	{}
 
 	virtual ~Restrictor() = default;
 
-	string createPrettyName()   const noexcept override;
-	string createUniqueId()     const noexcept override;
+	string createUniqueId()     const noexcept override { return Defaults::createHardwareUniqueId(*this, false); }
 	const string& getCssClass() const noexcept override { return CSS_RESTRICTOR_BOX_BUTTON; }
 	const string& getXmlTag()   const noexcept override { return TYPE_RESTRICTOR; }
 

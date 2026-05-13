@@ -55,7 +55,8 @@ TEST_F(RestrictorTest, TestFunctionality) {
 	r.setValue(ID, "1");
 
 	// createUniqueId: matches hardware identity helper.
-	EXPECT_EQ(Defaults::createHardwareUniqueId(r.getValues(), false), r.createUniqueId());
+	const Values values {r.copyValues()};
+	EXPECT_EQ(Defaults::createHardwareUniqueId(values, false), r.createUniqueId());
 
 	// Child collection keyed as COLLECTION_RESTRICTOR_MAPS.
 	EXPECT_NE(nullptr, r.getChild(COLLECTION_RESTRICTOR_MAPS));

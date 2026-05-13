@@ -147,7 +147,7 @@ string DialogGroup::createUniqueId() const noexcept {
 	return Defaults::createCommonUniqueId({inputGroupName->get_text()});
 }
 
-Data* DialogGroup::createData(StringUMap& rawData) const noexcept {
+Data* DialogGroup::createData(Values& rawData) const noexcept {
 	return new Group(rawData);
 }
 

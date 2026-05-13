@@ -172,7 +172,7 @@ void DialogInputSource::resolveSourcelessStorage() noexcept {
 	if (action == Actions::LOAD) return;
 
 	// Otherwise create the phantom source
-	StringUMap rawData;
+	Values rawData;
 	currentData = createData(rawData);
 	currentData->getProperties().setValue(SOURCELESS, "1");
 	items->create(currentData);
@@ -215,7 +215,7 @@ void DialogInputSource::createSubItems(DataMap& values) noexcept {
 	DialogInputMap::getInstance()->load(values);
 }
 
-LEDSpicerUI::Ui::Storage::Data* DialogInputSource::createData(StringUMap& rawData) const noexcept {
+LEDSpicerUI::Ui::Storage::Data* DialogInputSource::createData(Values& rawData) const noexcept {
 	auto is {new Storage::InputSource(rawData, ownerData->getProperties().getValue(UID))};
 	// At load owner is realized and valid (not stale) check if is a sourceless
 	if (action == Actions::LOAD and not Defaults::needSource(ownerData->getValue(NAME)))

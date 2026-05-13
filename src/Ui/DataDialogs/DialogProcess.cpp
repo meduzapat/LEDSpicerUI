@@ -107,6 +107,6 @@ string DialogProcess::createUniqueId() const noexcept {
 	return inputProcessName->get_text();
 }
 
-LEDSpicerUI::Ui::Storage::Data* DialogProcess::createData(StringUMap& rawData) const noexcept {
+LEDSpicerUI::Ui::Storage::Data* DialogProcess::createData(Values& rawData) const noexcept {
 	return new Storage::Process(rawData);
 }

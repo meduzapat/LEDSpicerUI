@@ -84,7 +84,7 @@ protected:
 
 	DialogDirectory(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept;
 
-	Storage::Data* createData(StringUMap& rawData) const noexcept override;
+	Storage::Data* createData(Values& rawData) const noexcept override;
 
 	const string& getType() const noexcept override;
 

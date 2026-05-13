@@ -69,7 +69,6 @@ add_executable(ledspicerui
 	src/Ui/Storage/Group.cpp
 	src/Ui/Storage/Device.cpp
 	src/Ui/Storage/RestrictorMap.cpp
-	src/Ui/Storage/Restrictor.cpp
 	src/Ui/Storage/Process.cpp
 	src/Ui/Storage/InputMapLink.cpp
 	src/Ui/Storage/InputMap.cpp

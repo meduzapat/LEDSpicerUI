@@ -23,7 +23,6 @@
 #include <tinyxml2.h>
 #include "Message.hpp"
 
-
 #pragma once
 
 namespace LEDSpicerUI {

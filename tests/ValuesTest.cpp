@@ -54,35 +54,40 @@ TEST_F(ValuesTest, Constructors) {
 	Values v2(std::move(v1));
 	EXPECT_EQ("value1", v2.getValue("key1"));
 	EXPECT_EQ("value2", v2.getValue("key2"));
+	EXPECT_EQ(0,        v1.getSize());
 
-	// Initializer list
-	Values v3 {{"key3", "value3"}};
-	EXPECT_EQ("value3", v3.getValue("key3"));
-
-	// Move assignment
-	v3 = std::move(v2);
+	// Copy constructor from iterators
+	StringUMap map2{{"key1", "value1"}, {"key2", "value2"}};
+	Values v3(map2.begin(), map2.end());
 	EXPECT_EQ("value1", v3.getValue("key1"));
 	EXPECT_EQ("value2", v3.getValue("key2"));
-	// should not have old data
-	EXPECT_EQ("", v3.getValue("key3"));
-	EXPECT_EQ("", v2.getValue("key1"));
 
-	// Move from other.
-	Values v4 {v3};
+	// Initializer list
+	Values v4 {{"key3", "value3"}};
+	EXPECT_EQ("value3", v4.getValue("key3"));
+
+	// Move assignment
+	v4 = std::move(v3);
 	EXPECT_EQ("value1", v4.getValue("key1"));
 	EXPECT_EQ("value2", v4.getValue("key2"));
 	// should not have old data
-	EXPECT_EQ(emptyString, v3.getValue("key1"));
+	EXPECT_EQ(0, v3.getSize());
+
+	// Move from other.
+	Values v5 {v4};
+	EXPECT_EQ("value1", v5.getValue("key1"));
+	EXPECT_EQ("value2", v5.getValue("key2"));
+	// should not have old data
+	EXPECT_EQ(0, v4.getSize());
 }
 
-TEST_F(ValuesTest, GetValue) {
+TEST_F(ValuesTest, GetSetValue) {
+
 	EXPECT_EQ("TestItem", values->getValue("name"));
 	EXPECT_EQ("",         values->getValue("nonexistent"));
 	EXPECT_EQ("default",  values->getValue("nonexistent", "default"));
 	EXPECT_EQ("yes",      values->getValue("ignored"));
-}
 
-TEST_F(ValuesTest, SetValue) {
 	values->setValue("key", "value");
 	EXPECT_EQ("value",   values->getValue("key"));
 	values->setValue("key", "NewName");

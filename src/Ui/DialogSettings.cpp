@@ -38,7 +38,7 @@ const string& DialogSettings::getConfigPath() const {
 	return configPath;
 }
 
-const StringVector& DialogSettings::getColorFiles() const {
+const LEDSpicerUI::StringVector& DialogSettings::getColorFiles() const {
 	return dataDirStatus.colorFiles;
 }
 
@@ -69,7 +69,7 @@ bool DialogSettings::loadSettings() {
 }
 
 void DialogSettings::saveSettings() {
-	StringUMap settings {
+	Values settings {
 		{"binaryPath",  binaryPath},
 		{"dataDir",     dataDir},
 		{"projectsDir", Defaults::getProjectsDir()}

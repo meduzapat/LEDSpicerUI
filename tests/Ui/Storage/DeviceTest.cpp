@@ -52,7 +52,7 @@ TEST_F(DeviceTest, TestFunctionality) {
 	EXPECT_NE(string::npos, d.createPrettyName().find("Raspberry Pi GPIO"));
 
 	// createUniqueId: matches hardware identity helper.
-	EXPECT_EQ(Defaults::createHardwareUniqueId(d.getValues()), d.createUniqueId());
+	EXPECT_EQ(Defaults::createHardwareUniqueId(d, true), d.createUniqueId());
 
 	// Child collection keyed as COLLECTION_ELEMENTS.
 	EXPECT_NE(nullptr, d.getChild(COLLECTION_ELEMENTS));

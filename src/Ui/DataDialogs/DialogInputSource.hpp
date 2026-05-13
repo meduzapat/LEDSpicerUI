@@ -92,7 +92,7 @@ protected:
 
 	void createSubItems(DataMap& values) noexcept override;
 	const string& getType() const noexcept override { return TYPE_INPUT_SOURCE; }
-	Storage::Data* createData(StringUMap& rawData) const noexcept override;
+	Storage::Data* createData(Values& rawData) const noexcept override;
 
 	/**
 	 * Resolves the current source value from combo or manual entry.

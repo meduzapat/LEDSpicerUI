@@ -21,6 +21,7 @@
  */
 
 #include "GladeDialog.hpp"
+#include "XMLHelper.hpp"
 
 #pragma once
 
@@ -124,7 +125,7 @@ protected:
 	 * @param colors
 	 * @return a CCS string representing the new color set.
 	 */
-	string setColors(StringUMap& colors) noexcept;
+	string setColors(const Values& colors) noexcept;
 
 	/**
 	 * Creates a deletable button with the desired color.

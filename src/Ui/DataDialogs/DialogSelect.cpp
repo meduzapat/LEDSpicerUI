@@ -95,7 +95,7 @@ void DialogSelect::open() noexcept {
 	for (auto flowChild : pickerBox->get_selected_children()) {
 		auto target{static_cast<Storage::Selection*>(flowChild->get_child())->getData()};
 		if (not destination->isSet(target)) {
-			StringUMap empty;
+			Values empty;
 			auto link{new Storage::Link(
 				empty,
 				request->linkKey,
@@ -140,10 +140,10 @@ void DialogSelect::load(DataMap& values, const string& ownerUniqueId) noexcept {
 
 	for (auto& rawItem : rawCollection) {
 		try {
-			if (rawItem.find(request->linkKey) == rawItem.end())
+			if (not rawItem.isSet(request->linkKey))
 				throw Message("Missing key " + request->linkKey + location);
 
-			const string& keyValue = rawItem.at(request->linkKey);
+			const string& keyValue = rawItem.getValue(request->linkKey);
 			Storage::Data* target  = request->sourceCollection->get(keyValue);
 			if (not target)
 				throw Message(
@@ -151,7 +151,7 @@ void DialogSelect::load(DataMap& values, const string& ownerUniqueId) noexcept {
 					" with " + request->linkKey + " = " + keyValue + location
 				);
 
-			rawItem.erase(request->linkKey);
+			rawItem.unSet(request->linkKey);
 			auto link{new Storage::Link(
 				rawItem,
 				request->linkKey,
@@ -241,8 +241,8 @@ void DialogSelect::addDisplayButtons(Storage::BoxButton& boxButton) noexcept {
 	boxButton.show_all();
 }
 
-vector<string> DialogSelect::getSelectedIndexes() const noexcept {
-	vector<string> result;
+LEDSpicerUI::StringVector DialogSelect::getSelectedIndexes() const noexcept {
+	StringVector result;
 	if (not request or not destination) return result;
 	int pickerIdx = 0;
 	for (const auto& [id, data] : *request->sourceCollection) {
@@ -258,7 +258,8 @@ vector<string> DialogSelect::getSelectedIndexes() const noexcept {
 	return result;
 }
 
-void DialogSelect::selectByIndexes(const vector<string>& indexes) noexcept {
+void DialogSelect::selectByIndexes(const StringVector& indexes) noexcept {
+
 	if (indexes.empty()) return;
 
 	std::unordered_set<int> targets;
@@ -276,7 +277,7 @@ void DialogSelect::selectByIndexes(const vector<string>& indexes) noexcept {
 				data->getProperties().getValue(request->filterProp) != request->filterValue
 			) continue;
 			if (targets.count(idx) and not destination->isSet(data)) {
-				StringUMap empty;
+				Values empty;
 				auto link{new Storage::Link(
 					empty,
 					request->linkKey,

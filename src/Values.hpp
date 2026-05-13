@@ -69,6 +69,9 @@ public:
 		return *this;
 	}
 
+	Values(StringUMap::const_iterator first, StringUMap::const_iterator last)
+		: values(first, last) {}
+
 	Values(std::initializer_list<std::pair<std::string, std::string>> init)
 		: values(init.begin(), init.end())
 	{}

@@ -63,7 +63,7 @@ protected:
 
 	void createSubItems(DataMap& values) noexcept override;
 	const string& getType()          const noexcept override { return TYPE_GROUP; }
-	Storage::Data* createData(StringUMap& rawData) const noexcept override;
+	Storage::Data* createData(Values& rawData) const noexcept override;
 
 	void wireChildrenDialogs()       noexcept override;
 	void disconnectChildrenDialogs() noexcept override;

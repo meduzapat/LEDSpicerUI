@@ -115,7 +115,7 @@ bool DialogRestrictorMap::checkAvailableInterfaces() const noexcept {
 	return size < total;
 }
 
-LEDSpicerUI::Ui::Storage::Data* DialogRestrictorMap::createData(StringUMap& rawData) const noexcept {
+LEDSpicerUI::Ui::Storage::Data* DialogRestrictorMap::createData(Values& rawData) const noexcept {
 	return new Storage::RestrictorMap(rawData);
 }
 

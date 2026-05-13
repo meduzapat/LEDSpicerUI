@@ -117,13 +117,13 @@ public:
 	/**
 	 * @return Vector with indexes of the found BoxButtons.
 	 */
-	vector<string> getSelectedIndexes() const noexcept;
+	StringVector getSelectedIndexes() const noexcept;
 
 	/**
 	 * Selects items by a list of indexes.
 	 * @param indexes Vector with indexes of the items to select.
 	 */
-	void selectByIndexes(const vector<string>& indexes) noexcept;
+	void selectByIndexes(const StringVector& indexes) noexcept;
 
 protected:
 

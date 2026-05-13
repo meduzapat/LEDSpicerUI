@@ -71,7 +71,7 @@ void DialogColors::setColorsFromFile(const string& path) noexcept {
 	resetColorButtons();
 
 	// Gather colors from file.
-	StringUMap colors;
+	Values colors;
 	try {
 		XMLHelper colorsXML(path, "Colors");
 		tinyxml2::XMLElement* xmlElement = colorsXML.getRoot()->FirstChildElement("color");
@@ -79,11 +79,11 @@ void DialogColors::setColorsFromFile(const string& path) noexcept {
 		// Extract Colors.
 		if (xmlElement) {
 			for (; xmlElement; xmlElement = xmlElement->NextSiblingElement()) {
-				auto colorAttr = colorsXML.processNode(xmlElement);
+				const auto colorAttr {XMLHelper::processNode(xmlElement)};
 				XMLHelper::checkAttributes({NAME, "color"}, colorAttr, "color");
-				if (colorAttr[NAME] == HUMAN_RANDOM || colors.find(colorAttr[NAME]) != colors.end())
+				if (colorAttr.isA(NAME, HUMAN_RANDOM) || not colors.isSet(colorAttr.getValue(NAME)))
 					continue;
-				colors[colorAttr[NAME]] = colorAttr[COLOR];
+				colors.setValue(colorAttr.getValue(NAME), colorAttr.getValue(COLOR));
 			}
 		}
 	}
@@ -99,7 +99,7 @@ void DialogColors::setColorsFromFile(const string& path) noexcept {
 	}
 
 	// Set new CSS data (if colors > 0).
-		if (const string c {setColors(colors)}; c.size()) {
+	if (const string c {setColors(colors)}; c.size()) {
 		currentProvider = Gtk::CssProvider::create();
 		currentProvider->load_from_data(c);
 		styleContext->add_provider_for_screen(
@@ -184,7 +184,7 @@ void DialogColors::populateColorBox(Gtk::FlowBox* destination, const StringVecto
 		createColorButton(destination, c);
 }
 
-StringVector DialogColors::getColorBoxValues(Gtk::FlowBox* destination) const noexcept {
+LEDSpicerUI::StringVector DialogColors::getColorBoxValues(Gtk::FlowBox* destination) const noexcept {
 	StringVector r;
 	for (auto child : destination->get_children()) {
 		auto c {static_cast<Gtk::FlowBoxChild*>(child)};
@@ -200,7 +200,7 @@ void DialogColors::onColorSelected(Gtk::Button* button) noexcept {
 	response(Gtk::ResponseType::RESPONSE_OK);
 }
 
-string DialogColors::setColors(StringUMap& colors) noexcept {
+string DialogColors::setColors(const Values& colors) noexcept {
 	// Remove previous buttons.
 	for (auto c : ContainerColorPicker->get_children())
 		ContainerColorPicker->remove(*c);

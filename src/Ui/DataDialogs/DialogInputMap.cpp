@@ -166,7 +166,7 @@ string DialogInputMap::createUniqueId() const noexcept {
 	});
 }
 
-LEDSpicerUI::Ui::Storage::Data* DialogInputMap::createData(StringUMap& rawData) const noexcept {
+LEDSpicerUI::Ui::Storage::Data* DialogInputMap::createData(Values& rawData) const noexcept {
 
 	const string
 		type   = rawData.count(TYPE)   ? rawData.at(TYPE)   : emptyString,

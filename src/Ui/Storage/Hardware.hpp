@@ -1,8 +1,8 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file	  Device.cpp
- * @since	 Feb 26, 2023
- * @author	Patricio A. Rossi (MeduZa)
+ * @file      Hardware.hpp
+ * @since     May 13, 2026
+ * @author    Patricio A. Rossi (MeduZa)
  *
  * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
@@ -20,20 +20,33 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Device.hpp"
+#include "Parent.hpp"
 
-using namespace LEDSpicerUI::Ui::Storage;
+#pragma once
 
+namespace LEDSpicerUI::Ui::Storage {
 
-string Device::createUniqueId() const noexcept {
-	return Defaults::createHardwareUniqueId(*this, true);
-}
+/**
+ * LEDSpicerUI::Ui::Storage::Hardware
+ *
+ * Provides hardware common code.
+ */
+class Hardware : public Parent {
 
-CollectionHandler* Device::getCollectionHandler() const noexcept {
-	return CollectionHandler::getInstance(COLLECTION_DEVICES);
-}
+public:
 
-bool Device::shouldSerialize(const string& key, const string& value) const noexcept {
-	if (key == ID and value == "1") return false;
-	return Hardware::shouldSerialize(key, value);
+	using Parent::Parent;
+
+	string createPrettyName() const noexcept {
+		string
+			name{getValue(NAME)},
+			r{Defaults::devicesInfo.at(name).name};
+		if (Defaults::isIdUser(name))
+			r += " Id: " + getValue(ID);
+		if (Defaults::isSerial(name))
+			r += " Port: " + (getValue(PORT).empty() ? "<autodetect>" : getValue(PORT));
+		return r;
+	}
+};
+
 }
