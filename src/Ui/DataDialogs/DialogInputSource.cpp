@@ -223,7 +223,7 @@ LEDSpicerUI::Ui::Storage::Data* DialogInputSource::createData(Values& rawData) c
 	return is;
 }
 
-StringMap DialogInputSource::scanEventDevices() noexcept{
+LEDSpicerUI::StringMap DialogInputSource::scanEventDevices() noexcept{
 
 	StringMap devices;
 

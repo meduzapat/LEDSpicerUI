@@ -69,7 +69,7 @@ protected:
 
 	void wireDialogs(Storage::DirectoryEntry* dir) noexcept override;
 
-	DataMap extractData(const string& filePath, const string& relPath) noexcept override;
+	DataMap& extractData(const string& filePath, const string& relPath) noexcept override;
 
 	void saveItem(Storage::Data* item, const string& filePath) noexcept override;
 

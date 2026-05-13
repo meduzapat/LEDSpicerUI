@@ -109,7 +109,7 @@ protected:
 	 * @param relPath  Navigator-relative directory path containing the file.
 	 * @return DataMap with all data extracted from the file.
 	 */
-	virtual DataMap extractData(const string& filePath, const string& relPath) noexcept abstract;
+	virtual DataMap& extractData(const string& filePath, const string& relPath) noexcept abstract;
 
 	/**
 	 * Writes one item to filePath.

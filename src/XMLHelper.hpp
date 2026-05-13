@@ -132,7 +132,7 @@ public:
 	/**
 	 * @return The whole extracted information at loading.
 	 */
-	const DataMap& getDataMap() const noexcept { return extractedData; }
+	DataMap& getDataMap() noexcept { return extractedData; }
 
 	/**
 	 * Convert a XML error into human readable text.

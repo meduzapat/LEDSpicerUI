@@ -83,7 +83,7 @@ void InputFile::processLinkedTriggers(const string& baseId) noexcept {
 	ValueVector imlData;
 	for (const string& chunk : Defaults::explode(linked, '|'))
 		if (not chunk.empty())
-			imlData.push_back(Values{{LINKED_ITEMS, chunk}});
+			imlData.push_back(std::move(Values{{LINKED_ITEMS, chunk}}));
 
 	if (imlData.empty())
 		return;

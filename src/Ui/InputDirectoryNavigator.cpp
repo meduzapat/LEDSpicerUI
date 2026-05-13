@@ -173,15 +173,10 @@ void InputDirectoryNavigator::wireDialogs(Storage::DirectoryEntry* dir) noexcept
 }
 
 
-DataMap InputDirectoryNavigator::extractData(const string& filePath, const string& relPath) noexcept {
-	try {
-		InputFile datafile(filePath, relPath);
-		return datafile.getDataMap();
-	}
-	catch (Message& e) {
-		Message::displayError(
-			"Skipping " + Glib::path_get_basename(filePath) +
-			":\n" + XMLHelper::cleanError(e.getMessage()));
-		return {};
-	}
+LEDSpicerUI::DataMap& InputDirectoryNavigator::extractData(
+	const string& filePath,
+	const string& relPath
+) noexcept {
+	InputFile datafile(filePath, relPath);
+	return datafile.getDataMap();
 }

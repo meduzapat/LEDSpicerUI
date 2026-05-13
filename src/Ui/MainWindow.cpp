@@ -411,7 +411,7 @@ void MainWindow::setConfiguration(const Values& values) {
 	comboUseColors->set_active_id(values.getValue("colorsFile", DEFAULT_COLORSINFO));
 }
 
-Values MainWindow::packLedspicerConfig() const {
+LEDSpicerUI::Values MainWindow::packLedspicerConfig() const noexcept {
 	Values r {
 		// ledspicerd.
 		{"version",      PACKAGE_DATA_VERSION},
@@ -440,11 +440,11 @@ void MainWindow::readConfigFile(const string& dataFilePath, bool wipe, uint8_t i
 
 	ConfigFile datafile(dataFilePath);
 	if (importFlags & Defaults::ImportFlags::CONFIG) {
-		auto c(datafile.getSettings());
+		const auto& c(datafile.getRootInfo());
 		// check if color are different.
 		const string
-			colors(c.find("colors") != c.end() ? c.at("colors") : ""),
-			previous(comboColors->get_active_id());
+			& colors {c.getValue("colors")},
+			& previous(comboColors->get_active_id());
 		if (not previous.empty() and previous != colors)
 			Message::displayInfo("Warning\nColors definition file changed, element color changed");
 		setConfiguration(c);
@@ -475,7 +475,7 @@ void MainWindow::readConfigFile(const string& dataFilePath, bool wipe, uint8_t i
 			processes.wipe();
 		}
 		DialogProcess::getInstance()->load(datafile.getDataMap());
-		inputRunEvery->set_text(datafile.getProcessLookupRunEvery());
+		inputRunEvery->set_text(datafile.getRootInfo().getValue(PARAM_MILLISECONDS));
 	}
 
 	// Load inputs from the inputs/ directory alongside the config file.
@@ -487,14 +487,11 @@ void MainWindow::readConfigFile(const string& dataFilePath, bool wipe, uint8_t i
 		// profileNavigator.load(Glib::path_get_dirname(dataFilePath) + "/" + PROFILE_PATH);      // future, must be last
 	}
 
-	// TODO: use registered profiles.
+	// TODO: default profile should be the one selected in the profiles box.
 	comboDefaultProfile->remove_all();
-	for (const auto& item : {datafile.getDefaultProfile()})
-		comboDefaultProfile->append(item);
-
-	// this will trigger load.
-	comboDefaultProfile->set_active_text(datafile.getDefaultProfile());
-
+	const string& dp {datafile.getRootInfo().getValue(DEFAULT_PROFILE)};
+	comboDefaultProfile->append(dp);
+	comboDefaultProfile->set_active_text(dp);
 }
 
 void MainWindow::setColorFile(const string& colorFile) {

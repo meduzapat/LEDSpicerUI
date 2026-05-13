@@ -95,16 +95,27 @@ void DirectoryNavigator::process(const string& absPath, const string& relPath) n
 
 	for (auto& entry : entries) {
 		if (entry.is_directory(ec)) {
-			string name(entry.path().filename().string());
-			string childRel(relPath.empty() ? name : relPath + "/" + name);
+
+			const string
+				name {entry.path().filename().string()},
+				childRel(relPath.empty() ? name : relPath + "/" + name);
+
 			scanData[COLLECTION_DIRECTORIES].push_back({{FILENAME, name}, {PATH_PARENT, relPath}});
-			process(entry.path().string(), childRel);
+			process(name, childRel);
 		}
 		else if (entry.is_regular_file(ec) and entry.path().extension() == ".xml") {
-			DataMap fileData(extractData(entry.path().string(), relPath));
-			for (auto& [key, vec] : fileData)
-				for (auto& item : vec)
-					scanData[key].push_back(std::move(item));
+			try {
+				DataMap& fileData {extractData(entry.path().string(), relPath)};
+				for (auto& [key, vec] : fileData)
+					for (auto& item : vec)
+						scanData[key].push_back(std::move(item));
+			}
+			catch (Message& e) {
+				Message::displayError(
+					"Skipping " + Glib::path_get_basename(entry.path().string()) + ":\n" +
+					XMLHelper::cleanError(e.getMessage())
+				);
+			}
 		}
 	}
 }
