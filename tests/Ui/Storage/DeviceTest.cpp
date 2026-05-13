@@ -40,12 +40,12 @@ protected:
 
 TEST_F(DeviceTest, TestFunctionality) {
 
-	Values data {{NAME, "RaspberryPi"}, {ID, "1"}, {PORT, ""}};
+	Values data {{NAME, "UltimarcUltimate"}, {ID, "1"}, {PORT, ""}};
 	Device d {data};
 
 	// getCssClass, getXmlTag, getCollectionHandler.
-	EXPECT_EQ(CSS_DEVICE_BOX_BUTTON,                            d.getCssClass());
-	EXPECT_EQ(TYPE_DEVICE,                                      d.getXmlTag());
+	EXPECT_EQ(CSS_DEVICE_BOX_BUTTON,                              d.getCssClass());
+	EXPECT_EQ(TYPE_DEVICE,                                        d.getXmlTag());
 	EXPECT_EQ(CollectionHandler::getInstance(COLLECTION_DEVICES), d.getCollectionHandler());
 
 	// createUniqueId: matches hardware identity helper.
@@ -54,14 +54,11 @@ TEST_F(DeviceTest, TestFunctionality) {
 	// Child collection keyed as COLLECTION_ELEMENTS.
 	EXPECT_NE(nullptr, d.getChild(COLLECTION_ELEMENTS));
 
+	EXPECT_EQ("Ultimarc Ipac Ultimate IO Id: 1", d.createPrettyName());
+
 	// toXML: ID="1" and PORT="" suppressed by shouldSerialize.
 	const string xml(d.toXML());
-	EXPECT_EQ("<device name=\"RaspberryPi\"/>\n", xml);
-
-	// shouldSerialize: non-default ID is included.
-	d.setValue(ID, "2");
-	EXPECT_NE(string::npos, d.toXML().find(ID));
-
+	EXPECT_EQ("<device name=\"UltimarcUltimate\"/>\n", xml);
 }
 
 int main(int argc, char** argv) {

@@ -310,10 +310,10 @@ void DialogForm::onCloneClicked(Storage::BoxButton& boxButton) noexcept {
 	clearForm();
 
 	// Clone Data, will return a copy with a different and unique ID.
-	StringUMap values(boxButton.getData()->copyValues());
+	Values values(boxButton.getData()->copyValues());
 
 	// Ask dialog to create a new Data with the cloned values.
-	Storage::Data* tempData{createData(values)};
+	Storage::Data* tempData {createData(values)};
 
 	// Create button, will set tracker if applicable.
 	Storage::BoxButton& newBoxButton(items->create(tempData));

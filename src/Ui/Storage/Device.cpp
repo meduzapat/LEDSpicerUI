@@ -24,6 +24,16 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
+string Device::createPrettyName() const noexcept {
+	string
+		name{getValue(NAME)},
+		r{Defaults::devicesInfo.at(name).name};
+	if (Defaults::isIdUser(name))
+		r += " Id: " + getValue(ID);
+	if (Defaults::isSerial(name))
+		r += " Port: " + (getValue(PORT).empty() ? "<autodetect>" : getValue(PORT));
+	return r;
+}
 
 string Device::createUniqueId() const noexcept {
 	return Defaults::createHardwareUniqueId(*this, true);
@@ -34,6 +44,6 @@ CollectionHandler* Device::getCollectionHandler() const noexcept {
 }
 
 bool Device::shouldSerialize(const string& key, const string& value) const noexcept {
-	if (key == ID and value == "1") return false;
-	return Hardware::shouldSerialize(key, value);
+	if (key == ID and  value == "1") return false;
+	return Parent::shouldSerialize(key, value);
 }

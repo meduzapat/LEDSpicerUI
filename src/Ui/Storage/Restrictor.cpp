@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      Hardware.hpp
- * @since     May 13, 2026
+ * @file      Restrictor.cpp
+ * @since     Feb 26, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
  * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
@@ -20,33 +20,20 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Parent.hpp"
+#include "Restrictor.hpp"
 
-#pragma once
+using namespace LEDSpicerUI::Ui::Storage;
 
-namespace LEDSpicerUI::Ui::Storage {
+string Restrictor::createPrettyName() const noexcept {
+	const string & name {getValue(NAME)};
+	string r {Defaults::restrictorsInfo.at(name).name};
+	if (Defaults::isIdUser(name, false))
+		r += " Id: " + getValue(ID);
+	if (Defaults::isSerial(name, false))
+		r += " Port: " + (getValue(PORT).empty() ? "<autodetect>" : getValue(PORT));
+	return r;
+}
 
-/**
- * LEDSpicerUI::Ui::Storage::Hardware
- *
- * Provides hardware common code.
- */
-class Hardware : public Parent {
-
-public:
-
-	using Parent::Parent;
-
-	string createPrettyName() const noexcept {
-		string
-			name{getValue(NAME)},
-			r{Defaults::devicesInfo.at(name).name};
-		if (Defaults::isIdUser(name))
-			r += " Id: " + getValue(ID);
-		if (Defaults::isSerial(name))
-			r += " Port: " + (getValue(PORT).empty() ? "<autodetect>" : getValue(PORT));
-		return r;
-	}
-};
-
+string Restrictor::createUniqueId() const noexcept {
+	return Defaults::createHardwareUniqueId(*this, false);
 }

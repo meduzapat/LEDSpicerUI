@@ -169,8 +169,8 @@ string DialogInputMap::createUniqueId() const noexcept {
 LEDSpicerUI::Ui::Storage::Data* DialogInputMap::createData(Values& rawData) const noexcept {
 
 	const string
-		type   = rawData.count(TYPE)   ? rawData.at(TYPE)   : emptyString,
-		target = rawData.count(TARGET) ? rawData.at(TARGET) : emptyString;
+		& type   = rawData.getValue(TYPE),
+		& target = rawData.getValue(TARGET);
 
 	auto handler{type.empty() ? nullptr : (
 		type == GROUP ?

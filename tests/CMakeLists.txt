@@ -165,12 +165,6 @@ add_test_executable(GroupTest
 	""
 )
 
-add_test_executable(HardwareTest
-	"Ui/Storage/HardwareTest.cpp"
-	"${STORAGE_BASE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Storage/Parent.cpp"
-	""
-)
-
 add_test_executable(DeviceTest
 	"Ui/Storage/DeviceTest.cpp"
 	"${STORAGE_BASE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Storage/Parent.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/Device.cpp"
@@ -179,7 +173,7 @@ add_test_executable(DeviceTest
 
 add_test_executable(RestrictorTest
 	"Ui/Storage/RestrictorTest.cpp"
-	"${STORAGE_BASE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Storage/Parent.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/Restrictor.hpp"
+	"${STORAGE_BASE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Storage/Parent.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/Restrictor.cpp"
 	""
 )
 

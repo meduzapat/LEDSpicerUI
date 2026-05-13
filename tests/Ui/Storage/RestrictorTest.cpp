@@ -40,20 +40,21 @@ protected:
 
 TEST_F(RestrictorTest, TestFunctionality) {
 
-	Values data {{NAME, "ServoStik"}, {ID, "1"}, {PORT, ""}};
+	Values data {{NAME, "ServoStik"}, {ID, "1"}};
 	Restrictor r {data};
 
 	// getCssClass, getXmlTag, getCollectionHandler.
-	EXPECT_EQ(CSS_RESTRICTOR_BOX_BUTTON, r.getCssClass());
-	EXPECT_EQ(TYPE_RESTRICTOR, r.getXmlTag());
+	EXPECT_EQ(CSS_RESTRICTOR_BOX_BUTTON,                              r.getCssClass());
+	EXPECT_EQ(TYPE_RESTRICTOR,                                        r.getXmlTag());
 	EXPECT_EQ(CollectionHandler::getInstance(COLLECTION_RESTRICTORS), r.getCollectionHandler());
 
 	// createUniqueId: matches hardware identity helper.
-	const Values values {r.copyValues()};
-	EXPECT_EQ(Defaults::createHardwareUniqueId(values, false), r.createUniqueId());
+	EXPECT_EQ(Defaults::createHardwareUniqueId(r, false), r.createUniqueId());
 
 	// Child collection keyed as COLLECTION_RESTRICTOR_MAPS.
 	EXPECT_NE(nullptr, r.getChild(COLLECTION_RESTRICTOR_MAPS));
+
+	EXPECT_EQ("Ultimarc ServoStik Id: 1", r.createPrettyName());
 
 	// toXML.
 	const string xml(r.toXML());
