@@ -23,6 +23,7 @@
 #include "DialogForm.hpp"
 
 using namespace LEDSpicerUI::Ui::DataDialogs;
+using namespace LEDSpicerUI::Ui::Storage;
 
 std::unordered_map<string, DialogForm*> DialogForm::familyToDialog;
 
@@ -64,7 +65,7 @@ void DialogForm::createItems(ValueVector& rawCollection, DataMap& values) noexce
 		currentData->wipe();
 		storeData();
 		// BoxButton will take care for data.
-		Storage::BoxButton& boxButton{items->create(currentData)};
+		BoxButton& boxButton{items->create(currentData)};
 		addButtons(boxButton);
 		createSubItems(values);
 		// updates labels and tooltips after children.
@@ -77,10 +78,7 @@ void DialogForm::createItems(ValueVector& rawCollection, DataMap& values) noexce
 	}
 }
 
-void DialogForm::setOwner(
-	Storage::BoxButtonCollection* collection,
-	Storage::Data* owner
-) noexcept {
+void DialogForm::setOwner(BoxButtonCollection* collection, Data* owner) noexcept {
 	ownerData = owner;
 	items     = collection;
 }
@@ -108,14 +106,14 @@ void DialogForm::reindex() noexcept {
 	items->reindex(box);
 }
 
-LEDSpicerUI::Ui::Storage::Data* DialogForm::createData() const noexcept {
+Data* DialogForm::createData() const noexcept {
 	Values data;
 	return createData(data);
 }
 
 void DialogForm::wireChildrenDialogs() noexcept {
 	currentData->setUp();
-	auto parent{dynamic_cast<Storage::Parent*>(currentData)};
+	auto parent{dynamic_cast<Parent*>(currentData)};
 	if (not parent) return;
 	for (auto& [family, items] : parent->getChildren()) {
 		familyToDialog.at(family)->setOwner(&items, currentData);
@@ -125,7 +123,7 @@ void DialogForm::wireChildrenDialogs() noexcept {
 }
 
 void DialogForm::disconnectChildrenDialogs() noexcept {
-	auto parent{dynamic_cast<Storage::Parent*>(currentData)};
+	auto parent{dynamic_cast<Parent*>(currentData)};
 	if (parent) {
 		for (auto& [family, items] : parent->getChildren())
 			familyToDialog.at(family)->removeOwner();
@@ -156,10 +154,7 @@ void DialogForm::setSignalApply() noexcept {
 	});
 }
 
-void DialogForm::createDeleteButton(
-	Storage::BoxButton& boxButton,
-	bool askConfirmation
-) noexcept {
+void DialogForm::createDeleteButton(BoxButton& boxButton, bool askConfirmation) noexcept {
 	auto button(Gtk::make_managed<Gtk::Button>());
 	boxButton.pack_start(*button, Gtk::PACK_SHRINK);
 	button->set_image_from_icon_name(ICON_TRASH, Gtk::ICON_SIZE_BUTTON);
@@ -176,7 +171,7 @@ void DialogForm::createDeleteButton(
 	});
 }
 
-void DialogForm::createEditButton(Storage::BoxButton& boxButton) noexcept {
+void DialogForm::createEditButton(BoxButton& boxButton) noexcept {
 	auto button(Gtk::make_managed<Gtk::Button>());
 	boxButton.pack_start(*button, Gtk::PACK_SHRINK);
 	button->set_image_from_icon_name(ICON_EDIT, Gtk::ICON_SIZE_BUTTON);
@@ -187,7 +182,7 @@ void DialogForm::createEditButton(Storage::BoxButton& boxButton) noexcept {
 	});
 }
 
-void DialogForm::createCloneButton(Storage::BoxButton& boxButton) noexcept {
+void DialogForm::createCloneButton(BoxButton& boxButton) noexcept {
 	auto button(Gtk::make_managed<Gtk::Button>());
 	boxButton.pack_start(*button, Gtk::PACK_SHRINK);
 	button->set_image_from_icon_name(ICON_COPY, Gtk::ICON_SIZE_BUTTON);
@@ -198,7 +193,7 @@ void DialogForm::createCloneButton(Storage::BoxButton& boxButton) noexcept {
 	});
 }
 
-void DialogForm::addButtons(Storage::BoxButton& boxButton) noexcept {
+void DialogForm::addButtons(BoxButton& boxButton) noexcept {
 	createEditButton(boxButton);
 	createDeleteButton(boxButton);
 	boxButton.show_all();
@@ -227,7 +222,7 @@ void DialogForm::onAddClicked() noexcept {
 		storeData();
 		Defaults::markDirty();
 		// Create Button, will set tracker if applicable.
-		Storage::BoxButton& boxButton(items->create(currentData));
+		BoxButton& boxButton(items->create(currentData));
 
 		// Add buttons, update UI and call after create callback.
 		addButtons(boxButton);
@@ -244,7 +239,7 @@ void DialogForm::onAddClicked() noexcept {
 	hide();
 }
 
-void DialogForm::onEditClicked(Storage::BoxButton& boxButton) noexcept {
+void DialogForm::onEditClicked(BoxButton& boxButton) noexcept {
 
 	// Set mode, clear form, set form details.
 	action = Actions::EDIT;
@@ -289,7 +284,7 @@ void DialogForm::onEditClicked(Storage::BoxButton& boxButton) noexcept {
 	hide();
 }
 
-void DialogForm::onDelClicked(Storage::BoxButton& boxButton) noexcept {
+void DialogForm::onDelClicked(BoxButton& boxButton) noexcept {
 
 	// Delete started.
 	currentData = boxButton.getData();
@@ -303,7 +298,7 @@ void DialogForm::onDelClicked(Storage::BoxButton& boxButton) noexcept {
 	currentData = nullptr;
 }
 
-void DialogForm::onCloneClicked(Storage::BoxButton& boxButton) noexcept {
+void DialogForm::onCloneClicked(BoxButton& boxButton) noexcept {
 
 	// Clone started, set mode, clear form.
 	action = Actions::ADD;
@@ -313,10 +308,10 @@ void DialogForm::onCloneClicked(Storage::BoxButton& boxButton) noexcept {
 	Values values(boxButton.getData()->copyValues());
 
 	// Ask dialog to create a new Data with the cloned values.
-	Storage::Data* tempData {createData(values)};
+	Data* tempData {createData(values)};
 
 	// Create button, will set tracker if applicable.
-	Storage::BoxButton& newBoxButton(items->create(tempData));
+	BoxButton& newBoxButton(items->create(tempData));
 	Defaults::markDirty();
 
 	// Update UI and call after create callback.
@@ -325,12 +320,12 @@ void DialogForm::onCloneClicked(Storage::BoxButton& boxButton) noexcept {
 	afterCreate(newBoxButton);
 }
 
-LEDSpicerUI::Ui::Storage::BoxButtonCollection* DialogForm::getPrimaryChildCollection() const noexcept {
-	auto p{dynamic_cast<LEDSpicerUI::Ui::Storage::Parent*>(currentData)};
+BoxButtonCollection* DialogForm::getPrimaryChildCollection() const noexcept {
+	auto p{dynamic_cast<Parent*>(currentData)};
 	if (not p) return nullptr;
 	return p->getPrimaryChild();
 }
 
-LEDSpicerUI::Ui::Storage::BoxButtonCollection* DialogForm::getChildCollection(const string& family) const noexcept {
-	return static_cast<LEDSpicerUI::Ui::Storage::Parent*>(currentData)->getChild(family);
+BoxButtonCollection* DialogForm::getChildCollection(const string& family) const noexcept {
+	return static_cast<Parent*>(currentData)->getChild(family);
 }
