@@ -177,8 +177,10 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 	});
 
 	signal_show().connect([this]() {
+		Defaults::setIgnoreChanges(true);
 		if (not DialogSettings::getInstance()->startup(this))
 			close();
+		Defaults::setIgnoreChanges(false);
 	});
 }
 
