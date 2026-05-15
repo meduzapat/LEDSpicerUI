@@ -20,6 +20,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "Settings.hpp"
 #include "XMLHelper.hpp"
 
 #pragma once
@@ -30,42 +31,53 @@
 namespace LEDSpicerUI::Config {
 
 /**
- * LEDSpicerUI::SettingsFile
- * Handles UI configuration file.
+ * LEDSpicerUI::Config::SettingsFile
+ *
+ * Handles UI configuration file I/O.
+ * Always call initialize or set the paths manually.
+ * Construction loads from file into Settings.
  */
 class SettingsFile : public XMLHelper {
 
 public:
 
-	using XMLHelper::XMLHelper;
-
-	virtual ~SettingsFile() = default;
+	SettingsFile();
 
 	/**
-	 * Saves settings to file.
-	 * @param settingsFile Path to config file.
-	 * @param values Settings to save.
-	 * @throws Message on write error.
+	 * One-call startup entry point.
+	 * Loads from file or applies defaults.
+	 *
+	 * @return true if a config file was found and loaded, false on first run.
 	 */
-	static void save(const string& settingsFile, const Values& values);
+	static bool initialize();
 
 	/**
-	 * @return Full path to config file.
+	 * Dumps to storage.
 	 */
-	static string getConfigFilePath();
+	static void save();
 
 	/**
-	 * @return True if config file exists.
+	 * Overrides the resolved path (used by tests). Pass empty string to reset.
+	 *
+	 * @param path
 	 */
-	static bool configExists();
-
-protected:
+	static void setSettingsPath(const string& path) noexcept;
 
 	/**
-	 * Ensures config directory exists.
-	 * @throws Glib::Error if directory creation fails.
+	 * @return the override path if set, otherwise the user config path.
 	 */
-	static void ensureConfigDir();
+	static const string& getSettingsPath() noexcept;
+
+	/**
+	 * @return True if getSettingsPath() exists on disk.
+	 */
+	static bool configExists() noexcept;
+
+private:
+
+	static string settingFilePath;
+
+	static void ensureConfigDir() noexcept;
 };
 
 } // namespace

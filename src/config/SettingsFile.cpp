@@ -24,44 +24,52 @@
 
 using namespace LEDSpicerUI::Config;
 
-string SettingsFile::getConfigFilePath() {
-	return Glib::get_user_config_dir() + "/" PACKAGE_NAME "/" UI_CONFIG_FILE;
+string SettingsFile::settingFilePath;
+
+SettingsFile::SettingsFile() : XMLHelper(getSettingsPath(), UI_CONFIG_TYPE) {
+	Settings::get().load(getRootInfo());
 }
 
-bool SettingsFile::configExists() {
-	return Glib::file_test(getConfigFilePath(), Glib::FILE_TEST_EXISTS);
-}
-
-void SettingsFile::ensureConfigDir() {
-	string configDir = Glib::get_user_config_dir() + "/" PACKAGE_NAME;
-	if (not Glib::file_test(configDir, Glib::FILE_TEST_IS_DIR)) {
-		Glib::RefPtr<Gio::File> file = Gio::File::create_for_path(configDir);
-		file->make_directory_with_parents();
+bool SettingsFile::initialize() {
+	if (settingFilePath.empty())
+		settingFilePath = Glib::get_user_config_dir() + "/" PACKAGE_NAME "/" UI_CONFIG_FILE;
+	if (not configExists()) {
+		Settings::get().load(Values{});
+		return false;
 	}
+	SettingsFile sf;
+	return true;
 }
 
-void SettingsFile::save(const string& settingsFile, const Values& values) {
+void SettingsFile::save() {
 	ensureConfigDir();
-
-	string xmlData;
-	xmlData  = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-	xmlData += "<!-- " DEFAULT_MESSAGE " -->\n";
-	xmlData += "<" PACKAGE_DATA_NAME "\n";
-
-	Defaults::increaseTab();
-	xmlData += Defaults::tab() + "version=\"" PACKAGE_DATA_VERSION "\"\n";
-	xmlData += Defaults::tab() + "type=\"" UI_CONFIG_TYPE "\"\n";
-	for (const auto& [key, value] : values)
-		if (not value.empty())
-			xmlData += Defaults::tab() + key + "=\"" + value + "\"\n";
+	string xml {xmlHeader(UI_CONFIG_TYPE, Settings::get().asValues())};
 	Defaults::reduceTab();
-
-	xmlData += "/>\n";
-
+	xml += xmlFooter();
 	try {
-		Glib::file_set_contents(settingsFile, xmlData);
+		Glib::file_set_contents(getSettingsPath(), xml);
 	}
 	catch (const Glib::FileError& e) {
 		throw Message("Failed to save settings: " + string(e.what()));
+	}
+}
+
+void SettingsFile::setSettingsPath(const string& path) noexcept {
+	settingFilePath = path;
+}
+
+const string& SettingsFile::getSettingsPath() noexcept {
+	return settingFilePath;
+}
+
+bool SettingsFile::configExists() noexcept {
+	return Glib::file_test(getSettingsPath(), Glib::FILE_TEST_EXISTS);
+}
+
+void SettingsFile::ensureConfigDir() noexcept {
+	const string dir {Glib::path_get_dirname(getSettingsPath())};
+	if (not Glib::file_test(dir, Glib::FILE_TEST_IS_DIR)) {
+		Glib::RefPtr<Gio::File> file = Gio::File::create_for_path(dir);
+		file->make_directory_with_parents();
 	}
 }

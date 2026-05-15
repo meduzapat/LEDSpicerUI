@@ -25,6 +25,7 @@
 using namespace LEDSpicerUI::Ui;
 using namespace Storage;
 using namespace DataDialogs;
+using LEDSpicerUI::Config::Settings;
 
 MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &builder) :
 	Gtk::ApplicationWindow(obj),
@@ -99,7 +100,7 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 			}
 
 			ConfigFile::save(ConfigFile::ConfigData(
-				DialogSettings::getInstance()->getConfigPath(),
+				Settings::get().getActiveConfigPath(),
 				comboDefaultProfile->get_active_text().raw(),
 				inputRunEvery->get_text().raw(),
 				packLedspicerConfig(),
@@ -109,7 +110,7 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 				processes
 			));
 
-			inputNavigator.save(projectDir + PATH_INPUT);
+			inputNavigator.save();
 
 			Defaults::cleanDirty();
 			Message::displayInfo("Project saved successfully.");
@@ -122,15 +123,9 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 		}
 	});
 
-	// Settings.
-	Gtk::Button* btnSettings = nullptr;
-	builder->get_widget("BtnSettings", btnSettings);
-	btnSettings->signal_clicked().connect([this]() {
-		if (DialogSettings::getInstance()->run() == Gtk::RESPONSE_APPLY) {
-			DialogSettings::getInstance()->saveSettings();
-			populateColorsCombo();
-		}
-		DialogSettings::getInstance()->hide();
+	// Refresh colors combo whenever the color file list is replaced.
+	Settings::get().colorFilesChanged.connect([this]() {
+		populateColorsCombo();
 	});
 
 	// About.
@@ -158,7 +153,7 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 	Defaults::registerWidget(comboUseColors);
 	builder->get_widget_derived("ListBoxDatasource", listBoxDataSource, "BtnDatasourceUp", "BtnDatasourceDown");
 	comboColors->signal_changed().connect([&]() {
-		DialogColors::getInstance()->setColorsFromFile(DialogSettings::getInstance()->getDataDir() + comboColors->get_active_id() + ".xml");
+		DialogColors::getInstance()->setColorsFromFile(Settings::get().getDataDir() + comboColors->get_active_id() + ".xml");
 	});
 
 	/*******************
@@ -182,88 +177,8 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 	});
 
 	signal_show().connect([this]() {
-
-		// Try to load existing settings.
-		if (DialogSettings::getInstance()->loadSettings()) {
-			// Settings loaded successfully, populate colors.
-			populateColorsCombo();
-			return;
-		}
-
-		// First run - attempt auto-detection.
-		string binaryPath = Glib::find_program_in_path("ledspicerd");
-
-		if (not binaryPath.empty()) {
-			// Found in PATH - auto-configure.
-			DialogSettings::getInstance()->setBinaryPath(binaryPath, true);
-
-			if (DialogSettings::getInstance()->isValid()) {
-				// Auto-detection successful.
-				DialogSettings::getInstance()->saveSettings();
-				populateColorsCombo();
-				Message::displayInfo(
-					"Welcome to LEDSpicerUI!\n\n"
-					"LEDSpicer was detected and configured automatically.\n"
-					"You can change settings anytime using the gear icon."
-				);
-				return;
-			}
-		}
-
-		// Binary not found or data dir invalid - show welcome dialog.
-		Gtk::MessageDialog dialog(
-			*this,
-			"Welcome to LEDSpicerUI!",
-			false,
-			Gtk::MESSAGE_INFO,
-			Gtk::BUTTONS_NONE,
-			true
-		);
-
-		string message;
-		if (binaryPath.empty()) {
-			message =
-				"ledspicerd was not found in your system.\n\n"
-				"You can:\n"
-				"• Locate the binary manually if LEDSpicer is installed\n"
-				"• Continue in portable mode (requires data directory)\n\n"
-				"Note: In portable mode, ledspicer.conf is stored\n"
-				"within the project directory.";
-		}
-		else {
-			message =
-				"LEDSpicer was found but the data directory is missing or invalid.\n\n"
-				"Please configure the data directory to continue.\n"
-				"The data directory should contain color profiles, and optionally\n"
-				"colors.ini, controls.ini, and gameData.xml.";
-		}
-		dialog.set_secondary_text(message);
-
-		dialog.add_button("Configure Settings", Gtk::RESPONSE_YES);
-		dialog.add_button("Exit", Gtk::RESPONSE_NO);
-
-		if (dialog.run() == Gtk::RESPONSE_YES) {
-			dialog.hide();
-
-			// Open settings dialog.
-			if (DialogSettings::getInstance()->run() == Gtk::RESPONSE_APPLY) {
-				DialogSettings::getInstance()->saveSettings();
-				populateColorsCombo();
-			}
-			else {
-				// User cancelled settings - check if we have minimum requirements.
-				if (not DialogSettings::getInstance()->isValid()) {
-					Message::displayError("Data directory is required. Application will close.");
-					close();
-					return;
-				}
-			}
-		}
-		else {
-			// User chose to exit.
+		if (not DialogSettings::getInstance()->startup(this))
 			close();
-			return;
-		}
 	});
 }
 
@@ -328,7 +243,7 @@ void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {
 			return;
 		}
 		const string& newProject {DialogProject::getInstance()->getProjectName()};
-		if (newProject == currentProjectName) {
+		if (newProject == Settings::get().getCurrentProject()) {
 			// TODO add revert option, instead of warning, ask to reload without saving.
 			Message::displayInfo("Already working on that project", DialogProject::getInstance());
 			DialogProject::getInstance()->hide();
@@ -339,29 +254,18 @@ void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {
 			return;
 		}
 
-		// Set Project and Paths.
-		currentProjectName = newProject;
-		Defaults::setSubtitle(currentProjectName);
-		// Resolve from where the config will be read.
-		projectDir = Defaults::getProjectsDir() + currentProjectName + "/";
-		if (Defaults::getMode() == Defaults::Mode::Portable) {
-			// Stores config in the project dir.
-			configPath = Defaults::getProjectsDir() + CONFIG_FILE;
-		}
-		else {
-			// System wide config.
-			configPath = DialogSettings::getInstance()->getConfigPath();
-		}
+		Settings::get().setCurrentProject(newProject);
+		Defaults::setSubtitle(newProject);
 
 		// Wipe random colors and any other color and read config.
-		setColorFile("");
+		comboColors->set_active_id("");
 		// Old data.
 		try {
-			readConfigFile(configPath, true, IMPORT_ALL);
+			readConfigFile(Settings::get().getActiveConfigPath(), true, IMPORT_ALL);
 		}
 		// New data.
 		catch (Message& e) {
-			if (Glib::file_test(configPath, Glib::FileTest::FILE_TEST_EXISTS))
+			if (Glib::file_test(Settings::get().getActiveConfigPath(), Glib::FileTest::FILE_TEST_EXISTS))
 				Message::displayError(XMLHelper::cleanError("The config file raised an error:\n" + e.getMessage()));
 			// Wipe all data.
 			profiles.wipe();
@@ -397,7 +301,7 @@ void MainWindow::setConfiguration(const Values& values) {
 	inputGroupId->set_text(values.getValue("groupId", DEFAULT_GROUPID));
 	inputPortNumber->set_text(values.getValue("port", DEFAULT_PORT));
 	inputFPS->set_text(values.getValue("fps", DEFAULT_FPS));
-	setColorFile(values.getValue("colors", DEFAULT_COLORS));
+	comboColors->set_active_id(values.getValue("colors", DEFAULT_COLORS));
 	comboLogLevel->set_active_id(values.getValue("logLevel", DEFAULT_LOGLEVEL));
 	listBoxDataSource->sortAndMark(Defaults::explode(values.getValue("dataSource", DEFAULT_DATASOURCE), ','));
 	auto randomColors(Defaults::explode(values.getValue("randomColors"), ','));
@@ -479,10 +383,10 @@ void MainWindow::readConfigFile(const string& dataFilePath, bool wipe, uint8_t i
 	}
 
 	// Load inputs from the inputs/ directory alongside the config file.
-	if (wipe and not projectDir.empty()) {
+	if (wipe and not Settings::get().getProjectDir().empty()) {
 		inputNavigator.clear();
 
-		inputNavigator.load(Glib::path_get_dirname(projectDir + PATH_INPUT));
+		inputNavigator.load();
 		// animationNavigator.load(Glib::path_get_dirname(dataFilePath) + "/" + ANIMATION_PATH);  // future
 		// profileNavigator.load(Glib::path_get_dirname(dataFilePath) + "/" + PROFILE_PATH);      // future, must be last
 	}
@@ -494,26 +398,11 @@ void MainWindow::readConfigFile(const string& dataFilePath, bool wipe, uint8_t i
 	comboDefaultProfile->set_active_text(dp);
 }
 
-void MainWindow::setColorFile(const string& colorFile) {
-
-	if (colorFile.empty()) {
-		comboColors->set_active_id("");
-		return;
-	}
-
-	try {
-		XMLHelper datafile(DialogSettings::getInstance()->getDataDir() + colorFile + ".xml", "Colors");
-		comboColors->set_active_id(colorFile);
-	}
-	catch (Message& e) {
-		e.displayError();
-	}
-}
-
 void MainWindow::populateColorsCombo() {
+	const string active = comboColors->get_active_id();
 	comboColors->remove_all();
-	comboColors->append("", "Select Colors");
-	for (const auto& c : DialogSettings::getInstance()->getColorFiles()) {
+	for (const auto& c : Settings::get().getColorFiles())
 		comboColors->append(c, c);
-	}
+	if (not active.empty())
+		comboColors->set_active_id(active);
 }

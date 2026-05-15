@@ -82,6 +82,8 @@ set(INPUT_FILE_SRCS
 	${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp
 	${CMAKE_SOURCE_DIR}/src/XMLHelper.cpp
 	${CMAKE_SOURCE_DIR}/src/Ui/Storage/DirNode.cpp
+	${CMAKE_SOURCE_DIR}/src/config/Settings.cpp
+	${CMAKE_SOURCE_DIR}/src/config/ProjectFile.cpp
 	${CMAKE_SOURCE_DIR}/src/config/InputFile.cpp
 )
 
@@ -203,7 +205,7 @@ add_test_executable(ProfileTest
 
 add_test_executable(ConfigFileTest
 	"config/ConfigFileTest.cpp"
-	"${STORAGE_BASE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp;${CMAKE_SOURCE_DIR}/src/XMLHelper.cpp;${CMAKE_SOURCE_DIR}/src/config/ConfigFile.cpp"
+	"${STORAGE_BASE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp;${CMAKE_SOURCE_DIR}/src/XMLHelper.cpp;${CMAKE_SOURCE_DIR}/src/config/Settings.cpp;${CMAKE_SOURCE_DIR}/src/config/ProjectFile.cpp;${CMAKE_SOURCE_DIR}/src/config/ConfigFile.cpp"
 	"${TINYXML2_LIBRARIES}"
 )
 
@@ -219,8 +221,14 @@ add_test_executable(InputFileTest
 	"${TINYXML2_LIBRARIES}"
 )
 
+add_test_executable(SettingsTest
+	"config/SettingsTest.cpp"
+	"${COMMON_SRCS};${CMAKE_SOURCE_DIR}/src/config/Settings.cpp"
+	""
+)
+
 add_test_executable(SettingsFileTest
 	"config/SettingsFileTest.cpp"
-	"${COMMON_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp;${CMAKE_SOURCE_DIR}/src/XMLHelper.cpp;${CMAKE_SOURCE_DIR}/src/config/SettingsFile.cpp"
+	"${COMMON_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp;${CMAKE_SOURCE_DIR}/src/XMLHelper.cpp;${CMAKE_SOURCE_DIR}/src/config/Settings.cpp;${CMAKE_SOURCE_DIR}/src/config/SettingsFile.cpp"
 	"${TINYXML2_LIBRARIES}"
 )

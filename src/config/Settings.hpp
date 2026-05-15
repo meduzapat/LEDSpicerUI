@@ -20,97 +20,152 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Defaults.hpp"
+#include <sigc++/sigc++.h>
+#include "Values.hpp"
 
 #pragma once
+
+#define CONFIG_FILE "ledspicer.conf"
 
 namespace LEDSpicerUI::Config {
 
 /**
  * LEDSpicerUI::Config::Settings
- * Central singleton for all persistent application-level settings,
- * providing helper wrappers for easy access.
+ *
+ * Central singleton for all application settings.
+ *
+ * Persistent settings (saved to disk via SettingsFile) live in the inherited Values map.
+ * Volatile settings (runtime state, never saved) live as typed members.
+ * Computed properties are derived on demand from both.
  */
 class Settings : protected Values {
 
 public:
 
-	inline const string
-		PATH_BINARY  {"binaryPath"},
-		PATH_DATA    {"dataDir"},
-		PATH_PROJECT {"projectsDir"},
-
+	/// Keys for persistent settings stored in the Values map.
+	static inline const string
+		PATH_BINARY          {"binaryPath"},
+		PATH_DATA            {"dataDir"},
+		PATH_PROJECT         {"projectsDir"},
+		DEFAULT_PROJECT      {"defaultProject"},
 		INTERACTIVE_MODE     {"interactiveMode"},
+		THEME_STYLE          {"themeStyle"},
 		CLEAN_PROJECT_DIR    {"cleanProjectDir"},
 		PRESERVE_EMPTY_DIR   {"preserveEmptyDir"},
 		REMOVE_INVALID_ITEMS {"removeInvalidItems"},
 		SAVE_BACKUP          {"saveBackup"},
-		DEBUG_FILES          {"debugFiles"},
-		THEME_STYLE          {"themeStyle"};
+		DEBUG_FILES          {"debugFiles"};
 
-	/// Application mode, derived from binary detection and interactiveMode.
+	/// Runtime mode — derived from binary detection result and interactiveMode preference.
 	enum class Mode {
-		Local,     /// ledspicerd detected, interactive mode OFF.
-		Iterative, /// ledspicerd detected, interactive mode ON.
-		Portable   /// ledspicerd not set or not detected.
+		Portable,  ///< Binary absent or detection failed; config lives in the project dir.
+		Local,     ///< Binary detected, interactive mode OFF.
+		Iterative  ///< Binary detected, interactive mode ON (future: live daemon commands).
 	};
 
-	/// UI theme style.
+	/// UI theme preference.
 	enum class ThemeStyle { Auto, Light, Dark };
 
-	Settings(const Settings&) = delete;
+	Settings(const Settings&)            = delete;
 	Settings& operator=(const Settings&) = delete;
 
-	/// Returns the single application-wide instance.
-	static Settings& getInstance() noexcept { return instance; }
+	static Settings& get() noexcept { return instance; }
 
-	const string& getBinaryPath()  const noexcept { return values.at(PATH_BINARY);  }
-	const string& getDataDir()     const noexcept { return values.at(PATH_DATA);    }
-	const string& getProjectsDir() const noexcept { return values.at(PATH_PROJECT); }
+	/**
+	 * Replaces persistent settings with sanitized values from SettingsFile.
+	 * Missing keys receive hard-coded defaults. Unknown keys are ignored.
+	 * Recomputes currentMode after loading.
+	 */
+	void load(const Values& source) noexcept;
 
-	void setBinaryPath(const string& path) noexcept;
-	void setDataDir(const string& dir)     noexcept;
-	void setProjectsDir(const string& dir) noexcept;
+	/**
+	 * @return Settings demoted to Values.
+	 */
+	const Values& asValues() const noexcept { return *this; }
 
-	bool isPortable()    const noexcept { return getMode() == Settings::Mode::Portable;  }
-	bool isInteractive() const noexcept { return getMode() == Settings::Mode::Iterative; }
-	Mode getMode()       const noexcept { return currentMode; }
+	auto begin() const noexcept { return values.cbegin(); }
+	auto end()   const noexcept { return values.cend();   }
 
-	void setInteractiveMode(bool value) noexcept;
+	const string& getBinaryPath()     const noexcept { return getValue(PATH_BINARY);     }
+	const string& getDataDir()        const noexcept { return getValue(PATH_DATA);       }
+	const string& getProjectsDir()    const noexcept { return getValue(PATH_PROJECT);    }
+	const string& getDefaultProject() const noexcept { return getValue(DEFAULT_PROJECT); }
 
-	ThemeStyle getThemeStyle() const noexcept;
-	void setThemeStyle(ThemeStyle style) noexcept;
+	void setBinaryPath(const string& path)     noexcept; ///< Also recomputes currentMode.
+	void setDataDir(const string& dir)         noexcept;
+	void setProjectsDir(const string& dir)     noexcept;
+	void setDefaultProject(const string& name) noexcept;
 
-	bool shouldCleanProjectDir()    const noexcept { return values.at(CLEAN_PROJECT_DIR)    == HUMAN_TRUE; }
-	bool shouldPreserveEmptyDir()   const noexcept { return values.at(PRESERVE_EMPTY_DIR)   == HUMAN_TRUE; }
-	bool shouldRemoveInvalidItems() const noexcept { return values.at(REMOVE_INVALID_ITEMS) == HUMAN_TRUE; }
-	bool shouldSaveBackup()         const noexcept { return values.at(SAVE_BACKUP)          == HUMAN_TRUE; }
-	bool shouldDebugFiles()         const noexcept { return values.at(DEBUG_FILES)          == HUMAN_TRUE; }
+	bool isInteractiveMode()        const noexcept { return is(INTERACTIVE_MODE);     }
+	bool shouldCleanProjectDir()    const noexcept { return is(CLEAN_PROJECT_DIR);    }
+	bool shouldPreserveEmptyDir()   const noexcept { return is(PRESERVE_EMPTY_DIR);   }
+	bool shouldRemoveInvalidItems() const noexcept { return is(REMOVE_INVALID_ITEMS); }
+	bool shouldSaveBackup()         const noexcept { return is(SAVE_BACKUP);          }
+	bool shouldDebugFiles()         const noexcept { return is(DEBUG_FILES);          }
 
+	void setInteractiveMode(bool value)    noexcept; ///< Also recomputes currentMode.
 	void setCleanProjectDir(bool value)    noexcept;
 	void setPreserveEmptyDir(bool value)   noexcept;
 	void setRemoveInvalidItems(bool value) noexcept;
 	void setSaveBackup(bool value)         noexcept;
 	void setDebugFiles(bool value)         noexcept;
 
+	ThemeStyle getThemeStyle()           const noexcept;
+	void       setThemeStyle(ThemeStyle) noexcept;
+
+	Mode getMode()      const noexcept { return currentMode;                    }
+	bool isPortable()   const noexcept { return currentMode == Mode::Portable;  }
+	bool isLocal()      const noexcept { return currentMode == Mode::Local;     }
+	bool isIterative()  const noexcept { return currentMode == Mode::Iterative; }
+
+	/// Called by DialogSettings after binary detection succeeds or fails.
+	void setMode(Mode mode) noexcept { currentMode = mode; }
+
+	const string&       getConfigPath()     const noexcept { return configPath;     }
+	const string&       getCurrentProject() const noexcept { return currentProject; }
+	const StringVector& getColorFiles()     const noexcept { return colorFiles;     }
+	bool getHasGameData() const noexcept { return hasGameData; }
+	bool getHasColors()   const noexcept { return hasColors;   }
+	bool getHasControls() const noexcept { return hasControls; }
+
+	void setConfigPath(const string& path)     noexcept;
+	void setCurrentProject(const string& name) noexcept; ///< Also writes DEFAULT_PROJECT.
+	void setColorFiles(StringVector files)     noexcept; ///< Also emits colorFilesChanged.
+
+	/// Fired whenever the color file list is replaced.
+	sigc::signal<void()> colorFilesChanged;
+	void setDataDirStatus(bool gameData, bool colors, bool controls) noexcept;
+
+	/// projectsDir + currentProject + "/", or empty if either is unset.
+	string getProjectDir() const noexcept;
+
+	/// Portable: getProjectDir() + CONFIG_FILE.  Local/Iterative: configPath.
+	string getActiveConfigPath() const noexcept;
+
 protected:
 
-	// LEDSpicer runtime
 	Mode currentMode = Mode::Portable;
+
+	string
+		configPath,
+		currentProject;
+
+	StringVector colorFiles;
+
+	bool
+		hasGameData = false,
+		hasColors   = false,
+		hasControls = false;
 
 	Settings()  = default;
 	~Settings() = default;
 
 private:
 
+	static const StringUMap DEFAULTS;
 	static Settings instance;
 
-	/**
-	 * Recomputes currentMode from binaryPath and interactiveMode.
-	 * Portable  → no binary path set.
-	 * Local     → binary detected, interactive mode OFF.
-	 * Iterative → binary detected, interactive mode ON.
-	 */
+	/// Derives currentMode from binaryPath (empty → Portable) and interactiveMode.
 	void updateMode() noexcept;
 };
 

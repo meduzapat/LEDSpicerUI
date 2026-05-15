@@ -21,135 +21,84 @@
  */
 
 #include <gtest/gtest.h>
-#include <fstream>
+#include <cstdio>
 #include "config/SettingsFile.hpp"
 
+using namespace LEDSpicerUI;
 using namespace LEDSpicerUI::Config;
-using LEDSpicerUI::Values;
 
-/**
- * SettingsFileTest
- * Tests SettingsFile unique functionality (UI config file operations).
- * XML parsing is already tested in XMLHelperTest.
- */
 class SettingsFileTest : public ::testing::Test {
 
 protected:
 
-	string testConfigFile;
+	string testPath;
 
 	void SetUp() override {
-		testConfigFile = PACKAGE_SAMPLES_DIR "test_settings.conf";
+		testPath = string(PACKAGE_SAMPLES_DIR) + "test_settings.conf";
+		SettingsFile::setSettingsPath(testPath);
+		if (Glib::file_test(testPath, Glib::FILE_TEST_EXISTS))
+			std::remove(testPath.c_str());
+		Settings::get().load(Values{});
 	}
 
 	void TearDown() override {
-		if (Glib::file_test(testConfigFile, Glib::FILE_TEST_EXISTS))
-			std::remove(testConfigFile.c_str());
+		if (Glib::file_test(testPath, Glib::FILE_TEST_EXISTS))
+			std::remove(testPath.c_str());
+		SettingsFile::setSettingsPath("");
 	}
 };
 
-TEST_F(SettingsFileTest, SaveCreatesValidFile) {
-	Values settings {
-		{"binaryPath",  "/usr/bin/ledspicerd"},
-		{"dataDir",     "/usr/share/ledspicer"},
-		{"projectsDir", "/home/user/projects"}
-	};
-
-	EXPECT_NO_THROW(SettingsFile::save(testConfigFile, settings));
-	EXPECT_TRUE(Glib::file_test(testConfigFile, Glib::FILE_TEST_EXISTS));
+TEST_F(SettingsFileTest, MissingFile) {
+	EXPECT_FALSE(SettingsFile::initialize());
+	const auto& s = Settings::get();
+	EXPECT_TRUE(s.getBinaryPath().empty());
+	EXPECT_TRUE(s.isPortable());
+	EXPECT_TRUE(s.shouldSaveBackup());
+	EXPECT_FALSE(s.shouldDebugFiles());
 }
 
-TEST_F(SettingsFileTest, SaveWritesCorrectContent) {
-	Values settings {
-		{"binaryPath", "/usr/bin/ledspicerd"},
-		{"dataDir",    "/usr/share/ledspicer"}
-	};
-
-	SettingsFile::save(testConfigFile, settings);
-
-	string content = Glib::file_get_contents(testConfigFile);
-
-	EXPECT_EQ("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-			  "<!-- This is an auto-generated file by " PACKAGE_STRING ". -->\n"
-			  "<LEDSpicer\n\tversion=\"1.1\"\n\ttype=\"Settings\"\n\t"
-			  "dataDir=\"/usr/share/ledspicer\"\n\tbinaryPath=\"/usr/bin/ledspicerd\"\n/>\n"
-			  , content);
+TEST_F(SettingsFileTest, LoadFromFile) {
+	Glib::file_set_contents(testPath,
+		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+		"<LEDSpicer version=\"1.1\" type=\"Settings\""
+		" binaryPath=\"/usr/bin/ledspicerd\""
+		" dataDir=\"/usr/share/ledspicer/\"/>"
+	);
+	EXPECT_TRUE(SettingsFile::initialize());
+	const auto& s = Settings::get();
+	EXPECT_EQ("/usr/bin/ledspicerd",   s.getBinaryPath());
+	EXPECT_EQ("/usr/share/ledspicer/", s.getDataDir());
 }
 
-TEST_F(SettingsFileTest, SaveSkipsEmptyValues) {
-	Values settings {
-		{"binaryPath",  "/usr/bin/ledspicerd"},
-		{"dataDir",     ""},
-		{"projectsDir", "/home/user/projects"}
-	};
-
-	SettingsFile::save(testConfigFile, settings);
-
-	string content = Glib::file_get_contents(testConfigFile);
-	EXPECT_EQ(string::npos, content.find("dataDir=")) << "Empty value should be skipped";
-}
-
-TEST_F(SettingsFileTest, LoadSavedSettings) {
-	Values originalSettings {
-		{"binaryPath",  "/usr/bin/ledspicerd"},
-		{"dataDir",     "/usr/share/ledspicer"},
-		{"projectsDir", "/home/user/projects"}
-	};
-
-	SettingsFile::save(testConfigFile, originalSettings);
-
-	EXPECT_NO_THROW({
-		SettingsFile config(testConfigFile, UI_CONFIG_TYPE);
-		const auto& loadedSettings = config.getRootInfo();
-
-		EXPECT_EQ("/usr/bin/ledspicerd",   loadedSettings.getValue("binaryPath"));
-		EXPECT_EQ("/usr/share/ledspicer",  loadedSettings.getValue("dataDir"));
-		EXPECT_EQ("/home/user/projects",   loadedSettings.getValue("projectsDir"));
-	});
-}
-
-TEST_F(SettingsFileTest, GetConfigFilePathReturnsValidPath) {
-	string configPath = SettingsFile::getConfigFilePath();
-
-	EXPECT_FALSE(configPath.empty());
-	EXPECT_NE(string::npos, configPath.find(PACKAGE_NAME))
-		<< "Config path should contain package name";
-	EXPECT_NE(string::npos, configPath.find(UI_CONFIG_FILE))
-		<< "Config path should contain config filename";
-}
-
-TEST_F(SettingsFileTest, ConfigExistsReturnsFalseWhenMissing) {
-	string actualConfigPath = SettingsFile::getConfigFilePath();
-	if (not Glib::file_test(actualConfigPath, Glib::FILE_TEST_EXISTS)) {
-		EXPECT_FALSE(SettingsFile::configExists());
-	}
-}
-
-TEST_F(SettingsFileTest, SaveHandlesSpecialCharacters) {
-	Values settings {
-		{"path", "/home/user/My Projects/LEDSpicer Files"},
-		{"note", "Test & Development"}
-	};
-
-	EXPECT_NO_THROW(SettingsFile::save(testConfigFile, settings));
-
-	SettingsFile config(testConfigFile, UI_CONFIG_TYPE);
-	const auto& loadedSettings = config.getRootInfo();
-
-	EXPECT_EQ("/home/user/My Projects/LEDSpicer Files", loadedSettings.getValue("path"));
-	EXPECT_EQ("Test & Development",                     loadedSettings.getValue("note"));
-}
-
-TEST_F(SettingsFileTest, SaveEmptySettings) {
-	Values emptySettings;
-
-	EXPECT_NO_THROW(SettingsFile::save(testConfigFile, emptySettings));
-
-	string content = Glib::file_get_contents(testConfigFile);
-
-	EXPECT_NE(string::npos, content.find("<?xml"));
-	EXPECT_NE(string::npos, content.find("<" PACKAGE_DATA_NAME));
-	EXPECT_NE(string::npos, content.find("version=\"" PACKAGE_DATA_VERSION "\""));
+TEST_F(SettingsFileTest, SaveToFile) {
+	Settings::get().setBinaryPath("/usr/bin/ledspicerd");
+	SettingsFile::save();
+	EXPECT_TRUE(Glib::file_test(testPath, Glib::FILE_TEST_EXISTS));
+	const string content = Glib::file_get_contents(testPath);
+	EXPECT_NE(string::npos, content.find("binaryPath=\"/usr/bin/ledspicerd\""));
 	EXPECT_NE(string::npos, content.find("type=\"" UI_CONFIG_TYPE "\""));
-	EXPECT_NE(string::npos, content.find("/>"));
+}
+
+TEST_F(SettingsFileTest, SaveRoundTrip) {
+	auto& s = Settings::get();
+	s.setBinaryPath("/usr/bin/ledspicerd");
+	s.setDataDir("/usr/share/ledspicer/");
+	s.setDebugFiles(true);
+	s.setThemeStyle(Settings::ThemeStyle::Dark);
+	SettingsFile::save();
+
+	s.load(Values{});
+	EXPECT_TRUE(s.getBinaryPath().empty());
+
+	EXPECT_TRUE(SettingsFile::initialize());
+	EXPECT_EQ("/usr/bin/ledspicerd",   s.getBinaryPath());
+	EXPECT_EQ("/usr/share/ledspicer/", s.getDataDir());
+	EXPECT_TRUE(s.shouldDebugFiles());
+	EXPECT_EQ(Settings::ThemeStyle::Dark, s.getThemeStyle());
+}
+
+int main(int argc, char** argv) {
+	auto app = Gtk::Application::create(argc, argv, "org.test");
+	::testing::InitGoogleTest(&argc, argv);
+	return RUN_ALL_TESTS();
 }

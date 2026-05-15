@@ -106,9 +106,9 @@ void InputDirectoryNavigator::clear() noexcept {
 	currentDir = &rootDir;
 }
 
-void InputDirectoryNavigator::load(const string& inputsDir) noexcept {
+void InputDirectoryNavigator::load() noexcept {
 	scanData.clear();
-	process(inputsDir, "");
+	process(Config::Settings::get().getProjectDir() + PATH_INPUT, "");
 	auto DDir {DataDialogs::DialogDirectory::getInstance()};
 	// Set Input Dialog as secondary.
 	DDir->setSettings(dirSetting);
@@ -173,10 +173,13 @@ void InputDirectoryNavigator::wireDialogs(Storage::DirectoryEntry* dir) noexcept
 }
 
 
-LEDSpicerUI::DataMap& InputDirectoryNavigator::extractData(
+void InputDirectoryNavigator::extractData(
 	const string& filePath,
-	const string& relPath
+	const string& relPath,
+	DataMap& out
 ) noexcept {
 	InputFile datafile(filePath, relPath);
-	return datafile.getDataMap();
+	for (auto& [key, vec] : datafile.getDataMap())
+		for (auto& item : vec)
+			out[key].push_back(std::move(item));
 }

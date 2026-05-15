@@ -22,119 +22,112 @@
 
 #include "Settings.hpp"
 
-using namespace LEDSpicerUI::Config;
+// Brings LEDSpicerUI types (StringVector, emptyString, etc.) and Config members into scope.
+using namespace LEDSpicerUI;
+using namespace Config;
 
 Settings Settings::instance;
 
+const StringUMap Settings::DEFAULTS = {
+	{"binaryPath",          ""},
+	{"dataDir",             ""},
+	{"projectsDir",         ""},
+	{"defaultProject",      ""},
+	{"interactiveMode",     HUMAN_TRUE},
+	{"themeStyle",          "Auto"},
+	{"cleanProjectDir",     HUMAN_FALSE},
+	{"preserveEmptyDir",    HUMAN_TRUE},
+	{"removeInvalidItems",  HUMAN_TRUE},
+	{"saveBackup",          HUMAN_TRUE},
+	{"debugFiles",          HUMAN_FALSE},
+};
+
+void Settings::load(const Values& raw) noexcept {
+	for (const auto& [key, def] : DEFAULTS)
+		setValue(key, raw.getValue(key, def));
+	updateMode();
+}
+
 void Settings::setBinaryPath(const string& path) noexcept {
-	values[PATH_BINARY] = path;
+	setValue(PATH_BINARY, path);
 	updateMode();
 }
 
 void Settings::setDataDir(const string& dir) noexcept {
-	values[PATH_BINARY] = dir;
+	setValue(PATH_DATA, dir);
 }
 
 void Settings::setProjectsDir(const string& dir) noexcept {
-	values[PATH_PROJECT] = dir;
+	setValue(PATH_PROJECT, dir);
+}
+
+void Settings::setDefaultProject(const string& name) noexcept {
+	setValue(DEFAULT_PROJECT, name);
 }
 
 void Settings::setInteractiveMode(bool value) noexcept {
-	values[INTERACTIVE_MODE] = value ? HUMAN_TRUE : HUMAN_FALSE;
+	setValue(INTERACTIVE_MODE, value ? HUMAN_TRUE : HUMAN_FALSE);
 	updateMode();
 }
 
 Settings::ThemeStyle Settings::getThemeStyle() const noexcept {
-	const string ts {values.at(THEME_STYLE)};
-	if (ts == "Light")
-		return ThemeStyle::Light;
-	else if (ts == "Dark")
-		return ThemeStyle::Dark;
-	else
-		return ThemeStyle::Auto;
+	const string& ts = getValue(THEME_STYLE);
+	if (ts == "Light") return ThemeStyle::Light;
+	if (ts == "Dark")  return ThemeStyle::Dark;
+	return ThemeStyle::Auto;
 }
 
 void Settings::setThemeStyle(ThemeStyle style) noexcept {
 	switch (style) {
-	case ThemeStyle::Light:
-		values[THEME_STYLE] = "Light";
-	break;
-	case ThemeStyle::Dark:
-		values[THEME_STYLE] = "Dark";
-		break;
-	default:
-		values[THEME_STYLE] = "Auto";
-		break;
+	case ThemeStyle::Light: setValue(THEME_STYLE, "Light"); break;
+	case ThemeStyle::Dark:  setValue(THEME_STYLE, "Dark");  break;
+	default:                setValue(THEME_STYLE, "Auto");  break;
 	}
 }
 
-void Settings::setCleanProjectDir(bool value) noexcept {
-	values[CLEAN_PROJECT_DIR] = value ? HUMAN_TRUE : HUMAN_FALSE;
+void Settings::setCleanProjectDir(bool value)    noexcept { setValue(CLEAN_PROJECT_DIR,    value ? HUMAN_TRUE : HUMAN_FALSE); }
+void Settings::setPreserveEmptyDir(bool value)   noexcept { setValue(PRESERVE_EMPTY_DIR,   value ? HUMAN_TRUE : HUMAN_FALSE); }
+void Settings::setRemoveInvalidItems(bool value) noexcept { setValue(REMOVE_INVALID_ITEMS, value ? HUMAN_TRUE : HUMAN_FALSE); }
+void Settings::setSaveBackup(bool value)         noexcept { setValue(SAVE_BACKUP,          value ? HUMAN_TRUE : HUMAN_FALSE); }
+void Settings::setDebugFiles(bool value)         noexcept { setValue(DEBUG_FILES,          value ? HUMAN_TRUE : HUMAN_FALSE); }
+
+void Settings::setConfigPath(const string& path) noexcept {
+	configPath = path;
 }
 
-void Settings::setPreserveEmptyDir(bool value) noexcept {
-	values[PRESERVE_EMPTY_DIR] = value ? HUMAN_TRUE : HUMAN_FALSE;
+void Settings::setCurrentProject(const string& name) noexcept {
+	currentProject = name;
+	setValue(DEFAULT_PROJECT, name);
 }
 
-void Settings::setRemoveInvalidItems(bool value) noexcept {
-	values[REMOVE_INVALID_ITEMS] = value ? HUMAN_TRUE : HUMAN_FALSE;
+void Settings::setColorFiles(StringVector files) noexcept {
+	colorFiles = std::move(files);
+	if (not colorFiles.empty()) colorFilesChanged.emit();
 }
 
-void Settings::setSaveBackup(bool value) noexcept {
-	values[SAVE_BACKUP] = value ? HUMAN_TRUE : HUMAN_FALSE;
+void Settings::setDataDirStatus(bool gameData, bool colors, bool controls) noexcept {
+	hasGameData = gameData;
+	hasColors   = colors;
+	hasControls = controls;
 }
 
-void Settings::setDebugFiles(bool value) noexcept {
-	values[DEBUG_FILES] = value ? HUMAN_TRUE : HUMAN_FALSE;
+string Settings::getProjectDir() const noexcept {
+	const string& proj = getValue(PATH_PROJECT);
+	if (proj.empty() || currentProject.empty())
+		return {};
+	return proj + currentProject + "/";
 }
 
-void Settings::load(const Values& valuesmap) noexcept {
-
-
-
-	binaryPath  = read("binaryPath");
-	dataDir     = read("dataDir");
-	projectsDir = read("projectsDir");
-
-	interactiveMode    = read("interactiveMode",    "true")  != "false";
-	cleanProjectDir    = read("cleanProjectDir",    "false") == "true";
-	preserveEmptyDir   = read("preserveEmptyDir",   "false") == "true";
-	removeInvalidItems = read("removeInvalidItems", "false") == "true";
-	saveBackup         = read("saveBackup",         "true")  != "false";
-	debugFiles         = read("debugFiles",         "false") == "true";
-
-	const string& ts = read("themeStyle", "auto");
-	if (ts == "light")
-		themeStyle = ThemeStyle::Light;
-	else if (ts == "dark")
-		themeStyle = ThemeStyle::Dark;
-	else
-		themeStyle = ThemeStyle::Auto;
-
-	updateMode();
-}
-
-LEDSpicerUI::Values Settings::toMap() const noexcept {
-	return {
-		{"binaryPath",        binaryPath},
-		{"dataDir",           dataDir},
-		{"projectsDir",       projectsDir},
-		{"interactiveMode",   interactiveMode    ? "true"  : "false"},
-		{"cleanProjectDir",   cleanProjectDir    ? "true"  : "false"},
-		{"preserveEmptyDir",  preserveEmptyDir   ? "true"  : "false"},
-		{"removeInvalidItems",removeInvalidItems ? "true"  : "false"},
-		{"saveBackup",        saveBackup         ? "true"  : "false"},
-		{"debugFiles",        debugFiles         ? "true"  : "false"},
-		{"themeStyle",        themeStyle == ThemeStyle::Light ? "light" :
-		                      themeStyle == ThemeStyle::Dark  ? "dark"  : "auto"},
-	};
+string Settings::getActiveConfigPath() const noexcept {
+	if (isPortable())
+		return getProjectDir() + CONFIG_FILE;
+	return configPath;
 }
 
 void Settings::updateMode() noexcept {
-	if (values[PATH_BINARY].empty())
+	if (getValue(PATH_BINARY).empty()) {
 		currentMode = Mode::Portable;
-	else if (values.at(INTERACTIVE_MODE) == HUMAN_TRUE)
-		currentMode = Mode::Iterative;
-	else
-		currentMode = Mode::Local;
+		return;
+	}
+	currentMode = (getValue(INTERACTIVE_MODE) == HUMAN_TRUE) ? Mode::Iterative : Mode::Local;
 }

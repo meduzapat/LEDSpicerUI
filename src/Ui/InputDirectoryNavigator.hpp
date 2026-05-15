@@ -47,10 +47,9 @@ public:
 	void clear() noexcept override;
 
 	/**
-	 * Loads all input files from inputsDir into the navigator tree.
-	 * @param inputsDir Filesystem path to the inputs directory.
+	 * Loads all input files from Settings::getProjectDir() + PATH_INPUT.
 	 */
-	void load(const string& inputsDir) noexcept;
+	void load() noexcept;
 
 protected:
 
@@ -69,7 +68,7 @@ protected:
 
 	void wireDialogs(Storage::DirectoryEntry* dir) noexcept override;
 
-	DataMap& extractData(const string& filePath, const string& relPath) noexcept override;
+	void extractData(const string& filePath, const string& relPath, DataMap& out) noexcept override;
 
 	void saveItem(Storage::Data* item, const string& filePath) noexcept override;
 

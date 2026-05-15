@@ -21,12 +21,25 @@
  */
 
 #include "XMLHelper.hpp"
-#include "Ui/Storage/DirectoryEntry.hpp"
+#include "Settings.hpp"
+#include "Storage/DirectoryEntry.hpp"
 
 #pragma once
 
-namespace LEDSpicerUI::Config {
-using Ui::Storage::DirectoryEntry;
+namespace LEDSpicerUI {
+
+namespace Constants {
+
+inline const string
+	/// Commonly used empty string.
+	PATH_INPUT     {"inputs/"},
+	PATH_ANIMATION {"animations/"},
+	PATH_PROFILE   {"profiles/"};
+}
+
+namespace Config {
+
+	using Ui::Storage::DirectoryEntry;
 
 /**
  * LEDSpicerUI::Config::ProjectFile
@@ -39,6 +52,11 @@ class ProjectFile : public XMLHelper {
 public:
 
 	ProjectFile() = delete;
+
+	/**
+	 * Writes content to path, or shows a debug dialog instead if debugFiles is enabled.
+	 */
+	static void saveFile(const string& path, const string& content);
 
 	virtual ~ProjectFile() = default;
 
@@ -73,4 +91,4 @@ protected:
 	{}
 };
 
-} // namespace
+}} // namespace

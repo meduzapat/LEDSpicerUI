@@ -23,59 +23,98 @@
 #include "DialogSettings.hpp"
 
 using namespace LEDSpicerUI::Ui;
-
+using LEDSpicerUI::Config::Settings;
 using LEDSpicerUI::Config::SettingsFile;
 
-const string& DialogSettings::getBinaryPath() const {
-	return binaryPath;
-}
-
-const string& DialogSettings::getDataDir() const {
-	return dataDir;
-}
-
-const string& DialogSettings::getConfigPath() const {
-	return configPath;
-}
-
-const LEDSpicerUI::StringVector& DialogSettings::getColorFiles() const {
-	return dataDirStatus.colorFiles;
-}
-
-bool DialogSettings::loadSettings() {
-
-	if (not SettingsFile::configExists()) return false;
-
+bool DialogSettings::startup(Gtk::Window* parent) {
 	try {
-		SettingsFile config(SettingsFile::getConfigFilePath(), UI_CONFIG_TYPE);
-		const auto& settings = config.getRootInfo();
-
-		setBinaryPath(settings.getValue("binaryPath"), true);
-		setDataDir(settings.getValue("dataDir"), true);
-
-		// Set projects dir, if not set use the default one.
-		string projectsDir = settings.getValue("projectsDir");
-		Defaults::setProjectsDir(
-			projectsDir.empty() ?
-			Glib::get_user_data_dir() + "/" PACKAGE_NAME "/projects/" :
-			projectsDir
-		);
+		if (loadSettings()) return true;
 	}
 	catch (Message& e) {
-		e.displayError();
+		if (SettingsFile::configExists()) {
+			const string corrupt = SettingsFile::getSettingsPath() + ".corrupt";
+			try {
+				Gio::File::create_for_path(SettingsFile::getSettingsPath())
+					->move(Gio::File::create_for_path(corrupt), Gio::FILE_COPY_OVERWRITE);
+			}
+			catch (...) {}
+			Message::displayError(
+				"The settings file is corrupt and was renamed to:\n" + corrupt +
+				"\n\nStarting fresh.",
+				parent
+			);
+		}
+		Settings::get().load(Values{});
+	}
+
+	if (autoDetect()) {
+		saveSettings();
+		Message::displayInfo(
+			"Welcome to LEDSpicerUI!\n\n"
+			"LEDSpicer was detected and configured automatically.\n"
+			"You can change settings anytime using the gear icon."
+		);
+		return true;
+	}
+
+	Gtk::MessageDialog dialog(
+		*parent,
+		"Welcome to LEDSpicerUI!",
+		false,
+		Gtk::MESSAGE_INFO,
+		Gtk::BUTTONS_NONE,
+		true
+	);
+
+	const string message = Settings::get().getBinaryPath().empty() ?
+		"ledspicerd was not found in your system.\n\n"
+		"You can:\n"
+		"• Locate the binary manually if LEDSpicer is installed\n"
+		"• Continue in portable mode (requires data directory)\n\n"
+		"Note: In portable mode, ledspicer.conf is stored\n"
+		"within the project directory."
+		:
+		"LEDSpicer was found but the data directory is missing or invalid.\n\n"
+		"Please configure the data directory to continue.\n"
+		"The data directory should contain color profiles, and optionally\n"
+		"colors.ini, controls.ini, and gameData.xml.";
+
+	dialog.set_secondary_text(message);
+	dialog.add_button("Configure Settings", Gtk::RESPONSE_YES);
+	dialog.add_button("Exit", Gtk::RESPONSE_NO);
+
+	if (dialog.run() != Gtk::RESPONSE_YES)
+		return false;
+
+	dialog.hide();
+	if (run() == Gtk::RESPONSE_APPLY) {
+		saveSettings();
+		return true;
+	}
+	if (not isValid()) {
+		Message::displayError("Data directory is required. Application will close.");
 		return false;
 	}
 	return true;
 }
 
+bool DialogSettings::autoDetect() {
+	const string path = Glib::find_program_in_path("ledspicerd");
+	if (path.empty()) return false;
+	setBinaryPath(path, true);
+	return isValid();
+}
+
+bool DialogSettings::loadSettings() {
+	const bool loaded = SettingsFile::initialize();
+	setBinaryPath(Settings::get().getBinaryPath(), true);
+	setDataDir(Settings::get().getDataDir(), true);
+	return loaded;
+}
+
 void DialogSettings::saveSettings() {
-	Values settings {
-		{"binaryPath",  binaryPath},
-		{"dataDir",     dataDir},
-		{"projectsDir", Defaults::getProjectsDir()}
-	};
 	try {
-		SettingsFile::save(SettingsFile::getConfigFilePath(), settings);
+		SettingsFile::save();
 	}
 	catch (Message& e) {
 		e.displayError();
@@ -84,8 +123,8 @@ void DialogSettings::saveSettings() {
 
 bool DialogSettings::isValid() const {
 	return (
-		not dataDir.empty() and
-		not dataDirStatus.colorFiles.empty()
+		not Settings::get().getDataDir().empty() and
+		not Settings::get().getColorFiles().empty()
 	);
 }
 
@@ -101,26 +140,127 @@ DialogSettings::DialogSettings(BaseObjectType* obj, const Glib::RefPtr<Gtk::Buil
 	builder->get_widget("LabelConfigPath",   labelConfigPath);
 	builder->get_widget("BtnApplySettings",  btnApply);
 
-	// Binary selection.
+	builder->get_widget("SwitchSettingsInteractiveMode",    switchInteractiveMode);
+	builder->get_widget("SwitchSettingsCleanProjectDir",    switchCleanProjectDir);
+	builder->get_widget("SwitchSettingsPreserveEmptyDir",   switchPreserveEmptyDir);
+	builder->get_widget("SwitchSettingsRemoveInvalidItems", switchRemoveInvalidItems);
+	builder->get_widget("SwitchSettingsSaveBackup",         switchSaveBackup);
+	builder->get_widget("SwitchSettingsDebugFiles",         switchDebugFiles);
+
+	// Sync all widgets to current Settings on every open.
+	signal_show().connect([this]() {
+		const auto& s = Settings::get();
+		if (not s.getBinaryPath().empty())
+			fileBinary->set_filename(s.getBinaryPath());
+		if (not s.getDataDir().empty())
+			fileDataDirSelect->set_filename(s.getDataDir());
+		switchInteractiveMode->set_active(s.isInteractiveMode());
+		switchCleanProjectDir->set_active(s.shouldCleanProjectDir());
+		switchPreserveEmptyDir->set_active(s.shouldPreserveEmptyDir());
+		switchRemoveInvalidItems->set_active(s.shouldRemoveInvalidItems());
+		switchSaveBackup->set_active(s.shouldSaveBackup());
+		switchDebugFiles->set_active(s.shouldDebugFiles());
+	});
+
+	switchInteractiveMode->property_active().signal_changed().connect([this]() {
+		Settings::get().setInteractiveMode(switchInteractiveMode->get_active());
+	});
+	switchCleanProjectDir->property_active().signal_changed().connect([this]() {
+		Settings::get().setCleanProjectDir(switchCleanProjectDir->get_active());
+	});
+	switchPreserveEmptyDir->property_active().signal_changed().connect([this]() {
+		Settings::get().setPreserveEmptyDir(switchPreserveEmptyDir->get_active());
+	});
+	switchRemoveInvalidItems->property_active().signal_changed().connect([this]() {
+		Settings::get().setRemoveInvalidItems(switchRemoveInvalidItems->get_active());
+	});
+	switchSaveBackup->property_active().signal_changed().connect([this]() {
+		Settings::get().setSaveBackup(switchSaveBackup->get_active());
+	});
+	switchDebugFiles->property_active().signal_changed().connect([this]() {
+		Settings::get().setDebugFiles(switchDebugFiles->get_active());
+	});
+
 	fileBinary->signal_file_set().connect([this]() {
 		setBinaryPath(fileBinary->get_filename(), false);
 	});
 
-	// Data dir selection.
 	fileDataDirSelect->signal_file_set().connect([this]() {
 		setDataDir(fileDataDirSelect->get_filename(), false);
 	});
+
+	// Open this dialog when the settings button is clicked; save on Apply.
+	Gtk::Button* btnSettings = nullptr;
+	builder->get_widget("BtnSettings", btnSettings);
+	btnSettings->signal_clicked().connect([this]() {
+		if (run() == Gtk::RESPONSE_APPLY)
+			saveSettings();
+		hide();
+	});
+}
+
+bool DialogSettings::detectLedspicerVersion() {
+
+	const string& binary = Settings::get().getBinaryPath();
+	if (binary.empty()) {
+		updateBinaryStatusLabel("");
+		return false;
+	}
+
+	string outputText, ledspicerVer;
+	if (not Defaults::runCommand(binary + " -v", outputText)) {
+		updateBinaryStatusLabel("");
+		return false;
+	}
+
+	ledspicerVer = Defaults::extractAfter(outputText, "LEDSpicer");
+	if (ledspicerVer.empty()) {
+		Message::displayError("The selected binary does not appear to be ledspicerd.", this);
+		updateBinaryStatusLabel("");
+		return false;
+	}
+
+	auto parts = Defaults::explode(ledspicerVer, ' ');
+	if (parts.size() > 1) ledspicerVer = parts[0];
+	updateBinaryStatusLabel(ledspicerVer);
+	return true;
+}
+
+void DialogSettings::setBinaryPath(const string& binaryPath, bool setFileBinarySelector) {
+	Settings::get().setBinaryPath(binaryPath);
+	if (detectLedspicerVersion()) {
+		processBinary();
+		if (setFileBinarySelector) fileBinary->set_filename(binaryPath);
+	}
+}
+
+void DialogSettings::updateBinaryStatusLabel(const string& version) {
+	const bool detected = not version.empty();
+	if (not detected) {
+		Settings::get().setBinaryPath("");
+		Settings::get().setConfigPath("");
+		labelBinaryStatus->set_text("Status: ❌ Not detected");
+		labelBinaryPath->set_text("N/A");
+		labelConfigPath->set_text("Will be saved inside the project directory");
+	}
+	else {
+		labelBinaryStatus->set_text("Status: ✅ Detected (" + version + ")");
+		labelBinaryPath->set_text(Settings::get().getBinaryPath());
+	}
+	switchInteractiveMode->set_sensitive(detected);
+	// Mode is derived automatically by Settings from binaryPath state.
 }
 
 void DialogSettings::processBinary() {
 
-	if (binaryPath.empty()) {
+	const string& binary = Settings::get().getBinaryPath();
+	if (binary.empty()) {
 		updateBinaryStatusLabel("");
 		return;
 	}
 
 	string outputText;
-	if (not Defaults::runCommand(binaryPath + " -h", outputText)) {
+	if (not Defaults::runCommand(binary + " -h", outputText)) {
 		updateBinaryStatusLabel("");
 		return;
 	}
@@ -142,7 +282,7 @@ void DialogSettings::processBinary() {
 
 		val = Defaults::extractAfter(line, "Projects dir:");
 		if (not val.empty()) {
-			Defaults::setProjectsDir(val);
+			Settings::get().setProjectsDir(val);
 			continue;
 		}
 
@@ -153,61 +293,10 @@ void DialogSettings::processBinary() {
 	}
 }
 
-bool DialogSettings::detectLedspicerVersion() {
-
-	if (binaryPath.empty()) {
-		updateBinaryStatusLabel("");
-		return false;
-	}
-
-	string outputText, ledspicerVer;
-	if (not Defaults::runCommand(binaryPath + " -v", outputText)) {
-		updateBinaryStatusLabel("");
-		return false;
-	}
-
-	ledspicerVer = Defaults::extractAfter(outputText, "LEDSpicer");
-	if (ledspicerVer.empty()) {
-		Message::displayError("The selected binary does not appear to be ledspicerd.", this);
-		updateBinaryStatusLabel("");
-		return false;
-	}
-
-	auto parts = Defaults::explode(ledspicerVer, ' ');
-	if (parts.size() > 1) ledspicerVer = parts[0];
-	updateBinaryStatusLabel(ledspicerVer);
-	return true;
-}
-
-void DialogSettings::setBinaryPath(const string& binaryPath, bool setFileBinarySelector) {
-	this->binaryPath = binaryPath;
-	if (detectLedspicerVersion()) {
-		processBinary();
-		if (setFileBinarySelector) fileBinary->set_filename(binaryPath);
-	}
-}
-
-void DialogSettings::updateBinaryStatusLabel(const string& version) {
-	// Binary not detected or invalid.
-	if (version.empty()) {
-		binaryPath = "";
-		configPath = "";
-		labelBinaryStatus->set_text("Status: ❌ Not detected");
-		labelBinaryPath->set_text("N/A");
-		labelConfigPath->set_text("Will be saved inside the project directory");
-		Defaults::setMode(Defaults::Mode::Portable);
-	}
-	else {
-		labelBinaryStatus->set_text("Status: ✅ Detected (" + version + ")");
-		labelBinaryPath->set_text(binaryPath);
-		Defaults::setMode(Defaults::Mode::Local);
-	}
-}
-
 void DialogSettings::setConfigPath(const string& configPath) {
 
 	if (configPath.empty()) {
-		this->configPath = "";
+		Settings::get().setConfigPath("");
 		labelConfigPath->set_text("N/A");
 		return;
 	}
@@ -219,25 +308,27 @@ void DialogSettings::setConfigPath(const string& configPath) {
 		isWritable = info->get_attribute_boolean("access::can-write");
 	}
 	catch (...) {
-		this->configPath = "";
+		Settings::get().setConfigPath("");
 		return;
 	}
 
-	this->configPath = configPath;
+	Settings::get().setConfigPath(configPath);
 	labelConfigPath->set_text((isWritable ? "" : "🔒") + configPath);
 }
 
 void DialogSettings::setDataDir(const string& dataDir, bool setFileDataDirSelector) {
 
-	dataDirStatus = {};
+	Settings::get().setDataDirStatus(false, false, false);
+	Settings::get().setColorFiles({});
 
 	if (dataDir.empty()) {
-		this->dataDir = "";
+		Settings::get().setDataDir("");
 		fileDataDirSelect->set_current_folder(Glib::get_home_dir());
 	}
 	else {
-		this->dataDir = dataDir + (dataDir.back() != '/' ? "/" : "");
-		if (setFileDataDirSelector) fileDataDirSelect->set_filename(this->dataDir);
+		const string normalized = dataDir + (dataDir.back() != '/' ? "/" : "");
+		Settings::get().setDataDir(normalized);
+		if (setFileDataDirSelector) fileDataDirSelect->set_filename(normalized);
 		processDataDir();
 	}
 	updateDataDirLabels();
@@ -245,22 +336,23 @@ void DialogSettings::setDataDir(const string& dataDir, bool setFileDataDirSelect
 }
 
 void DialogSettings::updateDataDirLabels() {
+	const auto& s = Settings::get();
 	string status;
-	status += dataDirStatus.hasColors               ? "✅" : "❌";
+	status += s.getHasColors()          ? "✅" : "❌";
 	status += " colors.ini    ";
-	status += dataDirStatus.hasGameData             ? "✅" : "❌";
+	status += s.getHasGameData()        ? "✅" : "❌";
 	status += " gameData.xml    ";
-	status += dataDirStatus.hasControls             ? "✅" : "❌";
+	status += s.getHasControls()        ? "✅" : "❌";
 	status += " controls.ini    ";
-	status += dataDirStatus.colorFiles.empty()      ? "❌" : "✅";
+	status += s.getColorFiles().empty() ? "❌" : "✅";
 	status += " Color profiles    ";
 	labelSystemFiles->set_text(status);
-	labelDataPath->set_text(this->dataDir.empty() ? "N/A" : this->dataDir);
+	labelDataPath->set_text(s.getDataDir().empty() ? "N/A" : s.getDataDir());
 }
 
 void DialogSettings::processDataDir() {
 
-	// dataDirStatus already reset by setDataDir before this call.
+	const string& dataDir = Settings::get().getDataDir();
 	if (dataDir.empty()) return;
 
 	auto directory = Gio::File::create_for_path(dataDir);
@@ -273,40 +365,35 @@ void DialogSettings::processDataDir() {
 		return;
 	}
 
+	bool hasGameData = false, hasColors = false, hasControls = false;
+	StringVector colorFiles;
+
 	Glib::RefPtr<Gio::FileInfo> fileInfo;
 	while ((fileInfo = enumerator->next_file())) {
 		if (fileInfo->get_file_type() == Gio::FILE_TYPE_DIRECTORY) continue;
 
-		string filename(fileInfo->get_name());
+		const string filename {fileInfo->get_name()};
 
-		if (filename == "gameData.xml") {
-			dataDirStatus.hasGameData = true;
-			continue;
-		}
-		else if (filename == "colors.ini") {
-			dataDirStatus.hasColors = true;
-			continue;
-		}
-		else if (filename == "controls.ini") {
-			dataDirStatus.hasControls = true;
-			continue;
-		}
+		if      (filename == "gameData.xml") { hasGameData = true; continue; }
+		else if (filename == "colors.ini")   { hasColors   = true; continue; }
+		else if (filename == "controls.ini") { hasControls = true; continue; }
 
 		auto parts = Defaults::explode(filename, '.');
 		if (parts.size() < 2) continue;
-
-		string ext(parts.back());
-		if (ext != "xml") continue;
+		if (parts.back() != "xml") continue;
 
 		try {
 			XMLHelper testCol(dataDir + filename, "Colors");
 			parts.pop_back();
-			dataDirStatus.colorFiles.push_back(Defaults::implode(parts, '.'));
+			colorFiles.push_back(Defaults::implode(parts, '.'));
 		}
 		catch (...) {}
 	}
+
+	Settings::get().setDataDirStatus(hasGameData, hasColors, hasControls);
+	Settings::get().setColorFiles(std::move(colorFiles));
 }
 
 void DialogSettings::updateApplyButton() {
-	btnApply->set_sensitive(not dataDirStatus.colorFiles.empty());
+	btnApply->set_sensitive(not Settings::get().getColorFiles().empty());
 }

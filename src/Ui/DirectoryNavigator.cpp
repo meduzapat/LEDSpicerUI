@@ -23,6 +23,7 @@
 #include "DirectoryNavigator.hpp"
 
 using namespace LEDSpicerUI::Ui;
+using namespace LEDSpicerUI::Config;
 
 DirectoryNavigator::~DirectoryNavigator() {
 	delete DataDialogs::DialogDirectory::getInstance();
@@ -52,10 +53,10 @@ Storage::DirectoryEntry* DirectoryNavigator::getCurrentDir() const noexcept {
 	return currentDir;
 }
 
-void DirectoryNavigator::save(const string& projectDir) noexcept {
+void DirectoryNavigator::save() noexcept {
 
 	namespace fs = std::filesystem;
-	const string baseDir(projectDir + string(getSubDir()));
+	const string baseDir(Config::Settings::get().getProjectDir() + string(getSubDir()));
 
 	std::function<void(Storage::BoxButtonCollection*)> saveDir =
 	[&](Storage::BoxButtonCollection* col) {
@@ -101,14 +102,11 @@ void DirectoryNavigator::process(const string& absPath, const string& relPath) n
 				childRel(relPath.empty() ? name : relPath + "/" + name);
 
 			scanData[COLLECTION_DIRECTORIES].push_back({{FILENAME, name}, {PATH_PARENT, relPath}});
-			process(name, childRel);
+			process(entry.path().string(), childRel);
 		}
 		else if (entry.is_regular_file(ec) and entry.path().extension() == ".xml") {
 			try {
-				DataMap& fileData {extractData(entry.path().string(), relPath)};
-				for (auto& [key, vec] : fileData)
-					for (auto& item : vec)
-						scanData[key].push_back(std::move(item));
+				extractData(entry.path().string(), relPath, scanData);
 			}
 			catch (Message& e) {
 				Message::displayError(

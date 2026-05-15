@@ -119,7 +119,5 @@ string InputFile::processMaps(
 }
 
 void InputFile::save(const Ui::Storage::Input& input, const string& filePath) {
-	// DEBUG: display instead of writing — remove when real saving is wired up.
-	debugSave(filePath, input.toXML());
-//	Glib::file_set_contents(filePath, input.toXML());
+	saveFile(filePath, input.toXML());
 }

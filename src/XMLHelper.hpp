@@ -25,6 +25,9 @@
 
 #pragma once
 
+#define XML_FILE_PLAIN ""
+#define DEFAULT_MESSAGE "This is an auto-generated file by " PACKAGE_STRING "."
+
 namespace LEDSpicerUI {
 
 using LEDSpicerUI::Ui::Message;
@@ -160,11 +163,6 @@ protected:
 	 * @throws Message if type mismatch or invalid version.
 	 */
 	void processRootNode(const string& expectedType);
-
-	/**
-	 * DEBUG: shows filePath and content in a scrollable dialog instead of writing to disk.
-	 */
-	static void debugSave(const string& filePath, const string& content) noexcept;
 
 };
 

@@ -65,14 +65,6 @@ public:
 
 protected:
 
-	string
-		/// The name of the current project.
-		currentProjectName,
-		/// Path for the config.
-		configPath,
-		/// Path for project files.
-		projectDir;
-
 	Gtk::Entry
 		* inputUserId     = nullptr,
 		* inputGroupId    = nullptr,
@@ -139,13 +131,6 @@ protected:
 	 * @throws LEDSpicerUI::Message
 	 */
 	void readConfigFile(const string& ledspicerconf, bool wipe, uint8_t importFlags);
-
-	/**
-	 * Sets the color file.
-	 * @param colorFile if empty will remove all colors.
-	 * @throws Message
-	 */
-	void setColorFile(const string& colorFile);
 
 	/**
 	 * Fill the colors combo box with available color profiles.

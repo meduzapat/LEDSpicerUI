@@ -685,14 +685,6 @@ string Defaults::sanitizeFilename(const string& text) {
 	return result;
 }
 
-string& Defaults::getProjectsDir() {
-	return Defaults::projectDir;
-}
-
-void Defaults::setProjectsDir(const string& dir) {
-	projectDir = dir;
-}
-
 Defaults::Mode Defaults::getMode() {
 	return currentMode;
 }

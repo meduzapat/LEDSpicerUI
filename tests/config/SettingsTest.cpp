@@ -23,197 +23,147 @@
 #include <gtest/gtest.h>
 #include "config/Settings.hpp"
 
+using namespace LEDSpicerUI;
 using namespace LEDSpicerUI::Config;
 using Mode       = Settings::Mode;
 using ThemeStyle = Settings::ThemeStyle;
 
-// Mock data representing a fully populated saved settings map.
-static const StringUMap MOCK_FULL_MAP = {
-	{"binaryPath",        "/usr/bin/ledspicerd"},
-	{"dataDir",           "/usr/share/ledspicer/"},
-	{"projectsDir",       "/home/user/projects/"},
-	{"interactiveMode",   HUMAN_FALSE},
-	{"themeStyle",        "Dark"},
-	{"cleanProjectDir",   HUMAN_TRUE},
-	{"preserveEmptyDir",  HUMAN_TRUE},
-	{"removeInvalidItems",HUMAN_TRUE},
-	{"saveBackup",        HUMAN_FALSE},
-	{"debugFiles",        HUMAN_TRUE},
-};
-
-// Mock data with only a subset of keys — simulates a partial or legacy saved file.
-static const StringUMap MOCK_PARTIAL_MAP = {
-	{"binaryPath",      "/usr/bin/ledspicerd"},
-	{"themeStyle",      "Light"},
-	{"cleanProjectDir", HUMAN_TRUE},
-	{"saveBackup",      HUMAN_FALSE},
-};
-
 class SettingsTest : public ::testing::Test {
+
 protected:
+
 	void SetUp() override {
-		// Reset to defaults before each test (empty map → all defaults).
-		Settings::get().fromMap({});
+		Settings::get().load(Values{});
 	}
+
 };
 
-TEST_F(SettingsTest, DefaultPaths) {
-	EXPECT_TRUE(Settings::get().getBinaryPath().empty());
-	EXPECT_TRUE(Settings::get().getDataDir().empty());
-	EXPECT_TRUE(Settings::get().getProjectsDir().empty());
+TEST_F(SettingsTest, DefaultState) {
+	const auto& s {Settings::get()};
+	EXPECT_TRUE(s.getBinaryPath().empty());
+	EXPECT_TRUE(s.getDataDir().empty());
+	EXPECT_TRUE(s.getProjectsDir().empty());
+	EXPECT_TRUE(s.getDefaultProject().empty());
+	EXPECT_EQ(ThemeStyle::Auto, s.getThemeStyle());
+	EXPECT_TRUE (s.isInteractiveMode());
+	EXPECT_FALSE(s.shouldCleanProjectDir());
+	EXPECT_TRUE (s.shouldPreserveEmptyDir());
+	EXPECT_TRUE (s.shouldRemoveInvalidItems());
+	EXPECT_TRUE (s.shouldSaveBackup());
+	EXPECT_FALSE(s.shouldDebugFiles());
+	EXPECT_EQ(Mode::Portable, s.getMode());
+	EXPECT_TRUE(s.isPortable());
 }
 
-TEST_F(SettingsTest, DefaultMode) {
-	EXPECT_EQ(Mode::Portable, Settings::get().getMode());
-	EXPECT_TRUE(Settings::get().isPortable());
+TEST_F(SettingsTest, LoadAndSerialize) {
+	auto& s = Settings::get();
+	s.load(Values{
+		{"binaryPath",         "/usr/bin/ledspicerd"},
+		{"dataDir",            "/usr/share/ledspicer/"},
+		{"projectsDir",        "/home/user/projects/"},
+		{"defaultProject",     "mygame"},
+		{"interactiveMode",    HUMAN_FALSE},
+		{"themeStyle",         "Dark"},
+		{"cleanProjectDir",    HUMAN_TRUE},
+		{"preserveEmptyDir",   HUMAN_FALSE},
+		{"removeInvalidItems", HUMAN_FALSE},
+		{"saveBackup",         HUMAN_FALSE},
+		{"debugFiles",         HUMAN_TRUE},
+	});
+
+	EXPECT_EQ("/usr/bin/ledspicerd",   s.getBinaryPath());
+	EXPECT_EQ("/usr/share/ledspicer/", s.getDataDir());
+	EXPECT_EQ("/home/user/projects/",  s.getProjectsDir());
+	EXPECT_EQ("mygame",                s.getDefaultProject());
+	EXPECT_EQ(ThemeStyle::Dark,        s.getThemeStyle());
+	EXPECT_FALSE(s.isInteractiveMode());
+	EXPECT_TRUE (s.shouldCleanProjectDir());
+	EXPECT_FALSE(s.shouldPreserveEmptyDir());
+	EXPECT_FALSE(s.shouldRemoveInvalidItems());
+	EXPECT_FALSE(s.shouldSaveBackup());
+	EXPECT_TRUE (s.shouldDebugFiles());
+	EXPECT_EQ(Mode::Local, s.getMode());
+
+	// Round-trip: snapshot → reset → load → same values.
+	const Values snap(s.begin(), s.end());
+	s.load(Values{});
+	s.load(snap);
+	EXPECT_EQ("/usr/bin/ledspicerd", s.getBinaryPath());
+	EXPECT_EQ(ThemeStyle::Dark,      s.getThemeStyle());
+	EXPECT_EQ(Mode::Local,           s.getMode());
 }
 
-TEST_F(SettingsTest, DefaultInteractiveMode) {
-	EXPECT_TRUE(Settings::get().isInteractiveMode());
+TEST_F(SettingsTest, LoadFillsMissingKeysWithDefaults) {
+	auto& s = Settings::get();
+	s.load(Values{{"binaryPath", "/usr/bin/ledspicerd"}, {"themeStyle", "Light"}});
+
+	EXPECT_EQ("/usr/bin/ledspicerd", s.getBinaryPath());
+	EXPECT_TRUE(s.getDataDir().empty());   // missing → default ""
+	EXPECT_EQ(ThemeStyle::Light, s.getThemeStyle());
+	EXPECT_TRUE(s.shouldSaveBackup());     // missing → default True
+	EXPECT_FALSE(s.shouldDebugFiles());    // missing → default False
+	// interactive mode defaults to True → with binary set, mode is Iterative
+	EXPECT_EQ(Mode::Iterative, s.getMode());
 }
 
-TEST_F(SettingsTest, DefaultThemeStyle) {
-	EXPECT_EQ(ThemeStyle::Auto, Settings::get().getThemeStyle());
+TEST_F(SettingsTest, ModeDerivation) {
+	auto& s = Settings::get();
+
+	// No binary → Portable regardless of interactive preference.
+	s.setBinaryPath("");
+	s.setInteractiveMode(true);
+	EXPECT_EQ(Mode::Portable, s.getMode());
+	EXPECT_TRUE(s.isPortable());
+
+	// Binary + interactive → Iterative.
+	s.setBinaryPath("/usr/bin/ledspicerd");
+	EXPECT_EQ(Mode::Iterative, s.getMode());
+	EXPECT_TRUE(s.isIterative());
+
+	// Binary, interactive off → Local.
+	s.setInteractiveMode(false);
+	EXPECT_EQ(Mode::Local, s.getMode());
+
+	// Clear binary → Portable again.
+	s.setBinaryPath("");
+	EXPECT_EQ(Mode::Portable, s.getMode());
 }
 
-TEST_F(SettingsTest, DefaultBooleans) {
-	EXPECT_FALSE(Settings::get().shouldCleanProjectDir());
-	EXPECT_FALSE(Settings::get().shouldPreserveEmptyDir());
-	EXPECT_FALSE(Settings::get().shouldRemoveInvalidItems());
-	EXPECT_TRUE (Settings::get().shouldSaveBackup());
-	EXPECT_FALSE(Settings::get().shouldDebugFiles());
+TEST_F(SettingsTest, VolatileState) {
+	auto& s = Settings::get();
+
+	s.setConfigPath("/etc/ledspicer/ledspicer.conf");
+	EXPECT_EQ("/etc/ledspicer/ledspicer.conf", s.getConfigPath());
+
+	s.setProjectsDir("/home/user/projects/");
+	s.setCurrentProject("arcade");
+	EXPECT_EQ("arcade", s.getCurrentProject());
+	EXPECT_EQ("arcade", s.getDefaultProject()); // setCurrentProject also writes DEFAULT_PROJECT
+	EXPECT_EQ("/home/user/projects/arcade/", s.getProjectDir());
+
+	// Portable mode → active config is inside the project dir.
+	EXPECT_TRUE(s.isPortable());
+	EXPECT_EQ("/home/user/projects/arcade/" CONFIG_FILE, s.getActiveConfigPath());
+
+	// Local mode → active config is configPath.
+	s.setBinaryPath("/usr/bin/ledspicerd");
+	s.setInteractiveMode(false);
+	EXPECT_TRUE(s.isLocal());
+	EXPECT_EQ("/etc/ledspicer/ledspicer.conf", s.getActiveConfigPath());
+
+	StringVector files = {"colors.ini", "extra.ini"};
+	s.setColorFiles(files);
+	EXPECT_EQ(2u, s.getColorFiles().size());
+	EXPECT_EQ("colors.ini", s.getColorFiles()[0]);
+
+	s.setDataDirStatus(true, true, false);
+	EXPECT_TRUE (s.getHasGameData());
+	EXPECT_TRUE (s.getHasColors());
+	EXPECT_FALSE(s.getHasControls());
 }
 
-TEST_F(SettingsTest, SetGetPaths) {
-	Settings::get().setBinaryPath("/usr/bin/ledspicerd");
-	Settings::get().setDataDir("/usr/share/ledspicer/");
-	Settings::get().setProjectsDir("/home/user/projects/");
 
-	EXPECT_EQ("/usr/bin/ledspicerd",   Settings::get().getBinaryPath());
-	EXPECT_EQ("/usr/share/ledspicer/", Settings::get().getDataDir());
-	EXPECT_EQ("/home/user/projects/",  Settings::get().getProjectsDir());
-}
-
-TEST_F(SettingsTest, SetGetThemeStyle) {
-	Settings::get().setThemeStyle(ThemeStyle::Dark);
-	EXPECT_EQ(ThemeStyle::Dark, Settings::get().getThemeStyle());
-
-	Settings::get().setThemeStyle(ThemeStyle::Light);
-	EXPECT_EQ(ThemeStyle::Light, Settings::get().getThemeStyle());
-
-	Settings::get().setThemeStyle(ThemeStyle::Auto);
-	EXPECT_EQ(ThemeStyle::Auto, Settings::get().getThemeStyle());
-}
-
-TEST_F(SettingsTest, SetGetBooleans) {
-	Settings::get().setCleanProjectDir(true);
-	Settings::get().setPreserveEmptyDir(true);
-	Settings::get().setRemoveInvalidItems(true);
-	Settings::get().setSaveBackup(false);
-	Settings::get().setDebugFiles(true);
-
-	EXPECT_TRUE (Settings::get().shouldCleanProjectDir());
-	EXPECT_TRUE (Settings::get().shouldPreserveEmptyDir());
-	EXPECT_TRUE (Settings::get().shouldRemoveInvalidItems());
-	EXPECT_FALSE(Settings::get().shouldSaveBackup());
-	EXPECT_TRUE (Settings::get().shouldDebugFiles());
-}
-
-TEST_F(SettingsTest, ModePortableWhenNoBinary) {
-	Settings::get().setBinaryPath("");
-	EXPECT_EQ(Mode::Portable, Settings::get().getMode());
-	EXPECT_TRUE(Settings::get().isPortable());
-}
-
-TEST_F(SettingsTest, ModeIterativeWhenBinaryAndInteractive) {
-	Settings::get().setInteractiveMode(true);
-	Settings::get().setBinaryPath("/usr/bin/ledspicerd");
-	EXPECT_EQ(Mode::Iterative, Settings::get().getMode());
-}
-
-TEST_F(SettingsTest, ModeLocalWhenBinaryNoInteractive) {
-	Settings::get().setInteractiveMode(false);
-	Settings::get().setBinaryPath("/usr/bin/ledspicerd");
-	EXPECT_EQ(Mode::Local, Settings::get().getMode());
-	EXPECT_FALSE(Settings::get().isPortable());
-}
-
-TEST_F(SettingsTest, ModeUpdatesWhenInteractiveModeChanges) {
-	Settings::get().setBinaryPath("/usr/bin/ledspicerd");
-	EXPECT_EQ(Mode::Iterative, Settings::get().getMode());
-
-	Settings::get().setInteractiveMode(false);
-	EXPECT_EQ(Mode::Local, Settings::get().getMode());
-
-	Settings::get().setInteractiveMode(true);
-	EXPECT_EQ(Mode::Iterative, Settings::get().getMode());
-}
-
-TEST_F(SettingsTest, ModeReturnsPortableWhenBinaryCleared) {
-	Settings::get().setBinaryPath("/usr/bin/ledspicerd");
-	EXPECT_EQ(Mode::Iterative, Settings::get().getMode());
-
-	Settings::get().setBinaryPath("");
-	EXPECT_TRUE(Settings::get().isPortable());
-}
-
-TEST_F(SettingsTest, FromMapLoadsAllValues) {
-	Settings::get().fromMap(MOCK_FULL_MAP);
-
-	EXPECT_EQ("/usr/bin/ledspicerd",   Settings::get().getBinaryPath());
-	EXPECT_EQ("/usr/share/ledspicer/", Settings::get().getDataDir());
-	EXPECT_EQ("/home/user/projects/",  Settings::get().getProjectsDir());
-	EXPECT_FALSE(Settings::get().isInteractiveMode());
-	EXPECT_EQ(ThemeStyle::Dark,        Settings::get().getThemeStyle());
-	EXPECT_TRUE (Settings::get().shouldCleanProjectDir());
-	EXPECT_TRUE (Settings::get().shouldPreserveEmptyDir());
-	EXPECT_TRUE (Settings::get().shouldRemoveInvalidItems());
-	EXPECT_FALSE(Settings::get().shouldSaveBackup());
-	EXPECT_TRUE (Settings::get().shouldDebugFiles());
-}
-
-TEST_F(SettingsTest, FromMapEmptyUsesDefaults) {
-
-	Settings::get().fromMap({});
-	EXPECT_TRUE(Settings::get().getBinaryPath().empty());
-	EXPECT_TRUE(Settings::get().isInteractiveMode());
-	EXPECT_FALSE(Settings::get().shouldCleanProjectDir());
-	EXPECT_TRUE (Settings::get().shouldSaveBackup());
-	EXPECT_EQ(Mode::Portable,   Settings::get().getMode());
-	EXPECT_EQ(ThemeStyle::Auto, Settings::get().getThemeStyle());
-}
-
-TEST_F(SettingsTest, FromMapThemeStyleLight) {
-	Settings::get().fromMap({{"themeStyle", "light"}});  // single-key mock
-	EXPECT_EQ(ThemeStyle::Light, Settings::get().getThemeStyle());
-}
-
-TEST_F(SettingsTest, FromMapUnknownThemeStyleFallsBackToAuto) {
-	Settings::get().fromMap({{"themeStyle", "solarized"}});  // single-key mock
-	EXPECT_EQ(ThemeStyle::Auto, Settings::get().getThemeStyle());
-}
-
-TEST_F(SettingsTest, ToMapContainsAllKeys) {
-	StringUMap m = Settings::get().toMap();
-
-	EXPECT_TRUE(m.count("binaryPath"));
-	EXPECT_TRUE(m.count("dataDir"));
-	EXPECT_TRUE(m.count("projectsDir"));
-	EXPECT_TRUE(m.count("interactiveMode"));
-	EXPECT_TRUE(m.count("themeStyle"));
-	EXPECT_TRUE(m.count("cleanProjectDir"));
-	EXPECT_TRUE(m.count("preserveEmptyDir"));
-	EXPECT_TRUE(m.count("removeInvalidItems"));
-	EXPECT_TRUE(m.count("saveBackup"));
-	EXPECT_TRUE(m.count("debugFiles"));
-}
-
-TEST_F(SettingsTest, RoundTrip) {
-	Settings::get().fromMap(MOCK_PARTIAL_MAP);
-	Settings::get().fromMap(Settings::get().toMap());
-
-	EXPECT_EQ("/usr/bin/ledspicerd", Settings::get().getBinaryPath());
-	EXPECT_EQ(ThemeStyle::Light,     Settings::get().getThemeStyle());
-	EXPECT_TRUE (Settings::get().shouldCleanProjectDir());
-	EXPECT_FALSE(Settings::get().shouldSaveBackup());
+int main(int argc, char** argv) {
+	::testing::InitGoogleTest(&argc, argv);
+	return RUN_ALL_TESTS();
 }

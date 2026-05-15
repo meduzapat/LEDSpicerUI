@@ -81,7 +81,7 @@ void DialogColors::setColorsFromFile(const string& path) noexcept {
 			for (; xmlElement; xmlElement = xmlElement->NextSiblingElement()) {
 				const auto colorAttr {XMLHelper::processNode(xmlElement)};
 				XMLHelper::checkAttributes({NAME, "color"}, colorAttr, "color");
-				if (colorAttr.isA(NAME, HUMAN_RANDOM) || not colors.isSet(colorAttr.getValue(NAME)))
+				if (colorAttr.isA(NAME, HUMAN_RANDOM) || colors.isSet(colorAttr.getValue(NAME)))
 					continue;
 				colors.setValue(colorAttr.getValue(NAME), colorAttr.getValue(COLOR));
 			}

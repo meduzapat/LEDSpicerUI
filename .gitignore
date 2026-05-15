@@ -12,6 +12,7 @@ Debug/
 
 # CMake build dir
 target/
+build/
 
 # CMake generated files
 CMakeCache.txt

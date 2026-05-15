@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
 project(LEDSpicerUI VERSION 0.0.15 LANGUAGES CXX)
-
 # Metadata (for glade file substitution and compile definitions)
 set(PACKAGE "ledspicerui")
 set(PACKAGE_NAME "${PROJECT_NAME}")
@@ -31,6 +30,7 @@ add_compile_definitions(
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GTKMM30 REQUIRED gtkmm-3.0>=3.24)
@@ -49,7 +49,9 @@ add_executable(ledspicerui
 	src/Values.cpp
 	src/Defaults.cpp
 	src/XMLHelper.cpp
+	src/config/Settings.cpp
 	src/config/SettingsFile.cpp
+	src/config/ProjectFile.cpp
 	src/config/ConfigFile.cpp
 	src/config/InputFile.cpp
 	src/Ui/Message.cpp

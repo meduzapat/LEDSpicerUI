@@ -24,16 +24,6 @@
 #include <glibmm.h>
 #include <giomm.h>
 
-#include <unordered_map>
-#include <unordered_set>
-
-#include <vector>
-using std::vector;
-
-#include <string>
-using std::string;
-using std::stringstream;
-
 #include <functional>
 
 #include <filesystem>
@@ -47,27 +37,12 @@ using std::unique_ptr;
 
 #pragma once
 
-#define XML_FILE_PLAIN ""
-#define CONFIG_FILE    "ledspicer.conf"
-
-#define DEFAULT_MESSAGE "This is an auto-generated file by " PACKAGE_STRING "."
-
 namespace LEDSpicerUI {
 
-using StringMap    = std::map<string, string>;
-using ValueVector  = std::vector<Values>;
-using StringUSet   = std::unordered_set<string>;
-using StringSet    = std::set<string>;
-using StringVector = std::vector<string>;
-using DataMap      = std::unordered_map<string, ValueVector>;
+using ValueVector = std::vector<Values>;
+using DataMap     = std::unordered_map<string, ValueVector>;
 
 namespace Constants {
-
-inline const string
-	/// Commonly used empty string.
-	PATH_INPUT     {"inputs/"},
-	PATH_ANIMATION {"animations/"},
-	PATH_PROFILE   {"profiles/"};
 
 /// Separators.
 constexpr char
@@ -741,18 +716,6 @@ public:
 	static string sanitizeFilename(const string& text);
 
 	/**
-	 * Sets the project directory.
-	 * @param dir
-	 */
-	static void setProjectsDir(const string& dir);
-
-	/**
-	 * Gets the project directory.
-	 * @return
-	 */
-	static string& getProjectsDir();
-
-	/**
 	 * Gets the current application mode.
 	 * @return Current mode.
 	 */
@@ -780,8 +743,6 @@ protected:
 	inline static Gtk::HeaderBar* header = nullptr;
 
 	inline static Gtk::Button* btnSave = nullptr;
-
-	inline static string projectDir = "";
 
 };
 

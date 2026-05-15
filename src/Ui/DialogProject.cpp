@@ -23,6 +23,7 @@
 #include "DialogProject.hpp"
 
 using namespace LEDSpicerUI::Ui;
+using LEDSpicerUI::Config::Settings;
 
 DialogProject::DialogProject(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &builder) :
 	GladeDialog(obj, builder)
@@ -77,13 +78,14 @@ DialogProject::DialogProject(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> con
 
 	// Dialog show
 	signal_show().connect([this]() {
+		const string& pd = Settings::get().getProjectsDir();
 		comboSelectProject->set_active_id(projectName);
 		inputNewProjectName->set_text("");
-		fileProjectsDirSelect->set_filename(Defaults::getProjectsDir());
-		labelProjectsPath->set_text(Defaults::getProjectsDir());
+		if (not pd.empty()) fileProjectsDirSelect->set_filename(pd);
+		labelProjectsPath->set_text(pd.empty() ? "N/A" : pd);
 		boxNewProjectName->set_visible(projectName.empty());
 		btnApply->set_sensitive(false);
-		if (not Defaults::getProjectsDir().empty()) {
+		if (not pd.empty()) {
 			scanProjects();
 			updateBoxProjectActions();
 		}
@@ -100,9 +102,10 @@ void DialogProject::scanProjects() {
 	comboSelectProject->append("", "Create New...");
 	comboSelectProject->set_active_id("");
 
-	if (Defaults::getProjectsDir().empty()) return;
+	const string& pd = Settings::get().getProjectsDir();
+	if (pd.empty()) return;
 
-	auto directory = Gio::File::create_for_path(Defaults::getProjectsDir());
+	auto directory = Gio::File::create_for_path(pd);
 	Glib::RefPtr<Gio::FileEnumerator> enumerator;
 	try {
 		enumerator = directory->enumerate_children();
@@ -129,15 +132,16 @@ void DialogProject::scanProjects() {
 
 void DialogProject::setProjectsDir(const string& projectsDir, bool setFileProjectsDirSelector) {
 	if (projectsDir.empty()) {
-		Defaults::setProjectsDir("");
+		Settings::get().setProjectsDir("");
 		labelProjectsPath->set_text("N/A");
 	}
 	else {
-		Defaults::setProjectsDir(projectsDir + (projectsDir.back() != '/' ? "/" : ""));
-		labelProjectsPath->set_text(Defaults::getProjectsDir());
+		const string normalized = projectsDir + (projectsDir.back() != '/' ? "/" : "");
+		Settings::get().setProjectsDir(normalized);
+		labelProjectsPath->set_text(normalized);
 		scanProjects();
 	}
-	if (setFileProjectsDirSelector) fileProjectsDirSelect->set_filename(Defaults::getProjectsDir());
+	if (setFileProjectsDirSelector) fileProjectsDirSelect->set_filename(Settings::get().getProjectsDir());
 	updateBoxProjectActions();
 }
 

@@ -22,6 +22,7 @@
 
 #include "Storage/DirectoryEntry.hpp"
 #include "DataDialogs/DialogDirectory.hpp"
+#include "config/Settings.hpp"
 
 #pragma once
 
@@ -67,10 +68,9 @@ public:
 	virtual void clear() noexcept abstract;
 
 	/**
-	 * Saves all items in the tree to disk under projectDir/specialized.
-	 * @param baseDir Root project directory plus the specialized sub directory.
+	 * Saves all items in the tree to disk under Settings::getProjectDir()/getSubDir().
 	 */
-	void save(const string& baseDir) noexcept;
+	void save() noexcept;
 
 protected:
 
@@ -104,12 +104,14 @@ protected:
 	void process(const string& absPath, const string& relPath) noexcept;
 
 	/**
-	 * Parses one .xml file and returns its extracted DataMap.
+	 * Parses one .xml file and merges its data into out.
+	 * The file object must stay alive during consumption — implementations
+	 * must not return a DataMap by value.
 	 * @param filePath Absolute path to the .xml file.
 	 * @param relPath  Navigator-relative directory path containing the file.
-	 * @return DataMap with all data extracted from the file.
+	 * @param out      Accumulator map to merge results into.
 	 */
-	virtual DataMap& extractData(const string& filePath, const string& relPath) noexcept abstract;
+	virtual void extractData(const string& filePath, const string& relPath, DataMap& out) noexcept abstract;
 
 	/**
 	 * Writes one item to filePath.

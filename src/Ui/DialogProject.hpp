@@ -21,6 +21,7 @@
  */
 
 #include "GladeDialog.hpp"
+#include "config/Settings.hpp"
 
 #pragma once
 

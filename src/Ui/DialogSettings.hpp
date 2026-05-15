@@ -30,6 +30,7 @@ namespace LEDSpicerUI::Ui {
 /**
  * LEDSpicerUI::Ui::DialogSettings
  * Handles LEDSpicerUI settings: binary detection, data directory.
+ * All persistent state lives in Settings; this class owns only UI widgets.
  */
 class DialogSettings : public GladeDialog<DialogSettings> {
 
@@ -39,53 +40,47 @@ public:
 
 	virtual ~DialogSettings() = default;
 
-	const string& getBinaryPath() const;
-	const string& getDataDir() const;
-	const string& getConfigPath() const;
-	const StringVector& getColorFiles() const;
-
 	/**
-	 * Sets the binary path and updates the label.
-	 * @param binaryPath the path to the ledspicerd binary.
-	 * @param setFileBinarySelector if true, will update the file selector to match the new path.
+	 * Full startup flow: load from disk, auto-detect, or show first-run welcome dialog.
+	 * @param parent Window to parent any dialogs shown during startup.
+	 * @return false if the application should exit, true to continue.
 	 */
-	void setBinaryPath(const string& binaryPath, bool setFileBinarySelector);
+	bool startup(Gtk::Window* parent);
 
 	/**
-	 * Sets the config file path and updates the label.
-	 * @param configPath the path to the config file.
+	 * Searches PATH for ledspicerd and auto-configures if found.
+	 * Saves settings if the result is valid.
+	 * @return true if binary was found and data directory is valid.
 	 */
-	void setConfigPath(const string& configPath);
+	bool autoDetect();
 
 	/**
-	 * Loads settings from config file into dialog.
-	 * @return true if settings were loaded successfully, false otherwise.
+	 * Calls SettingsFile::initialize() then syncs widgets from Settings.
+	 * @return true if a config file was found and loaded.
 	 */
 	bool loadSettings();
 
 	/**
-	 * Saves current dialog values to config file.
+	 * Pushes current Settings to disk via SettingsFile::save().
 	 */
 	void saveSettings();
 
 	bool isValid() const;
 
+	/**
+	 * Sets the binary path, runs detection, and updates UI.
+	 * @param binaryPath
+	 * @param setFileBinarySelector if true, syncs the file chooser widget.
+	 */
+	void setBinaryPath(const string& binaryPath, bool setFileBinarySelector);
+
+	/**
+	 * Sets the config file path and updates the label.
+	 * @param configPath
+	 */
+	void setConfigPath(const string& configPath);
+
 protected:
-
-	string
-		binaryPath, /// The path to the ledspicerd binary (if available).
-		dataDir,    /// Location of the data directory, should contain colors.ini, controls.ini, gameData.xml and color XML files.
-		configPath; /// The path to the ledspicer.conf file.
-
-	/// The status of the data directory.
-	struct DataDirStatus {
-		bool
-			hasGameData = false, /// True if gameData.xml is found in the data directory.
-			hasColors   = false, /// True if colors.ini is found in the data directory.
-			hasControls = false; /// True if controls.ini is found in the data directory.
-		StringVector colorFiles; /// List of color XML files found in the data directory.
-	}
-	dataDirStatus;
 
 	Gtk::Label
 		* labelBinaryPath   = nullptr,
@@ -100,43 +95,22 @@ protected:
 
 	Gtk::Button* btnApply = nullptr;
 
+	Gtk::Switch
+		* switchInteractiveMode    = nullptr,
+		* switchCleanProjectDir    = nullptr,
+		* switchPreserveEmptyDir   = nullptr,
+		* switchRemoveInvalidItems = nullptr,
+		* switchSaveBackup         = nullptr,
+		* switchDebugFiles         = nullptr;
+
 	DialogSettings(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
 
-	/**
-	 * Detects the ledspicerd version by running it and verifying that it is a valid ledspicerd binary.
-	 * @return true if ledspicerd was detected and version was extracted successfully.
-	 */
 	bool detectLedspicerVersion();
-
-	/**
-	 * Updates the binary status label based on the detected version.
-	 * @param version the detected version of ledspicerd.
-	 */
 	void updateBinaryStatusLabel(const string& version);
-
-	/**
-	 * Extracts dataDir and projectsDir from binary -h output.
-	 */
 	void processBinary();
-
-	/**
-	 * Sets the data directory and updates the status.
-	 * @param dataDir the path to the data directory.
-	 * @param setFileDataDirSelector if true, will update the file selector to match the new path.
-	 */
 	void setDataDir(const string& dataDir, bool setFileDataDirSelector);
-
-	/**
-	 * Updates the data directory status labels based on the current dataDirStatus.
-	 */
 	void updateDataDirLabels();
-
-	/**
-	 * Validates data directory contents.
-	 * Populates dataDirStatus with findings.
-	 */
 	void processDataDir();
-
 	void updateApplyButton();
 };
 

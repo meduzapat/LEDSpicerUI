@@ -20,16 +20,27 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <string>
-#include <unordered_map>
+#include <vector>
+using std::vector;
+
+#include <set>
 #include <map>
+#include <unordered_map>
+#include <unordered_set>
+
+#include <string>
 using std::string;
-using StringUMap = std::unordered_map<string, string>;
+using std::stringstream;
 
 #pragma once
 
 namespace LEDSpicerUI {
 
+using StringMap    = std::map<string, string>;
+using StringUMap   = std::unordered_map<string, string>;
+using StringVector = std::vector<string>;
+using StringUSet   = std::unordered_set<string>;
+using StringSet    = std::set<string>;
 
 namespace Constants {
 

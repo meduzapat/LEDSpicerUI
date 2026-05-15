@@ -21,6 +21,7 @@
  */
 
 #include "ConfigFile.hpp"
+#include "ProjectFile.hpp"
 
 using namespace LEDSpicerUI::Config;
 
@@ -276,8 +277,6 @@ void ConfigFile::save(const ConfigData& data) {
 	Defaults::reduceTab();
 	xmlData += xmlFooter();
 
-	// DEBUG: display instead of writing — remove when real saving is wired up.
-	debugSave(data.configPath, xmlData);
-//	Glib::file_set_contents(filePath, xmlData);
+	ProjectFile::saveFile(data.configPath, xmlData);
 
 }
