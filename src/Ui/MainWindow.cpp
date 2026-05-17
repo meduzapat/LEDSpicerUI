@@ -212,6 +212,7 @@ void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {
 	// Dialog to import config files.
 	Gtk::Button* btnImportConfig;
 	builder->get_widget("BtnImportConfig", btnImportConfig);
+	btnImportConfig->set_sensitive(false);
 	btnImportConfig->signal_clicked().connect([&]() {
 		if (dialogImportConfig.run() == Gtk::ResponseType::RESPONSE_OK) {
 			string newPath = dialogImportConfig.get_file()->get_path();
@@ -239,7 +240,7 @@ void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {
 		}
 	});
 
-	btnSelectProject->signal_clicked().connect([&, MainTabs]() {
+	btnSelectProject->signal_clicked().connect([&, MainTabs, btnImportConfig]() {
 		if (DialogProject::getInstance()->run() != Gtk::ResponseType::RESPONSE_APPLY) {
 			DialogProject::getInstance()->hide();
 			return;
@@ -293,6 +294,7 @@ void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {
 		Defaults::cleanDirty();
 		MainTabs->set_current_page(0);
 		MainTabs->set_sensitive(true);
+		btnImportConfig->set_sensitive(true);
 		DialogProject::getInstance()->hide();
 	});
 }

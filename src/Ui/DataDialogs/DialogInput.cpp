@@ -102,6 +102,7 @@ void DialogInput::resetForm() noexcept {
 	spinInputTimes->get_parent()->set_visible(Defaults::inputHasFlag(name, Defaults::INPUT_HAS_TIMES));
 	if (Defaults::inputHasFlag(name, Defaults::INPUT_HAS_BLINK)) {
 		switchInputBlink->get_parent()->set_visible(true);
+		comboBoxInputSpeed->set_sensitive(switchInputBlink->get_active());
 	}
 	else {
 		comboBoxInputSpeed->set_sensitive(true);

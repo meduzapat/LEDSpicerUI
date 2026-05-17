@@ -74,7 +74,7 @@ void DialogForm::createItems(ValueVector& rawCollection, DataMap& values) noexce
 	}
 	currentData = nullptr;
 	if (not errors.empty()) {
-		Message::displayError("Errors in " + getType() + ":\n" + errors, this);
+		Message::displayError("Errors in " + getType() + ":\n" + errors, is_visible() ? this : nullptr);
 	}
 }
 
