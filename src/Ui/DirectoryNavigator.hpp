@@ -58,24 +58,34 @@ public:
 	 */
 	void navigateUp() noexcept;
 
-	/// @return true if currently at root.
+	/**
+	 * @return true if currently at root.
+	 */
 	bool isAtRoot() const noexcept;
 
-	/// @return Currently active directory pointer.
+	/**
+	 * @return Currently active directory pointer.
+	 */
 	Storage::DirectoryEntry* getCurrentDir() const noexcept;
 
-	/// Called to clean up all data.
+	/**
+	 * Called to clean up all data.
+	 */
 	virtual void clear() noexcept abstract;
+
+	/**
+	 * Loads all items from disk under Settings::getProjectDir()/getSubDir() into the tree.
+	 * Clears existing data first.
+	 * Each specialized navigator implements this for its own subdir and file format.
+	 */
+	void load() noexcept;
 
 	/**
 	 * Saves all items in the tree to disk under Settings::getProjectDir()/getSubDir().
 	 */
-	void save() noexcept;
+	void save() const noexcept;
 
 protected:
-
-	/// Backing data for rootDir — must be declared before rootDir.
-	Values rootData;
 
 	/// Owned root directory entry for this navigator type.
 	Storage::DirectoryEntry rootDir;

@@ -39,6 +39,12 @@ class DirectoryEntry : public Parent, public DirNode {
 
 public:
 
+	/**
+	 * Default constructor for root directory.
+	 * Initializes with empty values and nullptr parent.
+	 */
+	DirectoryEntry() : DirectoryEntry(emptyData(), nullptr) {}
+
 	DirectoryEntry(Values& data, DirectoryEntry* parent) noexcept;
 
 	virtual ~DirectoryEntry() = default;
