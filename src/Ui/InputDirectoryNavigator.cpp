@@ -29,17 +29,10 @@ InputDirectoryNavigator::InputDirectoryNavigator(
 	const Glib::RefPtr<Gtk::Builder>& builder,
 	Gtk::Window* parentWindow
 ) noexcept :
-	DirectoryNavigator{builder},
-	dialogImportInput(DialogImport::Types::INPUT, parentWindow),
-	dirSetting {
-		boxInputs,
-		TYPE_INPUT_DIR,
-		[this](Storage::DirectoryEntry* dir) { enterDirectory(dir); }
-	}
+	DirectoryNavigator(),
+	dialogImportInput(DialogImport::Types::INPUT, parentWindow)
 {
-
 	DataDialogs::DialogInput::buildInstance(builder, "DialogInput");
-	dirSetting.fileDialog = DataDialogs::DialogInput::getInstance();
 
 	Gtk::Button
 		* btnNewInputFolder = nullptr,
@@ -52,6 +45,8 @@ InputDirectoryNavigator::InputDirectoryNavigator(
 	builder->get_widget("BoxInputBreadcrumb", boxBreadcrumb);
 	builder->get_widget("BtnAddInput",        btnAddInput);
 	builder->get_widget("BtnImportInput",     btnImportInput);
+
+	DataDialogs::DialogInput::getInstance()->setBox(boxInputs);
 
 	// Sort directories first, then files.
 	boxInputs->set_sort_func([](Gtk::FlowBoxChild* a, Gtk::FlowBoxChild* b) -> int {
@@ -71,8 +66,7 @@ InputDirectoryNavigator::InputDirectoryNavigator(
 	chEl->registerSensitivity(btnAddInput);
 	chEl->registerSensitivity(btnImportInput);
 
-	// Setup DialogDirectory.
-	DataDialogs::DialogForm::setSignalAddTo(btnNewInputFolder, DataDialogs::DialogDirectory::getInstance());
+	btnNewInputFolder->signal_clicked().connect([this]() { onNewDirClicked(); });
 
 	// Import button.
 	btnImportInput->signal_clicked().connect([this]() {
@@ -80,7 +74,7 @@ InputDirectoryNavigator::InputDirectoryNavigator(
 			StringVector selectedFiles(dialogImportInput.get_filenames());
 			for (const auto& selectedFile : selectedFiles) {
 				try {
-					InputFile datafile(selectedFile, currentDir->getFullPath());
+					InputFile datafile(selectedFile, currentDir);
 					DataDialogs::DialogInput::getInstance()->load(datafile.getDataMap());
 				}
 				catch (Message& e) {
@@ -92,44 +86,34 @@ InputDirectoryNavigator::InputDirectoryNavigator(
 	});
 
 	btnHome->signal_clicked().connect([this]() {
-		currentDir = &rootDir;
-		wireDialogs(currentDir);
+		enterDirectory(&rootDir);
 	});
 }
 
-InputDirectoryNavigator::~InputDirectoryNavigator() {
-	delete DataDialogs::DialogInput::getInstance();
-}
-
 void InputDirectoryNavigator::clear() noexcept {
-	rootDir.wipe();
+	rootDir.getPrimaryChild()->wipe();
 	currentDir = &rootDir;
 }
 
-void InputDirectoryNavigator::load() noexcept {
-	scanData.clear();
-	process(Config::Settings::get().getProjectDir() + PATH_INPUT, "");
-	auto DDir {DataDialogs::DialogDirectory::getInstance()};
-	// Set Input Dialog as secondary.
-	DDir->setSettings(dirSetting);
-	// Set Storage into root
-	DDir->setOwner(rootDir.getPrimaryChild(), &rootDir);
-	DDir->load(scanData);
+void InputDirectoryNavigator::extractData(const string& filePath, Storage::DirectoryEntry* parent) noexcept {
+
+	InputFile datafile(filePath, parent);
+	auto di {DataDialogs::DialogInput::getInstance()};
+	di->setOwner(parent->getPrimaryChild(), parent);
+	di->setCurrentDirectory(parent);
+	di->load(datafile.getDataMap());
 }
 
-void InputDirectoryNavigator::saveItem(Storage::Data* item, const string& filePath) noexcept {
+void InputDirectoryNavigator::saveItem(Storage::Data* item, const string& filePath) const noexcept {
 	InputFile::save(*static_cast<Storage::Input*>(item), filePath);
 }
 
-void InputDirectoryNavigator::wireDialogs(Storage::DirectoryEntry* dir) noexcept {
+void InputDirectoryNavigator::wireDialogs() noexcept {
 
-	DataDialogs::DialogDirectory::getInstance()->setSettings(dirSetting);
-	DataDialogs::DialogDirectory::getInstance()->setOwner(dir->getPrimaryChild(), dir);
-
-	DataDialogs::DialogInput::getInstance()->setOwner(dir->getPrimaryChild(), dir);
-	DataDialogs::DialogInput::getInstance()->setCurrentDirectory(dir);
-
-	DataDialogs::DialogDirectory::getInstance()->refreshItems();
+	auto di {DataDialogs::DialogInput::getInstance()};
+	di->setOwner(currentDir->getPrimaryChild(), currentDir);
+	di->setCurrentDirectory(currentDir);
+	di->refreshItems();
 
 	// Update navigation buttons.
 	btnHome->set_sensitive(not isAtRoot());
@@ -137,16 +121,16 @@ void InputDirectoryNavigator::wireDialogs(Storage::DirectoryEntry* dir) noexcept
 	// Rebuild breadcrumb.
 	for (auto child : boxBreadcrumb->get_children()) boxBreadcrumb->remove(*child);
 
-	if (not dir->isAtRoot()) {
-		// Walk the parent chain bottom-up, collecting ancestor buttons.
-		auto node = static_cast<Storage::DirectoryEntry*>(dir->getParent());
+	if (not currentDir->isAtRoot()) {
+		// Walk the parent chain bottom → up, collecting ancestor buttons.
+		auto node {static_cast<Storage::DirectoryEntry*>(currentDir->getParent())};
 		while (not node->isAtRoot()) {
-			auto btn{Gtk::make_managed<Gtk::Button>(node->getName())};
+			auto btn {Gtk::make_managed<Gtk::Button>(node->getName())};
 			btn->get_style_context()->add_class(CSS_BREADCRUMB_BUTTON);
 			btn->signal_clicked().connect([this, node]() {
 				enterDirectory(node);
 			});
-			auto sep{Gtk::make_managed<Gtk::Label>("/")};
+			auto sep {Gtk::make_managed<Gtk::Label>("/")};
 			sep->get_style_context()->add_class(CSS_BREADCRUMB_SEPARATOR);
 
 			// Reorder so each ancestor goes to the front, keeping correct left-to-right order.
@@ -159,27 +143,15 @@ void InputDirectoryNavigator::wireDialogs(Storage::DirectoryEntry* dir) noexcept
 		}
 
 		// Separator before the current (non-clickable) label.
-		auto sep{Gtk::make_managed<Gtk::Label>("/")};
+		auto sep {Gtk::make_managed<Gtk::Label>("/")};
 		sep->get_style_context()->add_class(CSS_BREADCRUMB_SEPARATOR);
 		boxBreadcrumb->pack_end(*sep, Gtk::PACK_SHRINK);
 
 		// Current directory label at the end.
-		auto cur{Gtk::make_managed<Gtk::Label>(dir->getName())};
+		auto cur {Gtk::make_managed<Gtk::Label>(currentDir->getName())};
 		cur->get_style_context()->add_class(CSS_BREADCRUMB_CURRENT);
 		boxBreadcrumb->pack_end(*cur, Gtk::PACK_SHRINK);
 	}
 
 	boxBreadcrumb->show_all();
-}
-
-
-void InputDirectoryNavigator::extractData(
-	const string& filePath,
-	const string& relPath,
-	DataMap& out
-) noexcept {
-	InputFile datafile(filePath, relPath);
-	for (auto& [key, vec] : datafile.getDataMap())
-		for (auto& item : vec)
-			out[key].push_back(std::move(item));
 }

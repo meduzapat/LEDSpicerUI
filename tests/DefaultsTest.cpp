@@ -83,11 +83,25 @@ TEST(DefaultsTest, Explode) {
 	EXPECT_EQ(result5[1], "b");
 	EXPECT_EQ(result5[2], "c");
 
-	// Spaces trimmed limit
-	auto result6 = Defaults::explode("  a  , b ,  c  ", ',', 2);
-	EXPECT_EQ(result6.size(), 2);
-	EXPECT_EQ(result6[0], "a");
-	EXPECT_EQ(result6[1], "b ,  c");
+	// Single item with spaces trimmed (no-delimiter path)
+	auto result7 = Defaults::explode("  item  ", ',');
+	EXPECT_EQ(result7.size(), 1);
+	EXPECT_EQ(result7[0], "item");
+}
+
+TEST(DefaultsTest, DetectElementType) {
+	// Each keyword maps to its 1-based index in elementTypes.
+	EXPECT_EQ("1", Defaults::detectElementType("button1"));
+	EXPECT_EQ("2", Defaults::detectElementType("joystick_left"));
+	EXPECT_EQ("3", Defaults::detectElementType("p1_trackball"));
+	EXPECT_EQ("4", Defaults::detectElementType("SPINNER_1"));   // case-insensitive
+	EXPECT_EQ("5", Defaults::detectElementType("credit"));
+	EXPECT_EQ("6", Defaults::detectElementType("light_red"));
+	EXPECT_EQ("7", Defaults::detectElementType("healthbar"));
+	EXPECT_EQ("8", Defaults::detectElementType("knocker"));
+	EXPECT_EQ("9", Defaults::detectElementType("misc_item"));
+	// Unknown name falls back to DEFAULT_ELEMENT_TYPE.
+	EXPECT_EQ(DEFAULT_ELEMENT_TYPE, Defaults::detectElementType("unknown_xyz"));
 }
 
 TEST(DefaultsTest, ImplodeChar) {

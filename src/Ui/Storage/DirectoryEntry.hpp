@@ -33,7 +33,6 @@ namespace LEDSpicerUI::Ui::Storage {
  * Never serialized — exists only at runtime for navigation.
  * Inherits Parent for child item storage.
  * Inherits DirNode for node identity and path resolution.
- * TODO: add move support — requires reseating parent pointer on move.
  */
 class DirectoryEntry : public Parent, public DirNode {
 
@@ -48,6 +47,14 @@ public:
 	DirectoryEntry(Values& data, DirectoryEntry* parent) noexcept;
 
 	virtual ~DirectoryEntry() = default;
+
+	/**
+	 * Creates a named child directory, registers it into this entry's primary
+	 * child collection, and returns the BoxButton that wraps it.
+	 * @param name Sanitized directory name.
+	 * @return Reference to the newly created BoxButton.
+	 */
+	BoxButton& createSubDir(const string& name) noexcept;
 
 	string createUniqueId()     const noexcept override;
 	string createPrettyName()   const noexcept override;

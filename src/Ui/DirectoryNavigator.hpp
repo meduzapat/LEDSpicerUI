@@ -21,7 +21,7 @@
  */
 
 #include "Storage/DirectoryEntry.hpp"
-#include "DataDialogs/DialogDirectory.hpp"
+#include "XMLHelper.hpp"
 #include "config/Settings.hpp"
 
 #pragma once
@@ -32,14 +32,15 @@ namespace LEDSpicerUI::Ui {
  * LEDSpicerUI::Ui::DirectoryNavigator
  * Base controller for directory-style navigation over a DirNode tree.
  * Owns the root DirectoryEntry and tracks the currently active directory.
- * Subclasses wire their specific consumer dialogs via wireDialogs().
- * Declaration order is critical — rootData must be initialized before rootDir.
+ * Manages directory creation, renaming, and deletion directly.
+ * Subclasses wire their specific file dialogs via wireDialogs() and
+ * load file data via extractData().
  */
 class DirectoryNavigator {
 
 public:
 
-	virtual ~DirectoryNavigator();
+	virtual ~DirectoryNavigator() = default;
 
 	/**
 	 * Called when this navigator's panel becomes active.
@@ -75,8 +76,7 @@ public:
 
 	/**
 	 * Loads all items from disk under Settings::getProjectDir()/getSubDir() into the tree.
-	 * Clears existing data first.
-	 * Each specialized navigator implements this for its own subdir and file format.
+	 * Clears existing data first, then calls wireDialogs() at root on completion.
 	 */
 	void load() noexcept;
 
@@ -93,47 +93,59 @@ protected:
 	/// Currently active directory. Always valid; starts at rootDir.
 	Storage::DirectoryEntry* currentDir;
 
-	/// Flat scan accumulator — populated by process(), consumed by DDir::load().
-	DataMap scanData;
-
-	DirectoryNavigator(const Glib::RefPtr<Gtk::Builder>& builder) noexcept;
+	DirectoryNavigator() noexcept;
 
 	/**
-	 * Wires all consumer dialogs to the given directory's contents and refreshes the view.
-	 * Each specialized navigator implements this for its own dialog set.
-	 * @param dir The directory to wire. Always a valid pointer (root or child).
+	 * Wires all consumer dialogs to current directory contents and refreshes the view.
 	 */
-	virtual void wireDialogs(Storage::DirectoryEntry* dir) noexcept abstract;
+	virtual void wireDialogs() noexcept abstract;
 
 	/**
-	 * Recursively walks absPath, populating scanData with directory entries and
-	 * file data. Directories before files within each level (sorted order).
+	 * Recursively walks absPath, building the DirectoryEntry tree and loading
+	 * file data into each directory's collection.
+	 * @param parent  DirectoryEntry that owns this level of the tree.
 	 * @param absPath Absolute filesystem path to scan.
-	 * @param relPath Navigator-relative path prefix for this level (empty = root).
 	 */
-	void process(const string& absPath, const string& relPath) noexcept;
+	void process(Storage::DirectoryEntry* parent, const string& absPath) noexcept;
 
 	/**
-	 * Parses one .xml file and merges its data into out.
-	 * The file object must stay alive during consumption — implementations
-	 * must not return a DataMap by value.
+	 * Parses one .xml file and loads its data directly into parent's collection.
 	 * @param filePath Absolute path to the .xml file.
-	 * @param relPath  Navigator-relative directory path containing the file.
-	 * @param out      Accumulator map to merge results into.
+	 * @param parent   DirectoryEntry that owns this file.
 	 */
-	virtual void extractData(const string& filePath, const string& relPath, DataMap& out) noexcept abstract;
+	virtual void extractData(const string& filePath, Storage::DirectoryEntry* parent) noexcept abstract;
 
 	/**
 	 * Writes one item to filePath.
-	 * @param item Data pointer.
+	 * @param item     Data pointer.
 	 * @param filePath Absolute destination path including filename and extension.
 	 */
-	virtual void saveItem(Storage::Data* item, const string& filePath) noexcept abstract;
+	virtual void saveItem(Storage::Data* item, const string& filePath) const noexcept abstract;
 
 	/**
-	 * @return The subdirectory path suffix for this navigator.
+	 * @return The subdirectory path suffix for this navigator (e.g. PATH_INPUT).
 	 */
 	virtual const string& getSubDir() const noexcept abstract;
+
+	/**
+	 * Prompts the user for a directory name. Pre-fills with current when renaming.
+	 * @param current Existing name to pre-fill, or empty for a new directory.
+	 * @return Sanitized name, or empty string if the user cancelled.
+	 */
+	string promptDirName(const string& current) noexcept;
+
+	/**
+	 * Shows the name prompt, validates uniqueness in currentDir, creates the
+	 * child directory, and refreshes the display.
+	 */
+	void onNewDirClicked() noexcept;
+
+	/**
+	 * Attaches navigation, edit, and delete buttons to a DirectoryEntry BoxButton.
+	 * @param bb BoxButton wrapping the DirectoryEntry.
+	 * @param de The DirectoryEntry being decorated.
+	 */
+	void wireDirButtons(Storage::BoxButton& bb, Storage::DirectoryEntry* de) noexcept;
 
 };
 

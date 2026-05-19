@@ -31,9 +31,3 @@ void DirectoryAware::setCurrentDirectory(Storage::DirectoryEntry* directory) noe
 LEDSpicerUI::Ui::Storage::DirectoryEntry* DirectoryAware::getCurrentDirectory() const noexcept {
 	return currentDirectory;
 }
-
-string DirectoryAware::getFullPath(const string& filename) const noexcept {
-	if (not currentDirectory or currentDirectory->isAtRoot())
-		return filename;
-	return currentDirectory->getFullPath() + "/" + filename;
-}

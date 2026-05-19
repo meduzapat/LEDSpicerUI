@@ -34,7 +34,7 @@ namespace LEDSpicerUI::Ui {
 /**
  * LEDSpicerUI::Ui::InputDirectoryNavigator
  * Specialized navigator for Input files.
- * Owns the inputs collection, handles loading/saving, manages DialogInput.
+ * Handles loading/saving and manages DialogInput.
  */
 class InputDirectoryNavigator : public DirectoryNavigator {
 
@@ -42,14 +42,9 @@ public:
 
 	InputDirectoryNavigator(const Glib::RefPtr<Gtk::Builder>& builder, Gtk::Window* parentWindow) noexcept;
 
-	virtual ~InputDirectoryNavigator();
+	virtual ~InputDirectoryNavigator() = default;
 
 	void clear() noexcept override;
-
-	/**
-	 * Loads all input files from Settings::getProjectDir() + PATH_INPUT.
-	 */
-	void load() noexcept;
 
 protected:
 
@@ -58,19 +53,16 @@ protected:
 
 	Gtk::Box* boxBreadcrumb = nullptr;
 
-	Gtk::Button * btnHome = nullptr;
+	Gtk::Button* btnHome = nullptr;
 
-	/// Display box for input directory contents. Populated by the builder.
+	/// Display box for directory contents. Set once; the active BBC changes on navigation.
 	OrdenableFlowBox* boxInputs = nullptr;
 
-	/// Section settings for DialogDirectory. References boxInputs — declared after it.
-	DataDialogs::DialogDirectory::SettingRequest dirSetting;
+	void wireDialogs() noexcept override;
 
-	void wireDialogs(Storage::DirectoryEntry* dir) noexcept override;
+	void extractData(const string& filePath, Storage::DirectoryEntry* parent) noexcept override;
 
-	void extractData(const string& filePath, const string& relPath, DataMap& out) noexcept override;
-
-	void saveItem(Storage::Data* item, const string& filePath) noexcept override;
+	void saveItem(Storage::Data* item, const string& filePath) const noexcept override;
 
 	const string& getSubDir() const noexcept override { return PATH_INPUT; }
 

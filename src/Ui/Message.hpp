@@ -84,6 +84,10 @@ public:
 	 */
 	string getMessage();
 
+	static Gtk::Window& getMain() noexcept { return *main; }
+
+	static int handleDialog(const string& message, Gtk::MessageDialog* dialog, Gtk::Window* transient);
+
 protected:
 
 	string error;
@@ -96,8 +100,6 @@ protected:
 
 	// Keeps a pointer to the main screen to center.
 	static Gtk::Window* main;
-
-	static int handleDialog(const string& message, Gtk::MessageDialog* dialog, Gtk::Window* transient);
 };
 
 } // namespace

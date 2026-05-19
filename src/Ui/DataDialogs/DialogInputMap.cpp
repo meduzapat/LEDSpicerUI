@@ -88,6 +88,12 @@ void DialogInputMap::setOwner(
 	DialogForm::setOwner(collection, owner);
 }
 
+void DialogInputMap::removeOwner() noexcept {
+	boxSourceMaps->wipe();
+	boxInputMaps->wipe();
+	DialogForm::removeOwner();
+}
+
 void DialogInputMap::clearForm() noexcept {
 	Storage::CollectionHandler::getInstance(COLLECTION_ELEMENTS)->refreshComboBox(comboBoxInputMapElement, {PROP_EXPAND});
 	Storage::CollectionHandler::getInstance(COLLECTION_GROUPS)->refreshComboBox(comboBoxInputMapGroup);

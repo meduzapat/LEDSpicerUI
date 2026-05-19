@@ -54,7 +54,7 @@ TEST_F(BoxButtonCollectionTest, ItemLifecycle) {
 	EXPECT_EQ(0u, collection.getSize());
 
 	// create increases size; isSet and isIdSet find existing items.
-	auto* dataA {makeData("A")};
+	auto dataA {makeData("A")};
 	BoxButton& bbA {collection.create(dataA)};
 	EXPECT_EQ(1u,   collection.getSize());
 	EXPECT_TRUE(collection.isSet(dataA));
@@ -72,13 +72,19 @@ TEST_F(BoxButtonCollectionTest, ItemLifecycle) {
 
 	// Non-const iteration covers all items.
 	size_t count {0};
-	for (auto& _ : collection) ++count;
+	for (auto& _ : collection) {
+		static_cast<void>(_); // avoids warning;
+		++count;
+	}
 	EXPECT_EQ(3u, count);
 
 	// Const iteration covers all items.
 	count = 0;
 	const BoxButtonCollection& coll {collection};
-	for (const auto& _ : coll) ++count;
+	for (const auto& _ : coll) {
+		static_cast<void>(_); // avoids warning;
+		++count;
+	}
 	EXPECT_EQ(3u, count);
 
 	// remove by BoxButton reference.
@@ -87,7 +93,7 @@ TEST_F(BoxButtonCollectionTest, ItemLifecycle) {
 	EXPECT_FALSE(collection.isIdSet("A"));
 
 	// remove by Data pointer.
-	auto* dataB {collection.begin()[0]->getData()};
+	auto dataB {collection.begin()[0]->getData()};
 	collection.remove(dataB);
 	EXPECT_EQ(1u, collection.getSize());
 
@@ -110,7 +116,7 @@ TEST_F(BoxButtonCollectionTest, SwapLifecycle) {
 
 TEST_F(BoxButtonCollectionTest, SensitivityLifecycle) {
 
-	auto* widget {Gtk::manage(new Gtk::Button())};
+	auto widget {Gtk::manage(new Gtk::Button())};
 	collection.create(makeData("A"));
 	collection.registerSensitivity(widget);
 	EXPECT_TRUE(widget->is_sensitive());  // 1 >= minCount(1)

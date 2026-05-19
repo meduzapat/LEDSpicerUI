@@ -116,7 +116,9 @@ void DialogForm::wireChildrenDialogs() noexcept {
 	auto parent{dynamic_cast<Parent*>(currentData)};
 	if (not parent) return;
 	for (auto& [family, items] : parent->getChildren()) {
-		familyToDialog.at(family)->setOwner(&items, currentData);
+		auto child{familyToDialog.at(family)};
+		child->action = action;
+		child->setOwner(&items, currentData);
 	}
 
 	if (auto pc{getPrimaryChildCollection()}; pc) pc->registerSensitivity(btnApply);

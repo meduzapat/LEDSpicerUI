@@ -61,7 +61,7 @@ string Message::getMessage() {
 }
 
 int Message::handleDialog(const string& message, Gtk::MessageDialog* dialog, Gtk::Window* transient) {
-	dialog->set_transient_for(transient ? *transient : *main);
+	dialog->set_transient_for(transient ? (transient->is_visible() ? *transient : *main) : *main);
 	dialog->set_secondary_text(message);
 	int r = dialog->run();
 	dialog->hide();

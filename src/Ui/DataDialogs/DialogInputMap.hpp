@@ -49,6 +49,7 @@ public:
 	void setNormalBox(const bool flag) noexcept;
 
 	void setOwner(Storage::BoxButtonCollection* collection, Storage::Data* owner) noexcept override;
+	void removeOwner() noexcept override;
 
 	void load(DataMap& values)    noexcept override;
 	void clearForm()              noexcept override;

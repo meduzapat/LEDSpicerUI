@@ -31,8 +31,8 @@ class InputFileTest : public ::testing::Test {
 protected:
 
 	void SetUp() override {
-		inputMulti  = std::make_unique<InputFile>(PACKAGE_SAMPLES_DIR "data/" + PATH_INPUT + "inputMulti.xml",  "");
-		inputSingle = std::make_unique<InputFile>(PACKAGE_SAMPLES_DIR "data/" + PATH_INPUT + "inputSingle.xml", "");
+		inputMulti  = std::make_unique<InputFile>(PACKAGE_SAMPLES_DIR "data/" + PATH_INPUT + "inputMulti.xml",  nullptr);
+		inputSingle = std::make_unique<InputFile>(PACKAGE_SAMPLES_DIR "data/" + PATH_INPUT + "inputSingle.xml", nullptr);
 	}
 
 	void TearDown() override {
@@ -155,7 +155,7 @@ TEST_F(InputFileTest, SingleSourceMapsAreProcessed) {
 
 TEST_F(InputFileTest, MissingAttributesHandling) {
 	EXPECT_THROW(
-		InputFile(PACKAGE_SAMPLES_DIR "data/" + PATH_INPUT + "inputMalformed.xml", ""),
+		InputFile(PACKAGE_SAMPLES_DIR "data/" + PATH_INPUT + "inputMalformed.xml", nullptr),
 		Message
 	);
 }

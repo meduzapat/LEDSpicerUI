@@ -88,6 +88,9 @@ void DialogInput::createSubItems(DataMap& values) noexcept {
 
 void DialogInput::resetForm() noexcept {
 
+	// Wipe child boxes before making them visible (prevents stale content flash).
+	DialogForm::resetForm();
+
 	string name(selectorCombo->get_active_id());
 	bool needSources {Defaults::needSource(name)};
 
@@ -112,7 +115,6 @@ void DialogInput::resetForm() noexcept {
 
 	brief->set_text(Defaults::inputInfo.at(name).brief.data());
 	btnApply->set_sensitive(true);
-	DialogForm::resetForm();
 }
 
 void DialogInput::isValid() const {
@@ -221,7 +223,8 @@ void DialogInput::onEmpty() noexcept {
 	boxInputMapsBox->hide();
 	boxLinkedElementsAndGroups->hide();
 	boxInputCreditsSettings->hide();
-	entryInputName->set_text("");
+	if (action == Actions::ADD)
+		entryInputName->set_text("");
 	comboBoxInputCreditsMode->set_active(0);
 	spinInputTimes->get_parent()->hide();
 	spinInputTimes->set_value(0.0f);
@@ -237,16 +240,24 @@ void DialogInput::onEmpty() noexcept {
 }
 
 void DialogInput::onSelected() noexcept {
-	const auto name{selectorCombo->get_active_id()};
-	const bool
-//		oldSourced {Defaults::needSource(previousName)},
-		newSourced {Defaults::needSource(name)};
 
-//	if (oldSourced and not newSourced)
-	if (newSourced)
-		DialogInputSource::getInstance()->populateSources(name);
-	else
-		DialogInputSource::getInstance()->resolveSourcelessStorage();
+	const auto name        {selectorCombo->get_active_id()};
+	const bool newSourced  {Defaults::needSource(name)};
+	const bool isConversion{not previousName.empty() and previousName != name};
+	const bool oldSourced  {isConversion and Defaults::needSource(previousName)};
+
+	if (newSourced) {
+		if (isConversion and not oldSourced)
+			DialogInputSource::getInstance()->convertToSourced();
+		if (action != Actions::LOAD)
+			DialogInputSource::getInstance()->populateSources(name);
+	}
+	else {
+		if (isConversion and oldSourced)
+			DialogInputSource::getInstance()->convertToSourceless();
+		else
+			DialogInputSource::getInstance()->resolveSourcelessStorage();
+	}
 
 	// Drop fields the new type doesn't support.
 	if (not Defaults::inputHasFlag(name, Defaults::INPUT_HAS_BLINK))

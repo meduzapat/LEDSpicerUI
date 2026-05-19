@@ -29,6 +29,12 @@ DirectoryEntry::DirectoryEntry(Values& data, DirectoryEntry* parent) noexcept :
 	DirNode(getProperties(), parent, getValue(FILENAME))
 {}
 
+BoxButton& DirectoryEntry::createSubDir(const string& name) noexcept {
+	Values v;
+	v.setValue(FILENAME, name);
+	return getPrimaryChild()->create(new DirectoryEntry(v, this));
+}
+
 string DirectoryEntry::createUniqueId() const noexcept {
 	return Defaults::createCommonUniqueId({
 		not isAtRoot() ? parent->getFsId() : emptyString,
@@ -37,7 +43,7 @@ string DirectoryEntry::createUniqueId() const noexcept {
 }
 
 string DirectoryEntry::createPrettyName() const noexcept {
-	return "📁 " + getName();
+	return getName() + "/";
 }
 
 string DirectoryEntry::createTooltip() const noexcept {

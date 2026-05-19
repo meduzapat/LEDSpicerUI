@@ -24,11 +24,12 @@
 
 using namespace LEDSpicerUI::Config;
 
-InputFile::InputFile(const string& filePath, const string& relPath) :
-	ProjectFile(filePath, "Input", nullptr)
+InputFile::InputFile(const string& filePath, Ui::Storage::DirectoryEntry* parent) :
+	ProjectFile(filePath, "Input", parent)
 {
 	string errors;
 
+	const string relPath {parent ? parent->getFullPath() : emptyString};
 	string baseId(Defaults::createCommonUniqueId({relPath, filename}));
 
 	Values input {rootInfo.copyValues()};
@@ -41,6 +42,7 @@ InputFile::InputFile(const string& filePath, const string& relPath) :
 	}
 	else {
 		ValueVector mapsSources;
+		const bool needsSrc{Defaults::needSource(rootInfo.getValue(NAME))};
 
 		for (size_t idx = 0; mapsNode; mapsNode = mapsNode->NextSiblingElement("maps"), ++idx) {
 			Values source {processNode(mapsNode)};
@@ -51,6 +53,11 @@ InputFile::InputFile(const string& filePath, const string& relPath) :
 				mapsNode,
 				Defaults::createCommonUniqueId({sourceBaseId, COLLECTION_INPUT_MAPS})
 			);
+			if (not needsSrc) {
+				if (mapsNode->NextSiblingElement("maps"))
+					Defaults::markDirty();
+				break;
+			}
 		}
 
 		extractedData.emplace(

@@ -87,10 +87,8 @@ void XMLHelper::checkAttributes(
 			throw Message("Missing attribute '" + attribute + "' inside " + place);
 }
 
-string XMLHelper::xmlHeader(
-	const string& type,
-	const Values& attrs
-) noexcept {
+string XMLHelper::xmlHeader(const string& type, const Values& attrs) noexcept {
+
 	string r;
 	r  = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
 	r += "<!-- " DEFAULT_MESSAGE " -->\n";
@@ -111,6 +109,7 @@ string XMLHelper::xmlSection(
 	const string& content,
 	const Values& attrs
 ) noexcept {
+
 	if (content.empty()) return "";
 	string r(Defaults::tab() + "<" + tag);
 	for (const auto& [k, v] : attrs)
@@ -135,6 +134,7 @@ string XMLHelper::toXML(const Values& values) noexcept {
 }
 
 string XMLHelper::cleanError(const string& error) noexcept {
+
 	// ex: Unable to read the file /xxx/yyy/zzzz.xml
 	// Error=XML_ERROR_MISMATCHED_ELEMENT ErrorID=14 (0xe)
 	// Line number=369: XMLElement name=map

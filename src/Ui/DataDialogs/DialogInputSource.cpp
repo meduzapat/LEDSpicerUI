@@ -21,8 +21,10 @@
  */
 
 #include "DialogInputSource.hpp"
+#include "config/Settings.hpp"
 
 using namespace LEDSpicerUI::Ui::DataDialogs;
+using namespace LEDSpicerUI::Config;
 
 DialogInputSource::DialogInputSource(
 	BaseObjectType* obj,
@@ -206,9 +208,21 @@ void DialogInputSource::convertToSourced() noexcept {
 
 	if (not items->getSize()) return;
 
-	auto phantom{(*items->begin())->getData()};
-	phantom->getProperties().unSet(SOURCELESS);
-	currentData = phantom;
+	vector<Storage::BoxButton*> toRemove;
+	for (auto btn : *items) {
+		if (not btn->getData()->getProperties().getValue(SOURCELESS).empty())
+			toRemove.push_back(btn);
+	}
+
+	if (currentData and not toRemove.empty()) {
+		disconnectChildrenDialogs();
+		currentData = nullptr;
+	}
+
+	for (auto btn : toRemove) {
+		box->remove(*btn);
+		items->remove(*btn);
+	}
 }
 
 void DialogInputSource::createSubItems(DataMap& values) noexcept {
@@ -228,7 +242,7 @@ LEDSpicerUI::StringMap DialogInputSource::scanEventDevices() noexcept{
 	StringMap devices;
 
 	if (
-		Defaults::getMode() == Defaults::Mode::Portable or
+		Settings::get().isPortable() or
 		not Defaults::isDevInputListener(comboBoxInputSelectInput->get_active_id())
 	) {
 		return devices;

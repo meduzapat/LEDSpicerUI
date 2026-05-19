@@ -224,7 +224,7 @@ const StringVector Defaults::elementTypes{
 	"credit",
 	"light",
 	"bar",
-	"knocker"
+	"knocker",
 	"misc"
 };
 
@@ -331,12 +331,12 @@ StringVector Defaults::explode(const string& text, const char delimiter, const s
 	}
 
 	stringstream ss(text);
-	string chunk;
+	string chunk {text};
 
 	// If delimiter is not found in string, return whole string as single element
 	if (text.find(delimiter) == string::npos) {
 		trim(chunk);
-		result.push_back(text);
+		result.push_back(chunk);
 		return result;
 	}
 
@@ -621,28 +621,6 @@ string Defaults::extractName(const string& fullFileName, const string& rootPath)
 	return dir + "/" + filename;
 }
 
-string Defaults::capToDirectory(const string& fullFileName, const string& baseDir) {
-	string
-		filename(Glib::path_get_basename(fullFileName)),
-		dir(Glib::path_get_dirname(fullFileName));
-
-	if (filename.find('.') != string::npos) {
-		filename = filename.substr(0, filename.find_last_of('.'));
-	}
-
-	if (dir == baseDir or baseDir.size() > dir.size()) {
-		return filename;
-	}
-
-	auto pos = dir.find(baseDir);
-	if (pos == string::npos) {
-		return filename;
-	}
-
-	dir = dir.substr(baseDir.length() + 1);
-	return dir + "/" + filename;
-}
-
 string Defaults::extractAfter(const string& line, const string& prefix) {
 	auto pos = line.find(prefix);
 	if (pos == string::npos)
@@ -683,12 +661,4 @@ string Defaults::sanitizeFilename(const string& text) {
 		}
 	}
 	return result;
-}
-
-Defaults::Mode Defaults::getMode() {
-	return currentMode;
-}
-
-void Defaults::setMode(Mode mode) {
-	currentMode = mode;
 }

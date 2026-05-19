@@ -25,24 +25,24 @@
 using namespace LEDSpicerUI::Ui;
 using namespace LEDSpicerUI::Config;
 
-DirectoryNavigator::~DirectoryNavigator() {
-	delete DataDialogs::DialogDirectory::getInstance();
-}
+DirectoryNavigator::DirectoryNavigator() noexcept :
+	currentDir(&rootDir)
+{}
 
 void DirectoryNavigator::onActivate() noexcept {
-	wireDialogs(currentDir);
+	wireDialogs();
 }
 
 void DirectoryNavigator::enterDirectory(Storage::DirectoryEntry* dir) noexcept {
 	currentDir = dir;
-	wireDialogs(currentDir);
+	wireDialogs();
 }
 
 void DirectoryNavigator::navigateUp() noexcept {
 	if (currentDir == &rootDir) return;
-	Storage::DirNode* parent = currentDir->getParent();
-	currentDir = parent ? static_cast<Storage::DirectoryEntry*>(parent) : &rootDir;
-	wireDialogs(currentDir);
+	auto parent {static_cast<Storage::DirectoryEntry*>(currentDir->getParent())};
+	currentDir = parent ? parent : &rootDir;
+	wireDialogs();
 }
 
 bool DirectoryNavigator::isAtRoot() const noexcept {
@@ -53,10 +53,16 @@ Storage::DirectoryEntry* DirectoryNavigator::getCurrentDir() const noexcept {
 	return currentDir;
 }
 
-void DirectoryNavigator::save() noexcept {
+void DirectoryNavigator::load() noexcept {
+	clear();
+	process(&rootDir, Settings::get().getProjectDir() + string(getSubDir()));
+	wireDialogs();
+}
+
+void DirectoryNavigator::save() const noexcept {
 
 	namespace fs = std::filesystem;
-	const string baseDir(Config::Settings::get().getProjectDir() + string(getSubDir()));
+	const string baseDir {Settings::get().getProjectDir() + string(getSubDir())};
 
 	std::function<void(Storage::BoxButtonCollection*)> saveDir =
 	[&](Storage::BoxButtonCollection* col) {
@@ -79,14 +85,8 @@ void DirectoryNavigator::save() noexcept {
 	saveDir(rootDir.getPrimaryChild());
 }
 
-DirectoryNavigator::DirectoryNavigator(const Glib::RefPtr<Gtk::Builder>& builder) noexcept :
-	rootDir(rootData, nullptr),
-	currentDir(&rootDir)
-{
-	DataDialogs::DialogDirectory::buildInstance(builder, "DialogDirectory");
-}
+void DirectoryNavigator::process(Storage::DirectoryEntry* parent, const string& absPath) noexcept {
 
-void DirectoryNavigator::process(const string& absPath, const string& relPath) noexcept {
 	namespace fs = std::filesystem;
 	std::error_code ec;
 
@@ -96,17 +96,14 @@ void DirectoryNavigator::process(const string& absPath, const string& relPath) n
 
 	for (auto& entry : entries) {
 		if (entry.is_directory(ec)) {
-
-			const string
-				name {entry.path().filename().string()},
-				childRel(relPath.empty() ? name : relPath + "/" + name);
-
-			scanData[COLLECTION_DIRECTORIES].push_back({{FILENAME, name}, {PATH_PARENT, relPath}});
-			process(entry.path().string(), childRel);
+			const string name {entry.path().filename().string()};
+			auto& bb {parent->createSubDir(name)};
+			wireDirButtons(bb, static_cast<Storage::DirectoryEntry*>(bb.getData()));
+			process(static_cast<Storage::DirectoryEntry*>(bb.getData()), entry.path().string());
 		}
 		else if (entry.is_regular_file(ec) and entry.path().extension() == ".xml") {
 			try {
-				extractData(entry.path().string(), relPath, scanData);
+				extractData(entry.path().string(), parent);
 			}
 			catch (Message& e) {
 				Message::displayError(
@@ -116,4 +113,104 @@ void DirectoryNavigator::process(const string& absPath, const string& relPath) n
 			}
 		}
 	}
+}
+
+string DirectoryNavigator::promptDirName(const string& current) noexcept {
+
+	Gtk::MessageDialog dialog("Folder Name", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK_CANCEL, true);
+	dialog.set_transient_for(Message::getMain());
+	dialog.set_position(Gtk::WIN_POS_CENTER_ON_PARENT);
+	Gtk::Entry entry;
+	entry.set_text(current);
+	entry.set_activates_default(true);
+	dialog.get_message_area()->pack_start(entry, false, false);
+	dialog.show_all();
+	entry.grab_focus();
+	if (dialog.run() != Gtk::RESPONSE_OK)
+		return emptyString;
+	return Defaults::sanitizeFilename(entry.get_text());
+}
+
+void DirectoryNavigator::onNewDirClicked() noexcept {
+
+	const string name {promptDirName("")};
+	if (name.empty()) return;
+
+	const string uid {Defaults::createCommonUniqueId({currentDir->getFsId(), name})};
+	if (Storage::CollectionHandler::getInstance(COLLECTION_DIRECTORIES)->isIdSet(uid)) {
+		Message::displayError("A folder named \"" + name + "\" already exists here.");
+		return;
+	}
+
+	auto& bb {currentDir->createSubDir(name)};
+	wireDirButtons(bb, static_cast<Storage::DirectoryEntry*>(bb.getData()));
+	Defaults::markDirty();
+	wireDialogs();
+}
+
+void DirectoryNavigator::wireDirButtons(Storage::BoxButton& bb, Storage::DirectoryEntry* de) noexcept {
+
+	// Navigation button — takes over the label area so the whole name is clickable.
+	auto navBtn {Gtk::make_managed<Gtk::Button>()};
+	navBtn->set_relief(Gtk::RELIEF_NONE);
+	navBtn->set_hexpand(true);
+	auto lbox {static_cast<Gtk::HBox*>(bb.getLabel()->get_parent())};
+	lbox->remove(*bb.getLabel());
+	navBtn->add(*bb.getLabel());
+	lbox->pack_start(*navBtn, Gtk::PACK_EXPAND_WIDGET);
+	navBtn->signal_clicked().connect([this, de]() {
+		enterDirectory(de);
+	});
+
+	// Edit button — rename the directory.
+	auto editBtn {Gtk::make_managed<Gtk::Button>()};
+	bb.pack_start(*editBtn, Gtk::PACK_SHRINK);
+	editBtn->set_image_from_icon_name(ICON_EDIT, Gtk::ICON_SIZE_BUTTON);
+	editBtn->get_style_context()->add_class(CSS_BOX_BACKGROUND_EDIT);
+	editBtn->set_tooltip_text("Rename " + de->createPrettyName());
+	editBtn->signal_clicked().connect([this, de, &bb]() {
+		const string name {promptDirName(de->getName())};
+		if (name.empty() or name == de->getName()) return;
+
+		const string uid {Defaults::createCommonUniqueId({
+			de->getParent() ? de->getParent()->getFsId() : emptyString,
+			name
+		})};
+		if (Storage::CollectionHandler::getInstance(COLLECTION_DIRECTORIES)->isIdSet(uid)) {
+			Message::displayError("A folder named \"" + name + "\" already exists here.");
+			return;
+		}
+		const string oldId {de->createUniqueId()};
+		de->getProperties().setValue(FILENAME, name);
+		de->syncRegistration(oldId);
+		bb.sync();
+		Defaults::markDirty();
+	});
+
+	// Delete button — remove the directory and all its contents.
+	auto delBtn {Gtk::make_managed<Gtk::Button>()};
+	bb.pack_start(*delBtn, Gtk::PACK_SHRINK);
+	delBtn->set_image_from_icon_name(ICON_TRASH, Gtk::ICON_SIZE_BUTTON);
+	delBtn->get_style_context()->add_class(CSS_BOX_BACKGROUND_DELETE);
+	delBtn->set_tooltip_text("Delete " + de->createPrettyName());
+	delBtn->signal_clicked().connect([this, de, &bb]() {
+		if (Message::ask(
+				"Are you sure you want to remove " + de->createPrettyName() + "?"
+			) != Gtk::ResponseType::RESPONSE_YES) return;
+
+		// If currentDir is inside the directory being deleted, retreat to root.
+		for (auto cur = currentDir; cur != &rootDir; cur = static_cast<Storage::DirectoryEntry*>(cur->getParent())) {
+			if (cur == de) { currentDir = &rootDir; break; }
+		}
+
+		auto ownerDE {de->getParent()
+			? static_cast<Storage::DirectoryEntry*>(de->getParent())
+			: &rootDir
+		};
+		ownerDE->getPrimaryChild()->remove(bb);
+		Defaults::markDirty();
+		wireDialogs();
+	});
+
+	bb.show_all();
 }

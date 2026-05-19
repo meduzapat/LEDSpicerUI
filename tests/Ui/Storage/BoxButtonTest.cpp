@@ -81,7 +81,7 @@ TEST_F(BoxButtonTest, MoveLifecycle) {
 	// Destroying a moved-from BoxButton is safe and does not double-unregister.
 	Values d2 {{"name", "Item2"}};
 	auto data2 {new MockData {d2}};
-	auto* heapSrc {new BoxButton {data2}};
+	auto heapSrc {new BoxButton {data2}};
 	BoxButton heapDst {std::move(*heapSrc)};
 	EXPECT_NO_FATAL_FAILURE(delete heapSrc);
 	EXPECT_TRUE(data2->getCollectionHandler()->isSet(data2));

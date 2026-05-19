@@ -32,7 +32,6 @@ namespace LEDSpicerUI::Ui::DataDialogs {
  * Mix into any DialogForm subclass that manages FileNode Data objects
  * (Inputs, Animations, Profiles) stored inside project directories.
  * The navigator sets currentDirectory before opening the dialog.
- * Not a dialog itself — carries no GTK ancestry.
  */
 class DirectoryAware {
 
@@ -50,13 +49,6 @@ public:
 	 * @return The active directory, or nullptr if at root.
 	 */
 	Storage::DirectoryEntry* getCurrentDirectory() const noexcept;
-
-	/**
-	 * Resolves a filename relative to the current directory.
-	 * @param filename Bare filename without path.
-	 * @return Full relative path: "subdir/filename" or "filename" at root.
-	 */
-	string getFullPath(const string& filename) const noexcept;
 
 protected:
 

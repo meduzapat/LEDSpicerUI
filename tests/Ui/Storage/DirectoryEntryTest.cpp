@@ -45,9 +45,9 @@ TEST(DirectoryEntryTest, TestFunctionality) {
 	EXPECT_EQ(Defaults::createCommonUniqueId({emptyString,    "root"}),  root.createUniqueId());
 	EXPECT_EQ(Defaults::createCommonUniqueId({root.getFsId(), "child"}), child.createUniqueId());
 
-	// createPrettyName() prefixes with folder emoji.
-	EXPECT_NE(string::npos, root.createPrettyName().find("root"));
-	EXPECT_NE(string::npos, root.createPrettyName().find("📁"));
+	// createPrettyName() appends trailing slash.
+	EXPECT_EQ("root/",  root.createPrettyName());
+	EXPECT_EQ("child/", child.createPrettyName());
 
 	// createTooltip() returns full path.
 	EXPECT_EQ("root",       root.createTooltip());

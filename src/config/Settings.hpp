@@ -20,7 +20,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <sigc++/sigc++.h>
+#include <functional>
 #include "Values.hpp"
 
 #pragma once
@@ -58,9 +58,9 @@ public:
 
 	/// Runtime mode — derived from binary detection result and interactiveMode preference.
 	enum class Mode {
-		Portable,  ///< Binary absent or detection failed; config lives in the project dir.
-		Local,     ///< Binary detected, interactive mode OFF.
-		Iterative  ///< Binary detected, interactive mode ON (future: live daemon commands).
+		Portable,  /// Binary absent or detection failed; config lives in the project dir.
+		Local,     /// Binary detected, interactive mode OFF.
+		Iterative  /// Binary detected, interactive mode ON.
 	};
 
 	/// UI theme preference.
@@ -130,10 +130,11 @@ public:
 
 	void setConfigPath(const string& path)     noexcept;
 	void setCurrentProject(const string& name) noexcept; ///< Also writes DEFAULT_PROJECT.
-	void setColorFiles(StringVector files)     noexcept; ///< Also emits colorFilesChanged.
+	void setColorFiles(StringVector files)     noexcept; ///< Also calls colorFilesChanged if set.
 
-	/// Fired whenever the color file list is replaced.
-	sigc::signal<void()> colorFilesChanged;
+	/// Register a callback fired whenever the color file list is replaced.
+	void onColorFilesChanged(std::function<void()> cb) noexcept { colorFilesChanged = std::move(cb); }
+
 	void setDataDirStatus(bool gameData, bool colors, bool controls) noexcept;
 
 	/// projectsDir + currentProject + "/", or empty if either is unset.
@@ -151,6 +152,7 @@ protected:
 		currentProject;
 
 	StringVector colorFiles;
+	std::function<void()> colorFilesChanged;
 
 	bool
 		hasGameData = false,

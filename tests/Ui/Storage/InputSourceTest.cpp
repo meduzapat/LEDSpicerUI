@@ -22,6 +22,7 @@
 
 #include <gtest/gtest.h>
 #include "Storage/InputSource.hpp"
+#include "Storage/InputMap.hpp"
 #include "Storage/CollectionHandler.hpp"
 
 using namespace LEDSpicerUI::Ui::Storage;
@@ -60,17 +61,28 @@ TEST_F(InputSourceTest, TestFunctionality) {
 	src.getProperties().setValue(NAME, "Joystick 1");
 	EXPECT_EQ("Joystick 1", src.createPrettyName());
 
-	// createTooltip reflects map count.
-	EXPECT_NE(string::npos, src.createTooltip().find("0"));
-
-	// Child collection keyed as COLLECTION_INPUT_MAPS.
-	EXPECT_NE(nullptr, src.getChild(COLLECTION_INPUT_MAPS));
-
 	// shouldSerialize: SOURCE suppressed when empty, included when non-empty.
+	// Must be checked before adding maps (InputMap with null link crashes toXML).
 	Values empty;
 	InputSource srcEmpty {empty, "owner_1"};
 	EXPECT_EQ(string::npos, srcEmpty.toXML().find(SOURCE));
 	EXPECT_NE(string::npos, src.toXML().find(SOURCE));
+
+	// createTooltip with zero maps.
+	EXPECT_NE(string::npos, src.createTooltip().find("0"));
+
+	// createTooltip with maps present.
+	auto* mapCh {src.getChild(COLLECTION_INPUT_MAPS)};
+	Values mapData {{TYPE, "button"}, {TARGET, "p1_b1"}, {TRIGGER, "press"}, {COLOR, "red"}, {FILTER, ""}};
+	mapCh->create(new InputMap(mapData, nullptr));
+	EXPECT_NE(string::npos, src.createTooltip().find("1"));
+
+	// Child collection keyed as COLLECTION_INPUT_MAPS.
+	EXPECT_NE(nullptr, mapCh);
+
+	// Dependency registration: COLLECTION_ELEMENTS and COLLECTION_GROUPS are watched.
+	EXPECT_NE(nullptr, CollectionHandler::getInstance(COLLECTION_ELEMENTS));
+	EXPECT_NE(nullptr, CollectionHandler::getInstance(COLLECTION_GROUPS));
 
 }
 

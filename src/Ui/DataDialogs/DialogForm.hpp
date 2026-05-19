@@ -74,6 +74,12 @@ public:
 	virtual void removeOwner() noexcept;
 
 	/**
+	 * Sets the display box for this dialog's items.
+	 * @param displayBox The flow box owned by the navigator.
+	 */
+	void setBox(OrdenableFlowBox* displayBox) noexcept { box = displayBox; }
+
+	/**
 	 * Clear the From leaving it empty for data entry.
 	 */
 	virtual void clearForm() noexcept abstract;

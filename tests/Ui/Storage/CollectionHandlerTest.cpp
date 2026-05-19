@@ -50,7 +50,7 @@ TEST_F(CollectionHandlerTest, InstanceLifecycle) {
 	EXPECT_NE(ch, CollectionHandler::getInstance("other"));
 
 	// removeInstance destroys the entry — next getInstance creates a fresh one with no items.
-	auto* tempCh = CollectionHandler::getInstance("temp");
+	auto tempCh = CollectionHandler::getInstance("temp");
 	Values td {{NAME, "X"}};
 	MockData tempItem {td};
 	tempCh->add(&tempItem);

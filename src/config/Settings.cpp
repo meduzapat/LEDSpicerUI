@@ -22,7 +22,6 @@
 
 #include "Settings.hpp"
 
-// Brings LEDSpicerUI types (StringVector, emptyString, etc.) and Config members into scope.
 using namespace LEDSpicerUI;
 using namespace Config;
 
@@ -102,7 +101,7 @@ void Settings::setCurrentProject(const string& name) noexcept {
 
 void Settings::setColorFiles(StringVector files) noexcept {
 	colorFiles = std::move(files);
-	if (not colorFiles.empty()) colorFilesChanged.emit();
+	if (not colorFiles.empty() and colorFilesChanged) colorFilesChanged();
 }
 
 void Settings::setDataDirStatus(bool gameData, bool colors, bool controls) noexcept {

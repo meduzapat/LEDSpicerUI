@@ -162,6 +162,29 @@ TEST_F(SettingsTest, VolatileState) {
 	EXPECT_FALSE(s.getHasControls());
 }
 
+TEST_F(SettingsTest, ColorFilesChangedCallback) {
+	auto& s = Settings::get();
+
+	int calls = 0;
+	s.onColorFilesChanged([&calls]() { ++calls; });
+
+	// Empty list → callback not fired.
+	s.setColorFiles({});
+	EXPECT_EQ(0, calls);
+
+	// Non-empty list → callback fired.
+	s.setColorFiles({"a.ini"});
+	EXPECT_EQ(1, calls);
+
+	// Fires again on subsequent non-empty sets.
+	s.setColorFiles({"b.ini", "c.ini"});
+	EXPECT_EQ(2, calls);
+
+	// Replace callback with null-equivalent (no crash on next set).
+	s.onColorFilesChanged(nullptr);
+	s.setColorFiles({"d.ini"});
+	EXPECT_EQ(2, calls);
+}
 
 int main(int argc, char** argv) {
 	::testing::InitGoogleTest(&argc, argv);

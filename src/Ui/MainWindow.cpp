@@ -124,7 +124,7 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 	});
 
 	// Refresh colors combo whenever the color file list is replaced.
-	Settings::get().colorFilesChanged.connect([this]() {
+	Settings::get().onColorFilesChanged([this]() {
 		populateColorsCombo();
 	});
 
@@ -396,10 +396,12 @@ void MainWindow::readConfigFile(const string& dataFilePath, bool wipe, uint8_t i
 	}
 
 	// TODO: default profile should be the one selected in the profiles box.
-	comboDefaultProfile->remove_all();
-	const string& dp {datafile.getRootInfo().getValue(DEFAULT_PROFILE)};
-	comboDefaultProfile->append(dp);
-	comboDefaultProfile->set_active_text(dp);
+//	comboDefaultProfile->remove_all();
+//	const string& dp {datafile.getRootInfo().getValue(DEFAULT_PROFILE)};
+	comboDefaultProfile->append("default");
+	comboDefaultProfile->set_active_text("default");
+//	comboDefaultProfile->append(dp);
+//	comboDefaultProfile->set_active_text(dp);
 }
 
 void MainWindow::populateColorsCombo() {

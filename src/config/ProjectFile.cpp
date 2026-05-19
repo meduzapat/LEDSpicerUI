@@ -25,17 +25,21 @@
 using namespace LEDSpicerUI::Config;
 
 void ProjectFile::saveFile(const string& path, const string& content) {
+
+	// Debug files.
 	if (Settings::get().shouldDebugFiles()) {
 		Gtk::Dialog dialog("DEBUG: " + path);
 		dialog.set_default_size(700, 500);
 		dialog.set_resizable(true);
+		dialog.set_position(Gtk::WIN_POS_CENTER_ON_PARENT);
+		dialog.set_transient_for(Message::getMain());
 
-		auto* scrolled = Gtk::manage(new Gtk::ScrolledWindow());
+		auto scrolled {Gtk::manage(new Gtk::ScrolledWindow())};
 		scrolled->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 		scrolled->set_hexpand(true);
 		scrolled->set_vexpand(true);
 
-		auto* textView = Gtk::manage(new Gtk::TextView());
+		auto textView {Gtk::manage(new Gtk::TextView())};
 		textView->get_buffer()->set_text(content);
 		textView->set_editable(false);
 		textView->set_monospace(true);
@@ -46,5 +50,6 @@ void ProjectFile::saveFile(const string& path, const string& content) {
 		dialog.run();
 		return;
 	}
+	// Normal save.
 	Glib::file_set_contents(path, content);
 }
