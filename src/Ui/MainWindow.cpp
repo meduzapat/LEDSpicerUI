@@ -231,16 +231,17 @@ void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {
 	builder->get_widget("BtnSelectProject", btnSelectProject);
 
 	// Activate configuration tabs.
-	Gtk::Notebook* MainTabs = nullptr;
-	builder->get_widget("MainTabs", MainTabs);
-	MainTabs->signal_switch_page().connect([this](Gtk::Widget*, guint pageNum) {
-		// Inputs
-		if (pageNum == 4) {
+	Gtk::Stack* MainTabs = nullptr;
+	Gtk::Box* MainTabsBox = nullptr;
+	builder->get_widget("MainTabs",    MainTabs);
+	builder->get_widget("MainTabsBox", MainTabsBox);
+	MainTabs->property_visible_child_name().signal_changed().connect([this, MainTabs]() {
+		if (MainTabs->get_visible_child_name() == "inputs") {
 			inputNavigator.onActivate();
 		}
 	});
 
-	btnSelectProject->signal_clicked().connect([&, MainTabs, btnImportConfig]() {
+	btnSelectProject->signal_clicked().connect([&, MainTabs, MainTabsBox, btnImportConfig]() {
 		if (DialogProject::getInstance()->run() != Gtk::ResponseType::RESPONSE_APPLY) {
 			DialogProject::getInstance()->hide();
 			return;
@@ -292,8 +293,8 @@ void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {
 		DialogRestrictor::getInstance()->refreshItems();
 		DialogProcess::getInstance()->refreshItems();
 		Defaults::cleanDirty();
-		MainTabs->set_current_page(0);
-		MainTabs->set_sensitive(true);
+		MainTabs->set_visible_child("configuration");
+		MainTabsBox->set_sensitive(true);
 		btnImportConfig->set_sensitive(true);
 		DialogProject::getInstance()->hide();
 	});
