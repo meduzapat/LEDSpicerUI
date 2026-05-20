@@ -187,6 +187,14 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 MainWindow::~MainWindow() {
 
 	inputNavigator.clear();
+
+	// need to be wipe in the correct order or the dependencies will cause problems.
+	profiles.wipe();
+	groups.wipe();
+	processes.wipe();
+	restrictors.wipe();
+	devices.wipe();
+
 	CollectionHandler::purgeAll();
 
 	// Data dialogs.
