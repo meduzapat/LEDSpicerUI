@@ -70,6 +70,8 @@ protected:
 		* spinInputTimes        = nullptr,
 		* spinInputCreditsCoins = nullptr;
 
+	Gtk::ToggleButton* toggleInputTimesForever = nullptr;
+
 	Gtk::Box
 		* boxInputSourcesBox         = nullptr,
 		* boxInputMapsBox            = nullptr,

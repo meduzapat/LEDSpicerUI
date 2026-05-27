@@ -45,6 +45,7 @@ DialogInput::DialogInput(
 	builder->get_widget("EntryInputName",             entryInputName);
 	builder->get_widget("SwitchInputBlink",           switchInputBlink);
 	builder->get_widget("SpinInputTimes",             spinInputTimes);
+	builder->get_widget("ToggleInputTimesForever",    toggleInputTimesForever);
 	builder->get_widget("SwitchInputCreditsOnce",     switchInputCreditsOnce);
 	builder->get_widget("SwitchInputCreditsAlwaysOn", switchInputCreditsAlwaysOn);
 	builder->get_widget("SpinInputCreditsCoins",      spinInputCreditsCoins);
@@ -55,6 +56,7 @@ DialogInput::DialogInput(
 	builder->get_widget("BriefInput",                 brief);
 
 	Defaults::linkSwitchToWidget(switchInputBlink, comboBoxInputSpeed);
+	Defaults::linkToggleToWidget(toggleInputTimesForever, spinInputTimes, true);
 
 	setSignalAdd(btnAddInput);
 	setSignalApply();
@@ -102,6 +104,7 @@ void DialogInput::resetForm() noexcept {
 
 	btnAddInputMap->set_visible(not needSources);
 	btnAddInputMap->set_sensitive(true);
+	toggleInputTimesForever->set_active(spinInputTimes->get_value_as_int() == 0);
 	spinInputTimes->get_parent()->set_visible(Defaults::inputHasFlag(name, Defaults::INPUT_HAS_TIMES));
 	if (Defaults::inputHasFlag(name, Defaults::INPUT_HAS_BLINK)) {
 		switchInputBlink->get_parent()->set_visible(true);
@@ -168,9 +171,9 @@ void DialogInput::storeData() noexcept {
 	if (Defaults::inputHasFlag(id, Defaults::INPUT_HAS_BLINK))
 		currentData->setValue(BLINK, switchInputBlink->get_active() ? HUMAN_TRUE : HUMAN_FALSE);
 
-	if (Defaults::inputHasFlag(id, Defaults::INPUT_HAS_TIMES))
-		if (spinInputTimes->get_value_as_int())
-			currentData->setValue(TIMES, std::to_string(spinInputTimes->get_value_as_int()));
+	if (Defaults::inputHasFlag(id, Defaults::INPUT_HAS_TIMES)) {
+		currentData->setValue(TIMES, std::to_string(toggleInputTimesForever->get_active() ? 0 : spinInputTimes->get_value_as_int()));
+	}
 
 	if (Defaults::inputHasFlag(id, Defaults::INPUT_HAS_SPEED))
 		currentData->setValue(SPEED, comboBoxInputSpeed->get_active_id());
@@ -195,8 +198,12 @@ void DialogInput::retrieveData() noexcept {
 	if (Defaults::inputHasFlag(name, Defaults::INPUT_HAS_BLINK))
 		switchInputBlink->set_active(currentData->is(BLINK));
 
-	if (Defaults::inputHasFlag(name, Defaults::INPUT_HAS_TIMES))
-		spinInputTimes->set_value(std::stod(currentData->getValue(TIMES, "0")));
+	if (Defaults::inputHasFlag(name, Defaults::INPUT_HAS_TIMES)) {
+		if (currentData->getValue(TIMES).empty() or currentData->getValue(TIMES) == "0")
+			toggleInputTimesForever->set_active(true);
+		else
+			spinInputTimes->set_value(std::stod(currentData->getValue(TIMES)));
+	}
 
 	if (Defaults::inputHasFlag(name, Defaults::INPUT_HAS_SPEED))
 		comboBoxInputSpeed->set_active_id(currentData->getValue(SPEED));
@@ -229,6 +236,7 @@ void DialogInput::onEmpty() noexcept {
 	comboBoxInputCreditsMode->set_active(0);
 	spinInputTimes->get_parent()->hide();
 	spinInputTimes->set_value(0.0f);
+	toggleInputTimesForever->set_active(false);
 	spinInputCreditsCoins->set_value(1.0f);
 	switchInputCreditsOnce->set_active(false);
 	switchInputCreditsAlwaysOn->set_active(false);

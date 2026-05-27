@@ -10126,11 +10126,24 @@ False: the element or group will stay ON.</property>
                       </packing>
                     </child>
                     <child>
+                      <object class="GtkToggleButton" id="ToggleInputTimesForever">
+                        <property name="label" translatable="yes">Forever</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">True</property>
+                        <property name="tooltip-text" translatable="yes">Toggle this  to blink forever.</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
                       <object class="GtkSpinButton" id="SpinInputTimes">
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
-                        <property name="tooltip-text" translatable="yes">The number of times to blink after the trigger.
-Use 0 for never stop</property>
+                        <property name="tooltip-text" translatable="yes">The number of times to blink after the trigger.</property>
                         <property name="input-purpose">number</property>
                         <property name="adjustment">adjustment_2-0-0-255-1-10</property>
                         <property name="climb-rate">1</property>
@@ -10139,7 +10152,7 @@ Use 0 for never stop</property>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
-                        <property name="position">1</property>
+                        <property name="position">2</property>
                       </packing>
                     </child>
                   </object>
