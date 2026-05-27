@@ -214,3 +214,19 @@ void DirectoryNavigator::wireDirButtons(Storage::BoxButton& bb, Storage::Directo
 
 	bb.show_all();
 }
+
+void DirectoryNavigator::sortDirectoriesFirst(OrdenableFlowBox* box) noexcept {
+	box->set_sort_func([](Gtk::FlowBoxChild* a, Gtk::FlowBoxChild* b) -> int {
+		auto
+			dA {static_cast<Storage::BoxButton*>(a->get_child())->getData()},
+			dB {static_cast<Storage::BoxButton*>(b->get_child())->getData()};
+		const bool
+			aIsDir {dynamic_cast<Storage::DirectoryEntry*>(dA) != nullptr},
+			bIsDir {dynamic_cast<Storage::DirectoryEntry*>(dB) != nullptr};
+		if (aIsDir != bIsDir)
+			return aIsDir ? -1 : 1;
+		return dynamic_cast<Storage::DirNode*>(dA)->getName().compare(
+			dynamic_cast<Storage::DirNode*>(dB)->getName()
+		);
+	});
+}

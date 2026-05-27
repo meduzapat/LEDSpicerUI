@@ -54,6 +54,7 @@ add_executable(ledspicerui
 	src/config/ProjectFile.cpp
 	src/config/ConfigFile.cpp
 	src/config/InputFile.cpp
+	src/config/AnimationFile.cpp
 	src/Ui/Message.cpp
 	src/Ui/DialogColors.cpp
 	src/Ui/DialogProject.cpp
@@ -78,6 +79,8 @@ add_executable(ledspicerui
 	src/Ui/Storage/InputSource.cpp
 	src/Ui/Storage/Input.cpp
 	src/Ui/Storage/Profile.cpp
+	src/Ui/Storage/Actor.cpp
+	src/Ui/Storage/Animation.cpp
 	src/Ui/Storage/BoxButton.cpp
 	src/Ui/Storage/BoxButtonCollection.cpp
 	src/Ui/DataDialogs/DialogForm.cpp
@@ -96,8 +99,11 @@ add_executable(ledspicerui
 	src/Ui/DataDialogs/DialogInput.cpp
 	src/Ui/DataDialogs/DialogProcess.cpp
 	src/Ui/DataDialogs/DialogProfile.cpp
+	src/Ui/DataDialogs/DialogActor.cpp
+	src/Ui/DataDialogs/DialogAnimation.cpp
 	src/Ui/DirectoryNavigator.cpp
 	src/Ui/InputDirectoryNavigator.cpp
+	src/Ui/AnimationDirectoryNavigator.cpp
 	src/Ui/DialogImport.cpp
 	src/Ui/MainWindow.cpp
 	src/LEDSpicerUI.cpp

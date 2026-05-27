@@ -36,6 +36,7 @@
 #include "DialogSettings.hpp"
 #include "DialogProject.hpp"
 #include "InputDirectoryNavigator.hpp"
+#include "AnimationDirectoryNavigator.hpp"
 
 #include "DataDialogs/DialogDevice.hpp"
 #include "DataDialogs/DialogRestrictor.hpp"
@@ -105,6 +106,9 @@ protected:
 
 	/// Navigator for input files.
 	InputDirectoryNavigator inputNavigator;
+
+	/// Navigator for animation files.
+	AnimationDirectoryNavigator animationNavigator;
 
 	/**
 	 * Populates the configuration.

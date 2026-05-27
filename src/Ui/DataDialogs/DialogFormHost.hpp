@@ -97,7 +97,7 @@ protected:
 			"TMap value type must derive from Defaults::BaseInfo"
 		);
 		if (not listStore)
-			listStore   = static_cast<Gtk::ListStore*>(selectorCombo->get_model().get());
+			listStore = static_cast<Gtk::ListStore*>(selectorCombo->get_model().get());
 		auto row = *(listStore->append());
 		row.set_value(0, emptyString);
 		row.set_value(1, emptyMsg);

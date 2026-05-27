@@ -179,6 +179,11 @@ void DialogColors::resetColorButtons() const noexcept {
 			box->remove(*c);
 }
 
+void DialogColors::wipeColorPicker(Gtk::FlowBox* destination) noexcept {
+	for (auto c : destination->get_children())
+		destination->remove(*c);
+}
+
 void DialogColors::populateColorBox(Gtk::FlowBox* destination, const StringVector& colors) noexcept {
 	for (const auto& c : colors)
 		createColorButton(destination, c);

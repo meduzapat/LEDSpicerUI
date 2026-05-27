@@ -113,7 +113,7 @@ void DialogInput::resetForm() noexcept {
 	boxInputCreditsSettings->set_visible(Defaults::inputHasFlag(name, Defaults::INPUT_HAS_CREDITS));
 	comboBoxInputSpeed->get_parent()->set_visible(Defaults::inputHasFlag(name, Defaults::INPUT_HAS_SPEED));
 
-	brief->set_text(Defaults::inputInfo.at(name).brief.data());
+	brief->set_text(Defaults::inputInfo.at(name).brief);
 	btnApply->set_sensitive(true);
 }
 

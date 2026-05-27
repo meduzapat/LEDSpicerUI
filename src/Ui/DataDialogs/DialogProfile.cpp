@@ -111,7 +111,12 @@ DialogProfile::DialogProfile(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 
 	// Animations selector.
 	builder->get_widget("BtnProfileAddAnimations",      btnProfilesAddAnimations);
-	builder->get_widget_derived("BoxProfileAnimations", boxProfileAnimations);
+	builder->get_widget_derived(
+		"BoxProfileAnimations",
+		boxProfileAnimations,
+		"BtnProfileAnimationUp",
+		"BtnProfileAnimationDn"
+	);
 	btnProfilesAddAnimations->signal_clicked().connect([this]() {
 		setUpSelector(COLLECTION_ANIMATIONS, animationsRequest);
 		DialogSelect::getInstance()->open();

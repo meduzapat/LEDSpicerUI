@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      DialogImport.hpp
- * @since     Feb 14, 2023
+ * @file      AnimationFile.hpp
+ * @since     May 2026
  * @author    Patricio A. Rossi (MeduZa)
  *
  * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
@@ -20,39 +20,39 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Message.hpp"
+#include "ProjectFile.hpp"
+#include "Storage/Animation.hpp"
 
 #pragma once
 
-namespace LEDSpicerUI::Ui {
+namespace LEDSpicerUI::Config {
 
 /**
- * LEDSpicerUI::Ui::DialogImport
- * Dialog to create select files to import.
+ * LEDSpicerUI::Config::AnimationFile
+ * Single-use parser for one animation XML file.
+ * Walks every <actor> child of the LEDSpicer root and stores its raw
+ * attributes into extractedData so DialogAnimation::load() can consume them.
  */
-class DialogImport: public Gtk::FileChooserDialog {
+class AnimationFile : public ProjectFile {
 
 public:
 
-	enum class Types : uint8_t {CONFIG, INPUT, ANIMATION};
+	/**
+	 * @param filePath Full path to the .xml file on disk.
+	 * @param parent   Owning directory node, or nullptr for root level.
+	 * @throws Message on parse errors.
+	 */
+	AnimationFile(const string& filePath, Ui::Storage::DirectoryEntry* parent);
 
-	DialogImport(const Types type, Gtk::Window* parent);
+	virtual ~AnimationFile() = default;
 
-	virtual ~DialogImport() = default;
+	/**
+	 * Writes the animation data back to an XML file at filePath.
+	 * @param animation
+	 * @param filePath
+	 */
+	static void save(const Ui::Storage::Animation& animation, const string& filePath);
 
-	uint8_t getConfigParameters();
-
-protected:
-
-	Gtk::Button* btbOk = nullptr;
-
-	uint8_t flags = 0;
-
-	static const std::unordered_map<const Types, const string> setups;
-
-	void setFlags(uint8_t value, bool on);
-
-	void setConfigBox(Gtk::Box* box);
 };
 
 } // namespace

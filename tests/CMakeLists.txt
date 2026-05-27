@@ -76,6 +76,12 @@ set(STORAGE_PROFILE_SRCS
 	${CMAKE_SOURCE_DIR}/src/Ui/Storage/Profile.cpp
 )
 
+set(STORAGE_ANIMATION_SRCS
+	${STORAGE_DIRNODE_SRCS}
+	${CMAKE_SOURCE_DIR}/src/Ui/Storage/Actor.cpp
+	${CMAKE_SOURCE_DIR}/src/Ui/Storage/Animation.cpp
+)
+
 # Shared between ProjectFileTest and InputFileTest.
 set(INPUT_FILE_SRCS
 	${STORAGE_BASE_SRCS}
@@ -203,6 +209,12 @@ add_test_executable(ProfileTest
 	"${TINYXML2_LIBRARIES}"
 )
 
+add_test_executable(AnimationTest
+	"Ui/Storage/AnimationTest.cpp"
+	"${STORAGE_ANIMATION_SRCS}"
+	"${TINYXML2_LIBRARIES}"
+)
+
 add_test_executable(ConfigFileTest
 	"config/ConfigFileTest.cpp"
 	"${STORAGE_BASE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp;${CMAKE_SOURCE_DIR}/src/XMLHelper.cpp;${CMAKE_SOURCE_DIR}/src/config/Settings.cpp;${CMAKE_SOURCE_DIR}/src/config/ProjectFile.cpp;${CMAKE_SOURCE_DIR}/src/config/ConfigFile.cpp"
@@ -218,6 +230,12 @@ add_test_executable(ProjectFileTest
 add_test_executable(InputFileTest
 	"config/InputFileTest.cpp"
 	"${INPUT_FILE_SRCS}"
+	"${TINYXML2_LIBRARIES}"
+)
+
+add_test_executable(AnimationFileTest
+	"config/AnimationFileTest.cpp"
+	"${STORAGE_BASE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp;${CMAKE_SOURCE_DIR}/src/XMLHelper.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/DirNode.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/Actor.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/Animation.cpp;${CMAKE_SOURCE_DIR}/src/config/Settings.cpp;${CMAKE_SOURCE_DIR}/src/config/ProjectFile.cpp;${CMAKE_SOURCE_DIR}/src/config/AnimationFile.cpp"
 	"${TINYXML2_LIBRARIES}"
 )
 

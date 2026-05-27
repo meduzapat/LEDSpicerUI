@@ -158,6 +158,77 @@ inline const string
 	ONCE         {"once"},
 	ALWAYS_ON    {"alwaysOn"},
 
+/// Animation actor configuration keys.
+	ACTOR_GROUP    {"group"},
+	COLORS         {"colors"},
+	DIRECTION      {"direction"},
+	BOUNCER        {"bouncer"},
+	START_TIME     {"startTime"},
+	END_TIME       {"endTime"},
+	RESTART_TIME   {"restartTime"},
+	REPEAT         {"repeat"},
+	START_AT       {"startAt"},
+	CYCLES         {"cycles"},
+	TAIL_LENGTH    {"tailLength"},
+	TAIL_COLOR     {"tailColor"},
+	TAIL_INTENSITY {"tailIntensity"},
+	TONES          {"tones"},
+	CHANNEL        {"channel"},
+	OFF            {"off"},
+	LOW            {"low"},
+	MID            {"mid"},
+	HIGH           {"high"},
+	PCM            {"pcm"},
+	FORMAT         {"format"},
+
+/// Animation actor type names (also the XML `type` attribute values).
+	ANIM_TYPE_FILLER      {"Filler"},
+	ANIM_TYPE_PULSE       {"Pulse"},
+	ANIM_TYPE_GRADIENT    {"Gradient"},
+	ANIM_TYPE_SERPENTINE  {"Serpentine"},
+	ANIM_TYPE_RANDOM      {"Random"},
+	ANIM_TYPE_FILE_READER {"FileReader"},
+	ANIM_TYPE_ALSA_AUDIO  {"AlsaAudio"},
+	ANIM_TYPE_PULSE_AUDIO {"PulseAudio"},
+
+/// Direction values (also relabelled to Outward/Inward for audio actors).
+	DIRECTION_FORWARD  {"Forward"},
+	DIRECTION_BACKWARD {"Backward"},
+	DIRECTION_OUTWARD  {"Outward"},
+	DIRECTION_INWARD   {"Inward"},
+
+/// Filter values.
+	FILTER_NORMAL  {"Normal"},
+	FILTER_COMBINE {"Combine"},
+
+/// Animation actor mode values (per-type domain).
+	MODE_NORMAL      {"Normal"},
+	MODE_RANDOM      {"Random"},
+	MODE_WAVE        {"Wave"},
+	MODE_CURTAIN     {"Curtain"},
+	MODE_LINEAR      {"Linear"},
+	MODE_EXPONENTIAL {"Exponential"},
+	MODE_ALL         {"All"},
+	MODE_CYCLIC      {"Cyclic"},
+	MODE_VU_METER    {"VuMeter"},
+	MODE_SINGLE      {"Single"},
+	MODE_DISCO       {"Disco"},
+
+/// Audio channel values.
+	CHANNEL_BOTH  {"Both"},
+	CHANNEL_MONO  {"Mono"},
+	CHANNEL_LEFT  {"Left"},
+	CHANNEL_RIGHT {"Right"},
+
+/// Audio palette defaults.
+	AUDIO_DEFAULT_OFF  {"Off"},
+	AUDIO_DEFAULT_LOW  {"Green"},
+	AUDIO_DEFAULT_MID  {"Yellow"},
+	AUDIO_DEFAULT_HIGH {"Red"},
+
+/// FileReader format values.
+	FORMAT_RGBA {"rgba"},
+
 /// UI-related constants.
 	DEFAULT_ELEMENT_TYPE {"9"},
 	PLAYER   {"player"},
@@ -178,6 +249,7 @@ inline const string
 	TYPE_INPUT_MAP       {"input map"},
 	TYPE_INPUT_LINKMAP   {"input linked map"},
 	TYPE_ANIMATION       {"animation"},
+	TYPE_ACTOR           {"actor"},
 	TYPE_PROFILE         {"profile"},
 
 /// Collection / families — dual-purpose string constants.
@@ -192,6 +264,7 @@ inline const string
 	COLLECTION_INPUT_MAPS      {"i.m"},
 	COLLECTION_INPUT_LINKMAPS  {"i.l"},
 	COLLECTION_ANIMATIONS      {"a"},
+	COLLECTION_ACTORS          {"ac"},
 	COLLECTION_PROFILES        {"pr"},
 
 /// Link families keys.
@@ -211,6 +284,8 @@ inline const string
 // CSS classes.
 /// Storage box buttons
 	CSS_BOX_BUTTON                {"BoxButton"},
+	CSS_ACTOR_BOX_BUTTON          {"ActorBoxButton"},
+	CSS_ANIMATION_BOX_BUTTON      {"AnimationBoxButton"},
 	CSS_DEVICE_BOX_BUTTON         {"DeviceBoxButton"},
 	CSS_DIRECTORY_BOX_BUTTON      {"DirectoryBoxButton"},
 	CSS_ELEMENT_BOX_BUTTON        {"ElementBoxButton"},
@@ -298,6 +373,16 @@ public:
 		INPUT_HAS_CREDITS     = 1 << 6, /// Has credits-specific settings.
 	};
 
+	/// Animation actor capability flags.
+	enum AnimationFlags : uint8_t {
+		ANIM_USES_FRAME     = 1 << 0, /// Frame-family actor: speed, startAt, cycles.
+		ANIM_USES_DIRECTION = 1 << 1, /// Direction-family actor: direction + bouncer.
+		ANIM_USES_AUDIO     = 1 << 2, /// Audio-family actor: mode/channel/off/low/mid/high; direction is Outward/Inward.
+		ANIM_HAS_COLOR      = 1 << 3, /// Uses a single `color` attribute.
+		ANIM_HAS_COLORS     = 1 << 4, /// Uses a multi `colors` attribute. Both COLOR and COLORS = XOR choice.
+		// Reserved: ANIM_CAN_FADE = 1 << 5
+	};
+
 	struct BaseInfo {
 		const string name;  /// Human-readable display name.
 		const string brief; /// A brief description of the device.
@@ -331,6 +416,13 @@ public:
 	 */
 	struct InputInfo : public BaseInfo {
 		const uint8_t flags; /// Bitwise capability flags.
+	};
+
+	/**
+	 * Structure with animation actor information.
+	 */
+	struct AnimationInfo : public BaseInfo {
+		const uint8_t flags; /// Bitwise capability flags (AnimationFlags).
 	};
 
 	Defaults() = delete;
@@ -520,6 +612,9 @@ public:
 	/// A list of input to their information.
 	static const std::unordered_map<string, InputInfo> inputInfo;
 
+	/// A list of animation actor types to their information.
+	static const std::unordered_map<string, AnimationInfo> animationsInfo;
+
 	/// A List of string names to its internal enumerated type.
 	static const std::unordered_map<string, Ways> wayIds;
 
@@ -641,16 +736,26 @@ public:
 	 * switch on enables the widget, switch off disables it.
 	 * @param sw the controlling switch.
 	 * @param widget the controlled widget.
+	 * @param invert if true, the logic is inverted: switch on disables the widget, switch off enables it.
 	 */
-	static void linkSwitchToWidget(Gtk::Switch* sw, Gtk::Widget* widget) noexcept;
+	static void linkSwitchToWidget(
+		Gtk::Switch* sw,
+		Gtk::Widget* widget,
+		bool invert = false
+	) noexcept;
 
 	/**
 	 * Links a Gtk::ToggleButton to a widget, controlling its sensitivity:
 	 * toggle active enables the widget, inactive disables it.
 	 * @param toggle the controlling toggle button.
 	 * @param widget the controlled widget.
+	 * @param invert if true, the logic is inverted: active disables the widget, inactive enables it.
 	 */
-	static void linkToggleToWidget(Gtk::ToggleButton* toggle, Gtk::Widget* widget) noexcept;
+	static void linkToggleToWidget(
+		Gtk::ToggleButton* toggle,
+		Gtk::Widget* widget,
+		bool invert = false
+	) noexcept;
 
 	/**
 	 * Sets the state to ignore Changes.

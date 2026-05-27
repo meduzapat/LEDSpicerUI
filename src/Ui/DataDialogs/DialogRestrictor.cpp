@@ -119,7 +119,7 @@ void DialogRestrictor::resetForm() noexcept {
 		waysIcons.at(w)->show();
 	}
 
-	brief->set_label(Defaults::restrictorsInfo.at(name).brief.data());
+	brief->set_label(Defaults::restrictorsInfo.at(name).brief);
 	btnApply->set_sensitive(true);
 	// Disable add interface button if there no more interfaces left.
 	btnAddRestrictorMap->set_sensitive(

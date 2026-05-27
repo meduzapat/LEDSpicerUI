@@ -54,7 +54,9 @@ DialogInputLinkMaps::DialogInputLinkMaps(
 		"BoxInputLinkedMappings",
 		boxInputLinkedMappings,
 		"BtnInputMappingUp",
-		"BtnInputMappingDown"
+		"BtnInputMappingDn",
+		"BtnInputMappingFirst",
+		"BtnInputMappingLast"
 	);
 
 	mapsRequest.displayBox = boxInputLinkedMappings;

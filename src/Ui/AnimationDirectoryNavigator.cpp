@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      InputDirectoryNavigator.cpp
- * @since     Feb 16, 2026
+ * @file      AnimationDirectoryNavigator.cpp
+ * @since     May 2026
  * @author    Patricio A. Rossi (MeduZa)
  *
  * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
@@ -20,58 +20,58 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "InputDirectoryNavigator.hpp"
+#include "AnimationDirectoryNavigator.hpp"
 
 using namespace LEDSpicerUI::Ui;
 using namespace LEDSpicerUI::Config;
 
-InputDirectoryNavigator::InputDirectoryNavigator(
+AnimationDirectoryNavigator::AnimationDirectoryNavigator(
 	const Glib::RefPtr<Gtk::Builder>& builder,
 	Gtk::Window* parentWindow
-) :
+) noexcept :
 	DirectoryNavigator(),
-	dialogImportInput(DialogImport::Types::INPUT, parentWindow)
+	dialogImportAnimation(DialogImport::Types::ANIMATION, parentWindow)
 {
-	DataDialogs::DialogInput::buildInstance(builder, "DialogInput");
+	DataDialogs::DialogAnimation::buildInstance(builder, "DialogAnimation");
 
 	Gtk::Button
-		* btnNewInputFolder = nullptr,
-		* btnAddInput       = nullptr,
-		* btnImportInput    = nullptr;
+		* btnNewAnimationFolder = nullptr,
+		* btnAddAnimation       = nullptr,
+		* btnImportAnimation    = nullptr;
 
-	builder->get_widget_derived("BoxInputs",  boxInputs);
-	builder->get_widget("BtnInputHome",       btnHome);
-	builder->get_widget("BtnNewInputFolder",  btnNewInputFolder);
-	builder->get_widget("BoxInputBreadcrumb", boxBreadcrumb);
-	builder->get_widget("BtnAddInput",        btnAddInput);
-	builder->get_widget("BtnImportInput",     btnImportInput);
+	builder->get_widget_derived("BoxAnimations",  boxAnimations);
+	builder->get_widget("BtnAnimationHome",       btnHome);
+	builder->get_widget("BtnNewAnimationFolder",  btnNewAnimationFolder);
+	builder->get_widget("BoxAnimationBreadcrumb", boxBreadcrumb);
+	builder->get_widget("BtnAddAnimation",        btnAddAnimation);
+	builder->get_widget("BtnImportAnimation",     btnImportAnimation);
 
-	DataDialogs::DialogInput::getInstance()->setBox(boxInputs);
+	DataDialogs::DialogAnimation::getInstance()->setBox(boxAnimations);
 
-	sortDirectoriesFirst(boxInputs);
+	sortDirectoriesFirst(boxAnimations);
 
-	// Register automatic buttons.
-	auto chEl {Storage::CollectionHandler::getInstance(COLLECTION_ELEMENTS)};
-	chEl->registerSensitivity(btnAddInput);
-	chEl->registerSensitivity(btnImportInput);
+	// An animation needs at least one group to play on.
+	auto chGroups {Storage::CollectionHandler::getInstance(COLLECTION_GROUPS)};
+	chGroups->registerSensitivity(btnAddAnimation);
+	chGroups->registerSensitivity(btnImportAnimation);
 
-	btnNewInputFolder->signal_clicked().connect([this]() { onNewDirClicked(); });
+	btnNewAnimationFolder->signal_clicked().connect([this]() { onNewDirClicked(); });
 
 	// Import button.
-	btnImportInput->signal_clicked().connect([this]() {
-		if (dialogImportInput.run() == Gtk::ResponseType::RESPONSE_OK) {
-			StringVector selectedFiles(dialogImportInput.get_filenames());
+	btnImportAnimation->signal_clicked().connect([this]() {
+		if (dialogImportAnimation.run() == Gtk::ResponseType::RESPONSE_OK) {
+			StringVector selectedFiles(dialogImportAnimation.get_filenames());
 			for (const auto& selectedFile : selectedFiles) {
 				try {
-					InputFile datafile(selectedFile, currentDir);
-					DataDialogs::DialogInput::getInstance()->load(datafile.getDataMap());
+					AnimationFile datafile(selectedFile, currentDir);
+					DataDialogs::DialogAnimation::getInstance()->load(datafile.getDataMap());
 				}
 				catch (Message& e) {
 					Message::displayError(XMLHelper::cleanError(e.getMessage()));
 				}
 			}
 		}
-		dialogImportInput.hide();
+		dialogImportAnimation.hide();
 	});
 
 	btnHome->signal_clicked().connect([this]() {
@@ -79,30 +79,34 @@ InputDirectoryNavigator::InputDirectoryNavigator(
 	});
 }
 
-void InputDirectoryNavigator::clear() noexcept {
+void AnimationDirectoryNavigator::clear() noexcept {
 	rootDir.getPrimaryChild()->wipe();
 	currentDir = &rootDir;
 }
 
-void InputDirectoryNavigator::extractData(const string& filePath, Storage::DirectoryEntry* parent) {
-
-	InputFile datafile(filePath, parent);
-	auto di {DataDialogs::DialogInput::getInstance()};
-	di->setOwner(parent->getPrimaryChild(), parent);
-	di->setCurrentDirectory(parent);
-	di->load(datafile.getDataMap());
+void AnimationDirectoryNavigator::extractData(
+	const string& filePath,
+	Storage::DirectoryEntry* parent
+) {
+	AnimationFile datafile(filePath, parent);
+	auto da {DataDialogs::DialogAnimation::getInstance()};
+	da->setOwner(parent->getPrimaryChild(), parent);
+	da->setCurrentDirectory(parent);
+	da->load(datafile.getDataMap());
 }
 
-void InputDirectoryNavigator::saveItem(Storage::Data* item, const string& filePath) const noexcept {
-	InputFile::save(*static_cast<Storage::Input*>(item), filePath);
+void AnimationDirectoryNavigator::saveItem(
+	Storage::Data* item,
+	const string& filePath
+) const noexcept {
+	AnimationFile::save(*static_cast<Storage::Animation*>(item), filePath);
 }
 
-void InputDirectoryNavigator::wireDialogs() noexcept {
-
-	auto di {DataDialogs::DialogInput::getInstance()};
-	di->setOwner(currentDir->getPrimaryChild(), currentDir);
-	di->setCurrentDirectory(currentDir);
-	di->refreshItems();
+void AnimationDirectoryNavigator::wireDialogs() noexcept {
+	auto da {DataDialogs::DialogAnimation::getInstance()};
+	da->setOwner(currentDir->getPrimaryChild(), currentDir);
+	da->setCurrentDirectory(currentDir);
+	da->refreshItems();
 
 	// Update navigation buttons.
 	btnHome->set_sensitive(not isAtRoot());
@@ -111,7 +115,6 @@ void InputDirectoryNavigator::wireDialogs() noexcept {
 	for (auto child : boxBreadcrumb->get_children()) boxBreadcrumb->remove(*child);
 
 	if (not currentDir->isAtRoot()) {
-		// Walk the parent chain bottom → up, collecting ancestor buttons.
 		auto node {static_cast<Storage::DirectoryEntry*>(currentDir->getParent())};
 		while (not node->isAtRoot()) {
 			auto btn {Gtk::make_managed<Gtk::Button>(node->getName())};
@@ -122,7 +125,6 @@ void InputDirectoryNavigator::wireDialogs() noexcept {
 			auto sep {Gtk::make_managed<Gtk::Label>("/")};
 			sep->get_style_context()->add_class(CSS_BREADCRUMB_SEPARATOR);
 
-			// Reorder so each ancestor goes to the front, keeping correct left-to-right order.
 			boxBreadcrumb->pack_start(*btn, Gtk::PACK_SHRINK);
 			boxBreadcrumb->pack_start(*sep, Gtk::PACK_SHRINK);
 			boxBreadcrumb->reorder_child(*btn, 0);
@@ -131,12 +133,10 @@ void InputDirectoryNavigator::wireDialogs() noexcept {
 			node = static_cast<Storage::DirectoryEntry*>(node->getParent());
 		}
 
-		// Separator before the current (non-clickable) label.
 		auto sep {Gtk::make_managed<Gtk::Label>("/")};
 		sep->get_style_context()->add_class(CSS_BREADCRUMB_SEPARATOR);
 		boxBreadcrumb->pack_end(*sep, Gtk::PACK_SHRINK);
 
-		// Current directory label at the end.
 		auto cur {Gtk::make_managed<Gtk::Label>(currentDir->getName())};
 		cur->get_style_context()->add_class(CSS_BREADCRUMB_CURRENT);
 		boxBreadcrumb->pack_end(*cur, Gtk::PACK_SHRINK);

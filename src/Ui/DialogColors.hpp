@@ -44,7 +44,7 @@ public:
 	void setColorsFromFile(const string& colorsFilename) noexcept;
 
 	/**
-	 * Colorize a button with the desired colors class.
+	 * Colorize a button with the desired colors class and update its label.
 	 * @param button
 	 * @param name
 	 */
@@ -74,6 +74,13 @@ public:
 	 * Set no color for all registered color buttons.
 	 */
 	void resetColorButtons() const noexcept;
+
+	/**
+	 * Removes all the selected colors.
+	 *
+	 * @param destination
+	 */
+	void wipeColorPicker(Gtk::FlowBox* destination) noexcept;
 
 	/**
 	 * Fills a flow box with color buttons that can be removed.

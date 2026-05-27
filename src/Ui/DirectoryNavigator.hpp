@@ -112,8 +112,9 @@ protected:
 	 * Parses one .xml file and loads its data directly into parent's collection.
 	 * @param filePath Absolute path to the .xml file.
 	 * @param parent   DirectoryEntry that owns this file.
+	 * @throws Message if the file is invalid or cannot be loaded.
 	 */
-	virtual void extractData(const string& filePath, Storage::DirectoryEntry* parent) noexcept abstract;
+	virtual void extractData(const string& filePath, Storage::DirectoryEntry* parent) abstract;
 
 	/**
 	 * Writes one item to filePath.
@@ -146,6 +147,13 @@ protected:
 	 * @param de The DirectoryEntry being decorated.
 	 */
 	void wireDirButtons(Storage::BoxButton& bb, Storage::DirectoryEntry* de) noexcept;
+
+	/**
+	 * Installs a sort function on the given box that places directories before
+	 * files; entries within each group are sorted alphabetically by name.
+	 * @param box The flow box to sort.
+	 */
+	static void sortDirectoriesFirst(OrdenableFlowBox* box) noexcept;
 
 };
 

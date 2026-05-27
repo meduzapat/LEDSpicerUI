@@ -238,3 +238,163 @@ TEST(DefaultsTest, ExtractName) {
 	EXPECT_EQ("file.v1", Defaults::extractName("/a/b/c/file.v1.xml", "/a/b/c"));
 	EXPECT_EQ("file",    Defaults::extractName("/a/b/c/file.xml",    "/a/b/c/file.xml"));
 }
+
+TEST(DefaultsTest, AnimationsInfoShape) {
+	// The eight actor types this dialog supports must be present.
+	const StringVector expected {
+		"Filler", "Gradient", "Pulse", "Serpentine",
+		"Random", "FileReader", "AlsaAudio", "PulseAudio"
+	};
+	EXPECT_EQ(expected.size(), Defaults::animationsInfo.size());
+	for (const auto& name : expected) {
+		EXPECT_NE(
+			Defaults::animationsInfo.end(),
+			Defaults::animationsInfo.find(name)
+		) << "Missing animation type: " << name;
+	}
+
+	// Every entry must have a non-empty name and brief description.
+	for (const auto& [id, info] : Defaults::animationsInfo) {
+		EXPECT_FALSE(info.name.empty())  << "Empty name for "  << id;
+		EXPECT_FALSE(info.brief.empty()) << "Empty brief for " << id;
+	}
+}
+
+TEST(DefaultsTest, AnimationsInfoFlagInvariants) {
+	const auto& info = Defaults::animationsInfo;
+
+	// Audio actors do NOT use the frame/direction families and DO use audio.
+	for (const char* a : {"AlsaAudio", "PulseAudio"}) {
+		const auto flags = info.at(a).flags;
+		EXPECT_FALSE(flags & Defaults::ANIM_USES_FRAME)     << a;
+		EXPECT_FALSE(flags & Defaults::ANIM_USES_DIRECTION) << a;
+		EXPECT_TRUE (flags & Defaults::ANIM_USES_AUDIO)     << a;
+		// Audio actors have their own 4-color palette; not regular color/colors.
+		EXPECT_FALSE(flags & Defaults::ANIM_HAS_COLOR)      << a;
+		EXPECT_FALSE(flags & Defaults::ANIM_HAS_COLORS)     << a;
+	}
+
+	// Frame-family actors all use the frame flag and never audio.
+	for (const char* f : {"Filler", "Gradient", "Pulse", "Serpentine", "Random", "FileReader"}) {
+		const auto flags = info.at(f).flags;
+		EXPECT_TRUE (flags & Defaults::ANIM_USES_FRAME) << f;
+		EXPECT_FALSE(flags & Defaults::ANIM_USES_AUDIO) << f;
+	}
+
+	// XOR color types — both flags set.
+	for (const char* x : {"Filler", "Pulse"}) {
+		const auto flags = info.at(x).flags;
+		EXPECT_TRUE(flags & Defaults::ANIM_HAS_COLOR)  << x;
+		EXPECT_TRUE(flags & Defaults::ANIM_HAS_COLORS) << x;
+	}
+
+	// Multi-color only.
+	for (const char* m : {"Gradient", "Random"}) {
+		const auto flags = info.at(m).flags;
+		EXPECT_FALSE(flags & Defaults::ANIM_HAS_COLOR)  << m;
+		EXPECT_TRUE (flags & Defaults::ANIM_HAS_COLORS) << m;
+	}
+
+	// Single-color only.
+	EXPECT_TRUE (info.at("Serpentine").flags & Defaults::ANIM_HAS_COLOR);
+	EXPECT_FALSE(info.at("Serpentine").flags & Defaults::ANIM_HAS_COLORS);
+
+	// FileReader uses neither color slot.
+	EXPECT_FALSE(info.at("FileReader").flags & Defaults::ANIM_HAS_COLOR);
+	EXPECT_FALSE(info.at("FileReader").flags & Defaults::ANIM_HAS_COLORS);
+}
+
+TEST(DefaultsTest, InputHasFlag) {
+	EXPECT_TRUE (Defaults::inputHasFlag("Actions", Defaults::INPUT_HAS_SPEED));
+	EXPECT_TRUE (Defaults::inputHasFlag("Actions", Defaults::INPUT_NEEDS_SOURCE));
+	EXPECT_FALSE(Defaults::inputHasFlag("Actions", Defaults::INPUT_HAS_TIMES));
+	EXPECT_TRUE (Defaults::inputHasFlag("Blinker", Defaults::INPUT_HAS_TIMES));
+	EXPECT_TRUE (Defaults::needSource("Actions"));
+	EXPECT_FALSE(Defaults::needSource("Mame"));
+	EXPECT_TRUE (Defaults::hasLinkedMaps("Credits"));
+	EXPECT_FALSE(Defaults::hasLinkedMaps("Mame"));
+}
+
+TEST(DefaultsTest, ExtractAfter) {
+	EXPECT_EQ("value",       Defaults::extractAfter("key=value",    "key="));
+	EXPECT_EQ("trimmed",     Defaults::extractAfter("key=  trimmed  ", "key="));
+	EXPECT_EQ("",            Defaults::extractAfter("nokey",        "key="));
+	EXPECT_EQ("",            Defaults::extractAfter("",             "key="));
+	// Prefix appearing mid-string still matches at first occurrence.
+	EXPECT_EQ("rest",        Defaults::extractAfter("foo:: rest",   "::"));
+}
+
+TEST(DefaultsTest, SanitizeFilename) {
+	EXPECT_EQ("clean",      Defaults::sanitizeFilename("clean"));
+	EXPECT_EQ("",           Defaults::sanitizeFilename("/\\:*?\"<>|"));
+	EXPECT_EQ("a b c",      Defaults::sanitizeFilename("a b c"));            // spaces preserved
+	EXPECT_EQ("ab",         Defaults::sanitizeFilename("a/b"));
+	EXPECT_EQ("filename",   Defaults::sanitizeFilename("file<>name"));
+	EXPECT_EQ("",           Defaults::sanitizeFilename(""));
+}
+
+TEST(DefaultsTest, LinkSwitchToWidget) {
+	Gtk::Switch sw;
+	Gtk::Button target;
+
+	sw.set_active(false);
+	Defaults::linkSwitchToWidget(&sw, &target);
+	EXPECT_FALSE(target.get_sensitive());            // mirror initial state.
+
+	sw.set_active(true);
+	EXPECT_TRUE(target.get_sensitive());
+
+	sw.set_active(false);
+	EXPECT_FALSE(target.get_sensitive());
+}
+
+TEST(DefaultsTest, LinkSwitchToWidgetInverted) {
+	Gtk::Switch sw;
+	Gtk::Button target;
+
+	sw.set_active(false);
+	Defaults::linkSwitchToWidget(&sw, &target, true);
+	EXPECT_TRUE(target.get_sensitive());             // inverted initial state.
+
+	sw.set_active(true);
+	EXPECT_FALSE(target.get_sensitive());
+
+	sw.set_active(false);
+	EXPECT_TRUE(target.get_sensitive());
+}
+
+TEST(DefaultsTest, LinkToggleToWidget) {
+	Gtk::ToggleButton toggle;
+	Gtk::Button target;
+
+	toggle.set_active(false);
+	Defaults::linkToggleToWidget(&toggle, &target);
+	EXPECT_FALSE(target.get_sensitive());
+
+	toggle.set_active(true);
+	EXPECT_TRUE(target.get_sensitive());
+
+	toggle.set_active(false);
+	EXPECT_FALSE(target.get_sensitive());
+}
+
+TEST(DefaultsTest, LinkToggleToWidgetInverted) {
+	Gtk::ToggleButton toggle;
+	Gtk::Button target;
+
+	toggle.set_active(false);
+	Defaults::linkToggleToWidget(&toggle, &target, true);
+	EXPECT_TRUE(target.get_sensitive());
+
+	toggle.set_active(true);
+	EXPECT_FALSE(target.get_sensitive());
+
+	toggle.set_active(false);
+	EXPECT_TRUE(target.get_sensitive());
+}
+
+int main(int argc, char** argv) {
+	auto app = Gtk::Application::create(argc, argv, "org.test");
+	::testing::InitGoogleTest(&argc, argv);
+	return RUN_ALL_TESTS();
+}

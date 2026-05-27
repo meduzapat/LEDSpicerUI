@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      InputDirectoryNavigator.hpp
- * @since     Feb 16, 2026
+ * @file      AnimationDirectoryNavigator.hpp
+ * @since     May 2026
  * @author    Patricio A. Rossi (MeduZa)
  *
  * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
@@ -21,10 +21,9 @@
  */
 
 #include "DirectoryNavigator.hpp"
-#include "DataDialogs/DialogElement.hpp"
-#include "DataDialogs/DialogInput.hpp"
-#include "DataDialogs/DialogInputMap.hpp"
-#include "config/InputFile.hpp"
+#include "DataDialogs/DialogAnimation.hpp"
+#include "DataDialogs/DialogActor.hpp"
+#include "config/AnimationFile.hpp"
 #include "DialogImport.hpp"
 
 #pragma once
@@ -32,31 +31,31 @@
 namespace LEDSpicerUI::Ui {
 
 /**
- * LEDSpicerUI::Ui::InputDirectoryNavigator
- * Specialized navigator for Input files.
- * Handles loading/saving and manages DialogInput.
+ * LEDSpicerUI::Ui::AnimationDirectoryNavigator
+ * Specialized navigator for Animation files.
+ * Handles loading/saving and manages DialogAnimation.
  */
-class InputDirectoryNavigator : public DirectoryNavigator {
+class AnimationDirectoryNavigator : public DirectoryNavigator {
 
 public:
 
-	InputDirectoryNavigator(const Glib::RefPtr<Gtk::Builder>& builder, Gtk::Window* parentWindow);
+	AnimationDirectoryNavigator(const Glib::RefPtr<Gtk::Builder>& builder, Gtk::Window* parentWindow) noexcept;
 
-	virtual ~InputDirectoryNavigator() = default;
+	virtual ~AnimationDirectoryNavigator() = default;
 
 	void clear() noexcept override;
 
 protected:
 
-	/// Import input dialog.
-	DialogImport dialogImportInput;
+	/// Import dialog for existing LEDSpicer animation files.
+	DialogImport dialogImportAnimation;
 
 	Gtk::Box* boxBreadcrumb = nullptr;
 
 	Gtk::Button* btnHome = nullptr;
 
-	/// Display box for directory contents. Set once; the active BBC changes on navigation.
-	OrdenableFlowBox* boxInputs = nullptr;
+	/// Display box for the animations list at the active directory.
+	OrdenableFlowBox* boxAnimations = nullptr;
 
 	void wireDialogs() noexcept override;
 
@@ -64,7 +63,7 @@ protected:
 
 	void saveItem(Storage::Data* item, const string& filePath) const noexcept override;
 
-	const string& getSubDir() const noexcept override { return PATH_INPUT; }
+	const string& getSubDir() const noexcept override { return PATH_ANIMATION; }
 
 };
 

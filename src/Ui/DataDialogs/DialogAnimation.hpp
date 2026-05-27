@@ -20,17 +20,29 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "Storage/Animation.hpp"
 #include "DialogForm.hpp"
+#include "DirectoryAware.hpp"
+#include "DialogActor.hpp"
 
 #pragma once
 
 namespace LEDSpicerUI::Ui::DataDialogs {
 
 /**
- * LEDSpicerUI::Ui::DialogAnimation
- * Dialog to create and edit animations.
+ * LEDSpicerUI::Ui::DataDialogs::DialogAnimation
+ *
+ * File-level dialog for an Animation. Holds the filename entry and the
+ * ordered collection of Actor children that make up the animation file;
+ * actor type selection / per-type fields live in DialogActor.
  */
-class DialogAnimation: public DialogForm, public SingletonDialog<DialogAnimation> {
+class DialogAnimation :
+	public DialogForm,
+	public DirectoryAware,
+	public SingletonDialog<DialogAnimation>
+{
+
+	friend class Gtk::Builder;
 
 public:
 
@@ -45,7 +57,14 @@ public:
 
 protected:
 
-	using DialogForm::DialogForm;
+	Gtk::Entry* entryAnimationName = nullptr;
+
+	DialogAnimation(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept;
+
+	void createSubItems(DataMap& values)      noexcept override;
+	const string& getType()             const noexcept override { return TYPE_ANIMATION; }
+
+	Storage::Data* createData(Values& rawData) const noexcept override;
 
 };
 

@@ -171,33 +171,76 @@ const std::unordered_map<string, Defaults::RestrictorInfo> Defaults::restrictors
 const std::unordered_map<string, Defaults::InputInfo> Defaults::inputInfo = {
 	{"Actions", {
 		"Input Actions",
-		"Creates interactive guided events using blinking elements. Supports linked trigger sequences.",
+		"Creates interactive guided events.",
 		INPUT_NEEDS_SOURCE | INPUT_DEV_LISTENER | INPUT_LINKED_MAPS | INPUT_HAS_SPEED | INPUT_HAS_BLINK
 	}},
 	{"Blinker", {
 		"Input Blinker",
-		"Blinks an element or group a set number of times after a hardware input trigger.",
+		"Blinks an element or group.",
 		INPUT_NEEDS_SOURCE | INPUT_DEV_LISTENER | INPUT_HAS_SPEED | INPUT_HAS_TIMES
 	}},
 	{"Credits", {
 		"Player's Credits",
-		"Manages coin and start button interactions with configurable credit-per-coin and multi-player modes.",
+		"Manages coin and start button interactions.",
 		INPUT_NEEDS_SOURCE | INPUT_DEV_LISTENER | INPUT_LINKED_MAPS | INPUT_HAS_CREDITS
 	}},
 	{"Impulse", {
 		"Keyboard Impulse",
-		"Lights an element or group when a hardware input is triggered.",
+		"Lights an element or group.",
 		INPUT_NEEDS_SOURCE | INPUT_DEV_LISTENER
 	}},
 	{"Mame", {
 		"MAME Output",
-	    "Listens for output from MAME on port 8000 and maps events to elements and groups.",
+		"Listens for output from MAME on port 8000.",
 		0
 	}},
 	{"Network", {
 		"Network Listener",
 		"Receives named trigger strings over a network socket.",
 		0
+	}},
+};
+
+const std::unordered_map<string, Defaults::AnimationInfo> Defaults::animationsInfo = {
+	{"Filler", {
+		"Filler",
+		"Fills the group with a color(s)",
+		ANIM_USES_FRAME | ANIM_USES_DIRECTION | ANIM_HAS_COLOR | ANIM_HAS_COLORS
+	}},
+	{"Gradient", {
+		"Gradient",
+		"Paints a smooth gradient across the group.",
+		ANIM_USES_FRAME | ANIM_USES_DIRECTION | ANIM_HAS_COLORS
+	}},
+	{"Pulse", {
+		"Pulse",
+		"Pulses the group on and off.",
+		ANIM_USES_FRAME | ANIM_USES_DIRECTION | ANIM_HAS_COLOR | ANIM_HAS_COLORS
+	}},
+	{"Serpentine", {
+		"Serpentine",
+		"Moves a lit element across the group like a snake.",
+		ANIM_USES_FRAME | ANIM_USES_DIRECTION | ANIM_HAS_COLOR
+	}},
+	{"Random", {
+		"Random",
+		"Randomly lights elements of the group.",
+		ANIM_USES_FRAME | ANIM_HAS_COLORS
+	}},
+	{"FileReader", {
+		"File Reader",
+		"Plays back a pre-rendered animation from a file.",
+		ANIM_USES_FRAME | ANIM_USES_DIRECTION
+	}},
+	{"AlsaAudio", {
+		"ALSA Audio",
+		"Drives the group from an ALSA audio capture device.",
+		ANIM_USES_AUDIO
+	}},
+	{"PulseAudio", {
+		"PulseAudio",
+		"Drives the group from a PulseAudio capture stream.",
+		ANIM_USES_AUDIO
 	}},
 };
 
@@ -567,18 +610,18 @@ void Defaults::setFilter(Gtk::SearchEntry* filterEntry, Gtk::FlowBox* box, Gtk::
 	});
 }
 
-void Defaults::linkSwitchToWidget(Gtk::Switch* sw, Gtk::Widget* widget) noexcept {
-	sw->property_active().signal_changed().connect([sw, widget]() {
-		widget->set_sensitive(sw->get_active());
+void Defaults::linkSwitchToWidget(Gtk::Switch* sw, Gtk::Widget* widget, bool invert) noexcept {
+	sw->property_active().signal_changed().connect([sw, widget, invert]() {
+		widget->set_sensitive(sw->get_active() != invert);
 	});
-	widget->set_sensitive(sw->get_active());
+	widget->set_sensitive(sw->get_active() != invert);
 }
 
-void Defaults::linkToggleToWidget(Gtk::ToggleButton* toggle, Gtk::Widget* widget) noexcept {
-	toggle->signal_toggled().connect([toggle, widget]() {
-		widget->set_sensitive(toggle->get_active());
+void Defaults::linkToggleToWidget(Gtk::ToggleButton* toggle, Gtk::Widget* widget, bool invert) noexcept {
+	toggle->signal_toggled().connect([toggle, widget, invert]() {
+		widget->set_sensitive(toggle->get_active() != invert);
 	});
-	widget->set_sensitive(toggle->get_active());
+	widget->set_sensitive(toggle->get_active() != invert);
 }
 
 void Defaults::setIgnoreChanges(bool state) {

@@ -32,7 +32,8 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 	// Set import dialog
 	dialogImportConfig(DialogImport::Types::CONFIG, this),
 
-	inputNavigator(builder, this)
+	inputNavigator(builder, this),
+	animationNavigator(builder, this)
 {
 
 	Message::initialize(builder, this);
@@ -111,6 +112,7 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 			));
 
 			inputNavigator.save();
+			animationNavigator.save();
 
 			Defaults::cleanDirty();
 			Message::displayInfo("Project saved successfully.");
@@ -186,6 +188,7 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 
 MainWindow::~MainWindow() {
 
+	animationNavigator.clear();
 	inputNavigator.clear();
 
 	// need to be wipe in the correct order or the dependencies will cause problems.
@@ -244,9 +247,9 @@ void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {
 	builder->get_widget("MainTabs",    MainTabs);
 	builder->get_widget("MainTabsBox", MainTabsBox);
 	MainTabs->property_visible_child_name().signal_changed().connect([this, MainTabs]() {
-		if (MainTabs->get_visible_child_name() == "inputs") {
-			inputNavigator.onActivate();
-		}
+		const auto child {MainTabs->get_visible_child_name()};
+		if (child == "inputs")     inputNavigator.onActivate();
+		if (child == "animations") animationNavigator.onActivate();
 	});
 
 	btnSelectProject->signal_clicked().connect([&, MainTabs, MainTabsBox, btnImportConfig]() {
@@ -286,7 +289,7 @@ void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {
 			processes.wipe();
 			groups.wipe();
 			inputNavigator.clear();
-			// animationNavigator.clear();
+			animationNavigator.clear();
 			//profileNavigator.clear();
 			// Refresh UI boxes after wipe.
 			// Clear random colors and profile selector.
@@ -395,13 +398,14 @@ void MainWindow::readConfigFile(const string& dataFilePath, bool wipe, uint8_t i
 		inputRunEvery->set_text(datafile.getRootInfo().getValue(PARAM_MILLISECONDS));
 	}
 
-	// Load inputs from the inputs/ directory alongside the config file.
+	// Load inputs and animations from the project subdirectories.
 	if (wipe and not Settings::get().getProjectDir().empty()) {
 		inputNavigator.clear();
+		animationNavigator.clear();
 
 		inputNavigator.load();
-		// animationNavigator.load(Glib::path_get_dirname(dataFilePath) + "/" + ANIMATION_PATH);  // future
-		// profileNavigator.load(Glib::path_get_dirname(dataFilePath) + "/" + PROFILE_PATH);      // future, must be last
+		animationNavigator.load();
+		// profileNavigator.load(...);  // future, must be last
 	}
 
 	// TODO: default profile should be the one selected in the profiles box.

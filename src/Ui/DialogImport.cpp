@@ -25,8 +25,9 @@
 using namespace LEDSpicerUI::Ui;
 
 const std::unordered_map<const DialogImport::Types, const string> DialogImport::setups {
-	{Types::CONFIG, "Select a config file"},
-	{Types::INPUT,  "Select one or more input files"}
+	{Types::CONFIG,    "Select a config file"},
+	{Types::INPUT,     "Select one or more input files"},
+	{Types::ANIMATION, "Select one or more animation files"}
 };
 
 DialogImport::DialogImport(const Types type, Gtk::Window* parent) :

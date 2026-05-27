@@ -124,7 +124,7 @@ void DialogDevice::resetForm() noexcept {
 	else {
 		btnAddElement->set_sensitive(true);
 	}
-	brief->set_text(Defaults::devicesInfo.at(name).brief.data());
+	brief->set_text(Defaults::devicesInfo.at(name).brief);
 	DialogForm::resetForm();
 }
 
