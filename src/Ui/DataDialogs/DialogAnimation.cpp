@@ -33,10 +33,10 @@ DialogAnimation::DialogAnimation(
 	registerChildDialog<DialogActor>(builder, "DialogActor", COLLECTION_ACTORS);
 
 	Gtk::Button* btnAddAnimation = nullptr;
-	builder->get_widget_derived("BoxAnimations",    box);
-	builder->get_widget("BtnAddAnimation",          btnAddAnimation);
-	builder->get_widget("BtnApplyAnimation",        btnApply);
-	builder->get_widget("EntryAnimationName",       entryAnimationName);
+	builder->get_widget_derived("BoxAnimations", box);
+	builder->get_widget("BtnAddAnimation",       btnAddAnimation);
+	builder->get_widget("BtnApplyAnimation",     btnApply);
+	builder->get_widget("EntryAnimationName",    entryAnimationName);
 
 	setSignalAdd(btnAddAnimation);
 	setSignalApply();

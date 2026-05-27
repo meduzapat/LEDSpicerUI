@@ -299,7 +299,7 @@ void DialogActor::isValid() const {
 			throw Message("Invalid bouncer value: " + bouncer);
 
 		if (const string dir {currentData->getValue(DIRECTION)};
-		    not dir.empty() and dir != DIRECTION_FORWARD and dir != DIRECTION_BACKWARD)
+			not dir.empty() and dir != DIRECTION_FORWARD and dir != DIRECTION_BACKWARD)
 			throw Message("Invalid direction value: " + dir);
 	}
 
@@ -308,12 +308,15 @@ void DialogActor::isValid() const {
 	const bool hasColors {static_cast<bool>(flags & Defaults::ANIM_HAS_COLORS)};
 	const bool useColors {hasColors and (not hasColor or radioBoxActorColors->get_active())};
 
+	// Do not punish on load.
 	if (hasColor and not useColors and btnActorColor->get_label().empty())
 		throw Message("Pick a color.");
 
+	// Do not punish on load.
 	if (useColors) {
 		const auto vals {DialogColors::getInstance()->getColorBoxValues(boxActorColorList)};
-		const size_t minColors {type == ANIM_TYPE_GRADIENT ? 3u : 1u};
+		// Allow no colors for non-gradient multi-color types, but gradient needs at least three to make sense.
+		const size_t minColors {type == ANIM_TYPE_GRADIENT ? 3u : 0u};
 		if (vals.size() < minColors)
 			throw Message(
 				type + " needs at least " + std::to_string(minColors) + " color"
@@ -543,16 +546,30 @@ void DialogActor::retrieveData() noexcept {
 	}
 }
 
-void DialogActor::onEmpty() noexcept {
+void DialogActor::clearForm() noexcept {
+
+	Storage::CollectionHandler::getInstance(COLLECTION_GROUPS)->refreshComboBox(comboBoxActorGroup);
+	comboBoxActorGroup->set_active(-1);
+	comboBoxActorFilter->set_active_id(FILTER_COMBINE);
 
 	// Optional timers.
 	toggleActorStartTime->set_active(false);
 	toggleActorEndTime->set_active(false);
 	toggleActorRestartTime->set_active(false);
+	spinActorStartTime->set_value(1);
+	spinActorEndTime->set_value(1);
+	spinActorRestartTime->set_value(1);
 
 	// Repeat.
 	toggleActorRepeatForever->set_active(false);
 	toggleActorRepeat->set_active(false);
+	spinActorRepeat->set_value(1);
+
+	// Delegates to selectorCombo->set_active(0) which fires onEmpty()
+	DialogFormHost::clearForm();
+}
+
+void DialogActor::onEmpty() noexcept {
 
 	// StartAt and Cycles share a row.
 	toggleActorStartAt->get_parent()->set_visible(false);
@@ -572,14 +589,6 @@ void DialogActor::onEmpty() noexcept {
 
 	auto colors {DialogColors::getInstance()};
 
-	Storage::CollectionHandler::getInstance(COLLECTION_GROUPS)->refreshComboBox(comboBoxActorGroup);
-	comboBoxActorGroup->set_active(-1);
-	comboBoxActorFilter->set_active_id(FILTER_COMBINE);
-
-	spinActorStartTime->set_value(1);
-	spinActorEndTime->set_value(1);
-	spinActorRestartTime->set_value(1);
-	spinActorRepeat->set_value(1);
 	scaleActorStartAt->set_value(100);
 	spinActorCycles->set_value(1);
 

@@ -169,7 +169,8 @@ void DialogInput::storeData() noexcept {
 		currentData->setValue(BLINK, switchInputBlink->get_active() ? HUMAN_TRUE : HUMAN_FALSE);
 
 	if (Defaults::inputHasFlag(id, Defaults::INPUT_HAS_TIMES))
-		currentData->setValue(TIMES, spinInputTimes->get_text());
+		if (spinInputTimes->get_value_as_int())
+			currentData->setValue(TIMES, std::to_string(spinInputTimes->get_value_as_int()));
 
 	if (Defaults::inputHasFlag(id, Defaults::INPUT_HAS_SPEED))
 		currentData->setValue(SPEED, comboBoxInputSpeed->get_active_id());
@@ -195,7 +196,7 @@ void DialogInput::retrieveData() noexcept {
 		switchInputBlink->set_active(currentData->is(BLINK));
 
 	if (Defaults::inputHasFlag(name, Defaults::INPUT_HAS_TIMES))
-		spinInputTimes->set_text(currentData->getValue(TIMES));
+		spinInputTimes->set_value(std::stod(currentData->getValue(TIMES, "0")));
 
 	if (Defaults::inputHasFlag(name, Defaults::INPUT_HAS_SPEED))
 		comboBoxInputSpeed->set_active_id(currentData->getValue(SPEED));

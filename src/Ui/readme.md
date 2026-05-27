@@ -1,7 +1,5 @@
 # LEDSpicerUI — Developer Documentation Index
 
-> **Status:** Work in progress — reflects design as of v0.0.7 / data format 1.1.
-
 This index links the three subsystem guides. Read them in order if you are new
 to the codebase; jump to a specific one if you need a refresher on a particular
 layer.
@@ -12,13 +10,13 @@ layer.
 
 The foundation. Covers the `Data` class and its entire hierarchy:
 
-- `fieldsData` (serialized) vs `properties` (runtime-only)
-- `toXML()`, `createUniqueId()`, `createPrettyName()`, `getCssClass()`
-- Composed data — `Data` that owns child `BoxButtonCollection`s
-- `Link` — reference wrapper pointing to another `Data`
-- `DirNode`, `DirectoryEntry`, `FileData` — the file tree types
-- `activate()` / `deActivate()` lifecycle hooks
-- The `ignored` field set (provisional)
+- `Values` field store — inherited `values` (serialized) vs the `properties` member (runtime-only)
+- `toXML()`, `xmlBody()`, `createUniqueId()`, `createPrettyName()`, `getCssClass()`
+- Composition — `Parent` subclasses owning child `BoxButtonCollection`s, plus `Parent::registerDependency`
+- `Link` and `InputMap` — reference wrappers pointing to another `Data`
+- `DirNode` mixin, `DirectoryEntry`, and the file-backed types (`Input`, `Animation`, `Profile`)
+- `setUp()` / `tearDown()` lifecycle hooks
+- `shouldSerialize()` — opt-out for fields you don't want emitted
 
 **Read this first.** Everything else builds on these concepts.
 
@@ -32,10 +30,11 @@ The two collection types and how they relate:
 - `CollectionHandler` — global named registry, keyed lookup, cascade deletes
 - Global vs scoped collection names
 - `add` / `remove` / `replace` semantics
-- `Dependency` — cascade delete registration with optional depletion callbacks
-- `ComboBoxText` subscribers — auto-refresh on add/remove
-- `release()` — pairing rule for every `registerDependency` call
-- Teardown order and `purgeAll()`
+- `Parent::registerDependency` — preferred cascade wiring for child families;
+  `CollectionHandler::registerDependency` for dialog-local collections
+- `refreshComboBox(combo)` / `refreshComboBox(combo, excludeProperties)` — explicit combo repopulation
+- `SensitivityTracker` — automatic widget enable/disable based on collection size
+- `release()` pairing rules and the `purgeAll()` teardown order
 
 **Read after the Data guide.** Required before touching anything that crosses
 dialog boundaries.
@@ -53,8 +52,9 @@ The UI controller layer. Covers `DialogForm` and all its specializations:
 - `BoxButton` decoration — edit, delete, clone buttons
 - Child dialog instantiation from builder and the refresh chain
 - The Add button — lives in the parent layout, wired by the child dialog
-- `DialogFileForm` — directory-scoped file dialogs
-- `DialogSelect` and `SettingRequest` — picking from existing items
+- `DialogFormHost` — type-selector dialogs with `onConvert` / `onEmpty` / `onSelected`
+- `DirectoryAware` — directory-scoped file dialogs (`DialogInput`, `DialogAnimation`, `DialogProfile`)
+- `DialogSelect` and `SelectionRequest` — picking from existing items
 - Step-by-step guide for creating a new dialog
 
 **Read after the Collections guide.** Dialogs are the only layer that should
@@ -66,20 +66,23 @@ call into both `BoxButtonCollection` and `CollectionHandler` directly.
 
 ```
 DialogForm  (DataDialogs/)
-    │  reads/writes
+    │  reads / writes via storeData() / retrieveData()
     ▼
-Data subclasses  (Storage/)
-    │  registered in
-    ▼
-CollectionHandler  (Storage/)
-    │  owns BoxButtons via
-    ▼
-BoxButtonCollection  (Storage/)
-    │  wraps
-    ▼
-BoxButton → Data*
+Data subclasses  (Storage/)               ◄── registered (raw pointer) in ──┐
+    ▲                                                                       │
+    │  owned by                                                             │
+    │                                                                CollectionHandler
+BoxButton  (Storage/)                                                    (Storage/)
+    ▲                                                                       │
+    │  held in                                                              │ cascade
+    │                                                                       │ deletes /
+BoxButtonCollection  (Storage/)  ◄────── registered as dependency of ───────┘ comboboxes
 ```
 
-A change in `Data` or `BoxButtonCollection` will ripple upward into
-`CollectionHandler` and then into the dialog layer. A change confined to
-a `DialogForm` subclass affects only that dialog.
+- `BoxButtonCollection` is the sole owner of `BoxButton`, which is the sole
+  owner of its `Data*`.
+- `CollectionHandler` holds only raw `Data*` pointers for global lookup and
+  cascade delete; it never deletes the `Data` itself.
+- A change in `Data` or `BoxButtonCollection` will ripple upward into
+  `CollectionHandler` and then into the dialog layer. A change confined to
+  a `DialogForm` subclass affects only that dialog.

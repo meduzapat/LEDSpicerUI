@@ -1,7 +1,5 @@
 # LEDSpicerUI — Dialog System Developer Guide
 
-> **Status:** Work in progress — reflects design as of v0.0.13 / data format 1.1.
-
 ---
 
 ## Table of Contents
@@ -16,7 +14,7 @@
 8. [BoxButton Decoration — Adding Action Buttons](#8-boxbutton-decoration--adding-action-buttons)
 9. [Child Dialogs and Refresh Chains](#9-child-dialogs-and-refresh-chains)
 10. [DialogFormHost — Type-Selector Dialogs](#10-dialogformhost--type-selector-dialogs)
-11. [DialogFileForm — File-Based Dialogs](#11-dialogfileform--file-based-dialogs)
+11. [DirectoryAware — File-Based Dialogs](#11-directoryaware--file-based-dialogs)
 12. [DialogSelect — Picking From Existing Items](#12-dialogselect--picking-from-existing-items)
 13. [Creating a New Dialog — Step-by-Step](#13-creating-a-new-dialog--step-by-step)
 14. [Quick Reference — Virtual Methods to Override](#14-quick-reference--virtual-methods-to-override)
@@ -42,17 +40,19 @@ All dialogs are **singletons** for the application lifetime.
 Gtk::Dialog
 ├── GladeDialog<T>                — CRTP singleton base for non-form dialogs.
 │   ├── DialogSelect
-│   └── DialogColors
+│   ├── DialogLinkEditor
+│   └── DialogColors              (lives in src/Ui/, not DataDialogs/)
 └── DialogForm                    — Base for all data-entry dialogs.
     ├── DialogFormHost            — Type-selector dialogs with conversion support.
     │   ├── DialogDevice
     │   ├── DialogRestrictor
-    │   ├── DialogInput
-    │   └── DialogInputSource
+    │   ├── DialogInput            (+ DirectoryAware)
+    │   ├── DialogInputSource
+    │   └── DialogActor
     ├── DialogProcess
     ├── DialogGroup
-    ├── DialogProfile
-    ├── DialogDirectory
+    ├── DialogProfile              (+ DirectoryAware)
+    ├── DialogAnimation            (+ DirectoryAware)
     ├── DialogElement
     ├── DialogRestrictorMap
     ├── DialogInputMap
@@ -304,9 +304,11 @@ void MyDialog::retrieveData() {
 
 ---
 
-## 11. DialogFileForm — File-Based Dialogs
+## 11. DirectoryAware — File-Based Dialogs
 
-`DirectoryAware` mixin adds current-directory tracking for dialogs that manage file-based `Data` objects (`Input`, `Animation`, `Profile`):
+The `DirectoryAware` mixin adds current-directory tracking for dialogs
+that manage file-based `Data` objects. It is currently mixed into
+`DialogInput`, `DialogAnimation`, and `DialogProfile`.
 
 ```cpp
 void setCurrentDirectory(DirectoryEntry* directory);

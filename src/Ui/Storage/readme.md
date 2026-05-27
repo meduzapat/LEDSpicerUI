@@ -1,7 +1,5 @@
 # LEDSpicerUI — Data System Developer Guide
 
-> **Status:** Work in progress — reflects design as of v0.0.13 / data format 1.1.
-
 ---
 
 ## Table of Contents
@@ -47,12 +45,13 @@ Values                         — General-purpose field store. Used directly wh
     │   ├── Restrictor         — Owns a RestrictorMap collection.
     │   ├── InputSource        — Owns a maps collection.
     │   ├── Group              — Owns a Link→Element collection.
-    │   └── FileNode           (+ DirNode mixin) — File-based items; FILENAME stored as property.
-    │       ├── Input
-    │       ├── Animation      [pending]
-    │       └── Profile
+    │   ├── InputMapLink       — Owns an InputMap-link collection (no XML tag of its own).
+    │   ├── Input              (+ DirNode mixin) — File-based; owns sources and link maps.
+    │   ├── Animation          (+ DirNode mixin) — File-based; owns an Actor collection.
+    │   └── Profile            (+ DirNode mixin) — File-based; owns scoped elements/groups/inputs/animations.
     ├── Element
-    ├── InputMapLink
+    ├── Actor                  — Single animation actor (Filler, Pulse, Audio, …); scoped to a parent Animation by PID.
+    ├── Process                — Standalone process entry; primary key is PARAM_PROCESS_NAME.
     └── DirectoryEntry         (+ DirNode mixin) — Runtime-only directory node. Never serialized.
 ```
 
@@ -60,17 +59,18 @@ Values                         — General-purpose field store. Used directly wh
 
 | Mixin | Consumer | Purpose |
 |-------|----------|---------|
-| `DirNode` | `FileNode` subclasses, `DirectoryEntry` | Parent pointer, UID/PID/FILENAME written into a `Values` dest. |
+| `DirNode` | `Input`, `Animation`, `Profile`, `DirectoryEntry` | Parent pointer, UID/PID/FILENAME written into a `Values` dest. |
 
 ---
 
 ## 3. Values — The Field Store
 
-`Values` (`Values.hpp`) is a standalone class that owns a `StringUMap` and exposes all field accessors. It is not tied to `Data` — any class that needs a plain key-value store can use it directly. Current known consumers:
+`Values` (defined in `src/Values.hpp`, one level above `Storage/`) is a standalone class that owns a `StringUMap` and exposes all field accessors. It is not tied to `Data` — any class that needs a plain key-value store can use it directly. Current known consumers:
 
 - **`Data` base** — the serializable field map inherited by every `Data` subclass.
 - **`Data::properties`** — a `Values` member inside every `Data` for runtime-only state.
 - **`DirNode` constructor** — takes a `Values&` destination to write `UID`, `PID`, `FILENAME` into.
+- **`Parent::children`** — child `BoxButtonCollection`s are keyed by collection ID string.
 
 ### API
 
@@ -137,13 +137,41 @@ bool   has = data->getProperties().isSet(UID);
 
 ```cpp
 Device::Device(StringUMap& data) noexcept :
-    Parent(data, {COLLECTION_ELEMENT})
+    Parent(data, {COLLECTION_ELEMENTS})
 {}
 ```
 
 Child collections are destroyed with the parent, recursively deleting all owned `BoxButton`s and `Data` objects.
 
-`getChild(key)` returns the `BoxButtonCollection*` for that key, or `nullptr` if absent.
+| Method | Purpose |
+|--------|---------|
+| `getChild(id)` | Returns the `BoxButtonCollection*` for that collection ID, or `nullptr`. |
+| `getPrimaryChild()` | Returns the first child collection (used as default size source). |
+| `getChildren()` | Returns the full `id → BoxButtonCollection` map. |
+| `getSize()` | Item count of the primary child. Override when a different family is the size driver. |
+| `begin()` / `end()` | Iterate over all child collections. |
+
+### Registering dependencies on global collections
+
+`Parent::registerDependency(watchedCollection, targetFamily)` is the
+preferred way to wire cascade deletes from a global collection into one of
+this `Parent`'s child families. Used by `Group`, `Profile`, `Animation`,
+`InputSource`, `InputMapLink`:
+
+```cpp
+// Group.hpp — child links to global Elements are removed when an Element disappears.
+registerDependency(COLLECTION_ELEMENTS, COLLECTION_GROUP_LINKS);
+
+// Profile.cpp — every Profile child family follows its global counterpart.
+registerDependency(COLLECTION_ELEMENTS,   COLLECTION_PROFILE_ELEMENTS);
+registerDependency(COLLECTION_GROUPS,     COLLECTION_PROFILE_GROUPS);
+registerDependency(COLLECTION_INPUTS,     COLLECTION_PROFILE_INPUTS);
+registerDependency(COLLECTION_ANIMATIONS, COLLECTION_PROFILE_ANIMATIONS);
+```
+
+`Parent` resolves the watched `CollectionHandler*` and the target child
+`BoxButtonCollection*` itself and forwards the pairing to the handler.
+The registration is automatically released when the `Parent` is destroyed.
 
 ---
 
@@ -211,12 +239,12 @@ Lightweight `Gtk::FlowBoxChild` used exclusively by `DialogSelect`. Holds a `Dat
 
 ## 9. Ignoring Fields During XML Serialization
 
-Override `shouldSerialize(key, value)` to suppress specific fields from XML output. The base implementation returns `true` for all fields.
+Override `shouldSerialize(key, value)` to suppress specific fields from XML output. The base implementation skips entries whose value is empty (`return not value.empty();`) — override it when more nuanced filtering is needed.
 
 ```cpp
 bool MyData::shouldSerialize(const string& key, const string& value) const noexcept {
-    if (key == BRIGHTNESS and value == "100") return false;
-    return true;
+    if (key == BRIGHTNESS and value == "100") return false; // suppress defaults
+    return not value.empty();                                // keep the base behaviour
 }
 ```
 
@@ -231,7 +259,7 @@ bool MyData::shouldSerialize(const string& key, const string& value) const noexc
 The constructor takes a `Values& dest` — the destination where `UID`, `PID`, and `FILENAME` are written. Consumers pass either `values` (for `Values`-inherited fields) or `properties` (for runtime-only identity):
 
 ```cpp
-// FileNode subclasses — identity in properties (not serialized):
+// Input / Animation / Profile — identity in properties (not serialized):
 DirNode(getProperties(), parent, filename)
 
 // DirectoryEntry — identity in properties (never serialized):
@@ -298,7 +326,7 @@ string MyData::xmlBody() const noexcept {
 }
 ```
 
-`FileNode` subclasses override `toXML()` directly, wrapping with `XMLHelper::xmlHeader()` / `XMLHelper::xmlFooter()` because they represent standalone files rather than embedded elements.
+File-backed `Parent` subclasses (`Input`, `Animation`, `Profile` — those that mix in `DirNode`) override `toXML()` directly, wrapping with `XMLHelper::xmlHeader()` / `XMLHelper::xmlFooter()` because they represent standalone files rather than embedded elements.
 
 ---
 
@@ -306,14 +334,17 @@ string MyData::xmlBody() const noexcept {
 
 | Type | `values` | `properties` | Child collections | Serialized |
 |------|----------|--------------|-------------------|------------|
-| `Device` | name, port, id, … | — | `elements` | Yes — `<device>` |
+| `Device` | name, port, id, … | — | `COLLECTION_ELEMENTS` | Yes — `<device>` |
 | `Element` | name, pin, position, … | strip descriptor (when strip) | — | Yes — `<element>` |
-| `Group` | name, defaultColor | — | link→Element items | Yes — `<group>` |
-| `Input` | input type key | `FILENAME`, `UID`, `PID` | `sources`, `linkmaps` | Yes — per-file XML |
-| `Animation` | animation type key | `FILENAME`, `UID`, `PID` | (pending) | Yes — per-file XML |
-| `Profile` | backgroundColor | `FILENAME`, `UID`, `PID` | elements, groups, inputs, animations | Yes — per-file XML |
-| `InputSource` | `source` (hw path) | `UID`, `PID`, `SOURCELESS` | `maps` | Yes — `<maps>` |
+| `Group` | name, defaultColor | — | `COLLECTION_GROUP_LINKS` (Links → Element) | Yes — `<group>` |
+| `Actor` | type-specific fields | `PID` (parent Animation), stable UID | — | Yes — `<actor>` |
+| `Process` | process name, mapping data | — | — | Yes — `<map>` (under `<processLookup>`) |
+| `Input` | input type key | `FILENAME`, `UID`, `PID` | `COLLECTION_INPUT_SOURCES`, `COLLECTION_INPUT_LINKMAPS` | Yes — per-file XML |
+| `Animation` | — | `FILENAME`, `UID`, `PID` | `COLLECTION_ACTORS` | Yes — per-file XML |
+| `Profile` | backgroundColor, … | `FILENAME`, `UID`, `PID` | `COLLECTION_PROFILE_ELEMENTS`, `COLLECTION_PROFILE_GROUPS`, `COLLECTION_PROFILE_INPUTS`, `COLLECTION_PROFILE_ANIMATIONS` | Yes — per-file XML |
+| `InputSource` | `source` (hw path) | `UID`, `PID`, `SOURCELESS` | `COLLECTION_INPUT_MAPS` | Yes — `<maps>` |
 | `InputMap` | trigger, type, color, filter | `PID` | — | Yes — `<map>` (`linkKey=TARGET`, `linkType=TYPE_MAP`) |
+| `InputMapLink` | — | — | `COLLECTION_INPUT_MAP_LINKS` | No tag (`getXmlTag()` empty); body-only `Parent` aggregator |
 | `Link` | own fieldsData (e.g. color, filter) | — | — | Yes — self-closing (`linkKey`, `linkType`, `linkFields`) |
 | `DirectoryEntry` | — | `UID`, `PID`, `FILENAME` | `contents` | **No** — runtime only |
 
@@ -331,6 +362,6 @@ string MyData::xmlBody() const noexcept {
 | `createUniqueId()` | Recommended | Stable collection key. Default hashes primary key via `getPrimaryValue()`. |
 | `getPrimaryKey()` | When primary key ≠ `NAME` | Drives default `createUniqueId()` and `getPrimaryValue()`. |
 | `xmlBody()` | When has serializable children | Inner XML content. Default `""` (self-closing). |
-| `toXML()` | `FileNode` subclasses only | Full file serialization via `XMLHelper::xmlHeader/Footer`. |
+| `toXML()` | `DirNode`-backed `Parent` subclasses (`Input`, `Animation`, `Profile`) | Full file serialization via `XMLHelper::xmlHeader/Footer`. |
 | `shouldSerialize(key, value)` | When fields need suppression | Return `false` to omit a field from XML. |
 | `getValue()` / `setValue()` | `Link` only | Redirect `linkKey` lookups to target; silence writes to `linkKey`. |

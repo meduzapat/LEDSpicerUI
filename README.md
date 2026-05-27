@@ -34,7 +34,7 @@ I need to create a .desktop laucher so right now open the terminal and type ```l
 
 ## License
 
-Copyright (C) 2018 - 2023 Patricio A. Rossi
+Copyright (C) 2018 - 2026 Patricio A. Rossi
 
 LEDSpicer is free software: you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the

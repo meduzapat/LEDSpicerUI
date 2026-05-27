@@ -44,6 +44,6 @@ CollectionHandler* Device::getCollectionHandler() const noexcept {
 }
 
 bool Device::shouldSerialize(const string& key, const string& value) const noexcept {
-	if (key == ID and  value == "1") return false;
+	if (key == ID and value == "1") return false;
 	return Parent::shouldSerialize(key, value);
 }

@@ -52,6 +52,7 @@ public:
 	virtual ~DialogActor() = default;
 
 	void load(DataMap& values)    noexcept override;
+	void clearForm()              noexcept override;
 	void resetForm()              noexcept override;
 	void storeData()              noexcept override;
 	void retrieveData()           noexcept override;

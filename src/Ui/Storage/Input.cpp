@@ -61,3 +61,8 @@ string Input::toXML() const noexcept {
 	xml += XMLHelper::xmlFooter();
 	return xml;
 }
+
+bool Input::shouldSerialize(const string& key, const string& value) const noexcept {
+	if (key == TIMES and value == "0") return false;
+	return Parent::shouldSerialize(key, value);
+}

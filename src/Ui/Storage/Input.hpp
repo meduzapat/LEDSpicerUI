@@ -58,6 +58,9 @@ public:
 		return CollectionHandler::getInstance(COLLECTION_INPUTS);
 	}
 
+protected:
+
+	bool shouldSerialize(const string& key, const string& value) const noexcept override;
 };
 
 } // namespace

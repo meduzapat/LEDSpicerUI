@@ -124,8 +124,8 @@ until `purgeAll()`.
 ## 6. Adding, Removing, and Replacing Items
 
 ```cpp
-ch->add(myData);             // indexes by createUniqueId(); refreshes combos + sensitivity; no-op if already present
-ch->remove(myData);          // removes; cascades; refreshes combos + sensitivity; no-op if not present
+ch->add(myData);             // indexes by createUniqueId(); refreshes sensitivity; no-op if already present
+ch->remove(myData);          // removes; cascades; refreshes sensitivity; no-op if not present
 ch->replace(myData, oldId);  // re-keys if ID changed; no cascade; no sensitivity refresh
 ```
 
@@ -135,52 +135,69 @@ ch->replace(myData, oldId);  // re-keys if ID changed; no cascade; no sensitivit
 
 ## 7. Dependencies — Cascade Deletes
 
-A `Dependency` registers a `BoxButtonCollection` so that when an item is
-removed from the registry, all matching entries are removed from that
-collection automatically.
+A dependency wires a `BoxButtonCollection` to a watched
+`CollectionHandler` so that when an item is removed from the global
+registry, every entry referencing it is removed from the dependent
+collection too.
+
+### Preferred API — `Parent::registerDependency`
+
+When the dependent collection is a child of a `Parent` (the usual case),
+register the dependency from the `Parent` constructor using the family
+name pair:
 
 ```cpp
-struct Dependency {
-    BoxButtonCollection*  collection;
-    size_t                minSize = 0;       // 0 = no guard
-    std::function<void()> onDepletion;       // fired when size drops below minSize
-};
+// Group.cpp — when a global Element is removed, drop any Link to it
+// from this Group's link-collection.
+registerDependency(COLLECTION_ELEMENTS, COLLECTION_GROUP_LINKS);
+
+// Profile.cpp — every profile family follows its global counterpart.
+registerDependency(COLLECTION_ELEMENTS,   COLLECTION_PROFILE_ELEMENTS);
+registerDependency(COLLECTION_GROUPS,     COLLECTION_PROFILE_GROUPS);
+registerDependency(COLLECTION_INPUTS,     COLLECTION_PROFILE_INPUTS);
+registerDependency(COLLECTION_ANIMATIONS, COLLECTION_PROFILE_ANIMATIONS);
 ```
 
-**Plain** — cascade only:
+`Parent` looks up the watched `CollectionHandler*` and the matching child
+`BoxButtonCollection*` and forwards the pairing to the handler. The
+`Parent` destructor releases every dependency it registered, so callers
+do not have to track the pairings themselves.
+
+### Low-level API — `CollectionHandler::registerDependency`
+
+For collections that are not owned by a `Parent` (typically dialog-local
+collections) the dependency is registered directly on the handler:
 
 ```cpp
-CollectionHandler::getInstance(COLLECTION_ELEMENT)->registerDependency({&maps});
+CollectionHandler::getInstance(COLLECTION_ELEMENTS)->registerDependency(&maps);
 ```
 
-**Guarded** — cascade + depletion callback:
-
-```cpp
-CollectionHandler::getInstance(COLLECTION_ELEMENT)->registerDependency({
-    &elements,
-    1,
-    [this]() { CollectionHandler::getInstance(COLLECTION_GROUP)->remove(this); }
-});
-```
-
-The callback fires after the full cascade completes, preventing re-entrant
-modification.
+The signature is a single pointer — there is no min-size guard or
+depletion callback. Pair every direct call with
+`release(BoxButtonCollection*)` in the owner's destructor (see
+[§10](#10-releasing-registrations)).
 
 ---
 
-## 8. ComboBox Subscribers
+## 8. ComboBox Refresh
+
+ComboBoxes are not auto-subscribed any more — there is no implicit
+re-population on `add()` / `remove()`. Refresh the combo explicitly when
+it becomes visible (dialog open, stack page switch, selector reopened):
 
 ```cpp
-ch->registerComboBox(myCombo);   // auto-refreshed on every add/remove
-ch->refreshComboBox(myCombo);    // manual refresh (e.g. on stack page switch)
+// Simple refresh — one row per item in the collection.
+CollectionHandler::getInstance(COLLECTION_ELEMENTS)->refreshComboBox(myCombo);
+
+// Filter out items whose properties match any of the given keys
+// (used by selectors that hide already-consumed items).
+CollectionHandler::getInstance(COLLECTION_ELEMENTS)
+    ->refreshComboBox(myCombo, {ASSIGNED_TO_GROUP});
 ```
 
-Every `registerComboBox` call must have a paired `release` in the owning
-object's destructor:
-
-```cpp
-CollectionHandler::getInstance(COLLECTION_ELEMENT)->release(myCombo);
-```
+Because the combo is not registered with the handler there is nothing to
+release; the combo can be destroyed at any time without notifying the
+handler.
 
 ---
 
@@ -217,14 +234,13 @@ elements.registerSensitivity(btnApply);
 
 | Registration | Needs paired release? |
 |---|---|
-| `registerDependency` | Yes — in destructor |
-| `registerComboBox` | Yes — in destructor |
+| `Parent::registerDependency` | No — released automatically in the `Parent` destructor |
+| `CollectionHandler::registerDependency` | Yes — in destructor of the owner |
 | `registerSensitivity` | Only if the widget can be destroyed before the collection |
 
 ```cpp
-CollectionHandler::getInstance(COLLECTION_ELEMENT)->release(&myCollection);
-CollectionHandler::getInstance(COLLECTION_ELEMENT)->release(myCombo);
-CollectionHandler::getInstance(COLLECTION_ELEMENT)->releaseSensitive(myWidget);
+CollectionHandler::getInstance(COLLECTION_ELEMENTS)->release(&myCollection);
+CollectionHandler::getInstance(COLLECTION_ELEMENTS)->releaseSensitive(myWidget);
 ```
 
 ---
@@ -237,6 +253,7 @@ bool   has   = ch->isSet(myData);                     // by createUniqueId()
 bool   hasId = ch->isIdSet("someId");
 size_t n     = ch->countByKey(TYPE, "1");
 vector<Data*> v = ch->findByProperty(PID, parentId);
+bool   any   = ch->hasAny(PID, parentId);             // existence-only — cheaper than findByProperty
 ```
 
 ---
@@ -277,19 +294,20 @@ Reversing this order leaves dangling pointer calls in `Data` destructors.
 | Method | Effect |
 |--------|--------|
 | `getInstance(name)` | Returns (or creates) the named instance. |
-| `add(Data*)` | Indexes by `createUniqueId()`; refreshes combos + sensitivity; no-op if present. |
-| `remove(Data*)` | Removes; cascades; refreshes combos + sensitivity; no-op if absent. |
+| `removeInstance(name)` | Destroys a single named instance. |
+| `add(Data*)` | Indexes by `createUniqueId()`; refreshes sensitivity; no-op if present. |
+| `remove(Data*)` | Removes; cascades to dependent collections; refreshes sensitivity; no-op if absent. |
 | `replace(Data*, oldId)` | Re-keys if id changed; no cascade. |
 | `get(id)` | Returns `Data*` or `nullptr`. |
 | `isSet(Data*)` | Existence check by `createUniqueId()`. |
 | `isIdSet(string)` | Existence check by id string. |
 | `countByKey(key, value)` | Count items where `getValue(key) == value`. |
 | `findByProperty(prop, value)` | Returns all items with matching property. |
-| `registerDependency(Dependency)` | Registers a cascade target. |
-| `registerComboBox(combo)` | Auto-refreshes combo on add/remove. |
+| `hasAny(prop, value)` | Existence-only variant of `findByProperty` — cheaper when only the boolean matters. |
+| `registerDependency(BoxButtonCollection*)` | Registers a cascade target. Use `Parent::registerDependency` when possible. |
 | `release(BoxButtonCollection*)` | Removes a dependency registration. |
-| `release(ComboBoxText*)` | Removes a combo registration. |
-| `refreshComboBox(combo)` | Manually repopulates one combo. |
+| `refreshComboBox(combo)` | Repopulates one combo from the collection. |
+| `refreshComboBox(combo, excludeProperties)` | Same, but skips items whose properties match any of the given keys. |
 | `registerSensitivity(widget, n)` | Widget sensitive when size >= n (default 1). |
 | `releaseSensitive(widget)` | Removes sensitivity binding. |
 | `purgeAll()` | Destroys all named instances. |
