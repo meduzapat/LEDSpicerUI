@@ -3391,8 +3391,6 @@ Compatible with version @MINIMUM_COMPATIBILITY@+</property>
                     <property name="spacing">5</property>
                     <child>
                       <object class="GtkLabel">
-                        <property name="name">0</property>
-                        <property name="width-request">110</property>
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="label">Transition</property>
@@ -3408,6 +3406,7 @@ Compatible with version @MINIMUM_COMPATIBILITY@+</property>
                         <property name="width-request">100</property>
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
+                        <property name="halign">start</property>
                         <property name="valign">start</property>
                         <property name="homogeneous">True</property>
                         <property name="min-children-per-line">1</property>
