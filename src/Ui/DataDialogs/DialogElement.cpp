@@ -50,9 +50,9 @@ DialogElement::DialogElement(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 	builder->get_widget("FlowBoxPinLayout", pinsBox);
 
 	// Scattered RGB.
-	builder->get_widget("EntryPinR", pinR);
-	builder->get_widget("EntryPinG", pinG);
-	builder->get_widget("EntryPinB", pinB);
+	builder->get_widget("SpinPinR", pinR);
+	builder->get_widget("SpinPinG", pinG);
+	builder->get_widget("SpinPinB", pinB);
 
 	// RGB.
 	builder->get_widget("ComboBoxRGBRGB",   comboBoxRGBRGB);
@@ -64,9 +64,9 @@ DialogElement::DialogElement(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 	builder->get_widget("EntryPositionStrip", positionStrip);
 
 	// Single Pin
-	builder->get_widget("EntryPin",              pin);
+	builder->get_widget("SpinPin",               pin);
 	builder->get_widget("ToggleElementSolenoid", solenoid);
-	builder->get_widget("EntryElementOnTime",    timeOn);
+	builder->get_widget("SpinElementOnTime",     timeOn);
 
 	// Multi RGB.
 	builder->get_widget("EntryPositionsMRGB", positionsMRGB);
@@ -125,9 +125,9 @@ DialogElement::DialogElement(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 
 	solenoid->signal_toggled().connect([&]() {
 		bool active(solenoid->get_active());
-		timeOn->set_sensitive(active);
+		timeOn->get_parent()->set_sensitive(active);
 		timeOn->set_value(0.0f);
-		brightness->set_sensitive(not active and not Defaults::isMonochrome(comboBoxDevices->get_active_id()));
+		brightness->get_parent()->set_sensitive(not active and not Defaults::isMonochrome(comboBoxDevices->get_active_id()));
 		if (active) brightness->set_value(100);
 	});
 
@@ -198,10 +198,10 @@ void DialogElement::clearFormConditinal(uint8_t flags) noexcept {
 		pin->set_value(0.0f);
 		solenoid->set_active(false);
 		timeOn->set_value(0.0f);
-		timeOn->set_sensitive(false);
+		timeOn->get_parent()->set_sensitive(false);
 		if (flags)
 			// restore it to the device-native sensitivity when switching pages.
-			brightness->set_sensitive(not Defaults::isMonochrome(comboBoxDevices->get_active_id()));
+			brightness->get_parent()->set_sensitive(not Defaults::isMonochrome(comboBoxDevices->get_active_id()));
 	}
 
 	// Scattered RGB.
@@ -301,17 +301,8 @@ void DialogElement::isValid() const {
 	switch (static_cast<tabIndex>(notebookDeviceConnections->get_current_page())) {
 	case tabIndex::Single:
 
-		// Check for changes, solenoid or pin.
-		if (action != Actions::EDIT or std::to_string(pin->get_value_as_int()) != currentData->getValue(PIN) + currentData->getValue(SOLENOID)) {
-			checkPin(pin);
-		}
-
-		// Check solenoid milliseconds.
-		if (solenoid->get_active() and timeOn->get_value_as_int() < 1) {
-			if (action != Actions::LOAD)
-				timeOn->grab_focus();
-			throw Message("Enter a valid number of milliseconds for the timer for element " + name + ".");
-		}
+		checkPin(pin);
+		// timeOn == 0 means "use the daemon default" and is not persisted.
 		break;
 
 	// Scattered RGB.
@@ -387,20 +378,20 @@ void DialogElement::storeData() noexcept {
 	case tabIndex::Single:
 		// Solenoid.
 		if (solenoid->get_active()) {
-			currentData->setValue(SOLENOID, std::to_string(pin->get_value_as_int()));
+			currentData->setValue(SOLENOID, pin->get_value_as_int());
 			if (auto t {timeOn->get_value_as_int()}; t > 0) {
-				currentData->setValue(TIME_ON, std::to_string(t));
+				currentData->setValue(TIME_ON, t);
 			}
 		}
 		// LED.
 		else {
-			currentData->setValue(PIN, std::to_string(pin->get_value_as_int()));
+			currentData->setValue(PIN, pin->get_value_as_int());
 		}
 		break;
 	case tabIndex::sRGB:
-		currentData->setValue(RED_PIN,   std::to_string(pinR->get_value_as_int()));
-		currentData->setValue(GREEN_PIN, std::to_string(pinG->get_value_as_int()));
-		currentData->setValue(BLUE_PIN,  std::to_string(pinB->get_value_as_int()));
+		currentData->setValue(RED_PIN,   pinR->get_value_as_int());
+		currentData->setValue(GREEN_PIN, pinG->get_value_as_int());
+		currentData->setValue(BLUE_PIN,  pinB->get_value_as_int());
 		break;
 	case tabIndex::RGB:
 		currentData->setValue(POSITION,    positionRGB->get_text());
@@ -440,8 +431,8 @@ void DialogElement::storeData() noexcept {
 			if (i < children.size()) {
 				// Reuse existing child - update name and position
 				string oldChildId = children[i]->createUniqueId();
-				children[i]->setValue(NAME, childName);
-				children[i]->setValue(POSITION, std::to_string(position + i));
+				children[i]->setValue(NAME,     childName);
+				children[i]->setValue(POSITION, position + i);
 				collection->replace(children[i], oldChildId);
 			}
 			else {
@@ -494,7 +485,7 @@ void DialogElement::storeData() noexcept {
 	}
 	currentData->setValue(NAME, name);
 	currentData->setValue(TYPE, elementType->get_active_id() == "0" ? Glib::ustring(DEFAULT_ELEMENT_TYPE) : elementType->get_active_id());
-	currentData->setValue(BRIGHTNESS, std::to_string(static_cast<uint>(brightness->get_value())));
+	currentData->setValue(BRIGHTNESS, static_cast<uint>(brightness->get_value()));
 
 	// Cleanup if changed from strip to non-strip
 	if (wasStrip and not isStrip) {
@@ -514,6 +505,7 @@ void DialogElement::storeData() noexcept {
 void DialogElement::retrieveData() noexcept {
 
 	// Gets the string position and selects the connection, returns the index.
+	// Already guarded against bad input via try/catch (raw XML can hold garbage).
 	std::function<const int(const string&)> setConnectorSelected = [&](const string& connector) {
 		int idx;
 		try {
@@ -554,15 +546,9 @@ void DialogElement::retrieveData() noexcept {
 		positionStrip->set_text(currentData->getValue(POSITION));
 		sizeStrip->set_text(currentData->getValue(STRIPSIZE));
 
-		int idx, tot;
-		try {
-			idx = std::stoi(currentData->getValue(POSITION)) -1;
-			tot = std::stoi(currentData->getValue(STRIPSIZE));
-		}
-		catch (...) {
-			// impossible invalid data, skip.
-			return;
-		}
+		const int idx {currentData->getInt(POSITION) - 1};
+		const int tot {currentData->getInt(STRIPSIZE)};
+		if (idx < 0 or tot <= 0) return;
 		for (int c = idx; c < idx + tot; ++c) {
 			Gtk::FlowBoxChild* child(pinsBox->get_child_at_index(c));
 			if (not child) continue;
@@ -579,30 +565,31 @@ void DialogElement::retrieveData() noexcept {
 	// Single.
 	else if (not currentData->getValue(PIN).empty()) {
 		notebookDeviceConnections->set_current_page(tabIndex::Single);
-		pin->set_value(std::stoi(currentData->getValue(PIN)));
+		pin->set_value(currentData->getInt(PIN));
 		solenoid->set_active(false);
 	}
 	// Solenoid.
 	else if (not currentData->getValue(SOLENOID).empty()) {
 		notebookDeviceConnections->set_current_page(tabIndex::Single);
-		pin->set_value(std::stoi(currentData->getValue(SOLENOID)));
+		pin->set_value(currentData->getInt(SOLENOID));
 		solenoid->set_active(true);
 		if (not currentData->getValue(TIME_ON).empty())
-			timeOn->set_value(std::stoi(currentData->getValue(TIME_ON)));
+			timeOn->set_value(currentData->getInt(TIME_ON));
 	}
 	// Scattered RGB
 	else {
 		notebookDeviceConnections->set_current_page(tabIndex::sRGB);
-		pinR->set_value(std::stoi(currentData->getValue(RED_PIN)));
-		pinG->set_value(std::stoi(currentData->getValue(GREEN_PIN)));
-		pinB->set_value(std::stoi(currentData->getValue(BLUE_PIN)));
+		pinR->set_value(currentData->getInt(RED_PIN));
+		pinG->set_value(currentData->getInt(GREEN_PIN));
+		pinB->set_value(currentData->getInt(BLUE_PIN));
 	}
 	DialogColors::getInstance()->colorizeButton(
 		btnDefaultColor,
 		currentData->getValue(DEFAULT_COLOR, NO_COLOR)
 	);
 	elementType->set_active_id(currentData->getValue(TYPE, DEFAULT_ELEMENT_TYPE));
-	brightness->set_value(std::stoi(currentData->getValue(BRIGHTNESS, DEFAULT_BRIGHTNESS)) ?: 100);
+	const int b {currentData->getInt(BRIGHTNESS)};
+	brightness->set_value(b ? b : 100);
 }
 
 string DialogElement::createUniqueId() const noexcept {
@@ -627,9 +614,10 @@ void DialogElement::changeNumberOfPins(const uint16_t newSize) noexcept {
 
 	// resize.
 	if (newSize < numberOfPins) {
-		uint16_t pinsToSearch(numberOfPins - newSize);
 		std::unordered_set<Storage::BoxButton*> elementsToDelete;
-		for (uint16_t c(numberOfPins - pinsToSearch); c < numberOfPins; ++c)
+		// Pins are 1-based: after shrink, the newly-invalid pins are
+		// [newSize + 1 .. numberOfPins].
+		for (uint16_t c(newSize + 1); c <= numberOfPins; ++c)
 			findElementByPin(c, elementsToDelete);
 		// delete elements
 		string deleted;
@@ -691,6 +679,10 @@ void DialogElement::drawPins() noexcept {
 		pinsBox->remove(*child);
 
 	if (not numberOfPins) return;
+
+	// Keep the pin spinners aligned with the current device range.
+	for (auto* spin : {pin, pinR, pinG, pinB})
+		spin->set_range(1, numberOfPins);
 
 	std::vector<std::pair<string, string>> pinsUsage(numberOfPins, {NO_COLOR, ""});
 	findConnectorTypes(pinsUsage);

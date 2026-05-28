@@ -82,14 +82,14 @@ void Element::convertPositionToRGB(Data* data, const string& position, const str
 	for (const auto& c : colorFormat) {
 		switch (c) {
 		case 'R':
-			data->setValue(RED_PIN, std::to_string(pin++));
+			data->setValue(RED_PIN, pin++);
 			break;
 		case 'G':
-			data->setValue(GREEN_PIN, std::to_string(pin++));
+			data->setValue(GREEN_PIN, pin++);
 
 			break;
 		case 'B':
-			data->setValue(BLUE_PIN, std::to_string(pin++));
+			data->setValue(BLUE_PIN, pin++);
 			break;
 		}
 	}

@@ -94,7 +94,9 @@ protected:
 	vector<Element*> stripChildren;
 
 	bool shouldSerialize(const string& key, const string& value) const noexcept override {
-		return not (key == BRIGHTNESS and value == DEFAULT_BRIGHTNESS);
+		if (key == TIME_ON    and value == "0") return false;
+		if (key == BRIGHTNESS and value == DEFAULT_BRIGHTNESS) return false;
+		return Data::shouldSerialize(key, value);
 	}
 };
 

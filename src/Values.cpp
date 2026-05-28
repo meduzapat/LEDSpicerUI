@@ -22,7 +22,29 @@
 
 #include "Values.hpp"
 
+#include <cctype>
+#include <cerrno>
+#include <cstdlib>
+#include <limits>
+
 using namespace LEDSpicerUI;
+
+namespace {
+
+bool parseDoubleStrict(const string& s, double& out) noexcept {
+	if (s.empty()) return false;
+	errno = 0;
+	const char* begin = s.c_str();
+	char* end = nullptr;
+	const double v = std::strtod(begin, &end);
+	if (end == begin or errno == ERANGE) return false;
+	while (*end != '\0' and std::isspace(static_cast<unsigned char>(*end))) ++end;
+	if (*end != '\0') return false;
+	out = v;
+	return true;
+}
+
+} // namespace
 
 bool Values::isSet(const string& key) const noexcept {
 	return values.find(key) != values.end();
@@ -46,6 +68,32 @@ void Values::unSet(const string& key) noexcept {
 
 void Values::setValue(const string& key, const string& value) noexcept {
 	values[key] = value;
+}
+
+void Values::setValue(const string& key, const char* value)   noexcept { values[key] = value ? value : emptyString; }
+void Values::setValue(const string& key, int value)           noexcept { values[key] = std::to_string(value); }
+void Values::setValue(const string& key, unsigned value)      noexcept { values[key] = std::to_string(value); }
+void Values::setValue(const string& key, long value)          noexcept { values[key] = std::to_string(value); }
+void Values::setValue(const string& key, unsigned long value) noexcept { values[key] = std::to_string(value); }
+void Values::setValue(const string& key, double value)        noexcept { values[key] = std::to_string(value); }
+void Values::setValue(const string& key, bool value)          noexcept { values[key] = value ? HUMAN_TRUE : HUMAN_FALSE; }
+
+bool Values::isNumber(const string& key) const noexcept {
+	double tmp;
+	return parseDoubleStrict(getValue(key), tmp);
+}
+
+int Values::getInt(const string& key) const noexcept {
+	double v;
+	if (not parseDoubleStrict(getValue(key), v)) return 0;
+	if (v < static_cast<double>(std::numeric_limits<int>::min()) or
+		v > static_cast<double>(std::numeric_limits<int>::max())) return 0;
+	return static_cast<int>(v);
+}
+
+double Values::getDouble(const string& key) const noexcept {
+	double v;
+	return parseDoubleStrict(getValue(key), v) ? v : 0.00f;
 }
 
 void Values::setValues(const StringUMap& values) noexcept {

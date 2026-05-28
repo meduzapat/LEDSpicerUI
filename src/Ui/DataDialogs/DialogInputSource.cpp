@@ -125,8 +125,6 @@ void DialogInputSource::storeData() noexcept {
 
 void DialogInputSource::retrieveData() noexcept {
 
-	currentData->getProperties().setValue(PATH_BASE, currentData->getValue(PATH_BASE));
-
 	// sourceless will be handled at activation.
 	if (action == Actions::LOAD and not currentData->getProperties().getValue(SOURCELESS).empty()) return;
 
@@ -231,9 +229,12 @@ void DialogInputSource::createSubItems(DataMap& values) noexcept {
 
 LEDSpicerUI::Ui::Storage::Data* DialogInputSource::createData(Values& rawData) const noexcept {
 	auto is {new Storage::InputSource(rawData, ownerData->getProperties().getValue(UID))};
-	// At load owner is realized and valid (not stale) check if is a sourceless
-	if (action == Actions::LOAD and not Defaults::needSource(ownerData->getValue(NAME)))
-		is->getProperties().setValue(SOURCELESS, "1");
+	if (action == Actions::LOAD) {
+		is->getProperties().setValue(PATH_BASE, is->getValue(PATH_BASE));
+		// At load owner is realized and valid (not stale) check if is a sourceless
+		if (not Defaults::needSource(ownerData->getValue(NAME)))
+			is->getProperties().setValue(SOURCELESS, "1");
+	}
 	return is;
 }
 

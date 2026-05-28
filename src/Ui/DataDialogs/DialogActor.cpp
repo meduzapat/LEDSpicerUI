@@ -274,35 +274,6 @@ void DialogActor::isValid() const {
 	if (comboBoxActorFilter->get_active_id().empty())
 		throw Message("Pick a filter.");
 
-	// Numeric fields. Widgets clamp on user input but raw XML can hold garbage.
-	if (action == Actions::LOAD) {
-		const auto checkNum = [this](const string& key) {
-			const string v {currentData->getValue(key)};
-			if (not v.empty() and not Defaults::isNumber(v))
-				throw Message("Invalid numeric value for " + key + ": " + v);
-		};
-		checkNum(START_TIME);
-		checkNum(END_TIME);
-		checkNum(RESTART_TIME);
-		checkNum(START_AT);
-		checkNum(CYCLES);
-		checkNum(TAIL_LENGTH);
-		checkNum(TAIL_INTENSITY);
-		checkNum(TONES);
-
-		const string repeat {currentData->getValue(REPEAT)};
-		if (not repeat.empty() and repeat != "-1" and not Defaults::isNumber(repeat))
-			throw Message("Invalid repeat value: " + repeat);
-
-		const string bouncer {currentData->getValue(BOUNCER)};
-		if (not bouncer.empty() and bouncer != HUMAN_TRUE and bouncer != HUMAN_FALSE)
-			throw Message("Invalid bouncer value: " + bouncer);
-
-		if (const string dir {currentData->getValue(DIRECTION)};
-			not dir.empty() and dir != DIRECTION_FORWARD and dir != DIRECTION_BACKWARD)
-			throw Message("Invalid direction value: " + dir);
-	}
-
 	// Color requirements.
 	const bool hasColor  {static_cast<bool>(flags & Defaults::ANIM_HAS_COLOR)};
 	const bool hasColors {static_cast<bool>(flags & Defaults::ANIM_HAS_COLORS)};
@@ -356,14 +327,14 @@ void DialogActor::storeData() noexcept {
 		if (toggleActorRepeatForever->get_active())
 			currentData->setValue(REPEAT, "-1");
 		else
-			currentData->setValue(REPEAT, spinActorRepeat->get_text());
+			currentData->setValue(REPEAT, spinActorRepeat->get_value_as_int());
 	}
 
 	if (typeHas(type, Defaults::ANIM_USES_FRAME)) {
 		if (toggleActorStartAt->get_active())
-			currentData->setValue(START_AT, std::to_string(static_cast<int>(scaleActorStartAt->get_value())));
+			currentData->setValue(START_AT, static_cast<int>(scaleActorStartAt->get_value()));
 		if (toggleActorCycles->get_active())
-			currentData->setValue(CYCLES, spinActorCycles->get_text());
+			currentData->setValue(CYCLES, spinActorCycles->get_value_as_int());
 	}
 
 	if (typeHas(type, Defaults::ANIM_USES_DIRECTION) or typeHas(type, Defaults::ANIM_USES_AUDIO))
@@ -400,12 +371,12 @@ void DialogActor::storeData() noexcept {
 
 	if (type == ANIM_TYPE_GRADIENT) {
 		currentData->setValue(MODE, comboBoxActorGradientMode->get_active_id());
-		currentData->setValue(TONES, spinActorGradientTones->get_text());
+		currentData->setValue(TONES, spinActorGradientTones->get_value_as_int());
 	}
 
 	if (type == ANIM_TYPE_SERPENTINE and switchActorSerpentineTail->get_active()) {
-		currentData->setValue(TAIL_LENGTH, spinActorSerpentineTailLength->get_text());
-		currentData->setValue(TAIL_INTENSITY, std::to_string(static_cast<int>(scaleActorSerpentineTailIntensity->get_value())));
+		currentData->setValue(TAIL_LENGTH, spinActorSerpentineTailLength->get_value_as_int());
+		currentData->setValue(TAIL_INTENSITY, static_cast<int>(scaleActorSerpentineTailIntensity->get_value()));
 		const string tailColor {btnActorSerpentineTailColor->get_label()};
 		if (not tailColor.empty())
 			currentData->setValue(TAIL_COLOR, tailColor);
@@ -446,10 +417,9 @@ void DialogActor::retrieveData() noexcept {
 		comboBoxActorFilter->set_active_id(v);
 
 	auto loadOptional = [this](const string& key, Gtk::ToggleButton* tog, Gtk::SpinButton* spin) {
-		const string v {currentData->getValue(key)};
-		const bool on {not v.empty()};
+		const bool on {currentData->isSet(key) and not currentData->getValue(key).empty()};
 		tog->set_active(on);
-		if (on) spin->set_value(std::stod(v));
+		if (on) spin->set_value(currentData->getDouble(key));
 	};
 	loadOptional(START_TIME,   toggleActorStartTime,   spinActorStartTime);
 	loadOptional(END_TIME,     toggleActorEndTime,     spinActorEndTime);
@@ -464,20 +434,18 @@ void DialogActor::retrieveData() noexcept {
 		if (repeat == "-1")
 			toggleActorRepeatForever->set_active(true);
 		else
-			spinActorRepeat->set_value(std::stoi(repeat));
+			spinActorRepeat->set_value(currentData->getInt(REPEAT));
 	}
 
 	if (typeHas(type, Defaults::ANIM_USES_FRAME)) {
-		const string startAt {currentData->getValue(START_AT)};
-		if (not startAt.empty()) {
+		if (currentData->isSet(START_AT) and not currentData->getValue(START_AT).empty()) {
 			toggleActorStartAt->set_active(true);
-			scaleActorStartAt->set_value(std::stod(startAt));
+			scaleActorStartAt->set_value(currentData->getDouble(START_AT));
 		}
 
-		const string cycles {currentData->getValue(CYCLES)};
-		if (not cycles.empty()) {
+		if (currentData->isSet(CYCLES) and not currentData->getValue(CYCLES).empty()) {
 			toggleActorCycles->set_active(true);
-			spinActorCycles->set_value(std::stoi(cycles));
+			spinActorCycles->set_value(currentData->getInt(CYCLES));
 		}
 	}
 
@@ -518,15 +486,16 @@ void DialogActor::retrieveData() noexcept {
 
 	if (type == ANIM_TYPE_GRADIENT) {
 		comboBoxActorGradientMode->set_active_id(currentData->getValue(MODE, MODE_ALL));
-		spinActorGradientTones->set_value(std::stoi(currentData->getValue(TONES, "10")));
+		if (currentData->isSet(TONES))
+			spinActorGradientTones->set_value(currentData->getInt(TONES));
 	}
 
 	if (type == ANIM_TYPE_SERPENTINE) {
 		const string tailLen {currentData->getValue(TAIL_LENGTH)};
 		if (not tailLen.empty() and tailLen != "0") {
 			switchActorSerpentineTail->set_active(true);
-			spinActorSerpentineTailLength->set_value(std::stoi(tailLen));
-			scaleActorSerpentineTailIntensity->set_value(std::stoi(currentData->getValue(TAIL_INTENSITY)));
+			spinActorSerpentineTailLength->set_value(currentData->getInt(TAIL_LENGTH));
+			scaleActorSerpentineTailIntensity->set_value(currentData->getInt(TAIL_INTENSITY));
 			colors->colorizeButton(btnActorSerpentineTailColor, currentData->getValue(TAIL_COLOR));
 		}
 	}

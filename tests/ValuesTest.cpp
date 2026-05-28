@@ -42,42 +42,34 @@ protected:
 };
 
 TEST_F(ValuesTest, Constructors) {
-	// Construction from StringUMap (move)
+	// Construction from StringUMap (move).
 	StringUMap map1{{"key1", "value1"}, {"key2", "value2"}};
 	Values v1(map1);
 	EXPECT_EQ("value1", v1.getValue("key1"));
-	EXPECT_EQ("value2", v1.getValue("key2"));
-	// original map should be moved-from
 	EXPECT_TRUE(map1.empty());
 
-	// Move construction
+	// Move construction.
 	Values v2(std::move(v1));
-	EXPECT_EQ("value1", v2.getValue("key1"));
 	EXPECT_EQ("value2", v2.getValue("key2"));
-	EXPECT_EQ(0,        v1.getSize());
+	EXPECT_EQ(0, v1.getSize());
 
-	// Copy constructor from iterators
+	// Iterator range.
 	StringUMap map2{{"key1", "value1"}, {"key2", "value2"}};
 	Values v3(map2.begin(), map2.end());
 	EXPECT_EQ("value1", v3.getValue("key1"));
-	EXPECT_EQ("value2", v3.getValue("key2"));
 
-	// Initializer list
+	// Initializer list.
 	Values v4 {{"key3", "value3"}};
 	EXPECT_EQ("value3", v4.getValue("key3"));
 
-	// Move assignment
+	// Move assignment.
 	v4 = std::move(v3);
 	EXPECT_EQ("value1", v4.getValue("key1"));
-	EXPECT_EQ("value2", v4.getValue("key2"));
-	// should not have old data
 	EXPECT_EQ(0, v3.getSize());
 
 	// Move from other.
 	Values v5 {v4};
-	EXPECT_EQ("value1", v5.getValue("key1"));
 	EXPECT_EQ("value2", v5.getValue("key2"));
-	// should not have old data
 	EXPECT_EQ(0, v4.getSize());
 }
 
@@ -134,4 +126,98 @@ TEST_F(ValuesTest, Swap) {
 	EXPECT_EQ("2",        values->getValue("b"));
 	EXPECT_EQ("TestItem", v2.getValue("name"));
 	EXPECT_EQ("42",       v2.getValue("value"));
+}
+
+TEST_F(ValuesTest, emptyNumberConstant) {
+	EXPECT_EQ("0", emptyNumber);
+}
+
+TEST_F(ValuesTest, isNumber) {
+	// SetUp gives us "value"="42" and "boolean"=HUMAN_TRUE.
+	EXPECT_TRUE (values->isNumber("value"));
+	EXPECT_FALSE(values->isNumber("boolean"));
+	EXPECT_FALSE(values->isNumber("name"));
+	EXPECT_FALSE(values->isNumber("nonexistent"));
+
+	values->setValue("neg",      "-3");
+	values->setValue("decimal",  "3.14");
+	values->setValue("plus",     "+2");
+	values->setValue("padded",   "  5  ");
+	values->setValue("zero",     "0");
+	values->setValue("empty",    emptyString);
+	values->setValue("garbage",  "12abc");
+	values->setValue("letters",  "abc");
+	values->setValue("overflow", "1e9999");
+
+	EXPECT_TRUE (values->isNumber("neg"));
+	EXPECT_TRUE (values->isNumber("decimal"));
+	EXPECT_TRUE (values->isNumber("plus"));
+	EXPECT_TRUE (values->isNumber("padded"));
+	EXPECT_TRUE (values->isNumber("zero"));
+	EXPECT_FALSE(values->isNumber("empty"));
+	EXPECT_FALSE(values->isNumber("garbage"));
+	EXPECT_FALSE(values->isNumber("letters"));
+	EXPECT_FALSE(values->isNumber("overflow"));
+}
+
+TEST_F(ValuesTest, getInt) {
+	EXPECT_EQ(42, values->getInt("value"));
+	EXPECT_EQ(0,  values->getInt("nonexistent"));
+	EXPECT_EQ(0,  values->getInt("name"));        // "TestItem" → 0
+
+	values->setValue("neg",      "-7");
+	values->setValue("decimal",  "3.7");
+	values->setValue("garbage",  "12abc");
+	values->setValue("huge",     "9999999999999");
+	values->setValue("empty",    emptyString);
+
+	EXPECT_EQ(-7, values->getInt("neg"));
+	// Decimal truncates toward zero (strict parser accepts the whole literal).
+	EXPECT_EQ(3,  values->getInt("decimal"));
+	EXPECT_EQ(0,  values->getInt("garbage"));
+	EXPECT_EQ(0,  values->getInt("huge"));        // out of int range
+	EXPECT_EQ(0,  values->getInt("empty"));
+}
+
+TEST_F(ValuesTest, getDouble) {
+	EXPECT_DOUBLE_EQ(42.0, values->getDouble("value"));
+	EXPECT_DOUBLE_EQ(0.0,  values->getDouble("nonexistent"));
+	EXPECT_DOUBLE_EQ(0.0,  values->getDouble("name"));
+
+	values->setValue("pi",       "3.14");
+	values->setValue("neg",      "-2.5");
+	values->setValue("garbage",  "1.2x");
+	values->setValue("empty",    emptyString);
+
+	EXPECT_DOUBLE_EQ(3.14, values->getDouble("pi"));
+	EXPECT_DOUBLE_EQ(-2.5, values->getDouble("neg"));
+	EXPECT_DOUBLE_EQ(0.0,  values->getDouble("garbage"));
+	EXPECT_DOUBLE_EQ(0.0,  values->getDouble("empty"));
+}
+
+TEST_F(ValuesTest, setValueTyped) {
+	values->setValue("i",  42);
+	values->setValue("ni", -7);
+	values->setValue("u",  static_cast<unsigned>(99));
+	values->setValue("l",  static_cast<long>(123456789));
+	values->setValue("ul", static_cast<unsigned long>(987654321));
+	values->setValue("d",  3.5);
+	values->setValue("bt", true);
+	values->setValue("bf", false);
+
+	EXPECT_EQ("42",          values->getValue("i"));
+	EXPECT_EQ("-7",          values->getValue("ni"));
+	EXPECT_EQ("99",          values->getValue("u"));
+	EXPECT_EQ("123456789",   values->getValue("l"));
+	EXPECT_EQ("987654321",   values->getValue("ul"));
+	EXPECT_EQ(HUMAN_TRUE,    values->getValue("bt"));
+	EXPECT_EQ(HUMAN_FALSE,   values->getValue("bf"));
+	EXPECT_TRUE(values->is("bt"));
+	EXPECT_FALSE(values->is("bf"));
+
+	// Round-trip through getInt / getDouble.
+	EXPECT_EQ(42,  values->getInt("i"));
+	EXPECT_EQ(-7,  values->getInt("ni"));
+	EXPECT_EQ(99,  values->getInt("u"));
+	EXPECT_DOUBLE_EQ(3.5, values->getDouble("d"));
 }

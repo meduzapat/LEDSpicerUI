@@ -32,7 +32,7 @@ DirNode::DirNode(
 	parent(parent),
 	dest(dest)
 {
-	dest.setValue(UID,      std::to_string(++nodeCounter));
+	dest.setValue(UID,      ++nodeCounter);
 	dest.setValue(PID,      parent ? parent->getFsId() : emptyString);
 	dest.setValue(FILENAME, filename);
 }

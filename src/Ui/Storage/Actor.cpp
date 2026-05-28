@@ -25,7 +25,7 @@
 using namespace LEDSpicerUI::Ui::Storage;
 
 Actor::Actor(Values& data, const string& ownerId) noexcept : Data(data) {
-	getProperties().setValue(UID, std::to_string(++actorCounter));
+	getProperties().setValue(UID, ++actorCounter);
 	getProperties().setValue(PID, ownerId);
 }
 

@@ -6338,7 +6338,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkSpinButton" id="EntryPinR">
+                  <object class="GtkSpinButton" id="SpinPinR">
                     <property name="name">Red</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
@@ -6374,7 +6374,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkSpinButton" id="EntryPinG">
+                  <object class="GtkSpinButton" id="SpinPinG">
                     <property name="name">Green</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
@@ -6411,7 +6411,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkSpinButton" id="EntryPinB">
+                  <object class="GtkSpinButton" id="SpinPinB">
                     <property name="name">Blue</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
@@ -6474,7 +6474,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkSpinButton" id="EntryPin">
+                      <object class="GtkSpinButton" id="SpinPin">
                         <property name="name">Single Connector</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
@@ -6535,7 +6535,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkSpinButton" id="EntryElementOnTime">
+                      <object class="GtkSpinButton" id="SpinElementOnTime">
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="max-length">4</property>

@@ -169,26 +169,24 @@ void DialogInput::storeData() noexcept {
 	currentData->getProperties().setValue(FILENAME, entryInputName->get_text());
 
 	if (Defaults::inputHasFlag(id, Defaults::INPUT_HAS_BLINK))
-		currentData->setValue(BLINK, switchInputBlink->get_active() ? HUMAN_TRUE : HUMAN_FALSE);
+		currentData->setValue(BLINK, switchInputBlink->get_active());
 
 	if (Defaults::inputHasFlag(id, Defaults::INPUT_HAS_TIMES)) {
-		currentData->setValue(TIMES, std::to_string(toggleInputTimesForever->get_active() ? 0 : spinInputTimes->get_value_as_int()));
+		currentData->setValue(TIMES, toggleInputTimesForever->get_active() ? 0 : spinInputTimes->get_value_as_int());
 	}
 
 	if (Defaults::inputHasFlag(id, Defaults::INPUT_HAS_SPEED))
 		currentData->setValue(SPEED, comboBoxInputSpeed->get_active_id());
 
 	if (Defaults::inputHasFlag(id, Defaults::INPUT_HAS_CREDITS)) {
-		currentData->setValue(MODE, comboBoxInputCreditsMode->get_active_text());
-		currentData->setValue(COINS_CREDIT, spinInputCreditsCoins->get_text());
-		currentData->setValue(ONCE, switchInputCreditsOnce->get_active() ? HUMAN_TRUE : HUMAN_FALSE);
-		currentData->setValue(ALWAYS_ON, switchInputCreditsAlwaysOn->get_active() ? HUMAN_TRUE : HUMAN_FALSE);
+		currentData->setValue(MODE,         comboBoxInputCreditsMode->get_active_text());
+		currentData->setValue(COINS_CREDIT, spinInputCreditsCoins->get_value_as_int());
+		currentData->setValue(ONCE,         switchInputCreditsOnce->get_active());
+		currentData->setValue(ALWAYS_ON,    switchInputCreditsAlwaysOn->get_active());
 	}
 }
 
 void DialogInput::retrieveData() noexcept {
-
-	currentData->getProperties().setValue(PATH_BASE, currentData->getValue(PATH_BASE));
 
 	string name(currentData->getValue(NAME));
 
@@ -202,7 +200,7 @@ void DialogInput::retrieveData() noexcept {
 		if (currentData->getValue(TIMES).empty() or currentData->getValue(TIMES) == "0")
 			toggleInputTimesForever->set_active(true);
 		else
-			spinInputTimes->set_value(std::stod(currentData->getValue(TIMES)));
+			spinInputTimes->set_value(currentData->getDouble(TIMES));
 	}
 
 	if (Defaults::inputHasFlag(name, Defaults::INPUT_HAS_SPEED))
@@ -210,7 +208,7 @@ void DialogInput::retrieveData() noexcept {
 
 	if (Defaults::inputHasFlag(name, Defaults::INPUT_HAS_CREDITS)) {
 		comboBoxInputCreditsMode->set_active_text(currentData->getValue(MODE));
-		spinInputCreditsCoins->set_value(std::stof(currentData->getValue(COINS_CREDIT)));
+		spinInputCreditsCoins->set_value(currentData->getDouble(COINS_CREDIT));
 		switchInputCreditsOnce->set_active(currentData->is(ONCE));
 		switchInputCreditsAlwaysOn->set_active(currentData->is(ALWAYS_ON));
 	}
@@ -221,7 +219,10 @@ string DialogInput::createUniqueId() const noexcept {
 }
 
 LEDSpicerUI::Ui::Storage::Data* DialogInput::createData(Values& rawData) const noexcept {
-	return new Storage::Input(rawData, currentDirectory);
+	auto* data {new Storage::Input(rawData, currentDirectory)};
+	if (action == Actions::LOAD)
+		data->getProperties().setValue(PATH_BASE, data->getValue(PATH_BASE));
+	return data;
 }
 
 void DialogInput::onEmpty() noexcept {

@@ -65,7 +65,7 @@ void Settings::setDefaultProject(const string& name) noexcept {
 }
 
 void Settings::setInteractiveMode(bool value) noexcept {
-	setValue(INTERACTIVE_MODE, value ? HUMAN_TRUE : HUMAN_FALSE);
+	setValue(INTERACTIVE_MODE, value);
 	updateMode();
 }
 
@@ -84,11 +84,11 @@ void Settings::setThemeStyle(ThemeStyle style) noexcept {
 	}
 }
 
-void Settings::setCleanProjectDir(bool value)    noexcept { setValue(CLEAN_PROJECT_DIR,    value ? HUMAN_TRUE : HUMAN_FALSE); }
-void Settings::setPreserveEmptyDir(bool value)   noexcept { setValue(PRESERVE_EMPTY_DIR,   value ? HUMAN_TRUE : HUMAN_FALSE); }
-void Settings::setRemoveInvalidItems(bool value) noexcept { setValue(REMOVE_INVALID_ITEMS, value ? HUMAN_TRUE : HUMAN_FALSE); }
-void Settings::setSaveBackup(bool value)         noexcept { setValue(SAVE_BACKUP,          value ? HUMAN_TRUE : HUMAN_FALSE); }
-void Settings::setDebugFiles(bool value)         noexcept { setValue(DEBUG_FILES,          value ? HUMAN_TRUE : HUMAN_FALSE); }
+void Settings::setCleanProjectDir(bool value)    noexcept { setValue(CLEAN_PROJECT_DIR,    value); }
+void Settings::setPreserveEmptyDir(bool value)   noexcept { setValue(PRESERVE_EMPTY_DIR,   value); }
+void Settings::setRemoveInvalidItems(bool value) noexcept { setValue(REMOVE_INVALID_ITEMS, value); }
+void Settings::setSaveBackup(bool value)         noexcept { setValue(SAVE_BACKUP,          value); }
+void Settings::setDebugFiles(bool value)         noexcept { setValue(DEBUG_FILES,          value); }
 
 void Settings::setConfigPath(const string& path) noexcept {
 	configPath = path;

@@ -29,8 +29,9 @@ InputFile::InputFile(const string& filePath, Ui::Storage::DirectoryEntry* parent
 {
 	string errors;
 
-	const string relPath {parent ? parent->getFullPath() : emptyString};
-	string baseId(Defaults::createCommonUniqueId({relPath, filename}));
+	const string
+		relPath {parent ? parent->getFullPath() : emptyString},
+		baseId  {Defaults::createCommonUniqueId({relPath, filename})};
 
 	Values input {rootInfo.copyValues()};
 	input.setValue(FILENAME, filename);
@@ -46,7 +47,7 @@ InputFile::InputFile(const string& filePath, Ui::Storage::DirectoryEntry* parent
 
 		for (size_t idx = 0; mapsNode; mapsNode = mapsNode->NextSiblingElement("maps"), ++idx) {
 			Values source {processNode(mapsNode)};
-			string sourceBaseId(Defaults::createCommonUniqueId({baseId, std::to_string(idx)}));
+			const string sourceBaseId(Defaults::createCommonUniqueId({baseId, std::to_string(idx)}));
 			source.setValue(PATH_BASE, sourceBaseId);
 			mapsSources.push_back(std::move(source));
 			errors += processMaps(

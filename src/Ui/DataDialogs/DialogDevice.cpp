@@ -169,9 +169,6 @@ void DialogDevice::isValid() const {
 			throw Message(deviceName + " that connects to " + (port.empty() ? "<autodetect>" : port) + " already exists");
 		throw Message(deviceName + " already exists");
 	}
-
-//	if (action != Actions::LOAD and not DialogElement::getInstance()->getBox()->getSize())
-//		throw Message("Add at least one element.");
 }
 
 void DialogDevice::storeData() noexcept {
@@ -185,9 +182,9 @@ void DialogDevice::storeData() noexcept {
 		currentData->setValue(PORT, inputDevicePort->get_text());
 	if (Defaults::isVariable(name))
 		// Store Pins, not LEDs
-		currentData->setValue(PINS, std::to_string(spinnerLeds->get_value_as_int() * 3));
+		currentData->setValue(PINS, spinnerLeds->get_value_as_int() * 3);
 	if (Defaults::isMonochrome(name))
-		currentData->setValue(CHANGE_POINT, std::to_string(static_cast<uint8_t>(changePoint->get_value())));
+		currentData->setValue(CHANGE_POINT, static_cast<int>(changePoint->get_value()));
 }
 
 void DialogDevice::retrieveData() noexcept {
@@ -201,9 +198,9 @@ void DialogDevice::retrieveData() noexcept {
 		inputDevicePort->set_text(currentData->getValue(PORT));
 	if (Defaults::isVariable(name))
 		// Read Pins, convert to LEDs
-		spinnerLeds->set_value(std::stod(currentData->getValue(PINS)) / 3);
-	if (Defaults::isMonochrome(name))
-		changePoint->set_value(std::stod(currentData->getValue(CHANGE_POINT, std::to_string(DEFAULT_CHANGE_VALUE))));
+		spinnerLeds->set_value(currentData->getDouble(PINS) / 3);
+	if (Defaults::isMonochrome(name) and currentData->isSet(CHANGE_POINT))
+		changePoint->set_value(currentData->getDouble(CHANGE_POINT));
 
 	markUsed([this](const string& id) {
 		return currentData->getCollectionHandler()->countByKey(NAME, id) < Defaults::devicesInfo.at(id).maxIds;

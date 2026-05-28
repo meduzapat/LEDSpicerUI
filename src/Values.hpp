@@ -47,6 +47,7 @@ namespace Constants {
 /// Common values used in configs.
 inline const string
 	emptyString,
+	emptyNumber  {"0"},
 	NAME         {"name"}, // Generic parameter
 	HUMAN_TRUE   {"True"},
 	HUMAN_FALSE  {"False"},
@@ -118,11 +119,41 @@ public:
 	virtual string getValue(const string& key, const string& defaultValue) const noexcept;
 
 	/**
+	 * @return true if the value parses as a number.
+	 */
+	bool isNumber(const string& key) const noexcept;
+
+	/**
+	 * @return value parsed as int, or 0 if missing, empty, unparseable, or out of int range.
+	 */
+	int getInt(const string& key) const noexcept;
+
+	/**
+	 * @return value parsed as double, or 0.00 if missing, empty, or unparseable.
+	 */
+	double getDouble(const string& key) const noexcept;
+
+	/**
 	 * Allows the change of an internal value.
 	 * @param key
 	 * @param value
 	 */
 	virtual void setValue(const string& key, const string& value) noexcept;
+
+	/**
+	 * String-literal overload, avoids resolving to setValue(bool).
+	 */
+	void setValue(const string& key, const char* value)       noexcept;
+
+	/**
+	 * Typed overloads, stringify the value into the map.
+	 */
+	void setValue(const string& key, int value)           noexcept;
+	void setValue(const string& key, unsigned value)      noexcept;
+	void setValue(const string& key, long value)          noexcept;
+	void setValue(const string& key, unsigned long value) noexcept;
+	void setValue(const string& key, double value)        noexcept;
+	void setValue(const string& key, bool value)          noexcept;
 
 	/**
 	 * Compares a value against another value

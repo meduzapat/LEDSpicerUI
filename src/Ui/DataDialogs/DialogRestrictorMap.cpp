@@ -140,8 +140,8 @@ void DialogRestrictorMap::populateInterfacesCombobox() noexcept {
 void DialogRestrictorMap::trimToInterfaces(uint8_t maxInterfaces) noexcept {
 	vector<Storage::BoxButton*> toRemove;
 	for (auto btn : *items) {
-		const string& iface = btn->getData()->getValue(RESTRICTOR_INTERFACE);
-		if (not iface.empty() and std::stoi(iface) > maxInterfaces)
+		if (btn->getData()->isSet(RESTRICTOR_INTERFACE) and
+			btn->getData()->getInt(RESTRICTOR_INTERFACE) > maxInterfaces)
 			toRemove.push_back(btn);
 	}
 	string deleted;

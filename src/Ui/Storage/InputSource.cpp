@@ -27,7 +27,7 @@ using namespace LEDSpicerUI::Ui::Storage;
 InputSource::InputSource(Values& data, const string& ownerId) noexcept :
 	Parent(data, {COLLECTION_INPUT_MAPS})
 {
-	getProperties().setValue(UID, std::to_string(++sourceCounter));
+	getProperties().setValue(UID, ++sourceCounter);
 	getProperties().setValue(PID, ownerId);
 	registerDependency(COLLECTION_ELEMENTS, COLLECTION_INPUT_MAPS);
 	registerDependency(COLLECTION_GROUPS,   COLLECTION_INPUT_MAPS);
