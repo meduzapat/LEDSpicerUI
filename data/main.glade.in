@@ -1752,48 +1752,57 @@ If nothing is set, the default is 1000ms.</property>
                         <property name="can-focus">False</property>
                         <property name="orientation">vertical</property>
                         <child>
-                          <object class="GtkBox">
+                          <object class="GtkBox" id="BoxProfileNavigation">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
-                            <property name="homogeneous">True</property>
+                            <property name="spacing">5</property>
                             <child>
-                              <object class="GtkBox">
+                              <object class="GtkButton" id="BtnProfileHome">
                                 <property name="visible">True</property>
-                                <property name="can-focus">False</property>
+                                <property name="can-focus">True</property>
+                                <property name="receives-default">True</property>
+                                <property name="tooltip-text">Go to root folder</property>
                                 <child>
-                                  <object class="GtkLabel">
+                                  <object class="GtkImage">
                                     <property name="visible">True</property>
                                     <property name="can-focus">False</property>
-                                    <property name="halign">end</property>
-                                    <property name="margin-end">5</property>
-                                    <property name="label">Default Profile</property>
+                                    <property name="icon-name">go-home-symbolic</property>
+                                    <property name="use-fallback">True</property>
                                   </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">0</property>
-                                  </packing>
                                 </child>
-                                <child>
-                                  <object class="GtkComboBoxText" id="ComboDefaultProfile">
-                                    <property name="visible">True</property>
-                                    <property name="can-focus">False</property>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">1</property>
-                                  </packing>
-                                </child>
+                                <style>
+                                  <class name="NavigationButton"/>
+                                </style>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
-                                <property name="fill">True</property>
+                                <property name="fill">False</property>
                                 <property name="position">0</property>
                               </packing>
                             </child>
                             <child>
-                              <placeholder/>
+                              <object class="GtkBox" id="BoxProfileBreadcrumb">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="halign">start</property>
+                                <child>
+                                  <placeholder/>
+                                </child>
+                                <child>
+                                  <placeholder/>
+                                </child>
+                                <child>
+                                  <placeholder/>
+                                </child>
+                                <style>
+                                  <class name="BreadcrumbBox"/>
+                                </style>
+                              </object>
+                              <packing>
+                                <property name="expand">True</property>
+                                <property name="fill">True</property>
+                                <property name="position">1</property>
+                              </packing>
                             </child>
                           </object>
                           <packing>
@@ -1817,8 +1826,6 @@ If nothing is set, the default is 1000ms.</property>
                                     <property name="can-focus">False</property>
                                     <property name="valign">start</property>
                                     <property name="homogeneous">True</property>
-                                    <property name="selection-mode">none</property>
-                                    <property name="activate-on-single-click">False</property>
                                   </object>
                                 </child>
                                 <style>
@@ -1869,6 +1876,27 @@ If nothing is set, the default is 1000ms.</property>
                           </packing>
                         </child>
                         <child>
+                          <object class="GtkButton" id="BtnNewProfileFolder">
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">True</property>
+                            <property name="tooltip-text" translatable="yes">Create new Folder</property>
+                            <child>
+                              <object class="GtkImage">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="icon-name">folder-new-symbolic</property>
+                                <property name="use-fallback">True</property>
+                              </object>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                        <child>
                           <object class="GtkButton" id="BtnImportProfile">
                             <property name="visible">True</property>
                             <property name="can-focus">True</property>
@@ -1886,7 +1914,7 @@ If nothing is set, the default is 1000ms.</property>
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">1</property>
+                            <property name="position">2</property>
                           </packing>
                         </child>
                       </object>
