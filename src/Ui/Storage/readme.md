@@ -77,7 +77,8 @@ Values                         — General-purpose field store. Used directly wh
 ```cpp
 values.getValue(key);                  // returns const string& or emptyString
 values.getValue(key, defaultValue);    // returns string
-values.setValue(key, value);
+values.setValue(key, value);           // overloads: string, const char*, int,
+                                       // unsigned, long, unsigned long, double, bool
 values.isSet(key);                     // true if key exists
 values.unSet(key);                     // removes key
 values.wipe();                         // clears all entries
@@ -86,9 +87,27 @@ values.setValues(other);               // inserts all entries from other
 values.copyValues();                   // returns StringUMap copy
 values.swap(other);                    // O(1) contents exchange
 // Iterators: begin(), end(), cbegin(), cend()
+
+// Typed reads — best-effort parse of the stored string.
+values.isNumber(key);                  // true if std::stod accepts the value
+values.getInt(key);                    // std::stoi; 0 on missing/garbage/overflow
+values.getDouble(key);                 // std::stod; 0.0 on missing/garbage/overflow
+values.is(key);                        // value == HUMAN_TRUE
+values.isA(key, "Foo");                // value == "Foo"
 ```
 
 `Values` is default-constructible (empty map) or pre-populated from a `StringUMap&` (which is moved in).
+
+The typed setters accept a real numeric or boolean value and stringify
+it on the way in; `setValue(key, true)` writes `HUMAN_TRUE`, etc. The
+typed getters parse the stored string and return `0` / `0.0` (or
+`false` for `is`) on any failure — they never throw. Two convenience
+constants live next to `emptyString`:
+
+```cpp
+inline const string emptyString;       // ""
+inline const string emptyNumber{"0"};  // "0"
+```
 
 ---
 
@@ -104,10 +123,19 @@ values.swap(other);                    // O(1) contents exchange
 
 ```cpp
 data->setValue(NAME, "MyDevice");
+data->setValue(BRIGHTNESS, 100);             // typed overload, no to_string needed
+data->setValue(ENABLED, true);               // stores HUMAN_TRUE
 string name = data->getValue(NAME);
 string port = data->getValue(PORT, "auto");  // default if missing
+int    pins = data->getInt(PINS);            // 0 if missing/garbage
 data->wipe();                                // unregisters from handler, clears values
 ```
+
+> **Loading raw data:** the typed getters (`getInt`, `getDouble`,
+> `isNumber`) and `is()` are the safe way to read freshly-loaded data
+> in `retrieveData()`. Raw values from XML are untrusted strings;
+> direct `std::stoi(getValue(...))` will throw on garbage inside a
+> `noexcept` method and crash the program.
 
 **`getPrimaryValue()`** returns `getValue(getPrimaryKey())`. The default primary key is `NAME`. Override `getPrimaryKey()` when a subclass uses a different field as its identifier.
 
