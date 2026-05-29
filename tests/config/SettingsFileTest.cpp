@@ -85,16 +85,19 @@ TEST_F(SettingsFileTest, SaveRoundTrip) {
 	s.setDataDir("/usr/share/ledspicer/");
 	s.setDebugFiles(true);
 	s.setThemeStyle(Settings::ThemeStyle::Dark);
+	s.setCurrentProject("arcade");
 	SettingsFile::save();
 
 	s.load(Values{});
 	EXPECT_TRUE(s.getBinaryPath().empty());
+	EXPECT_TRUE(s.getDefaultProject().empty());
 
 	EXPECT_TRUE(SettingsFile::initialize());
 	EXPECT_EQ("/usr/bin/ledspicerd",   s.getBinaryPath());
 	EXPECT_EQ("/usr/share/ledspicer/", s.getDataDir());
 	EXPECT_TRUE(s.shouldDebugFiles());
 	EXPECT_EQ(Settings::ThemeStyle::Dark, s.getThemeStyle());
+	EXPECT_EQ("arcade",                s.getDefaultProject());
 }
 
 int main(int argc, char** argv) {

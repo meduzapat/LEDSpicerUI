@@ -115,6 +115,7 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 			profileNavigator.save();
 
 			Defaults::cleanDirty();
+			DialogSettings::getInstance()->saveSettings();
 			Message::displayInfo("Project saved successfully.");
 		}
 		catch (Message& e) {
@@ -174,8 +175,14 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 
 	signal_show().connect([this]() {
 		Defaults::setIgnoreChanges(true);
-		if (not DialogSettings::getInstance()->startup(this))
+		if (not DialogSettings::getInstance()->startup(this)) {
+			Defaults::setIgnoreChanges(false);
 			close();
+			return;
+		}
+		const string& defaultProject = Settings::get().getDefaultProject();
+		if (not defaultProject.empty())
+			openProject(defaultProject);
 		Defaults::setIgnoreChanges(false);
 	});
 }
@@ -215,10 +222,9 @@ void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {
 	DialogColors::getInstance()->activateColorPicker(btnAddRandomColor, boxRandomColors);
 
 	// Dialog to import config files.
-	Gtk::Button* btnImportConfig;
 	builder->get_widget("BtnImportConfig", btnImportConfig);
 	btnImportConfig->set_sensitive(false);
-	btnImportConfig->signal_clicked().connect([&]() {
+	btnImportConfig->signal_clicked().connect([this]() {
 		if (dialogImportConfig.run() == Gtk::ResponseType::RESPONSE_OK) {
 			string newPath = dialogImportConfig.get_file()->get_path();
 			try {
@@ -236,18 +242,16 @@ void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {
 	builder->get_widget("BtnSelectProject", btnSelectProject);
 
 	// Activate configuration tabs.
-	Gtk::Stack* MainTabs = nullptr;
-	Gtk::Box* MainTabsBox = nullptr;
-	builder->get_widget("MainTabs",    MainTabs);
-	builder->get_widget("MainTabsBox", MainTabsBox);
-	MainTabs->property_visible_child_name().signal_changed().connect([this, MainTabs]() {
-		const auto child {MainTabs->get_visible_child_name()};
+	builder->get_widget("MainTabs",    mainTabs);
+	builder->get_widget("MainTabsBox", mainTabsBox);
+	mainTabs->property_visible_child_name().signal_changed().connect([this]() {
+		const auto child {mainTabs->get_visible_child_name()};
 		if (child == "inputs")     inputNavigator.onActivate();
 		if (child == "animations") animationNavigator.onActivate();
 		if (child == "profiles")   profileNavigator.onActivate();
 	});
 
-	btnSelectProject->signal_clicked().connect([&, MainTabs, MainTabsBox, btnImportConfig]() {
+	btnSelectProject->signal_clicked().connect([this]() {
 		if (DialogProject::getInstance()->run() != Gtk::ResponseType::RESPONSE_APPLY) {
 			DialogProject::getInstance()->hide();
 			return;
@@ -263,42 +267,7 @@ void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {
 			DialogProject::getInstance()->hide();
 			return;
 		}
-
-		Settings::get().setCurrentProject(newProject);
-		Defaults::setSubtitle(newProject);
-
-		// Wipe random colors and any other color and read config.
-		comboColors->set_active_id("");
-		// Old data.
-		try {
-			readConfigFile(Settings::get().getActiveConfigPath(), true, IMPORT_ALL);
-		}
-		// New data.
-		catch (Message& e) {
-			if (Glib::file_test(Settings::get().getActiveConfigPath(), Glib::FileTest::FILE_TEST_EXISTS))
-				Message::displayError(XMLHelper::cleanError("The config file raised an error:\n" + e.getMessage()));
-			// Wipe all data.
-			devices.wipe();
-			restrictors.wipe();
-			processes.wipe();
-			groups.wipe();
-			inputNavigator.clear();
-			animationNavigator.clear();
-			profileNavigator.clear();
-			// Refresh UI boxes after wipe.
-			DialogColors::getInstance()->resetColorButtons();
-			Values values;
-			setConfiguration(values);
-		}
-		// Always refresh all boxes — covers load, new project, and (conditionally) import.
-		DialogDevice::getInstance()->refreshItems();
-		DialogGroup::getInstance()->refreshItems();
-		DialogRestrictor::getInstance()->refreshItems();
-		DialogProcess::getInstance()->refreshItems();
-		Defaults::cleanDirty();
-		MainTabs->set_visible_child("configuration");
-		MainTabsBox->set_sensitive(true);
-		btnImportConfig->set_sensitive(true);
+		openProject(newProject);
 		DialogProject::getInstance()->hide();
 	});
 }
@@ -326,26 +295,66 @@ void MainWindow::setConfiguration(const Values& values) {
 LEDSpicerUI::Values MainWindow::packLedspicerConfig() const noexcept {
 	Values r {
 		// ledspicerd.
-		{"version",      PACKAGE_DATA_VERSION},
-		{"type",         "Configuration"},
-		{"userId",       inputUserId->get_text()},
-		{"userId",       inputUserId->get_text()},
-		{"groupId",      inputGroupId->get_text()},
-		{"port",         inputPortNumber->get_text()},
-		{"fps",          inputFPS->get_text()},
-		{"logLevel",     comboLogLevel->get_active_id()},
-		{"colors",       comboColors->get_active_id()},
-		{"dataSource",   Defaults::implode(listBoxDataSource->getCheckedValues(), ',')},
+		{"version",        PACKAGE_DATA_VERSION},
+		{"type",           "Configuration"},
+		{"defaultProject", Settings::get().getCurrentProject()},
+		{"userId",         inputUserId->get_text()},
+		{"groupId",        inputGroupId->get_text()},
+		{"port",           inputPortNumber->get_text()},
+		{"fps",            inputFPS->get_text()},
+		{"logLevel",       comboLogLevel->get_active_id()},
+		{"colors",         comboColors->get_active_id()},
+		{"dataSource",     Defaults::implode(listBoxDataSource->getCheckedValues(), ',')},
 		// Emitter.
-		{"craftProfile", toggleCraftProfiles->get_active() ? HUMAN_TRUE : HUMAN_FALSE},
-		{"colorsFile",   comboUseColors->get_active_id()},
-
+		{"craftProfile",   toggleCraftProfiles->get_active() ? HUMAN_TRUE : HUMAN_FALSE},
+		{"colorsFile",     comboUseColors->get_active_id()},
 	};
 
 	if (const auto rc {DialogColors::getInstance()->getColorBoxValues(boxRandomColors)}; not rc.empty())
 		r.setValue("randomColors", Defaults::implode(rc, ','));
 
 	return r;
+}
+
+void MainWindow::openProject(const string& name) {
+	Settings::get().setCurrentProject(name);
+	Defaults::setSubtitle(name);
+	comboColors->set_active_id("");
+
+	const bool configExists = Glib::file_test(
+		Settings::get().getActiveConfigPath(), Glib::FileTest::FILE_TEST_EXISTS
+	);
+	bool loadedOk = false;
+	try {
+		readConfigFile(Settings::get().getActiveConfigPath(), true, IMPORT_ALL);
+		loadedOk = true;
+	}
+	catch (Message& e) {
+		if (configExists)
+			Message::displayError(XMLHelper::cleanError("The config file raised an error:\n" + e.getMessage()));
+		devices.wipe();
+		restrictors.wipe();
+		processes.wipe();
+		groups.wipe();
+		inputNavigator.clear();
+		animationNavigator.clear();
+		profileNavigator.clear();
+		DialogColors::getInstance()->resetColorButtons();
+		Values values;
+		setConfiguration(values);
+	}
+
+	DialogDevice::getInstance()->refreshItems();
+	DialogGroup::getInstance()->refreshItems();
+	DialogRestrictor::getInstance()->refreshItems();
+	DialogProcess::getInstance()->refreshItems();
+	Defaults::cleanDirty();
+	mainTabs->set_visible_child("configuration");
+	mainTabsBox->set_sensitive(true);
+	btnImportConfig->set_sensitive(true);
+
+	if (configExists and loadedOk)
+		DialogSettings::getInstance()->saveSettings();
 }
 
 void MainWindow::readConfigFile(const string& dataFilePath, bool wipe, uint8_t importFlags) {

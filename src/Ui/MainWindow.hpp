@@ -90,6 +90,10 @@ protected:
 	/// Import configuration dialog.
 	DialogImport dialogImportConfig;
 
+	Gtk::Stack*  mainTabs       = nullptr;
+	Gtk::Box*    mainTabsBox    = nullptr;
+	Gtk::Button* btnImportConfig = nullptr;
+
 	/// @name Storage Collections
 	Storage::BoxButtonCollection
 		/// Created devices in the dialog devices.
@@ -126,6 +130,13 @@ protected:
 	 * @param builder
 	 */
 	void prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder);
+
+	/**
+	 * Opens a project by name: sets current project, loads its config, and activates the UI.
+	 * Persists the project to UI settings immediately if the config file already exists.
+	 * @param name project directory name
+	 */
+	void openProject(const string& name);
 
 	/**
 	 * Reads a ledspicer.conf file.
