@@ -33,7 +33,8 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 	dialogImportConfig(DialogImport::Types::CONFIG, this),
 
 	inputNavigator(builder, this),
-	animationNavigator(builder, this)
+	animationNavigator(builder, this),
+	profileNavigator(builder, this)
 {
 
 	Message::initialize(builder, this);
@@ -49,14 +50,12 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 	DialogRestrictor::buildInstance(builder, "DialogRestrictor");
 	DialogProcess::buildInstance(builder,    "DialogProcess");
 	DialogGroup::buildInstance(builder,      "DialogGroup");
-	DialogProfile::buildInstance(builder,    "DialogProfile");
 
 	// Connect primary dialogs with the collections.
 	DialogDevice::getInstance()->setOwner(&devices,         nullptr);
 	DialogRestrictor::getInstance()->setOwner(&restrictors, nullptr);
 	DialogProcess::getInstance()->setOwner(&processes,      nullptr);
 	DialogGroup::getInstance()->setOwner(&groups,           nullptr);
-	DialogProfile::getInstance()->setOwner(&profiles,       nullptr);
 
 	// Setup ledspicer fields.
 	builder->get_widget("InputUserId",     inputUserId);
@@ -102,7 +101,7 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 
 			ConfigFile::save(ConfigFile::ConfigData(
 				Settings::get().getActiveConfigPath(),
-				comboDefaultProfile->get_active_text().raw(),
+				profileNavigator.getDefaultProfileName(),
 				inputRunEvery->get_text().raw(),
 				packLedspicerConfig(),
 				devices,
@@ -113,6 +112,7 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 
 			inputNavigator.save();
 			animationNavigator.save();
+			profileNavigator.save();
 
 			Defaults::cleanDirty();
 			Message::displayInfo("Project saved successfully.");
@@ -164,12 +164,6 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 	builder->get_widget("InputRunEvery", inputRunEvery);
 	Defaults::registerWidget(inputRunEvery);
 
-	/*******************
-	 * Default Profile *
-	 *******************/
-	builder->get_widget("ComboDefaultProfile", comboDefaultProfile);
-	Defaults::registerWidget(comboDefaultProfile);
-
 	// Check for unsaved project.
 	signal_delete_event().connect([](GdkEventAny*) {
 		if (Defaults::isDirty())
@@ -188,11 +182,11 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 
 MainWindow::~MainWindow() {
 
+	profileNavigator.clear();
 	animationNavigator.clear();
 	inputNavigator.clear();
 
 	// need to be wipe in the correct order or the dependencies will cause problems.
-	profiles.wipe();
 	groups.wipe();
 	processes.wipe();
 	restrictors.wipe();
@@ -250,6 +244,7 @@ void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {
 		const auto child {MainTabs->get_visible_child_name()};
 		if (child == "inputs")     inputNavigator.onActivate();
 		if (child == "animations") animationNavigator.onActivate();
+		if (child == "profiles")   profileNavigator.onActivate();
 	});
 
 	btnSelectProject->signal_clicked().connect([&, MainTabs, MainTabsBox, btnImportConfig]() {
@@ -283,18 +278,15 @@ void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {
 			if (Glib::file_test(Settings::get().getActiveConfigPath(), Glib::FileTest::FILE_TEST_EXISTS))
 				Message::displayError(XMLHelper::cleanError("The config file raised an error:\n" + e.getMessage()));
 			// Wipe all data.
-			profiles.wipe();
 			devices.wipe();
 			restrictors.wipe();
 			processes.wipe();
 			groups.wipe();
 			inputNavigator.clear();
 			animationNavigator.clear();
-			//profileNavigator.clear();
+			profileNavigator.clear();
 			// Refresh UI boxes after wipe.
-			// Clear random colors and profile selector.
 			DialogColors::getInstance()->resetColorButtons();
-			comboDefaultProfile->remove_all();
 			Values values;
 			setConfiguration(values);
 		}
@@ -398,23 +390,17 @@ void MainWindow::readConfigFile(const string& dataFilePath, bool wipe, uint8_t i
 		inputRunEvery->set_text(datafile.getRootInfo().getValue(PARAM_MILLISECONDS));
 	}
 
-	// Load inputs and animations from the project subdirectories.
+	// Load inputs, animations and profiles from the project subdirectories.
 	if (wipe and not Settings::get().getProjectDir().empty()) {
 		inputNavigator.clear();
 		animationNavigator.clear();
+		profileNavigator.setDefaultProfileName(datafile.getRootInfo().getValue("defaultProfile"));
+		profileNavigator.clear();
 
 		inputNavigator.load();
 		animationNavigator.load();
-		// profileNavigator.load(...);  // future, must be last
+		profileNavigator.load();
 	}
-
-	// TODO: default profile should be the one selected in the profiles box.
-//	comboDefaultProfile->remove_all();
-//	const string& dp {datafile.getRootInfo().getValue(DEFAULT_PROFILE)};
-	comboDefaultProfile->append("default");
-	comboDefaultProfile->set_active_text("default");
-//	comboDefaultProfile->append(dp);
-//	comboDefaultProfile->set_active_text(dp);
 }
 
 void MainWindow::populateColorsCombo() {

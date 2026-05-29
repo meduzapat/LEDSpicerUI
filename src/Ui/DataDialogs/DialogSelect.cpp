@@ -71,7 +71,6 @@ void DialogSelect::open() noexcept {
 		return;
 	}
 	conn.disconnect();
-//	btnApply->set_sensitive(true);
 
 	// Build a fast lookup set of selected target pointers.
 	std::unordered_set<const Storage::Data*> selected;
@@ -135,20 +134,17 @@ void DialogSelect::load(DataMap& values, const string& ownerUniqueId) noexcept {
 		Defaults::createCommonUniqueId({ownerUniqueId, request->collectionId})
 	]};
 
-	string location(" while loading " + request->linkType + " for " + ownerUniqueId);
 	string errors;
 
 	for (auto& rawItem : rawCollection) {
 		try {
-			if (not rawItem.isSet(request->linkKey))
-				throw Message("Missing key " + request->linkKey + location);
 
-			const string& keyValue = rawItem.getValue(request->linkKey);
-			Storage::Data* target  = request->sourceCollection->get(keyValue);
+			const string& keyValue {rawItem.getValue(request->linkKey)};
+			Storage::Data* target  {request->sourceCollection->get(keyValue)};
 			if (not target)
 				throw Message(
 					"Cannot find " + request->linkType +
-					" with " + request->linkKey + " = " + keyValue + location
+					" with " + request->linkKey + " " + keyValue
 				);
 
 			rawItem.unSet(request->linkKey);
@@ -183,9 +179,8 @@ void DialogSelect::populatePicker() noexcept {
 	for (const auto& [id, data] : *request->sourceCollection) {
 		if (data->getProperties().getValue(PROP_NO_SELECT).empty()) {
 
-			if (not request->filterProp.empty() and
-				data->getProperties().getValue(request->filterProp) != request->filterValue
-			) continue;
+			if (not request->filterProp.empty() and data->getProperties().getValue(request->filterProp) != request->filterValue)
+				continue;
 
 			auto selection{Gtk::make_managed<Storage::Selection>(data)};
 			auto flowChild{Gtk::make_managed<Gtk::FlowBoxChild>()};
@@ -216,7 +211,7 @@ void DialogSelect::addDisplayButtons(Storage::BoxButton& boxButton) noexcept {
 	// EDIT — only when this link type carries extra fields.
 	if (not request->linkFields.empty()) {
 		auto btn{Gtk::make_managed<Gtk::Button>()};
-		boxButton.pack_start(*btn, Gtk::PACK_SHRINK);
+		boxButton.packButtonStart(*btn);
 		btn->set_image_from_icon_name(ICON_EDIT, Gtk::ICON_SIZE_BUTTON);
 		btn->set_tooltip_text("Edit");
 		btn->signal_clicked().connect([&boxButton, this]() {
@@ -229,7 +224,7 @@ void DialogSelect::addDisplayButtons(Storage::BoxButton& boxButton) noexcept {
 
 	// DELETE its always present.
 	auto btn{Gtk::make_managed<Gtk::Button>()};
-	boxButton.pack_start(*btn, Gtk::PACK_SHRINK);
+	boxButton.packButtonStart(*btn);
 	btn->set_image_from_icon_name(ICON_DELETE, Gtk::ICON_SIZE_BUTTON);
 	btn->set_tooltip_text("Remove");
 	btn->signal_clicked().connect([&boxButton, this]() {

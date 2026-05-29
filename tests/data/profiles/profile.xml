@@ -4,25 +4,18 @@
 	type="Profile"
 	backgroundColor="Off"
 >
-	<startTransitions showElementTimer="2000">
-		<animation name="fadeInOutSlow" />
-	</startTransitions>
-	<endTransitions hideElementTimer="300">
-		<animation name="fadeInOutVeryFast" />
-	</endTransitions>
-	
-	<animations>
-	  <animation name="cabinetSoundAware" />
-		<animation name="test" />
-	</animations>
 	<alwaysOnElements>
-		<element name="P1_BUTTON_1"  color="White" />
-		<element name="P1_BUTTON_2"  color="White" />
-		<element name="P1_BUTTON_3"  color="White" />
+		<element name="P1_BUTTON_1" color="White" />
+		<element name="P1_BUTTON_2" color="White" />
+		<element name="P1_BUTTON_3" color="White" />
 	</alwaysOnElements>
 	<alwaysOnGroups>
 		<group name="CONTROLS" color="Gray" />
 	</alwaysOnGroups>
+	<animations>
+		<animation name="cabinetSoundAware" />
+		<animation name="test" />
+	</animations>
 	<inputs>
 		<input name="ControlPanel" />
 	</inputs>

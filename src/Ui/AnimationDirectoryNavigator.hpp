@@ -50,14 +50,7 @@ protected:
 	/// Import dialog for existing LEDSpicer animation files.
 	DialogImport dialogImportAnimation;
 
-	Gtk::Box* boxBreadcrumb = nullptr;
-
-	Gtk::Button* btnHome = nullptr;
-
-	/// Display box for the animations list at the active directory.
-	OrdenableFlowBox* boxAnimations = nullptr;
-
-	void wireDialogs() noexcept override;
+	void setupDialog() noexcept override;
 
 	void extractData(const string& filePath, Storage::DirectoryEntry* parent) override;
 

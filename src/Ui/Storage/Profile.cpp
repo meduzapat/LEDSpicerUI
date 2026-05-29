@@ -46,21 +46,49 @@ string Profile::createUniqueId() const noexcept {
 	});
 }
 
-//string Profile::xmlBody() const noexcept {
-//	string r;
-//	const auto emit = [&](const string& tag, const string& key) {
-//		const auto& col = children.at(key);
-//		if (col.getSize() == 0) return;
-//		r += XMLHelper::xmlSection(tag, [&]{
-//			string s;
-//			for (const auto& e : col)
-//				s += e->getData()->toXML();
-//			return s;
-//		}());
-//	};
-//	emit("alwaysOnElements", COLLECTION_PROFILE_ELEMENTS);
-//	emit("alwaysOnGroups",   COLLECTION_PROFILE_GROUPS);
-//	emit("inputs",           COLLECTION_PROFILE_INPUTS);
-//	emit("animations",       COLLECTION_PROFILE_ANIMATIONS);
-//	return r;
-//}
+string Profile::createPrettyName() const noexcept {
+	return getName();
+}
+
+string Profile::toXML() const noexcept {
+
+	Values attrs;
+	attrs.setValue(BACKGROUND_COLOR, getValue(BACKGROUND_COLOR));
+
+	string xml {XMLHelper::xmlHeader(TYPE_PROFILE, attrs)};
+
+	// Bare name attrs.
+	const auto emit = [this](const string& tag, const string& collectionKey) {
+		string inner;
+		for (auto btn : *getChild(collectionKey))
+			inner += btn->getData()->toXML();
+		return XMLHelper::xmlSection(tag, inner);
+	};
+
+	// Full path attrs.
+	const auto emitPathRefs = [this](
+		const string& tag,
+		const string& collectionKey,
+		const string& itemTag,
+		const string& sourceCollectionId
+	) {
+		auto* ch {CollectionHandler::getInstance(sourceCollectionId)};
+		string inner;
+		for (auto btn : *getChild(collectionKey)) {
+			auto* target {ch->get(btn->getData()->createUniqueId())};
+			auto* node   {dynamic_cast<const DirNode*>(target)};
+			if (not node) continue;
+			inner += Defaults::tab() + "<" + itemTag + " name=\"" + node->getFullPath() + "\"/>\n";
+		}
+		return XMLHelper::xmlSection(tag, inner);
+	};
+
+	xml += emit("alwaysOnElements", COLLECTION_PROFILE_ELEMENTS);
+	xml += emit("alwaysOnGroups",   COLLECTION_PROFILE_GROUPS);
+	xml += emitPathRefs("animations", COLLECTION_PROFILE_ANIMATIONS, TYPE_ANIMATION, COLLECTION_ANIMATIONS);
+	xml += emitPathRefs("inputs",     COLLECTION_PROFILE_INPUTS,     TYPE_INPUT,     COLLECTION_INPUTS);
+
+	Defaults::reduceTab();
+	xml += XMLHelper::xmlFooter();
+	return xml;
+}

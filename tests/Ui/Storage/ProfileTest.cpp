@@ -22,6 +22,7 @@
 
 #include <gtest/gtest.h>
 #include "Storage/Profile.hpp"
+#include "Storage/Link.hpp"
 
 using namespace LEDSpicerUI::Ui::Storage;
 using namespace LEDSpicerUI::Constants;
@@ -37,6 +38,24 @@ public:
 
 	StubDirNode() noexcept : StubValues{}, DirNode(v, nullptr, "stub_1") {}
 
+};
+
+// Minimal stub target for Link — avoids pulling in Element/Group machinery.
+class StubTarget : public Data {
+
+public:
+
+	StubTarget(Values& d, const string& cssClass, const string& xmlTag) :
+		Data(d), css(cssClass), tag(xmlTag) {}
+
+	const string& getCssClass() const noexcept override { return css; }
+	const string& getXmlTag()   const noexcept override { return tag; }
+	CollectionHandler* getCollectionHandler() const noexcept override { return nullptr; }
+
+private:
+
+	const string css;
+	const string tag;
 };
 
 class ProfileTest : public ::testing::Test {
@@ -73,10 +92,61 @@ TEST_F(ProfileTest, TestFunctionality) {
 	EXPECT_NE(nullptr, rootProfile.getChild(COLLECTION_PROFILE_INPUTS));
 	EXPECT_NE(nullptr, rootProfile.getChild(COLLECTION_PROFILE_ANIMATIONS));
 
-	// toXML.
-	const string xml(rootProfile.toXML());
-	EXPECT_EQ("<profile filename=\"default\" backgroundColor=\"Off\"/>\n", xml);
+}
 
+TEST_F(ProfileTest, ToXMLEmpty) {
+
+	Values data {{FILENAME, "empty"}, {BACKGROUND_COLOR, "Off"}};
+	Profile profile {data, nullptr};
+
+	// Empty profile: header + footer only, no inner sections.
+	EXPECT_EQ(
+		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+		"<!-- This is an auto-generated file by " PACKAGE_STRING ". -->\n"
+		"<LEDSpicer\n\tversion=\"1.1\"\n\ttype=\"profile\"\n\tbackgroundColor=\"Off\"\n>\n</LEDSpicer>\n",
+		profile.toXML()
+	);
+}
+
+TEST_F(ProfileTest, ToXMLWithChildren) {
+
+	// Target items the Links will point at.
+	Values eRaw {{NAME, "P1_BUTTON_1"}};
+	StubTarget targetElement {eRaw, "ElementClass", TYPE_ELEMENT};
+
+	Values gRaw {{NAME, "CONTROLS"}};
+	StubTarget targetGroup {gRaw, "GroupClass", TYPE_GROUP};
+
+	Values profileRaw {{FILENAME, "withChildren"}, {BACKGROUND_COLOR, "Red"}};
+	Profile profile {profileRaw, nullptr};
+
+	// Element link inside alwaysOnElements.
+	Values elLink {{COLOR, "White"}};
+	profile.getChild(COLLECTION_PROFILE_ELEMENTS)->create(
+		new Link(elLink, NAME, TYPE_ELEMENT, {}, &targetElement)
+	);
+
+	// Group link inside alwaysOnGroups.
+	Values grLink {{COLOR, "Gray"}};
+	profile.getChild(COLLECTION_PROFILE_GROUPS)->create(
+		new Link(grLink, NAME, TYPE_GROUP, {}, &targetGroup)
+	);
+
+	const string xml(profile.toXML());
+	EXPECT_NE(string::npos, xml.find("type=\"profile\""));
+	EXPECT_NE(string::npos, xml.find("backgroundColor=\"Red\""));
+	EXPECT_NE(string::npos, xml.find("<alwaysOnElements>"));
+	EXPECT_NE(string::npos, xml.find("<element"));
+	EXPECT_NE(string::npos, xml.find("name=\"P1_BUTTON_1\""));
+	EXPECT_NE(string::npos, xml.find("</alwaysOnElements>"));
+	EXPECT_NE(string::npos, xml.find("<alwaysOnGroups>"));
+	EXPECT_NE(string::npos, xml.find("<group"));
+	EXPECT_NE(string::npos, xml.find("name=\"CONTROLS\""));
+	EXPECT_NE(string::npos, xml.find("</alwaysOnGroups>"));
+	// No animations or inputs sections — children empty.
+	EXPECT_EQ(string::npos, xml.find("<animations>"));
+	EXPECT_EQ(string::npos, xml.find("<inputs>"));
+	EXPECT_NE(string::npos, xml.find("</LEDSpicer>"));
 }
 
 int main(int argc, char** argv) {

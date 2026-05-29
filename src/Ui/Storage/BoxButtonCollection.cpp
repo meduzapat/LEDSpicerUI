@@ -101,8 +101,7 @@ void BoxButtonCollection::reindex(OrdenableFlowBox* box) noexcept {
 	reorderedItems.reserve(items.size());
 
 	for (auto child : box->get_children()) {
-		auto flowChild = static_cast<Gtk::FlowBoxChild*>(child);
-		auto boxButton = static_cast<BoxButton*>(flowChild->get_child());
+		auto boxButton{static_cast<BoxButton*>(child)};
 		auto it {std::find_if(items.begin(), items.end(), [boxButton](BoxButton* item) {
 			return item == boxButton;
 		})};

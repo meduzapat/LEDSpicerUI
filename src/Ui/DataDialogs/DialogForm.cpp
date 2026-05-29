@@ -158,7 +158,7 @@ void DialogForm::setSignalApply() noexcept {
 
 void DialogForm::createDeleteButton(BoxButton& boxButton, bool askConfirmation) noexcept {
 	auto button(Gtk::make_managed<Gtk::Button>());
-	boxButton.pack_start(*button, Gtk::PACK_SHRINK);
+	boxButton.packButtonStart(*button);
 	button->set_image_from_icon_name(ICON_TRASH, Gtk::ICON_SIZE_BUTTON);
 	button->get_style_context()->add_class(CSS_BOX_BACKGROUND_DELETE);
 	button->set_tooltip_text("Delete " + boxButton.getData()->createPrettyName());
@@ -175,7 +175,7 @@ void DialogForm::createDeleteButton(BoxButton& boxButton, bool askConfirmation) 
 
 void DialogForm::createEditButton(BoxButton& boxButton) noexcept {
 	auto button(Gtk::make_managed<Gtk::Button>());
-	boxButton.pack_start(*button, Gtk::PACK_SHRINK);
+	boxButton.packButtonStart(*button);
 	button->set_image_from_icon_name(ICON_EDIT, Gtk::ICON_SIZE_BUTTON);
 	button->get_style_context()->add_class(CSS_BOX_BACKGROUND_EDIT);
 	button->set_tooltip_text("Edit " + boxButton.getData()->createPrettyName());
@@ -186,7 +186,7 @@ void DialogForm::createEditButton(BoxButton& boxButton) noexcept {
 
 void DialogForm::createCloneButton(BoxButton& boxButton) noexcept {
 	auto button(Gtk::make_managed<Gtk::Button>());
-	boxButton.pack_start(*button, Gtk::PACK_SHRINK);
+	boxButton.packButtonStart(*button);
 	button->set_image_from_icon_name(ICON_COPY, Gtk::ICON_SIZE_BUTTON);
 	button->get_style_context()->add_class(CSS_BOX_BACKGROUND_COPY);
 	button->set_tooltip_text("Clone " + boxButton.getData()->createPrettyName());

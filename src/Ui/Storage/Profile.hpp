@@ -42,16 +42,14 @@ public:
 	virtual ~Profile() = default;
 
 	string createUniqueId()     const noexcept override;
+	string createPrettyName()   const noexcept override;
 	const string& getCssClass() const noexcept override { return CSS_PROFILE_BOX_BUTTON; }
 	const string& getXmlTag()   const noexcept override { return TYPE_PROFILE; }
+	string toXML()              const noexcept override;
 
 	CollectionHandler* getCollectionHandler() const noexcept override {
 		return CollectionHandler::getInstance(COLLECTION_PROFILES);
 	}
-//
-//protected:
-//
-//	string xmlBody() const noexcept override;
 };
 
 } // namespace

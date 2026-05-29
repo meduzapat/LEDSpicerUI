@@ -55,6 +55,7 @@ add_executable(ledspicerui
 	src/config/ConfigFile.cpp
 	src/config/InputFile.cpp
 	src/config/AnimationFile.cpp
+	src/config/ProfileFile.cpp
 	src/Ui/Message.cpp
 	src/Ui/DialogColors.cpp
 	src/Ui/DialogProject.cpp
@@ -104,6 +105,7 @@ add_executable(ledspicerui
 	src/Ui/DirectoryNavigator.cpp
 	src/Ui/InputDirectoryNavigator.cpp
 	src/Ui/AnimationDirectoryNavigator.cpp
+	src/Ui/ProfileDirectoryNavigator.cpp
 	src/Ui/DialogImport.cpp
 	src/Ui/MainWindow.cpp
 	src/LEDSpicerUI.cpp

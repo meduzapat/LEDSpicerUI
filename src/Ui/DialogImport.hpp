@@ -34,7 +34,7 @@ class DialogImport: public Gtk::FileChooserDialog {
 
 public:
 
-	enum class Types : uint8_t {CONFIG, INPUT, ANIMATION};
+	enum class Types : uint8_t {CONFIG, INPUT, ANIMATION, PROFILE};
 
 	DialogImport(const Types type, Gtk::Window* parent);
 

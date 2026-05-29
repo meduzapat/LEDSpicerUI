@@ -50,9 +50,9 @@ protected:
 			FAIL() << "Failed to load: " PACKAGE_SAMPLES_DIR "data/test.ui";
 		}
 		// Initialize Message with test-specific dialogs
-		builder->get_widget("DialogErrorMessage", testErrorDialog);
-		builder->get_widget("DialogInfoMessage", testInfoDialog);
-		builder->get_widget("DialogQuestionMessage", testQuestionDialog);
+		builder->get_widget("DialogMessageError", testErrorDialog);
+		builder->get_widget("DialogMessageInfo", testInfoDialog);
+		builder->get_widget("DialogMessageQuestion", testQuestionDialog);
 		Message::initialize(builder, mainWindow.get());
 		testErrorDialog->signal_show().connect([&] () {
 			testErrorDialog->close();

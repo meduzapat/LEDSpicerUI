@@ -39,16 +39,16 @@ InputDirectoryNavigator::InputDirectoryNavigator(
 		* btnAddInput       = nullptr,
 		* btnImportInput    = nullptr;
 
-	builder->get_widget_derived("BoxInputs",  boxInputs);
+	builder->get_widget_derived("BoxInputs",  box);
 	builder->get_widget("BtnInputHome",       btnHome);
 	builder->get_widget("BtnNewInputFolder",  btnNewInputFolder);
 	builder->get_widget("BoxInputBreadcrumb", boxBreadcrumb);
 	builder->get_widget("BtnAddInput",        btnAddInput);
 	builder->get_widget("BtnImportInput",     btnImportInput);
 
-	DataDialogs::DialogInput::getInstance()->setBox(boxInputs);
+	DataDialogs::DialogInput::getInstance()->setBox(box);
 
-	sortDirectoriesFirst(boxInputs);
+	sortDirectoriesFirst(box);
 
 	// Register automatic buttons.
 	auto chEl {Storage::CollectionHandler::getInstance(COLLECTION_ELEMENTS)};
@@ -85,7 +85,6 @@ void InputDirectoryNavigator::clear() noexcept {
 }
 
 void InputDirectoryNavigator::extractData(const string& filePath, Storage::DirectoryEntry* parent) {
-
 	InputFile datafile(filePath, parent);
 	auto di {DataDialogs::DialogInput::getInstance()};
 	di->setOwner(parent->getPrimaryChild(), parent);
@@ -97,50 +96,9 @@ void InputDirectoryNavigator::saveItem(Storage::Data* item, const string& filePa
 	InputFile::save(*static_cast<Storage::Input*>(item), filePath);
 }
 
-void InputDirectoryNavigator::wireDialogs() noexcept {
-
+void InputDirectoryNavigator::setupDialog() noexcept {
 	auto di {DataDialogs::DialogInput::getInstance()};
 	di->setOwner(currentDir->getPrimaryChild(), currentDir);
 	di->setCurrentDirectory(currentDir);
 	di->refreshItems();
-
-	// Update navigation buttons.
-	btnHome->set_sensitive(not isAtRoot());
-
-	// Rebuild breadcrumb.
-	for (auto child : boxBreadcrumb->get_children()) boxBreadcrumb->remove(*child);
-
-	if (not currentDir->isAtRoot()) {
-		// Walk the parent chain bottom → up, collecting ancestor buttons.
-		auto node {static_cast<Storage::DirectoryEntry*>(currentDir->getParent())};
-		while (not node->isAtRoot()) {
-			auto btn {Gtk::make_managed<Gtk::Button>(node->getName())};
-			btn->get_style_context()->add_class(CSS_BREADCRUMB_BUTTON);
-			btn->signal_clicked().connect([this, node]() {
-				enterDirectory(node);
-			});
-			auto sep {Gtk::make_managed<Gtk::Label>("/")};
-			sep->get_style_context()->add_class(CSS_BREADCRUMB_SEPARATOR);
-
-			// Reorder so each ancestor goes to the front, keeping correct left-to-right order.
-			boxBreadcrumb->pack_start(*btn, Gtk::PACK_SHRINK);
-			boxBreadcrumb->pack_start(*sep, Gtk::PACK_SHRINK);
-			boxBreadcrumb->reorder_child(*btn, 0);
-			boxBreadcrumb->reorder_child(*sep, 1);
-
-			node = static_cast<Storage::DirectoryEntry*>(node->getParent());
-		}
-
-		// Separator before the current (non-clickable) label.
-		auto sep {Gtk::make_managed<Gtk::Label>("/")};
-		sep->get_style_context()->add_class(CSS_BREADCRUMB_SEPARATOR);
-		boxBreadcrumb->pack_end(*sep, Gtk::PACK_SHRINK);
-
-		// Current directory label at the end.
-		auto cur {Gtk::make_managed<Gtk::Label>(currentDir->getName())};
-		cur->get_style_context()->add_class(CSS_BREADCRUMB_CURRENT);
-		boxBreadcrumb->pack_end(*cur, Gtk::PACK_SHRINK);
-	}
-
-	boxBreadcrumb->show_all();
 }

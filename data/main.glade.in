@@ -2710,40 +2710,6 @@ Compatible with version @MINIMUM_COMPATIBILITY@+</property>
       </object>
     </child>
   </object>
-  <object class="GtkMessageDialog" id="DialogErrorMessage">
-    <property name="width-request">400</property>
-    <property name="height-request">100</property>
-    <property name="can-focus">False</property>
-    <property name="resizable">False</property>
-    <property name="modal">True</property>
-    <property name="window-position">center-on-parent</property>
-    <property name="destroy-with-parent">True</property>
-    <property name="type-hint">dialog</property>
-    <property name="deletable">False</property>
-    <property name="transient-for">MainWindow</property>
-    <property name="message-type">error</property>
-    <property name="buttons">close</property>
-    <property name="text">Error</property>
-    <child internal-child="vbox">
-      <object class="GtkBox">
-        <property name="can-focus">False</property>
-        <property name="orientation">vertical</property>
-        <property name="spacing">2</property>
-        <child internal-child="action_area">
-          <object class="GtkButtonBox">
-            <property name="can-focus">False</property>
-            <property name="homogeneous">True</property>
-            <property name="layout-style">end</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-  </object>
   <object class="GtkDialog" id="DialogGroup">
     <property name="width-request">800</property>
     <property name="height-request">600</property>
@@ -3225,7 +3191,62 @@ Compatible with version @MINIMUM_COMPATIBILITY@+</property>
       <action-widget response="-10">button2</action-widget>
     </action-widgets>
   </object>
-  <object class="GtkMessageDialog" id="DialogInfoMessage">
+  <object class="GtkMessageDialog" id="DialogMessageError">
+    <property name="width-request">400</property>
+    <property name="height-request">100</property>
+    <property name="can-focus">False</property>
+    <property name="resizable">False</property>
+    <property name="modal">True</property>
+    <property name="window-position">center-on-parent</property>
+    <property name="destroy-with-parent">True</property>
+    <property name="type-hint">dialog</property>
+    <property name="deletable">False</property>
+    <property name="transient-for">MainWindow</property>
+    <property name="message-type">error</property>
+    <property name="buttons">close</property>
+    <property name="text">Error</property>
+    <child internal-child="vbox">
+      <object class="GtkBox">
+        <property name="can-focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox">
+            <property name="can-focus">False</property>
+            <property name="homogeneous">True</property>
+            <property name="layout-style">end</property>
+            <child>
+              <object class="GtkButton" id="ButtonCopyError">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="focus-on-click">False</property>
+                <property name="receives-default">True</property>
+                <property name="tooltip-text" translatable="yes">Copy the message into clipboard.</property>
+                <child>
+                  <object class="GtkImage">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="icon-name">edit-copy</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkMessageDialog" id="DialogMessageInfo">
     <property name="width-request">400</property>
     <property name="height-request">100</property>
     <property name="can-focus">False</property>
@@ -3248,6 +3269,61 @@ Compatible with version @MINIMUM_COMPATIBILITY@+</property>
             <property name="can-focus">False</property>
             <property name="homogeneous">True</property>
             <property name="layout-style">end</property>
+            <child>
+              <object class="GtkButton" id="ButtonCopyInfo">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="focus-on-click">False</property>
+                <property name="receives-default">True</property>
+                <property name="tooltip-text" translatable="yes">Copy the message into clipboard.</property>
+                <child>
+                  <object class="GtkImage">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="icon-name">edit-copy</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkMessageDialog" id="DialogMessageQuestion">
+    <property name="can-focus">False</property>
+    <property name="resizable">False</property>
+    <property name="modal">True</property>
+    <property name="window-position">center-on-parent</property>
+    <property name="destroy-with-parent">True</property>
+    <property name="type-hint">dialog</property>
+    <property name="deletable">False</property>
+    <property name="transient-for">MainWindow</property>
+    <property name="message-type">question</property>
+    <property name="buttons">yes-no</property>
+    <child internal-child="vbox">
+      <object class="GtkBox">
+        <property name="can-focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox">
+            <property name="can-focus">False</property>
+            <property name="homogeneous">True</property>
+            <property name="layout-style">end</property>
+            <style>
+              <class name="noRoundLeft"/>
+            </style>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -3600,7 +3676,6 @@ Compatible with version @MINIMUM_COMPATIBILITY@+</property>
                                     <property name="valign">start</property>
                                     <property name="homogeneous">True</property>
                                     <property name="max-children-per-line">1</property>
-                                    <property name="selection-mode">none</property>
                                     <property name="activate-on-single-click">False</property>
                                   </object>
                                 </child>
@@ -4172,40 +4247,6 @@ Autodetected if ledspicerd is detected</property>
     <action-widgets>
       <action-widget response="-10">BtnApplyProject</action-widget>
     </action-widgets>
-  </object>
-  <object class="GtkMessageDialog" id="DialogQuestionMessage">
-    <property name="can-focus">False</property>
-    <property name="resizable">False</property>
-    <property name="modal">True</property>
-    <property name="window-position">center-on-parent</property>
-    <property name="destroy-with-parent">True</property>
-    <property name="type-hint">dialog</property>
-    <property name="deletable">False</property>
-    <property name="transient-for">MainWindow</property>
-    <property name="message-type">question</property>
-    <property name="buttons">yes-no</property>
-    <child internal-child="vbox">
-      <object class="GtkBox">
-        <property name="can-focus">False</property>
-        <property name="orientation">vertical</property>
-        <property name="spacing">2</property>
-        <child internal-child="action_area">
-          <object class="GtkButtonBox">
-            <property name="can-focus">False</property>
-            <property name="homogeneous">True</property>
-            <property name="layout-style">end</property>
-            <style>
-              <class name="noRoundLeft"/>
-            </style>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-      </object>
-    </child>
   </object>
   <object class="GtkDialog" id="DialogSelect">
     <property name="width-request">800</property>

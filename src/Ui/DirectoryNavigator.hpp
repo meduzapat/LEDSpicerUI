@@ -20,9 +20,9 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Storage/DirectoryEntry.hpp"
 #include "XMLHelper.hpp"
 #include "config/Settings.hpp"
+#include "Storage/DirectoryEntry.hpp"
 
 #pragma once
 
@@ -78,7 +78,7 @@ public:
 	 * Loads all items from disk under Settings::getProjectDir()/getSubDir() into the tree.
 	 * Clears existing data first, then calls wireDialogs() at root on completion.
 	 */
-	void load() noexcept;
+	virtual void load() noexcept;
 
 	/**
 	 * Saves all items in the tree to disk under Settings::getProjectDir()/getSubDir().
@@ -93,12 +93,26 @@ protected:
 	/// Currently active directory. Always valid; starts at rootDir.
 	Storage::DirectoryEntry* currentDir;
 
+	/// Breadcrumb container. Subclasses should populate and manage this directly.
+	Gtk::Box* boxBreadcrumb = nullptr;
+
+	/// Home button. Subclasses should connect this to enterDirectory(&rootDir) and manage sensitivity.
+	Gtk::Button* btnHome = nullptr;
+
+	/// Display box for the contents at the active directory.
+	OrdenableFlowBox* box = nullptr;
+
 	DirectoryNavigator() noexcept;
 
 	/**
 	 * Wires all consumer dialogs to current directory contents and refreshes the view.
 	 */
-	virtual void wireDialogs() noexcept abstract;
+	void wireDialogs() noexcept;
+
+	/**
+	 * Setups the consume dialog while wiring.
+	 */
+	virtual void setupDialog() noexcept abstract;
 
 	/**
 	 * Recursively walks absPath, building the DirectoryEntry tree and loading
@@ -144,9 +158,8 @@ protected:
 	/**
 	 * Attaches navigation, edit, and delete buttons to a DirectoryEntry BoxButton.
 	 * @param bb BoxButton wrapping the DirectoryEntry.
-	 * @param de The DirectoryEntry being decorated.
 	 */
-	void wireDirButtons(Storage::BoxButton& bb, Storage::DirectoryEntry* de) noexcept;
+	void wireDirButtons(Storage::BoxButton& bb) noexcept;
 
 	/**
 	 * Installs a sort function on the given box that places directories before
