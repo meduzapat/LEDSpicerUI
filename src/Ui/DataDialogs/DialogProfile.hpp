@@ -54,6 +54,9 @@ public:
 	void isValid()          const          override;
 	string createUniqueId() const noexcept override;
 
+	void wireChildrenDialogs()       noexcept override;
+	void disconnectChildrenDialogs() noexcept override;
+
 protected:
 
 	Gtk::Entry*  inputProfileName          = nullptr;
@@ -80,14 +83,17 @@ private:
 		inputsRequest;
 
 	/**
-	 * Wires DialogSelect for one link type immediately before use.
-	 * @param collection Key of the child collection on the current Profile.
-	 * @param req        Configuration for this link type.
+	 * Binds DialogSelect to the request's child collection.
+	 * @param req
 	 */
-	void setUpSelector(
-		const string& collection,
-		const DialogSelect::SelectionRequest& req
-	) noexcept;
+	void setUpSelector(const DialogSelect::SelectionRequest& req) noexcept;
+
+	/**
+	 * Rewrites NAME paths to uniqueIds for animation/input link items.
+	 * @param items
+	 * @param sourceCollectionId
+	 */
+	void resolvePaths(ValueVector& items, const string& sourceCollectionId) noexcept;
 };
 
 } // namespace

@@ -98,7 +98,7 @@ void DirectoryNavigator::process(Storage::DirectoryEntry* parent, const string& 
 		if (entry.is_directory(ec)) {
 			const string name {entry.path().filename().string()};
 			auto& bb {parent->createSubDir(name)};
-			wireDirButtons(bb, static_cast<Storage::DirectoryEntry*>(bb.getData()));
+			wireDirButtons(bb);
 			process(static_cast<Storage::DirectoryEntry*>(bb.getData()), entry.path().string());
 		}
 		else if (entry.is_regular_file(ec) and entry.path().extension() == ".xml") {
@@ -143,12 +143,14 @@ void DirectoryNavigator::onNewDirClicked() noexcept {
 	}
 
 	auto& bb {currentDir->createSubDir(name)};
-	wireDirButtons(bb, static_cast<Storage::DirectoryEntry*>(bb.getData()));
+	wireDirButtons(bb);
 	Defaults::markDirty();
 	wireDialogs();
 }
 
-void DirectoryNavigator::wireDirButtons(Storage::BoxButton& bb, Storage::DirectoryEntry* de) noexcept {
+void DirectoryNavigator::wireDirButtons(Storage::BoxButton& bb) noexcept {
+
+	auto de {static_cast<Storage::DirectoryEntry*>(bb.getData())};
 
 	// Navigation button — takes over the label area so the whole name is clickable.
 	auto navBtn {Gtk::make_managed<Gtk::Button>()};
@@ -169,7 +171,9 @@ void DirectoryNavigator::wireDirButtons(Storage::BoxButton& bb, Storage::Directo
 	editBtn->get_style_context()->add_class(CSS_BOX_BACKGROUND_EDIT);
 	editBtn->set_tooltip_text("Rename " + de->createPrettyName());
 	editBtn->signal_clicked().connect([this, de, &bb]() {
+
 		const string name {promptDirName(de->getName())};
+		// If the name is empty or unchanged, do nothing.
 		if (name.empty() or name == de->getName()) return;
 
 		const string uid {Defaults::createCommonUniqueId({
@@ -195,19 +199,9 @@ void DirectoryNavigator::wireDirButtons(Storage::BoxButton& bb, Storage::Directo
 	delBtn->set_tooltip_text("Delete " + de->createPrettyName());
 	delBtn->signal_clicked().connect([this, de, &bb]() {
 		if (Message::ask(
-				"Are you sure you want to remove " + de->createPrettyName() + "?"
-			) != Gtk::ResponseType::RESPONSE_YES) return;
-
-		// If currentDir is inside the directory being deleted, retreat to root.
-		for (auto cur = currentDir; cur != &rootDir; cur = static_cast<Storage::DirectoryEntry*>(cur->getParent())) {
-			if (cur == de) { currentDir = &rootDir; break; }
-		}
-
-		auto ownerDE {de->getParent()
-			? static_cast<Storage::DirectoryEntry*>(de->getParent())
-			: &rootDir
-		};
-		ownerDE->getPrimaryChild()->remove(bb);
+			"Are you sure you want to remove " + de->createPrettyName() + "?"
+		) != Gtk::ResponseType::RESPONSE_YES) return;
+		currentDir->getPrimaryChild()->remove(bb);
 		Defaults::markDirty();
 		wireDialogs();
 	});
@@ -229,4 +223,47 @@ void DirectoryNavigator::sortDirectoriesFirst(OrdenableFlowBox* box) noexcept {
 			dynamic_cast<Storage::DirNode*>(dB)->getName()
 		);
 	});
+}
+
+void DirectoryNavigator::wireDialogs() noexcept {
+
+	setupDialog();
+
+	btnHome->set_sensitive(not isAtRoot());
+
+	// Rebuild breadcrumb.
+	for (auto child : boxBreadcrumb->get_children())
+		boxBreadcrumb->remove(*child);
+
+	if (not currentDir->isAtRoot()) {
+		// Walk ancestors bottom → up, prepending each so left-to-right order stays correct.
+		auto node {static_cast<Storage::DirectoryEntry*>(currentDir->getParent())};
+		while (not node->isAtRoot()) {
+			auto btn {Gtk::make_managed<Gtk::Button>(node->getName())};
+			btn->get_style_context()->add_class(CSS_BREADCRUMB_BUTTON);
+			btn->signal_clicked().connect([this, node]() {
+				enterDirectory(node);
+			});
+			auto sep {Gtk::make_managed<Gtk::Label>("/")};
+			sep->get_style_context()->add_class(CSS_BREADCRUMB_SEPARATOR);
+
+			boxBreadcrumb->pack_start(*btn, Gtk::PACK_SHRINK);
+			boxBreadcrumb->pack_start(*sep, Gtk::PACK_SHRINK);
+			boxBreadcrumb->reorder_child(*btn, 0);
+			boxBreadcrumb->reorder_child(*sep, 1);
+
+			node = static_cast<Storage::DirectoryEntry*>(node->getParent());
+		}
+
+		// Trailing separator + current (non-clickable) label.
+		auto sep {Gtk::make_managed<Gtk::Label>("/")};
+		sep->get_style_context()->add_class(CSS_BREADCRUMB_SEPARATOR);
+		boxBreadcrumb->pack_end(*sep, Gtk::PACK_SHRINK);
+
+		auto cur {Gtk::make_managed<Gtk::Label>(currentDir->getName())};
+		cur->get_style_context()->add_class(CSS_BREADCRUMB_CURRENT);
+		boxBreadcrumb->pack_end(*cur, Gtk::PACK_SHRINK);
+	}
+
+	boxBreadcrumb->show_all();
 }

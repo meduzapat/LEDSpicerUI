@@ -34,9 +34,26 @@ Message::Message(const string& errorMessage, Gtk::Window* transient) : error(err
 }
 
 void Message::initialize(Glib::RefPtr<Gtk::Builder> const &builder, Gtk::Window* main) {
-	builder->get_widget("DialogErrorMessage",    errorDialog);
-	builder->get_widget("DialogInfoMessage",     infoDialog);
-	builder->get_widget("DialogQuestionMessage", questionDialog);
+	builder->get_widget("DialogMessageError",    errorDialog);
+	builder->get_widget("DialogMessageInfo",     infoDialog);
+	builder->get_widget("DialogMessageQuestion", questionDialog);
+
+	// Copy to clipboard buttons.
+	Gtk::Button
+		* btnInfoCopy  = nullptr,
+		* btnErrorCopy = nullptr;
+	builder->get_widget("ButtonCopyError", btnErrorCopy);
+	builder->get_widget("ButtonCopyInfo",  btnInfoCopy);
+	btnInfoCopy->signal_clicked().connect([]() {
+		// Access the secondary label directly via index 1.
+		auto child {infoDialog->get_message_area()->get_children()[1]};
+		Gtk::Clipboard::get()->set_text(static_cast<Gtk::Label*>(child)->get_text());
+	});
+	btnErrorCopy->signal_clicked().connect([]() {
+		// Access the secondary label directly via index 1.
+		auto child {errorDialog->get_message_area()->get_children()[1]};
+		Gtk::Clipboard::get()->set_text(static_cast<Gtk::Label*>(child)->get_text());
+	});
 	Message::main = static_cast<Gtk::Window*>(main);
 }
 
@@ -67,5 +84,3 @@ int Message::handleDialog(const string& message, Gtk::MessageDialog* dialog, Gtk
 	dialog->hide();
 	return r;
 }
-
-

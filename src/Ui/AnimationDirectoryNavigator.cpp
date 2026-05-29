@@ -39,16 +39,16 @@ AnimationDirectoryNavigator::AnimationDirectoryNavigator(
 		* btnAddAnimation       = nullptr,
 		* btnImportAnimation    = nullptr;
 
-	builder->get_widget_derived("BoxAnimations",  boxAnimations);
+	builder->get_widget_derived("BoxAnimations",  box);
 	builder->get_widget("BtnAnimationHome",       btnHome);
 	builder->get_widget("BtnNewAnimationFolder",  btnNewAnimationFolder);
 	builder->get_widget("BoxAnimationBreadcrumb", boxBreadcrumb);
 	builder->get_widget("BtnAddAnimation",        btnAddAnimation);
 	builder->get_widget("BtnImportAnimation",     btnImportAnimation);
 
-	DataDialogs::DialogAnimation::getInstance()->setBox(boxAnimations);
+	DataDialogs::DialogAnimation::getInstance()->setBox(box);
 
-	sortDirectoriesFirst(boxAnimations);
+	sortDirectoriesFirst(box);
 
 	// An animation needs at least one group to play on.
 	auto chGroups {Storage::CollectionHandler::getInstance(COLLECTION_GROUPS)};
@@ -84,10 +84,7 @@ void AnimationDirectoryNavigator::clear() noexcept {
 	currentDir = &rootDir;
 }
 
-void AnimationDirectoryNavigator::extractData(
-	const string& filePath,
-	Storage::DirectoryEntry* parent
-) {
+void AnimationDirectoryNavigator::extractData(const string& filePath, Storage::DirectoryEntry* parent) {
 	AnimationFile datafile(filePath, parent);
 	auto da {DataDialogs::DialogAnimation::getInstance()};
 	da->setOwner(parent->getPrimaryChild(), parent);
@@ -95,52 +92,14 @@ void AnimationDirectoryNavigator::extractData(
 	da->load(datafile.getDataMap());
 }
 
-void AnimationDirectoryNavigator::saveItem(
-	Storage::Data* item,
-	const string& filePath
-) const noexcept {
+void AnimationDirectoryNavigator::saveItem(Storage::Data* item, const string& filePath) const noexcept {
 	AnimationFile::save(*static_cast<Storage::Animation*>(item), filePath);
 }
 
-void AnimationDirectoryNavigator::wireDialogs() noexcept {
+void AnimationDirectoryNavigator::setupDialog() noexcept {
+
 	auto da {DataDialogs::DialogAnimation::getInstance()};
 	da->setOwner(currentDir->getPrimaryChild(), currentDir);
 	da->setCurrentDirectory(currentDir);
 	da->refreshItems();
-
-	// Update navigation buttons.
-	btnHome->set_sensitive(not isAtRoot());
-
-	// Rebuild breadcrumb.
-	for (auto child : boxBreadcrumb->get_children()) boxBreadcrumb->remove(*child);
-
-	if (not currentDir->isAtRoot()) {
-		auto node {static_cast<Storage::DirectoryEntry*>(currentDir->getParent())};
-		while (not node->isAtRoot()) {
-			auto btn {Gtk::make_managed<Gtk::Button>(node->getName())};
-			btn->get_style_context()->add_class(CSS_BREADCRUMB_BUTTON);
-			btn->signal_clicked().connect([this, node]() {
-				enterDirectory(node);
-			});
-			auto sep {Gtk::make_managed<Gtk::Label>("/")};
-			sep->get_style_context()->add_class(CSS_BREADCRUMB_SEPARATOR);
-
-			boxBreadcrumb->pack_start(*btn, Gtk::PACK_SHRINK);
-			boxBreadcrumb->pack_start(*sep, Gtk::PACK_SHRINK);
-			boxBreadcrumb->reorder_child(*btn, 0);
-			boxBreadcrumb->reorder_child(*sep, 1);
-
-			node = static_cast<Storage::DirectoryEntry*>(node->getParent());
-		}
-
-		auto sep {Gtk::make_managed<Gtk::Label>("/")};
-		sep->get_style_context()->add_class(CSS_BREADCRUMB_SEPARATOR);
-		boxBreadcrumb->pack_end(*sep, Gtk::PACK_SHRINK);
-
-		auto cur {Gtk::make_managed<Gtk::Label>(currentDir->getName())};
-		cur->get_style_context()->add_class(CSS_BREADCRUMB_CURRENT);
-		boxBreadcrumb->pack_end(*cur, Gtk::PACK_SHRINK);
-	}
-
-	boxBreadcrumb->show_all();
 }

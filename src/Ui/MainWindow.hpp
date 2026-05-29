@@ -37,12 +37,12 @@
 #include "DialogProject.hpp"
 #include "InputDirectoryNavigator.hpp"
 #include "AnimationDirectoryNavigator.hpp"
+#include "ProfileDirectoryNavigator.hpp"
 
 #include "DataDialogs/DialogDevice.hpp"
 #include "DataDialogs/DialogRestrictor.hpp"
 #include "DataDialogs/DialogProcess.hpp"
 #include "DataDialogs/DialogGroup.hpp"
-#include "DataDialogs/DialogProfile.hpp"
 
 #pragma once
 
@@ -77,10 +77,9 @@ protected:
 	Gtk::SpinButton* inputFPS = nullptr;
 
 	Gtk::ComboBoxText
-		* comboUseColors      = nullptr, /// colors.ini usage selector.
-		* comboColors         = nullptr,
-		* comboLogLevel       = nullptr,
-		* comboDefaultProfile = nullptr;
+		* comboUseColors = nullptr, /// colors.ini usage selector.
+		* comboColors    = nullptr,
+		* comboLogLevel  = nullptr;
 
 	/// The list of data sources for ROM names.
 	OrdenableListBox* listBoxDataSource = nullptr;
@@ -100,15 +99,16 @@ protected:
 		/// Created processes in the dialog processes.
 		processes,
 		/// Created groups in the dialog groups.
-		groups,
-		/// Created profiles in the dialog profiles.
-		profiles;
+		groups;
 
 	/// Navigator for input files.
 	InputDirectoryNavigator inputNavigator;
 
 	/// Navigator for animation files.
 	AnimationDirectoryNavigator animationNavigator;
+
+	/// Navigator for profile files.
+	ProfileDirectoryNavigator profileNavigator;
 
 	/**
 	 * Populates the configuration.

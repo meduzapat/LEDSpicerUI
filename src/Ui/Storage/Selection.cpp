@@ -21,10 +21,23 @@
  */
 
 #include "Selection.hpp"
+#include "DirNode.hpp"
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-Selection::Selection(Data* data) noexcept : Gtk::Button(data->createPrettyName()), data(data) {
+namespace {
+
+// Full path for DirNode-backed items; bare pretty name otherwise.
+string pickerLabel(Data* data) noexcept {
+	if (data->getProperties().isSet(LEDSpicerUI::Constants::FILENAME))
+		if (auto* node = dynamic_cast<DirNode*>(data))
+			return node->getFullPath();
+	return data->createPrettyName();
+}
+
+} // namespace
+
+Selection::Selection(Data* data) noexcept : Gtk::Button(pickerLabel(data)), data(data) {
 	set_halign(Gtk::Align::ALIGN_FILL);
 	set_margin_top(2);
 	set_margin_bottom(2);

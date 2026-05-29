@@ -51,14 +51,7 @@ protected:
 	/// Import input dialog.
 	DialogImport dialogImportInput;
 
-	Gtk::Box* boxBreadcrumb = nullptr;
-
-	Gtk::Button* btnHome = nullptr;
-
-	/// Display box for directory contents. Set once; the active BBC changes on navigation.
-	OrdenableFlowBox* boxInputs = nullptr;
-
-	void wireDialogs() noexcept override;
+	void setupDialog() noexcept override;
 
 	void extractData(const string& filePath, Storage::DirectoryEntry* parent) override;
 

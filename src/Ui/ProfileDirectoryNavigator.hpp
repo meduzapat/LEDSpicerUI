@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      AnimationDirectoryNavigator.hpp
+ * @file      ProfileDirectoryNavigator.hpp
  * @since     May 2026
  * @author    Patricio A. Rossi (MeduZa)
  *
@@ -21,9 +21,8 @@
  */
 
 #include "DirectoryNavigator.hpp"
-#include "DataDialogs/DialogAnimation.hpp"
-#include "DataDialogs/DialogActor.hpp"
-#include "config/AnimationFile.hpp"
+#include "DataDialogs/DialogProfile.hpp"
+#include "config/ProfileFile.hpp"
 #include "DialogImport.hpp"
 
 #pragma once
@@ -31,24 +30,39 @@
 namespace LEDSpicerUI::Ui {
 
 /**
- * LEDSpicerUI::Ui::AnimationDirectoryNavigator
- * Specialized navigator for Animation files.
- * Handles loading/saving and manages DialogAnimation.
+ * LEDSpicerUI::Ui::ProfileDirectoryNavigator
+ * Specialized navigator for Profile files.
+ * Handles loading/saving and manages DialogProfile.
  */
-class AnimationDirectoryNavigator : public DirectoryNavigator {
+class ProfileDirectoryNavigator : public DirectoryNavigator {
 
 public:
 
-	AnimationDirectoryNavigator(const Glib::RefPtr<Gtk::Builder>& builder, Gtk::Window* parentWindow) noexcept;
+	ProfileDirectoryNavigator(const Glib::RefPtr<Gtk::Builder>& builder, Gtk::Window* parentWindow) noexcept;
 
-	virtual ~AnimationDirectoryNavigator() = default;
+	virtual ~ProfileDirectoryNavigator() = default;
 
 	void clear() noexcept override;
 
+	/**
+	 * @return Name of the profile currently selected as default, or empty string.
+	 */
+	const string& getDefaultProfileName() const noexcept { return defaultProfileName; }
+
+	/**
+	 * Sets the default profile by name. Used after load() to restore the
+	 * selection persisted in the config file.
+	 * @param name
+	 */
+	void setDefaultProfileName(const string& name) noexcept { defaultProfileName = name; }
+
 protected:
 
-	/// Import dialog for existing LEDSpicer animation files.
-	DialogImport dialogImportAnimation;
+	/// Import dialog for existing LEDSpicer profile files.
+	DialogImport dialogImportProfile;
+
+	/// Name of the currently selected default profile (config-file scope).
+	string defaultProfileName;
 
 	void setupDialog() noexcept override;
 
@@ -56,7 +70,7 @@ protected:
 
 	void saveItem(Storage::Data* item, const string& filePath) const noexcept override;
 
-	const string& getSubDir() const noexcept override { return PATH_ANIMATION; }
+	const string& getSubDir() const noexcept override { return PATH_PROFILE; }
 
 };
 

@@ -97,7 +97,7 @@ DialogProfile::DialogProfile(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 	builder->get_widget("BtnProfilesAddElements",             btnProfilesAddElements);
 	builder->get_widget_derived("BoxProfileAlwaysOnElements", boxProfileAlwaysOnElements);
 	btnProfilesAddElements->signal_clicked().connect([this]() {
-		setUpSelector(COLLECTION_ELEMENTS, alwaysOnElementsRequest);
+		setUpSelector(alwaysOnElementsRequest);
 		DialogSelect::getInstance()->open();
 	});
 
@@ -105,7 +105,7 @@ DialogProfile::DialogProfile(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 	builder->get_widget("BtnProfilesAddGroups",             btnProfilesAddGroups);
 	builder->get_widget_derived("BoxProfileAlwaysOnGroups", boxProfileAlwaysOnGroups);
 	btnProfilesAddGroups->signal_clicked().connect([this]() {
-		setUpSelector(COLLECTION_GROUPS, alwaysOnGroupsRequest);
+		setUpSelector(alwaysOnGroupsRequest);
 		DialogSelect::getInstance()->open();
 	});
 
@@ -118,7 +118,7 @@ DialogProfile::DialogProfile(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 		"BtnProfileAnimationDn"
 	);
 	btnProfilesAddAnimations->signal_clicked().connect([this]() {
-		setUpSelector(COLLECTION_ANIMATIONS, animationsRequest);
+		setUpSelector(animationsRequest);
 		DialogSelect::getInstance()->open();
 	});
 
@@ -126,7 +126,7 @@ DialogProfile::DialogProfile(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 	builder->get_widget("BtnProfileAddInputs",      btnProfilesAddInputs);
 	builder->get_widget_derived("BoxProfileInputs", boxProfileInputs);
 	btnProfilesAddInputs->signal_clicked().connect([this]() {
-		setUpSelector(COLLECTION_INPUTS, inputsRequest);
+		setUpSelector(inputsRequest);
 		DialogSelect::getInstance()->open();
 	});
 
@@ -145,20 +145,30 @@ DialogProfile::DialogProfile(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 }
 
 void DialogProfile::load(DataMap& values) noexcept {
-	createItems(values[COLLECTION_PROFILES], values);
+	createItems(
+		values[Defaults::createCommonUniqueId({currentDirectory->getFullPath(), COLLECTION_PROFILES})],
+		values
+	);
 }
 
 void DialogProfile::createSubItems(DataMap& values) noexcept {
 	auto ds{DialogSelect::getInstance()};
-	const string ownerUid = currentData->createUniqueId();
+	const string& ownerUid {currentData->getProperties().getValue(PATH_BASE)};
 
-	setUpSelector(COLLECTION_ELEMENTS,   alwaysOnElementsRequest);
+	// Rewrite NAME paths to uniqueIds so DialogSelect::load resolves them.
+	const auto scoped = [&ownerUid](const string& family) {
+		return Defaults::createCommonUniqueId({ownerUid, family});
+	};
+	resolvePaths(values[scoped(COLLECTION_PROFILE_ANIMATIONS)], COLLECTION_ANIMATIONS);
+	resolvePaths(values[scoped(COLLECTION_PROFILE_INPUTS)],     COLLECTION_INPUTS);
+
+	setUpSelector(alwaysOnElementsRequest);
 	ds->load(values, ownerUid);
-	setUpSelector(COLLECTION_GROUPS,     alwaysOnGroupsRequest);
+	setUpSelector(alwaysOnGroupsRequest);
 	ds->load(values, ownerUid);
-	setUpSelector(COLLECTION_ANIMATIONS, animationsRequest);
+	setUpSelector(animationsRequest);
 	ds->load(values, ownerUid);
-	setUpSelector(COLLECTION_INPUTS,     inputsRequest);
+	setUpSelector(inputsRequest);
 	ds->load(values, ownerUid);
 }
 
@@ -191,49 +201,76 @@ void DialogProfile::isValid() const {
 }
 
 void DialogProfile::storeData() noexcept {
-	currentData->setValue(FILENAME,          inputProfileName->get_text());
-	currentData->setValue(BACKGROUND_COLOR,  btnProfileBackgroundColor->get_label());
+	currentData->getProperties().setValue(FILENAME, inputProfileName->get_text());
+	currentData->setValue(BACKGROUND_COLOR, btnProfileBackgroundColor->get_label());
 
 	auto ds{DialogSelect::getInstance()};
-	setUpSelector(COLLECTION_ELEMENTS,   alwaysOnElementsRequest);
+	setUpSelector(alwaysOnElementsRequest);
 	ds->reindex();
-	setUpSelector(COLLECTION_GROUPS,     alwaysOnGroupsRequest);
+	setUpSelector(alwaysOnGroupsRequest);
 	ds->reindex();
-	setUpSelector(COLLECTION_ANIMATIONS, animationsRequest);
+	setUpSelector(animationsRequest);
 	ds->reindex();
-	setUpSelector(COLLECTION_INPUTS,     inputsRequest);
+	setUpSelector(inputsRequest);
 	ds->reindex();
 }
 
 void DialogProfile::retrieveData() noexcept {
-	inputProfileName->set_text(currentData->getValue(FILENAME));
+	inputProfileName->set_text(currentData->getProperties().getValue(FILENAME));
 	DialogColors::getInstance()->colorizeButton(
 		btnProfileBackgroundColor,
 		currentData->getValue(BACKGROUND_COLOR)
 	);
 
 	auto ds{DialogSelect::getInstance()};
-	setUpSelector(COLLECTION_ELEMENTS,   alwaysOnElementsRequest);
+	setUpSelector(alwaysOnElementsRequest);
 	ds->refresh();
-	setUpSelector(COLLECTION_GROUPS,     alwaysOnGroupsRequest);
+	setUpSelector(alwaysOnGroupsRequest);
 	ds->refresh();
-	setUpSelector(COLLECTION_ANIMATIONS, animationsRequest);
+	setUpSelector(animationsRequest);
 	ds->refresh();
-	setUpSelector(COLLECTION_INPUTS,     inputsRequest);
+	setUpSelector(inputsRequest);
 	ds->refresh();
 }
 
 string DialogProfile::createUniqueId() const noexcept {
-	return Defaults::createCommonUniqueId({inputProfileName->get_text()});
+	return Defaults::createCommonUniqueId({
+		currentData->getProperties().getValue(PID),
+		inputProfileName->get_text()
+	});
 }
 
 LEDSpicerUI::Ui::Storage::Data* DialogProfile::createData(Values& rawData) const noexcept {
-	return new Storage::Profile(rawData, currentDirectory);
+	auto* data {new Storage::Profile(rawData, currentDirectory)};
+	// Rescue PATH_BASE to be used in loading process.
+	if (action == Actions::LOAD)
+		data->getProperties().setValue(PATH_BASE, data->getValue(PATH_BASE));
+	return data;
 }
 
-void DialogProfile::setUpSelector(
-	const string& collection,
-	const DialogSelect::SelectionRequest& req
-) noexcept {
-	DialogSelect::getInstance()->setUp(getChildCollection(collection), req);
+void DialogProfile::setUpSelector(const DialogSelect::SelectionRequest& req) noexcept {
+	DialogSelect::getInstance()->setUp(getChildCollection(req.collectionId), req);
+}
+
+void DialogProfile::resolvePaths(ValueVector& items, const string& sourceCollectionId) noexcept {
+	auto* ch {CollectionHandler::getInstance(sourceCollectionId)};
+	for (auto& raw : items) {
+		const string path {raw.getValue(NAME)};
+		for (auto& [id, data] : *ch) {
+			auto* node {dynamic_cast<const Storage::DirNode*>(data)};
+			if (node and node->getFullPath() == path) {
+				raw.setValue(NAME, id);
+				break;
+			}
+		}
+	}
+}
+
+void DialogProfile::wireChildrenDialogs() noexcept {
+	// Selectors bound lazily via setUpSelector().
+	currentData->setUp();
+}
+
+void DialogProfile::disconnectChildrenDialogs() noexcept {
+	currentData->tearDown();
 }
