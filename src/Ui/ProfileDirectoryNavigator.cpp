@@ -77,13 +77,17 @@ ProfileDirectoryNavigator::ProfileDirectoryNavigator(
 	box->signal_selected_children_changed().connect([this]() {
 		const auto selected {box->get_selected_children()};
 		if (selected.empty()) return;
-		auto bb {dynamic_cast<Storage::BoxButton*>(selected.front())};
-		if (not bb or not bb->getData()) return;
-		// Skip directory tiles.
-		if (dynamic_cast<Storage::DirectoryEntry*>(bb->getData())) return;
-		const string& name {bb->getData()->getValue(FILENAME)};
-		if (name.empty() or name == defaultProfileName) return;
-		defaultProfileName = name;
+		auto bb {static_cast<Storage::BoxButton*>(selected.front())};
+		if (bb == defaultProfileBB) return;
+		// This is the only way we have to know if the selected is not a directory.
+		if (not dynamic_cast<Storage::Profile*>(bb->getData())) {
+			if (defaultProfileBB and defaultProfileBB->get_parent() == box)
+				box->select_child(*defaultProfileBB);
+			else
+				box->unselect_all();
+			return;
+		}
+		defaultProfileBB = bb;
 		Defaults::markDirty();
 	});
 }
@@ -91,6 +95,21 @@ ProfileDirectoryNavigator::ProfileDirectoryNavigator(
 void ProfileDirectoryNavigator::clear() noexcept {
 	rootDir.getPrimaryChild()->wipe();
 	currentDir = &rootDir;
+	defaultProfileBB = nullptr;
+}
+
+void ProfileDirectoryNavigator::load() noexcept {
+	DirectoryNavigator::load();
+	defaultProfilePath.clear();
+}
+
+string ProfileDirectoryNavigator::getDefaultProfileName() const noexcept {
+	if (not defaultProfileBB) return emptyString;
+	return static_cast<Storage::Profile*>(defaultProfileBB->getData())->getFullPath();
+}
+
+void ProfileDirectoryNavigator::setDefaultProfileName(const string& fullPath) noexcept {
+	defaultProfilePath = fullPath;
 }
 
 void ProfileDirectoryNavigator::extractData(
@@ -102,6 +121,17 @@ void ProfileDirectoryNavigator::extractData(
 	dp->setOwner(parent->getPrimaryChild(), parent);
 	dp->setCurrentDirectory(parent);
 	dp->load(datafile.getDataMap());
+
+	if (defaultProfileBB == nullptr and not defaultProfilePath.empty()) {
+		for (auto btn : *parent->getPrimaryChild()) {
+			auto profile {dynamic_cast<Storage::Profile*>(btn->getData())};
+			if (profile and profile->getFullPath() == defaultProfilePath) {
+				defaultProfileBB = btn;
+				defaultProfilePath.clear();
+				break;
+			}
+		}
+	}
 }
 
 void ProfileDirectoryNavigator::saveItem(
@@ -116,4 +146,9 @@ void ProfileDirectoryNavigator::setupDialog() noexcept {
 	dp->setOwner(currentDir->getPrimaryChild(), currentDir);
 	dp->setCurrentDirectory(currentDir);
 	dp->refreshItems();
+	// Select selected or remove leftovers.
+	if (defaultProfileBB and defaultProfileBB->get_parent() == box)
+		box->select_child(*defaultProfileBB);
+	else
+		box->unselect_all();
 }

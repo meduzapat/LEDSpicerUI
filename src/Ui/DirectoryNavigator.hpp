@@ -78,7 +78,7 @@ public:
 	 * Loads all items from disk under Settings::getProjectDir()/getSubDir() into the tree.
 	 * Clears existing data first, then calls wireDialogs() at root on completion.
 	 */
-	void load() noexcept;
+	virtual void load() noexcept;
 
 	/**
 	 * Saves all items in the tree to disk under Settings::getProjectDir()/getSubDir().

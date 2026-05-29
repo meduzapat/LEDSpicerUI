@@ -394,15 +394,13 @@ void MainWindow::readConfigFile(const string& dataFilePath, bool wipe, uint8_t i
 	if (wipe and not Settings::get().getProjectDir().empty()) {
 		inputNavigator.clear();
 		animationNavigator.clear();
+		profileNavigator.setDefaultProfileName(datafile.getRootInfo().getValue("defaultProfile"));
 		profileNavigator.clear();
 
 		inputNavigator.load();
 		animationNavigator.load();
 		profileNavigator.load();
 	}
-
-	// Restore the default-profile selection persisted in the config root.
-	profileNavigator.setDefaultProfileName(datafile.getRootInfo().getValue("defaultProfile"));
 }
 
 void MainWindow::populateColorsCombo() {

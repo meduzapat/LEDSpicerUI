@@ -44,25 +44,31 @@ public:
 
 	void clear() noexcept override;
 
-	/**
-	 * @return Name of the profile currently selected as default, or empty string.
-	 */
-	const string& getDefaultProfileName() const noexcept { return defaultProfileName; }
+	void load() noexcept override;
 
 	/**
-	 * Sets the default profile by name. Used after load() to restore the
-	 * selection persisted in the config file.
-	 * @param name
+	 * @return Full relative path of the default profile (no extension), or empty string if none.
 	 */
-	void setDefaultProfileName(const string& name) noexcept { defaultProfileName = name; }
+	string getDefaultProfileName() const noexcept;
+
+	/**
+	 * Resolves the default profile by matching fullPath against loaded profiles.
+	 * Called after load() to restore the selection persisted in the config file.
+	 * If no match is found, the selection is left empty (save will report an error).
+	 * @param fullPath Relative path without extension, as stored in ledspicer.conf.
+	 */
+	void setDefaultProfileName(const string& fullPath) noexcept;
 
 protected:
 
 	/// Import dialog for existing LEDSpicer profile files.
 	DialogImport dialogImportProfile;
 
-	/// Name of the currently selected default profile (config-file scope).
-	string defaultProfileName;
+	/// Path from config (target for the load-time search); cleared once matched.
+	string defaultProfilePath;
+
+	/// Tile of the selected default profile; nullptr = none.
+	Storage::BoxButton* defaultProfileBB = nullptr;
 
 	void setupDialog() noexcept override;
 
