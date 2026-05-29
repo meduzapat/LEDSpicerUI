@@ -211,7 +211,7 @@ void DialogSelect::addDisplayButtons(Storage::BoxButton& boxButton) noexcept {
 	// EDIT — only when this link type carries extra fields.
 	if (not request->linkFields.empty()) {
 		auto btn{Gtk::make_managed<Gtk::Button>()};
-		boxButton.pack_start(*btn, Gtk::PACK_SHRINK);
+		boxButton.packButtonStart(*btn);
 		btn->set_image_from_icon_name(ICON_EDIT, Gtk::ICON_SIZE_BUTTON);
 		btn->set_tooltip_text("Edit");
 		btn->signal_clicked().connect([&boxButton, this]() {
@@ -224,7 +224,7 @@ void DialogSelect::addDisplayButtons(Storage::BoxButton& boxButton) noexcept {
 
 	// DELETE its always present.
 	auto btn{Gtk::make_managed<Gtk::Button>()};
-	boxButton.pack_start(*btn, Gtk::PACK_SHRINK);
+	boxButton.packButtonStart(*btn);
 	btn->set_image_from_icon_name(ICON_DELETE, Gtk::ICON_SIZE_BUTTON);
 	btn->set_tooltip_text("Remove");
 	btn->signal_clicked().connect([&boxButton, this]() {

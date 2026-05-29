@@ -32,7 +32,7 @@ namespace LEDSpicerUI::Ui::Storage {
  *
  * A class that contains a form with data, is used to handle and display that information.
  */
-class BoxButton : public Gtk::HBox {
+class BoxButton : public Gtk::FlowBoxChild {
 
 public:
 
@@ -49,15 +49,17 @@ public:
 	 * @param other The BoxButton instance to move from.
 	 */
 	BoxButton(BoxButton&& other) noexcept :
-		Gtk::HBox(std::move(other)),
+		Gtk::FlowBoxChild(std::move(other)),
 		data(std::exchange(other.data, nullptr)),
-		label(std::move(other.label)) {}
+		label(std::move(other.label)),
+		contentBox(std::exchange(other.contentBox, nullptr)) {}
 
 	BoxButton& operator=(BoxButton&& other) noexcept {
 		if (this != &other) {
-			Gtk::HBox::operator=(std::move(other));
-			data     = std::exchange(other.data, nullptr);
-			label    = std::move(other.label);
+			Gtk::FlowBoxChild::operator=(std::move(other));
+			data       = std::exchange(other.data, nullptr);
+			label      = std::move(other.label);
+			contentBox = std::exchange(other.contentBox, nullptr);
 		}
 		return *this;
 	}
@@ -102,6 +104,9 @@ protected:
 
 	/// Label to display.
 	Gtk::Label* label;
+
+	/// Internal horizontal layout container.
+	Gtk::HBox* contentBox = nullptr;
 };
 
 } // namespace

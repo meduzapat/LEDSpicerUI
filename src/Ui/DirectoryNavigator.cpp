@@ -166,7 +166,7 @@ void DirectoryNavigator::wireDirButtons(Storage::BoxButton& bb) noexcept {
 
 	// Edit button — rename the directory.
 	auto editBtn {Gtk::make_managed<Gtk::Button>()};
-	bb.pack_start(*editBtn, Gtk::PACK_SHRINK);
+	bb.packButtonStart(*editBtn);
 	editBtn->set_image_from_icon_name(ICON_EDIT, Gtk::ICON_SIZE_BUTTON);
 	editBtn->get_style_context()->add_class(CSS_BOX_BACKGROUND_EDIT);
 	editBtn->set_tooltip_text("Rename " + de->createPrettyName());
@@ -193,7 +193,7 @@ void DirectoryNavigator::wireDirButtons(Storage::BoxButton& bb) noexcept {
 
 	// Delete button — remove the directory and all its contents.
 	auto delBtn {Gtk::make_managed<Gtk::Button>()};
-	bb.pack_start(*delBtn, Gtk::PACK_SHRINK);
+	bb.packButtonStart(*delBtn);
 	delBtn->set_image_from_icon_name(ICON_TRASH, Gtk::ICON_SIZE_BUTTON);
 	delBtn->get_style_context()->add_class(CSS_BOX_BACKGROUND_DELETE);
 	delBtn->set_tooltip_text("Delete " + de->createPrettyName());
@@ -212,8 +212,8 @@ void DirectoryNavigator::wireDirButtons(Storage::BoxButton& bb) noexcept {
 void DirectoryNavigator::sortDirectoriesFirst(OrdenableFlowBox* box) noexcept {
 	box->set_sort_func([](Gtk::FlowBoxChild* a, Gtk::FlowBoxChild* b) -> int {
 		auto
-			dA {static_cast<Storage::BoxButton*>(a->get_child())->getData()},
-			dB {static_cast<Storage::BoxButton*>(b->get_child())->getData()};
+			dA {static_cast<Storage::BoxButton*>(a)->getData()},
+			dB {static_cast<Storage::BoxButton*>(b)->getData()};
 		const bool
 			aIsDir {dynamic_cast<Storage::DirectoryEntry*>(dA) != nullptr},
 			bIsDir {dynamic_cast<Storage::DirectoryEntry*>(dB) != nullptr};

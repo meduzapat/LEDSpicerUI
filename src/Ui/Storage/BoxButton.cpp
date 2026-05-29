@@ -25,9 +25,10 @@
 using namespace LEDSpicerUI::Ui::Storage;
 
 BoxButton::BoxButton(Data* form) noexcept :
-	Gtk::HBox(false, 2),
+	Gtk::FlowBoxChild(),
 	data{form},
-	label{Gtk::make_managed<Gtk::Label>()}
+	label{Gtk::make_managed<Gtk::Label>()},
+	contentBox{Gtk::make_managed<Gtk::HBox>(false, 2)}
 {
 	set_valign(Gtk::ALIGN_START);
 	set_vexpand(false);
@@ -35,6 +36,7 @@ BoxButton::BoxButton(Data* form) noexcept :
 	set_margin_bottom(2);
 	set_margin_left(2);
 	set_margin_right(2);
+	set_can_focus(false);
 
 	Gtk::HBox* lbox{Gtk::make_managed<Gtk::HBox>()};
 	lbox->pack_start(*label, Gtk::PACK_EXPAND_WIDGET);
@@ -43,12 +45,13 @@ BoxButton::BoxButton(Data* form) noexcept :
 	label->set_margin_right(5);
 	label->set_halign(Gtk::ALIGN_START);
 	label->set_visible(true);
-	pack_start(*lbox, Gtk::PACK_EXPAND_WIDGET);
+	contentBox->pack_start(*lbox, Gtk::PACK_EXPAND_WIDGET);
 
-	get_style_context()->add_class(CSS_BOX_BUTTON);
+	contentBox->get_style_context()->add_class(CSS_BOX_BUTTON);
 	auto cssClass{form->getCssClass()};
 	if (not cssClass.empty())
-		get_style_context()->add_class(string(cssClass));
+		contentBox->get_style_context()->add_class(string(cssClass));
+	add(*contentBox);
 	data->registerToCollection();
 	sync();
 	show_all();
@@ -63,7 +66,7 @@ BoxButton::~BoxButton() {
 }
 
 void BoxButton::packButtonStart(Gtk::Button& button) noexcept {
-	pack_start(button, Gtk::PACK_SHRINK);
+	contentBox->pack_start(button, Gtk::PACK_SHRINK);
 }
 
 void BoxButton::sync() noexcept {

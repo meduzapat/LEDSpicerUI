@@ -77,7 +77,7 @@ ProfileDirectoryNavigator::ProfileDirectoryNavigator(
 	box->signal_selected_children_changed().connect([this]() {
 		const auto selected {box->get_selected_children()};
 		if (selected.empty()) return;
-		auto bb {dynamic_cast<Storage::BoxButton*>(selected.front()->get_child())};
+		auto bb {dynamic_cast<Storage::BoxButton*>(selected.front())};
 		if (not bb or not bb->getData()) return;
 		// Skip directory tiles.
 		if (dynamic_cast<Storage::DirectoryEntry*>(bb->getData())) return;
