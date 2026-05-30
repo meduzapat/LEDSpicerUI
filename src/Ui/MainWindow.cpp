@@ -96,7 +96,7 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 	btnSaveProject->signal_clicked().connect([this]() {
 		try {
 			if (boxRandomColors->get_children().size() == 1) {
-				throw Message("The number of random colors need to be more than one or zero.");
+				throw Message("The number of random colors need to be more than one or none.");
 			}
 
 			ConfigFile::save(ConfigFile::ConfigData(
@@ -321,16 +321,12 @@ void MainWindow::openProject(const string& name) {
 	Defaults::setSubtitle(name);
 	comboColors->set_active_id("");
 
-	const bool configExists = Glib::file_test(
-		Settings::get().getActiveConfigPath(), Glib::FileTest::FILE_TEST_EXISTS
-	);
-	bool loadedOk = false;
 	try {
 		readConfigFile(Settings::get().getActiveConfigPath(), true, IMPORT_ALL);
-		loadedOk = true;
+		DialogSettings::getInstance()->saveSettings();
 	}
 	catch (Message& e) {
-		if (configExists)
+		if (Glib::file_test(Settings::get().getActiveConfigPath(), Glib::FileTest::FILE_TEST_EXISTS))
 			Message::displayError(XMLHelper::cleanError("The config file raised an error:\n" + e.getMessage()));
 		devices.wipe();
 		restrictors.wipe();
@@ -352,9 +348,6 @@ void MainWindow::openProject(const string& name) {
 	mainTabs->set_visible_child("configuration");
 	mainTabsBox->set_sensitive(true);
 	btnImportConfig->set_sensitive(true);
-
-	if (configExists and loadedOk)
-		DialogSettings::getInstance()->saveSettings();
 }
 
 void MainWindow::readConfigFile(const string& dataFilePath, bool wipe, uint8_t importFlags) {
