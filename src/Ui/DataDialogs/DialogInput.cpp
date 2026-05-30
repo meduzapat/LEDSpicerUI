@@ -219,7 +219,7 @@ string DialogInput::createUniqueId() const noexcept {
 }
 
 LEDSpicerUI::Ui::Storage::Data* DialogInput::createData(Values& rawData) const noexcept {
-	auto* data {new Storage::Input(rawData, currentDirectory)};
+	auto data {new Storage::Input(rawData, currentDirectory)};
 	if (action == Actions::LOAD)
 		data->getProperties().setValue(PATH_BASE, data->getValue(PATH_BASE));
 	return data;

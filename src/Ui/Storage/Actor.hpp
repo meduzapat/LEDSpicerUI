@@ -21,6 +21,7 @@
  */
 
 #include "CollectionHandler.hpp"
+#include "Link.hpp"
 
 #pragma once
 
@@ -32,12 +33,14 @@ namespace LEDSpicerUI::Ui::Storage {
  * The actor type (Filler, Pulse, Audio, ...) is stored in TYPE; the active
  * field set depends on the type's AnimationInfo flags.
  * Collection ID is scoped to its parent Animation via PID.
+ * Extends Link to hold a pointer to its Group, enabling cascade deletion
+ * when the group is removed.
  */
-class Actor : public Data {
+class Actor : public Link {
 
 public:
 
-	Actor(Values& data, const string& ownerId) noexcept;
+	Actor(Values& data, Data* group, const string& ownerId) noexcept;
 
 	virtual ~Actor() = default;
 

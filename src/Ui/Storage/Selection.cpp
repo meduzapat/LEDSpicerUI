@@ -30,7 +30,7 @@ namespace {
 // Full path for DirNode-backed items; bare pretty name otherwise.
 string pickerLabel(Data* data) noexcept {
 	if (data->getProperties().isSet(LEDSpicerUI::Constants::FILENAME))
-		if (auto* node = dynamic_cast<DirNode*>(data))
+		if (auto node = dynamic_cast<DirNode*>(data))
 			return node->getFullPath();
 	return data->createPrettyName();
 }

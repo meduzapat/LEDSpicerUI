@@ -69,8 +69,9 @@ void Link::setValue(const string& key, const string& value) noexcept {
 }
 
 string Link::toXML() const noexcept {
-
 	Values attrs {{linkKey, link->createUniqueId()}};
-	attrs.setValues(values);
+	for (const auto& [k, v] : values)
+		if (shouldSerialize(k, v))
+			attrs.setValue(k, v);
 	return createOpeningXML(linkType, attrs, true);
 }

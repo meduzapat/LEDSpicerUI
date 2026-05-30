@@ -20,9 +20,9 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <gtest/gtest.h>
 #include "Storage/Animation.hpp"
 #include "Storage/Actor.hpp"
+#include "MockBasicData.hpp"
 
 using namespace LEDSpicerUI::Ui::Storage;
 using namespace LEDSpicerUI::Constants;
@@ -37,6 +37,16 @@ class StubDirNode : private StubValues, public DirNode {
 public:
 
 	StubDirNode() noexcept : StubValues{}, DirNode(v, nullptr, "stub") {}
+
+};
+
+class StubGroup : public Test::Mocks::MockBasicData {
+
+public:
+
+	explicit StubGroup(const string& n) noexcept : MockBasicData(emptyData()) { setValue(NAME, n); }
+
+	string createUniqueId() const noexcept override { return getPrimaryValue(); }
 
 };
 
@@ -96,17 +106,29 @@ TEST_F(AnimationTest, ToXMLWithActors) {
 	Values data {{FILENAME, "twoactors"}};
 	Animation anim {data, nullptr};
 
+	StubGroup stubAll{"All"};
 	Values a1 {{TYPE, "Filler"}, {ACTOR_GROUP, "All"}, {COLOR, "Blue"}, {FILTER, "Combine"}};
 	Values a2 {{TYPE, "Pulse"},  {ACTOR_GROUP, "All"}, {COLOR, "Red"},  {FILTER, "Combine"}};
-	anim.getChild(COLLECTION_ACTORS)->create(new Actor(a1, anim.getFsId()));
-	anim.getChild(COLLECTION_ACTORS)->create(new Actor(a2, anim.getFsId()));
+	anim.getChild(COLLECTION_ACTORS)->create(new Actor(a1, &stubAll, anim.getFsId()));
+	anim.getChild(COLLECTION_ACTORS)->create(new Actor(a2, &stubAll, anim.getFsId()));
 
 	const string xml(anim.toXML());
-	EXPECT_NE(string::npos, xml.find("type=\"animation\""));
-	EXPECT_NE(string::npos, xml.find("<actor"));
-	EXPECT_NE(string::npos, xml.find("Filler"));
-	EXPECT_NE(string::npos, xml.find("Pulse"));
-	EXPECT_NE(string::npos, xml.find("</LEDSpicer>"));
+	EXPECT_EQ("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+			"<!-- This is an auto-generated file by LEDSpicerUI 0.0.15. -->\n"
+			"<LEDSpicer\n\tversion=\"1.1\"\n\ttype=\"animation\"\n>\n"
+			"\t<actor\n"
+				"\t\ttype=\"Filler\"\n"
+				"\t\tcolor=\"Blue\"\n"
+				"\t\tfilter=\"Combine\"\n"
+				"\t\tgroup=\"All\"\n"
+			"\t/>\n"
+			"\t<actor\n"
+				"\t\ttype=\"Pulse\"\n"
+				"\t\tcolor=\"Red\"\n"
+				"\t\tfilter=\"Combine\"\n"
+				"\t\tgroup=\"All\"\n"
+			"\t/>\n"
+			"</LEDSpicer>\n", xml);
 
 	EXPECT_EQ("Animation with 2 actors", anim.createTooltip());
 }
@@ -115,8 +137,9 @@ TEST_F(AnimationTest, ToXMLWithActors) {
 
 TEST_F(AnimationTest, ActorBasics) {
 
+	StubGroup stubAll{"All"};
 	Values data {{TYPE, "Serpentine"}, {ACTOR_GROUP, "All"}, {COLOR, "Blue"}, {FILTER, "Combine"}};
-	Actor actor {data, "owner_1"};
+	Actor actor {data, &stubAll, "owner_1"};
 
 	// getCssClass, getXmlTag, getCollectionHandler.
 	EXPECT_EQ(CSS_ACTOR_BOX_BUTTON, actor.getCssClass());
@@ -142,43 +165,71 @@ TEST_F(AnimationTest, ActorBasics) {
 TEST_F(AnimationTest, ActorUIDIsUniquePerInstance) {
 
 	Values d1 {{TYPE, "Filler"}}, d2 {{TYPE, "Pulse"}};
-	Actor a1 {d1, "owner_1"};
-	Actor a2 {d2, "owner_1"};
+	Actor a1 {d1, nullptr, "owner_1"};
+	Actor a2 {d2, nullptr, "owner_1"};
 	EXPECT_NE(a1.getProperties().getValue(UID), a2.getProperties().getValue(UID));
 }
 
 TEST_F(AnimationTest, ActorScopesCollectionByParent) {
 
 	Values d1 {{TYPE, "Filler"}}, d2 {{TYPE, "Filler"}};
-	Actor a {d1, "owner_1"};
-	Actor b {d2, "owner_2"};
+	Actor a {d1, nullptr, "owner_1"};
+	Actor b {d2, nullptr, "owner_2"};
 	// Different parents → different scoped collections.
 	EXPECT_NE(a.getCollectionHandler(), b.getCollectionHandler());
 }
 
 TEST_F(AnimationTest, ActorToXMLEmitsAttributes) {
 
+	StubGroup stubAll{"All"};
 	Values data {{TYPE, "Filler"}, {ACTOR_GROUP, "All"}, {COLOR, "Blue"}, {FILTER, "Combine"}};
-	Actor actor {data, "owner_1"};
+	Actor actor {data, &stubAll, "owner_1"};
 
 	const string xml(actor.toXML());
-	EXPECT_NE(string::npos, xml.find("<actor"));
-	EXPECT_NE(string::npos, xml.find("type=\"Filler\""));
-	EXPECT_NE(string::npos, xml.find("group=\"All\""));
-	EXPECT_NE(string::npos, xml.find("color=\"Blue\""));
-	EXPECT_NE(string::npos, xml.find("filter=\"Combine\""));
-	// Self-closing — no body.
-	EXPECT_NE(string::npos, xml.find("/>"));
+	EXPECT_EQ(
+		"<actor\n"
+			"\ttype=\"Filler\"\n"
+			"\tcolor=\"Blue\"\n"
+			"\tfilter=\"Combine\"\n"
+			"\tgroup=\"All\"\n"
+		"/>\n", xml);
 }
 
 TEST_F(AnimationTest, ActorEmptyValuesAreOmitted) {
 
+	StubGroup stubAll{"All"};
 	Values data {{TYPE, "Filler"}, {ACTOR_GROUP, "All"}, {COLOR, ""}};
-	Actor actor {data, "owner_1"};
+	Actor actor {data, &stubAll, "owner_1"};
 
 	// Empty COLOR should not appear in the serialized XML.
 	const string xml(actor.toXML());
 	EXPECT_EQ(string::npos, xml.find("color="));
+}
+
+TEST_F(AnimationTest, GroupDeleteCascadesAllActors) {
+
+	Values data {{FILENAME, "cascade"}};
+	Animation anim {data, nullptr};
+
+	StubGroup stubAll{"All"};
+	Values a1 {{TYPE, "Filler"},     {ACTOR_GROUP, "All"}};
+	Values a2 {{TYPE, "Pulse"},      {ACTOR_GROUP, "All"}};
+	Values a3 {{TYPE, "Serpentine"}, {ACTOR_GROUP, "All"}};
+	anim.getChild(COLLECTION_ACTORS)->create(new Actor(a1, &stubAll, anim.getFsId()));
+	anim.getChild(COLLECTION_ACTORS)->create(new Actor(a2, &stubAll, anim.getFsId()));
+	anim.getChild(COLLECTION_ACTORS)->create(new Actor(a3, &stubAll, anim.getFsId()));
+	ASSERT_EQ(3u, anim.getChild(COLLECTION_ACTORS)->getSize());
+
+	// Simulate group deletion: register anim's actors as a dependency of COLLECTION_GROUPS,
+	// then remove stubAll via its collection handler.
+	CollectionHandler::getInstance(COLLECTION_GROUPS)->add(&stubAll);
+	CollectionHandler::getInstance(COLLECTION_GROUPS)->registerDependency(
+		anim.getChild(COLLECTION_ACTORS)
+	);
+	CollectionHandler::getInstance(COLLECTION_GROUPS)->remove(&stubAll);
+
+	// All three actors must have been cascade-deleted.
+	EXPECT_EQ(0u, anim.getChild(COLLECTION_ACTORS)->getSize());
 }
 
 int main(int argc, char** argv) {

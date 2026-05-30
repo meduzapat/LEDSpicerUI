@@ -681,7 +681,7 @@ void DialogElement::drawPins() noexcept {
 	if (not numberOfPins) return;
 
 	// Keep the pin spinners aligned with the current device range.
-	for (auto* spin : {pin, pinR, pinG, pinB})
+	for (auto spin : {pin, pinR, pinG, pinB})
 		spin->set_range(1, numberOfPins);
 
 	std::vector<std::pair<string, string>> pinsUsage(numberOfPins, {NO_COLOR, ""});

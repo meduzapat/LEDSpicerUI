@@ -43,7 +43,7 @@ string Animation::createPrettyName() const noexcept {
 }
 
 string Animation::createTooltip() const noexcept {
-	const auto* actors {getChild(COLLECTION_ACTORS)};
+	const auto actors {getChild(COLLECTION_ACTORS)};
 	const auto count {actors ? actors->getSize() : 0};
 	return "Animation with " + std::to_string(count) + " actor" + (count == 1 ? "" : "s");
 }

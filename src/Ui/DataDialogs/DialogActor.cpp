@@ -198,7 +198,8 @@ void DialogActor::load(DataMap& values) noexcept {
 }
 
 LEDSpicerUI::Ui::Storage::Data* DialogActor::createData(Values& rawData) const noexcept {
-	return new Storage::Actor(rawData, ownerData->getProperties().getValue(UID));
+	auto group = Storage::CollectionHandler::getInstance(COLLECTION_GROUPS)->get(rawData.getValue(ACTOR_GROUP));
+	return new Storage::Actor(rawData, group, ownerData->getProperties().getValue(UID));
 }
 
 string DialogActor::createUniqueId() const noexcept {
@@ -297,7 +298,7 @@ void DialogActor::isValid() const {
 
 	// Audio palette: every band must have a color.
 	if (flags & Defaults::ANIM_USES_AUDIO) {
-		for (auto* btn : {btnActorAudioOff, btnActorAudioLow, btnActorAudioMid, btnActorAudioHigh})
+		for (auto btn : {btnActorAudioOff, btnActorAudioLow, btnActorAudioMid, btnActorAudioHigh})
 			if (btn->get_label().empty())
 				throw Message("All audio colors (Off / Low / Mid / High) must be set.");
 	}
@@ -310,9 +311,11 @@ void DialogActor::storeData() noexcept {
 
 	const string type {selectorCombo->get_active_id()};
 
-	currentData->setValue(TYPE,        type);
-	currentData->setValue(ACTOR_GROUP, comboBoxActorGroup->get_active_text().raw());
-	currentData->setValue(FILTER,      comboBoxActorFilter->get_active_id());
+	currentData->setValue(TYPE,   type);
+	currentData->setValue(FILTER, comboBoxActorFilter->get_active_id());
+	static_cast<Storage::Link*>(currentData)->setLink(
+		Storage::CollectionHandler::getInstance(COLLECTION_GROUPS)->get(comboBoxActorGroup->get_active_id())
+	);
 
 	auto storeOptional = [this](const string& key, Gtk::ToggleButton* tog, Gtk::SpinButton* spin) {
 		if (tog->get_active())

@@ -69,19 +69,24 @@ void BoxButtonCollection::remove(BoxButton& item) noexcept {
 }
 
 void BoxButtonCollection::remove(Data* form) noexcept {
-	auto it {std::find_if(
-		items.begin(),
-		items.end(),
-		[form](const BoxButton* button) {
-			return *button->getData() == *form;
+	bool removed = false;
+	// Multiple items can match the same form.
+	for (auto it = items.begin(); it != items.end();) {
+		if (*(*it)->getData() == *form) {
+			delete *it;
+			it = items.erase(it);
+			removed = true;
 		}
-	)};
-
-	delete *it;
-	items.erase(it);
-	refreshSensitiveWidgets();
-	// updates owner labels and tooltips
-	if (owner) owner->sync();
+		else {
+			++it;
+		}
+	}
+	// Defer UI refresh until all matches are gone; no-op if nothing was removed.
+	if (removed) {
+		refreshSensitiveWidgets();
+		// updates owner labels and tooltips
+		if (owner) owner->sync();
+	}
 }
 
 void BoxButtonCollection::swap(BoxButtonCollection& other) noexcept {

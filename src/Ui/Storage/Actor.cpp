@@ -24,7 +24,9 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
-Actor::Actor(Values& data, const string& ownerId) noexcept : Data(data) {
+Actor::Actor(Values& data, Data* group, const string& ownerId) noexcept :
+	Link(data, ACTOR_GROUP, TYPE_ACTOR, {}, group)
+{
 	getProperties().setValue(UID, ++actorCounter);
 	getProperties().setValue(PID, ownerId);
 }

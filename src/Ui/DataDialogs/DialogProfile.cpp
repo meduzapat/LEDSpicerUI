@@ -241,7 +241,7 @@ string DialogProfile::createUniqueId() const noexcept {
 }
 
 LEDSpicerUI::Ui::Storage::Data* DialogProfile::createData(Values& rawData) const noexcept {
-	auto* data {new Storage::Profile(rawData, currentDirectory)};
+	auto data {new Storage::Profile(rawData, currentDirectory)};
 	// Rescue PATH_BASE to be used in loading process.
 	if (action == Actions::LOAD)
 		data->getProperties().setValue(PATH_BASE, data->getValue(PATH_BASE));
@@ -253,11 +253,11 @@ void DialogProfile::setUpSelector(const DialogSelect::SelectionRequest& req) noe
 }
 
 void DialogProfile::resolvePaths(ValueVector& items, const string& sourceCollectionId) noexcept {
-	auto* ch {CollectionHandler::getInstance(sourceCollectionId)};
+	auto ch {CollectionHandler::getInstance(sourceCollectionId)};
 	for (auto& raw : items) {
 		const string path {raw.getValue(NAME)};
 		for (auto& [id, data] : *ch) {
-			auto* node {dynamic_cast<const Storage::DirNode*>(data)};
+			auto node {dynamic_cast<const Storage::DirNode*>(data)};
 			if (node and node->getFullPath() == path) {
 				raw.setValue(NAME, id);
 				break;

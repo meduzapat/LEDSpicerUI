@@ -95,7 +95,7 @@ string DialogAnimation::createUniqueId() const noexcept {
 }
 
 LEDSpicerUI::Ui::Storage::Data* DialogAnimation::createData(Values& rawData) const noexcept {
-	auto* data {new Storage::Animation(rawData, currentDirectory)};
+	auto data {new Storage::Animation(rawData, currentDirectory)};
 	if (action == Actions::LOAD)
 		data->getProperties().setValue(PATH_BASE, data->getValue(PATH_BASE));
 	return data;

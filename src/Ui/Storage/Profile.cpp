@@ -72,11 +72,11 @@ string Profile::toXML() const noexcept {
 		const string& itemTag,
 		const string& sourceCollectionId
 	) {
-		auto* ch {CollectionHandler::getInstance(sourceCollectionId)};
+		auto ch {CollectionHandler::getInstance(sourceCollectionId)};
 		string inner;
 		for (auto btn : *getChild(collectionKey)) {
-			auto* target {ch->get(btn->getData()->createUniqueId())};
-			auto* node   {dynamic_cast<const DirNode*>(target)};
+			auto target {ch->get(btn->getData()->createUniqueId())};
+			auto node   {dynamic_cast<const DirNode*>(target)};
 			if (not node) continue;
 			inner += Defaults::tab() + "<" + itemTag + " name=\"" + node->getFullPath() + "\"/>\n";
 		}

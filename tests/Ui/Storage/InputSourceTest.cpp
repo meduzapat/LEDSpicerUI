@@ -72,7 +72,7 @@ TEST_F(InputSourceTest, TestFunctionality) {
 	EXPECT_NE(string::npos, src.createTooltip().find("0"));
 
 	// createTooltip with maps present.
-	auto* mapCh {src.getChild(COLLECTION_INPUT_MAPS)};
+	auto mapCh {src.getChild(COLLECTION_INPUT_MAPS)};
 	Values mapData {{TYPE, "button"}, {TARGET, "p1_b1"}, {TRIGGER, "press"}, {COLOR, "red"}, {FILTER, ""}};
 	mapCh->create(new InputMap(mapData, nullptr));
 	EXPECT_NE(string::npos, src.createTooltip().find("1"));
