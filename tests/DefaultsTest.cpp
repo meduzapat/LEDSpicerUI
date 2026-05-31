@@ -331,6 +331,53 @@ TEST(DefaultsTest, SanitizeFilename) {
 	EXPECT_EQ("ab",         Defaults::sanitizeFilename("a/b"));
 	EXPECT_EQ("filename",   Defaults::sanitizeFilename("file<>name"));
 	EXPECT_EQ("",           Defaults::sanitizeFilename(""));
+	// Control characters stripped.
+	EXPECT_EQ("ab",         Defaults::sanitizeFilename("a\x01" "b"));
+	EXPECT_EQ("ab",         Defaults::sanitizeFilename("a\x1E" "b"));        // RS separator
+	EXPECT_EQ("ab",         Defaults::sanitizeFilename("a\x1F" "b"));        // US separator
+	EXPECT_EQ("ab",         Defaults::sanitizeFilename("a\x7F" "b"));        // DEL
+	// Leading dots stripped.
+	EXPECT_EQ("",           Defaults::sanitizeFilename("."));
+	EXPECT_EQ("",           Defaults::sanitizeFilename("..."));
+	EXPECT_EQ("foo",        Defaults::sanitizeFilename("..foo"));
+	EXPECT_EQ("a.b",        Defaults::sanitizeFilename("a.b"));              // non-leading dot preserved
+	// maxLen truncation.
+	EXPECT_EQ("abc",        Defaults::sanitizeFilename("abcdef", 3));
+	EXPECT_EQ("abcdef",     Defaults::sanitizeFilename("abcdef", 6));
+}
+
+TEST(DefaultsTest, SanitizeName) {
+	EXPECT_EQ("clean",      Defaults::sanitizeName("clean"));
+	EXPECT_EQ("",           Defaults::sanitizeName(""));
+	// XML-unsafe chars stripped.
+	EXPECT_EQ("",           Defaults::sanitizeName("<>&\""));
+	EXPECT_EQ("ab",         Defaults::sanitizeName("a<b"));
+	EXPECT_EQ("ab",         Defaults::sanitizeName("a>b"));
+	EXPECT_EQ("ab",         Defaults::sanitizeName("a&b"));
+	EXPECT_EQ("ab",         Defaults::sanitizeName("a\"b"));
+	// Control characters stripped.
+	EXPECT_EQ("ab",         Defaults::sanitizeName("a\x01" "b"));
+	EXPECT_EQ("ab",         Defaults::sanitizeName("a\x1E" "b"));            // RS separator
+	EXPECT_EQ("ab",         Defaults::sanitizeName("a\x1F" "b"));            // US separator
+	EXPECT_EQ("ab",         Defaults::sanitizeName("a\x7F" "b"));            // DEL
+	// Allowed special chars preserved.
+	EXPECT_EQ("a b",        Defaults::sanitizeName("a b"));                  // space
+	EXPECT_EQ("it's",       Defaults::sanitizeName("it's"));                 // apostrophe
+}
+
+TEST(DefaultsTest, EscapeXmlValue) {
+	EXPECT_EQ("clean",      Defaults::escapeXmlValue("clean"));
+	EXPECT_EQ("",           Defaults::escapeXmlValue(""));
+	EXPECT_EQ("&amp;",      Defaults::escapeXmlValue("&"));
+	EXPECT_EQ("&lt;",       Defaults::escapeXmlValue("<"));
+	EXPECT_EQ("&gt;",       Defaults::escapeXmlValue(">"));
+	EXPECT_EQ("&quot;",     Defaults::escapeXmlValue("\""));
+	EXPECT_EQ("a&amp;b",    Defaults::escapeXmlValue("a&b"));
+	EXPECT_EQ("&lt;tag&gt;", Defaults::escapeXmlValue("<tag>"));
+	EXPECT_EQ("say &quot;hi&quot;", Defaults::escapeXmlValue("say \"hi\""));
+	// Non-special chars pass through unchanged.
+	EXPECT_EQ("hello world", Defaults::escapeXmlValue("hello world"));
+	EXPECT_EQ("it's",        Defaults::escapeXmlValue("it's"));
 }
 
 TEST(DefaultsTest, LinkSwitchToWidget) {

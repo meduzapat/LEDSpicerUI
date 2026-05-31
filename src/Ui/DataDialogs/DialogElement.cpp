@@ -79,6 +79,7 @@ DialogElement::DialogElement(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 	builder->get_widget("ScaleElementBrightness", brightness);
 
 	builder->get_widget("NotebookDeviceConnections", notebookDeviceConnections);
+	Defaults::attachNameFilter(elementName);
 
 	DialogColors::getInstance()->activateColorButton(btnDefaultColor);
 

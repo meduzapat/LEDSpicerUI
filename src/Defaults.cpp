@@ -684,24 +684,75 @@ bool Defaults::runCommand(const string& command, string& output) {
 	}
 }
 
-string Defaults::sanitizeFilename(const string& text) {
+string Defaults::sanitizeFilename(const string& text, size_t maxLen) {
 	string result;
 	result.reserve(text.size());
-	for (auto ch : text) {
+	bool leadingDot = true;
+	for (unsigned char ch : text) {
+		if (ch < 0x20 or ch == 0x7F) continue; // C0 control chars and DEL
 		switch (ch) {
-			case '/':
-			case '\\':
-			case ':':
-			case '*':
-			case '?':
-			case '"':
-			case '<':
-			case '>':
-			case '|':
+			case '/': case '\\': case ':': case '*':
+			case '?': case '"': case '<': case '>': case '|':
 				continue;
-			default:
-				result += ch;
+			default: break;
 		}
+		if (leadingDot and ch == '.') continue;
+		leadingDot = false;
+		result += static_cast<char>(ch);
+	}
+	if (result.size() > maxLen)
+		result.resize(maxLen);
+	return result;
+}
+
+string Defaults::sanitizeName(const string& text) noexcept {
+	string result;
+	result.reserve(text.size());
+	for (unsigned char ch : text) {
+		if (ch < 0x20 or ch == 0x7F) continue; // C0 control chars and DEL
+		switch (ch) {
+			case '<': case '>': case '&': case '"':
+				continue;
+			default: break;
+		}
+		result += static_cast<char>(ch);
 	}
 	return result;
+}
+
+string Defaults::escapeXmlValue(const string& s) noexcept {
+	string r;
+	r.reserve(s.size());
+	for (char c : s) {
+		switch (c) {
+			case '&': r += "&amp;";  break;
+			case '<': r += "&lt;";   break;
+			case '>': r += "&gt;";   break;
+			case '"': r += "&quot;"; break;
+			default:  r += c;        break;
+		}
+	}
+	return r;
+}
+
+void Defaults::attachFilenameFilter(Gtk::Entry* entry, size_t maxLen) noexcept {
+	entry->set_max_length(static_cast<int>(maxLen));
+	entry->signal_changed().connect([entry, maxLen]() {
+		string text(entry->get_text()), filtered(sanitizeFilename(text, maxLen));
+		if (filtered != text) {
+			entry->set_text(filtered);
+			entry->set_position(-1);
+		}
+	});
+}
+
+void Defaults::attachNameFilter(Gtk::Entry* entry, size_t maxLen) noexcept {
+	entry->set_max_length(static_cast<int>(maxLen));
+	entry->signal_changed().connect([entry]() {
+		string text(entry->get_text()), filtered(sanitizeName(text));
+		if (filtered != text) {
+			entry->set_text(filtered);
+			entry->set_position(-1);
+		}
+	});
 }

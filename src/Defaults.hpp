@@ -795,12 +795,51 @@ public:
 	static bool runCommand(const string& command, string& output);
 
 	/**
-	 * Sanitizes a string for use as a filename/directory name.
-	 * Removes invalid characters: / \ : * ? " < > |
+	 * Sanitizes a string for use as a filename or directory name.
+	 * Removes control characters, filesystem-unsafe characters (/ \ : * ? " < > |),
+	 * and leading dots. Truncates to maxLen bytes.
+	 * @param text   The input string.
+	 * @param maxLen Maximum allowed length (default 64).
+	 * @return Sanitized string.
+	 */
+	static string sanitizeFilename(const string& text, size_t maxLen = 64);
+
+	/**
+	 * Sanitizes a string for use as a general name (element, group, process, etc.).
+	 * Removes control characters (including internal separator bytes) and XML
+	 * attribute-unsafe characters (< > & "). Spaces and other printable ASCII are kept.
 	 * @param text The input string.
 	 * @return Sanitized string.
 	 */
-	static string sanitizeFilename(const string& text);
+	static string sanitizeName(const string& text) noexcept;
+
+	/**
+	 * Escapes a string for safe embedding as an XML attribute value.
+	 * Replaces & < > " with their XML entity equivalents.
+	 * @param s The raw attribute value.
+	 * @return Escaped string.
+	 */
+	static string escapeXmlValue(const string& s) noexcept;
+
+	/**
+	 * Attaches a filename sanitization filter to a Gtk::Entry.
+	 * Connects a signal_changed handler that strips control characters,
+	 * filesystem-unsafe characters, and leading dots on every change.
+	 * Also sets the widget's maximum input length.
+	 * @param entry  The entry widget to filter.
+	 * @param maxLen Maximum allowed length (default 64).
+	 */
+	static void attachFilenameFilter(Gtk::Entry* entry, size_t maxLen = 64) noexcept;
+
+	/**
+	 * Attaches a name sanitization filter to a Gtk::Entry.
+	 * Connects a signal_changed handler that strips control characters and
+	 * XML-unsafe characters on every change.
+	 * Also sets the widget's maximum input length.
+	 * @param entry  The entry widget to filter.
+	 * @param maxLen Maximum allowed length (default 128).
+	 */
+	static void attachNameFilter(Gtk::Entry* entry, size_t maxLen = 128) noexcept;
 
 protected:
 

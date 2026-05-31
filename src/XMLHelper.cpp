@@ -97,7 +97,7 @@ string XMLHelper::xmlHeader(const string& type, const Values& attrs) noexcept {
 	r += Defaults::tab() + "version=\"" PACKAGE_DATA_VERSION "\"\n";
 	r += Defaults::tab() + "type=\"" + type + "\"\n";
 	for (const auto& [k, v] : attrs)
-		r += Defaults::tab() + k + "=\"" + v + "\"\n";
+		r += Defaults::tab() + k + "=\"" + Defaults::escapeXmlValue(v) + "\"\n";
 	Defaults::reduceTab();
 	r += ">\n";
 	Defaults::increaseTab();
@@ -113,7 +113,7 @@ string XMLHelper::xmlSection(
 	if (content.empty()) return "";
 	string r(Defaults::tab() + "<" + tag);
 	for (const auto& [k, v] : attrs)
-		r += " " + k + "=\"" + v + "\"";
+		r += " " + k + "=\"" + Defaults::escapeXmlValue(v) + "\"";
 	r += ">\n";
 	Defaults::increaseTab();
 	r += content;
@@ -129,7 +129,7 @@ string XMLHelper::xmlFooter() noexcept {
 string XMLHelper::toXML(const Values& values) noexcept {
 	string r;
 	for (const auto& v : values)
-		r += Defaults::tab() + v.first + "=\"" + v.second + "\"\n";
+		r += Defaults::tab() + v.first + "=\"" + Defaults::escapeXmlValue(v.second) + "\"\n";
 	return r;
 }
 

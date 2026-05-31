@@ -54,6 +54,7 @@ DialogInput::DialogInput(
 	builder->get_widget("BoxInputCreditsSettings",    boxInputCreditsSettings);
 	builder->get_widget("BoxLinkedElementsAndGroups", boxLinkedElementsAndGroups);
 	builder->get_widget("BriefInput",                 brief);
+	Defaults::attachFilenameFilter(entryInputName);
 
 	Defaults::linkSwitchToWidget(switchInputBlink, comboBoxInputSpeed);
 	Defaults::linkToggleToWidget(toggleInputTimesForever, spinInputTimes, true);

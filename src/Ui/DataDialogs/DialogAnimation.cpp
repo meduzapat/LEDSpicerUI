@@ -37,6 +37,7 @@ DialogAnimation::DialogAnimation(
 	builder->get_widget("BtnAddAnimation",       btnAddAnimation);
 	builder->get_widget("BtnApplyAnimation",     btnApply);
 	builder->get_widget("EntryAnimationName",    entryAnimationName);
+	Defaults::attachFilenameFilter(entryAnimationName);
 
 	setSignalAdd(btnAddAnimation);
 	setSignalApply();

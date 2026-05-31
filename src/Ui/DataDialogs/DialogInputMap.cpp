@@ -43,6 +43,7 @@ DialogInputMap::DialogInputMap(BaseObjectType* obj, const Glib::RefPtr<Gtk::Buil
 	builder->get_widget("StackElementAndGroup",       stackElementAndGroup);
 	builder->get_widget("BtnAddInputSourceMap",       btnAddSourceMap);
 	builder->get_widget("BtnAddInputMap",             btnAddInputMap);
+	Defaults::attachNameFilter(inputInputMapTrigger);
 
 	setSignalAdd(btnAddSourceMap);
 	setSignalAdd(btnAddInputMap);

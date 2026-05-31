@@ -55,6 +55,7 @@ DialogGroup::DialogGroup(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& 
 		"BtnGroupElementFirst",
 		"BtnGroupElementLast"
 	);
+	Defaults::attachNameFilter(inputGroupName);
 
 	setSignalAdd(btnAdd);
 	setSignalApply();

@@ -120,6 +120,7 @@ DialogActor::DialogActor(
 	builder->get_widget("SpinActorSerpentineTailLength",     spinActorSerpentineTailLength);
 	builder->get_widget("BtnActorSerpentineTailColor",       btnActorSerpentineTailColor);
 	builder->get_widget("ScaleActorSerpentineTailIntensity", scaleActorSerpentineTailIntensity);
+	Defaults::attachNameFilter(entryActorAlsaPcm);
 
 	// Per-type visibility map (only types with a unique container are listed).
 	perTypeBoxes = {

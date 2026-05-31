@@ -43,6 +43,8 @@ DialogProcess::DialogProcess(
 	builder->get_widget("EntryProcessName",       inputProcessName);
 	builder->get_widget("EntryProcessSystemType", inputSystemType);
 	builder->get_widget("SpinProcessRomPosition", spinProcessRomPosition);
+	Defaults::attachNameFilter(inputProcessName);
+	Defaults::attachNameFilter(inputSystemType);
 }
 
 void DialogProcess::load(DataMap& values) noexcept {

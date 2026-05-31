@@ -53,6 +53,7 @@ DialogDevice::DialogDevice(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 
 	Gtk::Notebook* notebookDeviceConnections;
 	builder->get_widget("NotebookDeviceConnections", notebookDeviceConnections);
+	Defaults::attachNameFilter(inputDevicePort);
 
 	// Populate Devices.
 	initializeSelector(noDevice, Defaults::devicesInfo);

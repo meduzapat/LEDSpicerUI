@@ -103,7 +103,7 @@ string Data::valuesXML(const Values& data) noexcept {
 		tab = Defaults::tab();
 	}
 	for (const auto& v : data)
-		r += tab + v.first + "=\"" + v.second + "\"" + el;
+		r += tab + v.first + "=\"" + Defaults::escapeXmlValue(v.second) + "\"" + el;
 	return r;
 }
 

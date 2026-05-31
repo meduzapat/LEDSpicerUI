@@ -123,6 +123,7 @@ string DirectoryNavigator::promptDirName(const string& current) noexcept {
 	Gtk::Entry entry;
 	entry.set_text(current);
 	entry.set_activates_default(true);
+	Defaults::attachFilenameFilter(&entry);
 	dialog.get_message_area()->pack_start(entry, false, false);
 	dialog.show_all();
 	entry.grab_focus();

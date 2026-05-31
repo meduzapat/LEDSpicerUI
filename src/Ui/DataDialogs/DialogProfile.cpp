@@ -87,6 +87,7 @@ DialogProfile::DialogProfile(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 	builder->get_widget("BtnAddProfile",             btnAdd);
 	builder->get_widget("InputProfileName",          inputProfileName);
 	builder->get_widget("BtnProfileBackgroundColor", btnProfileBackgroundColor);
+	Defaults::attachFilenameFilter(inputProfileName);
 
 	setSignalAdd(btnAdd);
 	setSignalApply();

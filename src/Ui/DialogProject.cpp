@@ -56,24 +56,9 @@ DialogProject::DialogProject(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> con
 		setProjectName(name);
 	});
 
+	Defaults::attachFilenameFilter(inputNewProjectName);
 	inputNewProjectName->signal_changed().connect([this]() {
-		string
-			text     = inputNewProjectName->get_text(),
-			filtered = Defaults::sanitizeFilename(text);
-
-		// Remove leading dots
-		while (not filtered.empty() and filtered[0] == '.') {
-			filtered.erase(0, 1);
-		}
-
-		// Update if changed (will re-trigger, but same text = no loop)
-		if (filtered != text) {
-			inputNewProjectName->set_text(filtered);
-			inputNewProjectName->set_position(-1);
-			return;
-		}
-
-		setProjectName(filtered);
+		setProjectName(string(inputNewProjectName->get_text()));
 	});
 
 	// Dialog show
@@ -146,7 +131,6 @@ void DialogProject::setProjectsDir(const string& projectsDir, bool setFileProjec
 }
 
 void DialogProject::setProjectName(const string& projectName) {
-	// TODO: sanitize
 	this->projectName = projectName;
 	btnApply->set_sensitive(not this->projectName.empty());
 }
