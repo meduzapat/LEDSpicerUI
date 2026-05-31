@@ -95,13 +95,14 @@ combobox.noRoundRight button.combo,
 	background-color: rgba(20,20,20,0.85);
 	border-radius: 6px;
 	padding: 5px 2px;
+	margin: 2px;
 }
 
 .BoxButton > box {
 	background: rgba(0,0,0,0.6);
 }
 
-.BoxButton > box > label {
+.BoxButton label {
 	color: white;
 }
 
@@ -110,8 +111,20 @@ combobox.noRoundRight button.combo,
 	border-radius: 4px;
 }
 
-.BoxButton.active {
-	box-shadow: 0 0 18px currentColor;
+.BoxButton:selected {
+	background-color: rgba(26, 95, 180, 0.85);
+	border-color: rgba(98, 160, 234, 0.9);
+	box-shadow: 0 0 12px rgba(98, 160, 234, 0.6);
+}
+
+.BoxButton:selected label {
+	color: #ffffff;
+	font-weight: bold;
+}
+
+.ProfileFlowBox .BoxButton {
+	margin: 1px;
+	padding: 3px 2px;
 }
 
 /* Hover effects for BoxButtons */
@@ -171,15 +184,15 @@ combobox.noRoundRight button.combo,
 	background-image: url("images/backgroundInputs.png");
 }
 
-.zoneCanvas.inputsSources {
+.zoneCanvas.inputSources {
 	background-image: url("images/backgroundInputSources.png");
 }
 
-.zoneCanvas.inputsMaps {
+.zoneCanvas.inputMaps {
 	background-image: url("images/backgroundInputMaps.png");
 }
 
-.zoneCanvas.inputsLinkMaps {
+.zoneCanvas.inputLinkMaps {
 	background-image: url("images/backgroundInputLinkMaps.png");
 }
 

@@ -21,6 +21,7 @@
  */
 
 #include "Link.hpp"
+#include "DirNode.hpp"
 
 using namespace LEDSpicerUI::Ui::Storage;
 
@@ -37,6 +38,9 @@ string Link::createUniqueId() const noexcept {
 }
 
 string Link::createPrettyName() const noexcept {
+	if (link->getProperties().isSet(LEDSpicerUI::Constants::FILENAME))
+		if (auto node = dynamic_cast<const DirNode*>(link))
+			return node->getFullPath();
 	return link->createPrettyName();
 }
 

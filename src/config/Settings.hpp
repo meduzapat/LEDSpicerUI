@@ -49,6 +49,7 @@ public:
 		PATH_PROJECT         {"projectsDir"},
 		DEFAULT_PROJECT      {"defaultProject"},
 		INTERACTIVE_MODE     {"interactiveMode"},
+		THEME_NAME           {"themeName"},
 		THEME_STYLE          {"themeStyle"},
 		CLEAN_PROJECT_DIR    {"cleanProjectDir"},
 		PRESERVE_EMPTY_DIR   {"preserveEmptyDir"},
@@ -109,6 +110,9 @@ public:
 	void setRemoveInvalidItems(bool value) noexcept;
 	void setSaveBackup(bool value)         noexcept;
 	void setDebugFiles(bool value)         noexcept;
+
+	const string& getThemeName()  const noexcept { return getValue(THEME_NAME); }
+	void setThemeName(const string& id)  noexcept { setValue(THEME_NAME, id);  }
 
 	ThemeStyle getThemeStyle()           const noexcept;
 	void       setThemeStyle(ThemeStyle) noexcept;

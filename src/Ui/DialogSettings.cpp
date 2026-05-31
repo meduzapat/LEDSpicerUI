@@ -109,6 +109,7 @@ bool DialogSettings::loadSettings() {
 	const bool loaded = SettingsFile::initialize();
 	setBinaryPath(Settings::get().getBinaryPath(), true);
 	setDataDir(Settings::get().getDataDir(), true);
+	applyCurrentTheme();
 	return loaded;
 }
 
@@ -147,6 +148,11 @@ DialogSettings::DialogSettings(BaseObjectType* obj, const Glib::RefPtr<Gtk::Buil
 	builder->get_widget("SwitchSettingsSaveBackup",         switchSaveBackup);
 	builder->get_widget("SwitchSettingsDebugFiles",         switchDebugFiles);
 
+	builder->get_widget("BtnSettingsStyleAuto",  btnStyleAuto);
+	builder->get_widget("BtnSettingsStyleLight", btnStyleLight);
+	builder->get_widget("BtnSettingsStyleDark",  btnStyleDark);
+	builder->get_widget("BoxSelectTheme",        flowBoxThemes);
+
 	// Sync all widgets to current Settings on every open.
 	signal_show().connect([this]() {
 		const auto& s = Settings::get();
@@ -160,6 +166,52 @@ DialogSettings::DialogSettings(BaseObjectType* obj, const Glib::RefPtr<Gtk::Buil
 		switchRemoveInvalidItems->set_active(s.shouldRemoveInvalidItems());
 		switchSaveBackup->set_active(s.shouldSaveBackup());
 		switchDebugFiles->set_active(s.shouldDebugFiles());
+		syncStyleButtons();
+		if (flowBoxThemes->get_children().empty())
+			populateThemes();
+		selectingTheme = true;
+		const string& currentId = s.getThemeName();
+		for (auto w : flowBoxThemes->get_children()) {
+			auto child = static_cast<Gtk::FlowBoxChild*>(w);
+			if (child->get_name() == currentId) {
+				flowBoxThemes->select_child(*child);
+				break;
+			}
+		}
+		selectingTheme = false;
+	});
+
+	// Style toggle buttons act as a mutual-exclusion radio group.
+	auto connectStyleBtn = [this](Gtk::ToggleButton* btn, Settings::ThemeStyle style) {
+		btn->signal_toggled().connect([this, btn, style]() {
+			if (settingStyle) return;
+			if (not btn->get_active()) {
+				// Prevent the user from deselecting the active button.
+				settingStyle = true;
+				btn->set_active(true);
+				settingStyle = false;
+				return;
+			}
+			settingStyle = true;
+			btnStyleAuto->set_active(style == Settings::ThemeStyle::Auto);
+			btnStyleLight->set_active(style == Settings::ThemeStyle::Light);
+			btnStyleDark->set_active(style == Settings::ThemeStyle::Dark);
+			settingStyle = false;
+			Settings::get().setThemeStyle(style);
+			applyCurrentTheme();
+		});
+	};
+	connectStyleBtn(btnStyleAuto,  Settings::ThemeStyle::Auto);
+	connectStyleBtn(btnStyleLight, Settings::ThemeStyle::Light);
+	connectStyleBtn(btnStyleDark,  Settings::ThemeStyle::Dark);
+
+	// Theme tile selection.
+	flowBoxThemes->signal_selected_children_changed().connect([this]() {
+		if (selectingTheme) return;
+		auto selected = flowBoxThemes->get_selected_children();
+		if (selected.empty()) return;
+		Settings::get().setThemeName(selected[0]->get_name());
+		applyCurrentTheme();
 	});
 
 	switchInteractiveMode->property_active().signal_changed().connect([this]() {
@@ -396,4 +448,48 @@ void DialogSettings::processDataDir() {
 
 void DialogSettings::updateApplyButton() {
 	btnApply->set_sensitive(not Settings::get().getColorFiles().empty());
+}
+
+void DialogSettings::populateThemes() {
+	for (const auto& meta : ThemeManager::getInstance().getThemes()) {
+		auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 4));
+
+		auto img = Gtk::manage(new Gtk::Image());
+		img->set_size_request(120, 80);
+		if (not meta.preview.empty()) {
+			const string imgPath{PACKAGE_DATA_DIR "themes/" + meta.id + "/" + meta.preview};
+			try {
+				img->set(Gdk::Pixbuf::create_from_file(imgPath, 120, 80, true));
+			}
+			catch (const Glib::Error&) {}
+		}
+		box->pack_start(*img, false, false);
+
+		auto lbl = Gtk::manage(new Gtk::Label(meta.name));
+		box->pack_start(*lbl, false, false);
+		box->show_all();
+
+		auto child = Gtk::manage(new Gtk::FlowBoxChild());
+		child->set_name(meta.id);
+		child->get_style_context()->add_class("ThemeTile");
+		child->add(*box);
+		child->show();
+		flowBoxThemes->add(*child);
+	}
+}
+
+void DialogSettings::syncStyleButtons() {
+	settingStyle = true;
+	const auto style = Settings::get().getThemeStyle();
+	btnStyleAuto->set_active(style  == Settings::ThemeStyle::Auto);
+	btnStyleLight->set_active(style == Settings::ThemeStyle::Light);
+	btnStyleDark->set_active(style  == Settings::ThemeStyle::Dark);
+	settingStyle = false;
+}
+
+void DialogSettings::applyCurrentTheme() {
+	ThemeManager::getInstance().apply(
+		Settings::get().getThemeName(),
+		Settings::get().getThemeStyle()
+	);
 }

@@ -1412,12 +1412,6 @@ If nothing is set, the default is 1000ms.</property>
                                 <child>
                                   <placeholder/>
                                 </child>
-                                <child>
-                                  <placeholder/>
-                                </child>
-                                <child>
-                                  <placeholder/>
-                                </child>
                                 <style>
                                   <class name="BreadcrumbBox"/>
                                 </style>
@@ -1603,6 +1597,9 @@ If nothing is set, the default is 1000ms.</property>
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
                                 <property name="halign">start</property>
+                                <child>
+                                  <placeholder/>
+                                </child>
                                 <style>
                                   <class name="BreadcrumbBox"/>
                                 </style>
@@ -1785,12 +1782,6 @@ If nothing is set, the default is 1000ms.</property>
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
                                 <property name="halign">start</property>
-                                <child>
-                                  <placeholder/>
-                                </child>
-                                <child>
-                                  <placeholder/>
-                                </child>
                                 <child>
                                   <placeholder/>
                                 </child>
@@ -3677,6 +3668,9 @@ Compatible with version @MINIMUM_COMPATIBILITY@+</property>
                                     <property name="homogeneous">True</property>
                                     <property name="max-children-per-line">1</property>
                                     <property name="activate-on-single-click">False</property>
+                                    <style>
+                                      <class name="ProfileFlowBox"/>
+                                    </style>
                                   </object>
                                 </child>
                                 <style>
@@ -3767,6 +3761,9 @@ Compatible with version @MINIMUM_COMPATIBILITY@+</property>
                                     <property name="max-children-per-line">1</property>
                                     <property name="selection-mode">none</property>
                                     <property name="activate-on-single-click">False</property>
+                                    <style>
+                                      <class name="ProfileFlowBox"/>
+                                    </style>
                                   </object>
                                 </child>
                                 <style>
@@ -3871,6 +3868,9 @@ Compatible with version @MINIMUM_COMPATIBILITY@+</property>
                                     <property name="max-children-per-line">1</property>
                                     <property name="selection-mode">none</property>
                                     <property name="activate-on-single-click">False</property>
+                                    <style>
+                                      <class name="ProfileFlowBox"/>
+                                    </style>
                                   </object>
                                 </child>
                                 <style>
@@ -3961,6 +3961,9 @@ Compatible with version @MINIMUM_COMPATIBILITY@+</property>
                                     <property name="max-children-per-line">1</property>
                                     <property name="selection-mode">none</property>
                                     <property name="activate-on-single-click">False</property>
+                                    <style>
+                                      <class name="ProfileFlowBox"/>
+                                    </style>
                                   </object>
                                 </child>
                                 <style>
@@ -4747,7 +4750,6 @@ Autodetected if ledspicer is installed</property>
                         <child>
                           <object class="GtkLabel">
                             <property name="visible">True</property>
-                            <property name="sensitive">False</property>
                             <property name="can-focus">False</property>
                             <property name="label" translatable="yes">Theme</property>
                           </object>
@@ -4766,7 +4768,6 @@ Autodetected if ledspicer is installed</property>
                             <child>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
-                                <property name="sensitive">False</property>
                                 <property name="can-focus">False</property>
                                 <property name="label" translatable="yes">Style</property>
                               </object>
@@ -6038,7 +6039,8 @@ If you have multiple serial devices, avoid using autodetect.</property>
     </child>
   </object>
   <object class="GtkDialog" id="DialogElement">
-    <property name="width-request">450</property>
+    <property name="width-request">500</property>
+    <property name="height-request">500</property>
     <property name="can-focus">False</property>
     <property name="title">Element</property>
     <property name="modal">True</property>
@@ -6800,7 +6802,6 @@ If you have multiple serial devices, avoid using autodetect.</property>
           <object class="GtkScrolledWindow" id="ScrolledWindowConnections">
             <property name="visible">True</property>
             <property name="can-focus">True</property>
-            <property name="valign">start</property>
             <property name="hadjustment">adjustmentMainWindowScrolledWindowsH</property>
             <property name="vadjustment">adjustmentMainWindowScrolledWindowsV</property>
             <property name="hscrollbar-policy">never</property>
@@ -6811,7 +6812,6 @@ If you have multiple serial devices, avoid using autodetect.</property>
               <object class="GtkViewport">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="valign">start</property>
                 <property name="vexpand">True</property>
                 <child>
                   <object class="GtkFlowBox" id="FlowBoxPinLayout">
@@ -6827,7 +6827,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                 </child>
                 <style>
                   <class name="zoneCanvas"/>
-                  <class name="pinLayout"/>
+                  <class name="devices"/>
                 </style>
               </object>
             </child>
@@ -8392,14 +8392,14 @@ Default: 100%.</property>
                 </child>
               </object>
               <packing>
-                <property name="expand">False</property>
+                <property name="expand">True</property>
                 <property name="fill">True</property>
                 <property name="position">1</property>
               </packing>
             </child>
           </object>
           <packing>
-            <property name="expand">False</property>
+            <property name="expand">True</property>
             <property name="fill">True</property>
             <property name="padding">2</property>
             <property name="position">8</property>
@@ -9460,7 +9460,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                     </child>
                     <style>
                       <class name="zoneCanvas"/>
-                      <class name="playerMappings"/>
+                      <class name="restrictors"/>
                     </style>
                   </object>
                   <packing>

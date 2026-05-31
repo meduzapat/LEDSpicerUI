@@ -32,10 +32,6 @@ BoxButton::BoxButton(Data* form) noexcept :
 {
 	set_valign(Gtk::ALIGN_START);
 	set_vexpand(false);
-	set_margin_top(2);
-	set_margin_bottom(2);
-	set_margin_left(2);
-	set_margin_right(2);
 	set_can_focus(false);
 
 	Gtk::HBox* lbox{Gtk::make_managed<Gtk::HBox>()};
@@ -47,10 +43,10 @@ BoxButton::BoxButton(Data* form) noexcept :
 	label->set_visible(true);
 	contentBox->pack_start(*lbox, Gtk::PACK_EXPAND_WIDGET);
 
-	contentBox->get_style_context()->add_class(CSS_BOX_BUTTON);
-	auto cssClass{form->getCssClass()};
+	get_style_context()->add_class(CSS_BOX_BUTTON);
+	const auto& cssClass{form->getCssClass()};
 	if (not cssClass.empty())
-		contentBox->get_style_context()->add_class(string(cssClass));
+		get_style_context()->add_class(cssClass);
 	add(*contentBox);
 	data->registerToCollection();
 	sync();

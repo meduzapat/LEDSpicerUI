@@ -1,0 +1,246 @@
+
+/* ============================================================
+ * LEDSpicerUI — Base Structural CSS
+ * Layout, sizing, spacing, and hardware-semantic colors.
+ * Themes must NOT override rules in this file.
+ * ============================================================ */
+
+/* ── Utility: border-radius overrides ─────────────────────── */
+
+combobox.noRoundLeft button.combo,
+.noRoundLeft {
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+}
+
+combobox.noRoundRight button.combo,
+.noRoundRight {
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
+}
+
+/* ── Hardware-semantic colors (fixed, never theme-overridden) ─ */
+
+.On {
+	background: #FFF;
+	color: #000;
+}
+
+.Off {
+	background: #000;
+	color: #FFF;
+}
+
+.Random {
+	background: linear-gradient(90deg, rgba(255,0,0,1) 0%, rgba(255,251,0,1) 21%, rgba(0,250,2,1) 52%, rgba(0,0,255,1) 79%, rgba(237,0,255,1) 100%);
+	color: #000;
+}
+
+/* RGB channel pin colors — hue identity must never change */
+.pinSingle {
+	background: #f6f5f4;
+	color: #000;
+}
+
+.pinRed {
+	background: #e01b24;
+	color: #fff;
+}
+
+.pinGreen {
+	background: #3da81b;
+	color: #fff;
+}
+
+.pinBlue {
+	background: #1c71d8;
+	color: #fff;
+}
+
+.pinSolenoid {
+	background: #813d9c;
+}
+
+.pinMulti {
+	background: linear-gradient(90deg, rgba(246,245,244,1) 0%, rgba(255,0,0,1) 25%, rgba(0,255,0,1) 50%, rgba(0,0,255,1) 75%, rgba(129,61,156,1) 100%);
+	color: #000;
+}
+
+/* ── Connector / pin label layout ─────────────────────────── */
+
+.pinLabel {
+	font-size: 8pt;
+	border: 1px solid #333;
+}
+
+.connectorBox {
+	margin: 0;
+	padding: 2px 4px;
+	font-size: 10pt;
+	background-color: rgba(128,128,128,0.12);
+	border-radius: 4px;
+}
+
+/* ── BoxButton structural layout ──────────────────────────── */
+
+.BoxButton {
+	border-radius: 6px;
+	padding: 5px 2px;
+	margin: 2px;
+}
+
+.BoxButton > box > button {
+	border-radius: 4px;
+}
+
+.BoxButton:selected label {
+	font-weight: bold;
+}
+
+.ProfileFlowBox .BoxButton {
+	margin: 1px;
+	padding: 3px 2px;
+}
+
+/* ── Directory navigator structure ────────────────────────── */
+
+.DirectoryBoxButton > button > label {
+	font-weight: bold;
+}
+
+.BreadcrumbBox {
+	padding: 2px 5px;
+}
+
+.BreadcrumbButton {
+	padding:    2px 6px;
+	min-height: 0;
+	min-width:  0;
+	border:     none;
+	background: transparent;
+}
+
+.BreadcrumbButton:hover {
+	text-decoration: underline;
+}
+
+.BreadcrumbCurrent {
+	font-weight: bold;
+	padding:     2px 6px;
+}
+
+.BreadcrumbSeparator {
+	opacity: 0.6;
+	padding: 0 2px;
+}
+
+.NavigationButton {
+	min-width:  32px;
+	min-height: 32px;
+	padding:    4px;
+}
+
+.NavigationButton:disabled {
+	opacity: 0.4;
+}
+
+/* ── Object type state rules ──────────────────────────────── */
+
+.GroupBoxButton.read-only {
+	opacity: 0.5;
+}
+
+/* ── Donation dialog structure ────────────────────────────── */
+
+.SupportButton {
+	font-weight: bold;
+}
+
+.DonateTitleLabel {
+	font-size: 15pt;
+	font-weight: bold;
+}
+
+.DonateButton {
+	font-weight: bold;
+	padding: 8px 20px;
+	border-radius: 4px;
+}
+
+/* ── Area background structure ────────────────────────────── */
+/* All background-image URLs are relative to the data/ directory.
+ * Themes provide background-color fallbacks; images are shared. */
+
+.layoutPreview {
+	background-image:    url("images/backgroundLayout.png");
+	background-size:     cover;
+	background-position: center;
+	background-repeat:   no-repeat;
+}
+
+.zoneCanvas {
+	background-repeat:   no-repeat;
+	background-size:     cover;
+	background-position: center;
+}
+
+.zoneCanvas.devices {
+	background-image: url("images/backgroundDevices.png");
+}
+
+.zoneCanvas.restrictors {
+	background-image: url("images/backgroundRestrictors.png");
+}
+
+.zoneCanvas.groups {
+	background-image: url("images/backgroundGroups.png");
+}
+
+.zoneCanvas.elements {
+	background-image: url("images/backgroundElements.png");
+}
+
+.zoneCanvas.processes {
+	background-image: url("images/backgroundProcesses.png");
+}
+
+.zoneCanvas.colors {
+	background-image: url("images/backgroundColors.png");
+}
+
+.zoneCanvas.inputs {
+	background-image: url("images/backgroundInputs.png");
+}
+
+.zoneCanvas.inputSources {
+	background-image: url("images/backgroundInputSources.png");
+}
+
+.zoneCanvas.inputMaps {
+	background-image: url("images/backgroundInputMaps.png");
+}
+
+.zoneCanvas.inputLinkMaps {
+	background-image: url("images/backgroundInputLinkMaps.png");
+}
+
+.zoneCanvas.animations {
+	background-image: url("images/backgroundAnimations.png");
+}
+
+.zoneCanvas.profiles {
+	background-image: url("images/backgroundProfiles.png");
+}
+
+
+/* ── Theme selector tile structure ────────────────────────── */
+
+.ThemeTile {
+	border-radius: 6px;
+	padding:       4px;
+	margin:        4px;
+}
+
+.ThemeTile:selected label {
+	font-weight: bold;
+}

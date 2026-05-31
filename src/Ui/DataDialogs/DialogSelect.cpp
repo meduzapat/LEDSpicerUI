@@ -213,6 +213,7 @@ void DialogSelect::addDisplayButtons(Storage::BoxButton& boxButton) noexcept {
 		auto btn{Gtk::make_managed<Gtk::Button>()};
 		boxButton.packButtonStart(*btn);
 		btn->set_image_from_icon_name(ICON_EDIT, Gtk::ICON_SIZE_BUTTON);
+		btn->get_style_context()->add_class(CSS_BOX_BACKGROUND_EDIT);
 		btn->set_tooltip_text("Edit");
 		btn->signal_clicked().connect([&boxButton, this]() {
 			DialogLinkEditor::getInstance()->open(
@@ -226,6 +227,7 @@ void DialogSelect::addDisplayButtons(Storage::BoxButton& boxButton) noexcept {
 	auto btn{Gtk::make_managed<Gtk::Button>()};
 	boxButton.packButtonStart(*btn);
 	btn->set_image_from_icon_name(ICON_DELETE, Gtk::ICON_SIZE_BUTTON);
+	btn->get_style_context()->add_class(CSS_BOX_BACKGROUND_DELETE);
 	btn->set_tooltip_text("Remove");
 	btn->signal_clicked().connect([&boxButton, this]() {
 		Defaults::markDirty();

@@ -21,18 +21,17 @@
  */
 
 #include "LEDSpicerUI.hpp"
+#include "ThemeManager.hpp"
 
 using namespace LEDSpicerUI;
 
 int main(int argc, char *argv[]) {
 
-	auto app         = Gtk::Application::create(argc, argv, "org.ledspicer.ui");
-	auto builder     = Gtk::Builder::create();
-	auto cssProvider = Gtk::CssProvider::create();
+	auto app     = Gtk::Application::create(argc, argv, "org.ledspicer.ui");
+	auto builder = Gtk::Builder::create();
 
 	try {
-		builder->add_from_file(PACKAGE_DATA_DIR       "main.glade");
-		cssProvider->load_from_path(PACKAGE_DATA_DIR  "style.css");
+		builder->add_from_file(PACKAGE_DATA_DIR "main.glade");
 	}
 	catch(Glib::Error& e) {
 		std::cerr << e.what() << std::endl;
@@ -43,12 +42,11 @@ int main(int argc, char *argv[]) {
 		return EXIT_FAILURE;
 	}
 
-	// Set CSS styles.
-	Gtk::StyleContext::add_provider_for_screen(
-		Gdk::Screen::get_default(),
-		cssProvider,
-		GTK_STYLE_PROVIDER_PRIORITY_APPLICATION
-	);
+	// Initialize and apply theme (loads settings defaults; Settings::load() may re-apply later).
+	auto& tm = Ui::ThemeManager::getInstance();
+	tm.initialize();
+	if (not tm.apply(Config::Settings::get().getThemeName(), Config::Settings::get().getThemeStyle()))
+		std::cerr << "Warning: theme '" << Config::Settings::get().getThemeName() << "' could not be applied; running unstyled." << std::endl;
 
 	Ui::MainWindow* mw = nullptr;
 	builder->get_widget_derived("MainWindow", mw);

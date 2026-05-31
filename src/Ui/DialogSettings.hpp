@@ -22,6 +22,7 @@
 
 #include "config/SettingsFile.hpp"
 #include "GladeDialog.hpp"
+#include "ThemeManager.hpp"
 
 #pragma once
 
@@ -103,6 +104,18 @@ protected:
 		* switchSaveBackup         = nullptr,
 		* switchDebugFiles         = nullptr;
 
+	Gtk::ToggleButton
+		* btnStyleAuto  = nullptr,
+		* btnStyleLight = nullptr,
+		* btnStyleDark  = nullptr;
+
+	Gtk::FlowBox* flowBoxThemes = nullptr;
+
+	/// Guards against recursive signal firing when syncing style buttons.
+	bool settingStyle    = false;
+	/// Guards against recursive signal firing when syncing theme selection.
+	bool selectingTheme  = false;
+
 	DialogSettings(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
 
 	bool detectLedspicerVersion();
@@ -112,6 +125,13 @@ protected:
 	void updateDataDirLabels();
 	void processDataDir();
 	void updateApplyButton();
+
+	/// Populates BoxSelectTheme with one ThemeTile per discovered theme.
+	void populateThemes();
+	/// Syncs style toggle buttons to current Settings without firing apply.
+	void syncStyleButtons();
+	/// Applies the current theme name + style from Settings via ThemeManager.
+	void applyCurrentTheme();
 };
 
 } // namespace
