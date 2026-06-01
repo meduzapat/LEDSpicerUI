@@ -116,7 +116,16 @@ string XMLHelper::xmlSection(
 		r += " " + k + "=\"" + Defaults::escapeXmlValue(v) + "\"";
 	r += ">\n";
 	Defaults::increaseTab();
-	r += content;
+	// Fixes indentation for multi-line content, adds a tab if the line is not empty.
+	for (size_t pos = 0; pos < content.size(); ) {
+		size_t nl = content.find('\n', pos);
+		if (nl == string::npos) nl = content.size() - 1;
+		const string line(content, pos, nl - pos + 1);
+		if (line.find_first_not_of(" \t\r\n") != string::npos)
+			r += '\t';
+		r += line;
+		pos = nl + 1;
+	}
 	Defaults::reduceTab();
 	r += Defaults::tab() + "</" + tag + ">\n";
 	return r;

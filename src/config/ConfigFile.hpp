@@ -40,6 +40,7 @@ public:
 	struct ConfigData {
 		const string
 			& configPath,
+			& defaultProject,
 			& defaultProfile,
 			& runEvery;
 		const Values& settings;
@@ -51,6 +52,7 @@ public:
 
 		ConfigData(
 			const string& configPath,
+			const string& defaultProject,
 			const string& defaultProfile,
 			const string& runEvery,
 			const Values& settings,
@@ -60,6 +62,7 @@ public:
 			const BoxButtonCollection& processes
 		) :
 			configPath(configPath),
+			defaultProject(defaultProject),
 			defaultProfile(defaultProfile),
 			runEvery(runEvery),
 			settings(settings),

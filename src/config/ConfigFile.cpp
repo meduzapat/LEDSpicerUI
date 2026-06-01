@@ -268,11 +268,11 @@ void ConfigFile::save(const ConfigData& data) {
 	xmlData += xmlSection("restrictors", collect(data.restrictors));
 
 	// Layout with groups
-	xmlData += xmlSection(
-		"layout",
-		collect(data.groups),
-		{{string("defaultProfile"), data.defaultProfile}}
-	);
+	Values layoutAttrs;
+	if (not data.defaultProject.empty())
+		layoutAttrs.setValue("defaultProject", data.defaultProject);
+	layoutAttrs.setValue("defaultProfile", data.defaultProfile);
+	xmlData += xmlSection("layout", collect(data.groups), layoutAttrs);
 
 	Defaults::reduceTab();
 	xmlData += xmlFooter();

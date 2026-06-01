@@ -102,6 +102,7 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 
 			ConfigFile::save(ConfigFile::ConfigData(
 				Settings::get().getActiveConfigPath(),
+				Settings::get().getCurrentProject(),
 				profileNavigator.getDefaultProfileName(),
 				inputRunEvery->get_text().raw(),
 				packLedspicerConfig(),
@@ -298,7 +299,6 @@ LEDSpicerUI::Values MainWindow::packLedspicerConfig() const noexcept {
 		// ledspicerd.
 		{"version",        PACKAGE_DATA_VERSION},
 		{"type",           "Configuration"},
-		{"defaultProject", Settings::get().getCurrentProject()},
 		{"userId",         inputUserId->get_text()},
 		{"groupId",        inputGroupId->get_text()},
 		{"port",           inputPortNumber->get_text()},
