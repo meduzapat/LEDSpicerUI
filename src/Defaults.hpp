@@ -425,6 +425,16 @@ public:
 		const uint8_t flags; /// Bitwise capability flags (AnimationFlags).
 	};
 
+	/**
+	 * Structure with color reference information.
+	 * name  — contract key, must match every valid color file.
+	 * brief — tooltip / calibration dialog hint.
+	 * pure  — ideal hex on a calibrated display (RRGGBB, no #).
+	 */
+	struct ColorInfo : public BaseInfo {
+		const string pure;
+	};
+
 	Defaults() = delete;
 	
 	virtual ~Defaults() = default;
@@ -620,6 +630,12 @@ public:
 
 	/// A list of different element types.
 	static const StringVector elementTypes;
+
+	/// Standard colors in family order — defines the name contract for color files.
+	static const vector<ColorInfo> legalColors;
+
+	/// Returns true if name belongs to the standard color set.
+	static bool isLegalColor(const string& name) noexcept;
 
 	/**
 	 * Initialize stuff here

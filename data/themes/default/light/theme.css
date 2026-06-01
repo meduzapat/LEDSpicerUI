@@ -50,11 +50,6 @@
 /* Zone canvas fallback */
 @define-color color-zone-bg         rgba(220,225,235,0.90);
 
-/* Connector / pin label */
-@define-color color-pin-label-bg    #e8e8e8;
-@define-color color-pin-label-text  #1a1a1a;
-@define-color color-connector-border #666;
-
 /* Donation dialog */
 @define-color color-support-text    #c8860a;
 @define-color color-support-hover   #a06800;
@@ -85,15 +80,6 @@
 .backgroundBlue {
 	background: @color-state-blue-bg;
 	color: #FFF;
-}
-
-.pinLabel {
-	background: @color-pin-label-bg;
-	color:      @color-pin-label-text;
-}
-
-.connectorBox {
-	border: 1px solid @color-connector-border;
 }
 
 .BoxButton {
@@ -246,5 +232,5 @@
 .zoneCanvas.animations    { background-image: url("backgroundAnimations.png");    }
 .zoneCanvas.profiles      { background-image: url("backgroundProfiles.png");      }
 
-.layoutPreview            { background-image: url("backgroundLayout.png");           }
+.layoutPreview            { background-image: url("backgroundLayout.png");          }
 .zoneCanvas.themes        { background-image: url("backgroundThemeSelector.png");   }

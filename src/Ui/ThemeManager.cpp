@@ -33,8 +33,15 @@ void ThemeManager::initialize() noexcept {
 		Glib::Dir d(themesDir);
 		for (const auto& entry : d) {
 			const string themeDir{themesDir + entry + "/"};
-			if (Glib::file_test(themeDir + "metadata.xml", Glib::FILE_TEST_IS_REGULAR))
-				parseMetadata(themeDir, entry);
+			if (not Glib::file_test(themeDir + "metadata.xml", Glib::FILE_TEST_IS_REGULAR))
+				continue;
+			if (not Glib::file_test(themeDir + "preview.png", Glib::FILE_TEST_IS_REGULAR)) {
+				std::cerr <<
+					"ThemeManager: skipping theme '"    << entry <<
+					"' — missing mandatory preview.png" << std::endl;
+				continue;
+			}
+			parseMetadata(themeDir, entry);
 		}
 	}
 	catch (const Glib::Error&) {}
@@ -108,9 +115,10 @@ void ThemeManager::parseMetadata(const string& themeDir, const string& themeId) 
 		return;
 
 	ThemeMetadata meta;
-	meta.id      = themeId;
-	meta.name    = root->Attribute("name")    ? root->Attribute("name")    : themeId;
-	meta.preview = root->Attribute("preview") ? root->Attribute("preview") : "";
+	meta.id   = themeId;
+	meta.name = root->Attribute("name") ? root->Attribute("name") : themeId;
+	if (const auto desc = root->FirstChildElement("description"); desc and desc->GetText())
+		meta.description = desc->GetText();
 
 	themes.push_back(std::move(meta));
 }

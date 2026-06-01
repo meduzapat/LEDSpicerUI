@@ -36,13 +36,14 @@ namespace LEDSpicerUI::Ui {
  * Singleton that discovers, loads, and switches themes at runtime.
  *
  * Each theme lives in PACKAGE_DATA_DIR/themes/<id>/ and provides:
- *   metadata.xml     — display name and preview image filenames
+ *   metadata.xml     — display name and description
+ *   preview.png      — mandatory selector thumbnail
  *   dark/theme.css   — dark variant palette
  *   light/theme.css  — light variant palette
  *
  * CSS is loaded in two layers:
- *   1. style-base.css    at APPLICATION priority  (structural, shared)
- *   2. theme/variant.css at APPLICATION+1 priority (colors, overrides)
+ *   1. style-base.css    at APPLICATION   priority (structural bones, no colors/images)
+ *   2. theme/variant.css at APPLICATION+1 priority (colors, backgrounds, images)
  *
  * Falls back to the legacy style.css if themes are unavailable.
  */
@@ -56,7 +57,7 @@ public:
 		string
 			id,
 			name,
-			preview; /// holds a filename relative to themes, Empty = no preview.
+			description; /// Shown as tooltip on the theme selector tile.
 	};
 
 	ThemeManager(const ThemeManager&)            = delete;

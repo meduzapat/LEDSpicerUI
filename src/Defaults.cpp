@@ -271,6 +271,82 @@ const StringVector Defaults::elementTypes{
 	"misc"
 };
 
+const vector<Defaults::ColorInfo> Defaults::legalColors {
+	// Grays — brightness scale from full on to full off.
+	{"White",          "Full brightness, maximum intensity.",              "FFFFFF"},
+	{"LightGray",      "Soft gray, noticeably dimmer than white.",         "C0C0C0"},
+	{"Gray",           "Even 50% midpoint gray.",                          "808080"},
+	{"DimGray",        "Low-intensity gray, subtle ambient.",              "696969"},
+	{"AlmostBlack",    "Barely on — useful when full off is unavailable.", "1A1A1A"},
+	{"Black",          "Full off, zero output.",                           "000000"},
+
+	// Reds — scale plus warm-hue variants.
+	{"Red",            "Pure unmistakable red, traffic-light red.",        "FF0000"},
+	{"LightRed",       "Soft pastel red, clearly lighter than Red.",       "FF8080"},
+	{"DarkRed",        "Deep red, roughly half brightness.",               "8B0000"},
+	{"VeryDarkRed",    "Near-off red, dim ambient.",                       "2D0000"},
+	{"Tomato",         "Warm red with an orange tint, ripe-tomato hue.",   "FF6347"},
+	{"Salmon",         "Pale pinkish-orange red, soft warm tone.",         "FA8072"},
+
+	// Greens — scale plus hue variants.
+	{"Green",          "Pure saturated green, classic arcade green.",      "00FF00"},
+	{"LightGreen",     "Soft pastel green, clearly lighter than Green.",   "90EE90"},
+	{"DarkGreen",      "Deep forest green.",                               "006400"},
+	{"VeryDarkGreen",  "Near-off green, dim ambient.",                     "003000"},
+	{"Lime",           "Bright yellow-green, citrus lime.",                "BFFF00"},
+	{"Olive",          "Muted desaturated yellow-green.",                  "808000"},
+
+	// Blues — scale plus purple-hue variants.
+	{"Blue",           "Pure saturated blue.",                             "0000FF"},
+	{"LightBlue",      "Soft sky blue, clearly lighter than Blue.",        "ADD8E6"},
+	{"DarkBlue",       "Deep navy blue.",                                  "00008B"},
+	{"VeryDarkBlue",   "Near-off blue, dim ambient.",                      "00002D"},
+	{"Violet",         "Blue-purple, between blue and purple.",            "8B00FF"},
+	{"Purple",         "Classic red-purple.",                              "800080"},
+
+	// Yellows — scale plus warm variants.
+	{"Yellow",         "Pure saturated yellow.",                           "FFFF00"},
+	{"LightYellow",    "Very pale yellow, near-white.",                    "FFFFE0"},
+	{"DarkYellow",     "Muted mid-brightness yellow.",                     "9B9B00"},
+	{"Gold",           "Rich warm yellow with a golden glow.",             "FFD700"},
+	{"VeryDarkYellow", "Near-off yellow, dim amber.",                      "2D2D00"},
+	{"YellowGreen",    "Clean bridge between yellow and green families.",  "9ACD32"},
+
+	// Magentas — scale plus pink variants.
+	{"Magenta",        "Pure saturated magenta, fuchsia.",                 "FF00FF"},
+	{"LightMagenta",   "Soft pastel magenta.",                             "FF99FF"},
+	{"DarkMagenta",    "Deep saturated magenta.",                          "8B008B"},
+	{"VeryDarkMagenta","Near-off magenta, dim ambient.",                   "2D002D"},
+	{"Pink",           "Classic warm pink, rose-like.",                    "FFC0CB"},
+	{"HotPink",        "Vivid intense pink, clearly warmer than magenta.", "FF69B4"},
+
+	// Cyans — scale plus cyan-green variants.
+	{"Cyan",           "Pure saturated cyan, aqua.",                       "00FFFF"},
+	{"LightCyan",      "Very pale cyan, near-white aqua.",                 "E0FFFF"},
+	{"DarkCyan",       "Deep teal-cyan.",                                  "008B8B"},
+	{"VeryDarkCyan",   "Near-off cyan, dim ambient.",                      "002D2D"},
+	{"Teal",           "Cyan-green bridge, deep and rich.",                "008080"},
+	{"Turquoise",      "Bright cyan-green, tropical water hue.",           "40E0D0"},
+
+	// Oranges and browns — warm low-hue variants.
+	{"Orange",         "Vivid warm orange.",                               "FFA500"},
+	{"LightOrange",    "Soft pale orange, peachy tone.",                   "FFB347"},
+	{"Brown",          "Dark earthy orange-brown.",                        "964B00"},
+	{"DarkOrange",     "Deep burnt orange, darker than Brown.",            "8B4513"},
+	{"Chocolate",      "Rich warm dark brown with a reddish tone.",        "D2691E"},
+	{"Coral",          "Warm red-orange, bridge between red and orange.",  "FF7F50"},
+
+	// Miscellaneous — borderline hues that span two families.
+	{"SlateBlue",      "Gray-blue with a purple undertone.",               "6A5ACD"},
+	{"Maroon",         "Very dark wine-red, sits between red and purple.", "800000"},
+};
+
+bool Defaults::isLegalColor(const string& name) noexcept {
+	for (const auto& c : legalColors)
+		if (c.name == name) return true;
+	return false;
+}
+
 // This can be wrong if a weird device came in, but at this moment only USB is ID user.
 bool Defaults::isIdUser(const string& name, bool isDevice) {
 	if (isDevice)

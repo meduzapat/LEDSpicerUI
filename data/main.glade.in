@@ -1940,6 +1940,23 @@ If nothing is set, the default is 1000ms.</property>
             <property name="position">3</property>
           </packing>
         </child>
+        <child>
+          <object class="GtkStatusbar" id="StatusBar">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="margin-start">10</property>
+            <property name="margin-end">10</property>
+            <property name="margin-top">6</property>
+            <property name="margin-bottom">6</property>
+            <property name="orientation">vertical</property>
+            <property name="spacing">2</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">4</property>
+          </packing>
+        </child>
       </object>
     </child>
     <child type="titlebar">
@@ -2539,8 +2556,8 @@ Compatible with version @MINIMUM_COMPATIBILITY@+</property>
     </child>
   </object>
   <object class="GtkDialog" id="DialogColors">
-    <property name="width-request">800</property>
-    <property name="height-request">600</property>
+    <property name="width-request">990</property>
+    <property name="height-request">400</property>
     <property name="can-focus">False</property>
     <property name="title">Select Color</property>
     <property name="modal">True</property>
@@ -4751,6 +4768,7 @@ Autodetected if ledspicer is installed</property>
                           <object class="GtkLabel">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
+                            <property name="xpad">2</property>
                             <property name="label" translatable="yes">Theme</property>
                           </object>
                           <packing>
@@ -4769,6 +4787,7 @@ Autodetected if ledspicer is installed</property>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
+                                <property name="xpad">3</property>
                                 <property name="label" translatable="yes">Style</property>
                               </object>
                               <packing>

@@ -105,7 +105,7 @@ void DialogColors::setColorsFromFile(const string& path) noexcept {
 		styleContext->add_provider_for_screen(
 			Gdk::Screen::get_default(),
 			currentProvider,
-			GTK_STYLE_PROVIDER_PRIORITY_APPLICATION
+			GTK_STYLE_PROVIDER_PRIORITY_APPLICATION - 1
 		);
 	}
 }
@@ -134,8 +134,7 @@ bool DialogColors::isValidColor(const string& colorName) const noexcept {
 	for (auto child : ContainerColorPicker->get_children()) {
 		auto c {static_cast<Gtk::FlowBoxChild*>(child)};
 		auto b {static_cast<Gtk::Button*>(c->get_child())};
-		const string t {b->get_label()};
-		if (colorName == t)
+		if (b->get_sensitive() and colorName == b->get_label())
 			return true;
 	}
 	return false;
@@ -206,28 +205,47 @@ void DialogColors::onColorSelected(Gtk::Button* button) noexcept {
 }
 
 string DialogColors::setColors(const Values& colors) noexcept {
-	// Remove previous buttons.
-	for (auto c : ContainerColorPicker->get_children())
+	const auto existing {ContainerColorPicker->get_children()};
+	for (auto c : existing)
 		ContainerColorPicker->remove(*c);
 
 	string cssData;
-	for (auto& [name, hex] : colors) {
-		// Discard any special color.
-		if (name == HUMAN_ON or name == HUMAN_OFF or name == HUMAN_RANDOM) continue;
 
+	auto addButton = [&](const string& name, const string& hex, const string& tooltip, bool enabled) {
 		cssData += '.' + name + "{background:#" + hex + ';';
 		if (Defaults::getLuminance(hex) > 0.5) cssData += "color:black;";
 		cssData += '}';
-		// Create Button.
 		Gtk::Button* b = Gtk::make_managed<Gtk::Button>(name);
-		b->set_label(name);
 		b->get_style_context()->add_class(name);
+		b->get_style_context()->add_class("colorPickerButton");
+		b->set_tooltip_text(tooltip);
+		b->set_sensitive(enabled);
 		ContainerColorPicker->add(*b);
 		b->signal_clicked().connect(sigc::bind(
 			sigc::mem_fun(*this, &DialogColors::onColorSelected),
 			b
 		));
+	};
+
+	// All 50 standard colors always rendered in family order.
+	// File hex used when available; pure reference used as fallback.
+	// Buttons not in the loaded file are shown but disabled.
+	for (const auto& entry : Defaults::legalColors) {
+		const bool calibrated = colors.isSet(entry.name);
+		const string& hex     = calibrated ? colors.getValue(entry.name) : entry.pure;
+		const string tooltip  = calibrated
+			? entry.brief
+			: entry.brief + "\n\nNot available in your color file.";
+		addButton(entry.name, hex, tooltip, calibrated);
 	}
+
+	// Custom colors from the file not in the standard set — at the bottom.
+	for (const auto& [name, hex] : colors) {
+		if (name == HUMAN_ON or name == HUMAN_OFF or name == HUMAN_RANDOM) continue;
+		if (Defaults::isLegalColor(name)) continue;
+		addButton(name, hex, "Custom color.", true);
+	}
+
 	ContainerColorPicker->show_all();
 	return cssData;
 }

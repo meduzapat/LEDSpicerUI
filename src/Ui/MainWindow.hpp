@@ -43,6 +43,7 @@
 #include "DataDialogs/DialogRestrictor.hpp"
 #include "DataDialogs/DialogProcess.hpp"
 #include "DataDialogs/DialogGroup.hpp"
+#include "StatusBar.hpp"
 
 #pragma once
 

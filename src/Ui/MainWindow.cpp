@@ -38,6 +38,7 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 {
 
 	Message::initialize(builder, this);
+	StatusBar::initialize(builder);
 
 	DialogSettings::buildInstance(builder, "DialogSettings");
 	DialogProject::buildInstance(builder,  "DialogProject");
@@ -372,7 +373,6 @@ void MainWindow::readConfigFile(const string& dataFilePath, bool wipe, uint8_t i
 		}
 		DialogDevice::getInstance()->load(datafile.getDataMap());
 		DialogGroup::getInstance()->load(datafile.getDataMap());
-		// TODO: set default profile
 	}
 
 	// Load restrictors from config file.

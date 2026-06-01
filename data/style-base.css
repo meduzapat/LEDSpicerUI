@@ -2,7 +2,8 @@
 /* ============================================================
  * LEDSpicerUI — Base Structural CSS
  * Layout, sizing, spacing, and hardware-semantic colors.
- * Themes must NOT override rules in this file.
+ * No backgrounds, no images, no theme colors — plain bones.
+ * Themes build on top of this file; they do not replace it.
  * ============================================================ */
 
 /* ── Utility: border-radius overrides ─────────────────────── */
@@ -36,7 +37,28 @@ combobox.noRoundRight button.combo,
 	color: #000;
 }
 
-/* RGB channel pin colors — hue identity must never change */
+/* ── Connector / pin label layout ─────────────────────────── */
+
+/* Baseline: opaque so the FlowBox zone artwork doesn't bleed through
+ * unused pins. Pin color classes below override this background. */
+.pinLabel {
+	font-size: 8pt;
+	border: 1px solid #333;
+	background: #3a3a3a;
+	color: #fff;
+}
+
+.connectorBox {
+	margin: 0;
+	padding: 2px 4px;
+	font-size: 10pt;
+	background-color: rgba(60,60,60,0.65);
+	border: 1px solid rgba(170,170,170,0.6);
+	border-radius: 4px;
+}
+
+/* Hardware pin colors — semantic, never theme-overridden.
+ * Listed AFTER .pinLabel so source order wins within this provider. */
 .pinSingle {
 	background: #f6f5f4;
 	color: #000;
@@ -59,26 +81,12 @@ combobox.noRoundRight button.combo,
 
 .pinSolenoid {
 	background: #813d9c;
+	color: #fff;
 }
 
 .pinMulti {
 	background: linear-gradient(90deg, rgba(246,245,244,1) 0%, rgba(255,0,0,1) 25%, rgba(0,255,0,1) 50%, rgba(0,0,255,1) 75%, rgba(129,61,156,1) 100%);
 	color: #000;
-}
-
-/* ── Connector / pin label layout ─────────────────────────── */
-
-.pinLabel {
-	font-size: 8pt;
-	border: 1px solid #333;
-}
-
-.connectorBox {
-	margin: 0;
-	padding: 2px 4px;
-	font-size: 10pt;
-	background-color: rgba(128,128,128,0.12);
-	border-radius: 4px;
 }
 
 /* ── BoxButton structural layout ──────────────────────────── */
@@ -144,6 +152,20 @@ combobox.noRoundRight button.combo,
 	opacity: 0.4;
 }
 
+/* ── Color picker disabled state ──────────────────────────── */
+/* Themes do not define this selector, so base wins without conflict. */
+
+.colorPickerButton:disabled {
+	border: 1px dashed rgba(180,180,180,0.7);
+	background-image: repeating-linear-gradient(
+		45deg,
+		rgba(0,0,0,0.25) 0px,
+		rgba(0,0,0,0.25) 2px,
+		transparent      2px,
+		transparent      6px
+	);
+}
+
 /* ── Object type state rules ──────────────────────────────── */
 
 .GroupBoxButton.read-only {
@@ -168,11 +190,10 @@ combobox.noRoundRight button.combo,
 }
 
 /* ── Area background structure ────────────────────────────── */
-/* All background-image URLs are relative to the data/ directory.
- * Themes provide background-color fallbacks; images are shared. */
+/* background-image for each zone is provided by the theme.
+ * Base only sets the shared positioning/sizing behavior. */
 
 .layoutPreview {
-	background-image:    url("images/backgroundLayout.png");
 	background-size:     cover;
 	background-position: center;
 	background-repeat:   no-repeat;
@@ -183,55 +204,6 @@ combobox.noRoundRight button.combo,
 	background-size:     cover;
 	background-position: center;
 }
-
-.zoneCanvas.devices {
-	background-image: url("images/backgroundDevices.png");
-}
-
-.zoneCanvas.restrictors {
-	background-image: url("images/backgroundRestrictors.png");
-}
-
-.zoneCanvas.groups {
-	background-image: url("images/backgroundGroups.png");
-}
-
-.zoneCanvas.elements {
-	background-image: url("images/backgroundElements.png");
-}
-
-.zoneCanvas.processes {
-	background-image: url("images/backgroundProcesses.png");
-}
-
-.zoneCanvas.colors {
-	background-image: url("images/backgroundColors.png");
-}
-
-.zoneCanvas.inputs {
-	background-image: url("images/backgroundInputs.png");
-}
-
-.zoneCanvas.inputSources {
-	background-image: url("images/backgroundInputSources.png");
-}
-
-.zoneCanvas.inputMaps {
-	background-image: url("images/backgroundInputMaps.png");
-}
-
-.zoneCanvas.inputLinkMaps {
-	background-image: url("images/backgroundInputLinkMaps.png");
-}
-
-.zoneCanvas.animations {
-	background-image: url("images/backgroundAnimations.png");
-}
-
-.zoneCanvas.profiles {
-	background-image: url("images/backgroundProfiles.png");
-}
-
 
 /* ── Theme selector tile structure ────────────────────────── */
 

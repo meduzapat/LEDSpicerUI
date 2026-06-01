@@ -48,11 +48,6 @@
 /* Zone canvas fallback (shown when background image is absent) */
 @define-color color-zone-bg         rgba(12,14,22,0.88);
 
-/* Connector / pin label */
-@define-color color-pin-label-bg    #1a1a1a;
-@define-color color-pin-label-text  #fff;
-@define-color color-connector-border #aaa;
-
 /* Donation dialog */
 @define-color color-support-text    #ffc439;
 @define-color color-support-hover   #ffd966;
@@ -85,17 +80,6 @@
 .backgroundBlue {
 	background: @color-state-blue-bg;
 	color: #FFF;
-}
-
-/* Pin label */
-.pinLabel {
-	background: @color-pin-label-bg;
-	color:      @color-pin-label-text;
-}
-
-/* Connector box */
-.connectorBox {
-	border: 1px solid @color-connector-border;
 }
 
 /* BoxButton */

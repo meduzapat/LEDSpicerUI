@@ -108,6 +108,7 @@ add_executable(ledspicerui
 	src/Ui/ProfileDirectoryNavigator.cpp
 	src/Ui/DialogImport.cpp
 	src/Ui/ThemeManager.cpp
+	src/Ui/StatusBar.cpp
 	src/Ui/MainWindow.cpp
 	src/LEDSpicerUI.cpp
 )
@@ -145,6 +146,7 @@ set(DATA_FILES
 	${CMAKE_BINARY_DIR}/data/main.glade
 	data/style.css
 	data/style-base.css
+	data/basicColors.xml
 )
 
 file(GLOB IMAGE_FILES "data/images/*.png" "data/images/*.svg")
@@ -153,7 +155,8 @@ file(GLOB_RECURSE THEME_FILES "data/themes/*")
 install(TARGETS ledspicerui DESTINATION bin)
 install(FILES ${DATA_FILES} DESTINATION share/${PROJECT_NAME})
 install(FILES ${IMAGE_FILES} DESTINATION share/${PROJECT_NAME}/images)
-install(DIRECTORY data/themes/ DESTINATION share/${PROJECT_NAME}/themes)
+install(DIRECTORY data/themes/ DESTINATION share/${PROJECT_NAME}/themes
+	PATTERN "*.md" EXCLUDE)
 
 if(HAVE_GTEST)
 	add_subdirectory(tests)

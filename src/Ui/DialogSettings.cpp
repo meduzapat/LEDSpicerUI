@@ -456,12 +456,13 @@ void DialogSettings::populateThemes() {
 
 		auto img = Gtk::manage(new Gtk::Image());
 		img->set_size_request(120, 80);
-		if (not meta.preview.empty()) {
-			const string imgPath{PACKAGE_DATA_DIR "themes/" + meta.id + "/" + meta.preview};
-			try {
-				img->set(Gdk::Pixbuf::create_from_file(imgPath, 120, 80, true));
-			}
-			catch (const Glib::Error&) {}
+		const string imgPath{PACKAGE_DATA_DIR "themes/" + meta.id + "/preview.png"};
+		try {
+			img->set(Gdk::Pixbuf::create_from_file(imgPath, 120, 80, true));
+		}
+		catch (const Glib::Error&) {
+			img->set_from_icon_name("image-missing", Gtk::ICON_SIZE_DIALOG);
+			img->set_pixel_size(64);
 		}
 		box->pack_start(*img, false, false);
 
@@ -472,6 +473,8 @@ void DialogSettings::populateThemes() {
 		auto child = Gtk::manage(new Gtk::FlowBoxChild());
 		child->set_name(meta.id);
 		child->get_style_context()->add_class("ThemeTile");
+		if (not meta.description.empty())
+			child->set_tooltip_text(meta.description);
 		child->add(*box);
 		child->show();
 		flowBoxThemes->add(*child);
