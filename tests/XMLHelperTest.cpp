@@ -155,7 +155,7 @@ TEST(XMLHelperTest, XmlSection) {
 	const string
 		content = Defaults::tab() + "<item/>\n",
 		result  = XMLHelper::xmlSection("items", content);
-	EXPECT_EQ("\t\t<items>\n\t\t<item/>\n\t\t</items>\n", result);
+	EXPECT_EQ("\t\t<items>\n\t\t\t<item/>\n\t\t</items>\n", result);
 }
 
 TEST(XMLHelperTest, XmlSectionEmptySkipped) {
@@ -165,7 +165,7 @@ TEST(XMLHelperTest, XmlSectionEmptySkipped) {
 TEST(XMLHelperTest, XmlSectionWithAttrs) {
 
 	const string result = XMLHelper::xmlSection("maps", "<map/>\n", {{"source", "hw1"}});
-	EXPECT_EQ("\t\t<maps source=\"hw1\">\n<map/>\n\t\t</maps>\n", result);
+	EXPECT_EQ("\t\t<maps source=\"hw1\">\n\t<map/>\n\t\t</maps>\n", result);
 }
 
 TEST(XMLHelperTest, XmlHeaderNoType) {
