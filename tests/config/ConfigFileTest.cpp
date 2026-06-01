@@ -45,7 +45,7 @@ TEST_F(ConfigFileTest, SettingsLifecycle) {
 
 	const string expectedColors {"Red, Blue, Green, Yellow, White, Black"};
 	const auto& settings = configFile->getRootInfo();
-	EXPECT_EQ("default",       settings.getValue("defaultProfile"));
+	EXPECT_EQ(DEFAULT,         settings.getValue("defaultProfile"));
 	EXPECT_EQ("500",           settings.getValue(PARAM_MILLISECONDS));
 	EXPECT_EQ(HUMAN_TRUE,      settings.getValue("craftProfile"));
 	EXPECT_EQ(HUMAN_TRUE,      settings.getValue("colorsFile"));

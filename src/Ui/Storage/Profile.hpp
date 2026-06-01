@@ -22,6 +22,7 @@
 
 #include "Parent.hpp"
 #include "DirNode.hpp"
+#include "Transition.hpp"
 #include "XMLHelper.hpp"
 
 #pragma once
@@ -50,6 +51,18 @@ public:
 	CollectionHandler* getCollectionHandler() const noexcept override {
 		return CollectionHandler::getInstance(COLLECTION_PROFILES);
 	}
+
+	/**
+	 * @return a pointer to the embedded Transition record; never null.
+	 *         Edited in place by DialogTransition. None when getValue(NAME) is empty.
+	 */
+	Transition* getTransition() noexcept { return &transition; }
+	const Transition* getTransition() const noexcept { return &transition; }
+
+protected:
+
+	/// Per-profile transition. Always present; "None" when its NAME is empty.
+	Transition transition;
 };
 
 } // namespace

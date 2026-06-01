@@ -66,6 +66,7 @@ constexpr int GZ40_DEFAULT_SPEED = 12;  // Integer
 
 // all strings constants.
 inline const string
+
 /// LEDSpicer configuration file keys.
 	DEFAULT_USERID   {"1000"},
 	DEFAULT_GROUPID  {"1000"},
@@ -87,9 +88,12 @@ inline const string
 	& DEFAULT_RUNEVERY {emptyString},
 
 /// Profile configuration keys.
-	DEFAULT_PROFILE  {"default"},
+	& DEFAULT_PROFILE  {DEFAULT},
 	BACKGROUND_COLOR {"backgroundColor"},
 	& DEFAULT_PROFILE_BACKGROUND_COLOR {HUMAN_OFF},
+	TRANSITION       {"transition"},
+	& DEFAULT_TRANSITION_SPEED {HUMAN_NORMAL},
+	& DEFAULT_TRANSITION_COLOR {HUMAN_OFF},
 
 /// Hardware configuration keys.
 
@@ -181,6 +185,8 @@ inline const string
 	PCM            {"pcm"},
 	FORMAT         {"format"},
 
+	DEFAULT_ACTOR_TOMES {"10"},
+
 /// Animation actor type names (also the XML `type` attribute values).
 	ANIM_TYPE_FILLER      {"Filler"},
 	ANIM_TYPE_PULSE       {"Pulse"},
@@ -251,6 +257,7 @@ inline const string
 	TYPE_ANIMATION       {"animation"},
 	TYPE_ACTOR           {"actor"},
 	TYPE_PROFILE         {"profile"},
+	TYPE_TRANSITION      {"transition"},
 
 /// Collection / families — dual-purpose string constants.
 	COLLECTION_DEVICES         {"d"},
@@ -373,6 +380,12 @@ public:
 		INPUT_HAS_CREDITS     = 1 << 6, /// Has credits-specific settings.
 	};
 
+	/// Profile transition capability flags.
+	enum TransitionFlags : uint8_t {
+		TRANS_HAS_SPEED = 1 << 0, /// Has a speed setting.
+		TRANS_HAS_COLOR = 1 << 1, /// Has a color setting.
+	};
+
 	/// Animation actor capability flags.
 	enum AnimationFlags : uint8_t {
 		ANIM_USES_FRAME     = 1 << 0, /// Frame-family actor: speed, startAt, cycles.
@@ -433,6 +446,13 @@ public:
 	 */
 	struct ColorInfo : public BaseInfo {
 		const string pure;
+	};
+
+	/**
+	 * Structure with profile transition information.
+	 */
+	struct TransitionInfo : public BaseInfo {
+		const uint8_t flags; /// Bitwise capability flags (TransitionFlags).
 	};
 
 	Defaults() = delete;
@@ -501,6 +521,13 @@ public:
 	 * @return True if the current input is a dev/input listener.
 	 */
 	static bool isDevInputListener(const string& input);
+
+	/**
+	 * @param transition The transition name to check.
+	 * @param flag The flag to check for.
+	 * @return True if the current transition has the specified flag.
+	 */
+	static bool transitionHasFlag(const string& transition, uint8_t flag);
 
 	/**
 	 * Common hardware unique ID generator.
@@ -624,6 +651,9 @@ public:
 
 	/// A list of animation actor types to their information.
 	static const std::unordered_map<string, AnimationInfo> animationsInfo;
+
+	/// A list of profile transition types to their information.
+	static const std::unordered_map<string, TransitionInfo> transitionsInfo;
 
 	/// A List of string names to its internal enumerated type.
 	static const std::unordered_map<string, Ways> wayIds;

@@ -36,6 +36,17 @@ ProfileFile::ProfileFile(const string& filePath, Ui::Storage::DirectoryEntry* pa
 	if (not profile.isSet(BACKGROUND_COLOR))
 		profile.setValue(BACKGROUND_COLOR, DEFAULT_PROFILE_BACKGROUND_COLOR);
 
+	// Pick up the optional <transition> element so Profile's ctor can move it into its embedded record.
+	if (auto* transitionNode = getRoot()->FirstChildElement(TYPE_TRANSITION.c_str())) {
+		Values transitionAttrs {processNode(transitionNode)};
+		if (transitionAttrs.isSet(NAME))
+			profile.setValue(TRANSITION, transitionAttrs.getValue(NAME));
+		if (transitionAttrs.isSet(SPEED))
+			profile.setValue(SPEED, transitionAttrs.getValue(SPEED));
+		if (transitionAttrs.isSet(COLOR))
+			profile.setValue(COLOR, transitionAttrs.getValue(COLOR));
+	}
+
 	// Walk a single named wrapper section and collect its inner elements into a vector.
 	const auto extractSection = [this, &baseId](
 		const string& wrapperTag,

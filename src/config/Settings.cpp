@@ -33,7 +33,7 @@ const StringUMap Settings::DEFAULTS = {
 	{"projectsDir",         ""},
 	{"defaultProject",      ""},
 	{"interactiveMode",     HUMAN_TRUE},
-	{"themeName",           "default"},
+	{"themeName",           DEFAULT},
 	{"themeStyle",          "Auto"},
 	{"cleanProjectDir",     HUMAN_FALSE},
 	{"preserveEmptyDir",    HUMAN_TRUE},

@@ -80,6 +80,7 @@ add_executable(ledspicerui
 	src/Ui/Storage/InputSource.cpp
 	src/Ui/Storage/Input.cpp
 	src/Ui/Storage/Profile.cpp
+	src/Ui/Storage/Transition.cpp
 	src/Ui/Storage/Actor.cpp
 	src/Ui/Storage/Animation.cpp
 	src/Ui/Storage/BoxButton.cpp
@@ -100,6 +101,7 @@ add_executable(ledspicerui
 	src/Ui/DataDialogs/DialogInput.cpp
 	src/Ui/DataDialogs/DialogProcess.cpp
 	src/Ui/DataDialogs/DialogProfile.cpp
+	src/Ui/DataDialogs/DialogTransition.cpp
 	src/Ui/DataDialogs/DialogActor.cpp
 	src/Ui/DataDialogs/DialogAnimation.cpp
 	src/Ui/DirectoryNavigator.cpp

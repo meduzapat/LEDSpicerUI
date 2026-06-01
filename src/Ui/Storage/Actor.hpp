@@ -56,6 +56,8 @@ protected:
 
 	const string& getPrimaryKey() const noexcept override { return TYPE; }
 
+	bool shouldSerialize(const string& key, const string& value) const noexcept override;
+
 private:
 
 	/// Counter for stable UID generation.

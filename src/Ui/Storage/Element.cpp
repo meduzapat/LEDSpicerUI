@@ -98,3 +98,9 @@ void Element::convertPositionToRGB(Data* data, const string& position, const str
 uint16_t Element::findFirstConnectorIndexByPosition(const string& position) noexcept {
 	return (((std::stod(position) -1) * 3) + 1) - 1;
 }
+
+bool Element::shouldSerialize(const string& key, const string& value) const noexcept {
+	if (key == TIME_ON    and value == "0") return false;
+	if (key == BRIGHTNESS and value == DEFAULT_BRIGHTNESS) return false;
+	return Data::shouldSerialize(key, value);
+}

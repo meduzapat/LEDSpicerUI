@@ -22,6 +22,7 @@
 
 #include "DialogForm.hpp"
 #include "DialogSelect.hpp"
+#include "DialogTransition.hpp"
 #include "DirectoryAware.hpp"
 #include "Storage/Profile.hpp"
 
@@ -45,7 +46,7 @@ class DialogProfile :
 
 public:
 
-	virtual ~DialogProfile() = default;
+	virtual ~DialogProfile() noexcept;
 
 	void load(DataMap& values)    noexcept override;
 	void clearForm()              noexcept override;
@@ -61,6 +62,7 @@ protected:
 
 	Gtk::Entry*  inputProfileName          = nullptr;
 	Gtk::Button* btnProfileBackgroundColor = nullptr;
+	Gtk::Button* btnProfileTransition      = nullptr;
 
 	OrdenableFlowBox
 		* boxProfileAlwaysOnElements = nullptr,
@@ -94,6 +96,11 @@ private:
 	 * @param sourceCollectionId
 	 */
 	void resolvePaths(ValueVector& items, const string& sourceCollectionId) noexcept;
+
+	/**
+	 * Updates the transition button's label from the current Profile's Transition.
+	 */
+	void refreshTransitionButton() noexcept;
 };
 
 } // namespace

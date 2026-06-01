@@ -103,7 +103,7 @@ TEST_F(DataTest, ValuesLifecycle) {
 	// getValue: existing, missing, missing with default.
 	EXPECT_EQ("TestItem", data->getValue("name"));
 	EXPECT_EQ("",         data->getValue("nonexistent"));
-	EXPECT_EQ("default",  data->getValue("nonexistent", "default"));
+	EXPECT_EQ(DEFAULT,    data->getValue("nonexistent", DEFAULT));
 
 	// setValue: set then overwrite.
 	data->setValue("key", "value");
@@ -118,9 +118,9 @@ TEST_F(DataTest, PropertyLifecycle) {
 	// Set, read, default for missing.
 	data->getProperties().setValue("k1", "v1");
 	data->getProperties().setValue("k2", "v2");
-	EXPECT_EQ("v1",      data->getProperties().getValue("k1"));
-	EXPECT_EQ("v2",      data->getProperties().getValue("k2"));
-	EXPECT_EQ("default", data->getProperties().getValue("missing", "default"));
+	EXPECT_EQ("v1",    data->getProperties().getValue("k1"));
+	EXPECT_EQ("v2",    data->getProperties().getValue("k2"));
+	EXPECT_EQ(DEFAULT, data->getProperties().getValue("missing", DEFAULT));
 	EXPECT_TRUE(data->getProperties().isSet("k1"));
 	EXPECT_FALSE(data->getProperties().isSet("missing"));
 

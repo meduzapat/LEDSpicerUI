@@ -69,7 +69,7 @@ protected:
 
 TEST_F(ProfileTest, TestFunctionality) {
 
-	Values rootData   {{FILENAME, "default"}, {BACKGROUND_COLOR, "Off"}};
+	Values rootData   {{FILENAME, DEFAULT}, {BACKGROUND_COLOR, "Off"}};
 	Profile rootProfile {rootData, nullptr};
 
 	StubDirNode parentDir;
@@ -83,8 +83,8 @@ TEST_F(ProfileTest, TestFunctionality) {
 	EXPECT_NE(nullptr,                rootProfile.getCollectionHandler());
 
 	// createUniqueId at root and nested.
-	EXPECT_EQ(Defaults::createCommonUniqueId({emptyString,          "default"}), rootProfile.createUniqueId());
-	EXPECT_EQ(Defaults::createCommonUniqueId({parentDir.getFsId(),  "nested"}),  nestedProfile.createUniqueId());
+	EXPECT_EQ(Defaults::createCommonUniqueId({emptyString,         DEFAULT}),  rootProfile.createUniqueId());
+	EXPECT_EQ(Defaults::createCommonUniqueId({parentDir.getFsId(), "nested"}), nestedProfile.createUniqueId());
 
 	// Child collections.
 	EXPECT_NE(nullptr, rootProfile.getChild(COLLECTION_PROFILE_ELEMENTS));

@@ -93,11 +93,7 @@ protected:
 	/// Pseudo children.
 	vector<Element*> stripChildren;
 
-	bool shouldSerialize(const string& key, const string& value) const noexcept override {
-		if (key == TIME_ON    and value == "0") return false;
-		if (key == BRIGHTNESS and value == DEFAULT_BRIGHTNESS) return false;
-		return Data::shouldSerialize(key, value);
-	}
+	bool shouldSerialize(const string& key, const string& value) const noexcept override;
 };
 
 } // namespace

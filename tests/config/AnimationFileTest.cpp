@@ -107,7 +107,7 @@ TEST_F(AnimationFileTest, GradientMultiColorsArePreserved) {
 	auto& actor = animationFull->getData(actorsKey("animationFull"))[2];
 	EXPECT_EQ("Red,Green,Blue", actor.getValue(COLORS));
 	EXPECT_EQ("Cyclic", actor.getValue(MODE));
-	EXPECT_EQ("10",     actor.getValue(TONES));
+	EXPECT_EQ(DEFAULT_ACTOR_TOMES, actor.getValue(TONES));
 }
 
 TEST_F(AnimationFileTest, AudioPaletteAttributesAreParsed) {

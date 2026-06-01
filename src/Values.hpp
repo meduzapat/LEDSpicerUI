@@ -46,8 +46,10 @@ namespace Constants {
 
 /// Common values used in configs.
 inline const string
+
 	emptyString,
 	emptyNumber  {"0"},
+	DEFAULT      {"default"},
 	NAME         {"name"}, // Generic parameter
 	HUMAN_TRUE   {"True"},
 	HUMAN_FALSE  {"False"},

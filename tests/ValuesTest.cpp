@@ -77,7 +77,7 @@ TEST_F(ValuesTest, GetSetValue) {
 
 	EXPECT_EQ("TestItem", values->getValue("name"));
 	EXPECT_EQ("",         values->getValue("nonexistent"));
-	EXPECT_EQ("default",  values->getValue("nonexistent", "default"));
+	EXPECT_EQ(DEFAULT,    values->getValue("nonexistent", DEFAULT));
 	EXPECT_EQ("yes",      values->getValue("ignored"));
 
 	values->setValue("key", "value");

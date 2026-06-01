@@ -62,12 +62,12 @@ TEST(XMLHelperTest, ProcessNodeByName) {
 
 	// Success case - test 'layout' node under root
 	const Values expected {
-		{"defaultProfile", "default"}
+		{"defaultProfile", DEFAULT}
 	};
 	Values nodeParam;
 	EXPECT_NO_THROW(nodeParam = helper.processNode("layout"));
-	EXPECT_EQ(nodeParam.getSize(), expected.getSize())         << "Layout node attribute count mismatch";
-	EXPECT_EQ(nodeParam.getValue("defaultProfile"), "default") << "defaultProfile value mismatch";
+	EXPECT_EQ(nodeParam.getSize(), expected.getSize())       << "Layout node attribute count mismatch";
+	EXPECT_EQ(nodeParam.getValue("defaultProfile"), DEFAULT) << "defaultProfile value mismatch";
 
 	// Failure case - nonexistent node
 	EXPECT_THROW(helper.processNode("bogus"), Message);

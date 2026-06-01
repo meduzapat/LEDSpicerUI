@@ -58,3 +58,8 @@ string Actor::createTooltip() const noexcept {
 CollectionHandler* Actor::getCollectionHandler() const noexcept {
 	return CollectionHandler::getInstance(COLLECTION_ACTORS + getProperties().getValue(PID));
 }
+
+bool Actor::shouldSerialize(const string& key, const string& value) const noexcept {
+	if (key == TONES and value == DEFAULT_ACTOR_TOMES) return false;
+	return Data::shouldSerialize(key, value);
+}

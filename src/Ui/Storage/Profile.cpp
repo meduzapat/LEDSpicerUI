@@ -37,6 +37,19 @@ Profile::Profile(Values& data, DirNode* parent) noexcept :
 	registerDependency(COLLECTION_GROUPS,     COLLECTION_PROFILE_GROUPS);
 	registerDependency(COLLECTION_INPUTS,     COLLECTION_PROFILE_INPUTS);
 	registerDependency(COLLECTION_ANIMATIONS, COLLECTION_PROFILE_ANIMATIONS);
+
+	// Move transition attrs parsed by ProfileFile into the embedded Transition record.
+	const string transitionName {getValue(TRANSITION)};
+	if (not transitionName.empty()) {
+		transition.setValue(NAME,  transitionName);
+		if (Defaults::transitionHasFlag(transitionName, Defaults::TRANS_HAS_SPEED))
+			transition.setValue(SPEED, getValue(SPEED, DEFAULT_TRANSITION_SPEED));
+		if (Defaults::transitionHasFlag(transitionName, Defaults::TRANS_HAS_COLOR))
+			transition.setValue(COLOR, getValue(COLOR, DEFAULT_TRANSITION_COLOR));
+	}
+	unSet(TRANSITION);
+	unSet(SPEED);
+	unSet(COLOR);
 }
 
 string Profile::createUniqueId() const noexcept {
@@ -83,6 +96,7 @@ string Profile::toXML() const noexcept {
 		return XMLHelper::xmlSection(tag, inner);
 	};
 
+	xml += transition.toXML();
 	xml += emit("alwaysOnElements", COLLECTION_PROFILE_ELEMENTS);
 	xml += emit("alwaysOnGroups",   COLLECTION_PROFILE_GROUPS);
 	xml += emitPathRefs("animations", COLLECTION_PROFILE_ANIMATIONS, TYPE_ANIMATION, COLLECTION_ANIMATIONS);

@@ -244,6 +244,24 @@ const std::unordered_map<string, Defaults::AnimationInfo> Defaults::animationsIn
 	}},
 };
 
+const std::unordered_map<string, Defaults::TransitionInfo> Defaults::transitionsInfo = {
+	{"FadeOutIn", {
+		"Fade Out / In",
+		"Fades the current profile out to a color, then fades the new profile in.",
+		TRANS_HAS_SPEED | TRANS_HAS_COLOR
+	}},
+	{"Crossfade", {
+		"Crossfade",
+		"Smoothly blends the current profile into the new one.",
+		TRANS_HAS_SPEED
+	}},
+	{"Curtain", {
+		"Curtain",
+		"A curtain closes over the current profile then opens to reveal the new one.",
+		TRANS_HAS_SPEED | TRANS_HAS_COLOR
+	}},
+};
+
 const std::unordered_map<string, Defaults::Ways> Defaults::wayIds {
 	{"w2",       Ways::w2},
 	{"w2v",      Ways::w2v},
@@ -400,6 +418,11 @@ bool Defaults::isDevInputListener(const string& input) {
 
 bool Defaults::hasLinkedMaps(const string& input) {
 	return inputHasFlag(input, INPUT_LINKED_MAPS);
+}
+
+bool Defaults::transitionHasFlag(const string& transition, uint8_t flag) {
+	auto it = transitionsInfo.find(transition);
+	return it != transitionsInfo.end() and (it->second.flags & flag);
 }
 
 string Defaults::createCommonUniqueId(const StringVector& fieldsData) {

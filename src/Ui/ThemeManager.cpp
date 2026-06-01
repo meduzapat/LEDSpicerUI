@@ -57,7 +57,7 @@ void ThemeManager::initialize() noexcept {
 
 bool ThemeManager::apply(const string& themeId, Config::Settings::ThemeStyle style) noexcept {
 
-	const string& id {themeId.empty() ? "default" : themeId};
+	const string& id {themeId.empty() ? DEFAULT : themeId};
 
 	removeProvider(baseProvider);
 	removeProvider(themeProvider);
@@ -71,8 +71,8 @@ bool ThemeManager::apply(const string& themeId, Config::Settings::ThemeStyle sty
 
 	themeProvider = loadCss(cssPath, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION + 1);
 	if (not themeProvider) {
-		if (id != "default")
-			return apply("default", style);
+		if (id != DEFAULT)
+			return apply(DEFAULT, style);
 		currentThemeId.clear();
 		currentVariant.clear();
 		return false;

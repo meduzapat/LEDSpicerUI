@@ -87,12 +87,22 @@ DialogProfile::DialogProfile(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 	builder->get_widget("BtnAddProfile",             btnAdd);
 	builder->get_widget("InputProfileName",          inputProfileName);
 	builder->get_widget("BtnProfileBackgroundColor", btnProfileBackgroundColor);
+	builder->get_widget("BtnProfileTransition",      btnProfileTransition);
 	Defaults::attachFilenameFilter(inputProfileName);
 
 	setSignalAdd(btnAdd);
 	setSignalApply();
 
 	DialogColors::getInstance()->activateColorButton(btnProfileBackgroundColor);
+
+	DialogTransition::buildInstance(builder, "DialogTransition");
+
+	btnProfileTransition->signal_clicked().connect([this]() {
+		auto profile {dynamic_cast<Storage::Profile*>(currentData)};
+		if (not profile) return;
+		DialogTransition::getInstance()->edit(profile->getTransition());
+		refreshTransitionButton();
+	});
 
 	// Always on elements selector.
 	builder->get_widget("BtnProfilesAddElements",             btnProfilesAddElements);
@@ -145,6 +155,10 @@ DialogProfile::DialogProfile(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 
 }
 
+DialogProfile::~DialogProfile() noexcept {
+	delete DialogTransition::getInstance();
+}
+
 void DialogProfile::load(DataMap& values) noexcept {
 	createItems(
 		values[Defaults::createCommonUniqueId({currentDirectory->getFullPath(), COLLECTION_PROFILES})],
@@ -176,6 +190,7 @@ void DialogProfile::createSubItems(DataMap& values) noexcept {
 void DialogProfile::clearForm() noexcept {
 	inputProfileName->set_text("");
 	DialogColors::getInstance()->colorizeButton(btnProfileBackgroundColor, DEFAULT_PROFILE_BACKGROUND_COLOR);
+	btnProfileTransition->set_label("Transition [None]");
 
 	boxProfileAlwaysOnElements->wipe();
 	boxProfileAlwaysOnGroups->wipe();
@@ -222,6 +237,7 @@ void DialogProfile::retrieveData() noexcept {
 		btnProfileBackgroundColor,
 		currentData->getValue(BACKGROUND_COLOR)
 	);
+	refreshTransitionButton();
 
 	auto ds{DialogSelect::getInstance()};
 	setUpSelector(alwaysOnElementsRequest);
@@ -274,4 +290,13 @@ void DialogProfile::wireChildrenDialogs() noexcept {
 
 void DialogProfile::disconnectChildrenDialogs() noexcept {
 	currentData->tearDown();
+}
+
+void DialogProfile::refreshTransitionButton() noexcept {
+	auto profile {dynamic_cast<Storage::Profile*>(currentData)};
+	if (not profile) {
+		btnProfileTransition->set_label("Transition [None]");
+		return;
+	}
+	btnProfileTransition->set_label("Transition [" + profile->getTransition()->createPrettyName() + "]");
 }
