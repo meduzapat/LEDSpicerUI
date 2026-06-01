@@ -1,0 +1,236 @@
+/* ============================================================
+ * LEDSpicerUI — Industrial Modern Light Theme
+ * Daylight blueprint variant. Same composition as dark, relit
+ * on cool paper.
+ * ============================================================ */
+
+/* ── Color palette ─────────────────────────────────────────── */
+
+/* UI state indicators */
+@define-color color-toggle-checked  #1077c4;
+@define-color color-state-green-bg  #1f8a4c;
+@define-color color-state-red-bg    #c0392b;
+@define-color color-state-blue-bg   #1565c0;
+
+/* BoxButton surfaces */
+@define-color color-box-bg          rgba(255,255,255,0.82);
+@define-color color-box-inner       rgba(244,246,250,0.92);
+@define-color color-box-border      rgba(16,119,196,0.20);
+@define-color color-box-text        #1a1d24;
+@define-color color-box-btn-text    #1a1d24;
+
+/* Selection */
+@define-color color-selected-bg     rgba(16,119,196,0.16);
+@define-color color-selected-border rgba(16,119,196,0.85);
+@define-color color-selected-glow   rgba(16,119,196,0.30);
+
+/* Action button hovers */
+@define-color color-edit-hover      #1077c4;
+@define-color color-copy-hover      #2ea84d;
+@define-color color-delete-hover    #c0392b;
+
+/* Object type identity */
+@define-color color-type-device          rgba(30,130,60,0.40);
+@define-color color-type-device-glow     rgba(30,130,60,0.30);
+@define-color color-type-device-border   rgba(30,130,60,0.85);
+@define-color color-type-restrictor        rgba(16,119,196,0.40);
+@define-color color-type-restrictor-glow   rgba(16,119,196,0.30);
+@define-color color-type-restrictor-border rgba(16,119,196,0.85);
+@define-color color-type-element         rgba(140,40,200,0.40);
+@define-color color-type-element-glow    rgba(140,40,200,0.30);
+@define-color color-type-element-border  rgba(140,40,200,0.85);
+@define-color color-type-group-system    #757a85;
+@define-color color-type-directory       #b46a00;
+@define-color color-type-directory-bg    rgba(180,106,0,0.07);
+@define-color color-type-directory-glow  rgba(180,106,0,0.25);
+
+/* Navigation */
+@define-color color-nav-hover       #1077c4;
+
+/* Zone canvas fallback */
+@define-color color-zone-bg         rgba(244,246,250,0.92);
+
+/* Donation dialog */
+@define-color color-support-text    #b46a00;
+@define-color color-support-hover   #8a5000;
+@define-color color-donate-title    #b46a00;
+@define-color color-donate-heart    #c0392b;
+@define-color color-donate-bg       #003087;
+@define-color color-donate-bg-hover #0042b8;
+@define-color color-donate-text     #ffffff;
+@define-color color-donate-border   #001d5c;
+@define-color color-donate-glow     rgba(16,119,196,0.30);
+
+/* ── Apply palette ─────────────────────────────────────────── */
+
+.formContainer button.toggle:checked {
+	background: @color-toggle-checked;
+}
+
+.backgroundGreen {
+	background: @color-state-green-bg;
+	color: #FFF;
+}
+
+.backgroundRed {
+	background: @color-state-red-bg;
+	color: #FFF;
+}
+
+.backgroundBlue {
+	background: @color-state-blue-bg;
+	color: #FFF;
+}
+
+.BoxButton {
+	border:           1px solid @color-box-border;
+	background-color: @color-box-bg;
+}
+
+.BoxButton > box {
+	background: @color-box-inner;
+}
+
+.BoxButton label {
+	color: @color-box-text;
+}
+
+.BoxButton > box > button {
+	color: @color-box-btn-text;
+}
+
+.BoxButton:selected {
+	background-color: @color-selected-bg;
+	border-color:     @color-selected-border;
+	box-shadow:       0 0 10px @color-selected-glow;
+}
+
+.BoxButton:selected label {
+	color: @color-box-text;
+}
+
+.BoxBackgroundEdit:hover {
+	background: @color-edit-hover;
+}
+
+.BoxBackgroundCopy:hover {
+	background: @color-copy-hover;
+}
+
+.BoxBackgroundDelete:hover {
+	background: @color-delete-hover;
+}
+
+.DeviceBoxButton {
+	border-color: @color-type-device;
+}
+
+.DeviceBoxButton:hover {
+	box-shadow:   0 0 10px @color-type-device-glow;
+	border-color: @color-type-device-border;
+}
+
+.RestrictorBoxButton {
+	border-color: @color-type-restrictor;
+}
+
+.RestrictorBoxButton:hover {
+	box-shadow:   0 0 10px @color-type-restrictor-glow;
+	border-color: @color-type-restrictor-border;
+}
+
+.ElementBoxButton {
+	border-color: @color-type-element;
+}
+
+.ElementBoxButton:hover {
+	box-shadow:   0 0 12px @color-type-element-glow;
+	border-color: @color-type-element-border;
+}
+
+.GroupBoxButton.system {
+	opacity:      0.7;
+	border-color: @color-type-group-system;
+}
+
+.DirectoryBoxButton {
+	border-color:     @color-type-directory;
+	background-color: @color-type-directory-bg;
+}
+
+.DirectoryBoxButton:hover {
+	box-shadow:   0 0 8px @color-type-directory-glow;
+	border-color: @color-type-directory;
+}
+
+.BreadcrumbButton:hover {
+	color: @color-nav-hover;
+}
+
+.zoneCanvas {
+	background-color: @color-zone-bg;
+}
+
+.ThemeTile {
+	border:           1px solid @color-box-border;
+	background-color: @color-box-bg;
+}
+
+.ThemeTile label {
+	color: @color-box-text;
+}
+
+.ThemeTile:selected {
+	background-color: @color-selected-bg;
+	border-color:     @color-selected-border;
+	box-shadow:       0 0 10px @color-selected-glow;
+}
+
+.ThemeTile:selected label {
+	color: @color-box-text;
+}
+
+.SupportButton {
+	color: @color-support-text;
+}
+
+.SupportButton:hover {
+	color: @color-support-hover;
+}
+
+.DonateTitleLabel {
+	color: @color-donate-title;
+}
+
+.DonateHeartIcon {
+	color: @color-donate-heart;
+}
+
+.DonateButton {
+	background-color: @color-donate-bg;
+	color:            @color-donate-text;
+	border-color:     @color-donate-border;
+}
+
+.DonateButton:hover {
+	background-color: @color-donate-bg-hover;
+	box-shadow:       0 0 14px @color-donate-glow;
+}
+
+/* ── Zone canvas background images ────────────────────────── */
+
+.zoneCanvas.devices       { background-image: url("backgroundDevices.png");       }
+.zoneCanvas.restrictors   { background-image: url("backgroundRestrictors.png");   }
+.zoneCanvas.groups        { background-image: url("backgroundGroups.png");        }
+.zoneCanvas.elements      { background-image: url("backgroundElements.png");      }
+.zoneCanvas.processes     { background-image: url("backgroundProcesses.png");     }
+.zoneCanvas.colors        { background-image: url("backgroundColors.png");        }
+.zoneCanvas.inputs        { background-image: url("backgroundInputs.png");        }
+.zoneCanvas.inputSources  { background-image: url("backgroundInputSources.png");  }
+.zoneCanvas.inputMaps     { background-image: url("backgroundInputMaps.png");     }
+.zoneCanvas.inputLinkMaps { background-image: url("backgroundInputLinkMaps.png"); }
+.zoneCanvas.animations    { background-image: url("backgroundAnimations.png");    }
+.zoneCanvas.profiles      { background-image: url("backgroundProfiles.png");      }
+
+.layoutPreview            { background-image: url("backgroundLayout.png");          }
+.zoneCanvas.themes        { background-image: url("backgroundThemeSelector.png");   }
