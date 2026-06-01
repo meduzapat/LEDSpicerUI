@@ -76,6 +76,7 @@ DialogActor::DialogActor(
 	builder->get_widget("SpinActorStartAt",   scaleActorStartAt);
 	builder->get_widget("ToggleActorCycles",  toggleActorCycles);
 	builder->get_widget("SpinActorCycles",    spinActorCycles);
+	builder->get_widget("ComboBoxActorSpeed", comboBoxActorSpeed);
 
 	// Direction family.
 	builder->get_widget("BoxActorDirection",  boxActorDirection);
@@ -224,6 +225,7 @@ void DialogActor::resetForm() noexcept {
 
 	// Frame-family widgets (StartAt and Cycles share a row).
 	toggleActorStartAt->get_parent()->set_visible(usesFrame);
+	comboBoxActorSpeed->get_parent()->set_visible(usesFrame);
 
 	// Direction also shows for audio with relabelled radios; bouncer doesn't.
 	boxActorDirection->set_visible(usesDirection or usesAudio);
@@ -339,6 +341,7 @@ void DialogActor::storeData() noexcept {
 			currentData->setValue(START_AT, static_cast<int>(scaleActorStartAt->get_value()));
 		if (toggleActorCycles->get_active())
 			currentData->setValue(CYCLES, spinActorCycles->get_value_as_int());
+		currentData->setValue(SPEED, comboBoxActorSpeed->get_active_id());
 	}
 
 	if (typeHas(type, Defaults::ANIM_USES_DIRECTION) or typeHas(type, Defaults::ANIM_USES_AUDIO))
@@ -451,6 +454,8 @@ void DialogActor::retrieveData() noexcept {
 			toggleActorCycles->set_active(true);
 			spinActorCycles->set_value(currentData->getInt(CYCLES));
 		}
+
+		comboBoxActorSpeed->set_active_id(currentData->getValue(SPEED, HUMAN_NORMAL));
 	}
 
 	if (typeHas(type, Defaults::ANIM_USES_DIRECTION) or typeHas(type, Defaults::ANIM_USES_AUDIO)) {
@@ -548,6 +553,8 @@ void DialogActor::onEmpty() noexcept {
 	toggleActorStartAt->get_parent()->set_visible(false);
 	toggleActorStartAt->set_active(false);
 	toggleActorCycles->set_active(false);
+	comboBoxActorSpeed->get_parent()->set_visible(false);
+	comboBoxActorSpeed->set_active_id(HUMAN_NORMAL);
 
 	// Direction + Audio family.
 	boxActorDirection->set_visible(false);
@@ -606,6 +613,7 @@ void DialogActor::onSelected() noexcept {
 	if (not typeHas(type, Defaults::ANIM_USES_FRAME)) {
 		currentData->unSet(START_AT);
 		currentData->unSet(CYCLES);
+		currentData->unSet(SPEED);
 	}
 	if (not typeHas(type, Defaults::ANIM_USES_DIRECTION))
 		currentData->unSet(BOUNCER);

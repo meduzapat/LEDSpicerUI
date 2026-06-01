@@ -83,6 +83,7 @@ protected:
 	Gtk::Scale*        scaleActorStartAt  = nullptr;
 	Gtk::ToggleButton* toggleActorCycles  = nullptr;
 	Gtk::SpinButton*   spinActorCycles    = nullptr;
+	Gtk::ComboBox*     comboBoxActorSpeed = nullptr;
 
 	// Direction family (ANIM_USES_DIRECTION) — also reused for audio with relabelled radios.
 	Gtk::Box*          boxActorDirection  = nullptr;

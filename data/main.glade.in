@@ -7809,7 +7809,7 @@ Default: 100%.</property>
                   <object class="GtkComboBox" id="ComboBoxActorSpeed">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
-                    <property name="tooltip-text">Controls the blink speed.</property>
+                    <property name="tooltip-text" translatable="yes">Animation playback speed.</property>
                     <property name="model">liststoreSpeed</property>
                     <property name="id-column">0</property>
                     <child>
