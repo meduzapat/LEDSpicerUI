@@ -21,7 +21,6 @@
  */
 
 #include "Element.hpp"
-#include "Group.hpp"
 
 using namespace LEDSpicerUI::Ui::Storage;
 
