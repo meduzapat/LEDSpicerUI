@@ -1,17 +1,17 @@
 <img width="1672" height="941" alt="LEDSpicerBanner16-9HD" src="https://github.com/user-attachments/assets/daf7c2ab-aa91-4035-9af8-0278aa209eb1" />
 
-## LEDSpicer UI - Visual Editor for the LEDSpicer Platform
+## LEDSpicer™ UI - Visual Editor for the LEDSpicer™ Platform
 
 [![GitHub](https://img.shields.io/github/v/release/meduzapat/LEDSpicerUI?color=blueviolet)](https://github.com/meduzapat/LEDSpicerUI/releases/latest)
 ![GitHub Release Date](https://img.shields.io/github/release-date/meduzapat/LEDSpicerUI)
 ![GitHub](https://img.shields.io/github/license/meduzapat/LEDSpicerUI?color=blue)
 [![Static Badge](https://img.shields.io/badge/Donations_are_welcome-gray?logo=paypal&labelColor=rgb(255%2C%20209%2C%2064))](https://www.paypal.com/donate/?hosted_button_id=LVNVCXN4NKWP8)
 
-This is the UI for the [LEDSpicer daemon](https://github.com/meduzapat/LEDSpicer "LEDSpicer Project").
+This is the UI for the [LEDSpicer™ daemon](https://github.com/meduzapat/LEDSpicer "LEDSpicer Project").
 
 Design control panel layouts, configure LED hardware, create animations, and manage profiles for arcade cabinets and interactive projects.
 
-Whether you are building a new arcade cabinet or maintaining an existing installation, LEDSpicer UI eliminates the need to manually edit configuration files by providing intuitive tools for designing layouts, configuring hardware, and managing profiles and animations.
+Whether you are building a new arcade cabinet or maintaining an existing installation, LEDSpicer™ UI eliminates the need to manually edit configuration files by providing intuitive tools for designing layouts, configuring hardware, and managing profiles and animations.
 ## Getting Started
 
 ```
@@ -38,11 +38,11 @@ I need to create a .desktop laucher so right now open the terminal and type ```l
 
 Copyright (C) 2018 - 2026 Patricio A. Rossi
 
-LEDSpicer is free software: you can redistribute it and/or modify it
+LEDSpicer™ is free software: you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
 Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
-LEDSpicer is distributed in the hope that it will be useful, but
+LEDSpicer™ is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 See the GNU General Public License for more details.
