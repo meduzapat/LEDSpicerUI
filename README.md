@@ -1,5 +1,4 @@
-<img width="1672" height="941" alt="LEDSpicerBanner16-9HD" src="https://github.com/user-attachments/assets/daf7c2ab-aa91-4035-9af8-0278aa209eb1" />
-
+<img width="1670" height="890" alt="LEDSpicerBanner16-9TransparentHD" src="https://github.com/user-attachments/assets/d929f436-1d8c-46d5-bbe5-c98c092f291e" />
 ## LEDSpicer™ UI - Visual Editor for the LEDSpicer™ Platform
 
 [![GitHub](https://img.shields.io/github/v/release/meduzapat/LEDSpicerUI?color=blueviolet)](https://github.com/meduzapat/LEDSpicerUI/releases/latest)
