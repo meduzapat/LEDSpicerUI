@@ -1,4 +1,6 @@
-<img width="1670" height="890" alt="LEDSpicer Banner 16-9 Transparent HD" src="https://github.com/user-attachments/assets/d929f436-1d8c-46d5-bbe5-c98c092f291e" style="border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" />
+<picture style="display: block; width: 1670px; max-width: 100%;">
+  <img alt="LEDSpicer Banner 16-9 Transparent HD" src="https://github.com/user-attachments/assets/d929f436-1d8c-46d5-bbe5-c98c092f291e" style="border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); background-color: transparent !important; width: 100%; height: auto; display: block;" />
+</picture>
 
 ## LEDSpicer™ UI - Visual Editor for the LEDSpicer™ Platform
 
