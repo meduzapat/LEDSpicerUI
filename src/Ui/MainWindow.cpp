@@ -39,6 +39,7 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 
 	Message::initialize(builder, this);
 	StatusBar::initialize(builder);
+	StatusBar::getInstance().push("Ready", StatusBar::Severity::Info, true);
 
 	DialogSettings::buildInstance(builder, "DialogSettings");
 	DialogProject::buildInstance(builder,  "DialogProject");
@@ -118,7 +119,7 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 
 			Defaults::cleanDirty();
 			DialogSettings::getInstance()->saveSettings();
-			Message::displayInfo("Project saved successfully.");
+			StatusBar::getInstance().push("Project saved", StatusBar::Severity::Success);
 		}
 		catch (Message& e) {
 			e.displayError();
@@ -233,7 +234,7 @@ void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {
 				readConfigFile(newPath, false, dialogImportConfig.getConfigParameters());
 			}
 			catch (Message& e) {
-				Message::displayError(XMLHelper::cleanError(e.getMessage()));
+				Message::displayError(XMLHelper::cleanError(e.takeMessage()));
 			}
 			Defaults::markDirty();
 		}
@@ -322,13 +323,14 @@ void MainWindow::openProject(const string& name) {
 	Defaults::setSubtitle(name);
 	comboColors->set_active_id("");
 
+	Message::beginBatch();
 	try {
 		readConfigFile(Settings::get().getActiveConfigPath(), true, IMPORT_ALL);
 		DialogSettings::getInstance()->saveSettings();
 	}
 	catch (Message& e) {
 		if (Glib::file_test(Settings::get().getActiveConfigPath(), Glib::FileTest::FILE_TEST_EXISTS))
-			Message::displayError(XMLHelper::cleanError("The config file raised an error:\n" + e.getMessage()));
+			Message::collect(XMLHelper::cleanError("The config file raised an error: " + e.takeMessage()));
 		devices.wipe();
 		restrictors.wipe();
 		processes.wipe();
@@ -340,6 +342,7 @@ void MainWindow::openProject(const string& name) {
 		Values values;
 		setConfiguration(values);
 	}
+	const auto report {Message::endBatch()};
 
 	DialogDevice::getInstance()->refreshItems();
 	DialogGroup::getInstance()->refreshItems();
@@ -349,20 +352,26 @@ void MainWindow::openProject(const string& name) {
 	mainTabs->set_visible_child("configuration");
 	mainTabsBox->set_sensitive(true);
 	btnImportConfig->set_sensitive(true);
+
+	if (not report.empty()) {
+		const auto count {std::count(report.begin(), report.end(), '\n')};
+		const string summary {
+			"Project loaded with " + std::to_string(count) +
+			(count == 1 ? " issue" : " issues")
+		};
+		Message::displayError(report, nullptr, summary);
+		StatusBar::getInstance().push(summary, StatusBar::Severity::Warning);
+	}
+	else {
+		StatusBar::getInstance().push("Project loaded", StatusBar::Severity::Success);
+	}
 }
 
 void MainWindow::readConfigFile(const string& dataFilePath, bool wipe, uint8_t importFlags) {
 
 	ConfigFile datafile(dataFilePath);
 	if (importFlags & Defaults::ImportFlags::CONFIG) {
-		const auto& c(datafile.getRootInfo());
-		// check if color are different.
-		const string
-			& colors {c.getValue("colors")},
-			& previous(comboColors->get_active_id());
-		if (not previous.empty() and previous != colors)
-			Message::displayInfo("Warning\nColors definition file changed, element color changed");
-		setConfiguration(c);
+		setConfiguration(datafile.getRootInfo());
 	}
 
 	// Load Devices, elements and groups from config file.

@@ -128,7 +128,7 @@ void DialogSelect::reindex() noexcept {
 	destination->reindex(request->displayBox);
 }
 
-void DialogSelect::load(DataMap& values, const string& ownerUniqueId) noexcept {
+void DialogSelect::load(DataMap& values, const string& ownerUniqueId, const string& ownerName) noexcept {
 
 	auto& rawCollection{values[
 		Defaults::createCommonUniqueId({ownerUniqueId, request->collectionId})
@@ -143,8 +143,7 @@ void DialogSelect::load(DataMap& values, const string& ownerUniqueId) noexcept {
 			Storage::Data* target  {request->sourceCollection->get(keyValue)};
 			if (not target)
 				throw Message(
-					"Cannot find " + request->linkType +
-					" with " + request->linkKey + " " + keyValue
+					request->linkType + " '" + keyValue + "' not found"
 				);
 
 			rawItem.unSet(request->linkKey);
@@ -160,15 +159,19 @@ void DialogSelect::load(DataMap& values, const string& ownerUniqueId) noexcept {
 			request->displayBox->add(btn);
 		}
 		catch (Message& e) {
-			errors += e.getMessage() + '\n';
-			Defaults::markDirty();
+			errors += e.takeMessage() + '\n';
 		}
 	}
 
 	request->displayBox->show_all();
 
-	if (not errors.empty())
-		Message::displayError("Errors loading " + request->linkType + ":\n" + errors, this);
+	if (not errors.empty()) {
+		const string scope {ownerName.empty() ? ownerUniqueId : ownerName};
+		if (Message::isBatching())
+			Message::collect("In " + scope + ", missing " + request->linkType + " links:\n" + errors);
+		else
+			Message::displayError("Errors loading " + request->linkType + ":\n" + errors, this);
+	}
 }
 
 void DialogSelect::populatePicker() noexcept {

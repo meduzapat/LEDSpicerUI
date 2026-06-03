@@ -106,9 +106,11 @@ void DirectoryNavigator::process(Storage::DirectoryEntry* parent, const string& 
 				extractData(entry.path().string(), parent);
 			}
 			catch (Message& e) {
-				Message::displayError(
-					"Skipping " + Glib::path_get_basename(entry.path().string()) + ":\n" +
-					XMLHelper::cleanError(e.getMessage())
+				const string parentPath {parent->getFullPath()};
+				Message::collect(
+					"Skipping " + (parentPath.empty() ? emptyString : parentPath + "/") +
+					Glib::path_get_basename(entry.path().string()) + ": " +
+					XMLHelper::cleanError(e.takeMessage())
 				);
 			}
 		}

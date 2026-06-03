@@ -124,7 +124,7 @@ void DialogInput::resetForm() noexcept {
 void DialogInput::isValid() const {
 
 	string id(selectorCombo->get_active_id());
-	if (id.empty()) throw Message("Select an input type.");
+	if (id.empty()) throw Message("Missing input type.");
 
 	string filename(entryInputName->get_text());
 	if (filename.empty()) {
@@ -153,11 +153,11 @@ void DialogInput::isValid() const {
 	if (action != Actions::LOAD) {
 		if (Defaults::needSource(id)) {
 			if (not DialogInputSource::getInstance()->getBox()->getSize())
-				throw Message("Add at least one source.");
+				throw Message("No sources defined.");
 		}
 		else {
 			if (not DialogInputMap::getInstance()->getBox()->getSize())
-				throw Message("Add at least one map.");
+				throw Message("No maps defined.");
 		}
 	}
 }

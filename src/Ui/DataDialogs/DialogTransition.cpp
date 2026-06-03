@@ -121,7 +121,7 @@ void DialogTransition::isValid() const {
 	const string name {comboName->get_active_id()};
 	if (name.empty()) return;
 	if (Defaults::transitionHasFlag(name, Defaults::TRANS_HAS_SPEED) and string(comboSpeed->get_active_id()).empty())
-		throw Message("Select a speed for the transition.");
+		throw Message("Missing transition speed.");
 	if (Defaults::transitionHasFlag(name, Defaults::TRANS_HAS_COLOR) and btnColor->get_label().empty())
-		throw Message("Select a color for the transition.");
+		throw Message("Missing transition color.");
 }

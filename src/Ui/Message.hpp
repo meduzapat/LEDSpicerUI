@@ -35,13 +35,6 @@ public:
 
 	Message(const string& errorMessage) : error(errorMessage) {}
 
-	/**
-	 * Throws an error and displays a error message dialog over transient window.
-	 * @param errorMessage text message to display.
-	 * @param transient the window to be over.
-	 */
-	Message(const string& errorMessage, Gtk::Window* transient);
-
 	virtual ~Message() = default;
 
 	/**
@@ -53,50 +46,102 @@ public:
 	/**
 	 * Displays the current message in a error dialog.
 	 * @param transient
+	 * @param heading optional bold heading shown above the body; defaults to "Error".
 	 */
-	void displayError(Gtk::Window* transient = nullptr);
+	void displayError(Gtk::Window* transient = nullptr, const string& heading = emptyString);
 
 	/**
 	 * Display an error message.
 	 * @param errorMessage
 	 * @param transient
+	 * @param heading optional bold heading shown above the body; defaults to "Error".
 	 */
-	static void displayError(const string& errorMessage, Gtk::Window* transient = nullptr);
+	static void displayError(
+		const string& errorMessage,
+		Gtk::Window* transient = nullptr,
+		const string& heading = emptyString
+	);
 
 	/**
 	 * Display and informative message.
 	 * @param errorMessage
 	 * @param transient
+	 * @param heading optional bold heading shown above the body; defaults to "Information".
 	 */
-	static void displayInfo(const string& infoMessage, Gtk::Window* transient = nullptr);
+	static void displayInfo(
+		const string& infoMessage,
+		Gtk::Window* transient = nullptr,
+		const string& heading = emptyString
+	);
 
 	/**
 	 * Ask a question that can be answered with yes or now.
 	 * @param question
 	 * @param transient
+	 * @param heading optional bold heading shown above the body; defaults to "Question".
 	 * @return the answer.
 	 */
-	static int ask(const string& question, Gtk::Window* transient = nullptr);
+	static Gtk::ResponseType ask(
+		const string& question,
+		Gtk::Window* transient = nullptr,
+		const string& heading = emptyString
+	);
+
+	/**
+	 * Starts collecting error messages instead of failing one-by-one.
+	 * While batching, collect() appends to an internal buffer. Call endBatch()
+	 * to retrieve the accumulated text and turn batching off.
+	 *
+	 * Intended for load paths where many small errors should be reported as a
+	 * single consolidated message rather than spamming the user with dialogs.
+	 */
+	static void beginBatch() noexcept;
+
+	/**
+	 * Appends a line to the batch buffer. No-op if batching is off, so callers
+	 * can use it unconditionally inside catch blocks during a load.
+	 */
+	static void collect(const string& line) noexcept;
+
+	/**
+	 * Returns the accumulated batch text, clears the buffer and turns batching
+	 * off. Empty string if nothing was collected.
+	 */
+	static string endBatch() noexcept;
+
+	/**
+	 * @return true while a batch is active.
+	 */
+	static bool isBatching() noexcept;
 
 	/**
 	 * Returns and resets the error message.
 	 * @return
 	 */
-	string getMessage();
+	string takeMessage();
 
 	static Gtk::Window& getMain() noexcept { return *main; }
 
-	static int handleDialog(const string& message, Gtk::MessageDialog* dialog, Gtk::Window* transient);
-
 protected:
+
+	enum class Kind {Info, Error, Question};
+
+	static Gtk::ResponseType handleDialog(
+		const string& message,
+		Kind kind,
+		Gtk::Window* transient,
+		const string& heading = emptyString
+	);
 
 	string error;
 
-	static Gtk::MessageDialog* errorDialog;
-
-	static Gtk::MessageDialog* infoDialog;
-
-	static Gtk::MessageDialog* questionDialog;
+	static Gtk::Dialog*   dialog;
+	static Gtk::Image*    icon;
+	static Gtk::Label*    primary;
+	static Gtk::TextView* body;
+	static Gtk::Button*   btnNo;
+	static Gtk::Button*   btnYes;
+	static Gtk::Button*   btnClose;
 
 	// Keeps a pointer to the main screen to center.
 	static Gtk::Window* main;

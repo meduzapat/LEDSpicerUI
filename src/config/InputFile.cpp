@@ -117,7 +117,7 @@ string InputFile::processMaps(
 			checkAttributes({TYPE, TARGET, TRIGGER, COLOR, FILTER}, mapAttr, "input map for " + inputName);
 		}
 		catch (Message& e) {
-			errors += e.getMessage() + '\n';
+			errors += e.takeMessage() + '\n';
 			continue;
 		}
 		maps.push_back(std::move(mapAttr));

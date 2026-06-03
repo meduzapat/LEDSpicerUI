@@ -43,8 +43,9 @@ DialogForm::~DialogForm() {
 
 void DialogForm::createItems(ValueVector& rawCollection, DataMap& values) noexcept {
 
-	string errors;
+	size_t itemIndex = 0;
 	for (auto& rawItem : rawCollection) {
+		++itemIndex;
 		action = Actions::LOAD;
 		clearForm();
 		currentData = createData(rawItem);
@@ -55,10 +56,14 @@ void DialogForm::createItems(ValueVector& rawCollection, DataMap& values) noexce
 			isValid();
 		}
 		catch (Message& e) {
+			string pretty {currentData->createPrettyName()};
+			Defaults::trim(pretty);
+			if (pretty.empty() or pretty == "()" or pretty == "→")
+				pretty = "#" + std::to_string(itemIndex);
+			const string owner {ownerData ? " in " + ownerData->createPrettyName() : emptyString};
 			disconnectChildrenDialogs();
 			delete currentData;
-			errors += e.getMessage() + '\n';
-			Defaults::markDirty();
+			Message::collect(getType() + " '" + pretty + "'" + owner + ": " + e.takeMessage());
 			continue;
 		}
 		// This will clean any anomaly.
@@ -73,9 +78,6 @@ void DialogForm::createItems(ValueVector& rawCollection, DataMap& values) noexce
 		disconnectChildrenDialogs();
 	}
 	currentData = nullptr;
-	if (not errors.empty()) {
-		Message::displayError("Errors in " + getType() + ":\n" + errors, is_visible() ? this : nullptr);
-	}
 }
 
 void DialogForm::setOwner(BoxButtonCollection* collection, Data* owner) noexcept {

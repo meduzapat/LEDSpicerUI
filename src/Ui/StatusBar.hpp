@@ -21,6 +21,7 @@
  */
 
 #include <gtkmm.h>
+#include <deque>
 #include <string>
 
 #pragma once
@@ -30,12 +31,24 @@ namespace LEDSpicerUI::Ui {
 /**
  * LEDSpicerUI::Ui::StatusBar
  *
- * Singleton wrapper around GtkStatusbar.
- * MainWindow calls initialize() once with the builder; everywhere else uses getInstance().
+ * Singleton wrapper around GtkStatusbar with auto-dismiss, FIFO queueing,
+ * hover-pause and a persistent idle message.
+ *
+ * Channel policy — when to use the status bar vs. a Message dialog:
+ *   Status bar : transient feedback the user can ignore (save confirmations,
+ *                connection state, welcome/ready text, low-severity info),
+ *                or a persistent idle message describing current state.
+ *   Message    : requires user acknowledgment, contains copyable detail,
+ *                represents a destructive intent, or aggregates a report.
+ *
+ * Status bar messages must be short and informative. Long text is ellipsized
+ * (no tooltip); if a message does not fit, rewrite it or route it to a dialog.
  */
 class StatusBar {
 
 public:
+
+	enum class Severity {Info, Success, Warning, Error};
 
 	StatusBar(const StatusBar&)            = delete;
 	StatusBar& operator=(const StatusBar&) = delete;
@@ -49,13 +62,30 @@ public:
 	static void initialize(const Glib::RefPtr<Gtk::Builder>& builder) noexcept;
 
 	/**
-	 * Replaces the current message with a new one.
-	 * @param message Text to display.
+	 * Display a status message.
+	 *
+	 * Transient messages (persistent=false) are queued FIFO and shown each for
+	 * a duration proportional to their length (clamped 3–8 s, doubled for
+	 * warnings/errors). The timer pauses while the pointer is over the bar.
+	 * When the transient queue empties, the persistent message (if any) is
+	 * restored as the idle text.
+	 *
+	 * Persistent messages (persistent=true) replace the previous persistent
+	 * text and become the bar's idle text. Only one is stored at a time.
+	 *
+	 * @param message    Short, single-line text.
+	 * @param severity   Affects display duration.
+	 * @param persistent If true, sets the idle text instead of queueing a transient.
 	 */
-	void push(const std::string& message) noexcept;
+	void push(
+		const std::string& message,
+		Severity severity = Severity::Info,
+		bool persistent = false
+	) noexcept;
 
 	/**
-	 * Clears the current message.
+	 * Clears the transient queue and any currently displayed transient
+	 * message. The persistent message (if any) is restored.
 	 */
 	void clear() noexcept;
 
@@ -63,10 +93,39 @@ private:
 
 	StatusBar() = default;
 
+	struct PendingMessage {
+		std::string text;
+		Severity    severity;
+	};
+
 	static StatusBar instance;
 
+	void showNext() noexcept;
+	void displayTransient(const PendingMessage& msg) noexcept;
+	void renderPersistent() noexcept;
+	void applySeverity(Severity severity) noexcept;
+	static unsigned durationFor(const std::string& msg, Severity sev) noexcept;
+
+	bool onTimeout() noexcept;
+	bool onPointerEnter(GdkEventCrossing* event) noexcept;
+	bool onPointerLeave(GdkEventCrossing* event) noexcept;
+
 	Gtk::Statusbar* bar       = nullptr;
+	Gtk::Label*     label     = nullptr;
 	guint           contextId = 0;
+
+	std::deque<PendingMessage> queue;
+	bool            showingTransient = false;
+
+	std::string     persistentText;
+	Severity        persistentSeverity {Severity::Info};
+	bool            hasPersistent    = false;
+
+	sigc::connection timeoutConn;
+	unsigned         currentDurationMs  = 0;
+	gint64           displayStartUs     = 0;
+	unsigned         remainingMsOnHover = 0;
+	bool             paused             = false;
 };
 
 } // namespace

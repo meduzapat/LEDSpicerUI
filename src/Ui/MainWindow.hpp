@@ -20,16 +20,6 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-
-// for file and dir stats
-#include <sys/stat.h>
-#include <sys/types.h>
-
-// for file accessing.
-#include <iostream>
-#include <fstream>
-
 #include "config/ConfigFile.hpp"
 
 #include "OrdenableListBox.hpp"
@@ -44,6 +34,9 @@
 #include "DataDialogs/DialogProcess.hpp"
 #include "DataDialogs/DialogGroup.hpp"
 #include "StatusBar.hpp"
+
+// for file and dir stats
+#include <sys/types.h>
 
 #pragma once
 

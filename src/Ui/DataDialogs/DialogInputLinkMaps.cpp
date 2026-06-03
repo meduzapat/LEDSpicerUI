@@ -103,7 +103,7 @@ void DialogInputLinkMaps::clearForm() noexcept {
 
 void DialogInputLinkMaps::isValid() const {
 	if (action != Actions::LOAD and getPrimaryChildCollection()->getSize() < 2)
-		throw Message("Select at least 2 maps.");
+		throw Message("Fewer than 2 maps selected.");
 }
 
 void DialogInputLinkMaps::storeData() noexcept {

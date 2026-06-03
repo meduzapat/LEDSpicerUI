@@ -76,7 +76,7 @@ void DialogAnimation::isValid() const {
 
 	if (action != Actions::LOAD) {
 		if (not DialogActor::getInstance()->getBox()->getSize())
-			throw Message("Add at least one actor.");
+			throw Message("No actors defined.");
 	}
 }
 

@@ -72,7 +72,7 @@ void DialogRestrictorMap::isValid() const {
 		throw Message("Invalid joystick number.");
 	}
 	if (Defaults::isMulti(comboBoxRestrictors->get_active_id()) and interface->get_active_id().empty()) {
-		throw Message("Select a hardware interface.");
+		throw Message("Missing hardware interface.");
 	}
 	if (action != Actions::EDIT or newPlayer != currentData->createUniqueId()) {
 		if (currentData->getCollectionHandler()->isIdSet(newPlayer)) {

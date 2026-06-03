@@ -111,8 +111,10 @@ public:
 	 * Loads Link items from XML into destination, then refreshes displayBox.
 	 * @param values        DataMap carrying the raw data.
 	 * @param ownerUniqueId Unique ID of the owning Data.
+	 * @param ownerName     Pretty name of the owning Data, used to scope
+	 *                      error messages during batch load.
 	 */
-	void load(DataMap& values, const string& ownerUniqueId) noexcept;
+	void load(DataMap& values, const string& ownerUniqueId, const string& ownerName) noexcept;
 
 	/**
 	 * @return Vector with indexes of the found BoxButtons.

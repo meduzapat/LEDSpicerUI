@@ -264,7 +264,7 @@ void DialogActor::resetForm() noexcept {
 void DialogActor::isValid() const {
 
 	const string type {selectorCombo->get_active_id()};
-	if (type.empty()) throw Message("Select an actor type.");
+	if (type.empty()) throw Message("Missing actor type.");
 
 	const auto info {Defaults::animationsInfo.find(type)};
 	if (info == Defaults::animationsInfo.end())
@@ -273,10 +273,10 @@ void DialogActor::isValid() const {
 	const auto flags {info->second.flags};
 
 	if (comboBoxActorGroup->get_active_text().empty())
-		throw Message("Pick a group for the actor.");
+		throw Message("Missing actor group.");
 
 	if (comboBoxActorFilter->get_active_id().empty())
-		throw Message("Pick a filter.");
+		throw Message("Missing filter.");
 
 	// Color requirements.
 	const bool hasColor  {static_cast<bool>(flags & Defaults::ANIM_HAS_COLOR)};
@@ -285,7 +285,7 @@ void DialogActor::isValid() const {
 
 	// Do not punish on load.
 	if (hasColor and not useColors and btnActorColor->get_label().empty())
-		throw Message("Pick a color.");
+		throw Message("Missing color.");
 
 	// Do not punish on load.
 	if (useColors) {
@@ -307,7 +307,7 @@ void DialogActor::isValid() const {
 	}
 
 	if (type == ANIM_TYPE_FILE_READER and btnActorFileReaderFile->get_filename().empty())
-		throw Message("Pick a binary file to play back.");
+		throw Message("Missing binary file.");
 }
 
 void DialogActor::storeData() noexcept {

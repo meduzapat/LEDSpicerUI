@@ -100,7 +100,11 @@ void DialogGroup::load(DataMap& values) noexcept {
 }
 
 void DialogGroup::createSubItems(DataMap& values) noexcept {
-	DialogSelect::getInstance()->load(values, currentData->createUniqueId());
+	DialogSelect::getInstance()->load(
+		values,
+		currentData->createUniqueId(),
+		getType() + " " + currentData->createPrettyName()
+	);
 }
 
 void DialogGroup::clearForm() noexcept {

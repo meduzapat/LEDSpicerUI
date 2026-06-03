@@ -109,17 +109,17 @@ void DialogInputMap::isValid() const {
 
 	if (stackElementAndGroup->get_visible_child_name() == "InputTypeElement") {
 		if (comboBoxInputMapElement->get_active_text().empty())
-			throw Message("Select a valid element.");
+			throw Message("Invalid element.");
 	}
 	else {
 		if (comboBoxInputMapGroup->get_active_text().empty())
-			throw Message("Select a valid group.");
+			throw Message("Invalid group.");
 	}
 
 	if (inputInputMapTrigger->get_text().empty()) {
 		if (action != Actions::LOAD)
 			inputInputMapTrigger->grab_focus();
-		throw Message("Enter a trigger.");
+		throw Message("Missing trigger.");
 	}
 
 	if (inputMapDefaultColor->get_label().empty())

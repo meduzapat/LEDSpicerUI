@@ -49,82 +49,184 @@ protected:
 		catch (...) {
 			FAIL() << "Failed to load: " PACKAGE_SAMPLES_DIR "data/test.ui";
 		}
-		// Initialize Message with test-specific dialogs
-		builder->get_widget("DialogMessageError", testErrorDialog);
-		builder->get_widget("DialogMessageInfo", testInfoDialog);
-		builder->get_widget("DialogMessageQuestion", testQuestionDialog);
+		// Single unified message dialog.
+		builder->get_widget("DialogMessage",       testDialog);
+		builder->get_widget("TextViewMessageBody", testBody);
 		Message::initialize(builder, mainWindow.get());
-		testErrorDialog->signal_show().connect([&] () {
-			testErrorDialog->close();
-		});
-		testInfoDialog->signal_show().connect([&] () {
-			testInfoDialog->close();
-		});
-		testQuestionDialog->signal_show().connect([&] () {
-			testQuestionDialog->close();
+		testDialog->signal_show().connect([&] () {
+			testDialog->close();
 		});
 	}
 
 	void TearDown() override {
-		// Restore original dialog pointers
 		mainWindow.reset();
 		builder.reset();
 		app.reset();
 	}
 
+	std::string bodyText() const {
+		return testBody->get_buffer()->get_text();
+	}
+
 	Glib::RefPtr<Gtk::Application> app;
-	Glib::RefPtr<Gtk::Builder> builder;
-	std::unique_ptr<Gtk::Window> mainWindow;
-	Gtk::MessageDialog* testErrorDialog    = nullptr;
-	Gtk::MessageDialog* testInfoDialog     = nullptr;
-	Gtk::MessageDialog* testQuestionDialog = nullptr;
+	Glib::RefPtr<Gtk::Builder>     builder;
+	std::unique_ptr<Gtk::Window>   mainWindow;
+	Gtk::Dialog*   testDialog = nullptr;
+	Gtk::TextView* testBody   = nullptr;
 };
 
 // Test case: ConstructorSimple
 TEST_F(MessageTest, ConstructorSimple) {
 	Message msg("Test error");
-	EXPECT_EQ(msg.getMessage(), "Test error");
-}
-
-// Test case: ConstructorWithDisplay
-TEST_F(MessageTest, ConstructorWithDisplay) {
-	EXPECT_NO_THROW({
-		Message msg("Displayed error", mainWindow.get());
-		EXPECT_EQ(msg.getMessage(), "Displayed error");
-		EXPECT_EQ(testErrorDialog->property_secondary_text().get_value(), "Displayed error");
-	});
+	EXPECT_EQ(msg.takeMessage(), "Test error");
 }
 
 // Test case: DisplayErrorInstance
 TEST_F(MessageTest, DisplayErrorInstance) {
 	Message msg("Instance error");
 	msg.displayError(mainWindow.get());
-	EXPECT_EQ(testErrorDialog->property_secondary_text().get_value(), "Instance error");
+	EXPECT_EQ(bodyText(), "Instance error");
 }
 
 // Test case: DisplayErrorStatic
 TEST_F(MessageTest, DisplayErrorStatic) {
 	Message::displayError("Static error");
-	EXPECT_EQ(testErrorDialog->property_secondary_text().get_value(), "Static error");
+	EXPECT_EQ(bodyText(), "Static error");
 }
 
 // Test case: DisplayInfo
 TEST_F(MessageTest, DisplayInfo) {
 	Message::displayInfo("Info message", mainWindow.get());
-	EXPECT_EQ(testInfoDialog->property_secondary_text().get_value(), "Info message");
+	EXPECT_EQ(bodyText(), "Info message");
 }
 
 // Test case: AskYes
 TEST_F(MessageTest, AskYes) {
-	int result = Message::ask("Do you agree?", mainWindow.get());
+	const auto result = Message::ask("Do you agree?", mainWindow.get());
 	// due to close() without answer but is expected.
 	EXPECT_EQ(result, Gtk::ResponseType::RESPONSE_DELETE_EVENT);
-	EXPECT_EQ(testQuestionDialog->property_secondary_text().get_value(), "Do you agree?");
+	EXPECT_EQ(bodyText(), "Do you agree?");
 }
 
 // Test case: GetMessage
 TEST_F(MessageTest, GetMessage) {
 	Message msg("Temp error");
-	EXPECT_EQ(msg.getMessage(), "Temp error");
-	EXPECT_EQ(msg.getMessage(), "");
+	EXPECT_EQ(msg.takeMessage(), "Temp error");
+	EXPECT_EQ(msg.takeMessage(), "");
+}
+
+// Test case: BatchStartsInactive
+TEST_F(MessageTest, BatchStartsInactive) {
+	// Ensure no prior test left batching on.
+	Message::endBatch();
+	EXPECT_FALSE(Message::isBatching());
+}
+
+// Test case: BeginBatchTurnsOnBatching
+TEST_F(MessageTest, BeginBatchTurnsOnBatching) {
+	Message::beginBatch();
+	EXPECT_TRUE(Message::isBatching());
+	Message::endBatch();
+}
+
+// Test case: CollectAccumulatesWhileBatching
+TEST_F(MessageTest, CollectAccumulatesWhileBatching) {
+	Message::beginBatch();
+	Message::collect("first");
+	Message::collect("second");
+	const auto report = Message::endBatch();
+	EXPECT_EQ(report, "first\nsecond\n");
+}
+
+// Test case: CollectIgnoredWhenNotBatching
+TEST_F(MessageTest, CollectIgnoredWhenNotBatching) {
+	Message::endBatch();   // ensure off
+	Message::collect("should be dropped");
+	Message::beginBatch();
+	const auto report = Message::endBatch();
+	EXPECT_TRUE(report.empty());
+}
+
+// Test case: EndBatchTurnsOffBatching
+TEST_F(MessageTest, EndBatchTurnsOffBatching) {
+	Message::beginBatch();
+	Message::collect("x");
+	Message::endBatch();
+	EXPECT_FALSE(Message::isBatching());
+}
+
+// Test case: EndBatchClearsBuffer
+TEST_F(MessageTest, EndBatchClearsBuffer) {
+	Message::beginBatch();
+	Message::collect("once");
+	(void)Message::endBatch();
+	// Next batch must start empty.
+	Message::beginBatch();
+	const auto second = Message::endBatch();
+	EXPECT_TRUE(second.empty());
+}
+
+// Test case: BeginBatchResetsBuffer
+TEST_F(MessageTest, BeginBatchResetsBuffer) {
+	Message::beginBatch();
+	Message::collect("stale");
+	// Restart without endBatch() — should still drop the stale line.
+	Message::beginBatch();
+	Message::collect("fresh");
+	const auto report = Message::endBatch();
+	EXPECT_EQ(report, "fresh\n");
+}
+
+// Test case: ThrownMessageRoutedThroughCollect
+TEST_F(MessageTest, ThrownMessageRoutedThroughCollect) {
+	Message::beginBatch();
+	try {
+		throw Message("boom");
+	}
+	catch (Message& e) {
+		Message::collect(e.takeMessage());
+	}
+	const auto report = Message::endBatch();
+	EXPECT_EQ(report, "boom\n");
+}
+
+// Test case: ConsecutiveDuplicatesAreCollapsed
+TEST_F(MessageTest, ConsecutiveDuplicatesAreCollapsed) {
+	Message::beginBatch();
+	Message::collect("same");
+	Message::collect("same");
+	Message::collect("same");
+	const auto report = Message::endBatch();
+	EXPECT_EQ(report, "same (\xc3\x97""3)\n");
+}
+
+// Test case: SingleOccurrenceHasNoCountSuffix
+TEST_F(MessageTest, SingleOccurrenceHasNoCountSuffix) {
+	Message::beginBatch();
+	Message::collect("once");
+	const auto report = Message::endBatch();
+	EXPECT_EQ(report, "once\n");
+}
+
+// Test case: NonConsecutiveDuplicatesAreCollapsedTogether
+TEST_F(MessageTest, NonConsecutiveDuplicatesAreCollapsedTogether) {
+	// endBatch sorts before collapsing, so duplicates interleaved with
+	// other lines still merge into a single (×N) entry.
+	Message::beginBatch();
+	Message::collect("A");
+	Message::collect("B");
+	Message::collect("A");
+	Message::collect("A");
+	const auto report = Message::endBatch();
+	EXPECT_EQ(report, "A (\xc3\x97""3)\nB\n");
+}
+
+// Test case: ReportIsSortedAlphabetically
+TEST_F(MessageTest, ReportIsSortedAlphabetically) {
+	Message::beginBatch();
+	Message::collect("zeta");
+	Message::collect("alpha");
+	Message::collect("mu");
+	const auto report = Message::endBatch();
+	EXPECT_EQ(report, "alpha\nmu\nzeta\n");
 }

@@ -67,7 +67,7 @@ AnimationDirectoryNavigator::AnimationDirectoryNavigator(
 					DataDialogs::DialogAnimation::getInstance()->load(datafile.getDataMap());
 				}
 				catch (Message& e) {
-					Message::displayError(XMLHelper::cleanError(e.getMessage()));
+					Message::displayError(XMLHelper::cleanError(e.takeMessage()));
 				}
 			}
 		}

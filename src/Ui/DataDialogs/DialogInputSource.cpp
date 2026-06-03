@@ -97,11 +97,11 @@ void DialogInputSource::isValid() const {
 
 	// Verify the source for non sourceless.
 	if (currentData->getProperties().getValue(SOURCELESS).empty()) {
-		if (resolvedSource().empty()) throw Message("Enter a valid source name.");
+		if (resolvedSource().empty()) throw Message("Invalid source name.");
 	}
 
 	if (action != Actions::LOAD and not DialogInputMap::getInstance()->getBox()->getSize())
-		throw Message("Add at least one map.");
+		throw Message("No maps defined.");
 }
 
 void DialogInputSource::storeData() noexcept {

@@ -29,7 +29,13 @@ ConfigFile::ConfigFile(const string& ledspicerconf) : XMLHelper(ledspicerconf, "
 	// rootInfo.attributes already populated by XMLHelper constructor
 	string errors(processDevices());
 	errors += processProcessLookup();
-	if (not errors.empty()) Message::displayError("Errors:\n" + errors);
+	if (not errors.empty()) {
+		const string report {"Errors:\n" + errors};
+		if (Message::isBatching())
+			Message::collect(report);
+		else
+			Message::displayError(report);
+	}
 }
 
 string ConfigFile::processDevices() {
@@ -50,7 +56,7 @@ string ConfigFile::processDevices() {
 			checkAttributes({NAME}, deviceAttr, TYPE_DEVICE);
 		}
 		catch (Message& e) {
-			errors += e.getMessage() + '\n';
+			errors += e.takeMessage() + '\n';
 			continue;
 		}
 		name = deviceAttr.getValue(NAME);
@@ -90,7 +96,7 @@ string ConfigFile::processRestrictors() {
 			checkAttributes({NAME}, restrictorAttr, TYPE_DEVICE);
 		}
 		catch (Message& e) {
-			errors += '\n' + e.getMessage();
+			errors += '\n' + e.takeMessage();
 			continue;
 		}
 		name = restrictorAttr.getValue(NAME);
@@ -129,7 +135,7 @@ string ConfigFile::processProcessLookup() {
 			checkAttributes({PARAM_PROCESS_NAME, PARAM_SYSTEM}, plAttr, "processlookup");
 		}
 		catch (Message& e) {
-			errors += e.getMessage() + '\n';
+			errors += e.takeMessage() + '\n';
 			continue;
 		}
 		process.push_back(std::move(plAttr));
@@ -172,7 +178,7 @@ string ConfigFile::processRestrictorMaps(tinyxml2::XMLElement* restrictorNode, c
 			checkAttributes({PLAYER, JOYSTICK, RESTRICTOR_INTERFACE}, mapAttr, "restrictor map");
 		}
 		catch (Message& e) {
-			errors += '\n' + e.getMessage();
+			errors += '\n' + e.takeMessage();
 			continue;
 		}
 		maps.push_back(std::move(mapAttr));

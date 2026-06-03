@@ -344,17 +344,17 @@ void DialogElement::isValid() const {
 	case tabIndex::RGB:
 		// Check empty.
 		if (positionRGB->get_text().empty()) {
-			throw Message("Missing element position for element " + name + ", select an connector.");
+			throw Message("Missing element position for element " + name + " (no connector).");
 		}
 		break;
 	case tabIndex::Strip:
 		if (positionStrip->get_text().empty()) {
-			throw Message("Missing element position and size for element " + name + ", select one or more connectors.");
+			throw Message("Missing element position and size for element " + name + " (no connectors).");
 		}
 		break;
 	case tabIndex::mRGB:
 		if (std::count(positionsMRGB->get_text().begin(), positionsMRGB->get_text().end(), ',') < 2) {
-			throw Message("Missing element positions for element " + name + ", select at least two connectors.");
+			throw Message("Missing element positions for element " + name + " (fewer than two connectors).");
 		}
 		break;
 	default:

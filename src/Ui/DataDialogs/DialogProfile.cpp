@@ -99,7 +99,6 @@ DialogProfile::DialogProfile(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 
 	btnProfileTransition->signal_clicked().connect([this]() {
 		auto profile {dynamic_cast<Storage::Profile*>(currentData)};
-		if (not profile) return;
 		DialogTransition::getInstance()->edit(profile->getTransition());
 		refreshTransitionButton();
 	});
@@ -167,8 +166,9 @@ void DialogProfile::load(DataMap& values) noexcept {
 }
 
 void DialogProfile::createSubItems(DataMap& values) noexcept {
-	auto ds{DialogSelect::getInstance()};
-	const string& ownerUid {currentData->getProperties().getValue(PATH_BASE)};
+	auto ds {DialogSelect::getInstance()};
+	const string& ownerUid  {currentData->getProperties().getValue(PATH_BASE)};
+	const string  ownerName {getType() + " " + currentData->createPrettyName()};
 
 	// Rewrite NAME paths to uniqueIds so DialogSelect::load resolves them.
 	const auto scoped = [&ownerUid](const string& family) {
@@ -178,13 +178,13 @@ void DialogProfile::createSubItems(DataMap& values) noexcept {
 	resolvePaths(values[scoped(COLLECTION_PROFILE_INPUTS)],     COLLECTION_INPUTS);
 
 	setUpSelector(alwaysOnElementsRequest);
-	ds->load(values, ownerUid);
+	ds->load(values, ownerUid, ownerName);
 	setUpSelector(alwaysOnGroupsRequest);
-	ds->load(values, ownerUid);
+	ds->load(values, ownerUid, ownerName);
 	setUpSelector(animationsRequest);
-	ds->load(values, ownerUid);
+	ds->load(values, ownerUid, ownerName);
 	setUpSelector(inputsRequest);
-	ds->load(values, ownerUid);
+	ds->load(values, ownerUid, ownerName);
 }
 
 void DialogProfile::clearForm() noexcept {
@@ -213,7 +213,7 @@ void DialogProfile::isValid() const {
 		}
 	}
 	if (btnProfileBackgroundColor->get_label().empty())
-		throw Message("Select a valid background color.");
+		throw Message("Invalid background color.");
 }
 
 void DialogProfile::storeData() noexcept {
@@ -275,7 +275,7 @@ void DialogProfile::resolvePaths(ValueVector& items, const string& sourceCollect
 		const string path {raw.getValue(NAME)};
 		for (auto& [id, data] : *ch) {
 			auto node {dynamic_cast<const Storage::DirNode*>(data)};
-			if (node and node->getFullPath() == path) {
+			if ( node->getFullPath() == path) {
 				raw.setValue(NAME, id);
 				break;
 			}

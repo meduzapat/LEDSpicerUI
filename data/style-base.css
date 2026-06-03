@@ -216,3 +216,10 @@ combobox.noRoundRight button.combo,
 .ThemeTile:selected label {
 	font-weight: bold;
 }
+
+/* ── Status bar severity tints ────────────────────────────── */
+
+.status-info    { }
+.status-success { color: #2e7d32; }
+.status-warning { color: #d97706; font-weight: bold; }
+.status-error   { color: #c62828; font-weight: bold; }

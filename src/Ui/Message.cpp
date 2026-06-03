@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      Error.cpp
+ * @file      Message.cpp
  * @since     Feb 12, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
@@ -24,63 +24,160 @@
 
 using namespace LEDSpicerUI::Ui;
 
-Gtk::MessageDialog* Message::errorDialog    = nullptr;
-Gtk::MessageDialog* Message::infoDialog     = nullptr;
-Gtk::MessageDialog* Message::questionDialog = nullptr;
-Gtk::Window* Message::main                  = nullptr;
+namespace {
 
-Message::Message(const string& errorMessage, Gtk::Window* transient) : error(errorMessage) {
-	displayError(errorMessage, transient);
+constexpr unsigned WRAP_COLS = 80;
+constexpr unsigned MIN_LINES = 3;
+constexpr unsigned MAX_LINES = 20;
+constexpr int      CHAR_W_PX = 8;    // ≈ Cantarell 10pt advance width
+constexpr int      LINE_H_PX = 20;   // ≈ Cantarell 10pt line height
+constexpr int      CHROME_W  = 80;   // icon column + margins + scrollbar gutter
+constexpr int      CHROME_H  = 140;  // heading row + button row + margins
+
+unsigned countWrappedLines(const string& s) noexcept {
+	if (s.empty()) return 1;
+	unsigned lines = 0, col = 0;
+	for (char c : s) {
+		if (c == '\n') {
+			++lines;
+			col = 0;
+		}
+		else
+			if (++col >= WRAP_COLS) {
+				++lines;
+				col = 0;
+		}
+	}
+	if (col > 0 or s.empty()) ++lines;
+	return lines;
+}
+
+}
+
+Gtk::Dialog*   Message::dialog   = nullptr;
+Gtk::Image*    Message::icon     = nullptr;
+Gtk::Label*    Message::primary  = nullptr;
+Gtk::TextView* Message::body     = nullptr;
+Gtk::Button*   Message::btnNo    = nullptr;
+Gtk::Button*   Message::btnYes   = nullptr;
+Gtk::Button*   Message::btnClose = nullptr;
+Gtk::Window*   Message::main     = nullptr;
+
+namespace {
+	bool   batching = false;
+	string batchBuffer;
 }
 
 void Message::initialize(Glib::RefPtr<Gtk::Builder> const &builder, Gtk::Window* main) {
-	builder->get_widget("DialogMessageError",    errorDialog);
-	builder->get_widget("DialogMessageInfo",     infoDialog);
-	builder->get_widget("DialogMessageQuestion", questionDialog);
-
-	// Copy to clipboard buttons.
-	Gtk::Button
-		* btnInfoCopy  = nullptr,
-		* btnErrorCopy = nullptr;
-	builder->get_widget("ButtonCopyError", btnErrorCopy);
-	builder->get_widget("ButtonCopyInfo",  btnInfoCopy);
-	btnInfoCopy->signal_clicked().connect([]() {
-		// Access the secondary label directly via index 1.
-		auto child {infoDialog->get_message_area()->get_children()[1]};
-		Gtk::Clipboard::get()->set_text(static_cast<Gtk::Label*>(child)->get_text());
-	});
-	btnErrorCopy->signal_clicked().connect([]() {
-		// Access the secondary label directly via index 1.
-		auto child {errorDialog->get_message_area()->get_children()[1]};
-		Gtk::Clipboard::get()->set_text(static_cast<Gtk::Label*>(child)->get_text());
-	});
-	Message::main = static_cast<Gtk::Window*>(main);
+	builder->get_widget("DialogMessage",       dialog);
+	builder->get_widget("ImageMessageIcon",    icon);
+	builder->get_widget("LabelMessagePrimary", primary);
+	builder->get_widget("TextViewMessageBody", body);
+	builder->get_widget("ButtonMessageNo",     btnNo);
+	builder->get_widget("ButtonMessageYes",    btnYes);
+	builder->get_widget("ButtonMessageClose",  btnClose);
+	Message::main = main;
 }
 
-void Message::displayError(Gtk::Window* transient) {
-	handleDialog(error, errorDialog, transient);
+void Message::displayError(Gtk::Window* transient, const string& heading) {
+	handleDialog(error, Kind::Error, transient, heading);
 }
 
-void Message::displayError(const string& errorMessage, Gtk::Window* transient) {
-	handleDialog(errorMessage, errorDialog, transient);
+void Message::displayError(const string& errorMessage, Gtk::Window* transient, const string& heading) {
+	handleDialog(errorMessage, Kind::Error, transient, heading);
 }
 
-void Message::displayInfo(const string& infoMessage, Gtk::Window* transient) {
-	handleDialog(infoMessage, infoDialog, transient);
+void Message::displayInfo(const string& infoMessage, Gtk::Window* transient, const string& heading) {
+	handleDialog(infoMessage, Kind::Info, transient, heading);
 }
 
-int Message::ask(const string& question, Gtk::Window* transient) {
-	return handleDialog(question, questionDialog, transient);
+Gtk::ResponseType Message::ask(const string& question, Gtk::Window* transient, const string& heading) {
+	return handleDialog(question, Kind::Question, transient, heading);
 }
 
-string Message::getMessage() {
+string Message::takeMessage() {
 	return std::move(error);
 }
 
-int Message::handleDialog(const string& message, Gtk::MessageDialog* dialog, Gtk::Window* transient) {
+void Message::beginBatch() noexcept {
+	batching = true;
+	batchBuffer.clear();
+}
+
+void Message::collect(const string& line) noexcept {
+	if (not batching) return;
+	batchBuffer += line + '\n';
+}
+
+string Message::endBatch() noexcept {
+	batching = false;
+	if (batchBuffer.empty())
+		return emptyString;
+
+	// Split into lines, sort so entries from the same source cluster, then
+	// collapse duplicates into "<line> (×N)" so a single bad source does
+	// not flood the report.
+	auto lines {Defaults::explode(batchBuffer, '\n')};
+	batchBuffer.clear();
+	std::sort(lines.begin(), lines.end());
+
+	string out;
+	for (size_t i = 0; i < lines.size(); ) {
+		if (lines[i].empty()) { ++i; continue; }
+		size_t j {i + 1};
+		while (j < lines.size() and lines[j] == lines[i])
+			++j;
+		out += lines[i];
+		if (j - i > 1)
+			out += " (\xc3\x97" + std::to_string(j - i) + ")";
+		out += '\n';
+		i = j;
+	}
+	return out;
+}
+
+bool Message::isBatching() noexcept {
+	return batching;
+}
+
+Gtk::ResponseType Message::handleDialog(const string& message, Kind kind, Gtk::Window* transient, const string& heading) {
+	const char*    iconName;
+	Glib::ustring  title;
+	const bool     isQuestion {kind == Kind::Question};
+	switch (kind) {
+	case Kind::Info:
+		iconName = "dialog-information";
+		title    = "Information";
+		break;
+	case Kind::Error:
+		iconName = "dialog-error";
+		title    = "Error";
+		break;
+	case Kind::Question:
+		iconName = "dialog-question";
+		title    = "Question";
+		break;
+	}
+	icon->set_from_icon_name(iconName, Gtk::ICON_SIZE_DIALOG);
+	primary->set_markup(
+		"<b>" + Glib::Markup::escape_text(heading.empty() ? title : Glib::ustring{heading}) + "</b>"
+	);
+	body->get_buffer()->set_text(message);
+	btnNo->set_visible(isQuestion);
+	btnYes->set_visible(isQuestion);
+	btnClose->set_visible(not isQuestion);
+	dialog->set_default_response(isQuestion ? Gtk::RESPONSE_NO : Gtk::RESPONSE_CLOSE);
+	dialog->set_title(title);
 	dialog->set_transient_for(transient ? (transient->is_visible() ? *transient : *main) : *main);
-	dialog->set_secondary_text(message);
-	int r = dialog->run();
+	// Manual sizing: GtkTextView + GtkScrolledWindow do not cooperate well
+	// with auto height-for-width, so compute a target size from a logical
+	// wrap column and the resulting line count, clamped to a sane range.
+	const unsigned shownLines {std::clamp(countWrappedLines(message), MIN_LINES, MAX_LINES)};
+	dialog->resize(
+		static_cast<int>(WRAP_COLS)  * CHAR_W_PX + CHROME_W,
+		static_cast<int>(shownLines) * LINE_H_PX + CHROME_H
+	);
+	const auto r {static_cast<Gtk::ResponseType>(dialog->run())};
 	dialog->hide();
 	return r;
 }
