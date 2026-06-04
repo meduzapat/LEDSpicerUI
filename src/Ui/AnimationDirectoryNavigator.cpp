@@ -59,7 +59,9 @@ AnimationDirectoryNavigator::AnimationDirectoryNavigator(
 
 	// Import button.
 	btnImportAnimation->signal_clicked().connect([this]() {
-		if (dialogImportAnimation.run() == Gtk::ResponseType::RESPONSE_OK) {
+		const auto resp {dialogImportAnimation.run()};
+		dialogImportAnimation.hide();
+		if (resp == Gtk::ResponseType::RESPONSE_OK) {
 			StringVector selectedFiles(dialogImportAnimation.get_filenames());
 			Message::beginBatch();
 			for (const auto& selectedFile : selectedFiles) {
@@ -74,7 +76,6 @@ AnimationDirectoryNavigator::AnimationDirectoryNavigator(
 			Defaults::markDirty();
 			Message::finishBatch("Animations imported");
 		}
-		dialogImportAnimation.hide();
 	});
 
 	btnHome->signal_clicked().connect([this]() {

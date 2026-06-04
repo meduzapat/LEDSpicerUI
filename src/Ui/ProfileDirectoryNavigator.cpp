@@ -54,7 +54,9 @@ ProfileDirectoryNavigator::ProfileDirectoryNavigator(
 
 	// Import button.
 	btnImportProfile->signal_clicked().connect([this]() {
-		if (dialogImportProfile.run() == Gtk::ResponseType::RESPONSE_OK) {
+		const auto resp {dialogImportProfile.run()};
+		dialogImportProfile.hide();
+		if (resp == Gtk::ResponseType::RESPONSE_OK) {
 			StringVector selectedFiles(dialogImportProfile.get_filenames());
 			Message::beginBatch();
 			for (const auto& selectedFile : selectedFiles) {
@@ -69,7 +71,6 @@ ProfileDirectoryNavigator::ProfileDirectoryNavigator(
 			Defaults::markDirty();
 			Message::finishBatch("Profiles imported");
 		}
-		dialogImportProfile.hide();
 	});
 
 	btnHome->signal_clicked().connect([this]() {

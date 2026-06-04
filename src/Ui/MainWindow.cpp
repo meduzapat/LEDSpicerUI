@@ -228,7 +228,9 @@ void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {
 	builder->get_widget("BtnImportConfig", btnImportConfig);
 	btnImportConfig->set_sensitive(false);
 	btnImportConfig->signal_clicked().connect([this]() {
-		if (dialogImportConfig.run() == Gtk::ResponseType::RESPONSE_OK) {
+		const auto resp {dialogImportConfig.run()};
+		dialogImportConfig.hide();
+		if (resp == Gtk::ResponseType::RESPONSE_OK) {
 			string newPath = dialogImportConfig.get_file()->get_path();
 			Message::beginBatch();
 			try {
@@ -245,7 +247,6 @@ void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {
 			Defaults::markDirty();
 			Message::finishBatch("Config imported");
 		}
-		dialogImportConfig.hide();
 	});
 
 	Gtk::Button* btnSelectProject;

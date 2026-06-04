@@ -59,7 +59,9 @@ InputDirectoryNavigator::InputDirectoryNavigator(
 
 	// Import button.
 	btnImportInput->signal_clicked().connect([this]() {
-		if (dialogImportInput.run() == Gtk::ResponseType::RESPONSE_OK) {
+		const auto resp {dialogImportInput.run()};
+		dialogImportInput.hide();
+		if (resp == Gtk::ResponseType::RESPONSE_OK) {
 			StringVector selectedFiles(dialogImportInput.get_filenames());
 			Message::beginBatch();
 			for (const auto& selectedFile : selectedFiles) {
@@ -74,7 +76,6 @@ InputDirectoryNavigator::InputDirectoryNavigator(
 			Defaults::markDirty();
 			Message::finishBatch("Inputs imported");
 		}
-		dialogImportInput.hide();
 	});
 
 	btnHome->signal_clicked().connect([this]() {
