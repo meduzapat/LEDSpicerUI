@@ -61,15 +61,18 @@ AnimationDirectoryNavigator::AnimationDirectoryNavigator(
 	btnImportAnimation->signal_clicked().connect([this]() {
 		if (dialogImportAnimation.run() == Gtk::ResponseType::RESPONSE_OK) {
 			StringVector selectedFiles(dialogImportAnimation.get_filenames());
+			Message::beginBatch();
 			for (const auto& selectedFile : selectedFiles) {
 				try {
 					AnimationFile datafile(selectedFile, currentDir);
 					DataDialogs::DialogAnimation::getInstance()->load(datafile.getDataMap());
 				}
 				catch (Message& e) {
-					Message::displayError(XMLHelper::cleanError(e.takeMessage()));
+					Message::collect(XMLHelper::cleanError(e.takeMessage()));
 				}
 			}
+			Defaults::markDirty();
+			Message::finishBatch("Animations imported");
 		}
 		dialogImportAnimation.hide();
 	});

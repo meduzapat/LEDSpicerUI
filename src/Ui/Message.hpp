@@ -21,6 +21,7 @@
  */
 
 #include "Defaults.hpp"
+#include "StatusBar.hpp"
 
 #pragma once
 
@@ -108,6 +109,15 @@ public:
 	 * off. Empty string if nothing was collected.
 	 */
 	static string endBatch() noexcept;
+
+	/**
+	 * Ends the batch and reports the result to the user. If anything was
+	 * collected, pops an error dialog with the report and pushes a warning to
+	 * the status bar; otherwise pushes @p action as a success status.
+	 * @param action Past-tense verb describing the operation, e.g.
+	 *               "Config imported", "Project loaded".
+	 */
+	static void finishBatch(const string& action) noexcept;
 
 	/**
 	 * @return true while a batch is active.

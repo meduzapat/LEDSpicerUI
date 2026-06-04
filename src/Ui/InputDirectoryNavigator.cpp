@@ -61,15 +61,18 @@ InputDirectoryNavigator::InputDirectoryNavigator(
 	btnImportInput->signal_clicked().connect([this]() {
 		if (dialogImportInput.run() == Gtk::ResponseType::RESPONSE_OK) {
 			StringVector selectedFiles(dialogImportInput.get_filenames());
+			Message::beginBatch();
 			for (const auto& selectedFile : selectedFiles) {
 				try {
 					InputFile datafile(selectedFile, currentDir);
 					DataDialogs::DialogInput::getInstance()->load(datafile.getDataMap());
 				}
 				catch (Message& e) {
-					Message::displayError(XMLHelper::cleanError(e.takeMessage()));
+					Message::collect(XMLHelper::cleanError(e.takeMessage()));
 				}
 			}
+			Defaults::markDirty();
+			Message::finishBatch("Inputs imported");
 		}
 		dialogImportInput.hide();
 	});

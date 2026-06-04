@@ -56,15 +56,18 @@ ProfileDirectoryNavigator::ProfileDirectoryNavigator(
 	btnImportProfile->signal_clicked().connect([this]() {
 		if (dialogImportProfile.run() == Gtk::ResponseType::RESPONSE_OK) {
 			StringVector selectedFiles(dialogImportProfile.get_filenames());
+			Message::beginBatch();
 			for (const auto& selectedFile : selectedFiles) {
 				try {
 					ProfileFile datafile(selectedFile, currentDir);
 					DataDialogs::DialogProfile::getInstance()->load(datafile.getDataMap());
 				}
 				catch (Message& e) {
-					Message::displayError(XMLHelper::cleanError(e.takeMessage()));
+					Message::collect(XMLHelper::cleanError(e.takeMessage()));
 				}
 			}
+			Defaults::markDirty();
+			Message::finishBatch("Profiles imported");
 		}
 		dialogImportProfile.hide();
 	});

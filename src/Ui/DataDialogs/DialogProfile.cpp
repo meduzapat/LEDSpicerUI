@@ -199,12 +199,13 @@ void DialogProfile::clearForm() noexcept {
 }
 
 void DialogProfile::isValid() const {
-	const string name(createUniqueId());
-	if (name.empty()) {
+	// Check the name field directly: createUniqueId() is never empty.
+	if (inputProfileName->get_text().empty()) {
 		if (action != Actions::LOAD)
 			inputProfileName->grab_focus();
 		throw Message("Invalid profile name.");
 	}
+	const string name(createUniqueId());
 	if (currentData->getCollectionHandler()->isIdSet(name)) {
 		if (action != Actions::EDIT or currentData->createUniqueId() != name) {
 			if (action != Actions::LOAD)

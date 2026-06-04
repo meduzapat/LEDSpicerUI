@@ -109,10 +109,17 @@ void Message::collect(const string& line) noexcept {
 	batchBuffer += line + '\n';
 }
 
-string Message::endBatch() noexcept {
+namespace {
+
+// Drains the batch buffer into a sorted, deduplicated report. Returns the
+// formatted text and the deduped line count so callers can present both
+// without recounting.
+struct BatchReport { string text; size_t count; };
+
+BatchReport drainBatch() noexcept {
 	batching = false;
 	if (batchBuffer.empty())
-		return emptyString;
+		return {emptyString, 0};
 
 	// Split into lines, sort so entries from the same source cluster, then
 	// collapse duplicates into "<line> (×N)" so a single bad source does
@@ -121,19 +128,40 @@ string Message::endBatch() noexcept {
 	batchBuffer.clear();
 	std::sort(lines.begin(), lines.end());
 
-	string out;
+	BatchReport r;
 	for (size_t i = 0; i < lines.size(); ) {
 		if (lines[i].empty()) { ++i; continue; }
 		size_t j {i + 1};
 		while (j < lines.size() and lines[j] == lines[i])
 			++j;
-		out += lines[i];
+		r.text += lines[i];
 		if (j - i > 1)
-			out += " (\xc3\x97" + std::to_string(j - i) + ")";
-		out += '\n';
+			r.text += " (\xc3\x97" + std::to_string(j - i) + ")";
+		r.text += '\n';
+		++r.count;
 		i = j;
 	}
-	return out;
+	return r;
+}
+
+}
+
+string Message::endBatch() noexcept {
+	return drainBatch().text;
+}
+
+void Message::finishBatch(const string& action) noexcept {
+	const auto report {drainBatch()};
+	if (report.count == 0) {
+		StatusBar::getInstance().push(action, StatusBar::Severity::Success);
+		return;
+	}
+	const string summary {
+		action + " with " + std::to_string(report.count) +
+		(report.count == 1 ? " issue" : " issues")
+	};
+	displayError(report.text, nullptr, summary);
+	StatusBar::getInstance().push(summary, StatusBar::Severity::Warning);
 }
 
 bool Message::isBatching() noexcept {

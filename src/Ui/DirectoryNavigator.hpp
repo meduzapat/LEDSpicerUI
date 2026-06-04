@@ -23,6 +23,7 @@
 #include "XMLHelper.hpp"
 #include "config/Settings.hpp"
 #include "Storage/DirectoryEntry.hpp"
+#include "StatusBar.hpp"
 
 #pragma once
 

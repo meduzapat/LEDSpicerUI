@@ -230,13 +230,20 @@ void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {
 	btnImportConfig->signal_clicked().connect([this]() {
 		if (dialogImportConfig.run() == Gtk::ResponseType::RESPONSE_OK) {
 			string newPath = dialogImportConfig.get_file()->get_path();
+			Message::beginBatch();
 			try {
 				readConfigFile(newPath, false, dialogImportConfig.getConfigParameters());
 			}
 			catch (Message& e) {
-				Message::displayError(XMLHelper::cleanError(e.takeMessage()));
+				Message::collect(XMLHelper::cleanError(e.takeMessage()));
 			}
+
+			DialogDevice::getInstance()->refreshItems();
+			DialogGroup::getInstance()->refreshItems();
+			DialogRestrictor::getInstance()->refreshItems();
+			DialogProcess::getInstance()->refreshItems();
 			Defaults::markDirty();
+			Message::finishBatch("Config imported");
 		}
 		dialogImportConfig.hide();
 	});
@@ -342,8 +349,6 @@ void MainWindow::openProject(const string& name) {
 		Values values;
 		setConfiguration(values);
 	}
-	const auto report {Message::endBatch()};
-
 	DialogDevice::getInstance()->refreshItems();
 	DialogGroup::getInstance()->refreshItems();
 	DialogRestrictor::getInstance()->refreshItems();
@@ -352,19 +357,7 @@ void MainWindow::openProject(const string& name) {
 	mainTabs->set_visible_child("configuration");
 	mainTabsBox->set_sensitive(true);
 	btnImportConfig->set_sensitive(true);
-
-	if (not report.empty()) {
-		const auto count {std::count(report.begin(), report.end(), '\n')};
-		const string summary {
-			"Project loaded with " + std::to_string(count) +
-			(count == 1 ? " issue" : " issues")
-		};
-		Message::displayError(report, nullptr, summary);
-		StatusBar::getInstance().push(summary, StatusBar::Severity::Warning);
-	}
-	else {
-		StatusBar::getInstance().push("Project loaded", StatusBar::Severity::Success);
-	}
+	Message::finishBatch("Project loaded");
 }
 
 void MainWindow::readConfigFile(const string& dataFilePath, bool wipe, uint8_t importFlags) {
