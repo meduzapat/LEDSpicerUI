@@ -114,7 +114,7 @@ namespace {
 // Drains the batch buffer into a sorted, deduplicated report. Returns the
 // formatted text and the deduped line count so callers can present both
 // without recounting.
-struct BatchReport { string text; size_t count; };
+struct BatchReport { string text; size_t count = 0; };
 
 BatchReport drainBatch() noexcept {
 	batching = false;
