@@ -26,13 +26,16 @@ using namespace LEDSpicerUI::Ui;
 
 namespace {
 
-constexpr unsigned WRAP_COLS = 80;
-constexpr unsigned MIN_LINES = 3;
-constexpr unsigned MAX_LINES = 20;
-constexpr int      CHAR_W_PX = 8;    // ≈ Cantarell 10pt advance width
-constexpr int      LINE_H_PX = 20;   // ≈ Cantarell 10pt line height
-constexpr int      CHROME_W  = 80;   // icon column + margins + scrollbar gutter
-constexpr int      CHROME_H  = 140;  // heading row + button row + margins
+constexpr unsigned
+	WRAP_COLS = 80,
+	MIN_LINES = 3,
+	MAX_LINES = 20;
+
+constexpr int
+	CHAR_W_PX = 8,    // ≈ Cantarell 10pt advance width
+	LINE_H_PX = 20,   // ≈ Cantarell 10pt line height
+	CHROME_W  = 80,   // icon column + margins + scrollbar gutter
+	CHROME_H  = 140;  // heading row + button row + margins
 
 unsigned countWrappedLines(const string& s) noexcept {
 	if (s.empty()) return 1;

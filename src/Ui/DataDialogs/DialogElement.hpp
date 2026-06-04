@@ -40,9 +40,13 @@ public:
 	/// Tab numbers for elements LED modes.
 	enum tabIndex : uint8_t {RGB, Strip, sRGB, Single, mRGB, TAB_COUNT};
 
+	/// Bitmask with all tabs, used to clear the form.
 	static constexpr uint8_t ALL_TAB_IDX = (1 << TAB_COUNT) - 1;
-	static constexpr const int MAX_COLUMNS = 20;
-	static constexpr const int MIN_COLUMNS = 10;
+
+	/// Maximum and minimum columns for the pin display.
+	static constexpr const int
+		MAX_COLUMNS = 20,
+		MIN_COLUMNS = 10;
 
 	virtual ~DialogElement() {
 		switchPageConnection.disconnect();
@@ -105,7 +109,8 @@ protected:
 	Gtk::Button*       btnDefaultColor = nullptr;
 	Gtk::FlowBox*      pinsBox         = nullptr;
 
-	Gtk::ComboBoxText* elementType = nullptr; /// Only used by the UI.
+	/// Only used by the UI.
+	Gtk::ComboBoxText* elementType = nullptr;
 
 	Gtk::Scale* brightness = nullptr;
 
