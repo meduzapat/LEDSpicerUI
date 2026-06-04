@@ -87,7 +87,7 @@ set(STORAGE_ANIMATION_SRCS
 # Shared between ProjectFileTest and InputFileTest.
 set(INPUT_FILE_SRCS
 	${STORAGE_BASE_SRCS}
-	${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp
+	${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp;${CMAKE_SOURCE_DIR}/src/Ui/StatusBar.cpp
 	${CMAKE_SOURCE_DIR}/src/XMLHelper.cpp
 	${CMAKE_SOURCE_DIR}/src/Ui/Storage/DirNode.cpp
 	${CMAKE_SOURCE_DIR}/src/config/Settings.cpp
@@ -141,13 +141,13 @@ add_test_executable(CollectionHandlerTest
 
 add_test_executable(MessageTest
 	"Ui/MessageTest.cpp"
-	"${COMMON_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp"
+	"${COMMON_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp;${CMAKE_SOURCE_DIR}/src/Ui/StatusBar.cpp"
 	""
 )
 
 add_test_executable(XMLHelperTest
 	"XMLHelperTest.cpp"
-	"${COMMON_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp;${CMAKE_SOURCE_DIR}/src/XMLHelper.cpp"
+	"${COMMON_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp;${CMAKE_SOURCE_DIR}/src/Ui/StatusBar.cpp;${CMAKE_SOURCE_DIR}/src/XMLHelper.cpp"
 	"${TINYXML2_LIBRARIES}"
 )
 
@@ -219,7 +219,7 @@ add_test_executable(AnimationTest
 
 add_test_executable(ConfigFileTest
 	"config/ConfigFileTest.cpp"
-	"${STORAGE_BASE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp;${CMAKE_SOURCE_DIR}/src/XMLHelper.cpp;${CMAKE_SOURCE_DIR}/src/config/Settings.cpp;${CMAKE_SOURCE_DIR}/src/config/ProjectFile.cpp;${CMAKE_SOURCE_DIR}/src/config/ConfigFile.cpp"
+	"${STORAGE_BASE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp;${CMAKE_SOURCE_DIR}/src/Ui/StatusBar.cpp;${CMAKE_SOURCE_DIR}/src/XMLHelper.cpp;${CMAKE_SOURCE_DIR}/src/config/Settings.cpp;${CMAKE_SOURCE_DIR}/src/config/ProjectFile.cpp;${CMAKE_SOURCE_DIR}/src/config/ConfigFile.cpp"
 	"${TINYXML2_LIBRARIES}"
 )
 
@@ -237,13 +237,13 @@ add_test_executable(InputFileTest
 
 add_test_executable(AnimationFileTest
 	"config/AnimationFileTest.cpp"
-	"${STORAGE_BASE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp;${CMAKE_SOURCE_DIR}/src/XMLHelper.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/DirNode.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/Link.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/Actor.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/Animation.cpp;${CMAKE_SOURCE_DIR}/src/config/Settings.cpp;${CMAKE_SOURCE_DIR}/src/config/ProjectFile.cpp;${CMAKE_SOURCE_DIR}/src/config/AnimationFile.cpp"
+	"${STORAGE_BASE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp;${CMAKE_SOURCE_DIR}/src/Ui/StatusBar.cpp;${CMAKE_SOURCE_DIR}/src/XMLHelper.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/DirNode.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/Link.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/Actor.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/Animation.cpp;${CMAKE_SOURCE_DIR}/src/config/Settings.cpp;${CMAKE_SOURCE_DIR}/src/config/ProjectFile.cpp;${CMAKE_SOURCE_DIR}/src/config/AnimationFile.cpp"
 	"${TINYXML2_LIBRARIES}"
 )
 
 add_test_executable(ProfileFileTest
 	"config/ProfileFileTest.cpp"
-	"${STORAGE_BASE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp;${CMAKE_SOURCE_DIR}/src/XMLHelper.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/DirNode.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/Link.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/Transition.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/Profile.cpp;${CMAKE_SOURCE_DIR}/src/config/Settings.cpp;${CMAKE_SOURCE_DIR}/src/config/ProjectFile.cpp;${CMAKE_SOURCE_DIR}/src/config/ProfileFile.cpp"
+	"${STORAGE_BASE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp;${CMAKE_SOURCE_DIR}/src/Ui/StatusBar.cpp;${CMAKE_SOURCE_DIR}/src/XMLHelper.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/DirNode.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/Link.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/Transition.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/Profile.cpp;${CMAKE_SOURCE_DIR}/src/config/Settings.cpp;${CMAKE_SOURCE_DIR}/src/config/ProjectFile.cpp;${CMAKE_SOURCE_DIR}/src/config/ProfileFile.cpp"
 	"${TINYXML2_LIBRARIES}"
 )
 
@@ -255,6 +255,6 @@ add_test_executable(SettingsTest
 
 add_test_executable(SettingsFileTest
 	"config/SettingsFileTest.cpp"
-	"${COMMON_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp;${CMAKE_SOURCE_DIR}/src/XMLHelper.cpp;${CMAKE_SOURCE_DIR}/src/config/Settings.cpp;${CMAKE_SOURCE_DIR}/src/config/SettingsFile.cpp"
+	"${COMMON_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp;${CMAKE_SOURCE_DIR}/src/Ui/StatusBar.cpp;${CMAKE_SOURCE_DIR}/src/XMLHelper.cpp;${CMAKE_SOURCE_DIR}/src/config/Settings.cpp;${CMAKE_SOURCE_DIR}/src/config/SettingsFile.cpp"
 	"${TINYXML2_LIBRARIES}"
 )

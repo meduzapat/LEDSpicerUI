@@ -119,12 +119,12 @@ struct BatchReport { string text; size_t count; };
 BatchReport drainBatch() noexcept {
 	batching = false;
 	if (batchBuffer.empty())
-		return {emptyString, 0};
+		return {LEDSpicerUI::Constants::emptyString, 0};
 
 	// Split into lines, sort so entries from the same source cluster, then
 	// collapse duplicates into "<line> (×N)" so a single bad source does
 	// not flood the report.
-	auto lines {Defaults::explode(batchBuffer, '\n')};
+	auto lines {LEDSpicerUI::Defaults::explode(batchBuffer, '\n')};
 	batchBuffer.clear();
 	std::sort(lines.begin(), lines.end());
 
