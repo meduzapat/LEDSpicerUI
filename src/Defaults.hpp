@@ -52,7 +52,7 @@ constexpr char
 	ID_SEPARATOR       = ',', // Comma
 	ID_GROUP_SEPARATOR = '|'; // Pipe
 
-/// The maximum number of attributes in a XML node before cutting into attributes into rows.
+/// The maximum number of attributes in a XML node before cutting attributes into rows.
 constexpr unsigned int ATTRIBUTES_LIMIT_PER_ROW = 2;
 
 /// Default values for monochrome devices.
