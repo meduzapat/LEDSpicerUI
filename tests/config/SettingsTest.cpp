@@ -46,7 +46,6 @@ TEST_F(SettingsTest, DefaultState) {
 	EXPECT_TRUE(s.getDefaultProject().empty());
 	EXPECT_EQ(ThemeStyle::Auto, s.getThemeStyle());
 	EXPECT_TRUE (s.isInteractiveMode());
-	EXPECT_FALSE(s.shouldCleanProjectDir());
 	EXPECT_TRUE (s.shouldPreserveEmptyDir());
 	EXPECT_TRUE (s.shouldRemoveInvalidItems());
 	EXPECT_TRUE (s.shouldSaveBackup());
@@ -64,7 +63,6 @@ TEST_F(SettingsTest, LoadAndSerialize) {
 		{"defaultProject",     "mygame"},
 		{"interactiveMode",    HUMAN_FALSE},
 		{"themeStyle",         "Dark"},
-		{"cleanProjectDir",    HUMAN_TRUE},
 		{"preserveEmptyDir",   HUMAN_FALSE},
 		{"removeInvalidItems", HUMAN_FALSE},
 		{"saveBackup",         HUMAN_FALSE},
@@ -77,7 +75,6 @@ TEST_F(SettingsTest, LoadAndSerialize) {
 	EXPECT_EQ("mygame",                s.getDefaultProject());
 	EXPECT_EQ(ThemeStyle::Dark,        s.getThemeStyle());
 	EXPECT_FALSE(s.isInteractiveMode());
-	EXPECT_TRUE (s.shouldCleanProjectDir());
 	EXPECT_FALSE(s.shouldPreserveEmptyDir());
 	EXPECT_FALSE(s.shouldRemoveInvalidItems());
 	EXPECT_FALSE(s.shouldSaveBackup());

@@ -98,7 +98,6 @@ protected:
 
 	Gtk::Switch
 		* switchInteractiveMode    = nullptr,
-		* switchCleanProjectDir    = nullptr,
 		* switchPreserveEmptyDir   = nullptr,
 		* switchRemoveInvalidItems = nullptr,
 		* switchSaveBackup         = nullptr,

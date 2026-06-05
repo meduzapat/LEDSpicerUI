@@ -59,10 +59,13 @@ void DirectoryNavigator::load() noexcept {
 	wireDialogs();
 }
 
-void DirectoryNavigator::save() const noexcept {
+void DirectoryNavigator::save() const {
 
 	namespace fs = std::filesystem;
-	const string baseDir {Settings::get().getProjectDir() + string(getSubDir())};
+	const auto& s {Settings::get()};
+	const bool debugMode     {s.shouldDebugFiles()};
+	const bool preserveEmpty {s.shouldPreserveEmptyDir()};
+	const string baseDir {s.getProjectDir() + string(getSubDir())};
 
 	std::function<void(Storage::BoxButtonCollection*)> saveDir =
 	[&](Storage::BoxButtonCollection* col) {
@@ -70,13 +73,19 @@ void DirectoryNavigator::save() const noexcept {
 			auto data {btn->getData()};
 			auto node {dynamic_cast<Storage::DirNode*>(data)};
 			if (data->getXmlTag().empty()) {
-				fs::create_directories(baseDir + node->getFullPath());
-				saveDir(static_cast<Storage::DirectoryEntry*>(node)->getPrimaryChild());
+				auto child {static_cast<Storage::DirectoryEntry*>(node)->getPrimaryChild()};
+				// Only fire on empty leaves; create_directories is mkdir -p so
+				// parent dirs come along for free.
+				if (preserveEmpty and not debugMode and child->getSize() == 0)
+					fs::create_directories(baseDir + node->getFullPath());
+				saveDir(child);
 			}
 			else {
-				const string parentPath(node->getPath());
-				if (not parentPath.empty())
-					fs::create_directories(baseDir + parentPath);
+				if (not debugMode) {
+					const string parentPath(node->getPath());
+					if (not parentPath.empty())
+						fs::create_directories(baseDir + parentPath);
+				}
 				saveItem(data, baseDir + node->getFullPath() + ".xml");
 			}
 		}

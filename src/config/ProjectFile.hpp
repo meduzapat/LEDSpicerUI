@@ -58,6 +58,25 @@ public:
 	 */
 	static void saveFile(const string& path, const string& content);
 
+	/**
+	 * Runs doSave inside a project-dir transaction: renames the existing
+	 * project dir to "<name>.bak", recreates a fresh project dir with the
+	 * three system subdirs, then runs doSave. On success keeps or discards
+	 * the backup according to Settings::shouldSaveBackup(). On failure
+	 * removes the partial project and renames the backup back into place,
+	 * then rethrows. In debugFiles mode the transaction is bypassed.
+	 *
+	 * Always cleans the project dir — anything that wasn't part of the
+	 * saved project ends up in the backup (or is lost if backups are off).
+	 *
+	 * @return true if a backup exists on disk after the call (project
+	 *         existed AND shouldSaveBackup() is true). Lets callers decide
+	 *         whether to surface a "backup saved" notification.
+	 * @throws Message if the backup could not be created, or if a save
+	 *         failure could not be rolled back.
+	 */
+	static bool saveProject(std::function<void()> doSave);
+
 	virtual ~ProjectFile() = default;
 
 	/// @return Bare filename without extension.

@@ -51,7 +51,6 @@ public:
 		INTERACTIVE_MODE     {"interactiveMode"},
 		THEME_NAME           {"themeName"},
 		THEME_STYLE          {"themeStyle"},
-		CLEAN_PROJECT_DIR    {"cleanProjectDir"},
 		PRESERVE_EMPTY_DIR   {"preserveEmptyDir"},
 		REMOVE_INVALID_ITEMS {"removeInvalidItems"},
 		SAVE_BACKUP          {"saveBackup"},
@@ -98,14 +97,12 @@ public:
 	void setDefaultProject(const string& name) noexcept;
 
 	bool isInteractiveMode()        const noexcept { return is(INTERACTIVE_MODE);     }
-	bool shouldCleanProjectDir()    const noexcept { return is(CLEAN_PROJECT_DIR);    }
 	bool shouldPreserveEmptyDir()   const noexcept { return is(PRESERVE_EMPTY_DIR);   }
 	bool shouldRemoveInvalidItems() const noexcept { return is(REMOVE_INVALID_ITEMS); }
 	bool shouldSaveBackup()         const noexcept { return is(SAVE_BACKUP);          }
 	bool shouldDebugFiles()         const noexcept { return is(DEBUG_FILES);          }
 
 	void setInteractiveMode(bool value)    noexcept; ///< Also recomputes currentMode.
-	void setCleanProjectDir(bool value)    noexcept;
 	void setPreserveEmptyDir(bool value)   noexcept;
 	void setRemoveInvalidItems(bool value) noexcept;
 	void setSaveBackup(bool value)         noexcept;

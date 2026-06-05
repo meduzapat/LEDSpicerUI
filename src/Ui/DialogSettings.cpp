@@ -142,7 +142,6 @@ DialogSettings::DialogSettings(BaseObjectType* obj, const Glib::RefPtr<Gtk::Buil
 	builder->get_widget("BtnApplySettings",  btnApply);
 
 	builder->get_widget("SwitchSettingsInteractiveMode",    switchInteractiveMode);
-	builder->get_widget("SwitchSettingsCleanProjectDir",    switchCleanProjectDir);
 	builder->get_widget("SwitchSettingsPreserveEmptyDir",   switchPreserveEmptyDir);
 	builder->get_widget("SwitchSettingsRemoveInvalidItems", switchRemoveInvalidItems);
 	builder->get_widget("SwitchSettingsSaveBackup",         switchSaveBackup);
@@ -161,7 +160,6 @@ DialogSettings::DialogSettings(BaseObjectType* obj, const Glib::RefPtr<Gtk::Buil
 		if (not s.getDataDir().empty())
 			fileDataDirSelect->set_filename(s.getDataDir());
 		switchInteractiveMode->set_active(s.isInteractiveMode());
-		switchCleanProjectDir->set_active(s.shouldCleanProjectDir());
 		switchPreserveEmptyDir->set_active(s.shouldPreserveEmptyDir());
 		switchRemoveInvalidItems->set_active(s.shouldRemoveInvalidItems());
 		switchSaveBackup->set_active(s.shouldSaveBackup());
@@ -216,9 +214,6 @@ DialogSettings::DialogSettings(BaseObjectType* obj, const Glib::RefPtr<Gtk::Buil
 
 	switchInteractiveMode->property_active().signal_changed().connect([this]() {
 		Settings::get().setInteractiveMode(switchInteractiveMode->get_active());
-	});
-	switchCleanProjectDir->property_active().signal_changed().connect([this]() {
-		Settings::get().setCleanProjectDir(switchCleanProjectDir->get_active());
 	});
 	switchPreserveEmptyDir->property_active().signal_changed().connect([this]() {
 		Settings::get().setPreserveEmptyDir(switchPreserveEmptyDir->get_active());

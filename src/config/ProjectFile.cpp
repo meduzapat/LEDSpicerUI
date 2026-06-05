@@ -53,3 +53,72 @@ void ProjectFile::saveFile(const string& path, const string& content) {
 	// Normal save.
 	Glib::file_set_contents(path, content);
 }
+
+bool ProjectFile::saveProject(std::function<void()> doSave) {
+
+	const auto& s {Settings::get()};
+
+	// Debug mode: dry-run only, no filesystem side-effects from the transaction.
+	if (s.shouldDebugFiles()) {
+		doSave();
+		return false;
+	}
+
+	namespace fs = std::filesystem;
+	// getProjectDir() returns with a trailing '/'; strip it so backupDir
+	// becomes a sibling ("/p/proj.bak"), not a child ("/p/proj/.bak").
+	string projectStr {s.getProjectDir()};
+	while (not projectStr.empty() and projectStr.back() == '/')
+		projectStr.pop_back();
+	const fs::path projectDir {projectStr};
+	const fs::path backupDir  {projectStr + ".bak"};
+
+	std::error_code ec;
+	const bool projectExisted {fs::exists(projectDir)};
+
+	// Stash the existing project into backupDir via rename (O(1), same FS).
+	// rename refuses to clobber, so wipe any prior backup first. If either
+	// step fails, abort before touching the project dir.
+	if (projectExisted) {
+		fs::remove_all(backupDir, ec);
+		if (ec)
+			throw Message("Could not remove previous backup: " + ec.message());
+		fs::rename(projectDir, backupDir, ec);
+		if (ec)
+			throw Message("Could not create backup: " + ec.message());
+	}
+
+	fs::create_directories(projectDir);
+	fs::create_directories(projectDir / Constants::PATH_INPUT);
+	fs::create_directories(projectDir / Constants::PATH_ANIMATION);
+	fs::create_directories(projectDir / Constants::PATH_PROFILE);
+
+	try {
+		doSave();
+	}
+	catch (...) {
+		fs::remove_all(projectDir, ec);
+		if (projectExisted) {
+			std::error_code revertEc;
+			fs::rename(backupDir, projectDir, revertEc);
+			if (revertEc)
+				throw Message(
+					"Save failed and the backup could not be restored. "
+					"Your previous data is at " + backupDir.string() +
+					". Reason: " + revertEc.message()
+				);
+		}
+		throw;
+	}
+
+	if (projectExisted and not s.shouldSaveBackup()) {
+		fs::remove_all(backupDir, ec);
+		if (ec)
+			Ui::StatusBar::getInstance().push(
+				"Could not remove old backup",
+				Ui::StatusBar::Severity::Warning
+			);
+		return false;
+	}
+	return projectExisted;
+}

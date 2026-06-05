@@ -84,7 +84,7 @@ public:
 	/**
 	 * Saves all items in the tree to disk under Settings::getProjectDir()/getSubDir().
 	 */
-	void save() const noexcept;
+	void save() const;
 
 protected:
 

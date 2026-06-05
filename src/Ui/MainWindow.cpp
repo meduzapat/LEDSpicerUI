@@ -26,6 +26,7 @@ using namespace LEDSpicerUI::Ui;
 using namespace Storage;
 using namespace DataDialogs;
 using LEDSpicerUI::Config::Settings;
+using LEDSpicerUI::Config::ProjectFile;
 
 MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &builder) :
 	Gtk::ApplicationWindow(obj),
@@ -101,30 +102,37 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 				throw Message("The number of random colors need to be more than one or none.");
 			}
 
-			ConfigFile::save(ConfigFile::ConfigData(
-				Settings::get().getActiveConfigPath(),
-				Settings::get().getCurrentProject(),
-				profileNavigator.getDefaultProfileName(),
-				inputRunEvery->get_text().raw(),
-				packLedspicerConfig(),
-				devices,
-				restrictors,
-				groups,
-				processes
-			));
+			const bool backupKept {ProjectFile::saveProject([&]() {
+				ConfigFile::save(ConfigFile::ConfigData(
+					Settings::get().getActiveConfigPath(),
+					Settings::get().getCurrentProject(),
+					profileNavigator.getDefaultProfileName(),
+					inputRunEvery->get_text().raw(),
+					packLedspicerConfig(),
+					devices,
+					restrictors,
+					groups,
+					processes
+				));
 
-			inputNavigator.save();
-			animationNavigator.save();
-			profileNavigator.save();
+				inputNavigator.save();
+				animationNavigator.save();
+				profileNavigator.save();
+			})};
 
 			Defaults::cleanDirty();
 			DialogSettings::getInstance()->saveSettings();
 			StatusBar::getInstance().push("Project saved", StatusBar::Severity::Success);
+			if (backupKept)
+				StatusBar::getInstance().push("Backup saved", StatusBar::Severity::Success);
 		}
 		catch (Message& e) {
 			e.displayError();
 		}
 		catch (const Glib::FileError& e) {
+			Message::displayError("Unable to save project: " + string(e.what()));
+		}
+		catch (const std::filesystem::filesystem_error& e) {
 			Message::displayError("Unable to save project: " + string(e.what()));
 		}
 	});

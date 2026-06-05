@@ -35,7 +35,6 @@ const StringUMap Settings::DEFAULTS = {
 	{"interactiveMode",     HUMAN_TRUE},
 	{"themeName",           DEFAULT},
 	{"themeStyle",          "Auto"},
-	{"cleanProjectDir",     HUMAN_FALSE},
 	{"preserveEmptyDir",    HUMAN_TRUE},
 	{"removeInvalidItems",  HUMAN_TRUE},
 	{"saveBackup",          HUMAN_TRUE},
@@ -85,7 +84,6 @@ void Settings::setThemeStyle(ThemeStyle style) noexcept {
 	}
 }
 
-void Settings::setCleanProjectDir(bool value)    noexcept { setValue(CLEAN_PROJECT_DIR,    value); }
 void Settings::setPreserveEmptyDir(bool value)   noexcept { setValue(PRESERVE_EMPTY_DIR,   value); }
 void Settings::setRemoveInvalidItems(bool value) noexcept { setValue(REMOVE_INVALID_ITEMS, value); }
 void Settings::setSaveBackup(bool value)         noexcept { setValue(SAVE_BACKUP,          value); }
