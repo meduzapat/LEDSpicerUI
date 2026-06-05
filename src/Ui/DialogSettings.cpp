@@ -77,7 +77,7 @@ bool DialogSettings::startup(Gtk::Window* parent) {
 		"LEDSpicer was found but the data directory is missing or invalid.\n\n"
 		"Please configure the data directory to continue.\n"
 		"The data directory should contain color profiles, and optionally\n"
-		"colors.ini, controls.ini, and gameData.xml.";
+		"colors.ini, controls.xml, and gameData.xml.";
 
 	dialog.set_secondary_text(message);
 	dialog.add_button("Configure Settings", Gtk::RESPONSE_YES);
@@ -87,7 +87,9 @@ bool DialogSettings::startup(Gtk::Window* parent) {
 		return false;
 
 	dialog.hide();
-	if (run() == Gtk::RESPONSE_APPLY) {
+	const bool applied = (run() == Gtk::RESPONSE_APPLY);
+	hide();
+	if (applied) {
 		saveSettings();
 		return true;
 	}
@@ -390,7 +392,7 @@ void DialogSettings::updateDataDirLabels() {
 	status += s.getHasGameData()        ? "✅" : "❌";
 	status += " gameData.xml    ";
 	status += s.getHasControls()        ? "✅" : "❌";
-	status += " controls.ini    ";
+	status += " controls.xml    ";
 	status += s.getColorFiles().empty() ? "❌" : "✅";
 	status += " Color profiles    ";
 	labelSystemFiles->set_text(status);
@@ -423,7 +425,7 @@ void DialogSettings::processDataDir() {
 
 		if      (filename == "gameData.xml") { hasGameData = true; continue; }
 		else if (filename == "colors.ini")   { hasColors   = true; continue; }
-		else if (filename == "controls.ini") { hasControls = true; continue; }
+		else if (filename == "controls.xml") { hasControls = true; continue; }
 
 		auto parts = Defaults::explode(filename, '.');
 		if (parts.size() < 2) continue;
@@ -451,9 +453,9 @@ void DialogSettings::populateThemes() {
 
 		auto img = Gtk::manage(new Gtk::Image());
 		img->set_size_request(120, 80);
-		const string imgPath{PACKAGE_DATA_DIR "themes/" + meta.id + "/preview.png"};
+		const string imgPath{"/org/ledspicer/ui/themes/" + meta.id + "/preview.png"};
 		try {
-			img->set(Gdk::Pixbuf::create_from_file(imgPath, 120, 80, true));
+			img->set(Gdk::Pixbuf::create_from_resource(imgPath, 120, 80, true));
 		}
 		catch (const Glib::Error&) {
 			img->set_from_icon_name("image-missing", Gtk::ICON_SIZE_DIALOG);

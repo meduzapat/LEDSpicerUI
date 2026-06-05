@@ -35,7 +35,7 @@ namespace LEDSpicerUI::Ui {
  *
  * Singleton that discovers, loads, and switches themes at runtime.
  *
- * Each theme lives in PACKAGE_DATA_DIR/themes/<id>/ and provides:
+ * Each theme is bundled under the GResource prefix /org/ledspicer/ui/themes/<id>/:
  *   metadata.xml     — display name and description
  *   preview.png      — mandatory selector thumbnail
  *   dark/theme.css   — dark variant palette
@@ -66,7 +66,7 @@ public:
 	static ThemeManager& getInstance() noexcept { return instance; }
 
 	/**
-	 * Scans PACKAGE_DATA_DIR/themes/ for available themes and loads their metadata.
+	 * Enumerates bundled themes under /org/ledspicer/ui/themes/ and loads their metadata.
 	 * Called once from main() before the main window is created.
 	 */
 	void initialize() noexcept;
@@ -118,21 +118,21 @@ private:
 	static string resolveVariant(Config::Settings::ThemeStyle style) noexcept;
 
 	/**
-	 * Parses themes/<id>/metadata.xml and appends to themes on success.
+	 * Parses the metadata.xml bundled under themeBase and appends to themes on success.
 	 *
-	 * @param themeDir Absolute path to the theme directory (e.g. PACKAGE_DATA_DIR/themes/darkblue).
+	 * @param themeBase Resource path to the theme directory (e.g. /org/ledspicer/ui/themes/default).
 	 * @param themeId
 	 */
-	void parseMetadata(const string& themeDir, const string& themeId) noexcept;
+	void parseMetadata(const string& themeBase, const string& themeId) noexcept;
 
 	/**
-	 * Loads a CSS file into a new provider on the default screen at the given priority.
+	 * Loads a bundled CSS resource into a new provider on the default screen at the given priority.
 	 *
-	 * @param path Absolute path to the CSS file to load.
+	 * @param resourcePath GResource path to the CSS file (e.g. /org/ledspicer/ui/style-base.css).
 	 * @param priority Priority to apply the provider at (e.g. GTK_STYLE_PROVIDER_PRIORITY_APPLICATION).
 	 * @return The loaded provider, or nullptr if loading failed.
 	 */
-	static Glib::RefPtr<Gtk::CssProvider> loadCss(const string& path, guint priority) noexcept;
+	static Glib::RefPtr<Gtk::CssProvider> loadCss(const string& resourcePath, guint priority) noexcept;
 
 	/**
 	 * Removes a provider from the default screen if non-null.

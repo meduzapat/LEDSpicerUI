@@ -21,6 +21,7 @@
  */
 
 #include "ThemeManager.hpp"
+#include <gio/gio.h>
 
 using namespace LEDSpicerUI::Ui;
 
@@ -28,23 +29,35 @@ ThemeManager ThemeManager::instance;
 
 void ThemeManager::initialize() noexcept {
 	themes.clear();
-	const string themesDir{PACKAGE_DATA_DIR "themes/"};
-	try {
-		Glib::Dir d(themesDir);
-		for (const auto& entry : d) {
-			const string themeDir{themesDir + entry + "/"};
-			if (not Glib::file_test(themeDir + "metadata.xml", Glib::FILE_TEST_IS_REGULAR))
-				continue;
-			if (not Glib::file_test(themeDir + "preview.png", Glib::FILE_TEST_IS_REGULAR)) {
-				std::cerr <<
-					"ThemeManager: skipping theme '"    << entry <<
-					"' — missing mandatory preview.png" << std::endl;
+
+	GError* error = nullptr;
+	gchar** children = g_resources_enumerate_children(
+		"/org/ledspicer/ui/themes", G_RESOURCE_LOOKUP_FLAGS_NONE, &error
+	);
+	if (children) {
+		auto exists = [](const string& path) noexcept {
+			GError* e = nullptr;
+			GBytes* b = g_resources_lookup_data(path.c_str(), G_RESOURCE_LOOKUP_FLAGS_NONE, &e);
+			if (e) { g_error_free(e); return false; }
+			g_bytes_unref(b);
+			return true;
+		};
+
+		for (gchar** it = children; *it; ++it) {
+			string entry{*it};
+			if (not entry.empty() and entry.back() == '/') entry.pop_back();
+
+			const string base{"/org/ledspicer/ui/themes/" + entry};
+			if (not exists(base + "/metadata.xml")) continue;
+			if (not exists(base + "/preview.png")) {
+				std::cerr << "ThemeManager: skipping '" << entry << "' — missing preview.png" << std::endl;
 				continue;
 			}
-			parseMetadata(themeDir, entry);
+			parseMetadata(base, entry);
 		}
+		g_strfreev(children);
 	}
-	catch (const Glib::Error&) {}
+	if (error) g_error_free(error);
 
 	auto gs = Gtk::Settings::get_default();
 	auto onSystemChange = [this]() {
@@ -57,17 +70,17 @@ void ThemeManager::initialize() noexcept {
 
 bool ThemeManager::apply(const string& themeId, Config::Settings::ThemeStyle style) noexcept {
 
-	const string& id {themeId.empty() ? DEFAULT : themeId};
+	const string& id{themeId.empty() ? DEFAULT : themeId};
 
 	removeProvider(baseProvider);
 	removeProvider(themeProvider);
 
-	baseProvider = loadCss(PACKAGE_DATA_DIR "style-base.css", GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+	baseProvider = loadCss("/org/ledspicer/ui/style-base.css", GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 	if (not baseProvider)
-		baseProvider = loadCss(PACKAGE_DATA_DIR "style.css", GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+		baseProvider = loadCss("/org/ledspicer/ui/style.css", GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 
 	const string variant{resolveVariant(style)};
-	const string cssPath{PACKAGE_DATA_DIR "themes/" + id + "/" + variant + "/theme.css"};
+	const string cssPath{"/org/ledspicer/ui/themes/" + id + "/" + variant + "/theme.css"};
 
 	themeProvider = loadCss(cssPath, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION + 1);
 	if (not themeProvider) {
@@ -94,7 +107,7 @@ string ThemeManager::resolveVariant(Config::Settings::ThemeStyle style) noexcept
 	if (style == Config::Settings::ThemeStyle::Light) return "light";
 
 	try {
-		auto gsettings {Gio::Settings::create("org.gnome.desktop.interface")};
+		auto gsettings{Gio::Settings::create("org.gnome.desktop.interface")};
 		if (gsettings->get_string("color-scheme") == "prefer-dark") return "dark";
 	}
 	catch (...) {}
@@ -105,14 +118,22 @@ string ThemeManager::resolveVariant(Config::Settings::ThemeStyle style) noexcept
 	return "light";
 }
 
-void ThemeManager::parseMetadata(const string& themeDir, const string& themeId) noexcept {
+void ThemeManager::parseMetadata(const string& themeBase, const string& themeId) noexcept {
+	GError* error = nullptr;
+	GBytes* bytes = g_resources_lookup_data(
+		(themeBase + "/metadata.xml").c_str(), G_RESOURCE_LOOKUP_FLAGS_NONE, &error
+	);
+	if (error) { g_error_free(error); return; }
+
+	gsize size;
+	const void* data = g_bytes_get_data(bytes, &size);
 	tinyxml2::XMLDocument doc;
-	if (doc.LoadFile((themeDir + "metadata.xml").c_str()) != tinyxml2::XML_SUCCESS)
-		return;
+	const bool parsed = doc.Parse(static_cast<const char*>(data), size) == tinyxml2::XML_SUCCESS;
+	g_bytes_unref(bytes);
+	if (not parsed) return;
 
 	const auto root = doc.FirstChildElement("theme");
-	if (not root)
-		return;
+	if (not root) return;
 
 	ThemeMetadata meta;
 	meta.id   = themeId;
@@ -123,14 +144,14 @@ void ThemeManager::parseMetadata(const string& themeDir, const string& themeId) 
 	themes.push_back(std::move(meta));
 }
 
-Glib::RefPtr<Gtk::CssProvider> ThemeManager::loadCss(const string& path, guint priority) noexcept {
+Glib::RefPtr<Gtk::CssProvider> ThemeManager::loadCss(const string& resourcePath, guint priority) noexcept {
 
-	auto provider {Gtk::CssProvider::create()};
+	auto provider{Gtk::CssProvider::create()};
 	try {
-		provider->load_from_path(path);
+		provider->load_from_resource(resourcePath);
 	}
 	catch (const Glib::Error& e) {
-		std::cerr << "ThemeManager: failed to load " << path << ": " << e.what() << std::endl;
+		std::cerr << "ThemeManager: failed to load " << resourcePath << ": " << e.what() << std::endl;
 		return {};
 	}
 	Gtk::StyleContext::add_provider_for_screen(
