@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.40.0 
+<!-- Generated with glade 3.40.0
 
 Copyright (C) @COPYRIGHT@
 
@@ -775,12 +775,12 @@ Very useful when MAME does not provide game's data, or when you want to customiz
                                         </child>
                                         <child>
                                           <object class="GtkListBoxRow">
-                                            <property name="name">controls.ini</property>
+                                            <property name="name">controls.xml</property>
                                             <property name="visible">True</property>
                                             <property name="can-focus">True</property>
                                             <child>
                                               <object class="GtkCheckButton" id="SourceControlIni">
-                                                <property name="label">controls.ini</property>
+                                                <property name="label">controls.xml</property>
                                                 <property name="visible">True</property>
                                                 <property name="can-focus">True</property>
                                                 <property name="receives-default">False</property>

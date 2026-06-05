@@ -43,3 +43,4 @@ tests/test-suite.log
 
 # Packages
 *.deb
+.idea
