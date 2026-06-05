@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
  * @file      StatusBar.cpp
- * @since     Jun 2026
+ * @since     Jun 4, 2026
  * @author    Patricio A. Rossi (MeduZa)
  *
  * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
@@ -26,37 +26,30 @@ using namespace LEDSpicerUI::Ui;
 
 StatusBar StatusBar::instance;
 
-namespace {
-	constexpr unsigned MIN_MS        = 3000;
-	constexpr unsigned MAX_MS        = 8000;
-	constexpr unsigned MS_PER_CHAR   = 70;
-	constexpr unsigned SEVERE_FACTOR = 2;
-	// Minimum time to keep showing a message after the pointer leaves the bar,
-	// so a brief hover near the end of its window does not make it vanish instantly.
-	constexpr unsigned MIN_RESUME_MS = 250;
-}
-
+/**
+ * Binds the bar widget and reaches into GtkStatusbar's message area to
+ * ellipsize the internal label — long messages must never widen the window.
+ */
 void StatusBar::initialize(const Glib::RefPtr<Gtk::Builder>& builder) noexcept {
 	builder->get_widget("StatusBar", instance.bar);
 	instance.contextId = instance.bar->get_context_id("main");
 
-	// Ellipsize the internal label so long messages never widen the window.
 	// GtkStatusbar's message area is a GtkBox whose first child is the GtkLabel.
-	auto box = dynamic_cast<Gtk::Box*>(instance.bar->get_message_area());
-	instance.label = dynamic_cast<Gtk::Label*>(box->get_children().front());
-	instance.label->set_ellipsize(Pango::ELLIPSIZE_END);
-	instance.label->set_hexpand(true);
-	instance.label->set_xalign(0.0f);
-
-	// Hover-pause: freeze the auto-dismiss timer while the pointer is over the bar.
-	instance.bar->add_events(Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK);
-	instance.bar->signal_enter_notify_event().connect(
-		sigc::mem_fun(instance, &StatusBar::onPointerEnter));
-	instance.bar->signal_leave_notify_event().connect(
-		sigc::mem_fun(instance, &StatusBar::onPointerLeave));
+	// Guard both casts in case GTK ever rearranges the widget tree.
+	if (auto* box = dynamic_cast<Gtk::Box*>(instance.bar->get_message_area())) {
+		const auto& children {box->get_children()};
+		if (not children.empty()) {
+			if (auto* label = dynamic_cast<Gtk::Label*>(children.front())) {
+				instance.label = label;
+				label->set_ellipsize(Pango::ELLIPSIZE_END);
+				label->set_hexpand(true);
+				label->set_xalign(0.0f);
+			}
+		}
+	}
 }
 
-void StatusBar::push(const std::string& message, Severity severity, bool persistent) noexcept {
+void StatusBar::push(const string& message, Severity severity, bool persistent) noexcept {
 	if (persistent) {
 		persistentText     = message;
 		persistentSeverity = severity;
@@ -74,7 +67,6 @@ void StatusBar::push(const std::string& message, Severity severity, bool persist
 void StatusBar::clear() noexcept {
 	timeoutConn.disconnect();
 	queue.clear();
-	paused = false;
 	if (showingTransient) {
 		bar->pop(contextId);
 		showingTransient = false;
@@ -82,9 +74,10 @@ void StatusBar::clear() noexcept {
 	renderPersistent();
 }
 
-unsigned StatusBar::durationFor(const std::string& msg, Severity sev) noexcept {
-	unsigned ms = static_cast<unsigned>(msg.size()) * MS_PER_CHAR;
-	ms = std::clamp(ms, MIN_MS, MAX_MS);
+unsigned StatusBar::durationFor(const string& msg, Severity sev) noexcept {
+	// Count UTF-8 characters, not bytes, so non-ASCII messages don't over-count.
+	const unsigned chars {static_cast<unsigned>(Glib::ustring(msg).length())};
+	unsigned ms = std::clamp(chars * MS_PER_CHAR, MIN_MS, MAX_MS);
 	if (sev == Severity::Warning or sev == Severity::Error)
 		ms *= SEVERE_FACTOR;
 	return ms;
@@ -105,14 +98,11 @@ void StatusBar::displayTransient(const PendingMessage& msg) noexcept {
 	bar->pop(contextId);
 	bar->push(msg.text, contextId);
 	applySeverity(msg.severity);
-	showingTransient  = true;
-	currentDurationMs = durationFor(msg.text, msg.severity);
-	displayStartUs    = g_get_monotonic_time();
-	paused            = false;
+	showingTransient = true;
 	timeoutConn.disconnect();
 	timeoutConn = Glib::signal_timeout().connect(
 		sigc::mem_fun(*this, &StatusBar::onTimeout),
-		currentDurationMs);
+		durationFor(msg.text, msg.severity));
 }
 
 void StatusBar::renderPersistent() noexcept {
@@ -127,43 +117,13 @@ void StatusBar::renderPersistent() noexcept {
 
 void StatusBar::applySeverity(Severity severity) noexcept {
 	auto ctx = label->get_style_context();
-	for (const auto& cls : {"status-info", "status-success", "status-warning", "status-error"})
+	for (const auto& cls : SEVERITY_CLASSES)
 		ctx->remove_class(cls);
-	switch (severity) {
-	case Severity::Info:    ctx->add_class("status-info");    break;
-	case Severity::Success: ctx->add_class("status-success"); break;
-	case Severity::Warning: ctx->add_class("status-warning"); break;
-	case Severity::Error:   ctx->add_class("status-error");   break;
-	}
+	ctx->add_class(SEVERITY_CLASSES[static_cast<size_t>(severity)]);
 }
 
 bool StatusBar::onTimeout() noexcept {
 	showingTransient = false;
 	showNext();
-	return false;
-}
-
-bool StatusBar::onPointerEnter(GdkEventCrossing*) noexcept {
-	if (not showingTransient or paused)
-		return false;
-	const gint64 elapsedMs = (g_get_monotonic_time() - displayStartUs) / 1000;
-	remainingMsOnHover = elapsedMs >= currentDurationMs
-		? 0
-		: currentDurationMs - static_cast<unsigned>(elapsedMs);
-	timeoutConn.disconnect();
-	paused = true;
-	return false;
-}
-
-bool StatusBar::onPointerLeave(GdkEventCrossing*) noexcept {
-	if (not paused)
-		return false;
-	paused = false;
-	const unsigned ms = std::max(remainingMsOnHover, MIN_RESUME_MS);
-	currentDurationMs = ms;
-	displayStartUs    = g_get_monotonic_time();
-	timeoutConn = Glib::signal_timeout().connect(
-		sigc::mem_fun(*this, &StatusBar::onTimeout),
-		ms);
 	return false;
 }

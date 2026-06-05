@@ -339,6 +339,12 @@ inline const string
 #define CSS_FORM_CONTAINER            "formContainer"
 #define CSS_SYSTEM                    "system"
 
+// Status bar severities
+#define CSS_STATUS_INFO               "status-info"
+#define CSS_STATUS_SUCCESS            "status-success"
+#define CSS_STATUS_WARNING            "status-warning"
+#define CSS_STATUS_ERROR              "status-error"
+
 // Icons — all symbolic
 #define ICON_COPY   "edit-copy-symbolic"
 #define ICON_DELETE "edit-delete-symbolic"

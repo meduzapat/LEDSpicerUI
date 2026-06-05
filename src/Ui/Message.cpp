@@ -24,54 +24,17 @@
 
 using namespace LEDSpicerUI::Ui;
 
-namespace {
-
-constexpr unsigned
-	WRAP_COLS = 80,
-	MIN_LINES = 3,
-	MAX_LINES = 20;
-
-constexpr int
-	CHAR_W_PX = 8,    // ≈ Cantarell 10pt advance width
-	LINE_H_PX = 20,   // ≈ Cantarell 10pt line height
-	CHROME_W  = 80,   // icon column + margins + scrollbar gutter
-	CHROME_H  = 140;  // heading row + button row + margins
-
-unsigned countWrappedLines(const string& s) noexcept {
-	if (s.empty()) return 1;
-	unsigned lines = 0, col = 0;
-	for (char c : s) {
-		if (c == '\n') {
-			++lines;
-			col = 0;
-		}
-		else
-			if (++col >= WRAP_COLS) {
-				++lines;
-				col = 0;
-		}
-	}
-	if (col > 0 or s.empty()) ++lines;
-	return lines;
-}
-
-}
-
 Gtk::Dialog*   Message::dialog   = nullptr;
 Gtk::Image*    Message::icon     = nullptr;
 Gtk::Label*    Message::primary  = nullptr;
 Gtk::TextView* Message::body     = nullptr;
-Gtk::Button*   Message::btnNo    = nullptr;
-Gtk::Button*   Message::btnYes   = nullptr;
-Gtk::Button*   Message::btnClose = nullptr;
+Gtk::Button
+	* Message::btnNo    = nullptr,
+	* Message::btnYes   = nullptr,
+	* Message::btnClose = nullptr;
 Gtk::Window*   Message::main     = nullptr;
 
-namespace {
-	bool   batching = false;
-	string batchBuffer;
-}
-
-void Message::initialize(Glib::RefPtr<Gtk::Builder> const &builder, Gtk::Window* main) {
+void Message::initialize(Glib::RefPtr<Gtk::Builder> const &builder, Gtk::Window* mainWindow) noexcept {
 	builder->get_widget("DialogMessage",       dialog);
 	builder->get_widget("ImageMessageIcon",    icon);
 	builder->get_widget("LabelMessagePrimary", primary);
@@ -79,26 +42,26 @@ void Message::initialize(Glib::RefPtr<Gtk::Builder> const &builder, Gtk::Window*
 	builder->get_widget("ButtonMessageNo",     btnNo);
 	builder->get_widget("ButtonMessageYes",    btnYes);
 	builder->get_widget("ButtonMessageClose",  btnClose);
-	Message::main = main;
+	Message::main = mainWindow;
 }
 
-void Message::displayError(Gtk::Window* transient, const string& heading) {
+void Message::displayError(Gtk::Window* transient, const string& heading) noexcept {
 	handleDialog(error, Kind::Error, transient, heading);
 }
 
-void Message::displayError(const string& errorMessage, Gtk::Window* transient, const string& heading) {
-	handleDialog(errorMessage, Kind::Error, transient, heading);
+void Message::displayError(const string& message, Gtk::Window* transient, const string& heading) noexcept {
+	handleDialog(message, Kind::Error, transient, heading);
 }
 
-void Message::displayInfo(const string& infoMessage, Gtk::Window* transient, const string& heading) {
-	handleDialog(infoMessage, Kind::Info, transient, heading);
+void Message::displayInfo(const string& message, Gtk::Window* transient, const string& heading) noexcept {
+	handleDialog(message, Kind::Info, transient, heading);
 }
 
-Gtk::ResponseType Message::ask(const string& question, Gtk::Window* transient, const string& heading) {
-	return handleDialog(question, Kind::Question, transient, heading);
+Gtk::ResponseType Message::ask(const string& message, Gtk::Window* transient, const string& heading) noexcept {
+	return handleDialog(message, Kind::Question, transient, heading);
 }
 
-string Message::takeMessage() {
+string Message::takeMessage() noexcept {
 	return std::move(error);
 }
 
@@ -112,22 +75,15 @@ void Message::collect(const string& line) noexcept {
 	batchBuffer += line + '\n';
 }
 
-namespace {
-
-// Drains the batch buffer into a sorted, deduplicated report. Returns the
-// formatted text and the deduped line count so callers can present both
-// without recounting.
-struct BatchReport { string text; size_t count = 0; };
-
-BatchReport drainBatch() noexcept {
+Message::BatchReport Message::drainBatch() noexcept {
 	batching = false;
 	if (batchBuffer.empty())
-		return {LEDSpicerUI::Constants::emptyString, 0};
+		return {emptyString, 0};
 
 	// Split into lines, sort so entries from the same source cluster, then
 	// collapse duplicates into "<line> (×N)" so a single bad source does
 	// not flood the report.
-	auto lines {LEDSpicerUI::Defaults::explode(batchBuffer, '\n')};
+	auto lines {Defaults::explode(batchBuffer, '\n')};
 	batchBuffer.clear();
 	std::sort(lines.begin(), lines.end());
 
@@ -139,14 +95,12 @@ BatchReport drainBatch() noexcept {
 			++j;
 		r.text += lines[i];
 		if (j - i > 1)
-			r.text += " (\xc3\x97" + std::to_string(j - i) + ")";
+			r.text += " (×" + std::to_string(j - i) + ")";
 		r.text += '\n';
 		++r.count;
 		i = j;
 	}
 	return r;
-}
-
 }
 
 string Message::endBatch() noexcept {
@@ -171,10 +125,27 @@ bool Message::isBatching() noexcept {
 	return batching;
 }
 
-Gtk::ResponseType Message::handleDialog(const string& message, Kind kind, Gtk::Window* transient, const string& heading) {
-	const char*    iconName;
-	Glib::ustring  title;
-	const bool     isQuestion {kind == Kind::Question};
+unsigned Message::countWrappedLines(const string& message) noexcept {
+	if (message.empty()) return 1;
+	unsigned lines = 0, col = 0;
+	for (char c : message) {
+		if (c == '\n') {
+			++lines;
+			col = 0;
+		}
+		else if (++col >= WRAP_COLS) {
+			++lines;
+			col = 0;
+		}
+	}
+	if (col > 0) ++lines;
+	return lines;
+}
+
+Gtk::ResponseType Message::handleDialog(const string& message, Kind kind, Gtk::Window* transient, const string& heading) noexcept {
+	Glib::ustring iconName;
+	Glib::ustring title;
+	const bool    isQuestion {kind == Kind::Question};
 	switch (kind) {
 	case Kind::Info:
 		iconName = "dialog-information";
@@ -199,16 +170,14 @@ Gtk::ResponseType Message::handleDialog(const string& message, Kind kind, Gtk::W
 	btnClose->set_visible(not isQuestion);
 	dialog->set_default_response(isQuestion ? Gtk::RESPONSE_NO : Gtk::RESPONSE_CLOSE);
 	dialog->set_title(title);
-	dialog->set_transient_for(transient ? (transient->is_visible() ? *transient : *main) : *main);
-	// Manual sizing: GtkTextView + GtkScrolledWindow do not cooperate well
-	// with auto height-for-width, so compute a target size from a logical
-	// wrap column and the resulting line count, clamped to a sane range.
+	auto& parent {(transient and transient->is_visible()) ? *transient : *main};
+	dialog->set_transient_for(parent);
 	const unsigned shownLines {std::clamp(countWrappedLines(message), MIN_LINES, MAX_LINES)};
 	dialog->resize(
 		static_cast<int>(WRAP_COLS)  * CHAR_W_PX + CHROME_W,
 		static_cast<int>(shownLines) * LINE_H_PX + CHROME_H
 	);
-	const auto r {static_cast<Gtk::ResponseType>(dialog->run())};
+	const auto response {static_cast<Gtk::ResponseType>(dialog->run())};
 	dialog->hide();
-	return r;
+	return response;
 }

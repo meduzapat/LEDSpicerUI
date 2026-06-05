@@ -28,70 +28,87 @@
 namespace LEDSpicerUI::Ui {
 
 /**
- * LEDSpicerUI::Error
+ * LEDSpicerUI::Ui::Message
+ *
+ * Dual-purpose error/info/question channel:
+ *
+ *   1. Throwable — `throw Message("…")` from any layer that detects a user
+ *      facing error; the caller catches with `catch (Message& e)` and calls
+ *      `e.displayError(this)` to surface it. Used pervasively by
+ *      `DialogForm::isValid()`, `XMLHelper`, and the config loaders.
+ *
+ *   2. Static dialog helpers — `Message::displayError/displayInfo/ask` for
+ *      ad-hoc dialogs that do not flow through exception handling.
+ *
+ * Batch API — `beginBatch` / `collect` / `finishBatch` consolidates many
+ * small errors raised during a load into a single deduplicated report
+ * instead of spamming the user with one dialog per failure.
  */
 class Message {
 
 public:
 
-	Message(const string& errorMessage) : error(errorMessage) {}
+	Message(const string& message) noexcept : error(message) {}
 
 	virtual ~Message() = default;
 
 	/**
-	 * Connects dialogs.
+	 * Binds the singleton dialog widgets from the builder.
 	 * @param builder
+	 * @param mainWindow Main window used as default transient parent and to
+	 *                   center dialogs that have no other parent.
 	 */
-	static void initialize(Glib::RefPtr<Gtk::Builder> const &builder, Gtk::Window* main);
+	static void initialize(Glib::RefPtr<Gtk::Builder> const &builder, Gtk::Window* mainWindow) noexcept;
 
 	/**
-	 * Displays the current message in a error dialog.
+	 * Displays the carried message in an error dialog. Use after catching
+	 * a `Message` thrown from a lower layer.
 	 * @param transient
-	 * @param heading optional bold heading shown above the body; defaults to "Error".
+	 * @param heading Optional bold heading above the body; defaults to "Error".
 	 */
-	void displayError(Gtk::Window* transient = nullptr, const string& heading = emptyString);
+	void displayError(Gtk::Window* transient = nullptr, const string& heading = emptyString) noexcept;
 
 	/**
 	 * Display an error message.
-	 * @param errorMessage
+	 * @param message
 	 * @param transient
-	 * @param heading optional bold heading shown above the body; defaults to "Error".
+	 * @param heading Optional bold heading above the body; defaults to "Error".
 	 */
 	static void displayError(
-		const string& errorMessage,
+		const string& message,
 		Gtk::Window* transient = nullptr,
 		const string& heading = emptyString
-	);
+	) noexcept;
 
 	/**
-	 * Display and informative message.
-	 * @param errorMessage
+	 * Display an informative message.
+	 * @param message
 	 * @param transient
-	 * @param heading optional bold heading shown above the body; defaults to "Information".
+	 * @param heading Optional bold heading above the body; defaults to "Information".
 	 */
 	static void displayInfo(
-		const string& infoMessage,
+		const string& message,
 		Gtk::Window* transient = nullptr,
 		const string& heading = emptyString
-	);
+	) noexcept;
 
 	/**
-	 * Ask a question that can be answered with yes or now.
-	 * @param question
+	 * Ask a question that can be answered with yes or no.
+	 * @param message
 	 * @param transient
-	 * @param heading optional bold heading shown above the body; defaults to "Question".
-	 * @return the answer.
+	 * @param heading Optional bold heading above the body; defaults to "Question".
+	 * @return The user's response.
 	 */
 	static Gtk::ResponseType ask(
-		const string& question,
+		const string& message,
 		Gtk::Window* transient = nullptr,
 		const string& heading = emptyString
-	);
+	) noexcept;
 
 	/**
 	 * Starts collecting error messages instead of failing one-by-one.
 	 * While batching, collect() appends to an internal buffer. Call endBatch()
-	 * to retrieve the accumulated text and turn batching off.
+	 * or finishBatch() to retrieve / report the accumulated text.
 	 *
 	 * Intended for load paths where many small errors should be reported as a
 	 * single consolidated message rather than spamming the user with dialogs.
@@ -125,36 +142,66 @@ public:
 	static bool isBatching() noexcept;
 
 	/**
-	 * Returns and resets the error message.
-	 * @return
+	 * Returns and resets the carried message.
 	 */
-	string takeMessage();
+	string takeMessage() noexcept;
 
 	static Gtk::Window& getMain() noexcept { return *main; }
 
 protected:
 
-	enum class Kind {Info, Error, Question};
+	enum class Kind : uint8_t {Info, Error, Question};
 
 	static Gtk::ResponseType handleDialog(
 		const string& message,
 		Kind kind,
 		Gtk::Window* transient,
 		const string& heading = emptyString
-	);
+	) noexcept;
+
+	/// Counts wrapped lines for `message`, assuming WRAP_COLS-wide hard wrap.
+	static unsigned countWrappedLines(const string& message) noexcept;
+
+	/// Drains the batch buffer into a sorted, deduplicated report. Returns the
+	/// formatted text and the deduped line count so callers can present both
+	/// without recounting.
+	struct BatchReport {
+		string text;
+		size_t count = 0;
+	};
+	static BatchReport drainBatch() noexcept;
 
 	string error;
 
+	// Dialog widgets bound by initialize().
 	static Gtk::Dialog*   dialog;
 	static Gtk::Image*    icon;
 	static Gtk::Label*    primary;
 	static Gtk::TextView* body;
-	static Gtk::Button*   btnNo;
-	static Gtk::Button*   btnYes;
-	static Gtk::Button*   btnClose;
+	static Gtk::Button
+		* btnNo,
+		* btnYes,
+		* btnClose;
 
-	// Keeps a pointer to the main screen to center.
+	/// Main window pointer, used to center dialogs that have no transient parent.
 	static Gtk::Window* main;
+
+	// Batch state.
+	inline static bool   batching = false;
+	inline static string batchBuffer;
+
+	// Manual sizing constants — GtkTextView + GtkScrolledWindow do not cooperate
+	// well with auto height-for-width, so the dialog is sized from a logical
+	// wrap column and the resulting line count, clamped to a sane range.
+	static constexpr unsigned
+		WRAP_COLS = 80,
+		MIN_LINES = 3,
+		MAX_LINES = 20;
+	static constexpr int
+		CHAR_W_PX = 8,    // ≈ Cantarell 10pt advance width
+		LINE_H_PX = 20,   // ≈ Cantarell 10pt line height
+		CHROME_W  = 80,   // icon column + margins + scrollbar gutter
+		CHROME_H  = 140;  // heading row + button row + margins
 };
 
 } // namespace
