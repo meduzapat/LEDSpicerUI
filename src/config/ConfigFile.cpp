@@ -251,7 +251,7 @@ void ConfigFile::save(const ConfigData& data) {
 	}};
 
 	// Build XML
-	string xmlData(xmlHeader("Configuration"));
+	string xmlData(xmlHeader(TYPE_CONFIGURATION));
 	xmlData += toXML(data.settings);
 	Defaults::reduceTab();
 	xmlData += ">\n";

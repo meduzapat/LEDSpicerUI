@@ -258,6 +258,7 @@ inline const string
 	TYPE_ACTOR           {"actor"},
 	TYPE_PROFILE         {"profile"},
 	TYPE_TRANSITION      {"transition"},
+	TYPE_CONFIGURATION   {"Configuration"},
 
 /// Collection / families — dual-purpose string constants.
 	COLLECTION_DEVICES         {"d"},

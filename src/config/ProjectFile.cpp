@@ -65,23 +65,24 @@ bool ProjectFile::saveProject(std::function<void()> doSave) {
 	}
 
 	namespace fs = std::filesystem;
-	// getProjectDir() returns with a trailing '/'; strip it so backupDir
-	// becomes a sibling ("/p/proj.bak"), not a child ("/p/proj/.bak").
+
+	// Remove the trailing '/' that getProjectDir() returns.
 	string projectStr {s.getProjectDir()};
-	while (not projectStr.empty() and projectStr.back() == '/')
-		projectStr.pop_back();
-	const fs::path projectDir {projectStr};
-	const fs::path backupDir  {projectStr + ".bak"};
+	if (projectStr.back() == '/') projectStr.pop_back();
+
+	const fs::path
+		projectDir {projectStr},
+		backupDir  {projectStr + ".bak"};
 
 	std::error_code ec;
 	const bool projectExisted {fs::exists(projectDir)};
 
-	// Stash the existing project into backupDir via rename (O(1), same FS).
-	// rename refuses to clobber, so wipe any prior backup first. If either
-	// step fails, abort before touching the project dir.
+	// Stash the existing project into backupDir.
 	if (projectExisted) {
+		// rename refuses to clobber, so wipe any prior backup first. If either
 		fs::remove_all(backupDir, ec);
 		if (ec)
+			// step fails, abort before touching the project dir.
 			throw Message("Could not remove previous backup: " + ec.message());
 		fs::rename(projectDir, backupDir, ec);
 		if (ec)
