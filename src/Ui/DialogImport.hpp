@@ -48,7 +48,7 @@ protected:
 
 	uint8_t flags = 0;
 
-	static const std::unordered_map<const Types, const string> setups;
+	static const std::unordered_map<Types, string> setups;
 
 	void setFlags(uint8_t value, bool on);
 

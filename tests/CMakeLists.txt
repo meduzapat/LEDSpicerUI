@@ -27,6 +27,11 @@ macro(add_test_executable TEST_NAME TEST_SRC EXTRA_SRCS EXTRA_LIBS)
 	target_compile_definitions(${TEST_NAME} PRIVATE
 		PACKAGE_SAMPLES_DIR="${CMAKE_SOURCE_DIR}/tests/"
 	)
+	target_link_directories(${TEST_NAME} PRIVATE
+		${GTKMM30_LIBRARY_DIRS}
+		${TINYXML2_LIBRARY_DIRS}
+		${GTEST_LIBRARY_DIRS}
+	)
 	target_link_libraries(${TEST_NAME} PRIVATE
 		${GTKMM30_LIBRARIES}
 		${GTEST_LIBRARIES}
