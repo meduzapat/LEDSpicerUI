@@ -68,6 +68,8 @@ bool ProjectFile::saveProject(std::function<void()> doSave) {
 
 	// Remove the trailing '/' that getProjectDir() returns.
 	string projectStr {s.getProjectDir()};
+	if (projectStr.empty())
+		throw Message("No project directory is configured. Please open or create a project first.");
 	if (projectStr.back() == '/') projectStr.pop_back();
 
 	const fs::path

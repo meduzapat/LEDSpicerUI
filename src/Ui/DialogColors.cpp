@@ -101,7 +101,13 @@ void DialogColors::setColorsFromFile(const string& path) noexcept {
 	// Set new CSS data (if colors > 0).
 	if (const string c {setColors(colors)}; c.size()) {
 		currentProvider = Gtk::CssProvider::create();
-		currentProvider->load_from_data(c);
+		try {
+			currentProvider->load_from_data(c);
+		}
+		catch (const Glib::Error&) {
+			currentProvider.reset();
+			return;
+		}
 		styleContext->add_provider_for_screen(
 			Gdk::Screen::get_default(),
 			currentProvider,
@@ -212,7 +218,7 @@ string DialogColors::setColors(const Values& colors) noexcept {
 	string cssData;
 
 	auto addButton = [&](const string& name, const string& hex, const string& tooltip, bool enabled) {
-		cssData += '.' + name + "{background:#" + hex + ';';
+		cssData += '.' + name + "{background-color:#" + hex + ';';
 		if (Defaults::getLuminance(hex) > 0.5) cssData += "color:black;";
 		cssData += '}';
 		Gtk::Button* b = Gtk::make_managed<Gtk::Button>(name);

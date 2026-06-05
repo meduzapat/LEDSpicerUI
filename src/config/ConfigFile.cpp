@@ -236,6 +236,9 @@ string ConfigFile::processGroups() {
 void ConfigFile::save(const ConfigData& data) {
 
 	// Validation
+	if (data.configPath.empty())
+		throw Message("No config file path is set. Please configure Settings before saving.");
+
 	if (data.defaultProfile.empty())
 		throw Message("Select a default profile in the profile section");
 
