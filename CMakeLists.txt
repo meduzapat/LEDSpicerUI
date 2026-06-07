@@ -51,6 +51,7 @@ add_executable(ledspicerui
 	src/XMLHelper.cpp
 	src/config/Settings.cpp
 	src/config/SettingsFile.cpp
+	src/config/Geometry.cpp
 	src/config/ProjectFile.cpp
 	src/config/ConfigFile.cpp
 	src/config/InputFile.cpp

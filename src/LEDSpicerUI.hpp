@@ -20,18 +20,11 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-
 // To handle c signals.
 #include <csignal>
 using std::signal;
 
-#include <glibmm.h>
-
-#include "Message.hpp"
 #include "Ui/MainWindow.hpp"
-
-#include "Ui/DialogProject.hpp"
 
 #pragma once
 

@@ -20,7 +20,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Message.hpp"
+#include "config/Geometry.hpp"
 
 #pragma once
 
@@ -47,6 +47,7 @@ public:
 			if (not instance) {
 				throw std::runtime_error("Failed to load widget: " + widgetId);
 			}
+			LEDSpicerUI::Config::Geometry::get().registerWindow(instance, widgetId);
 		}
 	}
 

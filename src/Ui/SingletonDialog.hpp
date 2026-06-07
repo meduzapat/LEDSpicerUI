@@ -20,9 +20,9 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <gtkmm/builder.h>
 #include <stdexcept>
-#include <string>
+
+#include "config/Geometry.hpp"
 
 #pragma once
 
@@ -43,6 +43,7 @@ public:
 			if (not instance) {
 				throw std::runtime_error("Failed to load widget: " + std::string(widgetId));
 			}
+			Config::Geometry::get().registerWindow(instance, std::string(widgetId));
 		}
 	}
 

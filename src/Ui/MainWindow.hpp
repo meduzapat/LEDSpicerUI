@@ -36,9 +36,6 @@
 #include "DataDialogs/DialogGroup.hpp"
 #include "StatusBar.hpp"
 
-// for file and dir stats
-#include <sys/types.h>
-
 #pragma once
 
 namespace LEDSpicerUI::Ui {
