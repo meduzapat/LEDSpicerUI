@@ -74,7 +74,7 @@ protected:
 	 * @return false if no changes or empty, true if the selection changed.
 	 */
 	bool handleTypeSwitch(
-		const OrdenableFlowBox* box,
+		const SortableFlowBox* box,
 		const string& confirmMsg
 	) noexcept;
 

@@ -93,14 +93,14 @@ void BoxButtonCollection::swap(BoxButtonCollection& other) noexcept {
 	std::swap(items, other.items);
 }
 
-void BoxButtonCollection::populateBox(OrdenableFlowBox* box) noexcept {
+void BoxButtonCollection::populateBox(SortableFlowBox* box) noexcept {
 	for (auto item : items) {
 		box->add(*item);
 	}
 	box->show_all();
 }
 
-void BoxButtonCollection::reindex(OrdenableFlowBox* box) noexcept {
+void BoxButtonCollection::reindex(SortableFlowBox* box) noexcept {
 	if (items.empty()) return;
 	BoxButtonVector reorderedItems;
 	reorderedItems.reserve(items.size());

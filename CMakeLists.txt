@@ -61,8 +61,8 @@ add_executable(ledspicerui
 	src/Ui/DialogProject.cpp
 	src/Ui/DialogPrompt.cpp
 	src/Ui/DialogSettings.cpp
-	src/Ui/OrdenableFlowBox.cpp
-	src/Ui/OrdenableListBox.cpp
+	src/Ui/SortableFlowBox.cpp
+	src/Ui/SortableListBox.cpp
 	src/Ui/Storage/CollectionHandler.cpp
 	src/Ui/Storage/Data.cpp
 	src/Ui/Storage/Parent.cpp

@@ -30,7 +30,7 @@ void DialogFormHost::clearForm() noexcept {
 }
 
 bool DialogFormHost::handleTypeSwitch(
-	const OrdenableFlowBox* box,
+	const SortableFlowBox* box,
 	const string& confirmMsg
 ) noexcept {
 

@@ -21,7 +21,7 @@
  */
 
 #include "SensitivityTracker.hpp"
-#include "OrdenableFlowBox.hpp"
+#include "SortableFlowBox.hpp"
 #include "BoxButton.hpp"
 
 #pragma once
@@ -118,16 +118,16 @@ public:
 	void swap(BoxButtonCollection& other) noexcept;
 
 	/**
-	 * Populate an OrdenableFlowBox with the BoxButton items.
-	 * @param box The OrdenableFlowBox to be populated.
+	 * Populate an SortableFlowBox with the BoxButton items.
+	 * @param box The SortableFlowBox to be populated.
 	 */
-	void populateBox(OrdenableFlowBox* box) noexcept;
+	void populateBox(SortableFlowBox* box) noexcept;
 
 	/**
 	 * Reindex the items in the collection for ordering.
-	 * @param box The OrdenableFlowBox containing the items.
+	 * @param box The SortableFlowBox containing the items.
 	 */
-	void reindex(OrdenableFlowBox* box) noexcept;
+	void reindex(SortableFlowBox* box) noexcept;
 
 	/**
 	 * Destroys all items from the collection.

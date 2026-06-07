@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      OrdenableListBox.cpp
+ * @file      SortableListBox.cpp
  * @since     May 4, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
@@ -20,16 +20,16 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "OrdenableListBox.hpp"
+#include "SortableListBox.hpp"
 
 using namespace LEDSpicerUI::Ui;
 
-OrdenableListBox::OrdenableListBox(
+SortableListBox::SortableListBox(
 	BaseObjectType* obj,
 	const Glib::RefPtr<Gtk::Builder>& builder,
 	const string& up,
 	const string& dn
-) : OrdenableListBox(obj, builder) {
+) : SortableListBox(obj, builder) {
 	// Link buttons
 	Gtk::Button
 		* btnUp = nullptr,
@@ -75,11 +75,11 @@ OrdenableListBox::OrdenableListBox(
 	});
 }
 
-size_t OrdenableListBox::getSize() {
+size_t SortableListBox::getSize() {
 	return get_children().size();
 }
 
-void OrdenableListBox::wipe() {
+void SortableListBox::wipe() {
 	for (auto child : get_children()) {
 		auto boxChild = static_cast<Gtk::ListBoxRow*>(child);
 		boxChild->remove();
@@ -87,7 +87,7 @@ void OrdenableListBox::wipe() {
 	}
 }
 
-void OrdenableListBox::sortAndMark(StringVector values) {
+void SortableListBox::sortAndMark(StringVector values) {
 	std::unordered_map<string, Gtk::ListBoxRow*> rows;
 	// move items into temp container
 	for (auto child : get_children()) {
@@ -108,7 +108,7 @@ void OrdenableListBox::sortAndMark(StringVector values) {
 	}
 }
 
-LEDSpicerUI::StringVector OrdenableListBox::getCheckedValues() {
+LEDSpicerUI::StringVector SortableListBox::getCheckedValues() {
 	StringVector values;
 	for (auto child : get_children()) {
 		auto boxChild(static_cast<Gtk::ListBoxRow*>(child));

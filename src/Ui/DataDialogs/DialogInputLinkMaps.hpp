@@ -21,7 +21,7 @@
  */
 
 #include "Storage/InputMapLink.hpp"
-#include "OrdenableFlowBox.hpp"
+#include "SortableFlowBox.hpp"
 #include "Storage/BoxButtonCollection.hpp"
 #include "DialogSelect.hpp"
 #include "DialogForm.hpp"
@@ -53,7 +53,7 @@ namespace LEDSpicerUI::Ui::DataDialogs {
 	protected:
 
 		/// Ordered display box for the current IML's map sequence.
-		OrdenableFlowBox* boxInputLinkedMappings = nullptr;
+		SortableFlowBox* boxInputLinkedMappings = nullptr;
 
 		/// Configuration for the map link selector.
 		DialogSelect::SelectionRequest mapsRequest;

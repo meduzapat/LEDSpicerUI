@@ -102,7 +102,7 @@ protected:
 	Gtk::Button* btnHome = nullptr;
 
 	/// Display box for the contents at the active directory.
-	OrdenableFlowBox* box = nullptr;
+	SortableFlowBox* box = nullptr;
 
 	DirectoryNavigator() noexcept;
 
@@ -171,7 +171,7 @@ protected:
 	 * files; entries within each group are sorted alphabetically by name.
 	 * @param box The flow box to sort.
 	 */
-	static void sortDirectoriesFirst(OrdenableFlowBox* box) noexcept;
+	static void sortDirectoriesFirst(SortableFlowBox* box) noexcept;
 
 };
 

@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      OrdenableFlowBox.cpp
+ * @file      SortableFlowBox.cpp
  * @since     Apr 10, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
@@ -20,18 +20,18 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "OrdenableFlowBox.hpp"
+#include "SortableFlowBox.hpp"
 
 using namespace LEDSpicerUI::Ui;
 
-OrdenableFlowBox::OrdenableFlowBox(
+SortableFlowBox::SortableFlowBox(
 	BaseObjectType* obj,
 	const Glib::RefPtr<Gtk::Builder>& builder,
 	const string& up,
 	const string& dn,
 	const string& first,
 	const string& last
-) : OrdenableFlowBox(obj, builder) {
+) : SortableFlowBox(obj, builder) {
 
 	Gtk::Button
 		* btnUp    = nullptr,
@@ -104,11 +104,11 @@ OrdenableFlowBox::OrdenableFlowBox(
 	}
 }
 
-size_t OrdenableFlowBox::getSize() const noexcept {
+size_t SortableFlowBox::getSize() const noexcept {
 	return get_children().size();
 }
 
-void OrdenableFlowBox::wipe() {
+void SortableFlowBox::wipe() {
 	for (auto child : get_children())
 		remove(*child);
 }

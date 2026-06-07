@@ -52,7 +52,7 @@ public:
 	struct SelectionRequest {
 
 		/// Box in the parent dialog where selected items are displayed.
-		OrdenableFlowBox* displayBox;
+		SortableFlowBox* displayBox;
 
 		const string&
 			/// Field name written into each Link.

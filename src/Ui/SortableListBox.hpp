@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      OrdenableFlowBox.hpp
- * @since     Apr 10, 2023
+ * @file      SortableListBox.hpp
+ * @since     May 4, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
  * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
@@ -27,23 +27,35 @@
 namespace LEDSpicerUI::Ui {
 
 /**
- * LEDSpicerUI::Ui::OrdenableFlowBox
+ * LEDSpicerUI::Ui::SortableListBox
  */
-class OrdenableFlowBox: public Gtk::FlowBox {
+class SortableListBox: public Gtk::ListBox {
 
 public:
 
-	OrdenableFlowBox() = delete;
+	SortableListBox() = delete;
 
-	OrdenableFlowBox(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>&) : Gtk::FlowBox(obj) {}
+	SortableListBox(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>&) : Gtk::ListBox(obj) {}
 
-	OrdenableFlowBox(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder, const string& up, const string& dn, const string& first = "", const string& last = "");
+	SortableListBox(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder, const string& up, const string& dn);
 
-	virtual ~OrdenableFlowBox() = default;
+	virtual ~SortableListBox() = default;
 
-	size_t getSize() const noexcept;
+	size_t getSize();
 
 	void wipe();
+
+	/**
+	 * for listbox with checkboxes, will sort and mark the checkboxes based on the array.
+	 * @param values the list of values with the order to set.
+	 */
+	void sortAndMark(StringVector values);
+
+	/**
+	 * for listbox with checkboxes.
+	 * @return Returns a list of selected checkbox.
+	 */
+	StringVector getCheckedValues();
 
 };
 

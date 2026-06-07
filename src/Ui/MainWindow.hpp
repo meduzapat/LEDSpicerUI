@@ -22,7 +22,7 @@
 
 #include "config/ConfigFile.hpp"
 
-#include "OrdenableListBox.hpp"
+#include "SortableListBox.hpp"
 #include "DialogSettings.hpp"
 #include "DialogProject.hpp"
 #include "DialogPrompt.hpp"
@@ -77,7 +77,7 @@ protected:
 		* comboLogLevel  = nullptr;
 
 	/// The list of data sources for ROM names.
-	OrdenableListBox* listBoxDataSource = nullptr;
+	SortableListBox* listBoxDataSource = nullptr;
 
 	/// Contains the possible pickers for colors when selecting colors randomly.
 	Gtk::FlowBox* boxRandomColors = nullptr;

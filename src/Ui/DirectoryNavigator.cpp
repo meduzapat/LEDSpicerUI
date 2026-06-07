@@ -207,7 +207,7 @@ void DirectoryNavigator::wireDirButtons(Storage::BoxButton& bb) noexcept {
 	bb.show_all();
 }
 
-void DirectoryNavigator::sortDirectoriesFirst(OrdenableFlowBox* box) noexcept {
+void DirectoryNavigator::sortDirectoriesFirst(SortableFlowBox* box) noexcept {
 	box->set_sort_func([](Gtk::FlowBoxChild* a, Gtk::FlowBoxChild* b) -> int {
 		auto
 			dA {static_cast<Storage::BoxButton*>(a)->getData()},

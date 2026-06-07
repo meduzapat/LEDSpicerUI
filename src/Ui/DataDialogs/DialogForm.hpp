@@ -22,7 +22,7 @@
 
 #include "SingletonDialog.hpp"
 #include "DialogColors.hpp"
-#include "OrdenableFlowBox.hpp"
+#include "SortableFlowBox.hpp"
 #include "Storage/CollectionHandler.hpp"
 #include "Storage/Parent.hpp"
 
@@ -77,7 +77,7 @@ public:
 	 * Sets the display box for this dialog's items.
 	 * @param displayBox The flow box owned by the navigator.
 	 */
-	void setBox(OrdenableFlowBox* displayBox) noexcept { box = displayBox; }
+	void setBox(SortableFlowBox* displayBox) noexcept { box = displayBox; }
 
 	/**
 	 * Clear the From leaving it empty for data entry.
@@ -126,16 +126,16 @@ public:
 	virtual string createUniqueId() const noexcept abstract;
 
 	/**
-	 * Using the box and the items it arrange the items based on the OrdenableFlowBox order.
+	 * Using the box and the items it arrange the items based on the SortableFlowBox order.
 	 */
 	void reindex() noexcept;
 
 	/**
 	 * Returns the display box for items.
 	 *
-	 * @return OrdenableFlowBox pointer.
+	 * @return SortableFlowBox pointer.
 	 */
-	OrdenableFlowBox* getBox() const noexcept { return box; }
+	SortableFlowBox* getBox() const noexcept { return box; }
 
 	/**
 	 * Method to add generic Add functionality that opens a dialog to create new Data (item).
@@ -156,7 +156,7 @@ protected:
 	Gtk::Button* btnApply = nullptr;
 
 	/// The box that display the item handled by this dialog, its located in the calling dialog.
-	OrdenableFlowBox* box = nullptr;
+	SortableFlowBox* box = nullptr;
 
 	/// Created items in the dialog.
 	Storage::BoxButtonCollection* items = nullptr;

@@ -64,7 +64,7 @@ protected:
 	Gtk::Button* btnGroupDefaultColor = nullptr;
 
 	/// Box in this dialog where selected element links are displayed.
-	OrdenableFlowBox* boxElements = nullptr;
+	SortableFlowBox* boxElements = nullptr;
 
 	/// Configuration for the element link selector.
 	DialogSelect::SelectionRequest elementRequest;

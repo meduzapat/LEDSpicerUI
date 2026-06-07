@@ -64,7 +64,7 @@ protected:
 	Gtk::Button* btnProfileBackgroundColor = nullptr;
 	Gtk::Button* btnProfileTransition      = nullptr;
 
-	OrdenableFlowBox
+	SortableFlowBox
 		* boxProfileAlwaysOnElements = nullptr,
 		* boxProfileAlwaysOnGroups   = nullptr,
 		* boxProfileAnimations       = nullptr,

@@ -71,7 +71,7 @@ protected:
 	Gtk::Button* inputMapDefaultColor = nullptr;
 	Gtk::Stack*  stackElementAndGroup = nullptr;
 
-	OrdenableFlowBox
+	SortableFlowBox
 		/// Maps box inside DialogInputSource — used by real (hardware) sources.
 		* boxSourceMaps = nullptr,
 		/// Maps box inside DialogInput — used by sourceless inputs.

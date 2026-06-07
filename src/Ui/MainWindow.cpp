@@ -223,6 +223,9 @@ MainWindow::~MainWindow() {
 
 	// Miscellaneous dialogs.
 	delete DialogColors::getInstance();
+	delete DialogSettings::getInstance();
+	delete DialogProject::getInstance();
+	delete DialogPrompt::getInstance();
 }
 
 void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {
