@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      SingletonDialog.hpp
- * @since     Feb 23, 2026
+ * @file      LayoutTester.cpp
+ * @since     Jun 8, 2026
  * @author    Patricio A. Rossi (MeduZa)
  *
  * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
@@ -20,43 +20,15 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdexcept>
+#include "LayoutTester.hpp"
 
-#include "config/Geometry.hpp"
+#include <iostream>
 
-#pragma once
+using namespace LEDSpicerUI::Ui::Layout;
 
-namespace LEDSpicerUI::Ui {
-
-template <typename Derived>
-class SingletonDialog {
-
-public:
-
-	static Derived* getInstance() {
-		return instance;
-	}
-
-	static void buildInstance(const Glib::RefPtr<Gtk::Builder>& builder, std::string_view widgetId) {
-		if (not instance) {
-			builder->get_widget_derived(widgetId.data(), instance);
-			if (not instance) {
-				throw std::runtime_error("Failed to load widget: " + std::string(widgetId));
-			}
-			Config::Geometry::get().registerWindow(instance, std::string(widgetId));
-		}
-	}
-
-protected:
-
-	static Derived* instance;
-
-	SingletonDialog() noexcept = default;
-
-};
-
-template <typename Derived>
-Derived* SingletonDialog<Derived>::instance = nullptr;
-
-} // namespace
-
+void LayoutTester::test(Storage::Element* element, const string& colorName) noexcept {
+	std::cerr
+		<< "[LayoutTester] test "
+		<< (element ? element->createUniqueId() : string{"<null>"})
+		<< " color=" << colorName << std::endl;
+}

@@ -145,6 +145,13 @@ public:
 	 */
 	static string cleanError(const string& error) noexcept;
 
+	/**
+	 * @return The path to the user config directory for this application with a trailing slash.
+	 */
+	static string getAppConfigDir() noexcept {
+		return Glib::get_user_config_dir() + "/" PACKAGE_NAME "/";
+	}
+
 protected:
 
 	/// Pointer to the root element.

@@ -113,8 +113,7 @@ differs.
 The following are hardware-semantic and live in `style-base.css`. Do
 not redefine them in `theme.css`:
 
-- `.pinLabel`, `.pinSingle`, `.pinRed`, `.pinGreen`, `.pinBlue`,
-  `.pinSolenoid`, `.pinMulti`
+- `.pinLabel`, `.pinSingle`, `.pinRed`, `.pinGreen`, `.pinBlue`, `.pinMulti`
 - `.connectorBox`
 - `.On`, `.Off`, `.Random`
 

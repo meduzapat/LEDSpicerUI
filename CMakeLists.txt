@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(LEDSpicerUI VERSION 0.0.15 LANGUAGES CXX)
+project(LEDSpicerUI VERSION 0.1.0 LANGUAGES CXX)
 # Metadata (for glade file substitution and compile definitions)
 set(PACKAGE "ledspicerui")
 set(PACKAGE_NAME "${PROJECT_NAME}")
@@ -51,6 +51,7 @@ add_executable(ledspicerui
 	src/XMLHelper.cpp
 	src/config/Settings.cpp
 	src/config/SettingsFile.cpp
+	src/config/Geometry.cpp
 	src/config/ProjectFile.cpp
 	src/config/ConfigFile.cpp
 	src/config/InputFile.cpp
@@ -63,6 +64,10 @@ add_executable(ledspicerui
 	src/Ui/DialogSettings.cpp
 	src/Ui/SortableFlowBox.cpp
 	src/Ui/SortableListBox.cpp
+	src/Ui/Layout/StripRenderer.cpp
+	src/Ui/Layout/LayoutTester.cpp
+	src/Ui/Layout/LayoutElement.cpp
+	src/Ui/Layout/Layout.cpp
 	src/Ui/Storage/CollectionHandler.cpp
 	src/Ui/Storage/Data.cpp
 	src/Ui/Storage/Parent.cpp
@@ -153,11 +158,13 @@ set(DATA_FILES
 )
 
 file(GLOB IMAGE_FILES "data/images/*.png" "data/images/*.svg")
+file(GLOB ELEMENT_IMAGE_FILES "data/images/elements/*.png" "data/images/elements/*.svg")
 file(GLOB_RECURSE THEME_FILES "data/themes/*")
 
 install(TARGETS ledspicerui DESTINATION bin)
 install(FILES ${DATA_FILES} DESTINATION share/${PROJECT_NAME})
 install(FILES ${IMAGE_FILES} DESTINATION share/${PROJECT_NAME}/images)
+install(FILES ${ELEMENT_IMAGE_FILES} DESTINATION share/${PROJECT_NAME}/images/elements)
 install(DIRECTORY data/themes/ DESTINATION share/${PROJECT_NAME}/themes
 	PATTERN "*.md" EXCLUDE)
 

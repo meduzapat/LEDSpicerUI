@@ -26,6 +26,8 @@
 
 namespace LEDSpicerUI::Ui::Storage {
 
+class CollectionObserver;
+
 using StringDataPtrMap = std::map<string, Data*>;
 
 /**
@@ -134,6 +136,18 @@ public:
 	void registerDependency(BoxButtonCollection* dependency) noexcept;
 
 	/**
+	 * Installs the lifecycle observer. Called once at bootstrap by the consumer
+	 * that owns the observer. Not reassigned, not cleared.
+	 */
+	void setObserver(CollectionObserver* obs) noexcept { observer = obs; }
+
+	/**
+	 * Notify the observer that an item's values have changed in place.
+	 * Used by BoxButton::sync() after a non-rename edit.
+	 */
+	void notifyChanged(Data* item) noexcept;
+
+	/**
 	 * Refresh a single combobox contents with the collection values.
 	 * @param comboBox the combobox to refresh.
 	 */
@@ -165,6 +179,9 @@ protected:
 
 	/// List of collections that keeps references to items in the collection.
 	vector<BoxButtonCollection*> dependencies;
+
+	/// Single lifecycle observer, set during bootstrap. nullptr for handlers without one.
+	CollectionObserver* observer = nullptr;
 
 	/// Keeps collections instances.
 	static std::unordered_map<string, CollectionHandler*> collections;

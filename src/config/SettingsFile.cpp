@@ -32,7 +32,7 @@ SettingsFile::SettingsFile() : XMLHelper(getSettingsPath(), UI_CONFIG_TYPE) {
 
 bool SettingsFile::initialize() {
 	if (settingFilePath.empty())
-		settingFilePath = Glib::get_user_config_dir() + "/" PACKAGE_NAME "/" UI_CONFIG_FILE;
+		settingFilePath = getAppConfigDir() + UI_CONFIG_FILE;
 	if (not configExists()) {
 		Settings::get().load(Values{});
 		return false;

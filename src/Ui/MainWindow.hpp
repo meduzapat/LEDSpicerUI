@@ -34,10 +34,9 @@
 #include "DataDialogs/DialogRestrictor.hpp"
 #include "DataDialogs/DialogProcess.hpp"
 #include "DataDialogs/DialogGroup.hpp"
+#include "Layout/Layout.hpp"
+#include "Layout/LayoutTester.hpp"
 #include "StatusBar.hpp"
-
-// for file and dir stats
-#include <sys/types.h>
 
 #pragma once
 
@@ -108,6 +107,12 @@ protected:
 
 	/// Navigator for profile files.
 	ProfileDirectoryNavigator profileNavigator;
+
+	/// Daemon test dispatcher used by the layout board (stub until #60).
+	Layout::LayoutTester layoutTester;
+
+	/// Visual board controller. Subscribed to Storage::Element lifecycle events.
+	Layout::Layout layout;
 
 	/**
 	 * Populates the configuration.

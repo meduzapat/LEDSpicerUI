@@ -79,11 +79,6 @@ combobox.noRoundRight button.combo,
 	color: #fff;
 }
 
-.pinSolenoid {
-	background: #813d9c;
-	color: #fff;
-}
-
 .pinMulti {
 	background: linear-gradient(90deg, rgba(246,245,244,1) 0%, rgba(255,0,0,1) 25%, rgba(0,255,0,1) 50%, rgba(0,0,255,1) 75%, rgba(129,61,156,1) 100%);
 	color: #000;
@@ -215,6 +210,117 @@ combobox.noRoundRight button.combo,
 
 .ThemeTile:selected label {
 	font-weight: bold;
+}
+
+/* ── LayoutElement (board tile) ───────────────────────────── */
+
+.layout-element {
+	border:        1px solid transparent;
+	border-radius: 4px;
+	padding:       2px;
+}
+
+.layout-element:hover {
+	background: rgba(255,255,255,0.04);
+}
+
+.layout-element-active {
+	border:     1px solid #1c71d8;
+	background: rgba(28,113,216,0.12);
+}
+
+.layout-element-icon {
+	padding:       2px;
+	border-radius: 4px;
+	border:        2px solid transparent;
+}
+
+.layout-element-active .layout-element-icon {
+	background: rgba(28,113,216,0.18);
+}
+
+.layout-element-icon-fired.led-r { border-color: #e01b24; background: rgba(224,27,36,0.35); }
+.layout-element-icon-fired.led-g { border-color: #3da81b; background: rgba(61,168,27,0.35); }
+.layout-element-icon-fired.led-b { border-color: #1c71d8; background: rgba(28,113,216,0.35); }
+.layout-element-icon-fired.led-y { border-color: #f5c211; background: rgba(245,194,17,0.35); }
+.layout-element-icon-fired.led-m { border-color: #c061cb; background: rgba(192,97,203,0.35); }
+.layout-element-icon-fired.led-c { border-color: #33c7de; background: rgba(51,199,222,0.35); }
+.layout-element-icon-fired.led-w { border-color: #ffffff; background: rgba(255,255,255,0.30); }
+
+/* ── LED swatches (shared: StripRenderer cells, RGB toggles, fire glow).
+ * Hex values match the .pin* palette for visual consistency.
+ * StripRenderer container gets a slight lift so off cells read as empty
+ * slots; cells inside use the .strip-led variant rules below. ── */
+
+.strip-renderer {
+	background:    rgba(255,255,255,0.06);
+	border-radius: 3px;
+	padding:       2px;
+}
+
+.strip-led {
+	min-width:     10px;
+	min-height:    10px;
+	padding:       0;
+	margin:        0;
+	border:        1px solid #555;
+	border-radius: 2px;
+}
+
+/* Bare swatches: cells inside StripRenderer paint directly. */
+.strip-led.led-off { background: #3a3a3a; }
+.strip-led.led-r   { background: #e01b24; }
+.strip-led.led-g   { background: #3da81b; }
+.strip-led.led-b   { background: #1c71d8; }
+.strip-led.led-y   { background: #f5c211; }
+.strip-led.led-m   { background: #c061cb; }
+.strip-led.led-c   { background: #33c7de; }
+.strip-led.led-w   { background: #f6f5f4; }
+
+/* RGB toggle row: dim outline when off, full color when checked.
+ * Scoped with :not(.strip-led) so strip cells use the .strip-led
+ * swatch rules above instead of the toggle variants. */
+button.led-r:not(.strip-led),
+button.led-g:not(.strip-led),
+button.led-b:not(.strip-led),
+button.led-y:not(.strip-led),
+button.led-m:not(.strip-led),
+button.led-c:not(.strip-led),
+button.led-w:not(.strip-led) {
+	background-image: none;
+	background-color: #2a2a2a;
+	border:           1px solid #555;
+	border-radius:    3px;
+	padding:          0;
+	min-width:        0;
+	min-height:       0;
+}
+
+button.led-r:not(.strip-led)         { border-color: #e01b24; }
+button.led-g:not(.strip-led)         { border-color: #3da81b; }
+button.led-b:not(.strip-led)         { border-color: #1c71d8; }
+
+button.led-r:not(.strip-led):hover   { background-color: rgba(224,27,36,0.30); }
+button.led-g:not(.strip-led):hover   { background-color: rgba(61,168,27,0.30); }
+button.led-b:not(.strip-led):hover   { background-color: rgba(28,113,216,0.30); }
+
+button.led-r:not(.strip-led):checked { background-color: #e01b24; border-color: #fff; }
+button.led-g:not(.strip-led):checked { background-color: #3da81b; border-color: #fff; }
+button.led-b:not(.strip-led):checked { background-color: #1c71d8; border-color: #fff; }
+
+/* Strip cells: kill GTK's :checked border accent so toggled cells
+ * keep the .strip-led border, not a white outline. */
+button.strip-led:checked,
+button.strip-led:focus {
+	border-color: #555;
+	box-shadow:   none;
+	outline:      none;
+}
+
+/* Strip cells: subtle hover lift while off, so the cell reads as clickable. */
+button.strip-led.led-off:hover {
+	background-color: rgba(255,255,255,0.18);
+	border-color:     #888;
 }
 
 /* ── Status bar severity tints ────────────────────────────── */

@@ -21,7 +21,6 @@
  */
 
 #include "LEDSpicerUI.hpp"
-#include "ThemeManager.hpp"
 
 using namespace LEDSpicerUI;
 
@@ -48,6 +47,7 @@ int main(int argc, char *argv[]) {
 	if (not tm.apply(Config::Settings::get().getThemeName(), Config::Settings::get().getThemeStyle()))
 		std::cerr << "Warning: theme '" << Config::Settings::get().getThemeName() << "' could not be applied; running unstyled." << std::endl;
 
+	Config::Geometry::get().load();
 	Ui::MainWindow* mw = nullptr;
 	builder->get_widget_derived("MainWindow", mw);
 	int r = app->run(*mw);

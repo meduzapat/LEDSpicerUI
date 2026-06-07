@@ -24,8 +24,21 @@
 
 using namespace LEDSpicerUI::Ui::Storage;
 
+ElementObserver* Element::observer = nullptr;
+
 Element::~Element() {
 	clearStripChildren();
+}
+
+void Element::registerToCollection() noexcept {
+	Data::registerToCollection();
+	observer->onAdded(this);
+}
+
+void Element::unregisterFromCollection() noexcept {
+	if (not properties.isSet(PROP_STRIP))
+		observer->onRemoved(this);
+	Data::unregisterFromCollection();
 }
 
 string Element::createPrettyName() const noexcept {
@@ -102,4 +115,13 @@ bool Element::shouldSerialize(const string& key, const string& value) const noex
 	if (key == TIME_ON    and value == "0") return false;
 	if (key == BRIGHTNESS and value == DEFAULT_BRIGHTNESS) return false;
 	return Data::shouldSerialize(key, value);
+}
+
+void Element::wipe() noexcept {
+	const string
+		lx {getValue(LAYOUT_X)},
+		ly {getValue(LAYOUT_Y)};
+	Data::wipe();
+	if (not lx.empty()) setValue(LAYOUT_X, lx);
+	if (not ly.empty()) setValue(LAYOUT_Y, ly);
 }

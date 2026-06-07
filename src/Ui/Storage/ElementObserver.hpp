@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      SingletonDialog.hpp
- * @since     Feb 23, 2026
+ * @file      ElementObserver.hpp
+ * @since     Jun 7, 2026
  * @author    Patricio A. Rossi (MeduZa)
  *
  * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
@@ -20,43 +20,29 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdexcept>
-
-#include "config/Geometry.hpp"
+#include "Data.hpp"
 
 #pragma once
 
-namespace LEDSpicerUI::Ui {
+namespace LEDSpicerUI::Ui::Storage {
 
-template <typename Derived>
-class SingletonDialog {
+class Element;
+
+/**
+ * LEDSpicerUI::Ui::Storage::ElementObserver
+ *
+ * Receives Element lifecycle events. Strip children are filtered out by
+ * Element's dispatch sites — observer only sees real Elements.
+ */
+class ElementObserver {
 
 public:
 
-	static Derived* getInstance() {
-		return instance;
-	}
+	virtual ~ElementObserver() = default;
 
-	static void buildInstance(const Glib::RefPtr<Gtk::Builder>& builder, std::string_view widgetId) {
-		if (not instance) {
-			builder->get_widget_derived(widgetId.data(), instance);
-			if (not instance) {
-				throw std::runtime_error("Failed to load widget: " + std::string(widgetId));
-			}
-			Config::Geometry::get().registerWindow(instance, std::string(widgetId));
-		}
-	}
-
-protected:
-
-	static Derived* instance;
-
-	SingletonDialog() noexcept = default;
-
+	virtual void onAdded(Element* element)   noexcept abstract;
+	virtual void onRemoved(Element* element) noexcept abstract;
+	virtual void onChanged(Element* element) noexcept abstract;
 };
 
-template <typename Derived>
-Derived* SingletonDialog<Derived>::instance = nullptr;
-
 } // namespace
-

@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      SingletonDialog.hpp
- * @since     Feb 23, 2026
+ * @file      LayoutTester.hpp
+ * @since     Jun 8, 2026
  * @author    Patricio A. Rossi (MeduZa)
  *
  * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
@@ -20,43 +20,29 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdexcept>
-
-#include "config/Geometry.hpp"
+#include "Storage/Element.hpp"
 
 #pragma once
 
-namespace LEDSpicerUI::Ui {
+namespace LEDSpicerUI::Ui::Layout {
 
-template <typename Derived>
-class SingletonDialog {
+/**
+ * LEDSpicerUI::Ui::Layout::LayoutTester
+ *
+ * Dispatches single-shot test commands to the daemon. v1 logs only;
+ * ticket #60 replaces the body with real SetElement / SetGroup calls.
+ */
+class LayoutTester {
 
 public:
 
-	static Derived* getInstance() {
-		return instance;
-	}
+	LayoutTester()  = default;
+	~LayoutTester() = default;
 
-	static void buildInstance(const Glib::RefPtr<Gtk::Builder>& builder, std::string_view widgetId) {
-		if (not instance) {
-			builder->get_widget_derived(widgetId.data(), instance);
-			if (not instance) {
-				throw std::runtime_error("Failed to load widget: " + std::string(widgetId));
-			}
-			Config::Geometry::get().registerWindow(instance, std::string(widgetId));
-		}
-	}
+	LayoutTester(const LayoutTester&)            = delete;
+	LayoutTester& operator=(const LayoutTester&) = delete;
 
-protected:
-
-	static Derived* instance;
-
-	SingletonDialog() noexcept = default;
-
+	void test(Storage::Element* element, const string& colorName) noexcept;
 };
 
-template <typename Derived>
-Derived* SingletonDialog<Derived>::instance = nullptr;
-
 } // namespace
-

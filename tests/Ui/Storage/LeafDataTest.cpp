@@ -26,11 +26,13 @@
 #include "Storage/InputMap.hpp"
 #include "Storage/InputMapLink.hpp"
 #include "Storage/Process.hpp"
+#include "ElementObserverMock.hpp"
 
 using namespace LEDSpicerUI::Ui::Storage;
 using namespace LEDSpicerUI::Constants;
 using LEDSpicerUI::Defaults;
 using LEDSpicerUI::Values;
+using LEDSpicerUI::Test::Mocks::MockElementObserver;
 
 // Element -------------------------------------------------------------
 
@@ -96,6 +98,23 @@ TEST(ElementTest, TestFunctionality) {
 	Element::splitRGB(&e3);
 	EXPECT_EQ("6", e3.getValue(RED_PIN));
 
+}
+
+TEST(ElementTest, TestCalledFlags) {
+
+	Element dummyElement;
+	auto observer {static_cast<MockElementObserver*>(dummyElement.getObserver())};
+	observer->reset();
+	EXPECT_FALSE(observer->isOnAddedCalled());
+	EXPECT_FALSE(observer->isOnRemovedCalled());
+	EXPECT_FALSE(observer->isOnChangedCalled());
+
+	// test onAdded: register element to collection, which triggers onAdded.
+	dummyElement.registerToCollection();
+	EXPECT_TRUE(observer->isOnAddedCalled());
+	// test onRemoved: unregister element from collection, which triggers onRemoved.
+	dummyElement.unregisterFromCollection();
+	EXPECT_TRUE(observer->isOnRemovedCalled());
 }
 
 // RestrictorMap -------------------------------------------------------
@@ -248,7 +267,11 @@ TEST(ProcessTest, TestFunctionality) {
 }
 
 int main(int argc, char** argv) {
+	MockElementObserver* observer {new MockElementObserver()};
+	Element::setObserver(observer);
 	auto app = Gtk::Application::create(argc, argv, "org.test");
 	::testing::InitGoogleTest(&argc, argv);
-	return RUN_ALL_TESTS();
+	auto result = RUN_ALL_TESTS();
+	delete observer;
+	return result;
 }

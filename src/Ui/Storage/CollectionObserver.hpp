@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      SingletonDialog.hpp
- * @since     Feb 23, 2026
+ * @file      CollectionObserver.hpp
+ * @since     Jun 7, 2026
  * @author    Patricio A. Rossi (MeduZa)
  *
  * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
@@ -20,43 +20,39 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdexcept>
-
-#include "config/Geometry.hpp"
+#include "Data.hpp"
 
 #pragma once
 
-namespace LEDSpicerUI::Ui {
+namespace LEDSpicerUI::Ui::Storage {
 
-template <typename Derived>
-class SingletonDialog {
+/**
+ * LEDSpicerUI::Ui::Storage::CollectionObserver
+ *
+ * Receives lifecycle events from a CollectionHandler.
+ * A handler holds at most one observer, set during bootstrap and never cleared.
+ */
+class CollectionObserver {
 
 public:
 
-	static Derived* getInstance() {
-		return instance;
-	}
+	virtual ~CollectionObserver() = default;
 
-	static void buildInstance(const Glib::RefPtr<Gtk::Builder>& builder, std::string_view widgetId) {
-		if (not instance) {
-			builder->get_widget_derived(widgetId.data(), instance);
-			if (not instance) {
-				throw std::runtime_error("Failed to load widget: " + std::string(widgetId));
-			}
-			Config::Geometry::get().registerWindow(instance, std::string(widgetId));
-		}
-	}
+	/**
+	 * Fired after item has been added to the collection.
+	 */
+	virtual void onAdded(Data* item) noexcept abstract;
 
-protected:
+	/**
+	 * Fired before item is erased from the collection.
+	 * The pointer is still valid and still resolvable in the collection at this point.
+	 */
+	virtual void onRemoved(Data* item) noexcept abstract;
 
-	static Derived* instance;
-
-	SingletonDialog() noexcept = default;
-
+	/**
+	 * Fired when an item's values change. Identity (pointer) is unchanged.
+	 */
+	virtual void onChanged(Data* item) noexcept abstract;
 };
 
-template <typename Derived>
-Derived* SingletonDialog<Derived>::instance = nullptr;
-
 } // namespace
-

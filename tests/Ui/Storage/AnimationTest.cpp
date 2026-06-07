@@ -114,8 +114,8 @@ TEST_F(AnimationTest, ToXMLWithActors) {
 
 	const string xml(anim.toXML());
 	EXPECT_EQ("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-			"<!-- This is an auto-generated file by LEDSpicerUI 0.0.15. -->\n"
-			"<LEDSpicer\n\tversion=\"1.1\"\n\ttype=\"Animation\"\n>\n"
+			"<!-- " DEFAULT_MESSAGE " -->\n"
+			"<LEDSpicer\n\tversion=\"" PACKAGE_DATA_VERSION "\"\n\ttype=\"Animation\"\n>\n"
 			"\t<actor\n"
 				"\t\ttype=\"Filler\"\n"
 				"\t\tcolor=\"Blue\"\n"
