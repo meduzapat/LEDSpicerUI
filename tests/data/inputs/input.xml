@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LEDSpicer
+	version="1.1"
+	type="Input"
+	name="Mame"
+>
+	<maps>
+		<map
+			type="Group"
+			target="All"
+			trigger="2"
+			color="Red"
+			filter="Normal"
+		/>
+		<map
+			type="Group"
+			target="All"
+			trigger="3"
+			color="Blue"
+			filter="Normal"
+		/>
+	</maps>
+</LEDSpicer>

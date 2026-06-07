@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<theme name="Default" author="Patricio A. Rossi (MeduZa)" version="1.0.0">
+	<description>Built-in neutral theme. Loaded when no other theme is configured.</description>
+</theme>

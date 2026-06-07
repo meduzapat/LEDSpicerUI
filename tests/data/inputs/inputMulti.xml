@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LEDSpicer
+	version="1.1"
+	type="Input"
+	name="Credits"
+	speed="Normal"
+	linkedTriggers="0,1|2,3"
+	mode="Single"
+	once="True"
+	alwaysOn="False"
+	coinsPerCredit="1"
+>
+	<maps source="hardware1">
+		<map
+			type="Element"
+			target="P1_COIN"
+			trigger="309"
+			color="White"
+			filter="Combine"
+		/>
+		<map
+			type="Element"
+			target="P1_START"
+			trigger="313"
+			color="Blue"
+			filter="Combine"
+		/>
+		<map
+			type="Element"
+			target="P1_BUTTON1"
+			trigger="315"
+			color="Yellow"
+			filter="Normal"
+		/>
+	</maps>
+	<maps source="hardware2">
+		<map
+			type="Element"
+			target="P2_START"
+			trigger="313"
+			color="Red"
+			filter="Combine"
+		/>
+	</maps>
+</LEDSpicer>
