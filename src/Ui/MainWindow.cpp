@@ -27,6 +27,7 @@ using namespace Storage;
 using namespace DataDialogs;
 using LEDSpicerUI::Config::Settings;
 using LEDSpicerUI::Config::ProjectFile;
+using LEDSpicerUI::Config::Geometry;
 
 MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &builder) :
 	Gtk::ApplicationWindow(obj),
@@ -41,6 +42,8 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 	Message::initialize(builder, this);
 	StatusBar::initialize(builder);
 	StatusBar::getInstance().push("Ready", StatusBar::Severity::Info, true);
+
+	Geometry::get().registerWindow(this, "MainWindow");
 
 	DialogSettings::buildInstance(builder, "DialogSettings");
 	DialogProject::buildInstance(builder,  "DialogProject");
@@ -200,6 +203,8 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 }
 
 MainWindow::~MainWindow() {
+
+	Geometry::get().terminate();
 
 	profileNavigator.clear();
 	animationNavigator.clear();
