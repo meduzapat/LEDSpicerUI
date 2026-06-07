@@ -1,0 +1,68 @@
+/* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
+/**
+ * @file      Input.cpp
+ * @since     Sep 27, 2023
+ * @author    Patricio A. Rossi (MeduZa)
+ *
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
+ *
+ * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * @copyright LEDSpicerUI is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * @copyright You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include "Input.hpp"
+
+using namespace LEDSpicerUI::Ui::Storage;
+
+string Input::createUniqueId() const noexcept {
+	return Defaults::createCommonUniqueId({
+		not isAtRoot() ? parent->getFsId() : emptyString,
+		getName()
+	});
+}
+
+string Input::createPrettyName() const noexcept {
+	return getName() + " [" + getValue(NAME) + "]";
+}
+
+string Input::createTooltip() const noexcept {
+	return "Input of type " + getValue(NAME);
+}
+
+string Input::toXML() const noexcept {
+
+	Values attrs;
+	attrs.setValues(values);
+
+	auto imlBBC {getChild(COLLECTION_INPUT_LINKMAPS)};
+	if (Defaults::hasLinkedMaps(getValue(NAME)) and imlBBC->getSize() > 0) {
+		StringVector chunks;
+		for (auto btn : *imlBBC)
+			chunks.push_back(btn->getData()->toXML());
+		attrs.setValue(LINKED_ITEMS, Defaults::implode(chunks, '|'));
+	}
+
+	string xml {XMLHelper::xmlHeader(TYPE_INPUT, attrs)};
+
+	for (auto btn : *getChild(COLLECTION_INPUT_SOURCES))
+		xml += btn->getData()->toXML();
+
+	Defaults::reduceTab();
+	xml += XMLHelper::xmlFooter();
+	return xml;
+}
+
+bool Input::shouldSerialize(const string& key, const string& value) const noexcept {
+	if (key == TIMES and value == "0") return false;
+	return Parent::shouldSerialize(key, value);
+}

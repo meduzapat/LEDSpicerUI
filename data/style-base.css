@@ -1,0 +1,225 @@
+
+/* ============================================================
+ * LEDSpicerUI — Base Structural CSS
+ * Layout, sizing, spacing, and hardware-semantic colors.
+ * No backgrounds, no images, no theme colors — plain bones.
+ * Themes build on top of this file; they do not replace it.
+ * ============================================================ */
+
+/* ── Utility: border-radius overrides ─────────────────────── */
+
+combobox.noRoundLeft button.combo,
+.noRoundLeft {
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+}
+
+combobox.noRoundRight button.combo,
+.noRoundRight {
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
+}
+
+/* ── Hardware-semantic colors (fixed, never theme-overridden) ─ */
+
+.On {
+	background: #FFF;
+	color: #000;
+}
+
+.Off {
+	background: #000;
+	color: #FFF;
+}
+
+.Random {
+	background: linear-gradient(90deg, rgba(255,0,0,1) 0%, rgba(255,251,0,1) 21%, rgba(0,250,2,1) 52%, rgba(0,0,255,1) 79%, rgba(237,0,255,1) 100%);
+	color: #000;
+}
+
+/* ── Connector / pin label layout ─────────────────────────── */
+
+/* Baseline: opaque so the FlowBox zone artwork doesn't bleed through
+ * unused pins. Pin color classes below override this background. */
+.pinLabel {
+	font-size: 8pt;
+	border: 1px solid #333;
+	background: #3a3a3a;
+	color: #fff;
+}
+
+.connectorBox {
+	margin: 0;
+	padding: 2px 4px;
+	font-size: 10pt;
+	background-color: rgba(60,60,60,0.65);
+	border: 1px solid rgba(170,170,170,0.6);
+	border-radius: 4px;
+}
+
+/* Hardware pin colors — semantic, never theme-overridden.
+ * Listed AFTER .pinLabel so source order wins within this provider. */
+.pinSingle {
+	background: #f6f5f4;
+	color: #000;
+}
+
+.pinRed {
+	background: #e01b24;
+	color: #fff;
+}
+
+.pinGreen {
+	background: #3da81b;
+	color: #fff;
+}
+
+.pinBlue {
+	background: #1c71d8;
+	color: #fff;
+}
+
+.pinSolenoid {
+	background: #813d9c;
+	color: #fff;
+}
+
+.pinMulti {
+	background: linear-gradient(90deg, rgba(246,245,244,1) 0%, rgba(255,0,0,1) 25%, rgba(0,255,0,1) 50%, rgba(0,0,255,1) 75%, rgba(129,61,156,1) 100%);
+	color: #000;
+}
+
+/* ── BoxButton structural layout ──────────────────────────── */
+
+.BoxButton {
+	border-radius: 6px;
+	padding: 5px 2px;
+	margin: 2px;
+}
+
+.BoxButton > box > button {
+	border-radius: 4px;
+}
+
+.BoxButton:selected label {
+	font-weight: bold;
+}
+
+.ProfileFlowBox .BoxButton {
+	margin: 1px;
+	padding: 3px 2px;
+}
+
+/* ── Directory navigator structure ────────────────────────── */
+
+.DirectoryBoxButton > button > label {
+	font-weight: bold;
+}
+
+.BreadcrumbBox {
+	padding: 2px 5px;
+}
+
+.BreadcrumbButton {
+	padding:    2px 6px;
+	min-height: 0;
+	min-width:  0;
+	border:     none;
+	background: transparent;
+}
+
+.BreadcrumbButton:hover {
+	text-decoration: underline;
+}
+
+.BreadcrumbCurrent {
+	font-weight: bold;
+	padding:     2px 6px;
+}
+
+.BreadcrumbSeparator {
+	opacity: 0.6;
+	padding: 0 2px;
+}
+
+.NavigationButton {
+	min-width:  32px;
+	min-height: 32px;
+	padding:    4px;
+}
+
+.NavigationButton:disabled {
+	opacity: 0.4;
+}
+
+/* ── Color picker disabled state ──────────────────────────── */
+/* Themes do not define this selector, so base wins without conflict. */
+
+.colorPickerButton:disabled {
+	border: 1px dashed rgba(180,180,180,0.7);
+	background-image: repeating-linear-gradient(
+		45deg,
+		rgba(0,0,0,0.25) 0px,
+		rgba(0,0,0,0.25) 2px,
+		transparent      2px,
+		transparent      6px
+	);
+}
+
+/* ── Object type state rules ──────────────────────────────── */
+
+.GroupBoxButton.read-only {
+	opacity: 0.5;
+}
+
+/* ── Donation dialog structure ────────────────────────────── */
+
+.SupportButton {
+	font-weight: bold;
+}
+
+.DonateTitleLabel {
+	font-size: 15pt;
+	font-weight: bold;
+}
+
+.DonateButton {
+	font-weight: bold;
+	padding: 8px 20px;
+	border-radius: 4px;
+}
+
+/* ── Area background structure ────────────────────────────── */
+/* background-image for each zone is provided by the theme.
+ * Base only sets the shared positioning/sizing behavior. */
+
+.layoutPreview {
+	background-size:     cover;
+	background-position: center;
+	background-repeat:   no-repeat;
+}
+
+.zoneCanvas {
+	background-repeat:   no-repeat;
+	background-size:     cover;
+	background-position: center;
+}
+
+/* ── Theme selector tile structure ────────────────────────── */
+
+.ThemeTile {
+	border-radius: 6px;
+	padding:       4px;
+	margin:        4px;
+}
+
+.ThemeTile:selected label {
+	font-weight: bold;
+}
+
+/* ── Status bar severity tints ────────────────────────────── */
+
+.status-info    { }
+.status-success { color: #2e7d32; }
+.status-warning { color: #d97706; font-weight: bold; }
+.status-error   { color: #c62828; font-weight: bold; }

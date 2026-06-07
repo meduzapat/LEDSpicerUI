@@ -1,0 +1,36 @@
+name: Run Tests
+
+on:
+  pull_request:
+    branches:
+      - master
+      - development
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            xvfb                  \
+            build-essential       \
+            cmake                 \
+            libgtkmm-3.0-dev      \
+            libtinyxml2-dev       \
+            libgtest-dev
+
+      - name: Configure
+        run: |
+          mkdir target
+          cd target
+          cmake .. -DCMAKE_CXX_FLAGS="-g3 -O0"
+
+      - name: Build and Run Tests
+        run: |
+          cd target/tests
+          cmake --build . --parallel 2
+          xvfb-run --auto-servernum ctest --output-on-failure --no-tests=error

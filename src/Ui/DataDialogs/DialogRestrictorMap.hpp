@@ -1,0 +1,86 @@
+/* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
+/**
+ * @file      DialogRestrictorMap.hpp
+ * @since     Oct 14, 2023
+ * @author    Patricio A. Rossi (MeduZa)
+ *
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
+ *
+ * @copyright LEDSpicerUI is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * @copyright LEDSpicerUI is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * @copyright You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include "DialogForm.hpp"
+#include "Storage/RestrictorMap.hpp"
+
+#pragma once
+
+namespace LEDSpicerUI::Ui::DataDialogs {
+
+/**
+ * LEDSpicerUI::Ui::DialogRestrictorMap
+ */
+class DialogRestrictorMap: public DialogForm, public SingletonDialog<DialogRestrictorMap> {
+
+	friend class Gtk::Builder;
+
+public:
+
+	virtual ~DialogRestrictorMap() = default;
+
+	void load(DataMap& values)    noexcept override;
+	void clearForm()              noexcept override;
+	void storeData()              noexcept override;
+	void retrieveData()           noexcept override;
+	void isValid()          const          override;
+	string createUniqueId() const noexcept override;
+
+	/**
+	 * Populates the interfaces combobox from the owner restrictor's available slots.
+	 */
+	void populateInterfacesCombobox() noexcept;
+
+	/**
+	 * Removes maps assigned to interfaces beyond maxInterfaces.
+	 */
+	void trimToInterfaces(uint8_t maxInterfaces) noexcept;
+
+protected:
+
+	Gtk::Button* btnAdd = nullptr;
+
+	Gtk::ComboBoxText
+		* player   = nullptr,
+		* joystick = nullptr;
+	Gtk::ComboBox
+		* interface           = nullptr,
+		* comboBoxRestrictors = nullptr;
+
+	Gtk::ListStore* liststoreRestrictorMapId = nullptr;
+
+	DialogRestrictorMap(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept;
+
+	/**
+	 * Checks if the owner restrictor still has available interface slots.
+	 * @return true if there is still room.
+	 */
+	bool checkAvailableInterfaces() const noexcept;
+
+	const string& getType() const noexcept override { return TYPE_RESTRICTOR_MAP; }
+	Storage::Data* createData(Values& rawData) const noexcept override;
+
+	void afterCreate(Storage::BoxButton& boxButton) noexcept override;
+	void afterDeleteConfirmation(Storage::BoxButton& boxButton) noexcept override;
+};
+
+} // namespace

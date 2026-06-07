@@ -1,0 +1,262 @@
+/* ============================================================
+ * LEDSpicerUI — Industrial Modern Dark Theme
+ * Industrial-noir arcade engineering. Palette only; structure
+ * lives in style-base.css and must not be overridden here.
+ * ============================================================ */
+
+/* ── Color palette ─────────────────────────────────────────── */
+
+/* UI state indicators */
+@define-color color-toggle-checked  #2cb6ff;
+@define-color color-state-green-bg  #1f8a4c;
+@define-color color-state-red-bg    #e0364a;
+@define-color color-state-blue-bg   #1c71d8;
+
+/* Window — darkest surface, sits beneath everything */
+@define-color color-window-bg       #0A0D14;
+
+/* BoxButton surfaces — each layer lighter than the one below */
+@define-color color-box-bg          rgba(22,30,46,0.95);
+@define-color color-box-inner       rgba(40,54,80,0.95);
+@define-color color-box-btn-bg      rgba(66,90,124,0.88);
+@define-color color-box-btn-bg-hov  rgba(92,128,172,0.94);
+@define-color color-box-border      rgba(44,182,255,0.22);
+@define-color color-box-highlight   rgba(120,200,255,0.10);
+@define-color color-box-text        #e8eefb;
+@define-color color-box-btn-text    #e8eefb;
+
+/* Selection */
+@define-color color-selected-bg     rgba(44,182,255,0.20);
+@define-color color-selected-border rgba(44,182,255,0.95);
+@define-color color-selected-glow   rgba(44,182,255,0.55);
+
+/* Action button hovers */
+@define-color color-edit-hover      #2cb6ff;
+@define-color color-copy-hover      #38d97b;
+@define-color color-delete-hover    #e0364a;
+
+/* Object type identity */
+@define-color color-type-device          rgba(56,217,123,0.45);
+@define-color color-type-device-glow     rgba(56,217,123,0.65);
+@define-color color-type-device-border   rgba(56,217,123,0.95);
+@define-color color-type-restrictor        rgba(44,182,255,0.45);
+@define-color color-type-restrictor-glow   rgba(44,182,255,0.65);
+@define-color color-type-restrictor-border rgba(44,182,255,0.95);
+@define-color color-type-element         rgba(200,76,255,0.45);
+@define-color color-type-element-glow    rgba(200,76,255,0.70);
+@define-color color-type-element-border  rgba(200,76,255,0.95);
+@define-color color-type-group-system    #8a8f9a;
+@define-color color-type-directory       #ffa641;
+
+/* Navigation */
+@define-color color-nav-hover       #2cb6ff;
+
+/* Zone canvas fallback (shown when background image is absent) */
+@define-color color-zone-bg         rgba(5,6,8,0.92);
+
+/* Donation dialog */
+@define-color color-support-text    #ffa641;
+@define-color color-support-hover   #ffc46e;
+@define-color color-donate-title    #ffa641;
+@define-color color-donate-heart    #e0364a;
+@define-color color-donate-bg       #003087;
+@define-color color-donate-bg-hover #0042b8;
+@define-color color-donate-text     #ffffff;
+@define-color color-donate-border   #001d5c;
+@define-color color-donate-glow     rgba(44,182,255,0.45);
+
+/* ── Apply palette ─────────────────────────────────────────── */
+
+/* Window — solid darkest layer establishes the floor */
+window {
+	background-color: @color-window-bg;
+}
+
+/* Form state */
+.formContainer button.toggle:checked {
+	background: @color-toggle-checked;
+}
+
+/* UI state indicators */
+.backgroundGreen {
+	background: @color-state-green-bg;
+	color: #FFF;
+}
+
+.backgroundRed {
+	background: @color-state-red-bg;
+	color: #FFF;
+}
+
+.backgroundBlue {
+	background: @color-state-blue-bg;
+	color: #FFF;
+}
+
+/* BoxButton — card lighter than window, with faint top highlight */
+.BoxButton {
+	border:           1px solid @color-box-border;
+	background-image: linear-gradient(180deg,
+	                    rgba(120,200,255,0.05) 0%,
+	                    rgba(120,200,255,0) 45%);
+	background-color: @color-box-bg;
+	box-shadow:       inset 0 1px 0 @color-box-highlight;
+}
+
+.BoxButton > box {
+	background: @color-box-inner;
+}
+
+.BoxButton label {
+	color: @color-box-text;
+}
+
+.BoxButton > box > button {
+	background-color: @color-box-btn-bg;
+	color:            @color-box-btn-text;
+}
+
+.BoxButton > box > button:hover {
+	background-color: @color-box-btn-bg-hov;
+}
+
+/* BoxButton selected state */
+.BoxButton:selected {
+	background-color: @color-selected-bg;
+	border-color:     @color-selected-border;
+	box-shadow:       0 0 12px @color-selected-glow;
+}
+
+.BoxButton:selected label {
+	color: @color-box-text;
+}
+
+/* Action button hovers */
+.BoxBackgroundEdit:hover {
+	background: @color-edit-hover;
+}
+
+.BoxBackgroundCopy:hover {
+	background: @color-copy-hover;
+}
+
+.BoxBackgroundDelete:hover {
+	background: @color-delete-hover;
+}
+
+/* Object type identity — border and glow only */
+.DeviceBoxButton {
+	border-color: @color-type-device;
+}
+
+.DeviceBoxButton:hover {
+	box-shadow:   0 0 10px @color-type-device-glow;
+	border-color: @color-type-device-border;
+}
+
+.RestrictorBoxButton {
+	border-color: @color-type-restrictor;
+}
+
+.RestrictorBoxButton:hover {
+	box-shadow:   0 0 10px @color-type-restrictor-glow;
+	border-color: @color-type-restrictor-border;
+}
+
+.ElementBoxButton {
+	border-color: @color-type-element;
+}
+
+.ElementBoxButton:hover {
+	box-shadow:   0 0 12px @color-type-element-glow;
+	border-color: @color-type-element-border;
+}
+
+.GroupBoxButton.system {
+	opacity:      0.7;
+	border-color: @color-type-group-system;
+}
+
+/* Directory navigator */
+.DirectoryBoxButton {
+	border-color: @color-type-directory;
+}
+
+.BreadcrumbButton:hover {
+	color: @color-nav-hover;
+}
+
+/* Zone canvas background-color fallback */
+.zoneCanvas {
+	background-color: @color-zone-bg;
+}
+
+/* Theme selector tile */
+.ThemeTile {
+	border:           1px solid @color-box-border;
+	background-image: linear-gradient(180deg,
+	                    rgba(120,200,255,0.05) 0%,
+	                    rgba(120,200,255,0) 45%);
+	background-color: @color-box-bg;
+	box-shadow:       inset 0 1px 0 @color-box-highlight;
+}
+
+.ThemeTile label {
+	color: @color-box-text;
+}
+
+.ThemeTile:selected {
+	background-color: @color-selected-bg;
+	border-color:     @color-selected-border;
+	box-shadow:       0 0 12px @color-selected-glow;
+}
+
+.ThemeTile:selected label {
+	color: @color-box-text;
+}
+
+/* Donation dialog */
+.SupportButton {
+	color: @color-support-text;
+}
+
+.SupportButton:hover {
+	color: @color-support-hover;
+}
+
+.DonateTitleLabel {
+	color: @color-donate-title;
+}
+
+.DonateHeartIcon {
+	color: @color-donate-heart;
+}
+
+.DonateButton {
+	background-color: @color-donate-bg;
+	color:            @color-donate-text;
+	border-color:     @color-donate-border;
+}
+
+.DonateButton:hover {
+	background-color: @color-donate-bg-hover;
+	box-shadow:       0 0 14px @color-donate-glow;
+}
+
+/* ── Zone canvas background images ────────────────────────── */
+
+.zoneCanvas.devices       { background-image: url("backgroundDevices.png");       }
+.zoneCanvas.restrictors   { background-image: url("backgroundRestrictors.png");   }
+.zoneCanvas.groups        { background-image: url("backgroundGroups.png");        }
+.zoneCanvas.elements      { background-image: url("backgroundElements.png");      }
+.zoneCanvas.processes     { background-image: url("backgroundProcesses.png");     }
+.zoneCanvas.colors        { background-image: url("backgroundColors.png");        }
+.zoneCanvas.inputs        { background-image: url("backgroundInputs.png");        }
+.zoneCanvas.inputSources  { background-image: url("backgroundInputSources.png");  }
+.zoneCanvas.inputMaps     { background-image: url("backgroundInputMaps.png");     }
+.zoneCanvas.inputLinkMaps { background-image: url("backgroundInputLinkMaps.png"); }
+.zoneCanvas.animations    { background-image: url("backgroundAnimations.png");    }
+.zoneCanvas.profiles      { background-image: url("backgroundProfiles.png");      }
+
+.layoutPreview            { background-image: url("backgroundLayout.png");           }
+.zoneCanvas.themes        { background-image: url("backgroundThemeSelector.png");   }

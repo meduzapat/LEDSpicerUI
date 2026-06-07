@@ -1,0 +1,45 @@
+# IDE
+.project
+.cproject
+.settings/
+.metadata/
+
+# Common
+*~
+*.cache
+*.log
+Debug/
+
+# CMake build dir
+target/
+build/
+
+# CMake generated files
+CMakeCache.txt
+CMakeFiles/
+*.cmake
+*.mk
+makefile
+
+# Binaries and build artifacts
+ledspicerui
+tests/DefaultsTest
+tests/DataTest
+tests/MessageTest
+tests/XMLHelperTest
+
+# Compiled objects and libs
+*.o
+*.so
+*.so.*
+*.dylib
+*.a
+*.la
+*.lo
+
+# Test artifacts
+tests/*.trs
+tests/test-suite.log
+
+# Packages
+*.deb
