@@ -7601,7 +7601,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="tooltip-text">Two ways</property>
-                            <property name="pixbuf">images/w2.png</property>
+                            <property name="pixbuf">images/restrictors/w2.png</property>
                           </object>
                         </child>
                       </object>
@@ -7617,7 +7617,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="tooltip-text">Two ways vertical</property>
-                            <property name="pixbuf">images/w2v.png</property>
+                            <property name="pixbuf">images/restrictors/w2v.png</property>
                           </object>
                         </child>
                       </object>
@@ -7633,7 +7633,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="tooltip-text">Four ways</property>
-                            <property name="pixbuf">images/w4.png</property>
+                            <property name="pixbuf">images/restrictors/w4.png</property>
                           </object>
                         </child>
                       </object>
@@ -7649,7 +7649,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="tooltip-text">Four ways diagonal</property>
-                            <property name="pixbuf">images/w4x.png</property>
+                            <property name="pixbuf">images/restrictors/w4x.png</property>
                           </object>
                         </child>
                       </object>
@@ -7665,7 +7665,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="tooltip-text">Eight ways</property>
-                            <property name="pixbuf">images/w8.png</property>
+                            <property name="pixbuf">images/restrictors/w8.png</property>
                           </object>
                         </child>
                       </object>
@@ -7681,7 +7681,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="tooltip-text">Sixteen ways</property>
-                            <property name="pixbuf">images/w16.png</property>
+                            <property name="pixbuf">images/restrictors/w16.png</property>
                           </object>
                         </child>
                       </object>
@@ -7697,7 +7697,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="tooltip-text">Forty-nine ways</property>
-                            <property name="pixbuf">images/w49.png</property>
+                            <property name="pixbuf">images/restrictors/w49.png</property>
                           </object>
                         </child>
                       </object>
@@ -7713,7 +7713,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="tooltip-text">Analog</property>
-                            <property name="pixbuf">images/analog.png</property>
+                            <property name="pixbuf">images/restrictors/analog.png</property>
                           </object>
                         </child>
                       </object>
@@ -7729,7 +7729,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="tooltip-text">Mouse Mode</property>
-                            <property name="pixbuf">images/mouse.png</property>
+                            <property name="pixbuf">images/restrictors/mouse.png</property>
                           </object>
                         </child>
                       </object>
@@ -7745,7 +7745,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="tooltip-text">Rotator 8 ways</property>
-                            <property name="pixbuf">images/rotate8.png</property>
+                            <property name="pixbuf">images/restrictors/rotate8.png</property>
                           </object>
                         </child>
                       </object>
@@ -7761,7 +7761,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="tooltip-text">Rotator 12 Ways</property>
-                            <property name="pixbuf">images/rotate12.png</property>
+                            <property name="pixbuf">images/restrictors/rotate12.png</property>
                           </object>
                         </child>
                       </object>
