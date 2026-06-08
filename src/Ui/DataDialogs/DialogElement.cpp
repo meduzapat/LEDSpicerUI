@@ -477,6 +477,11 @@ void DialogElement::storeData() noexcept {
 	 */
 	if (action == Actions::ADD)
 		DialogGroup::getInstance()->linkInto(GROUP_ALL_NAME, currentData);
+
+	// ADD/LOAD/CLONE fire onAdded through Element::registerToCollection at items->create time.
+	// EDIT needs an explicit notification because syncRegistration only fires on rename.
+	if (action == Actions::EDIT)
+		Storage::Element::getObserver()->onChanged(static_cast<Storage::Element*>(currentData));
 }
 
 void DialogElement::retrieveData() noexcept {

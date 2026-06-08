@@ -43,11 +43,31 @@ void Geometry::load() noexcept {
 				el->QueryIntAttribute("y", &mainWindowPos.second);
 			}
 		}
+		for (auto el = doc.getRoot()->FirstChildElement("Position"); el; el = el->NextSiblingElement("Position")) {
+			const char* id {el->Attribute("id")};
+			int value {-1};
+			if (id and el->QueryIntAttribute("value", &value) == tinyxml2::XML_SUCCESS)
+				positions[id] = {nullptr, value};
+		}
 	}
 	catch (...) {
 		entries.clear();
+		positions.clear();
 		mainWindowPos = {-1, -1};
 	}
+}
+
+void Geometry::registerPosition(Gtk::Paned* pane, const string& id) noexcept {
+	auto& slot = positions[id];
+	slot.first = pane;
+	if (slot.second > 0) {
+		pane->set_position(slot.second);
+		return;
+	}
+	auto mwit = entries.find(MAIN_WINDOW_ID);
+	const int mainH {mwit != entries.end() and mwit->second.h > 0 ? mwit->second.h : 600};
+	slot.second = mainH - mainH / 4;
+	pane->set_position(slot.second);
 }
 
 void Geometry::registerWindow(Gtk::Window* win, const string& id) noexcept {
@@ -93,6 +113,21 @@ void Geometry::terminate() noexcept {
 		++it;
 	}
 
+	for (auto it = positions.begin(); it != positions.end();) {
+		auto& [id, slot] = *it;
+		if (not slot.first) {
+			it = positions.erase(it);
+			dirty = true;
+			continue;
+		}
+		const int p {slot.first->get_position()};
+		if (p != slot.second) {
+			slot.second = p;
+			dirty = true;
+		}
+		++it;
+	}
+
 	if (dirty) save();
 }
 
@@ -109,6 +144,12 @@ void Geometry::save() noexcept {
 				"\" y=\"" + std::to_string(mainWindowPos.second) + "\"";
 		}
 		body += "/>\n";
+	}
+
+	for (const auto& [id, slot] : positions) {
+		if (slot.second <= 0) continue;
+		body += Defaults::tab() + "<Position id=\"" + id +
+			"\" value=\"" + std::to_string(slot.second) + "\"/>\n";
 	}
 
 	if (body.empty()) return;

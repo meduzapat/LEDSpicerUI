@@ -61,6 +61,12 @@ constexpr float DEFAULT_CHANGE_VALUE = 64.00f;
 /// Default milliseconds for solenoids and motors.
 constexpr unsigned int DEFAULT_SOLENOID  = 50;
 
+/// Milliseconds before an active LayoutElement returns to idle without further interaction.
+constexpr unsigned int LAYOUT_TIMEOUT_MS = 20000;
+
+/// Milliseconds the hardware stays lit for a single layout test command. No reset on re-click.
+constexpr unsigned int LIGHT_TIMEOUT_MS  = 1500;
+
 /// Default speed for GZ40 restrictor.
 constexpr int GZ40_DEFAULT_SPEED = 12;  // Integer
 
@@ -123,6 +129,8 @@ inline const string
 	CHANGE_POINT  {"changePoint"},
 	DEFAULT_COLOR {"defaultColor"},
 	BRIGHTNESS    {"brightness"},
+	LAYOUT_X      {"layoutX"},
+	LAYOUT_Y      {"layoutY"},
 
 	DEFAULT_BRIGHTNESS{"100"},
 
@@ -324,7 +332,16 @@ inline const string
 	CSS_PROCESS_BOX_BUTTON        {"ProcessBoxButton"},
 	CSS_PROFILE_BOX_BUTTON        {"ProfileBoxButton"},
 	CSS_RESTRICTOR_BOX_BUTTON     {"RestrictorBoxButton"},
-	CSS_RESTRICTOR_MAP_BOX_BUTTON {"RestrictorMapBoxButton"};
+	CSS_RESTRICTOR_MAP_BOX_BUTTON {"RestrictorMapBoxButton"},
+
+/// Color names (canonical, used in test dispatch and CSS class lookup).
+	COLOR_RED     {"Red"},
+	COLOR_GREEN   {"Green"},
+	COLOR_BLUE    {"Blue"},
+	COLOR_YELLOW  {"Yellow"},
+	COLOR_MAGENTA {"Magenta"},
+	COLOR_CYAN    {"Cyan"},
+	COLOR_WHITE   {"White"};
 
 } // namespace
 
@@ -343,7 +360,7 @@ inline const string
 // Color picker
 #define CSS_COLOR_BUTTON              "ColorButton"
 #define CSS_COLOR_PIN                 "pinSingle"
-#define CSS_COLOR_SOLENOID            "pinSolenoid"
+#define CSS_COLOR_SOLENOID            CSS_LED_M
 #define CSS_COLOR_RED                 "pinRed"
 #define CSS_COLOR_GREEN               "pinGreen"
 #define CSS_COLOR_BLUE                "pinBlue"
@@ -368,6 +385,25 @@ inline const string
 #define ICON_DELETE "edit-delete-symbolic"
 #define ICON_EDIT   "emblem-system-symbolic"
 #define ICON_TRASH  "user-trash-symbolic"
+
+// Layout
+#define CSS_LAYOUT_ELEMENT        "layout-element"
+#define CSS_LAYOUT_ELEMENT_ACTIVE "layout-element-active"
+#define CSS_LAYOUT_ELEMENT_ICON   "layout-element-icon"
+#define CSS_LAYOUT_ELEMENT_FIRED  "layout-element-icon-fired"
+#define CSS_STRIP_LED             "strip-led"
+#define CSS_STRIP_RENDERER        "strip-renderer"
+
+// LED swatches (shared by StripRenderer cells, RGB toggles, fire glow).
+#define CSS_LED_PREFIX "led-"
+#define CSS_LED_OFF    "led-off"
+#define CSS_LED_R      "led-r"
+#define CSS_LED_G      "led-g"
+#define CSS_LED_B      "led-b"
+#define CSS_LED_Y      "led-y"
+#define CSS_LED_M      "led-m"
+#define CSS_LED_C      "led-c"
+#define CSS_LED_W      "led-w"
 
 
 using namespace Constants;

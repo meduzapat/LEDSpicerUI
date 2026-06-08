@@ -64,6 +64,10 @@ add_executable(ledspicerui
 	src/Ui/DialogSettings.cpp
 	src/Ui/SortableFlowBox.cpp
 	src/Ui/SortableListBox.cpp
+	src/Ui/Layout/StripRenderer.cpp
+	src/Ui/Layout/LayoutTester.cpp
+	src/Ui/Layout/LayoutElement.cpp
+	src/Ui/Layout/Layout.cpp
 	src/Ui/Storage/CollectionHandler.cpp
 	src/Ui/Storage/Data.cpp
 	src/Ui/Storage/Parent.cpp
@@ -154,11 +158,13 @@ set(DATA_FILES
 )
 
 file(GLOB IMAGE_FILES "data/images/*.png" "data/images/*.svg")
+file(GLOB ELEMENT_IMAGE_FILES "data/images/elements/*.png" "data/images/elements/*.svg")
 file(GLOB_RECURSE THEME_FILES "data/themes/*")
 
 install(TARGETS ledspicerui DESTINATION bin)
 install(FILES ${DATA_FILES} DESTINATION share/${PROJECT_NAME})
 install(FILES ${IMAGE_FILES} DESTINATION share/${PROJECT_NAME}/images)
+install(FILES ${ELEMENT_IMAGE_FILES} DESTINATION share/${PROJECT_NAME}/images/elements)
 install(DIRECTORY data/themes/ DESTINATION share/${PROJECT_NAME}/themes
 	PATTERN "*.md" EXCLUDE)
 

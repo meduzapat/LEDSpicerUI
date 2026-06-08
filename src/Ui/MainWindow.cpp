@@ -36,14 +36,21 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 
 	inputNavigator(builder, this),
 	animationNavigator(builder, this),
-	profileNavigator(builder, this)
+	profileNavigator(builder, this),
+	layout(builder, &layoutTester)
 {
+
+	Storage::Element::setObserver(&layout);
 
 	Message::initialize(builder, this);
 	StatusBar::initialize(builder);
 	StatusBar::getInstance().push("Ready", StatusBar::Severity::Info, true);
 
 	Geometry::get().registerWindow(this, "MainWindow");
+
+	Gtk::Paned* mainPaned {nullptr};
+	builder->get_widget("MainPaned", mainPaned);
+	Geometry::get().registerPosition(mainPaned, "MainPaned");
 
 	DialogSettings::buildInstance(builder, "DialogSettings");
 	DialogProject::buildInstance(builder,  "DialogProject");
@@ -92,9 +99,6 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 	Gtk::HeaderBar* header;
 	builder->get_widget("Header", header);
 	Defaults::initialize(header, btnSaveProject);
-
-	Gtk::Fixed* FixedLayout;
-	builder->get_widget("FixedLayout",  FixedLayout);
 
 	// connect dialogs
 	prepareDialogs(builder);
@@ -217,6 +221,8 @@ MainWindow::~MainWindow() {
 	devices     = {};
 
 	CollectionHandler::purgeAll();
+
+	Storage::Element::setObserver(nullptr);
 
 	// Data dialogs.
 	delete DialogSelect::getInstance();

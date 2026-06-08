@@ -21,6 +21,7 @@
  */
 
 #include "CollectionHandler.hpp"
+#include "CollectionObserver.hpp"
 
 using namespace LEDSpicerUI::Ui::Storage;
 
@@ -85,6 +86,7 @@ void CollectionHandler::add(Data* item) noexcept {
 	if (collection.count(uid)) return;
 	collection.emplace(uid, item);
 	refreshSensitiveWidgets();
+	if (observer) observer->onAdded(item);
 }
 
 void CollectionHandler::remove(Data* item) noexcept {
@@ -93,6 +95,8 @@ void CollectionHandler::remove(Data* item) noexcept {
 
 	auto it{collection.find(uid)};
 	if (it == collection.end()) return;
+
+	if (observer) observer->onRemoved(item);
 
 	collection.erase(it);
 
@@ -106,12 +110,18 @@ void CollectionHandler::remove(Data* item) noexcept {
 void CollectionHandler::replace(Data* item, const string& oldId) noexcept {
 	if (item->createUniqueId() == oldId) return;
 	collection.erase(oldId);
-	add(item);
+	collection.emplace(item->createUniqueId(), item);
+	refreshSensitiveWidgets();
+	if (observer) observer->onChanged(item);
 	for (auto dep : dependencies) {
 		for (auto btn : *dep) {
 			if (*btn->getData() == *item) btn->sync();
 		}
 	}
+}
+
+void CollectionHandler::notifyChanged(Data* item) noexcept {
+	if (observer) observer->onChanged(item);
 }
 
 void CollectionHandler::registerDependency(BoxButtonCollection* dependency) noexcept {

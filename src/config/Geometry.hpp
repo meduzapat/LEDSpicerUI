@@ -60,6 +60,18 @@ public:
 	void registerWindow(Gtk::Window* win, const string& id) noexcept;
 
 	/**
+	 * Enrols a widget whose persisted state is a single integer position.
+	 * Currently used for GtkPaned dividers, extensible to any future
+	 * widget that exposes a single position value. If a stored value
+	 * exists, applies it; otherwise places the divider so the second
+	 * pack takes ~25% of the MainWindow height.
+	 *
+	 * @param pane the paned to track.
+	 * @param id   stable identifier (the glade widget id).
+	 */
+	void registerPosition(Gtk::Paned* pane, const string& id) noexcept;
+
+	/**
 	 * Captures current sizes from every registered window, compares
 	 * against the loaded values, writes geometry.xml only if any
 	 * value diverged. Call once at MainWindow dtor.
@@ -82,6 +94,9 @@ private:
 
 	/// Dialogs size data.
 	std::unordered_map<string, Entry> entries;
+
+	/// Single-value position registry (paned dividers today, extensible).
+	std::unordered_map<string, std::pair<Gtk::Paned*, int>> positions;
 
 	/// Captured / stored MainWindow position.
 	std::pair<int, int> mainWindowPos {-1, -1};

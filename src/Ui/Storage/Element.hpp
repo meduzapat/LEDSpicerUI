@@ -21,6 +21,7 @@
  */
 
 #include "CollectionHandler.hpp"
+#include "ElementObserver.hpp"
 
 #pragma once
 
@@ -69,6 +70,20 @@ public:
 		return CollectionHandler::getInstance(COLLECTION_ELEMENTS);
 	}
 
+	void registerToCollection()   noexcept override;
+	void unregisterFromCollection() noexcept override;
+
+	/**
+	 * Installs the observer. Set during bootstrap before any Element exists,
+	 * cleared after every Element has been destroyed.
+	 */
+	static void setObserver(ElementObserver* obs) noexcept { observer = obs; }
+
+	/**
+	 * Accessor for sites that need to fire onChanged directly (DialogElement edit).
+	 */
+	static ElementObserver* getObserver() noexcept { return observer; }
+
 	/**
 	 * Attempts to convert any RGB setup into scattered RGB.
 	 * @param data
@@ -88,10 +103,15 @@ public:
 	 */
 	static uint16_t findFirstConnectorIndexByPosition(const string& position) noexcept;
 
+	void wipe() noexcept override;
+
 protected:
 
 	/// Pseudo children.
 	vector<Element*> stripChildren;
+
+	/// Set during MainWindow bootstrap. Guaranteed non-null for the lifetime of any Element.
+	static ElementObserver* observer;
 
 	bool shouldSerialize(const string& key, const string& value) const noexcept override;
 };
