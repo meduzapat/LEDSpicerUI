@@ -602,6 +602,26 @@ string Defaults::matchElementTypeByName(const Glib::ustring& name) noexcept {
 	return emptyString;
 }
 
+string Defaults::buildPlayerControlName(
+	const string& player,
+	const string& type,
+	const string& index,
+	const string& waysSuffix
+) noexcept {
+	if (player.empty() or type.empty()) return emptyString;
+	string name {"P" + player + "_" + type};
+	if (type == "START" or type == "COIN") return name;  // index/ways not applicable
+	if (index.empty()) return emptyString;
+	name += index;
+	if (not waysSuffix.empty()) name += "_" + waysSuffix;
+	return name;
+}
+
+string Defaults::buildCabinetItemName(const string& category, const string& index) noexcept {
+	if (category.empty()) return emptyString;
+	return category + index;
+}
+
 void Defaults::initialize(Gtk::HeaderBar* header, Gtk::Button* btnSave) {
 	Defaults::header  = header;
 	Defaults::btnSave = btnSave;

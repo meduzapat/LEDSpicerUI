@@ -168,7 +168,7 @@ DialogElement::DialogElement(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 	Gtk::Button* btnGenerateElementName = nullptr;
 	builder->get_widget("BtnGenerateElementName", btnGenerateElementName);
 	btnGenerateElementName->signal_clicked().connect([this]() {
-		const string name {DialogPrompt::getInstance()->askElementName(this)};
+		const string name {DialogPrompt::getInstance()->askElementName(elementType->get_active_id(), this)};
 		if (name.empty()) return;
 		elementName->set_text(name);   // signal_changed fires refreshElementTypeOptions()
 		elementName->grab_focus();

@@ -124,6 +124,39 @@ TEST(DefaultsTest, MatchElementTypeByName) {
 	EXPECT_EQ(emptyString,            Defaults::matchElementTypeByName("unknown_xyz"));
 }
 
+TEST(DefaultsTest, BuildPlayerControlName) {
+	// Full form with WAYS modifier.
+	EXPECT_EQ("P1_JOYSTICK1_8WAYS",
+	          Defaults::buildPlayerControlName("1", "JOYSTICK", "1", "8WAYS"));
+	// Button, no ways.
+	EXPECT_EQ("P2_BUTTON4",
+	          Defaults::buildPlayerControlName("2", "BUTTON", "4", emptyString));
+	// START — no index, no ways even if passed.
+	EXPECT_EQ("P1_START",
+	          Defaults::buildPlayerControlName("1", "START", emptyString, emptyString));
+	EXPECT_EQ("P1_START",
+	          Defaults::buildPlayerControlName("1", "START", "5", "anything"));
+	// COIN — same rule as START.
+	EXPECT_EQ("P3_COIN",
+	          Defaults::buildPlayerControlName("3", "COIN", emptyString, emptyString));
+	// Player missing.
+	EXPECT_EQ(emptyString,
+	          Defaults::buildPlayerControlName(emptyString, "JOYSTICK", "1", emptyString));
+	// Type missing.
+	EXPECT_EQ(emptyString,
+	          Defaults::buildPlayerControlName("1", emptyString, "1", emptyString));
+	// Index required and missing.
+	EXPECT_EQ(emptyString,
+	          Defaults::buildPlayerControlName("1", "BUTTON", emptyString, emptyString));
+}
+
+TEST(DefaultsTest, BuildCabinetItemName) {
+	EXPECT_EQ("FLOOR",  Defaults::buildCabinetItemName("FLOOR", emptyString));
+	EXPECT_EQ("FLOOR2", Defaults::buildCabinetItemName("FLOOR", "2"));
+	EXPECT_EQ(emptyString, Defaults::buildCabinetItemName(emptyString, "1"));
+	EXPECT_EQ(emptyString, Defaults::buildCabinetItemName(emptyString, emptyString));
+}
+
 TEST(DefaultsTest, ImplodeChar) {
 	StringVector values{"a", "b", "c"};
 	EXPECT_EQ(Defaults::implode(values, ','), "a,b,c");

@@ -52,14 +52,24 @@ public:
 	string askGroupName(Gtk::Window* parent = nullptr) noexcept;
 
 	/**
-	 * @return Composed element name (EN1.id + EN2.id [+ "_" + EN3.id + EN4.id]),
-	 *         or empty on cancel.
+	 * Opens the structured name generator. Tabs and option lists are filtered
+	 * by the calling element's current type.
+	 * @return Composed element name, or empty on cancel.
 	 */
-	string askElementName(Gtk::Window* parent = nullptr) noexcept;
+	string askElementName(const string& elementTypeId, Gtk::Window* parent = nullptr) noexcept;
 
 protected:
 
 	enum class Section : uint8_t { DirName, GroupName, ElementName };
+
+	/// Per-element-type rules driving page visibility and combo populations.
+	struct Filter {
+		bool       playerTab          = false;
+		bool       cabinetTab         = false;
+		StringUSet playerTypes;       /// empty → all
+		bool       playerWaysAllowed  = false;
+		StringUSet cabinetCategories; /// empty → all
+	};
 
 	Gtk::Box
 		* boxName    = nullptr,
@@ -69,14 +79,30 @@ protected:
 	Gtk::Entry* entryName = nullptr;
 
 	Gtk::ComboBoxText
-		* comboGN1 = nullptr,
-		* comboGN2 = nullptr,
-		* comboEN1 = nullptr,
-		* comboEN2 = nullptr,
-		* comboEN3 = nullptr,
-		* comboEN4 = nullptr;
+		* comboGN1                = nullptr,
+		* comboGN2                = nullptr,
+		* comboPlayer             = nullptr,
+		* comboPlayerType         = nullptr,
+		* comboPlayerIndex        = nullptr,
+		* comboPlayerWays         = nullptr,
+		* comboCabinetIndex       = nullptr;
+
+	Gtk::ComboBox*  comboCabinetCategory = nullptr;
+	Gtk::ListStore* cabinetStore         = nullptr;
+
+	Gtk::Stack*         stack         = nullptr;
+	Gtk::StackSwitcher* stackSwitcher = nullptr;
+
+	Gtk::Label
+		* labelPlayerIndex   = nullptr,
+		* labelPlayerWays    = nullptr,
+		* previewLabel       = nullptr;
+
+	Gtk::Image* previewIcon = nullptr;
 
 	Gtk::Button* btnApply = nullptr;
+
+	Filter currentFilter;
 
 	DialogPrompt(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept;
 
@@ -85,6 +111,21 @@ protected:
 	 * and returns the composed string (empty on cancel).
 	 */
 	int runFor(Section section, Gtk::Window* parent) noexcept;
+
+	/// One-shot: inserts group headers (insensitive) and category rows.
+	void populateCabinetStore() noexcept;
+
+	/// Applies the per-element-type filter table to tabs, Player TYPE combo, and Cabinet rows.
+	void applyFilter(const string& elementTypeId) noexcept;
+
+	/// Show/hide Index and Ways rows on the Player page per the current TYPE pick.
+	void updatePlayerControlVisibility() noexcept;
+
+	/// Rebuild preview text + icon and gate the Apply button.
+	void updatePreview() noexcept;
+
+	/// Compose the preview string from the active page's widgets.
+	string buildPreview() const noexcept;
 };
 
 } // namespace
