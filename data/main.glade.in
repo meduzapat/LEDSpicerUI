@@ -3203,12 +3203,14 @@ Compatible with version @MINIMUM_COMPATIBILITY@+</property>
         <child>
           <object class="GtkBox" id="BoxPromptElement">
             <property name="can-focus">False</property>
+            <property name="orientation">vertical</property>
             <property name="spacing">8</property>
             <child>
-              <object class="GtkLabel">
+              <object class="GtkStackSwitcher" id="StackSwitcherNameGen">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label">Element</property>
+                <property name="halign">center</property>
+                <property name="stack">StackNameGen</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -3217,23 +3219,233 @@ Compatible with version @MINIMUM_COMPATIBILITY@+</property>
               </packing>
             </child>
             <child>
-              <object class="GtkComboBoxText" id="ComboBoxPromptEN1">
+              <object class="GtkStack" id="StackNameGen">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <items>
-                  <item id="P">Player</item>
-                  <item id="POWER">Power</item>
-                  <item id="FLOOR">Floor</item>
-                  <item id="MARQUEE">Marquee</item>
-                  <item id="LIGHT">Light</item>
-                  <item id="BAR">Bar</item>
-                  <item id="PUSHER">Pusher</item>
-                  <item id="PINBALL">Pinball</item>
-                  <item id="MENU" translatable="yes">Menu</item>
-                  <item id="BACK" translatable="yes">Back</item>
-                  <item id="PAUSE" translatable="yes">Pause</item>
-                  <item id="CONTROL" translatable="yes">Control</item>
-                </items>
+                <property name="transition-type">crossfade</property>
+                <child>
+                  <object class="GtkGrid" id="PageNameGenPlayer">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="row-spacing">4</property>
+                    <property name="column-spacing">8</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="halign">end</property>
+                        <property name="label">Player</property>
+                      </object>
+                      <packing>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkComboBoxText" id="ComboNameGenPlayer">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <items>
+                          <item id="1">1</item>
+                          <item id="2">2</item>
+                          <item id="3">3</item>
+                          <item id="4">4</item>
+                          <item id="5">5</item>
+                          <item id="6">6</item>
+                          <item id="7">7</item>
+                          <item id="8">8</item>
+                        </items>
+                      </object>
+                      <packing>
+                        <property name="left-attach">1</property>
+                        <property name="top-attach">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="halign">end</property>
+                        <property name="label">Type</property>
+                      </object>
+                      <packing>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkComboBoxText" id="ComboNameGenPlayerType">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                      </object>
+                      <packing>
+                        <property name="left-attach">1</property>
+                        <property name="top-attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="LabelNameGenPlayerIndex">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="halign">end</property>
+                        <property name="label">Index</property>
+                      </object>
+                      <packing>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkComboBoxText" id="ComboNameGenPlayerIndex">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <items>
+                          <item id="1">1</item>
+                          <item id="2">2</item>
+                          <item id="3">3</item>
+                          <item id="4">4</item>
+                          <item id="5">5</item>
+                          <item id="6">6</item>
+                          <item id="7">7</item>
+                          <item id="8">8</item>
+                          <item id="9">9</item>
+                          <item id="10">10</item>
+                          <item id="11">11</item>
+                          <item id="12">12</item>
+                          <item id="13">13</item>
+                          <item id="14">14</item>
+                          <item id="15">15</item>
+                          <item id="16">16</item>
+                          <item id="17">17</item>
+                          <item id="18">18</item>
+                          <item id="19">19</item>
+                          <item id="20">20</item>
+                        </items>
+                      </object>
+                      <packing>
+                        <property name="left-attach">1</property>
+                        <property name="top-attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="LabelNameGenPlayerWays">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="halign">end</property>
+                        <property name="label">Ways</property>
+                      </object>
+                      <packing>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">3</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkComboBoxText" id="ComboNameGenPlayerWays">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <items>
+                          <item id="2WAYS">2-Way</item>
+                          <item id="vertical2WAYS">Vertical 2-Way</item>
+                          <item id="4WAYS">4-Way</item>
+                          <item id="4xWAYS">4-Way Diagonal</item>
+                          <item id="8WAYS">8-Way</item>
+                          <item id="16WAYS">16-Way</item>
+                          <item id="49WAYS">49-Way</item>
+                          <item id="analogWAYS">Analog</item>
+                          <item id="mouseWAYS">Mouse</item>
+                          <item id="rotary8WAYS">Rotary 8</item>
+                          <item id="rotary12WAYS">Rotary 12</item>
+                        </items>
+                      </object>
+                      <packing>
+                        <property name="left-attach">1</property>
+                        <property name="top-attach">3</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="name">player</property>
+                    <property name="title">Player Control</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkGrid" id="PageNameGenCabinet">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="row-spacing">4</property>
+                    <property name="column-spacing">8</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="halign">end</property>
+                        <property name="label">Category</property>
+                      </object>
+                      <packing>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkComboBox" id="ComboNameGenCabinetCategory">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="model">liststoreNameGenCabinet</property>
+                        <property name="id-column">0</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="cabinetCategoryCell"/>
+                          <attributes>
+                            <attribute name="text">1</attribute>
+                            <attribute name="sensitive">2</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="left-attach">1</property>
+                        <property name="top-attach">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="halign">end</property>
+                        <property name="label">Index</property>
+                      </object>
+                      <packing>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkComboBoxText" id="ComboNameGenCabinetIndex">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <items>
+                          <item id="">(none)</item>
+                          <item id="1">1</item>
+                          <item id="2">2</item>
+                          <item id="3">3</item>
+                          <item id="4">4</item>
+                          <item id="5">5</item>
+                          <item id="6">6</item>
+                          <item id="7">7</item>
+                          <item id="8">8</item>
+                          <item id="9">9</item>
+                          <item id="10">10</item>
+                        </items>
+                      </object>
+                      <packing>
+                        <property name="left-attach">1</property>
+                        <property name="top-attach">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="name">cabinet</property>
+                    <property name="title">Cabinet Item</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -3242,80 +3454,41 @@ Compatible with version @MINIMUM_COMPATIBILITY@+</property>
               </packing>
             </child>
             <child>
-              <object class="GtkComboBoxText" id="ComboBoxPromptEN2">
+              <object class="GtkBox" id="BoxNameGenPreview">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <items>
-                  <item id="1">1</item>
-                  <item id="2">2</item>
-                  <item id="3">3</item>
-                  <item id="4">4</item>
-                  <item id="5">5</item>
-                  <item id="6">6</item>
-                  <item id="7">7</item>
-                  <item id="8">8</item>
-                  <item id="9">9</item>
-                  <item id="10">10</item>
-                </items>
+                <property name="halign">center</property>
+                <property name="spacing">6</property>
+                <child>
+                  <object class="GtkImage" id="ImageNameGenPreview">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="icon-name">dialog-question-symbolic</property>
+                    <property name="icon_size">3</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="LabelNameGenPreview">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="selectable">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
                 <property name="position">2</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkComboBoxText" id="ComboBoxPromptEN3">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <items>
-                  <item id="BUTTON">Button</item>
-                  <item id="JOYSTICK">Joystick</item>
-                  <item id="CREDIT">Credit Slot</item>
-                  <item id="START">Start</item>
-                  <item id="MOUSE">Mouse</item>
-                  <item id="TRACKBALL">Trackball</item>
-                  <item id="SPINNER">Spinner</item>
-                  <item id="GUN">Gun</item>
-                </items>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">3</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkComboBoxText" id="ComboBoxPromptEN4">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <items>
-                  <item id="1">1</item>
-                  <item id="2">2</item>
-                  <item id="3">3</item>
-                  <item id="4">4</item>
-                  <item id="5">5</item>
-                  <item id="6">6</item>
-                  <item id="7">7</item>
-                  <item id="8">8</item>
-                  <item id="9">9</item>
-                  <item id="10">10</item>
-                  <item id="11">11</item>
-                  <item id="12">12</item>
-                  <item id="13">13</item>
-                  <item id="14">14</item>
-                  <item id="15">15</item>
-                  <item id="16">16</item>
-                  <item id="17">17</item>
-                  <item id="18">18</item>
-                  <item id="19">19</item>
-                  <item id="20">20</item>
-                </items>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">4</property>
               </packing>
             </child>
           </object>
@@ -5499,6 +5672,16 @@ Autodetected if ledspicer is installed</property>
       <!-- column-name Label -->
       <column type="gchararray"/>
       <!-- column-name sensitive -->
+      <column type="gboolean"/>
+    </columns>
+  </object>
+  <object class="GtkListStore" id="liststoreNameGenCabinet">
+    <columns>
+      <!-- column-name Id (emit token, empty for headers) -->
+      <column type="gchararray"/>
+      <!-- column-name Label (display, group header when not sensitive) -->
+      <column type="gchararray"/>
+      <!-- column-name sensitive (false = group header / filtered out) -->
       <column type="gboolean"/>
     </columns>
   </object>
