@@ -157,8 +157,8 @@ string ConfigFile::processElements(tinyxml2::XMLElement* deviceNode, const strin
 			errors += "Ignored element, Missing element name in " + deviceName + '\n';
 			continue;
 		}
-		// Detect type
-		elementAttr.setValue("type", Defaults::detectElementType(elementAttr.getValue(NAME)));
+		// Type id flows through as-is; DialogElement::retrieveData() heals
+		// missing or unknown ids before isValid() runs.
 		elements.push_back(std::move(elementAttr));
 	}
 	extractedData.emplace(Defaults::createCommonUniqueId({deviceName, COLLECTION_ELEMENTS}), std::move(elements));

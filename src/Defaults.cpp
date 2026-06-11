@@ -276,17 +276,17 @@ const std::unordered_map<string, Defaults::Ways> Defaults::wayIds {
 	{"rotary12", Ways::rotary12},
 };
 
-const StringVector Defaults::elementTypes{
-	"",
-	"button",
-	"joystick",
-	"trackball",
-	"spinner",
-	"credit",
-	"light",
-	"bar",
-	"knocker",
-	"misc"
+const std::unordered_map<string, Defaults::ElementInfo> Defaults::elementsInfo = {
+	{ELEMENT_TYPE_ACTUATOR,  {"Actuator",             "Force-feedback items: solenoids, knockers, recoils, motors."}},
+	{ELEMENT_TYPE_BAR,       {"LEDs Light Strip",     "Addressable RGB strip used as a single element."}},
+	{ELEMENT_TYPE_BUTTON,    {"Button",               "LED illumination inside a standard pushbutton."}},
+	{ELEMENT_TYPE_CREDIT,    {"Coin Slot",            "Illumination for coin entry / credit doors."}},
+	{ELEMENT_TYPE_JOYSTICK,  {"Joystick",             "Illuminated joystick."}},
+	{ELEMENT_TYPE_LIGHT,     {"Generic Illumination", "Catch-all for basic lighting (marquee, underglow, restrictor indicators, etc.)."}},
+	{ELEMENT_TYPE_LIGHTGUN,  {"Light Gun",            "Illuminated light gun assembly."}},
+	{ELEMENT_TYPE_MISC,      {"Miscellaneous",        "Fallback category for elements that do not fit any other type."}},
+	{ELEMENT_TYPE_SPINNER,   {"Spinner",              "Illuminated spinner control."}},
+	{ELEMENT_TYPE_TRACKBALL, {"Trackball",            "Illuminated trackball assembly."}},
 };
 
 const vector<Defaults::ColorInfo> Defaults::legalColors {
@@ -580,11 +580,26 @@ string Defaults::titleCase(const string& text) noexcept {
 	return out;
 }
 
-string Defaults::detectElementType(const Glib::ustring& name) {
-	for (size_t c = 1; c < Defaults::elementTypes.size(); ++c)
-		if (name.lowercase().find(Defaults::elementTypes[c]) != name.npos)
-			return std::to_string(c);
-	return DEFAULT_ELEMENT_TYPE;
+string Defaults::matchElementTypeByName(const Glib::ustring& name) noexcept {
+	const auto n {name.lowercase()};
+	const auto has = [&](const char* needle) { return n.find(needle) != Glib::ustring::npos; };
+
+	// Joystick name carrying a restrictor-position suffix (e.g. P1_JOYSTICK1_4WAYS):
+	// hardware-wise just a light, not a control.
+	if (has("joystick") and has("ways"))           return ELEMENT_TYPE_LIGHT;
+
+	if (has("trackball") or has("mouse"))          return ELEMENT_TYPE_TRACKBALL;
+	if (has("spinner") or has("dial") or has("paddle")) return ELEMENT_TYPE_SPINNER;
+	if (has("lightgun"))                           return ELEMENT_TYPE_LIGHTGUN;
+	if (has("joystick") or has("pedal") or has("positional"))
+	                                               return ELEMENT_TYPE_JOYSTICK;
+	if (has("coin") or has("credit"))              return ELEMENT_TYPE_CREDIT;
+	if (has("strip") or has("bar"))                return ELEMENT_TYPE_BAR;
+	if (has("button"))                             return ELEMENT_TYPE_BUTTON;
+	if (has("light"))                              return ELEMENT_TYPE_LIGHT;
+	if (has("actuator") or has("solenoid") or has("knocker")
+	    or has("motor") or has("recoil"))          return ELEMENT_TYPE_ACTUATOR;
+	return emptyString;
 }
 
 void Defaults::initialize(Gtk::HeaderBar* header, Gtk::Button* btnSave) {

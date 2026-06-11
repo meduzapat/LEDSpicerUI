@@ -89,19 +89,39 @@ TEST(DefaultsTest, Explode) {
 	EXPECT_EQ(result7[0], "item");
 }
 
-TEST(DefaultsTest, DetectElementType) {
-	// Each keyword maps to its 1-based index in elementTypes.
-	EXPECT_EQ("1", Defaults::detectElementType("button1"));
-	EXPECT_EQ("2", Defaults::detectElementType("joystick_left"));
-	EXPECT_EQ("3", Defaults::detectElementType("p1_trackball"));
-	EXPECT_EQ("4", Defaults::detectElementType("SPINNER_1"));   // case-insensitive
-	EXPECT_EQ("5", Defaults::detectElementType("credit"));
-	EXPECT_EQ("6", Defaults::detectElementType("light_red"));
-	EXPECT_EQ("7", Defaults::detectElementType("healthbar"));
-	EXPECT_EQ("8", Defaults::detectElementType("knocker"));
-	EXPECT_EQ("9", Defaults::detectElementType("misc_item"));
-	// Unknown name falls back to DEFAULT_ELEMENT_TYPE.
-	EXPECT_EQ(DEFAULT_ELEMENT_TYPE, Defaults::detectElementType("unknown_xyz"));
+TEST(DefaultsTest, MatchElementTypeByName) {
+	// Direct keyword → id.
+	EXPECT_EQ(ELEMENT_TYPE_BUTTON,    Defaults::matchElementTypeByName("button1"));
+	EXPECT_EQ(ELEMENT_TYPE_JOYSTICK,  Defaults::matchElementTypeByName("joystick_left"));
+	EXPECT_EQ(ELEMENT_TYPE_TRACKBALL, Defaults::matchElementTypeByName("p1_trackball"));
+	EXPECT_EQ(ELEMENT_TYPE_SPINNER,   Defaults::matchElementTypeByName("SPINNER_1"));  // case-insensitive
+	EXPECT_EQ(ELEMENT_TYPE_CREDIT,    Defaults::matchElementTypeByName("credit"));
+	EXPECT_EQ(ELEMENT_TYPE_LIGHT,     Defaults::matchElementTypeByName("light_red"));
+	EXPECT_EQ(ELEMENT_TYPE_BAR,       Defaults::matchElementTypeByName("healthbar"));
+	EXPECT_EQ(ELEMENT_TYPE_ACTUATOR,  Defaults::matchElementTypeByName("knocker"));
+	EXPECT_EQ(ELEMENT_TYPE_LIGHTGUN,  Defaults::matchElementTypeByName("P1_LIGHTGUN"));
+
+	// Aliases.
+	EXPECT_EQ(ELEMENT_TYPE_CREDIT,    Defaults::matchElementTypeByName("coin1"));
+	EXPECT_EQ(ELEMENT_TYPE_BAR,       Defaults::matchElementTypeByName("LedStrip"));
+	EXPECT_EQ(ELEMENT_TYPE_TRACKBALL, Defaults::matchElementTypeByName("P1_MOUSE"));
+	EXPECT_EQ(ELEMENT_TYPE_SPINNER,   Defaults::matchElementTypeByName("dial_x"));
+	EXPECT_EQ(ELEMENT_TYPE_SPINNER,   Defaults::matchElementTypeByName("paddle"));
+	EXPECT_EQ(ELEMENT_TYPE_JOYSTICK,  Defaults::matchElementTypeByName("p1_pedal"));
+	EXPECT_EQ(ELEMENT_TYPE_JOYSTICK,  Defaults::matchElementTypeByName("positional1"));
+	EXPECT_EQ(ELEMENT_TYPE_ACTUATOR,  Defaults::matchElementTypeByName("solenoid_left"));
+	EXPECT_EQ(ELEMENT_TYPE_ACTUATOR,  Defaults::matchElementTypeByName("motor1"));
+	EXPECT_EQ(ELEMENT_TYPE_ACTUATOR,  Defaults::matchElementTypeByName("recoil_right"));
+
+	// Joystick + restrictor-position suffix → light (not joystick).
+	EXPECT_EQ(ELEMENT_TYPE_LIGHT,     Defaults::matchElementTypeByName("P1_JOYSTICK1_4WAYS"));
+	EXPECT_EQ(ELEMENT_TYPE_LIGHT,     Defaults::matchElementTypeByName("P1_JOYSTICK1_8WAYS"));
+
+	// Priority: lightgun before joystick keyword scan.
+	EXPECT_EQ(ELEMENT_TYPE_LIGHTGUN,  Defaults::matchElementTypeByName("P1_LIGHTGUN_JOYSTICK"));
+
+	// No keyword hit → empty string (caller falls back to a generic compatible).
+	EXPECT_EQ(emptyString,            Defaults::matchElementTypeByName("unknown_xyz"));
 }
 
 TEST(DefaultsTest, ImplodeChar) {

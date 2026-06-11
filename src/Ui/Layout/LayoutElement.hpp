@@ -129,7 +129,7 @@ private:
 
 	bool isInsideIcon(double x, double y) noexcept;
 
-	static const char* iconForType(const string& typeId) noexcept;
+	static string iconForType(const string& typeId) noexcept;
 	static const string& ledCssClass(const string& colorName) noexcept;
 	static StripRenderer::LedColor colorEnumFor(const string& colorName) noexcept;
 };

@@ -5492,6 +5492,16 @@ Autodetected if ledspicer is installed</property>
       <column type="gboolean"/>
     </columns>
   </object>
+  <object class="GtkListStore" id="liststoreElementTypes">
+    <columns>
+      <!-- column-name Id -->
+      <column type="gchararray"/>
+      <!-- column-name Label -->
+      <column type="gchararray"/>
+      <!-- column-name sensitive -->
+      <column type="gboolean"/>
+    </columns>
+  </object>
   <object class="GtkListStore" id="liststoreColorFormat">
     <columns>
       <!-- column-name values -->
@@ -6586,12 +6596,12 @@ If you have multiple serial devices, avoid using autodetect.</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkToggleButton" id="ToggleElementSolenoid">
-                    <property name="label">Solenoid</property>
+                  <object class="GtkToggleButton" id="ToggleElementActuator">
+                    <property name="label">Actuator</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">True</property>
-                    <property name="tooltip-text">Solenoids, Motors, Recoils, any other time-sensitive hardware must have their power cut off after being powered on. This checkbox indicates when this is necessary for this pin.</property>
+                    <property name="tooltip-text">Actuators (solenoids, motors, recoils, knockers and any other time-sensitive hardware) must have their power cut off after being powered on. This checkbox indicates when this is necessary for this pin.</property>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -6653,7 +6663,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label">Single Color / Solenoid</property>
+                <property name="label">Single Color / Actuator</property>
               </object>
               <packing>
                 <property name="position">3</property>
@@ -6854,22 +6864,19 @@ If you have multiple serial devices, avoid using autodetect.</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkComboBoxText" id="ComboBoxElementType">
+                  <object class="GtkComboBox" id="ComboBoxElementType">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
-                    <property name="active-id">0</property>
-                    <items>
-                      <item id="0">Select Type</item>
-                      <item id="1">Button</item>
-                      <item id="2">Joystick</item>
-                      <item id="3">Trackball</item>
-                      <item id="4">Spinner</item>
-                      <item id="5">Credit Slot</item>
-                      <item id="6">Light</item>
-                      <item id="7">Light Bar</item>
-                      <item id="8">Knocker</item>
-                      <item id="9">Misc</item>
-                    </items>
+                    <property name="tooltip-text">Element category. Limits the available options based on the active connection tab and toggles.</property>
+                    <property name="model">liststoreElementTypes</property>
+                    <property name="id-column">0</property>
+                    <child>
+                      <object class="GtkCellRendererText" id="elementTypeCell"/>
+                      <attributes>
+                        <attribute name="text">1</attribute>
+                        <attribute name="sensitive">2</attribute>
+                      </attributes>
+                    </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>

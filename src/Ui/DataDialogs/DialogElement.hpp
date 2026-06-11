@@ -88,7 +88,7 @@ protected:
 
 	Gtk::SpinButton
 		* timeOn = nullptr,
-		* pin    = nullptr, /// Single color / solenoid.
+		* pin    = nullptr, /// Single color / actuator.
 		* pinR   = nullptr,
 		* pinG   = nullptr,
 		* pinB   = nullptr;
@@ -106,12 +106,12 @@ protected:
 	/// The tabs to select the different connection modes.
 	Gtk::Notebook* notebookDeviceConnections = nullptr;
 
-	Gtk::ToggleButton* solenoid        = nullptr;
+	Gtk::ToggleButton* actuator        = nullptr;
 	Gtk::Button*       btnDefaultColor = nullptr;
 	Gtk::FlowBox*      pinsBox         = nullptr;
 
 	/// Only used by the UI.
-	Gtk::ComboBoxText* elementType = nullptr;
+	Gtk::ComboBox* elementType = nullptr;
 
 	Gtk::Scale* brightness = nullptr;
 
@@ -153,6 +153,22 @@ protected:
 	void findElementByPin(uint16_t finder, std::unordered_set<Storage::BoxButton*>& elementsFound) noexcept;
 
 	void onSwitchPage(Gtk::Widget*, uint pageNum) noexcept;
+
+	/**
+	 * Greys out element-type rows the current widget state forbids.
+	 * If the user's current pick is no longer allowed, re-detects.
+	 * User-facing orchestrator — call from every UI trigger that affects validity.
+	 */
+	void refreshElementTypeOptions() noexcept;
+
+	/** True when the given type id is compatible with the current widget state. */
+	bool isElementTypeAllowed(const string& id) const noexcept;
+
+	/** True when the current combobox selection is compatible with the widgets. */
+	bool validateElementType() const noexcept;
+
+	/** Best-fit type id for the current widget state and name. */
+	string detectElementType() const noexcept;
 
 	void onCloneClicked(Storage::BoxButton& boxButton) noexcept override;
 

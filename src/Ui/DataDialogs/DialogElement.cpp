@@ -66,7 +66,7 @@ DialogElement::DialogElement(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 
 	// Single Pin
 	builder->get_widget("SpinPin",               pin);
-	builder->get_widget("ToggleElementSolenoid", solenoid);
+	builder->get_widget("ToggleElementActuator", actuator);
 	builder->get_widget("SpinElementOnTime",     timeOn);
 
 	// Multi RGB.
@@ -81,6 +81,33 @@ DialogElement::DialogElement(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 
 	builder->get_widget("NotebookDeviceConnections", notebookDeviceConnections);
 	Defaults::attachNameFilter(elementName);
+
+	// One-shot: type catalog never changes at runtime. Curated display order;
+	// sensitive column flipped later by refreshElementTypeOptions().
+	{
+		auto store {static_cast<Gtk::ListStore*>(elementType->get_model().get())};
+		static const StringVector displayOrder {
+			ELEMENT_TYPE_BUTTON,
+			ELEMENT_TYPE_JOYSTICK,
+			ELEMENT_TYPE_LIGHTGUN,
+			ELEMENT_TYPE_TRACKBALL,
+			ELEMENT_TYPE_SPINNER,
+			ELEMENT_TYPE_BAR,
+			ELEMENT_TYPE_CREDIT,
+			ELEMENT_TYPE_ACTUATOR,
+			ELEMENT_TYPE_LIGHT,
+			ELEMENT_TYPE_MISC,
+		};
+		for (const auto& id : displayOrder) {
+			auto row {*(store->append())};
+			row.set_value(0, id);
+			row.set_value(1, Defaults::elementsInfo.at(id).name);
+			row.set_value(2, true);
+		}
+	}
+
+	// Name edits refine the detected type; the orchestrator gates user picks.
+	elementName->signal_changed().connect([this]() { refreshElementTypeOptions(); });
 
 	DialogColors::getInstance()->activateColorButton(btnDefaultColor);
 
@@ -125,12 +152,13 @@ DialogElement::DialogElement(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 		}
 	});
 
-	solenoid->signal_toggled().connect([&]() {
-		bool active(solenoid->get_active());
+	actuator->signal_toggled().connect([&]() {
+		bool active(actuator->get_active());
 		timeOn->get_parent()->set_sensitive(active);
 		timeOn->set_value(0.0f);
 		brightness->get_parent()->set_sensitive(not active and not Defaults::isMonochrome(comboBoxDevices->get_active_id()));
 		if (active) brightness->set_value(100);
+		refreshElementTypeOptions();
 	});
 
 	// When the notebook page changes, remove the values on the other page.
@@ -142,8 +170,7 @@ DialogElement::DialogElement(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builde
 	btnGenerateElementName->signal_clicked().connect([this]() {
 		const string name {DialogPrompt::getInstance()->askElementName(this)};
 		if (name.empty()) return;
-		elementName->set_text(name);
-		elementType->set_active_id(Defaults::detectElementType(name));
+		elementName->set_text(name);   // signal_changed fires refreshElementTypeOptions()
 		elementName->grab_focus();
 	});
 }
@@ -163,7 +190,7 @@ void DialogElement::clearFormConditinal(uint8_t flags) noexcept {
 	// Single pin.
 	if (not flags or (flags & (1 << tabIndex::Single))) {
 		pin->set_value(0.0f);
-		solenoid->set_active(false);
+		actuator->set_active(false);
 		timeOn->set_value(0.0f);
 		timeOn->get_parent()->set_sensitive(false);
 		if (flags)
@@ -202,7 +229,8 @@ void DialogElement::clearFormConditinal(uint8_t flags) noexcept {
 		// Common fields to always reset.
 		elementName->set_text("");
 		elementName->grab_focus();
-		elementType->set_active_id("0");
+		elementType->set_active_id(ELEMENT_TYPE_LIGHT);
+		refreshElementTypeOptions();
 		brightness->set_value(100);
 		brightness->set_sensitive(not dev.monochrome);
 		DialogColors::getInstance()->colorizeButton(btnDefaultColor, NO_COLOR);
@@ -344,7 +372,7 @@ void DialogElement::storeData() noexcept {
 	switch (static_cast<tabIndex>(notebookDeviceConnections->get_current_page())) {
 	case tabIndex::Single:
 		// Solenoid.
-		if (solenoid->get_active()) {
+		if (actuator->get_active()) {
 			currentData->setValue(SOLENOID, pin->get_value_as_int());
 			if (auto t {timeOn->get_value_as_int()}; t > 0) {
 				currentData->setValue(TIME_ON, t);
@@ -451,7 +479,7 @@ void DialogElement::storeData() noexcept {
 		currentData->setValue(DEFAULT_COLOR, btnDefaultColor->get_label());
 	}
 	currentData->setValue(NAME, name);
-	currentData->setValue(TYPE, elementType->get_active_id() == "0" ? Glib::ustring(DEFAULT_ELEMENT_TYPE) : elementType->get_active_id());
+	currentData->setValue(TYPE, elementType->get_active_id());
 	currentData->setValue(BRIGHTNESS, static_cast<uint>(brightness->get_value()));
 
 	// Cleanup if changed from strip to non-strip
@@ -509,7 +537,7 @@ void DialogElement::retrieveData() noexcept {
 		2. STRIPSIZE  → Strip  (position + count)
 		3. POSITION   → RGB    (single position)
 		4. PIN        → Single LED
-		5. SOLENOID   → Single solenoid
+		5. SOLENOID   → Single actuator
 		6. (none)     → Scattered RGB (RED_PIN/GREEN_PIN/BLUE_PIN)
 	*/
 	elementName->set_text(currentData->getValue(NAME));
@@ -548,13 +576,13 @@ void DialogElement::retrieveData() noexcept {
 	else if (not currentData->getValue(PIN).empty()) {
 		notebookDeviceConnections->set_current_page(tabIndex::Single);
 		pin->set_value(currentData->getInt(PIN));
-		solenoid->set_active(false);
+		actuator->set_active(false);
 	}
 	// Solenoid.
 	else if (not currentData->getValue(SOLENOID).empty()) {
 		notebookDeviceConnections->set_current_page(tabIndex::Single);
 		pin->set_value(currentData->getInt(SOLENOID));
-		solenoid->set_active(true);
+		actuator->set_active(true);
 		if (not currentData->getValue(TIME_ON).empty())
 			timeOn->set_value(currentData->getInt(TIME_ON));
 	}
@@ -572,6 +600,10 @@ void DialogElement::retrieveData() noexcept {
 	elementType->set_active_id(currentData->getValue(TYPE, DEFAULT_ELEMENT_TYPE));
 	const int b {currentData->getInt(BRIGHTNESS)};
 	brightness->set_value(b ? b : 100);
+
+	// Silent repair: loaded/imported XML may carry a missing or invalid type id.
+	if (not validateElementType())
+		elementType->set_active_id(detectElementType());
 }
 
 string DialogElement::createUniqueId() const noexcept {
@@ -961,7 +993,46 @@ void DialogElement::onSwitchPage(Gtk::Widget*, uint pageNum) noexcept {
 	}
 	uint8_t exclude = 1 << pageNum;
 	clearFormConditinal(ALL_TAB_IDX & ~exclude);
+	refreshElementTypeOptions();
 };
+
+void DialogElement::refreshElementTypeOptions() noexcept {
+	auto store {static_cast<Gtk::ListStore*>(elementType->get_model().get())};
+	for (auto iter : store->children()) {
+		auto row {*iter};
+		Glib::ustring id;
+		row.get_value(0, id);
+		row.set_value(2, isElementTypeAllowed(id));
+	}
+	if (not validateElementType())
+		elementType->set_active_id(detectElementType());
+}
+
+bool DialogElement::isElementTypeAllowed(const string& id) const noexcept {
+	const auto tab {notebookDeviceConnections->get_current_page()};
+	if (tab == tabIndex::Strip)
+		return id == ELEMENT_TYPE_BAR;
+	if (tab == tabIndex::Single and actuator->get_active())
+		return id == ELEMENT_TYPE_ACTUATOR;
+	// Every non-actuator id is allowed elsewhere (passive strips can be `bar`).
+	return id != ELEMENT_TYPE_ACTUATOR;
+}
+
+bool DialogElement::validateElementType() const noexcept {
+	return isElementTypeAllowed(elementType->get_active_id());
+}
+
+string DialogElement::detectElementType() const noexcept {
+	const auto tab {notebookDeviceConnections->get_current_page()};
+	if (tab == tabIndex::Strip)
+		return ELEMENT_TYPE_BAR;
+	if (tab == tabIndex::Single and actuator->get_active())
+		return ELEMENT_TYPE_ACTUATOR;
+	const string hit {Defaults::matchElementTypeByName(elementName->get_text())};
+	if (hit.empty() or not isElementTypeAllowed(hit))
+		return ELEMENT_TYPE_LIGHT;
+	return hit;
+}
 
 void DialogElement::onCloneClicked(Storage::BoxButton& boxButton) noexcept {
 

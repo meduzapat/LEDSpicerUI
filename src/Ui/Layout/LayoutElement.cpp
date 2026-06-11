@@ -362,14 +362,7 @@ StripRenderer::LedColor LayoutElement::colorEnumFor(const string& colorName) noe
 	return StripRenderer::LedColor::W;
 }
 
-const char* LayoutElement::iconForType(const string& typeId) noexcept {
-	if (typeId == "1") return "element-button.png";
-	if (typeId == "2") return "element-joystick.png";
-	if (typeId == "3") return "element-trackball.png";
-	if (typeId == "4") return "element-spinner.png";
-	if (typeId == "5") return "element-credit.png";
-	if (typeId == "6") return "element-light.png";
-	if (typeId == "7") return "element-bar.png";
-	if (typeId == "8") return "element-actuator.png";
-	return "element-misc.png";
+string LayoutElement::iconForType(const string& typeId) noexcept {
+	// Type id is guaranteed valid by retrieveData() repair before this is reached.
+	return "element-" + typeId + ".png";
 }

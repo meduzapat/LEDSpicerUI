@@ -257,9 +257,21 @@ inline const string
 	FORMAT_RGBA {"rgba"},
 
 /// UI-related constants.
-	DEFAULT_ELEMENT_TYPE {"9"},
 	PLAYER   {"player"},
 	JOYSTICK {"joystick"},
+
+/// Element type IDs (also the XML `type` attribute values, and the icon filename suffix).
+	ELEMENT_TYPE_ACTUATOR  {"actuator"},
+	ELEMENT_TYPE_BAR       {"bar"},
+	ELEMENT_TYPE_BUTTON    {"button"},
+	ELEMENT_TYPE_CREDIT    {"credit"},
+	ELEMENT_TYPE_JOYSTICK  {"joystick"},
+	ELEMENT_TYPE_LIGHT     {"light"},
+	ELEMENT_TYPE_LIGHTGUN  {"lightgun"},
+	ELEMENT_TYPE_MISC      {"misc"},
+	ELEMENT_TYPE_SPINNER   {"spinner"},
+	ELEMENT_TYPE_TRACKBALL {"trackball"},
+	& DEFAULT_ELEMENT_TYPE {ELEMENT_TYPE_MISC},
 
 /// Types
 	TYPE_MAP             {"map"},
@@ -499,6 +511,13 @@ public:
 	};
 
 	/**
+	 * Structure with element type information.
+	 * Catalog entry for a UI-side element category.
+	 * Map key is the type ID (matches XML `type` attribute and `element-<id>.png` icon).
+	 */
+	struct ElementInfo : public BaseInfo {};
+
+	/**
 	 * Structure with color reference information.
 	 * name  — contract key, must match every valid color file.
 	 * brief — tooltip / calibration dialog hint.
@@ -698,13 +717,6 @@ public:
 	 */
 	static double getLuminance(const string& color);
 
-	/**
-	 * Detects the element type from a string.
-	 * @param name
-	 * @return Returns default if not found.
-	 */
-	static string detectElementType(const Glib::ustring& name);
-
 	/// A list of all possible restrictors and rotators Ways (positions).
 	static constexpr std::array<Ways, 11> allWays{Ways::w2, Ways::w2v, Ways::w4, Ways::w4x, Ways::w8, Ways::w16, Ways::w49, Ways::analog, Ways::mouse, Ways::rotary8, Ways::rotary12};
 
@@ -726,8 +738,16 @@ public:
 	/// A List of string names to its internal enumerated type.
 	static const std::unordered_map<string, Ways> wayIds;
 
-	/// A list of different element types.
-	static const StringVector elementTypes;
+	/// A list of element types to their information.
+	static const std::unordered_map<string, ElementInfo> elementsInfo;
+
+	/**
+	 * Matches a name against the element-type keyword table.
+	 * Pure helper, no widget knowledge — context overrides live in DialogElement.
+	 * @param name Element name (any case).
+	 * @return Matching type id, or empty string when no keyword fires.
+	 */
+	static string matchElementTypeByName(const Glib::ustring& name) noexcept;
 
 	/// Standard colors in family order — defines the name contract for color files.
 	static const vector<ColorInfo> legalColors;
