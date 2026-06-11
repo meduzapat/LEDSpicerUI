@@ -36,7 +36,14 @@ DialogForm::DialogForm(
 	DialogColors::buildInstance(builder, "DialogColors");
 
 	add_button("_Cancel", Gtk::ResponseType::RESPONSE_CANCEL);
-	btnApply = add_button("_Apply", Gtk::ResponseType::RESPONSE_APPLY);
+
+	// Buttons added with add button sets a response, avoid that.
+	btnApply = Gtk::manage(new Gtk::Button("_Apply"));
+	btnApply->set_use_underline(true);
+	btnApply->set_can_default(true);
+	get_header_bar()->pack_end(*btnApply);
+	btnApply->show();
+
 }
 
 DialogForm::~DialogForm() {

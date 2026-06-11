@@ -48,6 +48,8 @@ void ProjectFile::saveFile(const string& path, const string& content) {
 		dialog.get_content_area()->pack_start(*scrolled, true, true, 0);
 		dialog.show_all();
 		dialog.run();
+		// Drain the dialog events before returning, to avoid the dialog crashing due to remaining events running.
+		while (Gtk::Main::events_pending()) Gtk::Main::iteration();
 		return;
 	}
 	// Normal save.
