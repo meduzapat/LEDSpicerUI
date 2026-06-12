@@ -110,24 +110,36 @@ protected:
 
 	/// Per-element-type rules driving page visibility and combo populations.
 	struct Filter {
-		bool       playerTab          = false;
-		bool       cabinetTab         = false;
-		StringUSet playerTypes;       /// empty → all
-		bool       playerWaysAllowed  = false;
-		StringUSet cabinetCategories; /// empty → all
+		bool
+			playerTab         = false,
+			cabinetTab        = false,
+			playerWaysAllowed = false;
+		StringUSet
+			playerTypes,       /// empty → all
+			cabinetCategories; /// empty → all
 	};
 
 	/// Logic tokens — kept in one place so behaviour comparisons match the catalogs.
 	static inline const string
 		PAGE_PLAYER    {"player"},
 		PAGE_CABINET   {"cabinet"},
+
+		TYPE_BUTTON    {"BUTTON"},
+		TYPE_JOYSTICK  {"JOYSTICK"},
+		TYPE_MOUSE     {"MOUSE"},
+		TYPE_LIGHTGUN  {"LIGHTGUN"},
+		TYPE_TRACKBALL {"TRACKBALL"},
+		TYPE_DIAL      {"DIAL"},
+		TYPE_PADDLE    {"PADDLE"},
+		TYPE_PEDAL     {"PEDAL"},
+		TYPE_POSITIONAL{"POSITIONAL"},
 		TYPE_START     {"START"},
 		TYPE_COIN      {"COIN"},
-		TYPE_JOYSTICK  {"JOYSTICK"},
+
 		ICON_INVALID   {"dialog-question-symbolic"};
 
-	static const vector<PlayerType>                 playerTypes;
-	static const vector<CabinetCategory>            cabinetCategories;
+	static const vector<PlayerType>      playerTypes;
+	static const vector<CabinetCategory> cabinetCategories;
 	static const std::unordered_map<string, Filter> filters;
 
 	Gtk::Box

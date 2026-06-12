@@ -26,17 +26,17 @@ using namespace LEDSpicerUI::Ui;
 using namespace LEDSpicerUI::Constants;
 
 const vector<DialogPrompt::PlayerType> DialogPrompt::playerTypes {
-	{"BUTTON",     "Button"},
-	{TYPE_JOYSTICK,"Joystick"},
-	{"MOUSE",      "Mouse"},
-	{"LIGHTGUN",   "Light Gun"},
-	{"TRACKBALL",  "Trackball"},
-	{"DIAL",       "Dial"},
-	{"PADDLE",     "Paddle"},
-	{"PEDAL",      "Pedal"},
-	{"POSITIONAL", "Positional"},
-	{TYPE_START,   "Start"},
-	{TYPE_COIN,    "Coin"},
+	{TYPE_BUTTON,     "Button"},
+	{TYPE_JOYSTICK,   "Joystick"},
+	{TYPE_MOUSE,      "Mouse"},
+	{TYPE_LIGHTGUN,   "Light Gun"},
+	{TYPE_TRACKBALL,  "Trackball"},
+	{TYPE_DIAL,       "Dial"},
+	{TYPE_PADDLE,     "Paddle"},
+	{TYPE_PEDAL,      "Pedal"},
+	{TYPE_POSITIONAL, "Positional"},
+	{TYPE_START,      "Start"},
+	{TYPE_COIN,       "Coin"},
 };
 
 const vector<DialogPrompt::CabinetCategory> DialogPrompt::cabinetCategories {
@@ -59,20 +59,16 @@ const vector<DialogPrompt::CabinetCategory> DialogPrompt::cabinetCategories {
 };
 
 const std::unordered_map<string, DialogPrompt::Filter> DialogPrompt::filters {
-	{ELEMENT_TYPE_BUTTON,    {true,  false, {"BUTTON"},             false, {}}},
-	{ELEMENT_TYPE_JOYSTICK,  {true,  false, {TYPE_JOYSTICK},        false, {}}},
-	{ELEMENT_TYPE_TRACKBALL, {true,  false, {"TRACKBALL", "MOUSE"}, false, {}}},
-	{ELEMENT_TYPE_SPINNER,   {true,  false, {"DIAL", "PADDLE"},     false, {}}},
-	{ELEMENT_TYPE_LIGHTGUN,  {true,  false, {"LIGHTGUN"},           false, {}}},
-	{ELEMENT_TYPE_CREDIT,    {true,  false, {TYPE_START, TYPE_COIN},false, {}}},
-	{ELEMENT_TYPE_ACTUATOR,  {false, true,  {},                     false,
-		{"KNOCKER", "MOTOR", "PUSHER", "SOLENOID", "RECOIL"}}},
-	{ELEMENT_TYPE_BAR,       {false, true,  {},                     false,
-		{"SOUND", "CABINET", "TMOLDING", "MARQUEE", "FLOOR"}}},
-	{ELEMENT_TYPE_LIGHT,     {true,  true,  {TYPE_JOYSTICK},        true,
-		{"SOUND", "CABINET", "TMOLDING", "MARQUEE", "FLOOR",
-		 "MENU", "BACK", "PAUSE", "ENTER", "POWER", "LIGHT"}}},
-	{ELEMENT_TYPE_MISC,      {true,  true,  {},                     true,  {}}},
+	{ELEMENT_TYPE_BUTTON,    {true,  false, false, {TYPE_BUTTON},                {}}},
+	{ELEMENT_TYPE_JOYSTICK,  {true,  false, false, {TYPE_JOYSTICK},              {}}},
+	{ELEMENT_TYPE_TRACKBALL, {true,  false, false, {TYPE_TRACKBALL, TYPE_MOUSE}, {}}},
+	{ELEMENT_TYPE_SPINNER,   {true,  false, false, {TYPE_DIAL, TYPE_PADDLE},     {}}},
+	{ELEMENT_TYPE_LIGHTGUN,  {true,  false, false, {TYPE_LIGHTGUN},              {}}},
+	{ELEMENT_TYPE_CREDIT,    {true,  false, false, {TYPE_START, TYPE_COIN},      {}}},
+	{ELEMENT_TYPE_ACTUATOR,  {false, true,  false, {},                           {"KNOCKER", "MOTOR", "PUSHER", "SOLENOID", "RECOIL"}}},
+	{ELEMENT_TYPE_BAR,       {false, true,  false, {},                           {"SOUND", "CABINET", "TMOLDING", "MARQUEE", "FLOOR"}}},
+	{ELEMENT_TYPE_LIGHT,     {true,  true,  true,  {TYPE_JOYSTICK},              {"SOUND", "CABINET", "TMOLDING", "MARQUEE", "FLOOR",  "MENU", "BACK", "PAUSE", "ENTER", "POWER", "LIGHT"}}},
+	{ELEMENT_TYPE_MISC,      {true,  true,  true,  {},                           {}}},
 };
 
 DialogPrompt::DialogPrompt(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept :
@@ -109,8 +105,7 @@ DialogPrompt::DialogPrompt(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 	entryName->set_activates_default(true);
 
 	// Every selection change rebuilds the preview.
-	for (auto* c : {comboPlayer, comboPlayerIndex, comboPlayerWays,
-	                comboCabinetCategory, comboCabinetIndex})
+	for (auto c : {comboPlayer, comboPlayerIndex, comboPlayerWays, comboCabinetCategory, comboCabinetIndex})
 		c->signal_changed().connect(sigc::mem_fun(*this, &DialogPrompt::updatePreview));
 
 	// Player TYPE drives row visibility too.
