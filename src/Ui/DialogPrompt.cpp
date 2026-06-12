@@ -23,6 +23,57 @@
 #include "DialogPrompt.hpp"
 
 using namespace LEDSpicerUI::Ui;
+using namespace LEDSpicerUI::Constants;
+
+const vector<DialogPrompt::PlayerType> DialogPrompt::playerTypes {
+	{"BUTTON",     "Button"},
+	{TYPE_JOYSTICK,"Joystick"},
+	{"MOUSE",      "Mouse"},
+	{"LIGHTGUN",   "Light Gun"},
+	{"TRACKBALL",  "Trackball"},
+	{"DIAL",       "Dial"},
+	{"PADDLE",     "Paddle"},
+	{"PEDAL",      "Pedal"},
+	{"POSITIONAL", "Positional"},
+	{TYPE_START,   "Start"},
+	{TYPE_COIN,    "Coin"},
+};
+
+const vector<DialogPrompt::CabinetCategory> DialogPrompt::cabinetCategories {
+	{"KNOCKER",  "Knocker"},
+	{"MOTOR",    "Motor"},
+	{"PUSHER",   "Pusher"},
+	{"SOLENOID", "Solenoid"},
+	{"RECOIL",   "Recoil"},
+	{"SOUND",    "Sound-reactive strip"},
+	{"CABINET",  "Cabinet bar"},
+	{"TMOLDING", "T-Molding"},
+	{"MARQUEE",  "Marquee"},
+	{"FLOOR",    "Under-cabinet glow"},
+	{"MENU",     "Menu"},
+	{"BACK",     "Back"},
+	{"PAUSE",    "Pause"},
+	{"ENTER",    "Enter"},
+	{"POWER",    "Power"},
+	{"LIGHT",    "Generic light"},
+};
+
+const std::unordered_map<string, DialogPrompt::Filter> DialogPrompt::filters {
+	{ELEMENT_TYPE_BUTTON,    {true,  false, {"BUTTON"},             false, {}}},
+	{ELEMENT_TYPE_JOYSTICK,  {true,  false, {TYPE_JOYSTICK},        false, {}}},
+	{ELEMENT_TYPE_TRACKBALL, {true,  false, {"TRACKBALL", "MOUSE"}, false, {}}},
+	{ELEMENT_TYPE_SPINNER,   {true,  false, {"DIAL", "PADDLE"},     false, {}}},
+	{ELEMENT_TYPE_LIGHTGUN,  {true,  false, {"LIGHTGUN"},           false, {}}},
+	{ELEMENT_TYPE_CREDIT,    {true,  false, {TYPE_START, TYPE_COIN},false, {}}},
+	{ELEMENT_TYPE_ACTUATOR,  {false, true,  {},                     false,
+		{"KNOCKER", "MOTOR", "PUSHER", "SOLENOID", "RECOIL"}}},
+	{ELEMENT_TYPE_BAR,       {false, true,  {},                     false,
+		{"SOUND", "CABINET", "TMOLDING", "MARQUEE", "FLOOR"}}},
+	{ELEMENT_TYPE_LIGHT,     {true,  true,  {TYPE_JOYSTICK},        true,
+		{"SOUND", "CABINET", "TMOLDING", "MARQUEE", "FLOOR",
+		 "MENU", "BACK", "PAUSE", "ENTER", "POWER", "LIGHT"}}},
+	{ELEMENT_TYPE_MISC,      {true,  true,  {},                     true,  {}}},
+};
 
 DialogPrompt::DialogPrompt(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept :
 	GladeDialog(obj, builder)
@@ -47,7 +98,6 @@ DialogPrompt::DialogPrompt(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 	builder->get_widget("LabelNameGenPlayerWays",      labelPlayerWays);
 	builder->get_widget("LabelNameGenPreview",         previewLabel);
 	builder->get_widget("ImageNameGenPreview",         previewIcon);
-	cabinetStore = static_cast<Gtk::ListStore*>(builder->get_object("liststoreNameGenCabinet").get());
 
 	Defaults::attachFilenameFilter(entryName);
 
@@ -58,12 +108,10 @@ DialogPrompt::DialogPrompt(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 
 	entryName->set_activates_default(true);
 
-	populateCabinetStore();
-
 	// Every selection change rebuilds the preview.
-	for (auto* c : {comboPlayer, comboPlayerIndex, comboPlayerWays, comboCabinetIndex})
+	for (auto* c : {comboPlayer, comboPlayerIndex, comboPlayerWays,
+	                comboCabinetCategory, comboCabinetIndex})
 		c->signal_changed().connect(sigc::mem_fun(*this, &DialogPrompt::updatePreview));
-	comboCabinetCategory->signal_changed().connect(sigc::mem_fun(*this, &DialogPrompt::updatePreview));
 
 	// Player TYPE drives row visibility too.
 	comboPlayerType->signal_changed().connect([this]() {
@@ -77,92 +125,28 @@ DialogPrompt::DialogPrompt(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>
 	);
 }
 
-namespace {
-
-struct PlayerType { const char* id; const char* label; };
-constexpr PlayerType PLAYER_TYPE_ALL[] = {
-	{"BUTTON",     "Button"},
-	{"JOYSTICK",   "Joystick"},
-	{"MOUSE",      "Mouse"},
-	{"LIGHTGUN",   "Light Gun"},
-	{"TRACKBALL",  "Trackball"},
-	{"DIAL",       "Dial"},
-	{"PADDLE",     "Paddle"},
-	{"PEDAL",      "Pedal"},
-	{"POSITIONAL", "Positional"},
-	{"START",      "Start"},
-	{"COIN",       "Coin"},
-};
-
-struct CabinetRow { const char* id; const char* label; };
-constexpr CabinetRow CABINET_GROUPS[][6] = {
-	{{nullptr, "Actuators"},   {"KNOCKER",  "Knocker"},               {"MOTOR",    "Motor"},
-	 {"PUSHER",  "Pusher"},    {"SOLENOID", "Solenoid"},              {"RECOIL",   "Recoil"}},
-	{{nullptr, "LED Strips"},  {"SOUND",    "Sound-reactive strip"},  {"CABINET",  "Cabinet bar"},
-	 {"TMOLDING","T-Molding"}, {"MARQUEE",  "Marquee"},               {"FLOOR",    "Under-cabinet glow"}},
-	{{nullptr, "Controls"},    {"MENU",     "Menu"},                  {"BACK",     "Back"},
-	 {"PAUSE",   "Pause"},     {"ENTER",    "Enter"},                 {nullptr, nullptr}},
-	{{nullptr, "System"},      {"POWER",    "Power"},                 {"LIGHT",    "Generic light"},
-	 {nullptr, nullptr},       {nullptr, nullptr},                    {nullptr, nullptr}},
-};
-
-const std::unordered_map<string, DialogPrompt::Filter> FILTERS {
-	{ELEMENT_TYPE_BUTTON,    {true,  false, {"BUTTON"},               false, {}}},
-	{ELEMENT_TYPE_JOYSTICK,  {true,  false, {"JOYSTICK"},             false, {}}},
-	{ELEMENT_TYPE_TRACKBALL, {true,  false, {"TRACKBALL", "MOUSE"},   false, {}}},
-	{ELEMENT_TYPE_SPINNER,   {true,  false, {"DIAL", "PADDLE"},       false, {}}},
-	{ELEMENT_TYPE_LIGHTGUN,  {true,  false, {"LIGHTGUN"},             false, {}}},
-	{ELEMENT_TYPE_CREDIT,    {true,  false, {"START", "COIN"},        false, {}}},
-	{ELEMENT_TYPE_ACTUATOR,  {false, true,  {},                       false,
-		{"KNOCKER", "MOTOR", "PUSHER", "SOLENOID", "RECOIL"}}},
-	{ELEMENT_TYPE_BAR,       {false, true,  {},                       false,
-		{"SOUND", "CABINET", "TMOLDING", "MARQUEE", "FLOOR"}}},
-	{ELEMENT_TYPE_LIGHT,     {true,  true,  {"JOYSTICK"},             true,
-		{"SOUND", "CABINET", "TMOLDING", "MARQUEE", "FLOOR",
-		 "MENU", "BACK", "PAUSE", "ENTER", "POWER", "LIGHT"}}},
-	{ELEMENT_TYPE_MISC,      {true,  true,  {},                       true,  {}}},
-};
-
-} // anonymous
-
-void DialogPrompt::populateCabinetStore() noexcept {
-	for (const auto& group : CABINET_GROUPS) {
-		for (const auto& row : group) {
-			if (not row.label) continue;
-			auto r {*(cabinetStore->append())};
-			r.set_value(0, string(row.id ? row.id : ""));
-			r.set_value(1, string(row.label));
-			r.set_value(2, row.id != nullptr);  // headers stay insensitive forever
-		}
-	}
-}
-
 void DialogPrompt::applyFilter(const string& elementTypeId) noexcept {
-	const auto it {FILTERS.find(elementTypeId)};
-	currentFilter = (it == FILTERS.end()) ? FILTERS.at(ELEMENT_TYPE_MISC) : it->second;
+	const auto it {filters.find(elementTypeId)};
+	currentFilter = (it == filters.end()) ? filters.at(ELEMENT_TYPE_MISC) : it->second;
 
 	// Stack pages.
-	stack->get_child_by_name("player")->set_visible(currentFilter.playerTab);
-	stack->get_child_by_name("cabinet")->set_visible(currentFilter.cabinetTab);
+	stack->get_child_by_name(PAGE_PLAYER) ->set_visible(currentFilter.playerTab);
+	stack->get_child_by_name(PAGE_CABINET)->set_visible(currentFilter.cabinetTab);
 	stackSwitcher->set_visible(currentFilter.playerTab and currentFilter.cabinetTab);
-	stack->set_visible_child(currentFilter.playerTab ? "player" : "cabinet");
+	stack->set_visible_child(currentFilter.playerTab ? PAGE_PLAYER : PAGE_CABINET);
 
 	// Rebuild the Player Control TYPE combo with only allowed ids.
 	comboPlayerType->remove_all();
-	for (const auto& t : PLAYER_TYPE_ALL) {
+	for (const auto& t : playerTypes) {
 		if (currentFilter.playerTypes.empty() or currentFilter.playerTypes.count(t.id))
 			comboPlayerType->append(t.id, t.label);
 	}
 
-	// Cabinet rows — keep headers insensitive; gate entries by the allowed set.
-	for (auto iter : cabinetStore->children()) {
-		auto row {*iter};
-		string id;
-		row.get_value(0, id);
-		if (id.empty()) continue;  // group header
-		const bool allowed {currentFilter.cabinetCategories.empty() or
-		                    currentFilter.cabinetCategories.count(id)};
-		row.set_value(2, allowed);
+	// Rebuild the Cabinet Category combo with only allowed ids.
+	comboCabinetCategory->remove_all();
+	for (const auto& c : cabinetCategories) {
+		if (currentFilter.cabinetCategories.empty() or currentFilter.cabinetCategories.count(c.id))
+			comboCabinetCategory->append(c.id, c.label);
 	}
 
 	// Reset selections.
@@ -176,27 +160,27 @@ void DialogPrompt::applyFilter(const string& elementTypeId) noexcept {
 
 void DialogPrompt::updatePlayerControlVisibility() noexcept {
 	const string t {comboPlayerType->get_active_id()};
-	const bool hasIndex {not t.empty() and t != "START" and t != "COIN"};
+	const bool hasIndex {not t.empty() and t != TYPE_START and t != TYPE_COIN};
 	labelPlayerIndex->set_visible(hasIndex);
 	comboPlayerIndex->set_visible(hasIndex);
-	const bool hasWays {currentFilter.playerWaysAllowed and t == "JOYSTICK"};
+	const bool hasWays {currentFilter.playerWaysAllowed and t == TYPE_JOYSTICK};
 	labelPlayerWays->set_visible(hasWays);
 	comboPlayerWays->set_visible(hasWays);
 }
 
 string DialogPrompt::buildPreview() const noexcept {
 	const string page {stack->get_visible_child_name()};
-	if (page == "player")
-		return Defaults::buildPlayerControlName(
-			comboPlayer->get_active_id(),
-			comboPlayerType->get_active_id(),
+	if (page == PAGE_PLAYER)
+		return buildPlayerControlName(
+			comboPlayer     ->get_active_id(),
+			comboPlayerType ->get_active_id(),
 			labelPlayerIndex->is_visible() ? string(comboPlayerIndex->get_active_id()) : emptyString,
-			labelPlayerWays->is_visible()  ? string(comboPlayerWays->get_active_id())  : emptyString
+			labelPlayerWays ->is_visible() ? string(comboPlayerWays ->get_active_id()) : emptyString
 		);
-	if (page == "cabinet")
-		return Defaults::buildCabinetItemName(
+	if (page == PAGE_CABINET)
+		return buildCabinetItemName(
 			comboCabinetCategory->get_active_id(),
-			comboCabinetIndex->get_active_id()
+			comboCabinetIndex   ->get_active_id()
 		);
 	return emptyString;
 }
@@ -205,7 +189,7 @@ void DialogPrompt::updatePreview() noexcept {
 	const string name {buildPreview()};
 	previewLabel->set_text(name);
 	if (name.empty()) {
-		previewIcon->set_from_icon_name("dialog-question-symbolic", Gtk::ICON_SIZE_DIALOG);
+		previewIcon->set_from_icon_name(ICON_INVALID, Gtk::ICON_SIZE_DIALOG);
 		btnApply->set_sensitive(false);
 		return;
 	}

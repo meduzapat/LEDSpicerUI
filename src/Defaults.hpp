@@ -749,29 +749,6 @@ public:
 	 */
 	static string matchElementTypeByName(const Glib::ustring& name) noexcept;
 
-	/**
-	 * Builds a Player Control element name (e.g. "P1_JOYSTICK1_8WAYS").
-	 * Returns empty when player or type is missing, or when type requires an
-	 * index and index is empty.
-	 * Index is ignored when type is START or COIN.
-	 * waysSuffix is appended verbatim ("4WAYS", "vertical2WAYS"…) when non-empty.
-	 */
-	static string buildPlayerControlName(
-		const string& player,
-		const string& type,
-		const string& index,
-		const string& waysSuffix
-	) noexcept;
-
-	/**
-	 * Builds a Cabinet Item element name (e.g. "FLOOR" or "FLOOR1").
-	 * Returns empty when category is empty. Index is appended verbatim when non-empty.
-	 */
-	static string buildCabinetItemName(
-		const string& category,
-		const string& index
-	) noexcept;
-
 	/// Standard colors in family order — defines the name contract for color files.
 	static const vector<ColorInfo> legalColors;
 

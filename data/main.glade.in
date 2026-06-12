@@ -3387,18 +3387,9 @@ Compatible with version @MINIMUM_COMPATIBILITY@+</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkComboBox" id="ComboNameGenCabinetCategory">
+                      <object class="GtkComboBoxText" id="ComboNameGenCabinetCategory">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="model">liststoreNameGenCabinet</property>
-                        <property name="id-column">0</property>
-                        <child>
-                          <object class="GtkCellRendererText" id="cabinetCategoryCell"/>
-                          <attributes>
-                            <attribute name="text">1</attribute>
-                            <attribute name="sensitive">2</attribute>
-                          </attributes>
-                        </child>
                       </object>
                       <packing>
                         <property name="left-attach">1</property>
@@ -5672,16 +5663,6 @@ Autodetected if ledspicer is installed</property>
       <!-- column-name Label -->
       <column type="gchararray"/>
       <!-- column-name sensitive -->
-      <column type="gboolean"/>
-    </columns>
-  </object>
-  <object class="GtkListStore" id="liststoreNameGenCabinet">
-    <columns>
-      <!-- column-name Id (emit token, empty for headers) -->
-      <column type="gchararray"/>
-      <!-- column-name Label (display, group header when not sensitive) -->
-      <column type="gchararray"/>
-      <!-- column-name sensitive (false = group header / filtered out) -->
       <column type="gboolean"/>
     </columns>
   </object>

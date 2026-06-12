@@ -145,6 +145,12 @@ add_test_executable(MessageTest
 	""
 )
 
+add_test_executable(DialogPromptTest
+	"Ui/DialogPromptTest.cpp"
+	"${COMMON_SRCS}"
+	""
+)
+
 add_test_executable(XMLHelperTest
 	"XMLHelperTest.cpp"
 	"${COMMON_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp;${CMAKE_SOURCE_DIR}/src/Ui/StatusBar.cpp;${CMAKE_SOURCE_DIR}/src/XMLHelper.cpp"

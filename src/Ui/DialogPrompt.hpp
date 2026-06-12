@@ -58,9 +58,55 @@ public:
 	 */
 	string askElementName(const string& elementTypeId, Gtk::Window* parent = nullptr) noexcept;
 
+	/**
+	 * Builds a Player Control element name (e.g. "P1_JOYSTICK1_8WAYS").
+	 * Returns empty when player or type is missing, or when type requires an
+	 * index and index is empty.
+	 * Index is ignored when type is START or COIN.
+	 * waysSuffix is appended verbatim ("4WAYS", "vertical2WAYS"…) when non-empty.
+	 */
+	static string buildPlayerControlName(
+		const string& player,
+		const string& type,
+		const string& index,
+		const string& waysSuffix
+	) noexcept {
+		if (player.empty() or type.empty()) return emptyString;
+		string name {"P" + player + "_" + type};
+		if (type == TYPE_START or type == TYPE_COIN) return name;
+		if (index.empty()) return emptyString;
+		name += index;
+		if (not waysSuffix.empty()) name += "_" + waysSuffix;
+		return name;
+	}
+
+	/**
+	 * Builds a Cabinet Item element name (e.g. "FLOOR" or "FLOOR1").
+	 * Returns empty when category is empty. Index is appended verbatim.
+	 */
+	static string buildCabinetItemName(
+		const string& category,
+		const string& index
+	) noexcept {
+		if (category.empty()) return emptyString;
+		return category + index;
+	}
+
 protected:
 
 	enum class Section : uint8_t { DirName, GroupName, ElementName };
+
+	/// Pretty label + emit id for the Player Control TYPE combo.
+	struct PlayerType {
+		string id;
+		string label;
+	};
+
+	/// Pretty label + emit id for the Cabinet Item Category combo.
+	struct CabinetCategory {
+		string id;
+		string label;
+	};
 
 	/// Per-element-type rules driving page visibility and combo populations.
 	struct Filter {
@@ -70,6 +116,19 @@ protected:
 		bool       playerWaysAllowed  = false;
 		StringUSet cabinetCategories; /// empty → all
 	};
+
+	/// Logic tokens — kept in one place so behaviour comparisons match the catalogs.
+	static inline const string
+		PAGE_PLAYER    {"player"},
+		PAGE_CABINET   {"cabinet"},
+		TYPE_START     {"START"},
+		TYPE_COIN      {"COIN"},
+		TYPE_JOYSTICK  {"JOYSTICK"},
+		ICON_INVALID   {"dialog-question-symbolic"};
+
+	static const vector<PlayerType>                 playerTypes;
+	static const vector<CabinetCategory>            cabinetCategories;
+	static const std::unordered_map<string, Filter> filters;
 
 	Gtk::Box
 		* boxName    = nullptr,
@@ -85,10 +144,8 @@ protected:
 		* comboPlayerType         = nullptr,
 		* comboPlayerIndex        = nullptr,
 		* comboPlayerWays         = nullptr,
+		* comboCabinetCategory    = nullptr,
 		* comboCabinetIndex       = nullptr;
-
-	Gtk::ComboBox*  comboCabinetCategory = nullptr;
-	Gtk::ListStore* cabinetStore         = nullptr;
 
 	Gtk::Stack*         stack         = nullptr;
 	Gtk::StackSwitcher* stackSwitcher = nullptr;
@@ -112,10 +169,7 @@ protected:
 	 */
 	int runFor(Section section, Gtk::Window* parent) noexcept;
 
-	/// One-shot: inserts group headers (insensitive) and category rows.
-	void populateCabinetStore() noexcept;
-
-	/// Applies the per-element-type filter table to tabs, Player TYPE combo, and Cabinet rows.
+	/// Applies the per-element-type filter to tabs and combo populations.
 	void applyFilter(const string& elementTypeId) noexcept;
 
 	/// Show/hide Index and Ways rows on the Player page per the current TYPE pick.
