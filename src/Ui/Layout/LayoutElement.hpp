@@ -75,8 +75,6 @@ public:
 
 private:
 
-	static const string ICON_DIR;
-
 	Storage::Element* element = nullptr;
 	LayoutTester*     tester  = nullptr;
 

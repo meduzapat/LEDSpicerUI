@@ -20,6 +20,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <gio/gio.h>
 #include "ThemeManager.hpp"
 
 using namespace LEDSpicerUI::Ui;
@@ -28,23 +29,21 @@ ThemeManager ThemeManager::instance;
 
 void ThemeManager::initialize() noexcept {
 	themes.clear();
-	const string themesDir{PACKAGE_DATA_DIR "themes/"};
-	try {
-		Glib::Dir d(themesDir);
-		for (const auto& entry : d) {
-			const string themeDir{themesDir + entry + "/"};
-			if (not Glib::file_test(themeDir + "metadata.xml", Glib::FILE_TEST_IS_REGULAR))
-				continue;
-			if (not Glib::file_test(themeDir + "preview.png", Glib::FILE_TEST_IS_REGULAR)) {
-				std::cerr <<
-					"ThemeManager: skipping theme '"    << entry <<
-					"' — missing mandatory preview.png" << std::endl;
-				continue;
-			}
-			parseMetadata(themeDir, entry);
+	constexpr const char* themesPrefix{"/org/ledspicer/ui/themes/"};
+	GError* err{nullptr};
+	gchar** children{g_resources_enumerate_children(themesPrefix, G_RESOURCE_LOOKUP_FLAGS_NONE, &err)};
+	if (children) {
+		for (int i = 0; children[i]; ++i) {
+			string themeId{children[i]};
+			if (not themeId.empty() and themeId.back() == '/')
+				themeId.pop_back();
+			parseMetadata(string{themesPrefix} + themeId + "/", themeId);
 		}
+		g_strfreev(children);
 	}
-	catch (const Glib::Error&) {}
+	else {
+		if (err) g_error_free(err);
+	}
 
 	auto gs = Gtk::Settings::get_default();
 	auto onSystemChange = [this]() {
@@ -62,12 +61,12 @@ bool ThemeManager::apply(const string& themeId, Config::Settings::ThemeStyle sty
 	removeProvider(baseProvider);
 	removeProvider(themeProvider);
 
-	baseProvider = loadCss(PACKAGE_DATA_DIR "style-base.css", GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+	baseProvider = loadCss("/org/ledspicer/ui/style-base.css", GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 	if (not baseProvider)
-		baseProvider = loadCss(PACKAGE_DATA_DIR "style.css", GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+		baseProvider = loadCss("/org/ledspicer/ui/style.css", GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 
 	const string variant{resolveVariant(style)};
-	const string cssPath{PACKAGE_DATA_DIR "themes/" + id + "/" + variant + "/theme.css"};
+	const string cssPath{"/org/ledspicer/ui/themes/" + id + "/" + variant + "/theme.css"};
 
 	themeProvider = loadCss(cssPath, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION + 1);
 	if (not themeProvider) {
@@ -105,9 +104,23 @@ string ThemeManager::resolveVariant(Config::Settings::ThemeStyle style) noexcept
 	return "light";
 }
 
-void ThemeManager::parseMetadata(const string& themeDir, const string& themeId) noexcept {
+void ThemeManager::parseMetadata(const string& resourcePrefix, const string& themeId) noexcept {
+	GError* err{nullptr};
+	GBytes* bytes{g_resources_lookup_data(
+		(resourcePrefix + "metadata.xml").c_str(),
+		G_RESOURCE_LOOKUP_FLAGS_NONE,
+		&err
+	)};
+	if (not bytes) {
+		if (err) g_error_free(err);
+		return;
+	}
+	gsize size{0};
+	const gchar* data{static_cast<const gchar*>(g_bytes_get_data(bytes, &size))};
 	tinyxml2::XMLDocument doc;
-	if (doc.LoadFile((themeDir + "metadata.xml").c_str()) != tinyxml2::XML_SUCCESS)
+	const bool parseOk{doc.Parse(data, size) == tinyxml2::XML_SUCCESS};
+	g_bytes_unref(bytes);
+	if (not parseOk)
 		return;
 
 	const auto root = doc.FirstChildElement("theme");
@@ -123,14 +136,14 @@ void ThemeManager::parseMetadata(const string& themeDir, const string& themeId) 
 	themes.push_back(std::move(meta));
 }
 
-Glib::RefPtr<Gtk::CssProvider> ThemeManager::loadCss(const string& path, guint priority) noexcept {
+Glib::RefPtr<Gtk::CssProvider> ThemeManager::loadCss(const string& resourcePath, guint priority) noexcept {
 
 	auto provider {Gtk::CssProvider::create()};
 	try {
-		provider->load_from_path(path);
+		provider->load_from_resource(resourcePath);
 	}
 	catch (const Glib::Error& e) {
-		std::cerr << "ThemeManager: failed to load " << path << ": " << e.what() << std::endl;
+		std::cerr << "ThemeManager: failed to load " << resourcePath << ": " << e.what() << std::endl;
 		return {};
 	}
 	Gtk::StyleContext::add_provider_for_screen(

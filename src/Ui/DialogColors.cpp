@@ -20,6 +20,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <iostream>
 #include "DialogColors.hpp"
 
 using namespace LEDSpicerUI::Ui;
@@ -105,12 +106,18 @@ void DialogColors::setColorsFromFile(const string& path) noexcept {
 	// Set new CSS data (if colors > 0).
 	if (const string c {setColors(colors)}; c.size()) {
 		currentProvider = Gtk::CssProvider::create();
-		currentProvider->load_from_data(c);
-		styleContext->add_provider_for_screen(
-			Gdk::Screen::get_default(),
-			currentProvider,
-			GTK_STYLE_PROVIDER_PRIORITY_APPLICATION - 1
-		);
+		try {
+			currentProvider->load_from_data(c);
+			styleContext->add_provider_for_screen(
+				Gdk::Screen::get_default(),
+				currentProvider,
+				GTK_STYLE_PROVIDER_PRIORITY_APPLICATION - 1
+			);
+		}
+		catch (const Glib::Error& e) {
+			std::cerr << "DialogColors: failed to apply color CSS: " << e.what() << std::endl;
+			currentProvider.reset();
+		}
 	}
 }
 

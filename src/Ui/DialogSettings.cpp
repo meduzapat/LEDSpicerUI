@@ -464,9 +464,9 @@ void DialogSettings::populateThemes() {
 
 		auto img = Gtk::manage(new Gtk::Image());
 		img->set_size_request(120, 80);
-		const string imgPath{PACKAGE_DATA_DIR "themes/" + meta.id + "/preview.png"};
+		const string imgPath{"/org/ledspicer/ui/themes/" + meta.id + "/preview.png"};
 		try {
-			img->set(Gdk::Pixbuf::create_from_file(imgPath, 120, 80, true));
+			img->set(Gdk::Pixbuf::create_from_resource(imgPath, 120, 80, true));
 		}
 		catch (const Glib::Error&) {
 			img->set_from_icon_name("image-missing", Gtk::ICON_SIZE_DIALOG);

@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
 	auto builder = Gtk::Builder::create();
 
 	try {
-		builder->add_from_file(PACKAGE_DATA_DIR "main.glade");
+		builder->add_from_resource("/org/ledspicer/ui/main.glade");
 	}
 	catch(Glib::Error& e) {
 		std::cerr << e.what() << std::endl;

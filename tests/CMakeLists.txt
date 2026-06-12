@@ -17,6 +17,12 @@ include_directories(
 	${GTEST_INCLUDE_DIRS}
 )
 
+link_directories(
+	${GTKMM30_LIBRARY_DIRS}
+	${TINYXML2_LIBRARY_DIRS}
+	${GTEST_LIBRARY_DIRS}
+)
+
 add_compile_options(-Wall -Wextra -fexceptions)
 
 macro(add_test_executable TEST_NAME TEST_SRC EXTRA_SRCS EXTRA_LIBS)

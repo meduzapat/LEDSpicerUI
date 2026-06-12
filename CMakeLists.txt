@@ -35,6 +35,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GTKMM30 REQUIRED gtkmm-3.0>=3.24)
 pkg_check_modules(TINYXML2 REQUIRED tinyxml2>=6.0)
+find_program(GLIB_COMPILE_RESOURCES glib-compile-resources REQUIRED)
 
 pkg_check_modules(GTEST gtest>=1.8)
 if(GTEST_FOUND)
@@ -134,6 +135,11 @@ target_compile_options(ledspicerui PRIVATE
 	-fexceptions
 )
 
+target_link_directories(ledspicerui PRIVATE
+	${GTKMM30_LIBRARY_DIRS}
+	${TINYXML2_LIBRARY_DIRS}
+)
+
 target_link_libraries(ledspicerui PRIVATE
 	${GTKMM30_LIBRARIES}
 	${TINYXML2_LIBRARIES}
@@ -150,25 +156,35 @@ configure_file(
 	@ONLY
 )
 
-set(DATA_FILES
-	${CMAKE_BINARY_DIR}/data/main.glade
-	data/style.css
-	data/style-base.css
-	data/basicColors.xml
+set(GRESOURCE_XML ${CMAKE_SOURCE_DIR}/data/ledspicerui.gresource.xml)
+set(GRESOURCE_C   ${CMAKE_BINARY_DIR}/src/resources.cpp)
+
+file(GLOB_RECURSE GRESOURCE_DEPS
+	"${CMAKE_SOURCE_DIR}/data/*.css"
+	"${CMAKE_SOURCE_DIR}/data/*.png"
+	"${CMAKE_SOURCE_DIR}/data/themes/*/metadata.xml"
 )
 
-file(GLOB IMAGE_FILES "data/images/*.png" "data/images/*.svg")
-file(GLOB ELEMENT_IMAGE_FILES "data/images/elements/*.png" "data/images/elements/*.svg")
-file(GLOB RESTRICTOR_IMAGE_FILES "data/images/restrictors/*.png" "data/images/restrictors/*.svg")
-file(GLOB_RECURSE THEME_FILES "data/themes/*")
+add_custom_command(
+	OUTPUT ${GRESOURCE_C}
+	COMMAND ${GLIB_COMPILE_RESOURCES}
+		--generate-source
+		--target=${GRESOURCE_C}
+		--sourcedir=${CMAKE_SOURCE_DIR}/data
+		--sourcedir=${CMAKE_BINARY_DIR}/data
+		${GRESOURCE_XML}
+	DEPENDS
+		${GRESOURCE_XML}
+		${GRESOURCE_DEPS}
+		${CMAKE_BINARY_DIR}/data/main.glade
+	COMMENT "Compiling GResource bundle"
+	VERBATIM
+)
+
+target_sources(ledspicerui PRIVATE ${GRESOURCE_C})
 
 install(TARGETS ledspicerui DESTINATION bin)
-install(FILES ${DATA_FILES} DESTINATION share/${PROJECT_NAME})
-install(FILES ${IMAGE_FILES} DESTINATION share/${PROJECT_NAME}/images)
-install(FILES ${ELEMENT_IMAGE_FILES} DESTINATION share/${PROJECT_NAME}/images/elements)
-install(FILES ${RESTRICTOR_IMAGE_FILES} DESTINATION share/${PROJECT_NAME}/images/restrictors)
-install(DIRECTORY data/themes/ DESTINATION share/${PROJECT_NAME}/themes
-	PATTERN "*.md" EXCLUDE)
+install(FILES data/basicColors.xml DESTINATION share/${PROJECT_NAME})
 
 if(HAVE_GTEST)
 	add_subdirectory(tests)

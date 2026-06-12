@@ -26,7 +26,7 @@
 using namespace LEDSpicerUI::Ui::Layout;
 using namespace LEDSpicerUI::Constants;
 
-const string LayoutElement::ICON_DIR {string{PACKAGE_DATA_DIR} + "images/elements/"};
+static constexpr const char* ICON_RESOURCE_PREFIX{"/org/ledspicer/ui/images/elements/"};
 
 LayoutElement::LayoutElement(Storage::Element* el, LayoutTester* t) noexcept :
 	Gtk::EventBox(),
@@ -77,8 +77,8 @@ void LayoutElement::build() noexcept {
 	body->pack_start(*nameLabel, Gtk::PACK_SHRINK);
 
 	iconImg = Gtk::manage(new Gtk::Image());
-	iconImg->set(Gdk::Pixbuf::create_from_file(
-		ICON_DIR + iconForType(element->getValue(TYPE)),
+	iconImg->set(Gdk::Pixbuf::create_from_resource(
+		ICON_RESOURCE_PREFIX + iconForType(element->getValue(TYPE)),
 		ICON_PX, ICON_PX, true
 	));
 	iconImg->get_style_context()->add_class(CSS_LAYOUT_ELEMENT_ICON);
@@ -137,8 +137,8 @@ void LayoutElement::refresh() noexcept {
 		return;
 	}
 	nameLabel->set_text(element->getPrimaryValue());
-	iconImg->set(Gdk::Pixbuf::create_from_file(
-		ICON_DIR + iconForType(element->getValue(TYPE)),
+	iconImg->set(Gdk::Pixbuf::create_from_resource(
+		ICON_RESOURCE_PREFIX + iconForType(element->getValue(TYPE)),
 		ICON_PX, ICON_PX, true
 	));
 	if (kind == Kind::Strip) {
