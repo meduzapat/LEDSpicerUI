@@ -18,10 +18,10 @@ data/themes/<id>/
 ├── preview.png             ← required, 400×267, RGBA
 ├── dark/
 │   ├── theme.css           ← required
-│   └── 14 background PNGs  ← 1920×1080, RGBA
+│   └── 14 background PNGs  ← see §3 for per-file sizes, RGBA
 └── light/
     ├── theme.css           ← required
-    └── 14 background PNGs  ← 1920×1080, RGBA
+    └── 14 background PNGs  ← see §3 for per-file sizes, RGBA
 ```
 
 `<id>` is the directory name and the value persisted to user settings.
@@ -66,10 +66,19 @@ Filenames must match exactly. Both `dark/` and `light/` must provide all
 | `backgroundLayout.png`        | Top-down arcade cabinet control panel layout    |
 | `backgroundThemeSelector.png` | Stylized swatches / palette display             |
 
+**Image sizes** (updated — the UI now scales backgrounds to fit the
+zone panels; the legacy 1920×1080 sheet was oversized)
+
+| Size      | Files |
+|-----------|-------|
+| 1200×400  | `backgroundAnimations`, `backgroundDevices`, `backgroundInputs`, `backgroundInputSources`, `backgroundInputMaps`, `backgroundInputLinkMaps`, `backgroundProcesses`, `backgroundProfiles`, `backgroundRestrictors`, `backgroundLayout` |
+| 1200×800  | `backgroundColors`, `backgroundGroups`, `backgroundElements` |
+| unchanged | `backgroundThemeSelector` (theme-selector tile art) |
+
 **Rules for the art**
 
-- 1920×1080, PNG with alpha (artwork is rendered over the variant's
-  base color; let transparent regions breathe).
+- PNG with alpha (artwork is rendered over the variant's base color;
+  let transparent regions breathe). Sizes per the table above.
 - Low contrast and quiet — UI widgets sit on top.
 - Dark variant: imagery on a near-black canvas, accents glow.
 - Light variant: imagery on a near-white canvas, accents whisper.
