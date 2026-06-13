@@ -46,7 +46,8 @@ public:
 		ICON_PX           = 48,
 		ELEMENT_WIDTH_PX  = 96,
 		RGB_TOGGLE_PX     = 18,
-		DRAG_THRESHOLD_PX = 5;
+		DRAG_THRESHOLD_PX = 5,
+		NAME_MAX_CHARS    = 20;
 
 	LayoutElement(Storage::Element* element, LayoutTester* tester) noexcept;
 
@@ -65,11 +66,23 @@ public:
 
 	Kind getKind() const noexcept { return kind; }
 
-	/** Fired when the tile becomes active so the board can deactivate the previous one. */
+	/**
+	 * Notifies the board that this tile is now active so it can deactivate the previous one.
+	 * @return the activation signal; payload is the activated tile.
+	 */
 	sigc::signal<void, LayoutElement*>& signal_activated() noexcept { return activated; }
 
-	/** Fired after a drag persists a new position, so the board can recompute its canvas. */
+	/**
+	 * Notifies the board that this tile's position changed so it can recompute its canvas.
+	 * @return the move signal.
+	 */
 	sigc::signal<void>& signal_moved() noexcept { return moved; }
+
+	/**
+	 * Notifies the board that the user requested editing this tile's element.
+	 * @return the edit-request signal; payload is the requesting tile.
+	 */
+	sigc::signal<void, LayoutElement*>& signal_editRequested() noexcept { return editRequested; }
 
 	static Kind categorize(const Storage::Element* element) noexcept;
 
@@ -82,41 +95,45 @@ private:
 
 	Kind kind = Kind::Mono;
 
-	Gtk::Box*      body      = nullptr;
-	Gtk::Label*    nameLabel = nullptr;
-	Gtk::Image*    iconImg   = nullptr;
-	Gtk::Box*      rgbRow    = nullptr;
-	StripRenderer* strip     = nullptr;
+	Gtk::Box
+		* body   = nullptr,
+		* rgbRow = nullptr;
+
+	Gtk::Label* nameLabel = nullptr;
+
+	Gtk::Image
+		* iconImg    = nullptr,
+		* iconBtnImg = nullptr;
+
+	StripRenderer*    strip      = nullptr;
 
 	Gtk::ToggleButton
-		* rgbR = nullptr,
-		* rgbG = nullptr,
-		* rgbB = nullptr;
+		* iconBtn = nullptr,
+		* rgbR    = nullptr,
+		* rgbG    = nullptr,
+		* rgbB    = nullptr;
 
 	bool
-		active        = false,
-		dragging      = false,
-		dragMoved     = false,
-		lightLocked   = false,
-		pressedOnIcon = false;
+		active    = false,
+		dragging  = false,
+		dragMoved = false;
 
 	double
 		dragOffsetX = 0.0,
 		dragOffsetY = 0.0;
 
-	sigc::connection
-		layoutTimer,
-		lightTimer;
+	sigc::connection lightTimer;
 
 	sigc::signal<void, LayoutElement*> activated;
 	sigc::signal<void>                 moved;
+	sigc::signal<void, LayoutElement*> editRequested;
 
 	string pendingTintClass;
 
 	void build() noexcept;
+	/// Sets the tile caption, truncating past NAME_MAX_CHARS with the full name in a tooltip.
+	void setName(const Glib::ustring& full) noexcept;
 	void persistPosition() noexcept;
-	void touchActivity() noexcept;
-	bool onLayoutIdle() noexcept;
 	bool onLightExpired() noexcept;
 	void fire(Storage::Element* target) noexcept;
 	void fireAll() noexcept;
@@ -127,9 +144,8 @@ private:
 	bool onButtonRelease(GdkEventButton* ev) noexcept;
 	bool onMotion(GdkEventMotion* ev)        noexcept;
 
-	bool isInsideIcon(double x, double y) noexcept;
-
 	static string iconForType(const string& typeId) noexcept;
+	static Glib::RefPtr<Gdk::Pixbuf> getCachedIcon(const string& typeId) noexcept;
 	static const string& ledCssClass(const string& colorName) noexcept;
 	static StripRenderer::LedColor colorEnumFor(const string& colorName) noexcept;
 };

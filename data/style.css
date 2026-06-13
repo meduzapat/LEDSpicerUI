@@ -1,3 +1,8 @@
+/* ============================================================
+ * LEDSpicerUI — Legacy Fallback Styles
+ * Self-contained styling used when themes are unavailable.
+ * Hardcoded colors; superseded by style-base.css + themes.
+ * ============================================================ */
 
 combobox.noRoundLeft button.combo,
 .noRoundLeft {
@@ -69,7 +74,7 @@ combobox.noRoundRight button.combo,
 	color: #000;
 }
 
-/* BoxButton Styles */
+/* ── BoxButton Styles ─────────────────────────────────────── */
 
 .BoxButton {
 	border: 1px solid rgba(255,255,255,0.08);
@@ -108,7 +113,7 @@ combobox.noRoundRight button.combo,
 	padding: 3px 2px;
 }
 
-/* Hover effects for BoxButtons */
+/* ── Hover effects for BoxButtons ─────────────────────────── */
 
 .BoxBackgroundEdit:hover {
 	background: #72b1e8;
@@ -122,7 +127,7 @@ combobox.noRoundRight button.combo,
 	background: #f55d5d;
 }
 
-/* Area backgrounds */
+/* ── Area backgrounds ─────────────────────────────────────── */
 
 .layoutPreview {
 	background-image: url("images/layoutBackground.png");
@@ -185,7 +190,7 @@ combobox.noRoundRight button.combo,
 	background-image: url("images/backgroundProfiles.png");
 }
 
-/* BoxButton styles for different categories */
+/* ── BoxButton styles for different categories ────────────── */
 
 .DeviceBoxButton {
 	border-color: rgba(53,117,26,0.6);
@@ -214,38 +219,6 @@ combobox.noRoundRight button.combo,
 	border-color: rgba(180,120,255,1);
 }
 
-/*
-.DeviceBoxButton {
-	background-image:    url("images/deviceButtonBackground.png");
-	border-color:        #35751a;
-}
-
-.RestrictorBoxButton {
-	background-image:    url("images/restrictorButtonBackground.png");
-	border-color:        #62a0ea;
-}
-
-.ElementBoxButton {
-	background-image:    url("images/elementButtonBackground.png");
-	border-color:        #3584e4;
-}
-
-.GroupBoxButton {
-	background-image:    url("images/groupButtonBackground.png");
-	border-color:        #f9f06b;
-}
-
-.ProcessBoxButton {
-	background-image:    url("images/processButtonBackground.png");
-	border-color:        #99c1f1;
-}
-
-.InputBoxButton {
-	background-image:    url("images/profileButtonBackground.png");
-	border-color:        #3584e4;
-}
-*/
-
 .GroupBoxButton.system {
 	opacity: 0.7;
 	border-color: #9a9996;
@@ -255,12 +228,9 @@ combobox.noRoundRight button.combo,
 	opacity: 0.5;
 }
 
-/* ===========================================
- * Directory Navigator Styles
- * Add to data/style.css
- * =========================================== */
+/* ── Directory Navigator Styles ───────────────────────────── */
 
-/* Directory BoxButton - folder appearance */
+/* Directory BoxButton — folder appearance */
 .DirectoryBoxButton {
 	background-image: url("images/directoryButtonBackground.png");
 	border-color:     #f5c211;
@@ -312,7 +282,7 @@ combobox.noRoundRight button.combo,
 	opacity: 0.4;
 }
 
-/* Donation dialog */
+/* ── Donation dialog ──────────────────────────────────────── */
 
 .SupportButton {
 	color: #ffc439;

@@ -22,6 +22,7 @@
 
 #include "LayoutElement.hpp"
 #include "Defaults.hpp"
+#include "config/Settings.hpp"
 
 using namespace LEDSpicerUI::Ui::Layout;
 using namespace LEDSpicerUI::Constants;
@@ -51,7 +52,6 @@ LayoutElement::LayoutElement(Storage::Element* el, LayoutTester* t) noexcept :
 }
 
 LayoutElement::~LayoutElement() {
-	layoutTimer.disconnect();
 	lightTimer.disconnect();
 }
 
@@ -61,8 +61,7 @@ LayoutElement::Kind LayoutElement::categorize(const Storage::Element* el) noexce
 		return Kind::Strip;
 	if (v.isSet(SOLENOID))
 		return Kind::Solenoid;
-	if (v.isSet(POSITION) or v.isSet(POSITIONS) or
-	    (v.isSet(RED_PIN) and v.isSet(GREEN_PIN) and v.isSet(BLUE_PIN)))
+	if (v.isSet(POSITION) or v.isSet(POSITIONS) or (v.isSet(RED_PIN) and v.isSet(GREEN_PIN) and v.isSet(BLUE_PIN)))
 		return Kind::Rgb;
 	return Kind::Mono;
 }
@@ -71,27 +70,36 @@ void LayoutElement::build() noexcept {
 	body = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 2));
 	add(*body);
 
-	nameLabel = Gtk::manage(new Gtk::Label(element->getPrimaryValue()));
-	nameLabel->set_ellipsize(Pango::ELLIPSIZE_END);
-	nameLabel->set_max_width_chars(12);
+	nameLabel = Gtk::manage(new Gtk::Label());
+	setName(element->getPrimaryValue());
 	body->pack_start(*nameLabel, Gtk::PACK_SHRINK);
 
+	auto pix {getCachedIcon(element->getValue(TYPE))};
+
 	iconImg = Gtk::manage(new Gtk::Image());
-	iconImg->set(Gdk::Pixbuf::create_from_file(
-		ICON_DIR + iconForType(element->getValue(TYPE)),
-		ICON_PX, ICON_PX, true
-	));
+	iconImg->set(pix);
 	iconImg->get_style_context()->add_class(CSS_LAYOUT_ELEMENT_ICON);
 
+	iconBtnImg = Gtk::manage(new Gtk::Image());
+	iconBtnImg->set(pix);
+	iconBtn = Gtk::manage(new Gtk::ToggleButton());
+	iconBtn->set_image(*iconBtnImg);
+	iconBtn->set_relief(Gtk::RELIEF_NONE);
+	iconBtn->set_can_focus(false);
+	iconBtn->get_style_context()->add_class(CSS_LAYOUT_ELEMENT_ICON);
+	iconBtn->signal_toggled().connect([this]() {
+		if (not iconBtn->get_active()) return; // already toggled.
+		fireAll();
+	});
+
+	rgbRow = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 2));
+	rgbRow->set_halign(Gtk::ALIGN_CENTER);
 	if (kind == Kind::Rgb or kind == Kind::Strip) {
-		rgbRow = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 2));
-		rgbRow->set_halign(Gtk::ALIGN_CENTER);
 		auto makeTgl {[this](const char* cssClass) {
-			auto* tgl {Gtk::manage(new Gtk::ToggleButton())};
+			auto tgl {Gtk::manage(new Gtk::ToggleButton())};
 			tgl->set_can_focus(false);
 			tgl->set_size_request(RGB_TOGGLE_PX, RGB_TOGGLE_PX);
 			tgl->get_style_context()->add_class(cssClass);
-			tgl->signal_toggled().connect([this]() { touchActivity(); });
 			rgbRow->pack_start(*tgl, Gtk::PACK_SHRINK);
 			return tgl;
 		}};
@@ -100,31 +108,50 @@ void LayoutElement::build() noexcept {
 		rgbB = makeTgl(CSS_LED_B);
 	}
 
+	auto btnEdit {Gtk::manage(new Gtk::Button())};
+	btnEdit->set_image_from_icon_name(ICON_EDIT, Gtk::ICON_SIZE_BUTTON);
+	btnEdit->set_can_focus(false);
+	btnEdit->set_relief(Gtk::RELIEF_NONE);
+	btnEdit->set_tooltip_text("Edit element");
+	btnEdit->signal_clicked().connect([this]() { editRequested.emit(this); });
+	rgbRow->pack_start(*btnEdit, Gtk::PACK_SHRINK);
+
 	if (kind == Kind::Strip) {
-		auto* iconCol {Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 2))};
+		auto iconCol {Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 2))};
 		iconCol->pack_start(*iconImg, Gtk::PACK_SHRINK);
+		iconCol->pack_start(*iconBtn, Gtk::PACK_SHRINK);
 		iconCol->pack_start(*rgbRow, Gtk::PACK_SHRINK);
-		auto* iconStripRow {Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 4))};
+
+		auto iconStripRow {Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 4))};
 		iconStripRow->pack_start(*iconCol, Gtk::PACK_SHRINK);
+
 		strip = Gtk::manage(new StripRenderer());
 		strip->setCount(static_cast<uint16_t>(element->getInt(STRIPSIZE)));
 		strip->signal_led_clicked().connect([this](uint16_t firstPhysicalIdx) {
-			touchActivity();
 			fireCell(firstPhysicalIdx);
 		});
+
 		iconStripRow->pack_start(*strip, Gtk::PACK_EXPAND_WIDGET);
 		body->pack_start(*iconStripRow, Gtk::PACK_SHRINK);
 	}
 	else {
 		body->pack_start(*iconImg, Gtk::PACK_SHRINK);
-		if (rgbRow) body->pack_start(*rgbRow, Gtk::PACK_SHRINK);
+		body->pack_start(*iconBtn, Gtk::PACK_SHRINK);
+		body->pack_start(*rgbRow, Gtk::PACK_SHRINK);
 	}
 
 	show_all();
-	if (rgbRow) rgbRow->hide();
+	iconBtn->hide();
+	rgbRow->hide();
 	if (strip)  strip->hide();
 }
 
+void LayoutElement::setName(const Glib::ustring& full) noexcept {
+	const bool over {full.length() > NAME_MAX_CHARS};
+	nameLabel->set_text(over ? full.substr(0, NAME_MAX_CHARS - 1) + "…" : full);
+	if (over) nameLabel->set_tooltip_text(full);
+	else      nameLabel->set_has_tooltip(false);
+}
 
 void LayoutElement::refresh() noexcept {
 	const Kind newKind {categorize(element)};
@@ -136,11 +163,10 @@ void LayoutElement::refresh() noexcept {
 		build();
 		return;
 	}
-	nameLabel->set_text(element->getPrimaryValue());
-	iconImg->set(Gdk::Pixbuf::create_from_file(
-		ICON_DIR + iconForType(element->getValue(TYPE)),
-		ICON_PX, ICON_PX, true
-	));
+	setName(element->getPrimaryValue());
+	auto pix {getCachedIcon(element->getValue(TYPE))};
+	iconImg->set(pix);
+	iconBtnImg->set(pix);
 	if (kind == Kind::Strip) {
 		const uint16_t count {static_cast<uint16_t>(element->getInt(STRIPSIZE))};
 		if (count != strip->getCount())
@@ -157,42 +183,25 @@ void LayoutElement::setActive(bool on) noexcept {
 		if (rgbR) rgbR->set_active(false);
 		if (rgbG) rgbG->set_active(false);
 		if (rgbB) rgbB->set_active(false);
-		if (rgbRow) rgbRow->show();
+		iconImg->hide();
+		iconBtn->show();
+		rgbRow->show();
 		if (strip)  strip->show();
-		if (auto win {get_window()}) win->raise();
-		layoutTimer.disconnect();
-		layoutTimer = Glib::signal_timeout().connect(
-			sigc::mem_fun(*this, &LayoutElement::onLayoutIdle),
-			LAYOUT_TIMEOUT_MS
-		);
+		get_window()->raise();
 		activated.emit(this);
 	}
 	else {
 		ctx->remove_class(CSS_LAYOUT_ELEMENT_ACTIVE);
-		if (rgbRow) rgbRow->hide();
-		if (strip)  strip->hide();
-		layoutTimer.disconnect();
+		iconBtn->hide();
+		iconImg->show();
+		rgbRow->hide();
+		if (strip) strip->hide();
 	}
 }
 
-void LayoutElement::touchActivity() noexcept {
-	layoutTimer.disconnect();
-	layoutTimer = Glib::signal_timeout().connect(
-		sigc::mem_fun(*this, &LayoutElement::onLayoutIdle),
-		LAYOUT_TIMEOUT_MS
-	);
-}
-
-bool LayoutElement::onLayoutIdle() noexcept {
-	setActive(false);
-	return false;
-}
-
 void LayoutElement::fire(Storage::Element* target) noexcept {
-	if (lightLocked) return;
+	if (lightTimer.connected()) return;
 	const string color {resolveColorName()};
-	lightLocked = true;
-	lightTimer.disconnect();
 	lightTimer = Glib::signal_timeout().connect(
 		sigc::mem_fun(*this, &LayoutElement::onLightExpired),
 		LIGHT_TIMEOUT_MS
@@ -201,11 +210,12 @@ void LayoutElement::fire(Storage::Element* target) noexcept {
 }
 
 void LayoutElement::fireAll() noexcept {
-	if (lightLocked) return;
-	const string& color {resolveColorName()};
-	const string& colorClass {ledCssClass(color)};
-	iconImg->get_style_context()->add_class(CSS_LAYOUT_ELEMENT_FIRED);
-	iconImg->get_style_context()->add_class(colorClass);
+	if (lightTimer.connected()) return;
+	const string
+		& color {resolveColorName()},
+		& colorClass {ledCssClass(color)};
+	iconBtn->get_style_context()->add_class(CSS_LAYOUT_ELEMENT_FIRED);
+	iconBtn->get_style_context()->add_class(colorClass);
 	if (strip) {
 		const auto ledColor {colorEnumFor(color)};
 		for (uint16_t i = 0; i < strip->getCount(); i += strip->getGroupRatio())
@@ -223,12 +233,12 @@ void LayoutElement::fireCell(uint16_t firstPhysicalIdx) noexcept {
 }
 
 bool LayoutElement::onLightExpired() noexcept {
-	lightLocked = false;
 	if (not pendingTintClass.empty()) {
-		iconImg->get_style_context()->remove_class(CSS_LAYOUT_ELEMENT_FIRED);
-		iconImg->get_style_context()->remove_class(pendingTintClass);
+		iconBtn->get_style_context()->remove_class(CSS_LAYOUT_ELEMENT_FIRED);
+		iconBtn->get_style_context()->remove_class(pendingTintClass);
 		pendingTintClass.clear();
 	}
+	iconBtn->set_active(false);
 	if (strip) strip->setAllOff();
 	return false;
 }
@@ -265,22 +275,12 @@ void LayoutElement::persistPosition() noexcept {
 
 bool LayoutElement::onButtonPress(GdkEventButton* ev) noexcept {
 	if (ev->button != 1) return false;
-	pressedOnIcon = isInsideIcon(ev->x, ev->y);
-	if (active) return false;
+	if (active) return true;
 	dragging    = true;
 	dragMoved   = false;
 	dragOffsetX = ev->x;
 	dragOffsetY = ev->y;
-	return false;
-}
-
-bool LayoutElement::isInsideIcon(double x, double y) noexcept {
-	int icon_x, icon_y;
-	iconImg->translate_coordinates(*this, 0, 0, icon_x, icon_y);
-	const int
-		iw {iconImg->get_allocated_width()},
-		ih {iconImg->get_allocated_height()};
-	return x >= icon_x and x < icon_x + iw and y >= icon_y and y < icon_y + ih;
+	return true;
 }
 
 bool LayoutElement::onButtonRelease(GdkEventButton* ev) noexcept {
@@ -290,7 +290,6 @@ bool LayoutElement::onButtonRelease(GdkEventButton* ev) noexcept {
 		if (dragMoved) {
 			if (auto win {get_window()}) win->set_cursor();
 			persistPosition();
-			touchActivity();
 			return false;
 		}
 	}
@@ -298,31 +297,39 @@ bool LayoutElement::onButtonRelease(GdkEventButton* ev) noexcept {
 		setActive(true);
 		return false;
 	}
-	touchActivity();
-	if (pressedOnIcon and isInsideIcon(ev->x, ev->y))
-		fireAll();
 	return false;
 }
 
 bool LayoutElement::onMotion(GdkEventMotion* ev) noexcept {
 	if (not dragging) return false;
+
 	const double
 		dx {ev->x - dragOffsetX},
 		dy {ev->y - dragOffsetY};
 	if (not dragMoved and dx * dx + dy * dy < DRAG_THRESHOLD_PX * DRAG_THRESHOLD_PX)
 		return false;
+
 	if (not dragMoved) {
 		if (auto win {get_window()}) win->set_cursor(Gdk::Cursor::create(Gdk::FLEUR));
 	}
-	auto parent {dynamic_cast<Gtk::Layout*>(get_parent())};
-	if (not parent) return false;
+
+	auto parent {static_cast<Gtk::Layout*>(get_parent())};
 	const int
 		x  {parent->child_property_x(*this).get_value()},
 		y  {parent->child_property_y(*this).get_value()},
 		nx {static_cast<int>(x + dx)},
 		ny {static_cast<int>(y + dy)};
-	const int cx {nx < 0 ? 0 : nx}, cy {ny < 0 ? 0 : ny};
+	const auto snap {[](int v, int g) {
+		if (g <= 0) return v;
+		const int n {(v + g / 2) / g * g};
+		return std::abs(v - n) <= g / 3 ? n : v;
+	}};
+	const int
+		g  {Config::Settings::get().getLayoutGrid()},
+		cx {snap(nx < 0 ? 0 : nx, g)},
+		cy {snap(ny < 0 ? 0 : ny, g)};
 	parent->move(*this, cx, cy);
+
 	guint cw, ch;
 	parent->get_size(cw, ch);
 	const guint
@@ -365,4 +372,13 @@ StripRenderer::LedColor LayoutElement::colorEnumFor(const string& colorName) noe
 string LayoutElement::iconForType(const string& typeId) noexcept {
 	// Type id is guaranteed valid by retrieveData() repair before this is reached.
 	return "element-" + typeId + ".png";
+}
+
+Glib::RefPtr<Gdk::Pixbuf> LayoutElement::getCachedIcon(const string& typeId) noexcept {
+	static std::unordered_map<string, Glib::RefPtr<Gdk::Pixbuf>> cache;
+	auto it {cache.find(typeId)};
+	if (it != cache.end()) return it->second;
+	auto pix {Gdk::Pixbuf::create_from_file(ICON_DIR + iconForType(typeId), ICON_PX, ICON_PX, true)};
+	cache.emplace(typeId, pix);
+	return pix;
 }

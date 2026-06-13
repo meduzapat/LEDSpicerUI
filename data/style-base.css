@@ -1,4 +1,3 @@
-
 /* ============================================================
  * LEDSpicerUI — Base Structural CSS
  * Layout, sizing, spacing, and hardware-semantic colors.
@@ -225,8 +224,8 @@ combobox.noRoundRight button.combo,
 }
 
 .layout-element-active {
-	border:     1px solid #1c71d8;
-	background: rgba(28,113,216,0.12);
+	border:     1px solid #ccc;
+	background: rgba(13,13,13,0.62);
 }
 
 .layout-element-icon {
@@ -279,14 +278,15 @@ combobox.noRoundRight button.combo,
 
 /* RGB toggle row: dim outline when off, full color when checked.
  * Scoped with :not(.strip-led) so strip cells use the .strip-led
- * swatch rules above instead of the toggle variants. */
-button.led-r:not(.strip-led),
-button.led-g:not(.strip-led),
-button.led-b:not(.strip-led),
-button.led-y:not(.strip-led),
-button.led-m:not(.strip-led),
-button.led-c:not(.strip-led),
-button.led-w:not(.strip-led) {
+ * swatch rules above, and :not(.layout-element-icon) so the icon
+ * toggle uses its own .layout-element-icon-fired rules. */
+button.led-r:not(.strip-led):not(.layout-element-icon),
+button.led-g:not(.strip-led):not(.layout-element-icon),
+button.led-b:not(.strip-led):not(.layout-element-icon),
+button.led-y:not(.strip-led):not(.layout-element-icon),
+button.led-m:not(.strip-led):not(.layout-element-icon),
+button.led-c:not(.strip-led):not(.layout-element-icon),
+button.led-w:not(.strip-led):not(.layout-element-icon) {
 	background-image: none;
 	background-color: #2a2a2a;
 	border:           1px solid #555;
@@ -296,17 +296,17 @@ button.led-w:not(.strip-led) {
 	min-height:       0;
 }
 
-button.led-r:not(.strip-led)         { border-color: #e01b24; }
-button.led-g:not(.strip-led)         { border-color: #3da81b; }
-button.led-b:not(.strip-led)         { border-color: #1c71d8; }
+button.led-r:not(.strip-led):not(.layout-element-icon)         { border-color: #e01b24; }
+button.led-g:not(.strip-led):not(.layout-element-icon)         { border-color: #3da81b; }
+button.led-b:not(.strip-led):not(.layout-element-icon)         { border-color: #1c71d8; }
 
-button.led-r:not(.strip-led):hover   { background-color: rgba(224,27,36,0.30); }
-button.led-g:not(.strip-led):hover   { background-color: rgba(61,168,27,0.30); }
-button.led-b:not(.strip-led):hover   { background-color: rgba(28,113,216,0.30); }
+button.led-r:not(.strip-led):not(.layout-element-icon):hover   { background-color: rgba(224,27,36,0.30); }
+button.led-g:not(.strip-led):not(.layout-element-icon):hover   { background-color: rgba(61,168,27,0.30); }
+button.led-b:not(.strip-led):not(.layout-element-icon):hover   { background-color: rgba(28,113,216,0.30); }
 
-button.led-r:not(.strip-led):checked { background-color: #e01b24; border-color: #fff; }
-button.led-g:not(.strip-led):checked { background-color: #3da81b; border-color: #fff; }
-button.led-b:not(.strip-led):checked { background-color: #1c71d8; border-color: #fff; }
+button.led-r:not(.strip-led):not(.layout-element-icon):checked { background-color: #e01b24; border-color: #fff; }
+button.led-g:not(.strip-led):not(.layout-element-icon):checked { background-color: #3da81b; border-color: #fff; }
+button.led-b:not(.strip-led):not(.layout-element-icon):checked { background-color: #1c71d8; border-color: #fff; }
 
 /* Strip cells: kill GTK's :checked border accent so toggled cells
  * keep the .strip-led border, not a white outline. */

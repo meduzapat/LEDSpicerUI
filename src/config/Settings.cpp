@@ -39,6 +39,7 @@ const StringUMap Settings::DEFAULTS = {
 	{"removeInvalidItems",  HUMAN_TRUE},
 	{"saveBackup",          HUMAN_TRUE},
 	{"debugFiles",          HUMAN_FALSE},
+	{"layoutGrid",          "0"},
 };
 
 void Settings::load(const Values& raw) noexcept {

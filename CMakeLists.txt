@@ -67,6 +67,7 @@ add_executable(ledspicerui
 	src/Ui/Layout/StripRenderer.cpp
 	src/Ui/Layout/LayoutTester.cpp
 	src/Ui/Layout/LayoutElement.cpp
+	src/Ui/Layout/LayoutBoard.cpp
 	src/Ui/Layout/Layout.cpp
 	src/Ui/Storage/CollectionHandler.cpp
 	src/Ui/Storage/Data.cpp

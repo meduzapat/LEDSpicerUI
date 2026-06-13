@@ -54,7 +54,8 @@ public:
 		PRESERVE_EMPTY_DIR   {"preserveEmptyDir"},
 		REMOVE_INVALID_ITEMS {"removeInvalidItems"},
 		SAVE_BACKUP          {"saveBackup"},
-		DEBUG_FILES          {"debugFiles"};
+		DEBUG_FILES          {"debugFiles"},
+		LAYOUT_GRID          {"layoutGrid"};
 
 	/// Runtime mode — derived from binary detection result and interactiveMode preference.
 	enum class Mode {
@@ -108,6 +109,16 @@ public:
 	void setSaveBackup(bool value)         noexcept;
 	void setDebugFiles(bool value)         noexcept;
 
+	/// Layout snap-to-grid step in pixels (same on both axes). 0 = snap disabled.
+	int  getLayoutGrid() const noexcept { return getInt(LAYOUT_GRID); }
+	void setLayoutGrid(int value) noexcept {
+		setValue(LAYOUT_GRID, value);
+		if (layoutGridChanged) layoutGridChanged();
+	}
+
+	/// Register a callback fired whenever the layout grid step changes.
+	void onLayoutGridChanged(std::function<void()> cb) noexcept { layoutGridChanged = std::move(cb); }
+
 	const string& getThemeName()  const noexcept { return getValue(THEME_NAME); }
 	void setThemeName(const string& id)  noexcept { setValue(THEME_NAME, id);  }
 
@@ -154,6 +165,7 @@ protected:
 
 	StringVector colorFiles;
 	std::function<void()> colorFilesChanged;
+	std::function<void()> layoutGridChanged;
 
 	bool
 		hasGameData = false,

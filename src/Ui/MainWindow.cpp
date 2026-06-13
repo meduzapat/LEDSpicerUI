@@ -37,7 +37,7 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 	inputNavigator(builder, this),
 	animationNavigator(builder, this),
 	profileNavigator(builder, this),
-	layout(builder, &layoutTester)
+	layout(builder, &layoutTester, &devices)
 {
 
 	Storage::Element::setObserver(&layout);

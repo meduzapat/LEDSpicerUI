@@ -126,6 +126,8 @@ void DialogDevice::resetForm() noexcept {
 		btnAddElement->set_sensitive(true);
 	}
 	brief->set_text(Defaults::devicesInfo.at(name).brief);
+	// Keep DE centered on a visible parent — falls back to MW when DD is hidden (editChild path).
+	DialogElement::getInstance()->set_transient_for(is_visible() ? *this : Message::getMain());
 	DialogForm::resetForm();
 }
 
@@ -218,6 +220,18 @@ string DialogDevice::createUniqueId() const noexcept {
 
 LEDSpicerUI::Ui::Storage::Data* DialogDevice::createData(Values& rawData) const noexcept {
 	return new Storage::Device(rawData);
+}
+
+void DialogDevice::editChild(Storage::BoxButton& device, Storage::BoxButton& child) noexcept {
+	action      = Actions::EDIT;
+	clearForm();
+	currentData = device.getData();
+	wireChildrenDialogs();
+	retrieveData();
+	resetForm();
+	DialogElement::getInstance()->onEditClicked(child);
+	disconnectChildrenDialogs();
+	currentData = nullptr;
 }
 
 void DialogDevice::onEmpty() noexcept {

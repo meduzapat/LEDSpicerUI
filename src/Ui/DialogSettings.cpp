@@ -151,6 +151,10 @@ DialogSettings::DialogSettings(BaseObjectType* obj, const Glib::RefPtr<Gtk::Buil
 	builder->get_widget("BtnSettingsStyleDark",  btnStyleDark);
 	builder->get_widget("BoxSelectTheme",        flowBoxThemes);
 
+	builder->get_widget("ScaleLayoutGrid", scaleLayoutGrid);
+	for (int v {0}; v <= 100; v += 10)
+		scaleLayoutGrid->add_mark(v, Gtk::POS_BOTTOM, "");
+
 	// Sync all widgets to current Settings on every open.
 	signal_show().connect([this]() {
 		syncing = true;
@@ -164,6 +168,7 @@ DialogSettings::DialogSettings(BaseObjectType* obj, const Glib::RefPtr<Gtk::Buil
 		switchRemoveInvalidItems->set_active(s.shouldRemoveInvalidItems());
 		switchSaveBackup->set_active(s.shouldSaveBackup());
 		switchDebugFiles->set_active(s.shouldDebugFiles());
+		scaleLayoutGrid->set_value(s.getLayoutGrid());
 		syncStyleButtons();
 		if (flowBoxThemes->get_children().empty())
 			populateThemes();
@@ -233,6 +238,17 @@ DialogSettings::DialogSettings(BaseObjectType* obj, const Glib::RefPtr<Gtk::Buil
 	});
 	switchDebugFiles->property_active().signal_changed().connect([this]() {
 		Settings::get().setDebugFiles(switchDebugFiles->get_active());
+		commit("Settings saved");
+	});
+
+	scaleLayoutGrid->signal_change_value().connect(
+		[this](Gtk::ScrollType, double value) -> bool {
+			scaleLayoutGrid->set_value(std::round(value / 10.0) * 10.0);
+			return true;
+		}
+	);
+	scaleLayoutGrid->signal_value_changed().connect([this]() {
+		Settings::get().setLayoutGrid(static_cast<int>(scaleLayoutGrid->get_value()));
 		commit("Settings saved");
 	});
 

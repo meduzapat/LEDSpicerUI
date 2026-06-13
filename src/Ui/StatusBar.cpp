@@ -31,22 +31,16 @@ StatusBar StatusBar::instance;
  * ellipsize the internal label — long messages must never widen the window.
  */
 void StatusBar::initialize(const Glib::RefPtr<Gtk::Builder>& builder) noexcept {
+
 	builder->get_widget("StatusBar", instance.bar);
 	instance.contextId = instance.bar->get_context_id("main");
 
-	// GtkStatusbar's message area is a GtkBox whose first child is the GtkLabel.
-	// Guard both casts in case GTK ever rearranges the widget tree.
-	if (auto* box = dynamic_cast<Gtk::Box*>(instance.bar->get_message_area())) {
-		const auto& children {box->get_children()};
-		if (not children.empty()) {
-			if (auto* label = dynamic_cast<Gtk::Label*>(children.front())) {
-				instance.label = label;
-				label->set_ellipsize(Pango::ELLIPSIZE_END);
-				label->set_hexpand(true);
-				label->set_xalign(0.0f);
-			}
-		}
-	}
+	auto box   {static_cast<Gtk::Box*>(instance.bar->get_message_area())};
+	auto label {static_cast<Gtk::Label*>(box->get_children().front())};
+	instance.label = label;
+	label->set_ellipsize(Pango::ELLIPSIZE_END);
+	label->set_hexpand(true);
+	label->set_xalign(0.0f);
 }
 
 void StatusBar::push(const string& message, Severity severity, bool persistent) noexcept {
