@@ -61,9 +61,6 @@ constexpr float DEFAULT_CHANGE_VALUE = 64.00f;
 /// Default milliseconds for solenoids and motors.
 constexpr unsigned int DEFAULT_SOLENOID  = 50;
 
-/// Milliseconds before an active LayoutElement returns to idle without further interaction.
-constexpr unsigned int LAYOUT_TIMEOUT_MS = 20000;
-
 /// Milliseconds the hardware stays lit for a single layout test command. No reset on re-click.
 constexpr unsigned int LIGHT_TIMEOUT_MS  = 1500;
 

@@ -50,6 +50,14 @@ public:
 	void isValid()          const          override;
 	string createUniqueId() const noexcept override;
 
+	/**
+	 * Edits a child element in place: runs DD's population pipeline so the
+	 * child dialog has fresh context, delegates to the child, no DD save.
+	 * @param device owning Device's BoxButton.
+	 * @param child  child Element's BoxButton.
+	 */
+	void editChild(Storage::BoxButton& device, Storage::BoxButton& child) noexcept;
+
 protected:
 
 	Gtk::ComboBox*   comboBoxId      = nullptr;

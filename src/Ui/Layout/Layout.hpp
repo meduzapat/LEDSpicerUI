@@ -21,8 +21,10 @@
  */
 
 #include "LayoutElement.hpp"
+#include "LayoutBoard.hpp"
 #include "LayoutTester.hpp"
 #include "Storage/ElementObserver.hpp"
+#include "Storage/BoxButtonCollection.hpp"
 
 #pragma once
 
@@ -48,7 +50,11 @@ public:
 		BOARD_PAD      = 10,
 		TILE_FALLBACK_PX = 100;
 
-	Layout(const Glib::RefPtr<Gtk::Builder>& builder, LayoutTester* tester) noexcept;
+	Layout(
+		const Glib::RefPtr<Gtk::Builder>& builder,
+		LayoutTester* tester,
+		Storage::BoxButtonCollection* devicesCollection
+	) noexcept;
 
 	virtual ~Layout();
 
@@ -61,8 +67,11 @@ public:
 
 private:
 
-	Gtk::Layout*  board  = nullptr;
+	LayoutBoard*  board  = nullptr;
 	LayoutTester* tester = nullptr;
+
+	/// Points to Devices Collection to lookup the Device and Element on edit.
+	Storage::BoxButtonCollection* devicesCollection = nullptr;
 
 	std::unordered_map<Storage::Element*, LayoutElement*> tiles;
 
@@ -72,7 +81,16 @@ private:
 
 	void placeNew(LayoutElement* tile) noexcept;
 	void onTileActivated(LayoutElement* tile) noexcept;
+	void onEditRequested(LayoutElement* tile) noexcept;
 	void recomputeBoardSize() noexcept;
+
+	/**
+	 * Walks the Devices collection to find the owning Device and the Element's BoxButton.
+	 * @param element the Element to look up.
+	 * @return pair (Device BoxButton, Element BoxButton).
+	 */
+	std::pair<Storage::BoxButton*, Storage::BoxButton*>
+		resolveButtons(Storage::Element* element) const noexcept;
 };
 
 } // namespace

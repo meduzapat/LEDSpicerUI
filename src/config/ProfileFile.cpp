@@ -37,7 +37,7 @@ ProfileFile::ProfileFile(const string& filePath, Ui::Storage::DirectoryEntry* pa
 		profile.setValue(BACKGROUND_COLOR, DEFAULT_PROFILE_BACKGROUND_COLOR);
 
 	// Pick up the optional <transition> element so Profile's ctor can move it into its embedded record.
-	if (auto* transitionNode = getRoot()->FirstChildElement(TYPE_TRANSITION.c_str())) {
+	if (auto transitionNode {getRoot()->FirstChildElement(TYPE_TRANSITION.c_str())}) {
 		Values transitionAttrs {processNode(transitionNode)};
 		if (transitionAttrs.isSet(NAME))
 			profile.setValue(TRANSITION, transitionAttrs.getValue(NAME));

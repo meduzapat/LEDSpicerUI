@@ -22,14 +22,29 @@
 
 #include "Layout.hpp"
 #include "Defaults.hpp"
+#include "DataDialogs/DialogDevice.hpp"
+#include "Storage/Device.hpp"
 
 using namespace LEDSpicerUI::Ui::Layout;
 using namespace LEDSpicerUI::Constants;
 
-Layout::Layout(const Glib::RefPtr<Gtk::Builder>& builder, LayoutTester* t) noexcept :
-	tester {t}
+Layout::Layout(
+	const Glib::RefPtr<Gtk::Builder>& builder,
+	LayoutTester* t,
+	Storage::BoxButtonCollection* devices
+) noexcept :
+	tester            {t},
+	devicesCollection {devices}
 {
-	builder->get_widget("LayoutBoard", board);
+	builder->get_widget_derived("LayoutBoard", board);
+	board->add_events(Gdk::BUTTON_PRESS_MASK);
+	board->signal_button_press_event().connect([this](GdkEventButton*) {
+		if (current) {
+			current->setActive(false);
+			current = nullptr;
+		}
+		return false;
+	});
 }
 
 Layout::~Layout() {
@@ -46,6 +61,7 @@ void Layout::onAdded(Storage::Element* element) noexcept {
 	placeNew(tile);
 	tile->signal_activated().connect(sigc::mem_fun(*this, &Layout::onTileActivated));
 	tile->signal_moved().connect(sigc::mem_fun(*this, &Layout::recomputeBoardSize));
+	tile->signal_editRequested().connect(sigc::mem_fun(*this, &Layout::onEditRequested));
 }
 
 void Layout::onRemoved(Storage::Element* element) noexcept {
@@ -99,4 +115,22 @@ void Layout::onTileActivated(LayoutElement* tile) noexcept {
 	if (current == tile) return;
 	if (current) current->setActive(false);
 	current = tile;
+}
+
+void Layout::onEditRequested(LayoutElement* tile) noexcept {
+	auto element {tile->getElement()};
+	auto [device, child] {resolveButtons(element)};
+	DataDialogs::DialogDevice::getInstance()->editChild(*device, *child);
+}
+
+std::pair<LEDSpicerUI::Ui::Storage::BoxButton*, LEDSpicerUI::Ui::Storage::BoxButton*>
+Layout::resolveButtons(Storage::Element* element) const noexcept {
+	for (auto device : *devicesCollection) {
+		auto elements {static_cast<Storage::Device*>(device->getData())->getChild(COLLECTION_ELEMENTS)};
+		for (auto child : *elements)
+			if (child->getData() == element)
+				return std::make_pair(device, child);
+	}
+	// Unreachable: a tile only exists for an Element owned by a Device in the collection.
+	return std::make_pair(nullptr, nullptr);
 }

@@ -60,6 +60,9 @@ public:
 	void isValid()          const          override;
 	string createUniqueId() const noexcept override;
 
+	/// Exposes the inherited edit entry so a parent dialog can drive an in-place edit.
+	using DialogForm::onEditClicked;
+
 	/**
 	 * Sets the current number of pins.
 	 * @param newSize

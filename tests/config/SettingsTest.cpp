@@ -50,6 +50,7 @@ TEST_F(SettingsTest, DefaultState) {
 	EXPECT_TRUE (s.shouldRemoveInvalidItems());
 	EXPECT_TRUE (s.shouldSaveBackup());
 	EXPECT_FALSE(s.shouldDebugFiles());
+	EXPECT_EQ(0, s.getLayoutGrid());
 	EXPECT_EQ(Mode::Portable, s.getMode());
 	EXPECT_TRUE(s.isPortable());
 }
@@ -67,6 +68,7 @@ TEST_F(SettingsTest, LoadAndSerialize) {
 		{"removeInvalidItems", HUMAN_FALSE},
 		{"saveBackup",         HUMAN_FALSE},
 		{"debugFiles",         HUMAN_TRUE},
+		{"layoutGrid",         "30"},
 	});
 
 	EXPECT_EQ("/usr/bin/ledspicerd",   s.getBinaryPath());
@@ -79,6 +81,7 @@ TEST_F(SettingsTest, LoadAndSerialize) {
 	EXPECT_FALSE(s.shouldRemoveInvalidItems());
 	EXPECT_FALSE(s.shouldSaveBackup());
 	EXPECT_TRUE (s.shouldDebugFiles());
+	EXPECT_EQ(30, s.getLayoutGrid());
 	EXPECT_EQ(Mode::Local, s.getMode());
 
 	// Round-trip: snapshot → reset → load → same values.
@@ -87,6 +90,7 @@ TEST_F(SettingsTest, LoadAndSerialize) {
 	s.load(snap);
 	EXPECT_EQ("/usr/bin/ledspicerd", s.getBinaryPath());
 	EXPECT_EQ(ThemeStyle::Dark,      s.getThemeStyle());
+	EXPECT_EQ(30,                    s.getLayoutGrid());
 	EXPECT_EQ(Mode::Local,           s.getMode());
 }
 
@@ -180,6 +184,26 @@ TEST_F(SettingsTest, ColorFilesChangedCallback) {
 	// Replace callback with null-equivalent (no crash on next set).
 	s.onColorFilesChanged(nullptr);
 	s.setColorFiles({"d.ini"});
+	EXPECT_EQ(2, calls);
+}
+
+TEST_F(SettingsTest, LayoutGridChangedCallback) {
+	auto& s = Settings::get();
+
+	int calls = 0;
+	s.onLayoutGridChanged([&calls]() { ++calls; });
+
+	s.setLayoutGrid(20);
+	EXPECT_EQ(20, s.getLayoutGrid());
+	EXPECT_EQ(1,  calls);
+
+	s.setLayoutGrid(0);
+	EXPECT_EQ(0, s.getLayoutGrid());
+	EXPECT_EQ(2, calls);
+
+	// Replace callback with null-equivalent (no crash on next set).
+	s.onLayoutGridChanged(nullptr);
+	s.setLayoutGrid(50);
 	EXPECT_EQ(2, calls);
 }
 

@@ -107,6 +107,8 @@ protected:
 		* btnStyleLight = nullptr,
 		* btnStyleDark  = nullptr;
 
+	Gtk::Scale* scaleLayoutGrid = nullptr;
+
 	Gtk::FlowBox* flowBoxThemes = nullptr;
 
 	/// Guards against recursive signal firing when syncing style buttons.
