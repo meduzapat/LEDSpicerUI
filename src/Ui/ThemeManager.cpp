@@ -27,8 +27,20 @@ using namespace LEDSpicerUI::Ui;
 ThemeManager ThemeManager::instance;
 
 void ThemeManager::initialize() noexcept {
+	scan();
+
+	auto gs = Gtk::Settings::get_default();
+	auto onSystemChange = [this]() {
+		if (Config::Settings::get().getThemeStyle() == Config::Settings::ThemeStyle::Auto)
+			apply(Config::Settings::get().getThemeName(), Config::Settings::ThemeStyle::Auto);
+	};
+	gs->property_gtk_application_prefer_dark_theme().signal_changed().connect(onSystemChange);
+	gs->property_gtk_theme_name().signal_changed().connect(onSystemChange);
+}
+
+void ThemeManager::scan() noexcept {
 	themes.clear();
-	const string themesDir{PACKAGE_DATA_DIR "themes/"};
+	const string themesDir{Config::Settings::get().getThemePath()};
 	try {
 		Glib::Dir d(themesDir);
 		for (const auto& entry : d) {
@@ -45,34 +57,27 @@ void ThemeManager::initialize() noexcept {
 		}
 	}
 	catch (const Glib::Error&) {}
-
-	auto gs = Gtk::Settings::get_default();
-	auto onSystemChange = [this]() {
-		if (Config::Settings::get().getThemeStyle() == Config::Settings::ThemeStyle::Auto)
-			apply(Config::Settings::get().getThemeName(), Config::Settings::ThemeStyle::Auto);
-	};
-	gs->property_gtk_application_prefer_dark_theme().signal_changed().connect(onSystemChange);
-	gs->property_gtk_theme_name().signal_changed().connect(onSystemChange);
 }
 
 bool ThemeManager::apply(const string& themeId, Config::Settings::ThemeStyle style) noexcept {
 
-	const string& id {themeId.empty() ? DEFAULT : themeId};
-
 	removeProvider(baseProvider);
 	removeProvider(themeProvider);
 
-	baseProvider = loadCss(PACKAGE_DATA_DIR "style-base.css", GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-	if (not baseProvider)
-		baseProvider = loadCss(PACKAGE_DATA_DIR "style.css", GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+	baseProvider = loadCssResource(RESOURCE_PREFIX + "style-base.css", GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+
+	// No theme selected: the bundled base CSS alone renders a clean, un-themed UI.
+	if (themeId.empty()) {
+		currentThemeId.clear();
+		currentVariant.clear();
+		return true;
+	}
 
 	const string variant{resolveVariant(style)};
-	const string cssPath{PACKAGE_DATA_DIR "themes/" + id + "/" + variant + "/theme.css"};
+	const string cssPath{Config::Settings::get().getThemePath() + themeId + "/" + variant + "/theme.css"};
 
 	themeProvider = loadCss(cssPath, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION + 1);
 	if (not themeProvider) {
-		if (id != DEFAULT)
-			return apply(DEFAULT, style);
 		currentThemeId.clear();
 		currentVariant.clear();
 		return false;
@@ -83,9 +88,20 @@ bool ThemeManager::apply(const string& themeId, Config::Settings::ThemeStyle sty
 	else if (style == Config::Settings::ThemeStyle::Light)
 		Gtk::Settings::get_default()->property_gtk_application_prefer_dark_theme() = false;
 
-	currentThemeId = id;
+	currentThemeId = themeId;
 	currentVariant = variant;
 	return true;
+}
+
+void ThemeManager::rescan() noexcept {
+	scan();
+}
+
+bool ThemeManager::hasTheme(const string& id) const noexcept {
+	for (const auto& meta : themes)
+		if (meta.id == id)
+			return true;
+	return false;
 }
 
 string ThemeManager::resolveVariant(Config::Settings::ThemeStyle style) noexcept {
@@ -131,6 +147,24 @@ Glib::RefPtr<Gtk::CssProvider> ThemeManager::loadCss(const string& path, guint p
 	}
 	catch (const Glib::Error& e) {
 		std::cerr << "ThemeManager: failed to load " << path << ": " << e.what() << std::endl;
+		return {};
+	}
+	Gtk::StyleContext::add_provider_for_screen(
+		Gdk::Screen::get_default(),
+		provider,
+		priority
+	);
+	return provider;
+}
+
+Glib::RefPtr<Gtk::CssProvider> ThemeManager::loadCssResource(const string& path, guint priority) noexcept {
+
+	auto provider {Gtk::CssProvider::create()};
+	try {
+		provider->load_from_resource(path);
+	}
+	catch (const Glib::Error& e) {
+		std::cerr << "ThemeManager: failed to load resource " << path << ": " << e.what() << std::endl;
 		return {};
 	}
 	Gtk::StyleContext::add_provider_for_screen(

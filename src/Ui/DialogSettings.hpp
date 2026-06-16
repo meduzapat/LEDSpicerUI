@@ -92,8 +92,11 @@ protected:
 		* labelSystemFiles  = nullptr;
 
 	Gtk::FileChooserButton
-		* fileBinary        = nullptr,
-		* fileDataDirSelect = nullptr;
+		* fileBinary         = nullptr,
+		* fileDataDirSelect  = nullptr,
+		* fileThemeDirSelect = nullptr;
+
+	Gtk::Button* btnThemeRefresh = nullptr;
 
 	Gtk::Switch
 		* switchInteractiveMode    = nullptr,
@@ -127,15 +130,35 @@ protected:
 	void updateDataDirLabels();
 	void processDataDir();
 
-	/// Persists Settings and pushes a transient status-bar confirmation.
-	/// No-op while syncing widgets from Settings during signal_show().
+	/**
+	 * Persists Settings and pushes a transient status-bar confirmation.
+	 * No-op while syncing widgets from Settings during signal_show().
+	 */
 	void commit(const string& message, StatusBar::Severity severity = StatusBar::Severity::Success);
 
-	/// Populates BoxSelectTheme with one ThemeTile per discovered theme.
-	void populateThemes();
-	/// Syncs style toggle buttons to current Settings without firing apply.
+	/**
+	 * Clears BoxSelectTheme and rebuilds the None tile plus one tile per discovered theme.
+	 */
+	void rebuildThemeTiles();
+	/**
+	 * Appends a single selectable tile to BoxSelectTheme. Empty previewPath renders a placeholder.
+	 */
+	void addThemeTile(const string& id, const string& name, const string& previewPath, const string& tooltip);
+	/**
+	 * Selects the tile matching the current theme name, if present.
+	 */
+	void selectCurrentThemeTile();
+	/**
+	 * Rescans the themes directory, applies the None-fallback, and refreshes the tiles.
+	 */
+	void refreshThemes();
+	/**
+	 * Syncs style toggle buttons to current Settings without firing apply.
+	 */
 	void syncStyleButtons();
-	/// Applies the current theme name + style from Settings via ThemeManager.
+	/**
+	 * Applies the current theme name + style from Settings via ThemeManager.
+	 */
 	void applyCurrentTheme();
 };
 

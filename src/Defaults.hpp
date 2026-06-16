@@ -70,6 +70,9 @@ constexpr int GZ40_DEFAULT_SPEED = 12;  // Integer
 // all strings constants.
 inline const string
 
+/// Application identity and embedded resource bundle (see data/ledspicerui.gresource.xml).
+	RESOURCE_PREFIX {"/org/ledspicer/ui/"},
+
 /// LEDSpicer configuration file keys.
 	DEFAULT_USERID   {"1000"},
 	DEFAULT_GROUPID  {"1000"},

@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
 	auto builder = Gtk::Builder::create();
 
 	try {
-		builder->add_from_file(PACKAGE_DATA_DIR "main.glade");
+		builder->add_from_resource(RESOURCE_PREFIX + "main.glade");
 	}
 	catch(Glib::Error& e) {
 		std::cerr << e.what() << std::endl;

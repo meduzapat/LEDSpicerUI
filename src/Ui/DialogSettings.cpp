@@ -107,6 +107,8 @@ bool DialogSettings::loadSettings() {
 	const bool loaded = SettingsFile::initialize();
 	setBinaryPath(Settings::get().getBinaryPath(), true);
 	setDataDir(Settings::get().getDataDir(), true);
+	// Rescan so applyCurrentTheme() validates the saved theme against disk.
+	ThemeManager::getInstance().rescan();
 	applyCurrentTheme();
 	return loaded;
 }
@@ -150,6 +152,8 @@ DialogSettings::DialogSettings(BaseObjectType* obj, const Glib::RefPtr<Gtk::Buil
 	builder->get_widget("BtnSettingsStyleLight", btnStyleLight);
 	builder->get_widget("BtnSettingsStyleDark",  btnStyleDark);
 	builder->get_widget("BoxSelectTheme",        flowBoxThemes);
+	builder->get_widget("FileThemeDirSelect",    fileThemeDirSelect);
+	builder->get_widget("BtnThemeRefresh",       btnThemeRefresh);
 
 	builder->get_widget("ScaleLayoutGrid", scaleLayoutGrid);
 	for (int v {0}; v <= 100; v += 10)
@@ -170,17 +174,15 @@ DialogSettings::DialogSettings(BaseObjectType* obj, const Glib::RefPtr<Gtk::Buil
 		switchDebugFiles->set_active(s.shouldDebugFiles());
 		scaleLayoutGrid->set_value(s.getLayoutGrid());
 		syncStyleButtons();
-		if (flowBoxThemes->get_children().empty())
-			populateThemes();
-		selectingTheme = true;
-		const string& currentId = s.getThemeName();
-		for (auto w : flowBoxThemes->get_children()) {
-			auto child = static_cast<Gtk::FlowBoxChild*>(w);
-			if (child->get_name() == currentId) {
-				flowBoxThemes->select_child(*child);
-				break;
-			}
+		const string themeDir {s.getThemePath()};
+		if (not Glib::file_test(themeDir, Glib::FILE_TEST_IS_DIR)) {
+			try { Gio::File::create_for_path(themeDir)->make_directory_with_parents(); }
+			catch (...) {}
 		}
+		fileThemeDirSelect->set_filename(themeDir);
+		selectingTheme = true;
+		rebuildThemeTiles();
+		selectCurrentThemeTile();
 		selectingTheme = false;
 		syncing = false;
 	});
@@ -210,14 +212,37 @@ DialogSettings::DialogSettings(BaseObjectType* obj, const Glib::RefPtr<Gtk::Buil
 	connectStyleBtn(btnStyleLight, Settings::ThemeStyle::Light);
 	connectStyleBtn(btnStyleDark,  Settings::ThemeStyle::Dark);
 
-	// Theme tile selection.
-	flowBoxThemes->signal_selected_children_changed().connect([this]() {
+	// Theme tile selection. Clicking a tile selects its theme; clicking the
+	// already-selected tile clears the selection (no theme).
+	flowBoxThemes->signal_child_activated().connect([this](Gtk::FlowBoxChild* child) {
 		if (selectingTheme) return;
-		auto selected = flowBoxThemes->get_selected_children();
-		if (selected.empty()) return;
-		Settings::get().setThemeName(selected[0]->get_name());
+		const string clicked  {child->get_name()};
+		const string previous {Settings::get().getThemeName()};
+		if (clicked == previous) {
+			selectingTheme = true;
+			flowBoxThemes->unselect_all();
+			selectingTheme = false;
+			Settings::get().setThemeName("");
+			applyCurrentTheme();
+			commit("Theme cleared");
+			return;
+		}
+		Settings::get().setThemeName(clicked);
 		applyCurrentTheme();
 		commit("Theme updated");
+	});
+
+	fileThemeDirSelect->signal_file_set().connect([this]() {
+		string dir {fileThemeDirSelect->get_filename()};
+		if (not dir.empty() and dir.back() != '/') dir += '/';
+		Settings::get().setThemePath(dir);
+		refreshThemes();
+		commit("Themes directory updated");
+	});
+
+	btnThemeRefresh->signal_clicked().connect([this]() {
+		refreshThemes();
+		commit("Themes rescanned");
 	});
 
 	switchInteractiveMode->property_active().signal_changed().connect([this]() {
@@ -474,35 +499,75 @@ void DialogSettings::commit(const string& message, StatusBar::Severity severity)
 	StatusBar::getInstance().push(message, severity);
 }
 
-void DialogSettings::populateThemes() {
-	for (const auto& meta : ThemeManager::getInstance().getThemes()) {
-		auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 4));
+void DialogSettings::rebuildThemeTiles() {
+	for (auto child : flowBoxThemes->get_children())
+		flowBoxThemes->remove(*child);
 
-		auto img = Gtk::manage(new Gtk::Image());
-		img->set_size_request(120, 80);
-		const string imgPath{PACKAGE_DATA_DIR "themes/" + meta.id + "/preview.png"};
-		try {
-			img->set(Gdk::Pixbuf::create_from_file(imgPath, 120, 80, true));
-		}
-		catch (const Glib::Error&) {
-			img->set_from_icon_name("image-missing", Gtk::ICON_SIZE_DIALOG);
-			img->set_pixel_size(64);
-		}
-		box->pack_start(*img, false, false);
+	// No "None" tile: an empty selection (nothing highlighted) is the no-theme
+	// state. Clicking the selected tile again clears it (see signal_child_activated).
+	const string& themeDir = Settings::get().getThemePath();
+	for (const auto& meta : ThemeManager::getInstance().getThemes())
+		addThemeTile(meta.id, meta.name, themeDir + meta.id + "/preview.png", meta.description);
+}
 
-		auto lbl = Gtk::manage(new Gtk::Label(meta.name));
-		box->pack_start(*lbl, false, false);
-		box->show_all();
+void DialogSettings::addThemeTile(const string& id, const string& name, const string& previewPath, const string& tooltip) {
+	auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 4));
 
-		auto child = Gtk::manage(new Gtk::FlowBoxChild());
-		child->set_name(meta.id);
-		child->get_style_context()->add_class("ThemeTile");
-		if (not meta.description.empty())
-			child->set_tooltip_text(meta.description);
-		child->add(*box);
-		child->show();
-		flowBoxThemes->add(*child);
+	auto img = Gtk::manage(new Gtk::Image());
+	img->set_size_request(120, 80);
+	try {
+		img->set(Gdk::Pixbuf::create_from_file(previewPath, 120, 80, true));
 	}
+	catch (const Glib::Error&) {
+		img->set_from_icon_name("image-missing", Gtk::ICON_SIZE_DIALOG);
+		img->set_pixel_size(64);
+	}
+	box->pack_start(*img, false, false);
+
+	auto lbl = Gtk::manage(new Gtk::Label(name));
+	box->pack_start(*lbl, false, false);
+	box->show_all();
+
+	auto child = Gtk::manage(new Gtk::FlowBoxChild());
+	child->set_name(id);
+	child->get_style_context()->add_class("ThemeTile");
+	if (not tooltip.empty())
+		child->set_tooltip_text(tooltip);
+	child->add(*box);
+	child->show();
+	flowBoxThemes->add(*child);
+}
+
+void DialogSettings::selectCurrentThemeTile() {
+	const string& currentId = Settings::get().getThemeName();
+	if (currentId.empty()) {
+		flowBoxThemes->unselect_all();
+		return;
+	}
+	for (auto w : flowBoxThemes->get_children()) {
+		auto child = static_cast<Gtk::FlowBoxChild*>(w);
+		if (child->get_name() == currentId) {
+			flowBoxThemes->select_child(*child);
+			return;
+		}
+	}
+}
+
+void DialogSettings::refreshThemes() {
+	ThemeManager::getInstance().rescan();
+
+	// A selection whose theme directory vanished falls back to no theme.
+	const string current {Settings::get().getThemeName()};
+	if (not current.empty() and not ThemeManager::getInstance().hasTheme(current)) {
+		Settings::get().setThemeName("");
+		applyCurrentTheme();
+		commit("Theme \"" + current + "\" not found; cleared", StatusBar::Severity::Warning);
+	}
+
+	selectingTheme = true;
+	rebuildThemeTiles();
+	selectCurrentThemeTile();
+	selectingTheme = false;
 }
 
 void DialogSettings::syncStyleButtons() {
@@ -515,8 +580,10 @@ void DialogSettings::syncStyleButtons() {
 }
 
 void DialogSettings::applyCurrentTheme() {
-	ThemeManager::getInstance().apply(
-		Settings::get().getThemeName(),
-		Settings::get().getThemeStyle()
-	);
+	auto& tm = ThemeManager::getInstance();
+	const string id {Settings::get().getThemeName()};
+	// A saved theme whose files were removed falls back to no theme.
+	if (not id.empty() and not tm.hasTheme(id))
+		Settings::get().setThemeName("");
+	tm.apply(Settings::get().getThemeName(), Settings::get().getThemeStyle());
 }

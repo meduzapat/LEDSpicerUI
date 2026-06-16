@@ -20,11 +20,10 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <glibmm.h>
-#include <gtkmm.h>
-#include <tinyxml2.h>
-#include <iostream>
+#include "Defaults.hpp"
 #include "config/Settings.hpp"
+#include <iostream>
+#include <tinyxml2.h>
 
 #pragma once
 
@@ -35,17 +34,22 @@ namespace LEDSpicerUI::Ui {
  *
  * Singleton that discovers, loads, and switches themes at runtime.
  *
- * Each theme lives in PACKAGE_DATA_DIR/themes/<id>/ and provides:
+ * Themes live on disk in the user-configurable directory returned by
+ * Settings::getThemePath() (default: the app config dir + "themes/"). It ships
+ * empty; users acquire themes separately and may point the setting anywhere.
+ * Each theme lives in <themePath>/<id>/ and provides:
  *   metadata.xml     — display name and description
  *   preview.png      — mandatory selector thumbnail
  *   dark/theme.css   — dark variant palette
  *   light/theme.css  — light variant palette
  *
  * CSS is loaded in two layers:
- *   1. style-base.css    at APPLICATION   priority (structural bones, no colors/images)
- *   2. theme/variant.css at APPLICATION+1 priority (colors, backgrounds, images)
+ *   1. style-base.css    from the GResource bundle at APPLICATION   priority
+ *                        (structural bones, no colors/images)
+ *   2. theme/variant.css from disk            at APPLICATION+1 priority
+ *                        (colors, backgrounds, images)
  *
- * Falls back to the legacy style.css if themes are unavailable.
+ * An empty theme id is the valid no-theme state: only the bundled base CSS loads.
  */
 class ThemeManager {
 
@@ -66,17 +70,23 @@ public:
 	static ThemeManager& getInstance() noexcept { return instance; }
 
 	/**
-	 * Scans PACKAGE_DATA_DIR/themes/ for available themes and loads their metadata.
+	 * Scans the themes directory and connects system dark-mode change tracking.
 	 * Called once from main() before the main window is created.
 	 */
 	void initialize() noexcept;
 
 	/**
-	 * Loads and applies style-base.css + the theme variant CSS to the default screen.
+	 * Re-scans the themes directory, refreshing the available theme list.
+	 * Call after the themes directory changes or on an explicit refresh.
+	 */
+	void rescan() noexcept;
+
+	/**
+	 * Loads and applies the bundled base CSS plus the theme variant CSS to the default screen.
 	 * Replaces any previously loaded theme providers.
-	 * @param themeId  Directory name under themes/.
+	 * @param themeId  Directory name under the themes directory; empty selects the no-theme state.
 	 * @param style    ThemeStyle::Auto detects system dark-mode preference.
-	 * @return true on success, false if CSS files could not be loaded.
+	 * @return true on success (including the no-theme state), false if a theme's CSS could not be loaded.
 	 */
 	bool apply(const string& themeId, Config::Settings::ThemeStyle style) noexcept;
 
@@ -84,6 +94,12 @@ public:
 	 * @return All discovered themes, in discovery order.
 	 */
 	const vector<ThemeMetadata>& getThemes() const noexcept { return themes; }
+
+	/**
+	 * @param id Theme directory name to look up.
+	 * @return true if a theme with this id was discovered by the last scan.
+	 */
+	bool hasTheme(const string& id) const noexcept;
 
 	/**
 	 * @return The id of the currently applied theme.
@@ -100,6 +116,11 @@ private:
 	ThemeManager() = default;
 
 	static ThemeManager instance;
+
+	/**
+	 * Clears and repopulates the theme list from Settings::getThemePath().
+	 */
+	void scan() noexcept;
 
 	string
 		currentThemeId,
@@ -120,19 +141,28 @@ private:
 	/**
 	 * Parses themes/<id>/metadata.xml and appends to themes on success.
 	 *
-	 * @param themeDir Absolute path to the theme directory (e.g. PACKAGE_DATA_DIR/themes/darkblue).
+	 * @param themeDir Absolute path to the theme directory (e.g. <themePath>/darkblue/).
 	 * @param themeId
 	 */
 	void parseMetadata(const string& themeDir, const string& themeId) noexcept;
 
 	/**
-	 * Loads a CSS file into a new provider on the default screen at the given priority.
+	 * Loads a CSS file from disk into a new provider on the default screen at the given priority.
 	 *
 	 * @param path Absolute path to the CSS file to load.
 	 * @param priority Priority to apply the provider at (e.g. GTK_STYLE_PROVIDER_PRIORITY_APPLICATION).
 	 * @return The loaded provider, or nullptr if loading failed.
 	 */
 	static Glib::RefPtr<Gtk::CssProvider> loadCss(const string& path, guint priority) noexcept;
+
+	/**
+	 * Loads a CSS file from the embedded GResource bundle into a new provider at the given priority.
+	 *
+	 * @param path Resource path of the CSS file.
+	 * @param priority Priority to apply the provider at.
+	 * @return The loaded provider, or nullptr if loading failed.
+	 */
+	static Glib::RefPtr<Gtk::CssProvider> loadCssResource(const string& path, guint priority) noexcept;
 
 	/**
 	 * Removes a provider from the default screen if non-null.
