@@ -204,7 +204,7 @@ void LayoutElement::fire(Storage::Element* target) noexcept {
 	const string color {resolveColorName()};
 	lightTimer = Glib::signal_timeout().connect(
 		sigc::mem_fun(*this, &LayoutElement::onLightExpired),
-		LIGHT_TIMEOUT_MS
+		Config::Settings::get().getLayoutTestTimeout()
 	);
 	tester->test(target, color);
 }

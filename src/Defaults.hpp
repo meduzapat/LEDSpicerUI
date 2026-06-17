@@ -61,9 +61,6 @@ constexpr float DEFAULT_CHANGE_VALUE = 64.00f;
 /// Default milliseconds for solenoids and motors.
 constexpr unsigned int DEFAULT_SOLENOID  = 50;
 
-/// Milliseconds the hardware stays lit for a single layout test command. No reset on re-click.
-constexpr unsigned int LIGHT_TIMEOUT_MS  = 1500;
-
 /// Default speed for GZ40 restrictor.
 constexpr int GZ40_DEFAULT_SPEED = 12;  // Integer
 

@@ -22,6 +22,7 @@
 
 #include "StripRenderer.hpp"
 #include "Defaults.hpp"
+#include "config/Settings.hpp"
 
 using namespace LEDSpicerUI::Ui::Layout;
 
@@ -89,15 +90,14 @@ void StripRenderer::scheduleCellOff(uint16_t physicalIdx) noexcept {
 		cells[i]->set_active(false);
 		setLedState(physicalIdx, LedColor::Off);
 		return false;
-	}, LIGHT_TIMEOUT_MS);
+	}, Config::Settings::get().getLayoutTestTimeout());
 }
 
 void StripRenderer::setLedState(uint16_t idx, LedColor color) noexcept {
 	const uint16_t displayIdx = static_cast<uint16_t>(idx / groupRatio);
 	auto cell {cells.at(displayIdx)};
 	auto ctx {cell->get_style_context()};
-	for (auto c : {LedColor::Off, LedColor::R, LedColor::G, LedColor::B,
-	               LedColor::Y, LedColor::M, LedColor::C, LedColor::W})
+	for (auto c : {LedColor::Off, LedColor::R, LedColor::G, LedColor::B, LedColor::Y, LedColor::M, LedColor::C, LedColor::W})
 		ctx->remove_class(cssClassFor(c));
 	ctx->add_class(cssClassFor(color));
 }

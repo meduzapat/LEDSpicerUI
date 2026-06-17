@@ -21,6 +21,8 @@
  */
 
 #include <glibmm.h>
+#include <cmath>
+#include <iomanip>
 
 #include "Settings.hpp"
 
@@ -43,6 +45,7 @@ const StringUMap Settings::DEFAULTS = {
 	{"saveBackup",          HUMAN_TRUE},
 	{"debugFiles",          HUMAN_FALSE},
 	{"layoutGrid",          "0"},
+	{"layoutTestTimeout",   "1.5"},
 };
 
 void Settings::load(const Values& raw) noexcept {
@@ -102,6 +105,16 @@ void Settings::setPreserveEmptyDir(bool value)   noexcept { setValue(PRESERVE_EM
 void Settings::setRemoveInvalidItems(bool value) noexcept { setValue(REMOVE_INVALID_ITEMS, value); }
 void Settings::setSaveBackup(bool value)         noexcept { setValue(SAVE_BACKUP,          value); }
 void Settings::setDebugFiles(bool value)         noexcept { setValue(DEBUG_FILES,          value); }
+
+unsigned Settings::getLayoutTestTimeout() const noexcept {
+	return static_cast<unsigned>(std::lround(getDouble(LAYOUT_TEST_TIMEOUT) * 1000));
+}
+
+void Settings::setLayoutTestTimeout(double seconds) noexcept {
+	stringstream ss;
+	ss << std::fixed << std::setprecision(1) << seconds;
+	setValue(LAYOUT_TEST_TIMEOUT, ss.str());
+}
 
 void Settings::setConfigPath(const string& path) noexcept {
 	configPath = path;

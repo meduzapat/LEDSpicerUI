@@ -112,14 +112,17 @@ protected:
 
 	Gtk::Scale* scaleLayoutGrid = nullptr;
 
+	Gtk::SpinButton* spinLayoutTestTimeout = nullptr;
+
 	Gtk::FlowBox* flowBoxThemes = nullptr;
 
-	/// Guards against recursive signal firing when syncing style buttons.
-	bool settingStyle    = false;
-	/// Guards against recursive signal firing when syncing theme selection.
-	bool selectingTheme  = false;
-	/// True while signal_show() is mirroring Settings into widgets; suppresses auto-save.
-	bool syncing         = false;
+	bool
+		/// Guards against recursive signal firing when syncing style buttons.
+		settingStyle    = false,
+		/// Guards against recursive signal firing when syncing theme selection.
+		selectingTheme  = false,
+		/// True while signal_show() is mirroring Settings into widgets; suppresses auto-save.
+		syncing         = false;
 
 	DialogSettings(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
 

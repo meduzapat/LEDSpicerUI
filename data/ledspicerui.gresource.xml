@@ -7,5 +7,6 @@
 	<gresource prefix="/org/ledspicer/ui">
 		<file compressed="true" preprocess="xml-stripblanks">main.glade</file>
 		<file compressed="true">style-base.css</file>
-@RESOURCE_IMAGE_ENTRIES@	</gresource>
+@RESOURCE_IMAGE_ENTRIES@
+	</gresource>
 </gresources>

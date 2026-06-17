@@ -56,7 +56,8 @@ public:
 		REMOVE_INVALID_ITEMS {"removeInvalidItems"},
 		SAVE_BACKUP          {"saveBackup"},
 		DEBUG_FILES          {"debugFiles"},
-		LAYOUT_GRID          {"layoutGrid"};
+		LAYOUT_GRID          {"layoutGrid"},
+		LAYOUT_TEST_TIMEOUT  {"layoutTestTimeout"};
 
 	/// Runtime mode — derived from binary detection result and interactiveMode preference.
 	enum class Mode {
@@ -125,6 +126,11 @@ public:
 
 	/// Register a callback fired whenever the layout grid step changes.
 	void onLayoutGridChanged(std::function<void()> cb) noexcept { layoutGridChanged = std::move(cb); }
+
+	/// Layout test light duration, in milliseconds. Stored as seconds (1 decimal); read on demand.
+	unsigned getLayoutTestTimeout() const noexcept;
+	/// @param seconds duration in seconds; persisted with a single decimal.
+	void     setLayoutTestTimeout(double seconds) noexcept;
 
 	const string& getThemeName()  const noexcept { return getValue(THEME_NAME); }
 	void setThemeName(const string& id)  noexcept { setValue(THEME_NAME, id);  }

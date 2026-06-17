@@ -51,6 +51,7 @@ TEST_F(SettingsTest, DefaultState) {
 	EXPECT_TRUE (s.shouldSaveBackup());
 	EXPECT_FALSE(s.shouldDebugFiles());
 	EXPECT_EQ(0, s.getLayoutGrid());
+	EXPECT_EQ(1500u, s.getLayoutTestTimeout());
 	EXPECT_EQ(Mode::Portable, s.getMode());
 	EXPECT_TRUE(s.isPortable());
 }
@@ -69,6 +70,7 @@ TEST_F(SettingsTest, LoadAndSerialize) {
 		{"saveBackup",         HUMAN_FALSE},
 		{"debugFiles",         HUMAN_TRUE},
 		{"layoutGrid",         "30"},
+		{"layoutTestTimeout",  "2.5"},
 	});
 
 	EXPECT_EQ("/usr/bin/ledspicerd",   s.getBinaryPath());
@@ -82,6 +84,7 @@ TEST_F(SettingsTest, LoadAndSerialize) {
 	EXPECT_FALSE(s.shouldSaveBackup());
 	EXPECT_TRUE (s.shouldDebugFiles());
 	EXPECT_EQ(30, s.getLayoutGrid());
+	EXPECT_EQ(2500u, s.getLayoutTestTimeout());
 	EXPECT_EQ(Mode::Local, s.getMode());
 
 	// Round-trip: snapshot → reset → load → same values.
@@ -91,6 +94,7 @@ TEST_F(SettingsTest, LoadAndSerialize) {
 	EXPECT_EQ("/usr/bin/ledspicerd", s.getBinaryPath());
 	EXPECT_EQ(ThemeStyle::Dark,      s.getThemeStyle());
 	EXPECT_EQ(30,                    s.getLayoutGrid());
+	EXPECT_EQ(2500u,                 s.getLayoutTestTimeout());
 	EXPECT_EQ(Mode::Local,           s.getMode());
 }
 
@@ -205,6 +209,26 @@ TEST_F(SettingsTest, LayoutGridChangedCallback) {
 	s.onLayoutGridChanged(nullptr);
 	s.setLayoutGrid(50);
 	EXPECT_EQ(2, calls);
+}
+
+TEST_F(SettingsTest, LayoutTestTimeoutConversion) {
+	auto& s = Settings::get();
+
+	// Default: 1.5 s → 1500 ms.
+	EXPECT_EQ(1500u, s.getLayoutTestTimeout());
+
+	// Setter takes seconds, getter returns milliseconds.
+	s.setLayoutTestTimeout(2.0);
+	EXPECT_EQ(2000u, s.getLayoutTestTimeout());
+
+	s.setLayoutTestTimeout(0.5);
+	EXPECT_EQ(500u, s.getLayoutTestTimeout());
+
+	// Single-decimal values survive a serialization round-trip.
+	const Values snap(s.begin(), s.end());
+	s.load(Values{});
+	s.load(snap);
+	EXPECT_EQ(500u, s.getLayoutTestTimeout());
 }
 
 int main(int argc, char** argv) {

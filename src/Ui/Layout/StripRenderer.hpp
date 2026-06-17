@@ -40,11 +40,11 @@ class StripRenderer: public Gtk::FlowBox {
 
 public:
 
-	/// Maximum number of toggles displayed. Real strips longer than this are grouped.
-	static constexpr uint16_t DISPLAY_CAP       = 50;
-
-	/// Soft cap for cells per visual row (forces 3–5 row pile-up on long strips).
-	static constexpr uint16_t MAX_CELLS_PER_ROW = 12;
+	static constexpr uint16_t
+		/// Maximum number of toggles displayed. Real strips longer than this are grouped.
+		DISPLAY_CAP       = 50,
+		/// Soft cap for cells per visual row (forces 3–5 row pile-up on long strips).
+		MAX_CELLS_PER_ROW = 12;
 
 	/// Logical color of a single LED (or group). CSS classes match these names.
 	enum class LedColor : uint8_t { Off, R, G, B, Y, M, C, W };
@@ -58,17 +58,27 @@ public:
 
 	void setCount(uint16_t stripSize) noexcept;
 
-	/** Physical idx is mapped onto its display cell when grouping is active. */
+	/**
+	 * Physical idx is mapped onto its display cell when grouping is active.
+	 * @param idx
+	 * @param color
+	 */
 	void setLedState(uint16_t idx, LedColor color) noexcept;
 
 	void setAllOff() noexcept;
 
-	/** Schedules the cell containing physicalIdx to revert to Off after LIGHT_TIMEOUT_MS. */
+	/**
+	 * Schedules the cell containing physicalIdx to revert to Off after the layout test timeout.
+	 * @param physicalIdx
+	 */
 	void scheduleCellOff(uint16_t physicalIdx) noexcept;
 
-	/** Argument = index of the first physical LED in the clicked group.
-	 *  Emitted only when a cell transitions OFF → ON via user click;
-	 *  rejected re-clicks during a live cell timer do not emit. */
+	/**
+	 * Emitted only when a cell transitions OFF → ON via user click;
+	 * rejected re-clicks during a live cell timer do not emit.
+	 * @param index of the first physical LED in the clicked group.
+	 * @return
+	 */
 	sigc::signal<void, uint16_t>& signal_led_clicked() noexcept { return ledClicked; }
 
 	uint16_t getCount() const noexcept { return stripSize; }

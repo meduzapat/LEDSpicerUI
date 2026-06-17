@@ -26,6 +26,10 @@ using namespace LEDSpicerUI::Ui;
 using LEDSpicerUI::Config::Settings;
 using LEDSpicerUI::Config::SettingsFile;
 
+const string
+	savedMessage      {"Settings saved"},
+	themeSavedMessage {"Theme updated"};
+
 bool DialogSettings::startup(Gtk::Window* parent) {
 	try {
 		if (loadSettings()) return true;
@@ -159,6 +163,8 @@ DialogSettings::DialogSettings(BaseObjectType* obj, const Glib::RefPtr<Gtk::Buil
 	for (int v {0}; v <= 100; v += 10)
 		scaleLayoutGrid->add_mark(v, Gtk::POS_BOTTOM, "");
 
+	builder->get_widget("SpinLayoutTestTimeout", spinLayoutTestTimeout);
+
 	// Sync all widgets to current Settings on every open.
 	signal_show().connect([this]() {
 		syncing = true;
@@ -173,6 +179,7 @@ DialogSettings::DialogSettings(BaseObjectType* obj, const Glib::RefPtr<Gtk::Buil
 		switchSaveBackup->set_active(s.shouldSaveBackup());
 		switchDebugFiles->set_active(s.shouldDebugFiles());
 		scaleLayoutGrid->set_value(s.getLayoutGrid());
+		spinLayoutTestTimeout->set_value(s.getLayoutTestTimeout() / 1000.0);
 		syncStyleButtons();
 		const string themeDir {s.getThemePath()};
 		if (not Glib::file_test(themeDir, Glib::FILE_TEST_IS_DIR)) {
@@ -205,7 +212,7 @@ DialogSettings::DialogSettings(BaseObjectType* obj, const Glib::RefPtr<Gtk::Buil
 			settingStyle = false;
 			Settings::get().setThemeStyle(style);
 			applyCurrentTheme();
-			commit("Theme style updated");
+			commit(themeSavedMessage);
 		});
 	};
 	connectStyleBtn(btnStyleAuto,  Settings::ThemeStyle::Auto);
@@ -229,7 +236,7 @@ DialogSettings::DialogSettings(BaseObjectType* obj, const Glib::RefPtr<Gtk::Buil
 		}
 		Settings::get().setThemeName(clicked);
 		applyCurrentTheme();
-		commit("Theme updated");
+		commit(themeSavedMessage);
 	});
 
 	fileThemeDirSelect->signal_file_set().connect([this]() {
@@ -247,23 +254,23 @@ DialogSettings::DialogSettings(BaseObjectType* obj, const Glib::RefPtr<Gtk::Buil
 
 	switchInteractiveMode->property_active().signal_changed().connect([this]() {
 		Settings::get().setInteractiveMode(switchInteractiveMode->get_active());
-		commit("Settings saved");
+		commit(savedMessage);
 	});
 	switchPreserveEmptyDir->property_active().signal_changed().connect([this]() {
 		Settings::get().setPreserveEmptyDir(switchPreserveEmptyDir->get_active());
-		commit("Settings saved");
+		commit(savedMessage);
 	});
 	switchRemoveInvalidItems->property_active().signal_changed().connect([this]() {
 		Settings::get().setRemoveInvalidItems(switchRemoveInvalidItems->get_active());
-		commit("Settings saved");
+		commit(savedMessage);
 	});
 	switchSaveBackup->property_active().signal_changed().connect([this]() {
 		Settings::get().setSaveBackup(switchSaveBackup->get_active());
-		commit("Settings saved");
+		commit(savedMessage);
 	});
 	switchDebugFiles->property_active().signal_changed().connect([this]() {
 		Settings::get().setDebugFiles(switchDebugFiles->get_active());
-		commit("Settings saved");
+		commit(savedMessage);
 	});
 
 	scaleLayoutGrid->signal_change_value().connect(
@@ -274,7 +281,12 @@ DialogSettings::DialogSettings(BaseObjectType* obj, const Glib::RefPtr<Gtk::Buil
 	);
 	scaleLayoutGrid->signal_value_changed().connect([this]() {
 		Settings::get().setLayoutGrid(static_cast<int>(scaleLayoutGrid->get_value()));
-		commit("Settings saved");
+		commit(savedMessage);
+	});
+
+	spinLayoutTestTimeout->signal_value_changed().connect([this]() {
+		Settings::get().setLayoutTestTimeout(spinLayoutTestTimeout->get_value());
+		commit(savedMessage);
 	});
 
 	fileBinary->signal_file_set().connect([this]() {
