@@ -154,6 +154,12 @@ Author: Patricio A Rossi
     <property name="step-increment">10</property>
     <property name="page-increment">10</property>
   </object>
+  <object class="GtkAdjustment" id="adjustmentLayoutTestTimeout">
+    <property name="lower">1</property>
+    <property name="upper">10</property>
+    <property name="step-increment">0.5</property>
+    <property name="page-increment">1</property>
+  </object>
   <object class="GtkApplicationWindow" id="MainWindow">
     <property name="can-focus">False</property>
     <child>
@@ -5398,6 +5404,45 @@ Ships empty; place theme folders here, or point this anywhere you keep them.</pr
                         <property name="expand">False</property>
                         <property name="fill">True</property>
                         <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkBox">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="spacing">6</property>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="label" translatable="yes">Test light duration (seconds)</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkSpinButton" id="SpinLayoutTestTimeout">
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="tooltip-text" translatable="yes">How long the hardware stays lit when testing an element in the Layout.</property>
+                            <property name="adjustment">adjustmentLayoutTestTimeout</property>
+                            <property name="digits">1</property>
+                            <property name="numeric">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">2</property>
                       </packing>
                     </child>
                   </object>
