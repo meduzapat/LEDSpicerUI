@@ -21,7 +21,9 @@ jobs:
             cmake                 \
             libgtkmm-3.0-dev      \
             libtinyxml2-dev       \
-            libgtest-dev
+            libgtest-dev          \
+            libglib2.0-bin        \
+            libxml2-utils
 
       - name: Configure
         run: |

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Source manifest for the embedded GResource bundle.
+  Edit the static entries here; image entries are generated automatically.
+-->
+<gresources>
+	<gresource prefix="/org/ledspicer/ui">
+		<file compressed="true" preprocess="xml-stripblanks">main.glade</file>
+		<file compressed="true">style-base.css</file>
+@RESOURCE_IMAGE_ENTRIES@	</gresource>
+</gresources>

@@ -1,7 +1,9 @@
 /* ============================================================
  * LEDSpicerUI — Base Structural CSS
  * Layout, sizing, spacing, and hardware-semantic colors.
- * No backgrounds, no images, no theme colors — plain bones.
+ * Neutral colors derive from the system palette (@theme_*, @borders) so the
+ * un-themed UI follows the desktop's light/dark mode. Hardware-semantic
+ * colors (pins, LEDs, On/Off) stay fixed. No images — plain bones.
  * Themes build on top of this file; they do not replace it.
  * ============================================================ */
 
@@ -42,17 +44,17 @@ combobox.noRoundRight button.combo,
  * unused pins. Pin color classes below override this background. */
 .pinLabel {
 	font-size: 8pt;
-	border: 1px solid #333;
-	background: #3a3a3a;
-	color: #fff;
+	border: 1px solid @borders;
+	background: @theme_bg_color;
+	color: @theme_fg_color;
 }
 
 .connectorBox {
 	margin: 0;
 	padding: 2px 4px;
 	font-size: 10pt;
-	background-color: rgba(60,60,60,0.65);
-	border: 1px solid rgba(170,170,170,0.6);
+	background-color: alpha(@theme_fg_color, 0.08);
+	border: 1px solid @borders;
 	border-radius: 4px;
 }
 
@@ -83,19 +85,36 @@ combobox.noRoundRight button.combo,
 	color: #000;
 }
 
-/* ── BoxButton structural layout ──────────────────────────── */
+/* ── BoxButton structural layout ──────────────────────────── 
+
+Neutral card frame so items read as distinct tiles in the un-themed UI.
+*/
 
 .BoxButton {
-	border-radius: 6px;
-	padding: 5px 2px;
-	margin: 2px;
+	border:           1px solid @borders;
+	background-color: alpha(@theme_fg_color, 0.04);
+	border-radius:    6px;
+	padding:          5px 2px;
+	margin:           2px;
 }
 
 .BoxButton > box > button {
 	border-radius: 4px;
 }
 
+.BoxButton:hover {
+	border-color: alpha(@theme_fg_color, 0.45);
+	box-shadow:   0 0 8px alpha(@theme_fg_color, 0.25);
+}
+
+.BoxButton:selected {
+	background-color: alpha(@theme_selected_bg_color, 0.85);
+	border-color:     @theme_selected_bg_color;
+	box-shadow:       0 0 12px alpha(@theme_selected_bg_color, 0.6);
+}
+
 .BoxButton:selected label {
+	color:       @theme_selected_fg_color;
 	font-weight: bold;
 }
 
@@ -104,7 +123,33 @@ combobox.noRoundRight button.combo,
 	padding: 3px 2px;
 }
 
-/* ── Directory navigator structure ────────────────────────── */
+/* ── Hover effects for BoxButton action buttons ─────────────
+
+Edit / Copy / Delete action accents — fixed semantic colors.
+*/
+
+.BoxBackgroundEdit:hover {
+	background: #72b1e8;
+}
+
+.BoxBackgroundCopy:hover {
+	background: #8ae32b;
+}
+
+.BoxBackgroundDelete:hover {
+	background: #f55d5d;
+}
+
+/* ── Directory navigator structure ──────────────────────────
+
+Folder tiles: amber border + tint marks them as containers to open.
+*/
+
+.DirectoryBoxButton,
+.DirectoryBoxButton:hover {
+	border-color: #f5c211;
+	background:   alpha(#f5c211, 0.07);
+}
 
 .DirectoryBoxButton > button > label {
 	font-weight: bold;
@@ -146,17 +191,19 @@ combobox.noRoundRight button.combo,
 	opacity: 0.4;
 }
 
-/* ── Color picker disabled state ──────────────────────────── */
-/* Themes do not define this selector, so base wins without conflict. */
+/* ── Color picker disabled state ────────────────────────────
+
+Themes do not define this selector, so base wins without conflict.
+*/
 
 .colorPickerButton:disabled {
-	border: 1px dashed rgba(180,180,180,0.7);
+	border: 1px dashed @borders;
 	background-image: repeating-linear-gradient(
 		45deg,
-		rgba(0,0,0,0.25) 0px,
-		rgba(0,0,0,0.25) 2px,
-		transparent      2px,
-		transparent      6px
+		alpha(@theme_fg_color, 0.25) 0px,
+		alpha(@theme_fg_color, 0.25) 2px,
+		transparent                  2px,
+		transparent                  6px
 	);
 }
 
@@ -164,6 +211,15 @@ combobox.noRoundRight button.combo,
 
 .GroupBoxButton.read-only {
 	opacity: 0.5;
+}
+
+/* Built-in groups: grey border and italic label mark them as not user-made. */
+.GroupBoxButton.system {
+	border-color: @insensitive_fg_color;
+}
+
+.GroupBoxButton.system label {
+	font-style: italic;
 }
 
 /* ── Donation dialog structure ────────────────────────────── */
@@ -183,9 +239,11 @@ combobox.noRoundRight button.combo,
 	border-radius: 4px;
 }
 
-/* ── Area background structure ────────────────────────────── */
-/* background-image for each zone is provided by the theme.
- * Base only sets the shared positioning/sizing behavior. */
+/* ── Area background structure ──────────────────────────────
+
+background-image for each zone is provided by the theme.
+Base only sets the shared positioning/sizing behavior.
+*/
 
 .layoutPreview {
 	background-size:     cover;
@@ -220,12 +278,12 @@ combobox.noRoundRight button.combo,
 }
 
 .layout-element:hover {
-	background: rgba(255,255,255,0.04);
+	background: alpha(@theme_fg_color, 0.05);
 }
 
 .layout-element-active {
-	border:     1px solid #ccc;
-	background: rgba(13,13,13,0.62);
+	border:     1px solid @theme_selected_bg_color;
+	background: alpha(@theme_selected_bg_color, 0.15);
 }
 
 .layout-element-icon {
@@ -235,7 +293,7 @@ combobox.noRoundRight button.combo,
 }
 
 .layout-element-active .layout-element-icon {
-	background: rgba(28,113,216,0.18);
+	background: alpha(@theme_selected_bg_color, 0.25);
 }
 
 .layout-element-icon-fired.led-r { border-color: #e01b24; background: rgba(224,27,36,0.35); }
@@ -247,12 +305,14 @@ combobox.noRoundRight button.combo,
 .layout-element-icon-fired.led-w { border-color: #ffffff; background: rgba(255,255,255,0.30); }
 
 /* ── LED swatches (shared: StripRenderer cells, RGB toggles, fire glow).
- * Hex values match the .pin* palette for visual consistency.
- * StripRenderer container gets a slight lift so off cells read as empty
- * slots; cells inside use the .strip-led variant rules below. ── */
+
+Hex values match the .pin* palette for visual consistency.
+StripRenderer container gets a slight lift so off cells read as empty
+slots; cells inside use the .strip-led variant rules below.
+*/
 
 .strip-renderer {
-	background:    rgba(255,255,255,0.06);
+	background:    alpha(@theme_fg_color, 0.06);
 	border-radius: 3px;
 	padding:       2px;
 }
@@ -262,7 +322,7 @@ combobox.noRoundRight button.combo,
 	min-height:    10px;
 	padding:       0;
 	margin:        0;
-	border:        1px solid #555;
+	border:        1px solid @borders;
 	border-radius: 2px;
 }
 
@@ -288,8 +348,8 @@ button.led-m:not(.strip-led):not(.layout-element-icon),
 button.led-c:not(.strip-led):not(.layout-element-icon),
 button.led-w:not(.strip-led):not(.layout-element-icon) {
 	background-image: none;
-	background-color: #2a2a2a;
-	border:           1px solid #555;
+	background-color: @theme_base_color;
+	border:           1px solid @borders;
 	border-radius:    3px;
 	padding:          0;
 	min-width:        0;
@@ -312,20 +372,20 @@ button.led-b:not(.strip-led):not(.layout-element-icon):checked { background-colo
  * keep the .strip-led border, not a white outline. */
 button.strip-led:checked,
 button.strip-led:focus {
-	border-color: #555;
+	border-color: @borders;
 	box-shadow:   none;
 	outline:      none;
 }
 
 /* Strip cells: subtle hover lift while off, so the cell reads as clickable. */
 button.strip-led.led-off:hover {
-	background-color: rgba(255,255,255,0.18);
-	border-color:     #888;
+	background-color: alpha(@theme_fg_color, 0.18);
+	border-color:     alpha(@theme_fg_color, 0.5);
 }
 
 /* ── Status bar severity tints ────────────────────────────── */
 
 .status-info    { }
-.status-success { color: #2e7d32; }
-.status-warning { color: #d97706; font-weight: bold; }
-.status-error   { color: #c62828; font-weight: bold; }
+.status-success { color: @success_color; }
+.status-warning { color: @warning_color; font-weight: bold; }
+.status-error   { color: @error_color;   font-weight: bold; }

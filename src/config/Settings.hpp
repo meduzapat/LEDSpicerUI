@@ -46,6 +46,7 @@ public:
 	static inline const string
 		PATH_BINARY          {"binaryPath"},
 		PATH_DATA            {"dataDir"},
+		PATH_THEME           {"themePath"},
 		PATH_PROJECT         {"projectsDir"},
 		DEFAULT_PROJECT      {"defaultProject"},
 		INTERACTIVE_MODE     {"interactiveMode"},
@@ -92,8 +93,14 @@ public:
 	const string& getProjectsDir()    const noexcept { return getValue(PATH_PROJECT);    }
 	const string& getDefaultProject() const noexcept { return getValue(DEFAULT_PROJECT); }
 
+	/**
+	 * User-configurable themes directory. Falls back to the in-config-dir default when unset.
+	 */
+	string getThemePath() const noexcept;
+
 	void setBinaryPath(const string& path)     noexcept; ///< Also recomputes currentMode.
 	void setDataDir(const string& dir)         noexcept;
+	void setThemePath(const string& dir)       noexcept;
 	void setProjectsDir(const string& dir)     noexcept;
 	void setDefaultProject(const string& name) noexcept;
 

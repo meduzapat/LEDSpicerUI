@@ -5017,6 +5017,86 @@ Autodetected if ledspicer is installed</property>
                       </packing>
                     </child>
                     <child>
+                      <object class="GtkBox">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="spacing">2</property>
+                        <property name="margin-top">4</property>
+                        <property name="margin-bottom">4</property>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="width-request">110</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="margin-end">5</property>
+                            <property name="label">Theme Folder</property>
+                            <property name="xalign">1</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkFileChooserButton" id="FileThemeDirSelect">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="tooltip-text">Directory scanned for installed themes.
+Ships empty; place theme folders here, or point this anywhere you keep them.</property>
+                            <property name="action">select-folder</property>
+                            <property name="create-folders">True</property>
+                            <property name="title">Select themes directory</property>
+                          </object>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="BtnThemeRefresh">
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">True</property>
+                            <property name="tooltip-text">Rescan the themes directory</property>
+                            <child>
+                              <object class="GtkImage">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="icon-name">view-refresh-symbolic</property>
+                              </object>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLinkButton" id="BtnGetThemes">
+                            <property name="label" translatable="yes">Get Themes</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">True</property>
+                            <property name="tooltip-text">Open the themes download page</property>
+                            <property name="uri">https://github.com/meduzapat/LEDSpicerData/tree/main/themes</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">3</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
                       <object class="GtkScrolledWindow">
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
@@ -5046,7 +5126,7 @@ Autodetected if ledspicer is installed</property>
                       <packing>
                         <property name="expand">True</property>
                         <property name="fill">True</property>
-                        <property name="position">1</property>
+                        <property name="position">2</property>
                       </packing>
                     </child>
                   </object>
@@ -7648,12 +7728,14 @@ If you have multiple serial devices, avoid using autodetect.</property>
                     <property name="activate-on-single-click">False</property>
                     <child>
                       <object class="GtkFlowBoxChild" id="w2">
-                        <property name="width-request">50</property>
-                        <property name="height-request">50</property>
+                        <property name="width-request">64</property>
+                        <property name="height-request">64</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <child>
                           <object class="GtkImage">
+                            <property name="width-request">64</property>
+                            <property name="height-request">64</property>
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="tooltip-text">Two ways</property>
@@ -7664,12 +7746,14 @@ If you have multiple serial devices, avoid using autodetect.</property>
                     </child>
                     <child>
                       <object class="GtkFlowBoxChild" id="w2v">
-                        <property name="width-request">50</property>
-                        <property name="height-request">50</property>
+                        <property name="width-request">64</property>
+                        <property name="height-request">64</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <child>
                           <object class="GtkImage">
+                            <property name="width-request">64</property>
+                            <property name="height-request">64</property>
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="tooltip-text">Two ways vertical</property>
@@ -7680,12 +7764,14 @@ If you have multiple serial devices, avoid using autodetect.</property>
                     </child>
                     <child>
                       <object class="GtkFlowBoxChild" id="w4">
-                        <property name="width-request">50</property>
-                        <property name="height-request">50</property>
+                        <property name="width-request">64</property>
+                        <property name="height-request">64</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <child>
                           <object class="GtkImage">
+                            <property name="width-request">64</property>
+                            <property name="height-request">64</property>
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="tooltip-text">Four ways</property>
@@ -7696,12 +7782,14 @@ If you have multiple serial devices, avoid using autodetect.</property>
                     </child>
                     <child>
                       <object class="GtkFlowBoxChild" id="w4x">
-                        <property name="width-request">50</property>
-                        <property name="height-request">50</property>
+                        <property name="width-request">64</property>
+                        <property name="height-request">64</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <child>
                           <object class="GtkImage">
+                            <property name="width-request">64</property>
+                            <property name="height-request">64</property>
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="tooltip-text">Four ways diagonal</property>
@@ -7712,12 +7800,14 @@ If you have multiple serial devices, avoid using autodetect.</property>
                     </child>
                     <child>
                       <object class="GtkFlowBoxChild" id="w8">
-                        <property name="width-request">50</property>
-                        <property name="height-request">50</property>
+                        <property name="width-request">64</property>
+                        <property name="height-request">64</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <child>
                           <object class="GtkImage">
+                            <property name="width-request">64</property>
+                            <property name="height-request">64</property>
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="tooltip-text">Eight ways</property>
@@ -7728,12 +7818,14 @@ If you have multiple serial devices, avoid using autodetect.</property>
                     </child>
                     <child>
                       <object class="GtkFlowBoxChild" id="w16">
-                        <property name="width-request">50</property>
-                        <property name="height-request">50</property>
+                        <property name="width-request">64</property>
+                        <property name="height-request">64</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <child>
                           <object class="GtkImage">
+                            <property name="width-request">64</property>
+                            <property name="height-request">64</property>
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="tooltip-text">Sixteen ways</property>
@@ -7744,12 +7836,14 @@ If you have multiple serial devices, avoid using autodetect.</property>
                     </child>
                     <child>
                       <object class="GtkFlowBoxChild" id="w49">
-                        <property name="width-request">50</property>
-                        <property name="height-request">50</property>
+                        <property name="width-request">64</property>
+                        <property name="height-request">64</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <child>
                           <object class="GtkImage">
+                            <property name="width-request">64</property>
+                            <property name="height-request">64</property>
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="tooltip-text">Forty-nine ways</property>
@@ -7760,12 +7854,14 @@ If you have multiple serial devices, avoid using autodetect.</property>
                     </child>
                     <child>
                       <object class="GtkFlowBoxChild" id="analog">
-                        <property name="width-request">50</property>
-                        <property name="height-request">50</property>
+                        <property name="width-request">64</property>
+                        <property name="height-request">64</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <child>
                           <object class="GtkImage">
+                            <property name="width-request">64</property>
+                            <property name="height-request">64</property>
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="tooltip-text">Analog</property>
@@ -7776,12 +7872,14 @@ If you have multiple serial devices, avoid using autodetect.</property>
                     </child>
                     <child>
                       <object class="GtkFlowBoxChild" id="mouse">
-                        <property name="width-request">50</property>
-                        <property name="height-request">50</property>
+                        <property name="width-request">64</property>
+                        <property name="height-request">64</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <child>
                           <object class="GtkImage">
+                            <property name="width-request">64</property>
+                            <property name="height-request">64</property>
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="tooltip-text">Mouse Mode</property>
@@ -7792,12 +7890,14 @@ If you have multiple serial devices, avoid using autodetect.</property>
                     </child>
                     <child>
                       <object class="GtkFlowBoxChild" id="rotary8">
-                        <property name="width-request">50</property>
-                        <property name="height-request">50</property>
+                        <property name="width-request">64</property>
+                        <property name="height-request">64</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <child>
                           <object class="GtkImage">
+                            <property name="width-request">64</property>
+                            <property name="height-request">64</property>
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="tooltip-text">Rotator 8 ways</property>
@@ -7808,12 +7908,14 @@ If you have multiple serial devices, avoid using autodetect.</property>
                     </child>
                     <child>
                       <object class="GtkFlowBoxChild" id="rotary12">
-                        <property name="width-request">50</property>
-                        <property name="height-request">50</property>
+                        <property name="width-request">64</property>
+                        <property name="height-request">64</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <child>
                           <object class="GtkImage">
+                            <property name="width-request">64</property>
+                            <property name="height-request">64</property>
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="tooltip-text">Rotator 12 Ways</property>

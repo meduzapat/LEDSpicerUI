@@ -27,7 +27,7 @@
 using namespace LEDSpicerUI::Ui::Layout;
 using namespace LEDSpicerUI::Constants;
 
-const string LayoutElement::ICON_DIR {string{PACKAGE_DATA_DIR} + "images/elements/"};
+const string LayoutElement::ICON_DIR {RESOURCE_PREFIX + "images/elements/"};
 
 LayoutElement::LayoutElement(Storage::Element* el, LayoutTester* t) noexcept :
 	Gtk::EventBox(),
@@ -378,7 +378,7 @@ Glib::RefPtr<Gdk::Pixbuf> LayoutElement::getCachedIcon(const string& typeId) noe
 	static std::unordered_map<string, Glib::RefPtr<Gdk::Pixbuf>> cache;
 	auto it {cache.find(typeId)};
 	if (it != cache.end()) return it->second;
-	auto pix {Gdk::Pixbuf::create_from_file(ICON_DIR + iconForType(typeId), ICON_PX, ICON_PX, true)};
+	auto pix {Gdk::Pixbuf::create_from_resource(ICON_DIR + iconForType(typeId), ICON_PX, ICON_PX, true)};
 	cache.emplace(typeId, pix);
 	return pix;
 }

@@ -9,6 +9,8 @@ RUN apt-get update && apt-get install -y \
   libgtkmm-3.0-dev \
   libtinyxml2-dev  \
   libgtest-dev     \
+  libglib2.0-bin   \
+  libxml2-utils    \
   git              \
   xvfb             \
   && rm -rf /var/lib/apt/lists/*

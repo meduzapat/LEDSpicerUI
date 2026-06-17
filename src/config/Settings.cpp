@@ -20,6 +20,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <glibmm.h>
+
 #include "Settings.hpp"
 
 using namespace LEDSpicerUI;
@@ -30,10 +32,11 @@ Settings Settings::instance;
 const StringUMap Settings::DEFAULTS = {
 	{"binaryPath",          ""},
 	{"dataDir",             ""},
+	{"themePath",           ""},
 	{"projectsDir",         ""},
 	{"defaultProject",      ""},
 	{"interactiveMode",     HUMAN_TRUE},
-	{"themeName",           DEFAULT},
+	{"themeName",           ""},
 	{"themeStyle",          "Auto"},
 	{"preserveEmptyDir",    HUMAN_TRUE},
 	{"removeInvalidItems",  HUMAN_TRUE},
@@ -55,6 +58,16 @@ void Settings::setBinaryPath(const string& path) noexcept {
 
 void Settings::setDataDir(const string& dir) noexcept {
 	setValue(PATH_DATA, dir);
+}
+
+string Settings::getThemePath() const noexcept {
+	const string& dir = getValue(PATH_THEME);
+	const string base {dir.empty() ? Glib::get_user_config_dir() + "/" PACKAGE_NAME "/themes" : dir};
+	return base.back() == '/' ? base : base + "/";
+}
+
+void Settings::setThemePath(const string& dir) noexcept {
+	setValue(PATH_THEME, dir);
 }
 
 void Settings::setProjectsDir(const string& dir) noexcept {

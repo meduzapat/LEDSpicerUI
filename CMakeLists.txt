@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 project(LEDSpicerUI VERSION 0.1.0 LANGUAGES CXX)
+
 # Metadata (for glade file substitution and compile definitions)
 set(PACKAGE "ledspicerui")
 set(PACKAGE_NAME "${PROJECT_NAME}")
@@ -7,6 +8,7 @@ set(PACKAGE_VERSION "${PROJECT_VERSION}")
 set(PACKAGE_STRING "${PROJECT_NAME} ${PROJECT_VERSION}")
 set(PACKAGE_TARNAME "ledspicerui")
 set(COPYRIGHT "Copyright © 2023 - 2026 Patricio A. Rossi (MeduZa)")
+set(DESCRIPTION "Graphical configuration editor for LEDSpicer")
 set(MINIMUM_COMPATIBILITY "0.7.0")
 set(PACKAGE_URL "https://github.com/meduzapat/LEDSpicerUI")
 set(PACKAGE_BUGREPORT "https://github.com/meduzapat/LEDSpicerUI/issues")
@@ -36,6 +38,10 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(GTKMM30 REQUIRED gtkmm-3.0>=3.24)
 pkg_check_modules(TINYXML2 REQUIRED tinyxml2>=6.0)
 
+# Build-time tools for the embedded GResource bundle (xml-stripblanks needs xmllint).
+find_program(GLIB_COMPILE_RESOURCES glib-compile-resources REQUIRED)
+find_program(XMLLINT xmllint REQUIRED)
+
 pkg_check_modules(GTEST gtest>=1.8)
 if(GTEST_FOUND)
 	message(STATUS "Google Test found - tests enabled")
@@ -45,7 +51,57 @@ else()
 	set(HAVE_GTEST NO)
 endif()
 
+# ── Embedded GResource bundle ───────────────────────────────────────────────
+# Every bundled asset is staged into <BUILD>/data, so glib-compile-resources
+# reads from a single tree. One --sourcedir means no source/build name
+# collision: the substituted main.glade is the only main.glade it can find.
+set(STAGE_DIR ${CMAKE_BINARY_DIR}/data)
+
+# Token-substituted Glade (PACKAGE_*, COPYRIGHT, DESCRIPTION, ...).
+configure_file(${CMAKE_SOURCE_DIR}/data/main.glade ${STAGE_DIR}/main.glade @ONLY)
+
+# One glob feeds the manifest entries, the staged copies, and the deps.
+# Relative paths keep the manifest tree-agnostic.
+file(GLOB_RECURSE RESOURCE_IMAGES
+	RELATIVE ${CMAKE_SOURCE_DIR}/data
+	CONFIGURE_DEPENDS
+	${CMAKE_SOURCE_DIR}/data/images/*.png
+	${CMAKE_SOURCE_DIR}/data/images/*.svg
+)
+
+# Stage the static assets next to the generated files. COPYONLY registers each
+# source as a reconfigure dependency, so edits restage and recompile.
+configure_file(${CMAKE_SOURCE_DIR}/data/style-base.css ${STAGE_DIR}/style-base.css COPYONLY)
+
+set(RESOURCE_STAGED ${STAGE_DIR}/main.glade ${STAGE_DIR}/style-base.css)
+set(RESOURCE_IMAGE_ENTRIES "")
+foreach(img ${RESOURCE_IMAGES})
+	configure_file(${CMAKE_SOURCE_DIR}/data/${img} ${STAGE_DIR}/${img} COPYONLY)
+	list(APPEND RESOURCE_STAGED ${STAGE_DIR}/${img})
+	string(APPEND RESOURCE_IMAGE_ENTRIES "\t\t<file>${img}</file>\n")
+endforeach()
+
+# Manifest: @RESOURCE_IMAGE_ENTRIES@ holds the generated <file> lines.
+configure_file(${CMAKE_SOURCE_DIR}/data/ledspicerui.gresource.xml ${STAGE_DIR}/ledspicerui.gresource.xml @ONLY)
+
+# Compile the staged tree into a linkable source.
+set(RESOURCE_SRC ${CMAKE_BINARY_DIR}/resources.cpp)
+add_custom_command(
+	OUTPUT ${RESOURCE_SRC}
+	COMMAND ${GLIB_COMPILE_RESOURCES}
+		--target=${RESOURCE_SRC}
+		--generate-source
+		--sourcedir=${STAGE_DIR}
+		${STAGE_DIR}/ledspicerui.gresource.xml
+	DEPENDS
+		${STAGE_DIR}/ledspicerui.gresource.xml
+		${RESOURCE_STAGED}
+	COMMENT "Compiling GResource bundle"
+	VERBATIM
+)
+
 add_executable(ledspicerui
+	${RESOURCE_SRC}
 	src/Values.cpp
 	src/Defaults.cpp
 	src/XMLHelper.cpp
@@ -142,34 +198,10 @@ target_link_libraries(ledspicerui PRIVATE
 
 target_compile_definitions(ledspicerui PRIVATE
 	PACKAGE_CONF_DIR="${CMAKE_SYSCONFDIR}/"
-	PACKAGE_DATA_DIR="${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}/"
 )
 
-configure_file(
-	${CMAKE_SOURCE_DIR}/data/main.glade.in
-	${CMAKE_BINARY_DIR}/data/main.glade
-	@ONLY
-)
-
-set(DATA_FILES
-	${CMAKE_BINARY_DIR}/data/main.glade
-	data/style.css
-	data/style-base.css
-	data/basicColors.xml
-)
-
-file(GLOB IMAGE_FILES "data/images/*.png" "data/images/*.svg")
-file(GLOB ELEMENT_IMAGE_FILES "data/images/elements/*.png" "data/images/elements/*.svg")
-file(GLOB RESTRICTOR_IMAGE_FILES "data/images/restrictors/*.png" "data/images/restrictors/*.svg")
-file(GLOB_RECURSE THEME_FILES "data/themes/*")
-
+# Core UI assets ship inside the GResource bundle, so only the binary installs.
 install(TARGETS ledspicerui DESTINATION bin)
-install(FILES ${DATA_FILES} DESTINATION share/${PROJECT_NAME})
-install(FILES ${IMAGE_FILES} DESTINATION share/${PROJECT_NAME}/images)
-install(FILES ${ELEMENT_IMAGE_FILES} DESTINATION share/${PROJECT_NAME}/images/elements)
-install(FILES ${RESTRICTOR_IMAGE_FILES} DESTINATION share/${PROJECT_NAME}/images/restrictors)
-install(DIRECTORY data/themes/ DESTINATION share/${PROJECT_NAME}/themes
-	PATTERN "*.md" EXCLUDE)
 
 if(HAVE_GTEST)
 	add_subdirectory(tests)
