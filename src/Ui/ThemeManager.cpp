@@ -53,7 +53,17 @@ void ThemeManager::scan() noexcept {
 					"' — missing mandatory preview.png" << std::endl;
 				continue;
 			}
-			parseMetadata(themeDir, entry);
+			const bool dual {
+				Glib::file_test(themeDir + "dark/theme.css",  Glib::FILE_TEST_IS_REGULAR) and
+				Glib::file_test(themeDir + "light/theme.css", Glib::FILE_TEST_IS_REGULAR)
+			};
+			if (not dual and not Glib::file_test(themeDir + "theme.css", Glib::FILE_TEST_IS_REGULAR)) {
+				std::cerr <<
+					"ThemeManager: skipping theme '" << entry <<
+					"' — needs dark/ + light/ theme.css or a single root theme.css" << std::endl;
+				continue;
+			}
+			parseMetadata(themeDir, entry, dual);
 		}
 	}
 	catch (const Glib::Error&) {}
@@ -73,8 +83,12 @@ bool ThemeManager::apply(const string& themeId, Config::Settings::ThemeStyle sty
 		return true;
 	}
 
-	const string variant{resolveVariant(style)};
-	const string cssPath{Config::Settings::get().getThemePath() + themeId + "/" + variant + "/theme.css"};
+	const ThemeMetadata* meta {findTheme(themeId)};
+	const bool dual {meta and meta->dual};
+	const string
+		variant {dual ? resolveVariant(style) : ""},
+		base    {Config::Settings::get().getThemePath() + themeId + "/"},
+		cssPath {dual ? base + variant + "/theme.css" : base + "theme.css"};
 
 	themeProvider = loadCss(cssPath, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION + 1);
 	if (not themeProvider) {
@@ -98,15 +112,19 @@ void ThemeManager::rescan() noexcept {
 }
 
 bool ThemeManager::hasTheme(const string& id) const noexcept {
+	return findTheme(id) != nullptr;
+}
+
+const ThemeManager::ThemeMetadata* ThemeManager::findTheme(const string& id) const noexcept {
 	for (const auto& meta : themes)
 		if (meta.id == id)
-			return true;
-	return false;
+			return &meta;
+	return nullptr;
 }
 
 string ThemeManager::resolveVariant(Config::Settings::ThemeStyle style) noexcept {
 
-	if (style == Config::Settings::ThemeStyle::Dark) return "dark";
+	if (style == Config::Settings::ThemeStyle::Dark)  return "dark";
 	if (style == Config::Settings::ThemeStyle::Light) return "light";
 
 	try {
@@ -121,22 +139,25 @@ string ThemeManager::resolveVariant(Config::Settings::ThemeStyle style) noexcept
 	return "light";
 }
 
-void ThemeManager::parseMetadata(const string& themeDir, const string& themeId) noexcept {
-	tinyxml2::XMLDocument doc;
-	if (doc.LoadFile((themeDir + "metadata.xml").c_str()) != tinyxml2::XML_SUCCESS)
-		return;
-
-	const auto root = doc.FirstChildElement("theme");
-	if (not root)
-		return;
-
-	ThemeMetadata meta;
-	meta.id   = themeId;
-	meta.name = root->Attribute("name") ? root->Attribute("name") : themeId;
-	if (const auto desc = root->FirstChildElement("description"); desc and desc->GetText())
-		meta.description = desc->GetText();
-
-	themes.push_back(std::move(meta));
+void ThemeManager::parseMetadata(const string& themeDir, const string& themeId, bool dual) noexcept {
+	try {
+		XMLHelper doc(themeDir + "metadata.xml", THEME_TYPE);
+		const auto& info {doc.getRootInfo()};
+		if (info.getValue("format") != THEME_FORMAT) {
+			throw Message(
+				"Theme \"" + themeId + "\" has unsupported format \"" +
+				info.getValue("format") + "\" (expected \"" THEME_FORMAT "\")"
+			);
+		}
+		ThemeMetadata meta;
+		meta.id          = themeId;
+		meta.name        = info.getValue("name", themeId);
+		meta.description = info.getValue("description");
+		meta.dual        = dual;
+		themes.push_back(std::move(meta));
+	}
+	// Malformed, foreign, or wrong-version metadata: skip the theme.
+	catch (const Message&) {}
 }
 
 Glib::RefPtr<Gtk::CssProvider> ThemeManager::loadCss(const string& path, guint priority) noexcept {

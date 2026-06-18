@@ -20,12 +20,15 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Defaults.hpp"
-#include "config/Settings.hpp"
 #include <iostream>
-#include <tinyxml2.h>
+
+#include "config/Settings.hpp"
+#include "XMLHelper.hpp"
 
 #pragma once
+
+#define THEME_TYPE   "Theme"
+#define THEME_FORMAT "1.0"
 
 namespace LEDSpicerUI::Ui {
 
@@ -38,15 +41,18 @@ namespace LEDSpicerUI::Ui {
  * Settings::getThemePath() (default: the app config dir + "themes/"). It ships
  * empty; users acquire themes separately and may point the setting anywhere.
  * Each theme lives in <themePath>/<id>/ and provides:
- *   metadata.xml     — display name and description
+ *   metadata.xml     — standard LEDSpicer file (type "Theme"); name, format and
+ *                      description live as root attributes (see ThemeMetadata)
  *   preview.png      — mandatory selector thumbnail
- *   dark/theme.css   — dark variant palette
- *   light/theme.css  — light variant palette
+ * plus its CSS in one of two layouts, auto-detected at scan time:
+ *   dual   — dark/theme.css and light/theme.css; the variant is picked per style.
+ *   single — a lone theme.css beside metadata.xml, applied to every style.
+ * Any extra assets (images, data) are the theme author's concern, not ours.
  *
  * CSS is loaded in two layers:
  *   1. style-base.css    from the GResource bundle at APPLICATION   priority
  *                        (structural bones, no colors/images)
- *   2. theme/variant.css from disk            at APPLICATION+1 priority
+ *   2. the theme's css   from disk                  at APPLICATION+1 priority
  *                        (colors, backgrounds, images)
  *
  * An empty theme id is the valid no-theme state: only the bundled base CSS loads.
@@ -61,7 +67,8 @@ public:
 		string
 			id,
 			name,
-			description; /// Shown as tooltip on the theme selector tile.
+			description;   /// Shown as tooltip on the theme selector tile.
+		bool dual {false}; /// true: ships dark/ + light/ variants. false: a single root theme.css.
 	};
 
 	ThemeManager(const ThemeManager&)            = delete;
@@ -107,7 +114,7 @@ public:
 	const string& getCurrentThemeId() const noexcept { return currentThemeId; }
 
 	/**
-	 * @return The currently applied variant string ("dark" or "light").
+	 * @return The currently applied variant ("dark" or "light"), empty for a single-css theme.
 	 */
 	const string& getCurrentVariant() const noexcept { return currentVariant; }
 
@@ -121,6 +128,12 @@ private:
 	 * Clears and repopulates the theme list from Settings::getThemePath().
 	 */
 	void scan() noexcept;
+
+	/**
+	 * @param id Theme directory name to look up.
+	 * @return The discovered theme, or nullptr if no theme has this id.
+	 */
+	const ThemeMetadata* findTheme(const string& id) const noexcept;
 
 	string
 		currentThemeId,
@@ -143,8 +156,9 @@ private:
 	 *
 	 * @param themeDir Absolute path to the theme directory (e.g. <themePath>/darkblue/).
 	 * @param themeId
+	 * @param dual     Whether the theme ships dark/ + light/ variants (vs a single root theme.css).
 	 */
-	void parseMetadata(const string& themeDir, const string& themeId) noexcept;
+	void parseMetadata(const string& themeDir, const string& themeId, bool dual) noexcept;
 
 	/**
 	 * Loads a CSS file from disk into a new provider on the default screen at the given priority.
