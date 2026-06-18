@@ -981,8 +981,13 @@ void DialogElement::findElementByPin(uint16_t finder, std::unordered_set<Storage
 void DialogElement::onSwitchPage(Gtk::Widget*, uint pageNum) noexcept {
 	switch (static_cast<tabIndex>(pageNum)) {
 	case tabIndex::RGB:
-	case tabIndex::sRGB:
 		pinsBox->set_selection_mode(Gtk::SELECTION_SINGLE);
+		break;
+	case tabIndex::sRGB:
+		pinsBox->set_selection_mode(
+			Defaults::devicesInfo.at(comboBoxDevices->get_active_id()).layoutRGB ?
+				Gtk::SELECTION_SINGLE : Gtk::SELECTION_NONE
+		);
 		break;
 	case tabIndex::Strip:
 	case tabIndex::mRGB:
