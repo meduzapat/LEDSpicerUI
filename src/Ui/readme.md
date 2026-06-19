@@ -2,7 +2,8 @@
 
 This index links the three subsystem guides. Read them in order if you are new
 to the codebase; jump to a specific one if you need a refresher on a particular
-layer.
+layer. For the source-tree layout, build steps, and coding standards, start at
+[../readme.md](../readme.md).
 
 ---
 

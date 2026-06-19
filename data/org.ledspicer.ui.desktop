@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=@PACKAGE_NAME@
+GenericName=LED Configuration Editor
+Comment=@DESCRIPTION@
+Exec=@PACKAGE@
+Icon=@APP_ID@
+StartupWMClass=@APP_ID@
+Terminal=false
+Categories=Settings;HardwareSettings;
+Keywords=LED;arcade;LEDSpicer;lighting;

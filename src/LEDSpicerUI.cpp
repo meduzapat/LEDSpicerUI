@@ -26,7 +26,7 @@ using namespace LEDSpicerUI;
 
 int main(int argc, char *argv[]) {
 
-	auto app     = Gtk::Application::create(argc, argv, "org.ledspicer.ui");
+	auto app     = Gtk::Application::create(argc, argv, APP_ID);
 	auto builder = Gtk::Builder::create();
 
 	try {
@@ -40,6 +40,8 @@ int main(int argc, char *argv[]) {
 		std::cerr << "Fail to load interface" << std::endl;
 		return EXIT_FAILURE;
 	}
+
+	Gtk::Window::set_default_icon_name(APP_ID);
 
 	// Initialize and apply theme (loads settings defaults; Settings::load() may re-apply later).
 	auto& tm = Ui::ThemeManager::getInstance();

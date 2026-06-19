@@ -14,19 +14,16 @@ This is the UI for the [LEDSpicer™ daemon](https://github.com/meduzapat/LEDSpi
 Design control panel layouts, configure LED hardware, create animations, and manage profiles for arcade cabinets and interactive projects.
 
 Whether you are building a new arcade cabinet or maintaining an existing installation, LEDSpicer™ UI eliminates the need to manually edit configuration files by providing intuitive tools for designing layouts, configuring hardware, and managing profiles and animations.
-## Getting Started
 
-```
-git clone git@github.com:meduzapat/LEDSpicerUI.git
-cd LEDSpicerUI
-./autogen.sh
-./configure CXXFLAGS='-g0 -O2'
-make
-sudo make install
-```
+## Install
+
+See the [Installation guide](https://github.com/meduzapat/LEDSpicerUI/wiki/Installation) for packages (Ubuntu PPA, Arch AUR, Fedora COPR) and the one-line installer.
+
+Building from source? Start with [src/readme.md](src/readme.md).
+
 ## Usage
 
-I need to create a .desktop laucher so right now open the terminal and type ```ledspicerui``` or open you run dialog (alt f2 ?) and type ledspicerui.
+Launch **LEDSpicer UI** from your applications menu, or run `ledspicerui` from a terminal. See the [Wiki](https://github.com/meduzapat/LEDSpicerUI/wiki) for guides.
 
 ## Comments are welcome.
 
