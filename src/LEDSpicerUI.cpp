@@ -26,6 +26,8 @@ using namespace LEDSpicerUI;
 
 int main(int argc, char *argv[]) {
 
+	Glib::set_prgname(APP_ID);
+
 	auto app     = Gtk::Application::create(argc, argv, APP_ID);
 	auto builder = Gtk::Builder::create();
 

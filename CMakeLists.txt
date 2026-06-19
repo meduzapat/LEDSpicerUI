@@ -14,7 +14,6 @@ set(PACKAGE_URL "https://github.com/meduzapat/LEDSpicerUI")
 set(PACKAGE_BUGREPORT "https://github.com/meduzapat/LEDSpicerUI/issues")
 set(PACKAGE_DATA_NAME "LEDSpicer")
 set(PACKAGE_DATA_VERSION "1.1")
-
 set(APP_ID "org.ledspicer.ui")
 
 # Global compile definitions (for source code)
