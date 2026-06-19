@@ -81,15 +81,6 @@ foreach(img ${RESOURCE_IMAGES})
 	string(APPEND RESOURCE_IMAGE_ENTRIES "\t\t<file>${img}</file>\n")
 endforeach()
 
-if(EXISTS ${CMAKE_SOURCE_DIR}/data/icons/256/${APP_ID}.png)
-	set(WINDOW_ICON ${CMAKE_SOURCE_DIR}/data/icons/256/${APP_ID}.png)
-else()
-	set(WINDOW_ICON ${CMAKE_SOURCE_DIR}/data/images/LEDSpicerLogo.png)
-endif()
-configure_file(${WINDOW_ICON} ${STAGE_DIR}/window-icon.png COPYONLY)
-list(APPEND RESOURCE_STAGED ${STAGE_DIR}/window-icon.png)
-string(APPEND RESOURCE_IMAGE_ENTRIES "\t\t<file>window-icon.png</file>\n")
-
 # Manifest: @RESOURCE_IMAGE_ENTRIES@ holds the generated <file> lines.
 configure_file(${CMAKE_SOURCE_DIR}/data/ledspicerui.gresource.xml ${STAGE_DIR}/ledspicerui.gresource.xml @ONLY)
 

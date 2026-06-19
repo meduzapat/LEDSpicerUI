@@ -70,9 +70,6 @@ inline const string
 /// Application identity and embedded resource bundle (see data/ledspicerui.gresource.xml).
 	RESOURCE_PREFIX {"/org/ledspicer/ui/"},
 
-/// Window icon, served from the bundle so no on-disk file is needed at runtime.
-	ICON_RESOURCE {RESOURCE_PREFIX + "images/LEDSpicerLogo.png"},
-
 /// LEDSpicer configuration file keys.
 	DEFAULT_USERID   {"1000"},
 	DEFAULT_GROUPID  {"1000"},
