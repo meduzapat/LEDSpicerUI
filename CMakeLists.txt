@@ -15,6 +15,8 @@ set(PACKAGE_BUGREPORT "https://github.com/meduzapat/LEDSpicerUI/issues")
 set(PACKAGE_DATA_NAME "LEDSpicer")
 set(PACKAGE_DATA_VERSION "1.1")
 
+set(APP_ID "org.ledspicer.ui")
+
 # Global compile definitions (for source code)
 add_compile_definitions(
 	PACKAGE="${PACKAGE}"
@@ -27,7 +29,15 @@ add_compile_definitions(
 	VERSION="${PACKAGE_VERSION}"
 	PACKAGE_DATA_NAME="${PACKAGE_DATA_NAME}"
 	PACKAGE_DATA_VERSION="${PACKAGE_DATA_VERSION}"
+	APP_ID="${APP_ID}"
 )
+
+# Build type is selected with -DCMAKE_BUILD_TYPE (Release = -O3 -DNDEBUG), not
+# CMakePresets: presets need CMake >= 3.21, while -D works on every supported
+# distro (some older ones still ship a pre-3.21 CMake). Default to Release.
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+	set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
+endif()
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -51,26 +61,16 @@ else()
 	set(HAVE_GTEST NO)
 endif()
 
-# ── Embedded GResource bundle ───────────────────────────────────────────────
-# Every bundled asset is staged into <BUILD>/data, so glib-compile-resources
-# reads from a single tree. One --sourcedir means no source/build name
-# collision: the substituted main.glade is the only main.glade it can find.
 set(STAGE_DIR ${CMAKE_BINARY_DIR}/data)
 
-# Token-substituted Glade (PACKAGE_*, COPYRIGHT, DESCRIPTION, ...).
 configure_file(${CMAKE_SOURCE_DIR}/data/main.glade ${STAGE_DIR}/main.glade @ONLY)
 
-# One glob feeds the manifest entries, the staged copies, and the deps.
-# Relative paths keep the manifest tree-agnostic.
 file(GLOB_RECURSE RESOURCE_IMAGES
 	RELATIVE ${CMAKE_SOURCE_DIR}/data
 	CONFIGURE_DEPENDS
 	${CMAKE_SOURCE_DIR}/data/images/*.png
 	${CMAKE_SOURCE_DIR}/data/images/*.svg
 )
-
-# Stage the static assets next to the generated files. COPYONLY registers each
-# source as a reconfigure dependency, so edits restage and recompile.
 configure_file(${CMAKE_SOURCE_DIR}/data/style-base.css ${STAGE_DIR}/style-base.css COPYONLY)
 
 set(RESOURCE_STAGED ${STAGE_DIR}/main.glade ${STAGE_DIR}/style-base.css)
@@ -80,6 +80,15 @@ foreach(img ${RESOURCE_IMAGES})
 	list(APPEND RESOURCE_STAGED ${STAGE_DIR}/${img})
 	string(APPEND RESOURCE_IMAGE_ENTRIES "\t\t<file>${img}</file>\n")
 endforeach()
+
+if(EXISTS ${CMAKE_SOURCE_DIR}/data/icons/256/${APP_ID}.png)
+	set(WINDOW_ICON ${CMAKE_SOURCE_DIR}/data/icons/256/${APP_ID}.png)
+else()
+	set(WINDOW_ICON ${CMAKE_SOURCE_DIR}/data/images/LEDSpicerLogo.png)
+endif()
+configure_file(${WINDOW_ICON} ${STAGE_DIR}/window-icon.png COPYONLY)
+list(APPEND RESOURCE_STAGED ${STAGE_DIR}/window-icon.png)
+string(APPEND RESOURCE_IMAGE_ENTRIES "\t\t<file>window-icon.png</file>\n")
 
 # Manifest: @RESOURCE_IMAGE_ENTRIES@ holds the generated <file> lines.
 configure_file(${CMAKE_SOURCE_DIR}/data/ledspicerui.gresource.xml ${STAGE_DIR}/ledspicerui.gresource.xml @ONLY)
@@ -203,6 +212,16 @@ target_compile_definitions(ledspicerui PRIVATE
 # Core UI assets ship inside the GResource bundle, so only the binary installs.
 install(TARGETS ledspicerui DESTINATION bin)
 
+# Optional freedesktop integration, off by default.
+option(INSTALL_DESKTOP_ENTRY "Install a freedesktop .desktop launcher and icon" OFF)
+if(INSTALL_DESKTOP_ENTRY)
+	configure_file(${CMAKE_SOURCE_DIR}/data/${APP_ID}.desktop ${STAGE_DIR}/${APP_ID}.desktop @ONLY)
+	install(FILES ${STAGE_DIR}/${APP_ID}.desktop DESTINATION share/applications)
+	install(FILES ${CMAKE_SOURCE_DIR}/data/icons/scalable/${APP_ID}.svg DESTINATION share/icons/hicolor/scalable/apps)
+	install(FILES ${CMAKE_SOURCE_DIR}/data/icons/256/${APP_ID}.png      DESTINATION share/icons/hicolor/256x256/apps)
+	install(FILES ${CMAKE_SOURCE_DIR}/data/icons/48/${APP_ID}.png       DESTINATION share/icons/hicolor/48x48/apps)
+endif()
+
 if(HAVE_GTEST)
 	add_subdirectory(tests)
 endif()
@@ -210,9 +229,11 @@ endif()
 message(STATUS "--------- Build Environment -----------")
 message(STATUS "Program:       ${PROJECT_NAME}")
 message(STATUS "Version:       ${PROJECT_VERSION}")
+message(STATUS "Build Type:    ${CMAKE_BUILD_TYPE}")
 message(STATUS "Compatibility: ${MINIMUM_COMPATIBILITY}")
 message(STATUS "C++ Compiler:  ${CMAKE_CXX_COMPILER}")
 message(STATUS "GTKmm:         ${GTKMM30_VERSION}")
 message(STATUS "TinyXML2:      ${TINYXML2_VERSION}")
 message(STATUS "Prefix:        ${CMAKE_INSTALL_PREFIX}")
+message(STATUS "Desktop Entry: ${INSTALL_DESKTOP_ENTRY}")
 message(STATUS "Tests Enabled: ${HAVE_GTEST}")

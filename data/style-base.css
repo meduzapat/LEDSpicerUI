@@ -309,10 +309,13 @@ Base only sets the shared positioning/sizing behavior.
 .layout-element-icon-fired.led-m { border-color: #c061cb; background: rgba(192,97,203,0.35); }
 .layout-element-icon-fired.led-c { border-color: #33c7de; background: rgba(51,199,222,0.35); }
 
-/* White fired LED can't glow on a light bg: neutral grey glow in light mode,
+/*
+White fired LED can't glow on a light bg: neutral grey glow in light mode
+*/
 .layout-element-icon-fired.led-w { border-color: alpha(@theme_fg_color, 0.6); background: alpha(@theme_fg_color, 0.15); }
 
-/* ── LED swatches (shared: StripRenderer cells, RGB toggles, fire glow).
+/*
+ ── LED swatches (shared: StripRenderer cells, RGB toggles, fire glow).
 
 Hex values match the .pin* palette for visual consistency.
 StripRenderer container gets a slight lift so off cells read as empty
