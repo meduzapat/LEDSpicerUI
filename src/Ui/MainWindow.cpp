@@ -37,7 +37,7 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 	inputNavigator(builder, this),
 	animationNavigator(builder, this),
 	profileNavigator(builder, this),
-	layout(builder, &layoutTester, &devices)
+	layout(builder, &devices)
 {
 
 	Storage::Element::setObserver(&layout);
@@ -94,6 +94,14 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 
 	builder->get_widget("BtnSaveProject", btnSaveProject);
 	builder->get_widget("BtnAbout",       btnAbout);
+
+	// Daemon connection toggle.
+	builder->get_widget("ToggleConnect", toggleConnect);
+	toggleConnect->signal_toggled().connect(sigc::mem_fun(*this, &MainWindow::onConnectToggled));
+
+	// Modal busy indicator for the connect/disconnect wait (defined in glade).
+	builder->get_widget("DaemonBusyWindow", busyWindow);
+	builder->get_widget("DaemonBusyLabel",  busyLabel);
 
 	// Top directory information.
 	Gtk::HeaderBar* header;
@@ -202,11 +210,15 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 		const string& defaultProject = Settings::get().getDefaultProject();
 		if (not defaultProject.empty())
 			openProject(defaultProject);
+		updateDaemonControls();
 		Defaults::setIgnoreChanges(false);
 	});
 }
 
 MainWindow::~MainWindow() {
+
+	// Stop the test daemon we own and remove the throwaway files it used.
+	DaemonHandler::getInstance().disconnect();
 
 	Geometry::get().terminate();
 
@@ -380,7 +392,64 @@ void MainWindow::openProject(const string& name) {
 	mainTabs->set_visible_child("configuration");
 	mainTabsBox->set_sensitive(true);
 	btnImportConfig->set_sensitive(true);
+
+	// Drop any previous connection and bind the daemon to this project: it builds
+	// its own throwaway config from the current settings and live collections.
+	DaemonHandler::getInstance().disconnect();
+	ignoreConnectToggle = true;
+	toggleConnect->set_active(false);
+	ignoreConnectToggle = false;
+	DaemonHandler::getInstance().init(
+		[this]() { return packLedspicerConfig(); },
+		devices, restrictors, groups
+	);
+	updateDaemonControls();
+
 	Message::finishBatch("Project loaded");
+}
+
+void MainWindow::onConnectToggled() {
+	if (ignoreConnectToggle)
+		return;
+	if (toggleConnect->get_active()) {
+		showBusy("Connecting…");
+		const bool ok {DaemonHandler::getInstance().connect()};
+		hideBusy();
+		if (ok) {
+			StatusBar::getInstance().push("Daemon connected", StatusBar::Severity::Success);
+			return;
+		}
+		// Connection failed: revert the toggle without re-entering.
+		ignoreConnectToggle = true;
+		toggleConnect->set_active(false);
+		ignoreConnectToggle = false;
+	}
+	else {
+		showBusy("Disconnecting…");
+		DaemonHandler::getInstance().disconnect();
+		layout.deactivate();
+		hideBusy();
+		StatusBar::getInstance().push("Daemon disconnected", StatusBar::Severity::Info);
+	}
+}
+
+void MainWindow::showBusy(const Glib::ustring& text) noexcept {
+	busyLabel->set_text(text);
+	busyWindow->show_all();
+	// Paint the window before the blocking call begins.
+	auto context {Glib::MainContext::get_default()};
+	while (context->pending())
+		context->iteration(false);
+}
+
+void MainWindow::hideBusy() noexcept {
+	busyWindow->hide();
+}
+
+void MainWindow::updateDaemonControls() noexcept {
+	// Hidden on portable, visible but disabled on local, enabled on interactive.
+	toggleConnect->set_visible(not Settings::get().isPortable());
+	toggleConnect->set_sensitive(Settings::get().isIterative());
 }
 
 void MainWindow::readConfigFile(const string& dataFilePath, bool wipe, uint8_t importFlags) {

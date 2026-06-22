@@ -35,7 +35,7 @@
 #include "DataDialogs/DialogProcess.hpp"
 #include "DataDialogs/DialogGroup.hpp"
 #include "Layout/Layout.hpp"
-#include "Layout/LayoutTester.hpp"
+#include "DaemonHandler.hpp"
 #include "StatusBar.hpp"
 
 #pragma once
@@ -88,6 +88,15 @@ protected:
 	Gtk::Box*    mainTabsBox    = nullptr;
 	Gtk::Button* btnImportConfig = nullptr;
 
+	/// Daemon connection toggle (top bar).
+	Gtk::ToggleButton* toggleConnect = nullptr;
+	/// Guards reentrancy while reverting toggleConnect in code.
+	bool ignoreConnectToggle = false;
+
+	/// Modal busy indicator (from glade); its label text is swapped per operation.
+	Gtk::Window* busyWindow = nullptr;
+	Gtk::Label*  busyLabel  = nullptr;
+
 	/// @name Storage Collections
 	Storage::BoxButtonCollection
 		/// Created devices in the dialog devices.
@@ -108,9 +117,6 @@ protected:
 	/// Navigator for profile files.
 	ProfileDirectoryNavigator profileNavigator;
 
-	/// Daemon test dispatcher used by the layout board (stub until #60).
-	Layout::LayoutTester layoutTester;
-
 	/// Visual board controller. Subscribed to Storage::Element lifecycle events.
 	Layout::Layout layout;
 
@@ -124,6 +130,26 @@ protected:
 	 * @return the generated configuration.
 	 */
 	Values packLedspicerConfig() const noexcept;
+
+	/**
+	 * Handles the daemon connect/disconnect toggle, reverting on failure.
+	 */
+	void onConnectToggled();
+
+	/**
+	 * Shows/enables the connect toggle per mode (hidden/disabled/enabled).
+	 */
+	void updateDaemonControls() noexcept;
+
+	/**
+	 * Shows the modal busy spinner with text and paints it before blocking.
+	 */
+	void showBusy(const Glib::ustring& text) noexcept;
+
+	/**
+	 * Hides the modal busy spinner.
+	 */
+	void hideBusy() noexcept;
 
 	/**
 	 * Connects Dialogs with buttons.

@@ -120,7 +120,6 @@ add_executable(ledspicerui
 	src/Ui/SortableFlowBox.cpp
 	src/Ui/SortableListBox.cpp
 	src/Ui/Layout/StripRenderer.cpp
-	src/Ui/Layout/LayoutTester.cpp
 	src/Ui/Layout/LayoutElement.cpp
 	src/Ui/Layout/LayoutBoard.cpp
 	src/Ui/Layout/Layout.cpp
@@ -173,6 +172,7 @@ add_executable(ledspicerui
 	src/Ui/DialogImport.cpp
 	src/Ui/ThemeManager.cpp
 	src/Ui/StatusBar.cpp
+	src/DaemonHandler.cpp
 	src/Ui/MainWindow.cpp
 	src/LEDSpicerUI.cpp
 )

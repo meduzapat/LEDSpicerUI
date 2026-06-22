@@ -30,10 +30,8 @@ using namespace LEDSpicerUI::Constants;
 
 Layout::Layout(
 	const Glib::RefPtr<Gtk::Builder>& builder,
-	LayoutTester* t,
 	Storage::BoxButtonCollection* devices
 ) noexcept :
-	tester            {t},
 	devicesCollection {devices}
 {
 	builder->get_widget_derived("LayoutBoard", board);
@@ -56,7 +54,7 @@ Layout::~Layout() {
 void Layout::onAdded(Storage::Element* element) noexcept {
 	if (element->getProperties().isSet(PROP_STRIP)) return;
 
-	auto tile {Gtk::manage(new LayoutElement(element, tester))};
+	auto tile {Gtk::manage(new LayoutElement(element))};
 	tiles.emplace(element, tile);
 	placeNew(tile);
 	tile->signal_activated().connect(sigc::mem_fun(*this, &Layout::onTileActivated));
@@ -115,6 +113,13 @@ void Layout::onTileActivated(LayoutElement* tile) noexcept {
 	if (current == tile) return;
 	if (current) current->setActive(false);
 	current = tile;
+}
+
+void Layout::deactivate() noexcept {
+	if (current) {
+		current->setActive(false);
+		current = nullptr;
+	}
 }
 
 void Layout::onEditRequested(LayoutElement* tile) noexcept {

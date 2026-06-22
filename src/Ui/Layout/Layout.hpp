@@ -22,7 +22,6 @@
 
 #include "LayoutElement.hpp"
 #include "LayoutBoard.hpp"
-#include "LayoutTester.hpp"
 #include "Storage/ElementObserver.hpp"
 #include "Storage/BoxButtonCollection.hpp"
 
@@ -52,7 +51,6 @@ public:
 
 	Layout(
 		const Glib::RefPtr<Gtk::Builder>& builder,
-		LayoutTester* tester,
 		Storage::BoxButtonCollection* devicesCollection
 	) noexcept;
 
@@ -65,10 +63,14 @@ public:
 	void onRemoved(Storage::Element* element) noexcept override;
 	void onChanged(Storage::Element* element) noexcept override;
 
+	/**
+	 * Closes the active element, if any (e.g. when daemon testing stops).
+	 */
+	void deactivate() noexcept;
+
 private:
 
 	LayoutBoard*  board  = nullptr;
-	LayoutTester* tester = nullptr;
 
 	/// Points to Devices Collection to lookup the Device and Element on edit.
 	Storage::BoxButtonCollection* devicesCollection = nullptr;

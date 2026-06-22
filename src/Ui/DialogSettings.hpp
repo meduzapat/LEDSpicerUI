@@ -103,7 +103,8 @@ protected:
 		* switchPreserveEmptyDir   = nullptr,
 		* switchRemoveInvalidItems = nullptr,
 		* switchSaveBackup         = nullptr,
-		* switchDebugFiles         = nullptr;
+		* switchDebugFiles         = nullptr,
+		* switchDebugDaemon        = nullptr;
 
 	Gtk::ToggleButton
 		* btnStyleAuto  = nullptr,

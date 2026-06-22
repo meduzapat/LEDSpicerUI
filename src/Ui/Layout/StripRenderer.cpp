@@ -37,35 +37,27 @@ StripRenderer::StripRenderer() noexcept : Gtk::FlowBox() {
 
 void StripRenderer::setCount(uint16_t newSize) noexcept {
 	clearCells();
-	stripSize  = newSize;
-	groupRatio = stripSize > DISPLAY_CAP
-		? static_cast<uint16_t>((stripSize + DISPLAY_CAP - 1) / DISPLAY_CAP)
-		: 1;
+	stripSize = newSize;
+	packCount = stripSize < DISPLAY_CAP ? stripSize : DISPLAY_CAP;
+	base = packCount ? stripSize / packCount : 1;
+	rem  = packCount ? stripSize % packCount : 0;
 
-	const uint16_t visible = groupRatio == 1
-		? stripSize
-		: static_cast<uint16_t>((stripSize + groupRatio - 1) / groupRatio);
-
-	const uint16_t perRow {visible < MAX_CELLS_PER_ROW ? visible : MAX_CELLS_PER_ROW};
+	const uint16_t perRow {packCount < MAX_CELLS_PER_ROW ? packCount : MAX_CELLS_PER_ROW};
 	set_min_children_per_line(perRow);
 	set_max_children_per_line(perRow);
 
-	cells.reserve(visible);
-	cellTimers.assign(visible, sigc::connection{});
-	for (uint16_t i = 0; i < visible; ++i) {
+	cells.reserve(packCount);
+	cellTimers.assign(packCount, sigc::connection{});
+	for (uint16_t i = 0; i < packCount; ++i) {
 		auto cell {Gtk::manage(new Gtk::ToggleButton())};
 		cell->set_size_request(12, 12);
 		cell->set_can_focus(false);
 		cell->set_relief(Gtk::RELIEF_NONE);
 		cell->get_style_context()->add_class(CSS_STRIP_LED);
 		cell->get_style_context()->add_class(cssClassFor(LedColor::Off));
-		if (groupRatio > 1) {
-			cell->set_tooltip_text(
-				"LED group of " + std::to_string(groupRatio) +
-				" (display capped at " + std::to_string(DISPLAY_CAP) + ")"
-			);
-		}
-		const uint16_t firstPhysical = static_cast<uint16_t>(i * groupRatio);
+		const uint16_t firstPhysical {firstPhysicalOf(i)};
+		if (const uint16_t groupSize {static_cast<uint16_t>(i < rem ? base + 1 : base)}; groupSize > 1)
+			cell->set_tooltip_text("LED group of " + std::to_string(groupSize));
 		cell->signal_toggled().connect([this, i, firstPhysical]() {
 			if (cells[i]->get_active()) {
 				if (cellTimers[i].connected()) return;
@@ -83,30 +75,53 @@ void StripRenderer::setCount(uint16_t newSize) noexcept {
 	show_all_children();
 }
 
+uint16_t StripRenderer::firstPhysicalOf(uint16_t cell) const noexcept {
+	const uint16_t boundary {static_cast<uint16_t>(rem * (base + 1))};
+	return cell < rem
+		? static_cast<uint16_t>(cell * (base + 1))
+		: static_cast<uint16_t>(boundary + (cell - rem) * base);
+}
+
+uint16_t StripRenderer::cellOf(uint16_t physicalIdx) const noexcept {
+	const uint16_t boundary {static_cast<uint16_t>(rem * (base + 1))};
+	return physicalIdx < boundary
+		? static_cast<uint16_t>(physicalIdx / (base + 1))
+		: static_cast<uint16_t>(rem + (physicalIdx - boundary) / base);
+}
+
+uint16_t StripRenderer::getGroupSize(uint16_t physicalIdx) const noexcept {
+	return cellOf(physicalIdx) < rem ? base + 1 : base;
+}
+
 void StripRenderer::scheduleCellOff(uint16_t physicalIdx) noexcept {
-	const uint16_t i {static_cast<uint16_t>(physicalIdx / groupRatio)};
+	const uint16_t i {cellOf(physicalIdx)};
 	cellTimers[i] = Glib::signal_timeout().connect([this, i, physicalIdx]() {
 		cellTimers[i].disconnect();
 		cells[i]->set_active(false);
 		setLedState(physicalIdx, LedColor::Off);
+		cellExpired.emit(physicalIdx);
 		return false;
 	}, Config::Settings::get().getLayoutTestTimeout());
 }
 
 void StripRenderer::setLedState(uint16_t idx, LedColor color) noexcept {
-	const uint16_t displayIdx = static_cast<uint16_t>(idx / groupRatio);
-	auto cell {cells.at(displayIdx)};
+	auto cell {cells.at(cellOf(idx))};
 	auto ctx {cell->get_style_context()};
 	for (auto c : {LedColor::Off, LedColor::R, LedColor::G, LedColor::B, LedColor::Y, LedColor::M, LedColor::C, LedColor::W})
 		ctx->remove_class(cssClassFor(c));
 	ctx->add_class(cssClassFor(color));
 }
 
+void StripRenderer::setAll(LedColor color) noexcept {
+	for (uint16_t i = 0; i < cells.size(); ++i)
+		setLedState(firstPhysicalOf(i), color);
+}
+
 void StripRenderer::setAllOff() noexcept {
 	for (uint16_t i = 0; i < cells.size(); ++i) {
 		cellTimers[i].disconnect();
 		cells[i]->set_active(false);
-		setLedState(static_cast<uint16_t>(i * groupRatio), LedColor::Off);
+		setLedState(firstPhysicalOf(i), LedColor::Off);
 	}
 }
 

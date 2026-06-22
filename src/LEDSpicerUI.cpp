@@ -58,6 +58,5 @@ int main(int argc, char *argv[]) {
 
 	delete mw;
 
-	std::cout << "LEDSpicer UI ended" << std::endl;
 	return r;
 }

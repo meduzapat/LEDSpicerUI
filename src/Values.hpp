@@ -32,6 +32,8 @@ using std::vector;
 using std::string;
 using std::stringstream;
 
+#include <functional>
+
 #pragma once
 
 namespace LEDSpicerUI {

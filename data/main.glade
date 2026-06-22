@@ -2060,6 +2060,27 @@ If nothing is set, the default is 1000ms.</property>
           </packing>
         </child>
         <child>
+          <object class="GtkToggleButton" id="ToggleConnect">
+            <property name="visible">True</property>
+            <property name="sensitive">False</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
+            <property name="tooltip-text" translatable="yes">Connect to the LEDSpicer daemon</property>
+            <child>
+              <object class="GtkImage">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="icon-name">network-transmit-receive-symbolic</property>
+                <property name="use-fallback">True</property>
+                <property name="icon_size">3</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="position">3</property>
+          </packing>
+        </child>
+        <child>
           <object class="GtkLinkButton" id="BtnDonate">
             <property name="visible">True</property>
             <property name="can-focus">True</property>
@@ -2142,6 +2163,48 @@ If nothing is set, the default is 1000ms.</property>
           <packing>
             <property name="pack-type">end</property>
             <property name="position">5</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkWindow" id="DaemonBusyWindow">
+    <property name="can-focus">False</property>
+    <property name="modal">True</property>
+    <property name="window-position">center-on-parent</property>
+    <property name="type-hint">dialog</property>
+    <property name="decorated">False</property>
+    <property name="transient-for">MainWindow</property>
+    <property name="border-width">16</property>
+    <child>
+      <object class="GtkBox">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <property name="spacing">12</property>
+        <child>
+          <object class="GtkSpinner">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="active">True</property>
+            <property name="width-request">32</property>
+            <property name="height-request">32</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="DaemonBusyLabel">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label"></property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
           </packing>
         </child>
       </object>
@@ -4523,6 +4586,7 @@ Autodetected if ledspicerd is detected</property>
               <object class="GtkStack" id="stackSettings">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
+                <property name="margin-left">5</property>
                 <property name="transition-type">slide-up-down</property>
                 <child>
                   <object class="GtkBox">
@@ -5301,6 +5365,7 @@ Ships empty; place theme folders here, or point this anywhere you keep them.</pr
                       <object class="GtkBox">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
+                        <property name="spacing">5</property>
                         <child>
                           <object class="GtkBox">
                             <property name="visible">True</property>
@@ -5339,7 +5404,41 @@ Ships empty; place theme folders here, or point this anywhere you keep them.</pr
                           </packing>
                         </child>
                         <child>
-                          <placeholder/>
+                          <object class="GtkBox">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="tooltip-text" translatable="yes">When enabled, daemon test actions (lighting and clearing elements) are shown in the status bar.</property>
+                            <property name="spacing">5</property>
+                            <child>
+                              <object class="GtkSwitch" id="SwitchSettingsDebugDaemon">
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="halign">end</property>
+                                <property name="label">Show daemon test actions</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
                         </child>
                       </object>
                       <packing>
