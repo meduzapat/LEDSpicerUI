@@ -21,8 +21,9 @@
  */
 
 #include "StripRenderer.hpp"
-#include "LayoutTester.hpp"
 #include "Storage/Element.hpp"
+#include "DaemonHandler.hpp"
+#include "config/Settings.hpp"
 
 #pragma once
 
@@ -49,7 +50,7 @@ public:
 		DRAG_THRESHOLD_PX = 5,
 		NAME_MAX_CHARS    = 20;
 
-	LayoutElement(Storage::Element* element, LayoutTester* tester) noexcept;
+	LayoutElement(Storage::Element* element) noexcept;
 
 	virtual ~LayoutElement();
 
@@ -91,7 +92,6 @@ private:
 	static const string ICON_DIR;
 
 	Storage::Element* element = nullptr;
-	LayoutTester*     tester  = nullptr;
 
 	Kind kind = Kind::Mono;
 
@@ -131,13 +131,30 @@ private:
 	string pendingTintClass;
 
 	void build() noexcept;
-	/// Sets the tile caption, truncating past NAME_MAX_CHARS with the full name in a tooltip.
+	/**
+	 * Sets the tile caption, truncating past NAME_MAX_CHARS with the full name in a tooltip.
+	 * @param full
+	 */
 	void setName(const Glib::ustring& full) noexcept;
 	void persistPosition() noexcept;
 	bool onLightExpired() noexcept;
 	void fire(Storage::Element* target) noexcept;
 	void fireAll() noexcept;
 	void fireCell(uint16_t firstPhysicalIdx) noexcept;
+	void clearCell(uint16_t firstPhysicalIdx) noexcept;
+	/**
+	 * Sends a Set command for target (Group for a strip master, else Element).
+	 */
+	void lightTarget(Storage::Element* target, const string& colorName) noexcept;
+	/**
+	 * Sends the matching Clear command for target.
+	 */
+	void clearTarget(Storage::Element* target) noexcept;
+
+	/**
+	 * Pushes a daemon test action to the status bar when daemon debug is on.
+	 */
+	void debugDaemon(const string& message) noexcept;
 	const string& resolveColorName() const noexcept;
 
 	bool onButtonPress(GdkEventButton* ev)   noexcept;

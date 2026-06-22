@@ -24,7 +24,7 @@
 #include <csignal>
 using std::signal;
 
-#include "Ui/MainWindow.hpp"
+#include "MainWindow.hpp"
 
 #pragma once
 

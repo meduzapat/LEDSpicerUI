@@ -111,6 +111,9 @@ void DirectoryNavigator::process(Storage::DirectoryEntry* parent, const string& 
 			process(static_cast<Storage::DirectoryEntry*>(bb.getData()), entry.path().string());
 		}
 		else if (entry.is_regular_file(ec) and entry.path().extension() == ".xml") {
+			// Never expose the throwaway layout-test profile.
+			if (entry.path().stem().string() == RESERVED_TEST_PROFILE)
+				continue;
 			try {
 				extractData(entry.path().string(), parent);
 			}

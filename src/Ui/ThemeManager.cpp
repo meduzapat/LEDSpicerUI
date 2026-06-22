@@ -47,22 +47,14 @@ void ThemeManager::scan() noexcept {
 			const string themeDir{themesDir + entry + "/"};
 			if (not Glib::file_test(themeDir + "metadata.xml", Glib::FILE_TEST_IS_REGULAR))
 				continue;
-			if (not Glib::file_test(themeDir + "preview.png", Glib::FILE_TEST_IS_REGULAR)) {
-				std::cerr <<
-					"ThemeManager: skipping theme '"    << entry <<
-					"' — missing mandatory preview.png" << std::endl;
+			if (not Glib::file_test(themeDir + "preview.png", Glib::FILE_TEST_IS_REGULAR))
 				continue;
-			}
 			const bool dual {
 				Glib::file_test(themeDir + "dark/theme.css",  Glib::FILE_TEST_IS_REGULAR) and
 				Glib::file_test(themeDir + "light/theme.css", Glib::FILE_TEST_IS_REGULAR)
 			};
-			if (not dual and not Glib::file_test(themeDir + "theme.css", Glib::FILE_TEST_IS_REGULAR)) {
-				std::cerr <<
-					"ThemeManager: skipping theme '" << entry <<
-					"' — needs dark/ + light/ theme.css or a single root theme.css" << std::endl;
+			if (not dual and not Glib::file_test(themeDir + "theme.css", Glib::FILE_TEST_IS_REGULAR))
 				continue;
-			}
 			parseMetadata(themeDir, entry, dual);
 		}
 	}

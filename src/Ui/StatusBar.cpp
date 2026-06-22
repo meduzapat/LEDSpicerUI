@@ -69,6 +69,9 @@ void StatusBar::clear() noexcept {
 }
 
 unsigned StatusBar::durationFor(const string& msg, Severity sev) noexcept {
+	// Debug feedback flashes briefly so rapid actions don't queue up.
+	if (sev == Severity::Debug)
+		return FLASH_MS;
 	// Count UTF-8 characters, not bytes, so non-ASCII messages don't over-count.
 	const unsigned chars {static_cast<unsigned>(Glib::ustring(msg).length())};
 	unsigned ms = std::clamp(chars * MS_PER_CHAR, MIN_MS, MAX_MS);

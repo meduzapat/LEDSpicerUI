@@ -33,8 +33,9 @@ namespace LEDSpicerUI::Ui::Layout {
  * LEDSpicerUI::Ui::Layout::StripRenderer
  *
  * FlowBox of toggle cells representing an addressable LED strip.
- * When stripSize exceeds DISPLAY_CAP, cells are grouped: each visible
- * toggle represents ceil(stripSize / DISPLAY_CAP) physical LEDs.
+ * When stripSize exceeds DISPLAY_CAP the LEDs are packed into DISPLAY_CAP cells,
+ * spread as evenly as possible (the first packs hold one extra LED), filled
+ * left to right.
  */
 class StripRenderer: public Gtk::FlowBox {
 
@@ -81,21 +82,48 @@ public:
 	 */
 	sigc::signal<void, uint16_t>& signal_led_clicked() noexcept { return ledClicked; }
 
+	/**
+	 * Emitted when a cell's timer expires, carrying its first physical LED.
+	 */
+	sigc::signal<void, uint16_t>& signal_cell_expired() noexcept { return cellExpired; }
+
 	uint16_t getCount() const noexcept { return stripSize; }
 
-	uint16_t getGroupRatio() const noexcept { return groupRatio; }
+	/**
+	 * Lights every cell with color (whole strip).
+	 */
+	void setAll(LedColor color) noexcept;
+
+	/**
+	 * @return number of physical LEDs in the pack containing physicalIdx.
+	 */
+	uint16_t getGroupSize(uint16_t physicalIdx) const noexcept;
 
 private:
 
 	uint16_t
-		stripSize  = 0,
-		groupRatio = 1;
+		stripSize = 0,  ///< Total physical LEDs.
+		packCount = 0,  ///< Visible cells, min(stripSize, DISPLAY_CAP).
+		base      = 1,  ///< LEDs per pack; the first rem packs hold one more.
+		rem       = 0;
 
 	std::vector<Gtk::ToggleButton*> cells;
 
 	std::vector<sigc::connection> cellTimers;
 
 	sigc::signal<void, uint16_t> ledClicked;
+
+	sigc::signal<void, uint16_t> cellExpired;
+
+	/**
+	 * @return display cell holding physicalIdx.
+	 */
+	uint16_t cellOf(uint16_t physicalIdx) const noexcept;
+
+	/**
+	 * @return first physical LED of cell.
+	 */
+	uint16_t firstPhysicalOf(uint16_t cell) const noexcept;
 
 	void clearCells() noexcept;
 

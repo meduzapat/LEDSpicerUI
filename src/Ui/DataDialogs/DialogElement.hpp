@@ -49,6 +49,8 @@ public:
 		MAX_COLUMNS = 20,
 		MIN_COLUMNS = 10;
 
+	inline const static string DEFAULT_RGB_ORDER = "RGB";
+
 	virtual ~DialogElement() {
 		switchPageConnection.disconnect();
 	};
@@ -86,8 +88,6 @@ public:
 	void drawPins() noexcept;
 
 protected:
-
-	string defaultRGBFormat;
 
 	Gtk::SpinButton
 		* timeOn = nullptr,

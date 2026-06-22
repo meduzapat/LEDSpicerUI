@@ -20,7 +20,6 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <functional>
 #include "Values.hpp"
 
 #pragma once
@@ -56,6 +55,7 @@ public:
 		REMOVE_INVALID_ITEMS {"removeInvalidItems"},
 		SAVE_BACKUP          {"saveBackup"},
 		DEBUG_FILES          {"debugFiles"},
+		DEBUG_DAEMON         {"debugDaemon"},
 		LAYOUT_GRID          {"layoutGrid"},
 		LAYOUT_TEST_TIMEOUT  {"layoutTestTimeout"};
 
@@ -110,12 +110,14 @@ public:
 	bool shouldRemoveInvalidItems() const noexcept { return is(REMOVE_INVALID_ITEMS); }
 	bool shouldSaveBackup()         const noexcept { return is(SAVE_BACKUP);          }
 	bool shouldDebugFiles()         const noexcept { return is(DEBUG_FILES);          }
+	bool shouldDebugDaemon()        const noexcept { return is(DEBUG_DAEMON);         }
 
 	void setInteractiveMode(bool value)    noexcept; ///< Also recomputes currentMode.
 	void setPreserveEmptyDir(bool value)   noexcept;
 	void setRemoveInvalidItems(bool value) noexcept;
 	void setSaveBackup(bool value)         noexcept;
 	void setDebugFiles(bool value)         noexcept;
+	void setDebugDaemon(bool value)        noexcept;
 
 	/// Layout snap-to-grid step in pixels (same on both axes). 0 = snap disabled.
 	int  getLayoutGrid() const noexcept { return getInt(LAYOUT_GRID); }

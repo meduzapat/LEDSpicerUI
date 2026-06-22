@@ -105,6 +105,7 @@ void Settings::setPreserveEmptyDir(bool value)   noexcept { setValue(PRESERVE_EM
 void Settings::setRemoveInvalidItems(bool value) noexcept { setValue(REMOVE_INVALID_ITEMS, value); }
 void Settings::setSaveBackup(bool value)         noexcept { setValue(SAVE_BACKUP,          value); }
 void Settings::setDebugFiles(bool value)         noexcept { setValue(DEBUG_FILES,          value); }
+void Settings::setDebugDaemon(bool value)        noexcept { setValue(DEBUG_DAEMON,         value); }
 
 unsigned Settings::getLayoutTestTimeout() const noexcept {
 	return static_cast<unsigned>(std::lround(getDouble(LAYOUT_TEST_TIMEOUT) * 1000));
