@@ -134,6 +134,12 @@ public:
 	void registerDependency(BoxButtonCollection* dependency) noexcept;
 
 	/**
+	 * Registers a callback fired after any add(), remove() or replace() on this collection.
+	 * @param cb the callback.
+	 */
+	void onChange(std::function<void()> cb) noexcept { changeCallback = std::move(cb); }
+
+	/**
 	 * Refresh a single combobox contents with the collection values.
 	 * @param comboBox the combobox to refresh.
 	 */
@@ -165,6 +171,9 @@ protected:
 
 	/// List of collections that keeps references to items in the collection.
 	vector<BoxButtonCollection*> dependencies;
+
+	/// Fired after any mutation, when set.
+	std::function<void()> changeCallback;
 
 	/// Keeps collections instances.
 	static std::unordered_map<string, CollectionHandler*> collections;

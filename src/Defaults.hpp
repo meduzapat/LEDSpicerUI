@@ -26,6 +26,7 @@
 
 #include <functional>
 
+#include <signal.h>
 #include <filesystem>
 #include <fstream>
 #include <sys/stat.h>
@@ -69,6 +70,10 @@ inline const string
 
 /// Application identity and embedded resource bundle (see data/ledspicerui.gresource.xml).
 	RESOURCE_PREFIX {"/org/ledspicer/ui/"},
+
+/// Canonical daemon executable name. Several LEDSpicer tools share the -v signature,
+/// so the manual binary picker must also match this name.
+	DAEMON_BINARY {"ledspicerd"},
 
 /// LEDSpicer configuration file keys.
 	DEFAULT_USERID   {"1000"},

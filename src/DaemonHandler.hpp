@@ -78,6 +78,25 @@ public:
 	 */
 	bool isConnected() const noexcept { return connected; }
 
+	/**
+	 * Flags the connected daemon as needing a refresh before its next command.
+	 * No-op while disconnected.
+	 */
+	void markStale() noexcept;
+
+	/**
+	 * Installs the hooks wrapping an in-place refresh: begin() before it starts
+	 * (raise the busy spinner, disable the toggle, deactivate the layout), and
+	 * end(ok) after (lower the spinner, reflect disconnect on failure).
+	 */
+	void setRefreshHandlers(
+		std::function<void()>     begin,
+		std::function<void(bool)> end
+	) noexcept {
+		onRefreshBegin = std::move(begin);
+		onRefreshEnd   = std::move(end);
+	}
+
 	/// Daemon command types. Values mirror the daemon's Message::Types enum.
 	enum class Command : uint8_t {
 		SetElement = 5, ClearElement = 6, SetGroup = 8, ClearGroup = 9
@@ -95,9 +114,9 @@ private:
 
 	/// Identity of the daemon found at connect, frozen for the session's recovery.
 	struct Discovery {
-		string       pid;      ///< empty ⟺ None; used to signal/stop.
+		string       pid;      /// empty ⟺ None; used to signal/stop.
 		DaemonStatus status {DaemonStatus::None};
-		string       restore;  ///< Manual: command line; *Service: unit name.
+		string       restore;  /// Manual: command line; *Service: unit name.
 	};
 
 	/// Budget and step, in ms, while waiting for the daemon to start or stop.
@@ -124,6 +143,19 @@ private:
 	 * @return true once it is up.
 	 */
 	bool start(const string& configPath) const noexcept;
+
+	/**
+	 * Rebuilds the test config and relaunches our daemon in place, leaving any
+	 * taken-over daemon stopped. Clears the stale flag.
+	 * @return true once ours is back up.
+	 */
+	bool restart() noexcept;
+
+	/**
+	 * Atomic, non-re-entrant in-place refresh, wrapped by the refresh handlers.
+	 * The triggering command is dropped; the daemon comes back blank.
+	 */
+	void refresh() noexcept;
 
 	/**
 	 * Stops the discovered daemon and waits for the hardware to free.
@@ -167,6 +199,13 @@ private:
 
 	/// Yields the current <settings> values for the test configuration.
 	std::function<Values()> configProvider;
+
+	/// Hooks wrapping an in-place refresh (busy spinner, toggle, layout).
+	std::function<void()>     onRefreshBegin;
+	std::function<void(bool)> onRefreshEnd;
+
+	/// Guards command() and restart() against re-entry while refreshing.
+	bool refreshing {false};
 
 	/// Live project collections used to build the test configuration.
 	const Ui::Storage::BoxButtonCollection

@@ -155,5 +155,5 @@ void Settings::updateMode() noexcept {
 		currentMode = Mode::Portable;
 		return;
 	}
-	currentMode = (getValue(INTERACTIVE_MODE) == HUMAN_TRUE) ? Mode::Iterative : Mode::Local;
+	currentMode = (getValue(INTERACTIVE_MODE) == HUMAN_TRUE) ? Mode::Interactive : Mode::Local;
 }

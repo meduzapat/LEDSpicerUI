@@ -182,9 +182,6 @@ void DialogGroup::isValid() const {
 			throw Message("Group with name " + name + " already exists.");
 		}
 	}
-
-//	if (action != Actions::LOAD and not boxElements->getSize())
-//		throw Message("Add at least one element.");
 }
 
 void DialogGroup::storeData() noexcept {

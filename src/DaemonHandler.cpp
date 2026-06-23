@@ -73,6 +73,9 @@ bool DaemonHandler::connect() noexcept {
 			return false;
 		}
 		if (not stopPrior()) {
+			StatusBar::getInstance().push(
+				"Unable to connect: could not stop the running daemon.", StatusBar::Severity::Error
+			);
 			restorePrior();
 			found = {};
 			return false;
@@ -82,6 +85,11 @@ bool DaemonHandler::connect() noexcept {
 
 	const string cfg {buildTestConfig()};
 	if (cfg.empty() or not start(cfg)) {
+		// buildTestConfig() reports its own failures; a started-but-down daemon does not.
+		if (not cfg.empty())
+			StatusBar::getInstance().push(
+				"Unable to connect: the daemon failed to start.", StatusBar::Severity::Error
+			);
 		if (tookOver)
 			restorePrior();
 		found = {};
@@ -89,6 +97,7 @@ bool DaemonHandler::connect() noexcept {
 		return false;
 	}
 	connected = true;
+	Settings::get().setDaemonStale(false);
 	return true;
 }
 
@@ -107,6 +116,43 @@ void DaemonHandler::disconnect() noexcept {
 	if (not testConfigPath.empty())  std::filesystem::remove(testConfigPath,  ec);
 	if (not testProfilePath.empty()) std::filesystem::remove(testProfilePath, ec);
 	connected = false;
+	Settings::get().setDaemonStale(false);
+}
+
+void DaemonHandler::markStale() noexcept {
+	if (connected)
+		Settings::get().setDaemonStale(true);
+}
+
+bool DaemonHandler::restart() noexcept {
+	// Stop ours without restoring the daemon we took over.
+	string out;
+	Defaults::runCommand("killall -15 " + Glib::shell_quote(processName()), out);
+	waitUntil([this] { return not running(); }, STOP_TIMEOUT_MS);
+
+	const string cfg {buildTestConfig()};
+	if (cfg.empty() or not start(cfg)) {
+		// Relaunch failed: hand the hardware back to the prior daemon and drop the link.
+		if (tookOver)
+			restorePrior();
+		found     = {};
+		tookOver  = false;
+		connected = false;
+		Settings::get().setDaemonStale(false);
+		return false;
+	}
+	Settings::get().setDaemonStale(false);
+	return true;
+}
+
+void DaemonHandler::refresh() noexcept {
+	refreshing = true;
+	onRefreshBegin();
+	const bool ok {restart()};
+	onRefreshEnd(ok);
+	if (not ok)
+		StatusBar::getInstance().push("Daemon refresh failed.", StatusBar::Severity::Error);
+	refreshing = false;
 }
 
 void DaemonHandler::discover() noexcept {
@@ -198,7 +244,7 @@ bool DaemonHandler::waitUntil(const std::function<bool()>& done, int timeoutMs) 
 	for (int waited {0}; waited < timeoutMs and not done(); waited += POLL_MS) {
 		while (context->pending())   // keep the busy spinner animating
 			context->iteration(false);
-		g_usleep(POLL_MS * 1000);
+		Glib::usleep(POLL_MS * 1000);
 	}
 	return done();
 }
@@ -208,9 +254,8 @@ bool DaemonHandler::stopPrior() noexcept {
 	case DaemonStatus::UserService:   runSystemctl("stop", found.restore, true);  break;
 	case DaemonStatus::SystemService: runSystemctl("stop", found.restore, false); break;
 	case DaemonStatus::Manual: {
-		// Ask it politely to quit.
-		string out;
-		Defaults::runCommand("kill -TERM " + Glib::shell_quote(found.pid), out);
+		// Ask politely to quit.
+		::kill(static_cast<pid_t>(std::atol(found.pid.c_str())), SIGTERM);
 		break;
 	}
 	default: break;
@@ -260,8 +305,16 @@ bool DaemonHandler::start(const string& configPath) const noexcept {
 }
 
 void DaemonHandler::command(Command type, std::initializer_list<string> fields) noexcept {
-	if (not connected)
+
+	// Drop if not connected or while refreshing.
+	if (not connected or refreshing)
 		return;
+
+	// A stale daemon is refreshed in place; this command is dropped so the board comes back blank and the user re-tests against the fresh daemon.
+	if (Settings::get().isDaemonStale()) {
+		refresh();
+		return;
+	}
 
 	const int portNumber {std::atoi(port.c_str())};
 	if (portNumber <= 0 or portNumber > 65535) {
@@ -287,7 +340,7 @@ void DaemonHandler::command(Command type, std::initializer_list<string> fields) 
 		)};
 		auto address {Gio::InetSocketAddress::create(
 			Gio::InetAddress::create_loopback(Gio::SOCKET_FAMILY_IPV4),
-			static_cast<guint16>(portNumber)
+			static_cast<uint16_t>(portNumber)
 		)};
 		socket->send_to(address, payload.data(), payload.size());
 	}
@@ -300,5 +353,5 @@ void DaemonHandler::command(Command type, std::initializer_list<string> fields) 
 
 string DaemonHandler::processName() noexcept {
 	const string& binary {Settings::get().getBinaryPath()};
-	return binary.empty() ? string("ledspicerd") : Glib::path_get_basename(binary);
+	return binary.empty() ? DAEMON_BINARY : Glib::path_get_basename(binary);
 }

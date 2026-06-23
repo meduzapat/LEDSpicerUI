@@ -70,6 +70,13 @@ public:
 	bool isValid() const;
 
 	/**
+	 * Registers a callback fired after the settings dialog closes, so the owner
+	 * can re-evaluate state that depends on settings (e.g. the daemon controls).
+	 * @param cb the callback.
+	 */
+	void onClose(std::function<void()> cb) noexcept { onClosed = std::move(cb); }
+
+	/**
 	 * Sets the binary path, runs detection, and updates UI.
 	 * @param binaryPath
 	 * @param setFileBinarySelector if true, syncs the file chooser widget.
@@ -116,6 +123,9 @@ protected:
 	Gtk::SpinButton* spinLayoutTestTimeout = nullptr;
 
 	Gtk::FlowBox* flowBoxThemes = nullptr;
+
+	/// Fired after the dialog closes, when set.
+	std::function<void()> onClosed;
 
 	bool
 		/// Guards against recursive signal firing when syncing style buttons.

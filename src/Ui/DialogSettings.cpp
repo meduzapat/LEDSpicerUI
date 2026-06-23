@@ -101,7 +101,7 @@ bool DialogSettings::startup(Gtk::Window* parent) {
 }
 
 bool DialogSettings::autoDetect() {
-	const string path = Glib::find_program_in_path("ledspicerd");
+	const string path = Glib::find_program_in_path(DAEMON_BINARY);
 	if (path.empty()) return false;
 	setBinaryPath(path, true);
 	return isValid();
@@ -137,6 +137,11 @@ DialogSettings::DialogSettings(BaseObjectType* obj, const Glib::RefPtr<Gtk::Buil
 	GladeDialog(obj, builder)
 {
 	builder->get_widget("FileBinary",        fileBinary);
+	// Nudge the picker toward the daemon: only show files named ledspicerd.
+	auto binaryFilter {Gtk::FileFilter::create()};
+	binaryFilter->set_name(DAEMON_BINARY);
+	binaryFilter->add_pattern(DAEMON_BINARY);
+	fileBinary->add_filter(binaryFilter);
 	builder->get_widget("FileDataDirSelect", fileDataDirSelect);
 	builder->get_widget("LabelBinaryPath",   labelBinaryPath);
 	builder->get_widget("LabelBinaryStatus", labelBinaryStatus);
@@ -314,6 +319,7 @@ DialogSettings::DialogSettings(BaseObjectType* obj, const Glib::RefPtr<Gtk::Buil
 	btnSettings->signal_clicked().connect([this]() {
 		run();
 		hide();
+		if (onClosed) onClosed();
 	});
 }
 
@@ -325,22 +331,28 @@ bool DialogSettings::detectLedspicerVersion() {
 		return false;
 	}
 
-	string outputText, ledspicerVer;
+	string outputText;
 	if (not Defaults::runCommand(binary + " -v", outputText)) {
 		updateBinaryStatusLabel("");
 		return false;
 	}
 
-	ledspicerVer = Defaults::extractAfter(outputText, "LEDSpicer");
+	// The -v banner must name the project; every LEDSpicer tool prints it.
+	const string ledspicerVer {Defaults::extractAfter(outputText, PACKAGE_DATA_NAME)};
 	if (ledspicerVer.empty()) {
-		Message::displayError("The selected binary does not appear to be ledspicerd.", this);
+		Message::displayError("The selected binary does not appear to be a " PACKAGE_DATA_NAME " program.", this);
 		updateBinaryStatusLabel("");
 		return false;
 	}
 
-	auto parts = Defaults::explode(ledspicerVer, ' ');
-	if (parts.size() > 1) ledspicerVer = parts[0];
-	updateBinaryStatusLabel(ledspicerVer);
+	// The siblings share that signature; only the daemon is named ledspicerd.
+	if (Glib::path_get_basename(binary) != DAEMON_BINARY) {
+		Message::displayError("The selected binary is not the " PACKAGE_DATA_NAME " daemon (" + DAEMON_BINARY + ").", this);
+		updateBinaryStatusLabel("");
+		return false;
+	}
+
+	updateBinaryStatusLabel(Defaults::explode(ledspicerVer, ' ').front());
 	return true;
 }
 

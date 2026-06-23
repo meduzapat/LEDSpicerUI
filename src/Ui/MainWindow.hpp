@@ -142,6 +142,12 @@ protected:
 	void updateDaemonControls() noexcept;
 
 	/**
+	 * Marks the test daemon stale when daemon-relevant data (devices, elements,
+	 * groups, port) changes.
+	 */
+	void onDaemonConfigChanged() noexcept;
+
+	/**
 	 * Shows the modal busy spinner with text and paints it before blocking.
 	 */
 	void showBusy(const Glib::ustring& text) noexcept;

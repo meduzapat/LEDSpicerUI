@@ -107,8 +107,8 @@ TEST_F(SettingsTest, LoadFillsMissingKeysWithDefaults) {
 	EXPECT_EQ(ThemeStyle::Light, s.getThemeStyle());
 	EXPECT_TRUE(s.shouldSaveBackup());     // missing → default True
 	EXPECT_FALSE(s.shouldDebugFiles());    // missing → default False
-	// interactive mode defaults to True → with binary set, mode is Iterative
-	EXPECT_EQ(Mode::Iterative, s.getMode());
+	// interactive mode defaults to True → with binary set, mode is Interactive
+	EXPECT_EQ(Mode::Interactive, s.getMode());
 }
 
 TEST_F(SettingsTest, ModeDerivation) {
@@ -120,10 +120,10 @@ TEST_F(SettingsTest, ModeDerivation) {
 	EXPECT_EQ(Mode::Portable, s.getMode());
 	EXPECT_TRUE(s.isPortable());
 
-	// Binary + interactive → Iterative.
+	// Binary + interactive → Interactive.
 	s.setBinaryPath("/usr/bin/ledspicerd");
-	EXPECT_EQ(Mode::Iterative, s.getMode());
-	EXPECT_TRUE(s.isIterative());
+	EXPECT_EQ(Mode::Interactive, s.getMode());
+	EXPECT_TRUE(s.isInteractive());
 
 	// Binary, interactive off → Local.
 	s.setInteractiveMode(false);

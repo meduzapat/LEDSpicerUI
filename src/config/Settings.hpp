@@ -61,9 +61,9 @@ public:
 
 	/// Runtime mode — derived from binary detection result and interactiveMode preference.
 	enum class Mode {
-		Portable,  /// Binary absent or detection failed; config lives in the project dir.
-		Local,     /// Binary detected, interactive mode OFF.
-		Iterative  /// Binary detected, interactive mode ON.
+		Portable,    /// Binary absent or detection failed; config lives in the project dir.
+		Local,       /// Binary detected, interactive mode OFF.
+		Interactive  /// Binary detected, interactive mode ON.
 	};
 
 	/// UI theme preference.
@@ -140,13 +140,17 @@ public:
 	ThemeStyle getThemeStyle()           const noexcept;
 	void       setThemeStyle(ThemeStyle) noexcept;
 
-	Mode getMode()      const noexcept { return currentMode;                    }
-	bool isPortable()   const noexcept { return currentMode == Mode::Portable;  }
-	bool isLocal()      const noexcept { return currentMode == Mode::Local;     }
-	bool isIterative()  const noexcept { return currentMode == Mode::Iterative; }
+	Mode getMode()      const noexcept { return currentMode;                      }
+	bool isPortable()   const noexcept { return currentMode == Mode::Portable;    }
+	bool isLocal()      const noexcept { return currentMode == Mode::Local;       }
+	bool isInteractive() const noexcept { return currentMode == Mode::Interactive; }
 
 	/// Called by DialogSettings after binary detection succeeds or fails.
 	void setMode(Mode mode) noexcept { currentMode = mode; }
+
+	/// Runtime flag: the connected test daemon's config no longer matches the live data.
+	bool isDaemonStale()      const noexcept { return daemonStale;  }
+	void setDaemonStale(bool value) noexcept { daemonStale = value; }
 
 	const string&       getConfigPath()     const noexcept { return configPath;     }
 	const string&       getCurrentProject() const noexcept { return currentProject; }
@@ -167,12 +171,15 @@ public:
 	/// projectsDir + currentProject + "/", or empty if either is unset.
 	string getProjectDir() const noexcept;
 
-	/// Portable: getProjectDir() + CONFIG_FILE.  Local/Iterative: configPath.
+	/// Portable: getProjectDir() + CONFIG_FILE.  Local/Interactive: configPath.
 	string getActiveConfigPath() const noexcept;
 
 protected:
 
 	Mode currentMode = Mode::Portable;
+
+	/// True when a connected test daemon needs a refresh to match edited data.
+	bool daemonStale = false;
 
 	string
 		configPath,

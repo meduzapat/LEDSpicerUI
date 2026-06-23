@@ -103,6 +103,36 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 	builder->get_widget("DaemonBusyWindow", busyWindow);
 	builder->get_widget("DaemonBusyLabel",  busyLabel);
 
+	// Settings has no Apply: re-evaluate the daemon controls whenever it closes.
+	DialogSettings::getInstance()->onClose([this]() { updateDaemonControls(); });
+
+	// Daemon-relevant changes (devices, elements, groups, port) stale the test daemon.
+	auto staleDaemon {[this]() { onDaemonConfigChanged(); }};
+	CollectionHandler::getInstance(COLLECTION_DEVICES )->onChange(staleDaemon);
+	CollectionHandler::getInstance(COLLECTION_ELEMENTS)->onChange(staleDaemon);
+	CollectionHandler::getInstance(COLLECTION_GROUPS  )->onChange(staleDaemon);
+	inputPortNumber->signal_changed().connect(staleDaemon);
+
+	// Coordinate the in-place daemon refresh: lock the UI and clear the board
+	// before, restore it after (reflecting a disconnect on failure).
+	DaemonHandler::getInstance().setRefreshHandlers(
+		[this]() {
+			showBusy("Refreshing…");
+			toggleConnect->set_sensitive(false);
+			layout.deactivate();
+		},
+		[this](bool ok) {
+			hideBusy();
+			if (not ok) {
+				ignoreConnectToggle = true;
+				toggleConnect->set_active(false);
+				ignoreConnectToggle = false;
+				StatusBar::getInstance().push("Daemon disconnected", StatusBar::Severity::Warning);
+			}
+			updateDaemonControls();
+		}
+	);
+
 	// Top directory information.
 	Gtk::HeaderBar* header;
 	builder->get_widget("Header", header);
@@ -447,9 +477,31 @@ void MainWindow::hideBusy() noexcept {
 }
 
 void MainWindow::updateDaemonControls() noexcept {
-	// Hidden on portable, visible but disabled on local, enabled on interactive.
+	// A test can only run in interactive mode, with a port and at least one element.
+	const bool eligible {
+		Settings::get().isInteractive()
+		and not inputPortNumber->get_text().empty()
+		and CollectionHandler::getInstance(COLLECTION_ELEMENTS)->getSize() > 0
+	};
+	// Hidden on portable; visible otherwise, enabled only when a test can run.
 	toggleConnect->set_visible(not Settings::get().isPortable());
-	toggleConnect->set_sensitive(Settings::get().isIterative());
+	toggleConnect->set_sensitive(eligible);
+
+	// A live daemon whose project drifted out of eligibility must drop.
+	if (not eligible and DaemonHandler::getInstance().isConnected()) {
+		DaemonHandler::getInstance().disconnect();
+		layout.deactivate();
+		ignoreConnectToggle = true;
+		toggleConnect->set_active(false);
+		ignoreConnectToggle = false;
+		StatusBar::getInstance().push("Daemon disconnected", StatusBar::Severity::Info);
+	}
+}
+
+void MainWindow::onDaemonConfigChanged() noexcept {
+	// Element/port changes re-evaluate the toggle; data drift stales a live daemon.
+	updateDaemonControls();
+	DaemonHandler::getInstance().markStale();
 }
 
 void MainWindow::readConfigFile(const string& dataFilePath, bool wipe, uint8_t importFlags) {
