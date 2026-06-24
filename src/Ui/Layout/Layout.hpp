@@ -64,13 +64,17 @@ public:
 	void onChanged(Storage::Element* element) noexcept override;
 
 	/**
-	 * Closes the active element, if any (e.g. when daemon testing stops).
+	 * Enables or disables tile testing; disabling closes the active tile and
+	 * cancels its in-flight light. Cosmetic only — command() guards the daemon link.
 	 */
-	void deactivate() noexcept;
+	void setTesting(bool on) noexcept;
 
 private:
 
 	LayoutBoard*  board  = nullptr;
+
+	/// True while the daemon is up and tiles may be tested.
+	bool testing = false;
 
 	/// Points to Devices Collection to lookup the Device and Element on edit.
 	Storage::BoxButtonCollection* devicesCollection = nullptr;

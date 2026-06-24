@@ -173,6 +173,7 @@ add_executable(ledspicerui
 	src/Ui/ThemeManager.cpp
 	src/Ui/StatusBar.cpp
 	src/DaemonHandler.cpp
+	src/DaemonSandbox.cpp
 	src/Ui/MainWindow.cpp
 	src/LEDSpicerUI.cpp
 )

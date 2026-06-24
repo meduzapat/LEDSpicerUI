@@ -97,8 +97,10 @@ inline const string
 
 /// Profile configuration keys.
 	& DEFAULT_PROFILE  {DEFAULT},
-	/// Reserved name of the throwaway layout-test profile; never shown or imported.
-	RESERVED_TEST_PROFILE {"__ledspicerui_test__"},
+	/// Throwaway layout-test sandbox handed to the daemon via --projects-dir.
+	TEST_SANDBOX_DIR             {"ledspicerui-test"},
+	TEST_SANDBOX_PROJECT         {"test"},
+	TEST_SANDBOX_DEFAULT_PROFILE {"test"},
 	BACKGROUND_COLOR {"backgroundColor"},
 	& DEFAULT_PROFILE_BACKGROUND_COLOR {HUMAN_OFF},
 	TRANSITION       {"transition"},

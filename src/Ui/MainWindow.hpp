@@ -36,6 +36,7 @@
 #include "DataDialogs/DialogGroup.hpp"
 #include "Layout/Layout.hpp"
 #include "DaemonHandler.hpp"
+#include "DaemonSandbox.hpp"
 #include "StatusBar.hpp"
 
 #pragma once
@@ -120,6 +121,9 @@ protected:
 	/// Visual board controller. Subscribed to Storage::Element lifecycle events.
 	Layout::Layout layout;
 
+	/// Isolated test environment for the daemon; exists only in interactive mode.
+	std::unique_ptr<DaemonSandbox> sandbox;
+
 	/**
 	 * Populates the configuration.
 	 * @param values if empty will use default values.
@@ -137,13 +141,45 @@ protected:
 	void onConnectToggled();
 
 	/**
+	 * Creates or drops the test sandbox to match interactive mode.
+	 */
+	void syncSandbox() noexcept;
+
+	/**
+	 * Regenerates the test config and launches the daemon.
+	 * @return true once our daemon is up.
+	 * @throws Message if the config cannot be written.
+	 */
+	bool launchDaemon();
+
+	/**
+	 * Connects for a new test session (busy spinner, status, enables testing).
+	 * @return true on success.
+	 */
+	bool connectDaemon() noexcept;
+
+	/**
+	 * Daemon readiness gate installed on DaemonHandler: command() asks before
+	 * each send. Reports whether the daemon is online and, refreshing it in
+	 * place when the base configuration drifted, fresh.
+	 * @return true if a test may fire now.
+	 */
+	bool ensureDaemonReady() noexcept;
+
+	/**
+	 * Refreshes a stale daemon in place before a test; drops the link on failure.
+	 * @return true if testing is usable afterwards.
+	 */
+	bool reconnectDaemon() noexcept;
+
+	/**
 	 * Shows/enables the connect toggle per mode (hidden/disabled/enabled).
 	 */
 	void updateDaemonControls() noexcept;
 
 	/**
-	 * Marks the test daemon stale when daemon-relevant data (devices, elements,
-	 * groups, port) changes.
+	 * Stales the test daemon when daemon-relevant data (devices, elements,
+	 * groups, port) changes, so it refreshes on the next test.
 	 */
 	void onDaemonConfigChanged() noexcept;
 

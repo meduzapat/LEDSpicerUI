@@ -103,8 +103,11 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 	builder->get_widget("DaemonBusyWindow", busyWindow);
 	builder->get_widget("DaemonBusyLabel",  busyLabel);
 
-	// Settings has no Apply: re-evaluate the daemon controls whenever it closes.
-	DialogSettings::getInstance()->onClose([this]() { updateDaemonControls(); });
+	// Settings has no Apply: re-evaluate the sandbox and daemon controls on close.
+	DialogSettings::getInstance()->onClose([this]() {
+		syncSandbox();
+		updateDaemonControls();
+	});
 
 	// Daemon-relevant changes (devices, elements, groups, port) stale the test daemon.
 	auto staleDaemon {[this]() { onDaemonConfigChanged(); }};
@@ -113,25 +116,8 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 	CollectionHandler::getInstance(COLLECTION_GROUPS  )->onChange(staleDaemon);
 	inputPortNumber->signal_changed().connect(staleDaemon);
 
-	// Coordinate the in-place daemon refresh: lock the UI and clear the board
-	// before, restore it after (reflecting a disconnect on failure).
-	DaemonHandler::getInstance().setRefreshHandlers(
-		[this]() {
-			showBusy("Refreshing…");
-			toggleConnect->set_sensitive(false);
-			layout.deactivate();
-		},
-		[this](bool ok) {
-			hideBusy();
-			if (not ok) {
-				ignoreConnectToggle = true;
-				toggleConnect->set_active(false);
-				ignoreConnectToggle = false;
-				StatusBar::getInstance().push("Daemon disconnected", StatusBar::Severity::Warning);
-			}
-			updateDaemonControls();
-		}
-	);
+	// command() asks this before every send; we refresh a stale daemon first.
+	DaemonHandler::getInstance().isReady = [this]() { return ensureDaemonReady(); };
 
 	// Top directory information.
 	Gtk::HeaderBar* header;
@@ -240,6 +226,8 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 		const string& defaultProject = Settings::get().getDefaultProject();
 		if (not defaultProject.empty())
 			openProject(defaultProject);
+		// Settings (and thus the mode) are loaded now: build the test sandbox.
+		syncSandbox();
 		updateDaemonControls();
 		Defaults::setIgnoreChanges(false);
 	});
@@ -247,7 +235,7 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 
 MainWindow::~MainWindow() {
 
-	// Stop the test daemon we own and remove the throwaway files it used.
+	// Stop the test daemon we own; the sandbox member wipes its files on destruction.
 	DaemonHandler::getInstance().disconnect();
 
 	Geometry::get().terminate();
@@ -423,16 +411,12 @@ void MainWindow::openProject(const string& name) {
 	mainTabsBox->set_sensitive(true);
 	btnImportConfig->set_sensitive(true);
 
-	// Drop any previous connection and bind the daemon to this project: it builds
-	// its own throwaway config from the current settings and live collections.
+	// Drop any previous test connection; this project's config is built on connect.
 	DaemonHandler::getInstance().disconnect();
+	layout.setTesting(false);
 	ignoreConnectToggle = true;
 	toggleConnect->set_active(false);
 	ignoreConnectToggle = false;
-	DaemonHandler::getInstance().init(
-		[this]() { return packLedspicerConfig(); },
-		devices, restrictors, groups
-	);
 	updateDaemonControls();
 
 	Message::finishBatch("Project loaded");
@@ -442,25 +426,128 @@ void MainWindow::onConnectToggled() {
 	if (ignoreConnectToggle)
 		return;
 	if (toggleConnect->get_active()) {
-		showBusy("Connecting…");
-		const bool ok {DaemonHandler::getInstance().connect()};
-		hideBusy();
-		if (ok) {
-			StatusBar::getInstance().push("Daemon connected", StatusBar::Severity::Success);
-			return;
+		if (not connectDaemon()) {
+			// Connection failed: revert the toggle without re-entering.
+			ignoreConnectToggle = true;
+			toggleConnect->set_active(false);
+			ignoreConnectToggle = false;
 		}
-		// Connection failed: revert the toggle without re-entering.
-		ignoreConnectToggle = true;
-		toggleConnect->set_active(false);
-		ignoreConnectToggle = false;
 	}
 	else {
 		showBusy("Disconnecting…");
 		DaemonHandler::getInstance().disconnect();
-		layout.deactivate();
+		layout.setTesting(false);
 		hideBusy();
 		StatusBar::getInstance().push("Daemon disconnected", StatusBar::Severity::Info);
 	}
+}
+
+void MainWindow::syncSandbox() noexcept {
+	const bool want {Settings::get().isInteractive()};
+	if (want == static_cast<bool>(sandbox))
+		return;
+	if (want) {
+		try {
+			sandbox = std::make_unique<DaemonSandbox>();
+		}
+		catch (Message& e) {
+			StatusBar::getInstance().push(
+				"Could not prepare the test sandbox: " + e.takeMessage(),
+				StatusBar::Severity::Warning
+			);
+		}
+		return;
+	}
+	// Leaving interactive mode: drop any live test daemon, then the sandbox.
+	if (toggleConnect->get_active()) {
+		DaemonHandler::getInstance().disconnect();
+		layout.setTesting(false);
+		ignoreConnectToggle = true;
+		toggleConnect->set_active(false);
+		ignoreConnectToggle = false;
+	}
+	sandbox.reset();
+}
+
+bool MainWindow::launchDaemon() {
+	sandbox->regenerate(packLedspicerConfig(), devices, restrictors, groups);
+	return DaemonHandler::getInstance().connect(
+		sandbox->getConfigPath(), sandbox->getProjectsDir(), inputPortNumber->get_text()
+	);
+}
+
+bool MainWindow::connectDaemon() noexcept {
+	if (not sandbox)
+		return false;
+	showBusy("Connecting…");
+	bool ok {false};
+	string error;
+	try {
+		ok = launchDaemon();
+	}
+	catch (Message& e) {
+		error = e.takeMessage();
+	}
+	hideBusy();
+	if (ok) {
+		Settings::get().setDaemonStale(false);
+		layout.setTesting(true);
+		StatusBar::getInstance().push("Daemon connected", StatusBar::Severity::Success);
+		return true;
+	}
+	StatusBar::getInstance().push(
+		error.empty()
+			? "Could not connect to the daemon. Another daemon may be running, the "
+			  "hardware may be missing, or the settings may be invalid."
+			: "Cannot connect: " + error,
+		StatusBar::Severity::Error
+	);
+	return false;
+}
+
+bool MainWindow::ensureDaemonReady() noexcept {
+	// No live daemon: consumers stay asleep, the command is dropped.
+	if (not toggleConnect->get_active())
+		return false;
+	// Live, but the base configuration drifted: redeploy it and cancel this test
+	// (the tile was paused mid-fire); the user reactivates to test the fresh daemon.
+	if (Settings::get().isDaemonStale()) {
+		reconnectDaemon();
+		return false;
+	}
+	return true;
+}
+
+bool MainWindow::reconnectDaemon() noexcept {
+	if (not sandbox)
+		return false;
+	// Pause consumers before anything pumps the loop: closing the active tile and
+	// cancelling its timers means no command can fire to re-enter this refresh.
+	layout.setTesting(false);
+	showBusy("Refreshing…");
+	bool ok {false};
+	string error;
+	try {
+		ok = launchDaemon();
+	}
+	catch (Message& e) {
+		error = e.takeMessage();
+	}
+	hideBusy();
+	if (ok) {
+		Settings::get().setDaemonStale(false);
+		layout.setTesting(true);   // resume consumers on the fresh daemon
+		return true;
+	}
+	// Could not refresh: stay paused, drop the link and reflect it on the toggle.
+	ignoreConnectToggle = true;
+	toggleConnect->set_active(false);
+	ignoreConnectToggle = false;
+	StatusBar::getInstance().push(
+		error.empty() ? "Daemon refresh failed." : "Daemon refresh failed: " + error,
+		StatusBar::Severity::Warning
+	);
+	return false;
 }
 
 void MainWindow::showBusy(const Glib::ustring& text) noexcept {
@@ -488,9 +575,9 @@ void MainWindow::updateDaemonControls() noexcept {
 	toggleConnect->set_sensitive(eligible);
 
 	// A live daemon whose project drifted out of eligibility must drop.
-	if (not eligible and DaemonHandler::getInstance().isConnected()) {
+	if (not eligible and toggleConnect->get_active()) {
 		DaemonHandler::getInstance().disconnect();
-		layout.deactivate();
+		layout.setTesting(false);
 		ignoreConnectToggle = true;
 		toggleConnect->set_active(false);
 		ignoreConnectToggle = false;
@@ -501,7 +588,13 @@ void MainWindow::updateDaemonControls() noexcept {
 void MainWindow::onDaemonConfigChanged() noexcept {
 	// Element/port changes re-evaluate the toggle; data drift stales a live daemon.
 	updateDaemonControls();
-	DaemonHandler::getInstance().markStale();
+	if (toggleConnect->get_active() and not Settings::get().isDaemonStale()) {
+		Settings::get().setDaemonStale(true);
+		StatusBar::getInstance().push(
+			"Base configuration changed — the daemon will refresh on your next test.",
+			StatusBar::Severity::Info
+		);
+	}
 }
 
 void MainWindow::readConfigFile(const string& dataFilePath, bool wipe, uint8_t importFlags) {

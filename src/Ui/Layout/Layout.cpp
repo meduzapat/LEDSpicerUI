@@ -60,6 +60,7 @@ void Layout::onAdded(Storage::Element* element) noexcept {
 	tile->signal_activated().connect(sigc::mem_fun(*this, &Layout::onTileActivated));
 	tile->signal_moved().connect(sigc::mem_fun(*this, &Layout::recomputeBoardSize));
 	tile->signal_editRequested().connect(sigc::mem_fun(*this, &Layout::onEditRequested));
+	tile->setTestGate([this] { return testing; });
 }
 
 void Layout::onRemoved(Storage::Element* element) noexcept {
@@ -115,8 +116,13 @@ void Layout::onTileActivated(LayoutElement* tile) noexcept {
 	current = tile;
 }
 
-void Layout::deactivate() noexcept {
+void Layout::setTesting(bool on) noexcept {
+	testing = on;
+	if (on)
+		return;
+	// Disabling testing closes the active tile and cancels its in-flight light.
 	if (current) {
+		current->stopTesting();
 		current->setActive(false);
 		current = nullptr;
 	}

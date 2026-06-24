@@ -145,9 +145,6 @@ public:
 	bool isLocal()      const noexcept { return currentMode == Mode::Local;       }
 	bool isInteractive() const noexcept { return currentMode == Mode::Interactive; }
 
-	/// Called by DialogSettings after binary detection succeeds or fails.
-	void setMode(Mode mode) noexcept { currentMode = mode; }
-
 	/// Runtime flag: the connected test daemon's config no longer matches the live data.
 	bool isDaemonStale()      const noexcept { return daemonStale;  }
 	void setDaemonStale(bool value) noexcept { daemonStale = value; }

@@ -199,6 +199,18 @@ void LayoutElement::setActive(bool on) noexcept {
 	}
 }
 
+void LayoutElement::stopTesting() noexcept {
+	lightTimer.disconnect();
+	if (not pendingTintClass.empty()) {
+		auto ctx {iconBtn->get_style_context()};
+		ctx->remove_class(CSS_LAYOUT_ELEMENT_FIRED);
+		ctx->remove_class(pendingTintClass);
+		pendingTintClass.clear();
+	}
+	iconBtn->set_active(false);
+	if (strip) strip->setAllOff();
+}
+
 void LayoutElement::fire(Storage::Element* target) noexcept {
 	if (lightTimer.connected()) return;
 	lightTimer = Glib::signal_timeout().connect(
@@ -226,12 +238,14 @@ void LayoutElement::fireCell(uint16_t firstPhysicalIdx) noexcept {
 	const string& color {resolveColorName()};
 	strip->setLedState(firstPhysicalIdx, colorEnumFor(color));
 	strip->scheduleCellOff(firstPhysicalIdx);
-	// Light every element packed into the clicked segment.
+	// Light every element packed into the clicked segment; stop if a send is
+	// dropped (e.g. testing paused mid-group for a daemon refresh).
 	const auto children {element->copyStripChildren()};
 	const uint16_t groupSize {strip->getGroupSize(firstPhysicalIdx)};
 	debugDaemon("Lighting " + std::to_string(groupSize) + " LEDs " + color);
 	for (uint16_t i {0}; i < groupSize; ++i)
-		lightTarget(children[firstPhysicalIdx + i], color);
+		if (not lightTarget(children[firstPhysicalIdx + i], color))
+			break;
 }
 
 void LayoutElement::clearCell(uint16_t firstPhysicalIdx) noexcept {
@@ -240,20 +254,21 @@ void LayoutElement::clearCell(uint16_t firstPhysicalIdx) noexcept {
 	const uint16_t groupSize {strip->getGroupSize(firstPhysicalIdx)};
 	debugDaemon("Clearing " + std::to_string(groupSize) + " LEDs");
 	for (uint16_t i {0}; i < groupSize; ++i)
-		clearTarget(children[firstPhysicalIdx + i]);
+		if (not clearTarget(children[firstPhysicalIdx + i]))
+			break;
 }
 
-void LayoutElement::lightTarget(Storage::Element* target, const string& colorName) noexcept {
+bool LayoutElement::lightTarget(Storage::Element* target, const string& colorName) noexcept {
 	const bool useGroup {target->isSet(STRIPSIZE) or target->getProperties().isSet(PROP_STRIP_UID)};
-	DaemonHandler::getInstance().command(
+	return DaemonHandler::getInstance().command(
 		useGroup ? DaemonHandler::Command::SetGroup : DaemonHandler::Command::SetElement,
 		{target->getPrimaryValue(), colorName, FILTER_NORMAL}
 	);
 }
 
-void LayoutElement::clearTarget(Storage::Element* target) noexcept {
+bool LayoutElement::clearTarget(Storage::Element* target) noexcept {
 	const bool useGroup {target->isSet(STRIPSIZE) or target->getProperties().isSet(PROP_STRIP_UID)};
-	DaemonHandler::getInstance().command(
+	return DaemonHandler::getInstance().command(
 		useGroup ? DaemonHandler::Command::ClearGroup : DaemonHandler::Command::ClearElement,
 		{target->getPrimaryValue()}
 	);
@@ -327,8 +342,8 @@ bool LayoutElement::onButtonRelease(GdkEventButton* ev) noexcept {
 			return false;
 		}
 	}
-	// Elements are only testable while connected to the daemon.
-	if (not active and DaemonHandler::getInstance().isConnected()) {
+	// Elements are only testable when the board allows it (daemon up, fresh).
+	if (not active and testGate and testGate()) {
 		setActive(true);
 		return false;
 	}

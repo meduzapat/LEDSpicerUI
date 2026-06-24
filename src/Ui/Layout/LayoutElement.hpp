@@ -61,7 +61,19 @@ public:
 
 	void setActive(bool on) noexcept;
 
+	/**
+	 * Cancels any in-flight test light — its timers and visuals — without
+	 * touching the daemon; used when testing is paused or stopped under the tile.
+	 */
+	void stopTesting() noexcept;
+
 	bool isActive() const noexcept { return active; }
+
+	/**
+	 * Installs the gate consulted before this tile may be tested; the tile may
+	 * activate only while it returns true. Without it the tile is not testable.
+	 */
+	void setTestGate(std::function<bool()> gate) noexcept { testGate = std::move(gate); }
 
 	Storage::Element* getElement() const noexcept { return element; }
 
@@ -90,6 +102,9 @@ public:
 private:
 
 	static const string ICON_DIR;
+
+	/// Gate consulted before this tile may be activated for testing.
+	std::function<bool()> testGate;
 
 	Storage::Element* element = nullptr;
 
@@ -144,12 +159,14 @@ private:
 	void clearCell(uint16_t firstPhysicalIdx) noexcept;
 	/**
 	 * Sends a Set command for target (Group for a strip master, else Element).
+	 * @return true if the command was sent (false when testing is unavailable).
 	 */
-	void lightTarget(Storage::Element* target, const string& colorName) noexcept;
+	bool lightTarget(Storage::Element* target, const string& colorName) noexcept;
 	/**
 	 * Sends the matching Clear command for target.
+	 * @return true if the command was sent (false when testing is unavailable).
 	 */
-	void clearTarget(Storage::Element* target) noexcept;
+	bool clearTarget(Storage::Element* target) noexcept;
 
 	/**
 	 * Pushes a daemon test action to the status bar when daemon debug is on.
