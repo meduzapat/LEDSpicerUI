@@ -444,11 +444,11 @@ void MainWindow::onConnectToggled() {
 		}
 	}
 	else {
-		showBusy("Disconnecting…");
+		showBusy("Stopping…");
 		DaemonHandler::getInstance().disconnect();
 		layout.setTesting(false);
 		hideBusy();
-		StatusBar::getInstance().push("Daemon disconnected", StatusBar::Severity::Info);
+		StatusBar::getInstance().push("Test mode off", StatusBar::Severity::Info);
 	}
 }
 
@@ -480,7 +480,11 @@ void MainWindow::syncSandbox() noexcept {
 }
 
 bool MainWindow::launchDaemon() {
+	// Always stage the shared sandbox config; both zones read it.
 	sandbox->regenerate(packLedspicerConfig(), devices, restrictors, groups);
+	// Daemon zone: ledspicerd runs only when there are devices to drive.
+	if (CollectionHandler::getInstance(COLLECTION_DEVICES)->getSize() == 0)
+		return true;
 	return DaemonHandler::getInstance().connect(
 		sandbox->getConfigPath(), sandbox->getProjectsDir(), inputPortNumber->get_text()
 	);
@@ -489,7 +493,8 @@ bool MainWindow::launchDaemon() {
 bool MainWindow::connectDaemon() noexcept {
 	if (not sandbox)
 		return false;
-	showBusy("Connecting…");
+	const bool daemon {CollectionHandler::getInstance(COLLECTION_DEVICES)->getSize() > 0};
+	showBusy(daemon ? "Connecting…" : "Staging…");
 	bool ok {false};
 	string error;
 	try {
@@ -501,8 +506,13 @@ bool MainWindow::connectDaemon() noexcept {
 	hideBusy();
 	if (ok) {
 		Settings::get().setConfigDirty(false);
-		layout.setTesting(true);
-		StatusBar::getInstance().push("Daemon connected", StatusBar::Severity::Success);
+		// Layout consumers only make sense against a live daemon.
+		if (daemon)
+			layout.setTesting(true);
+		StatusBar::getInstance().push(
+			daemon ? "Daemon connected" : "Test mode ready",
+			StatusBar::Severity::Success
+		);
 		return true;
 	}
 	StatusBar::getInstance().push(
@@ -546,7 +556,9 @@ bool MainWindow::reconnectDaemon() noexcept {
 	hideBusy();
 	if (ok) {
 		Settings::get().setConfigDirty(false);
-		layout.setTesting(true);   // resume consumers on the fresh daemon
+		// Resume consumers only when a daemon is actually live (devices present).
+		if (CollectionHandler::getInstance(COLLECTION_DEVICES)->getSize() > 0)
+			layout.setTesting(true);
 		return true;
 	}
 	// Could not refresh: stay paused, drop the link and reflect it on the toggle.
@@ -591,24 +603,28 @@ void MainWindow::hideBusy() noexcept {
 }
 
 void MainWindow::updateDaemonControls() noexcept {
-	// A test can only run in interactive mode, with a port and at least one element.
+	// Daemon zone needs devices + port; restrictor zone needs only restrictors.
+	// Enabled in interactive mode when either zone has data.
+	const bool
+		hasDevices {CollectionHandler::getInstance(COLLECTION_DEVICES)->getSize() > 0},
+		hasRestrictors {CollectionHandler::getInstance(COLLECTION_RESTRICTORS)->getSize() > 0},
+		portOk {not inputPortNumber->get_text().empty()};
 	const bool eligible {
 		Settings::get().isInteractive()
-		and not inputPortNumber->get_text().empty()
-		and CollectionHandler::getInstance(COLLECTION_ELEMENTS)->getSize() > 0
+		and ((hasDevices and portOk) or hasRestrictors)
 	};
 	// Hidden on portable; visible otherwise, enabled only when a test can run.
 	toggleConnect->set_visible(not Settings::get().isPortable());
 	toggleConnect->set_sensitive(eligible);
 
-	// A live daemon whose project drifted out of eligibility must drop.
+	// A live test session whose project drifted out of eligibility must drop.
 	if (not eligible and toggleConnect->get_active()) {
 		DaemonHandler::getInstance().disconnect();
 		layout.setTesting(false);
 		ignoreConnectToggle = true;
 		toggleConnect->set_active(false);
 		ignoreConnectToggle = false;
-		StatusBar::getInstance().push("Daemon disconnected", StatusBar::Severity::Info);
+		StatusBar::getInstance().push("Test mode off", StatusBar::Severity::Info);
 	}
 }
 
@@ -618,7 +634,7 @@ void MainWindow::onDaemonConfigChanged() noexcept {
 	if (toggleConnect->get_active() and not Settings::get().isConfigDirty()) {
 		Settings::get().setConfigDirty(true);
 		StatusBar::getInstance().push(
-			"Base configuration changed — the daemon will refresh on your next test.",
+			"Base configuration changed — it will refresh on your next test.",
 			StatusBar::Severity::Info
 		);
 	}

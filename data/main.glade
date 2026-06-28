@@ -2065,7 +2065,7 @@ If nothing is set, the default is 1000ms.</property>
             <property name="sensitive">False</property>
             <property name="can-focus">True</property>
             <property name="receives-default">True</property>
-            <property name="tooltip-text" translatable="yes">Connect to the LEDSpicer daemon</property>
+            <property name="tooltip-text" translatable="yes">Enable test mode — layout testing for devices and rotation testing for restrictors</property>
             <child>
               <object class="GtkImage">
                 <property name="visible">True</property>

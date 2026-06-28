@@ -146,8 +146,8 @@ protected:
 	void syncSandbox() noexcept;
 
 	/**
-	 * Regenerates the test config and launches the daemon.
-	 * @return true once our daemon is up.
+	 * Stages the shared test config; launches the daemon only when devices are present.
+	 * @return true once staged (and, with devices, the daemon is up).
 	 * @throws Message if the config cannot be written.
 	 */
 	bool launchDaemon();
@@ -186,8 +186,8 @@ protected:
 	void updateDaemonControls() noexcept;
 
 	/**
-	 * Stales the test daemon when daemon-relevant data (devices, elements,
-	 * groups, port) changes, so it refreshes on the next test.
+	 * Stales the staged test config when test-relevant data (devices, elements,
+	 * groups, restrictors, port) changes, so it refreshes on the next test.
 	 */
 	void onDaemonConfigChanged() noexcept;
 
