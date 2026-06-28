@@ -230,7 +230,7 @@ void LayoutElement::fireAll() noexcept {
 	if (strip)
 		strip->setAll(colorEnumFor(color));
 	pendingTintClass = colorClass;
-	debugDaemon((strip ? "Lighting strip " : "Lighting ") + element->getPrimaryValue() + ' ' + color);
+	debugHardwareTest((strip ? "Lighting strip " : "Lighting ") + element->getPrimaryValue() + ' ' + color);
 	fire(element);
 }
 
@@ -242,7 +242,7 @@ void LayoutElement::fireCell(uint16_t firstPhysicalIdx) noexcept {
 	// dropped (e.g. testing paused mid-group for a daemon refresh).
 	const auto children {element->copyStripChildren()};
 	const uint16_t groupSize {strip->getGroupSize(firstPhysicalIdx)};
-	debugDaemon("Lighting " + std::to_string(groupSize) + " LEDs " + color);
+	debugHardwareTest("Lighting " + std::to_string(groupSize) + " LEDs " + color);
 	for (uint16_t i {0}; i < groupSize; ++i)
 		if (not lightTarget(children[firstPhysicalIdx + i], color))
 			break;
@@ -252,7 +252,7 @@ void LayoutElement::clearCell(uint16_t firstPhysicalIdx) noexcept {
 	// Clear the same elements the pack lit.
 	const auto children {element->copyStripChildren()};
 	const uint16_t groupSize {strip->getGroupSize(firstPhysicalIdx)};
-	debugDaemon("Clearing " + std::to_string(groupSize) + " LEDs");
+	debugHardwareTest("Clearing " + std::to_string(groupSize) + " LEDs");
 	for (uint16_t i {0}; i < groupSize; ++i)
 		if (not clearTarget(children[firstPhysicalIdx + i]))
 			break;
@@ -282,13 +282,13 @@ bool LayoutElement::onLightExpired() noexcept {
 	}
 	iconBtn->set_active(false);
 	if (strip) strip->setAllOff();
-	debugDaemon((strip ? "Clearing strip " : "Clearing ") + element->getPrimaryValue());
+	debugHardwareTest((strip ? "Clearing strip " : "Clearing ") + element->getPrimaryValue());
 	clearTarget(element);
 	return false;
 }
 
-void LayoutElement::debugDaemon(const string& message) noexcept {
-	if (Config::Settings::get().shouldDebugDaemon())
+void LayoutElement::debugHardwareTest(const string& message) noexcept {
+	if (Config::Settings::get().shouldDebugHardwareTest())
 		StatusBar::getInstance().push(message, StatusBar::Severity::Debug);
 }
 

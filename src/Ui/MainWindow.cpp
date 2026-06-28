@@ -109,15 +109,25 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 		updateDaemonControls();
 	});
 
-	// Daemon-relevant changes (devices, elements, groups, port) stale the test daemon.
+	// Config changes stale the staged config; restrictors are included for the rotator test.
 	auto staleDaemon {[this]() { onDaemonConfigChanged(); }};
-	CollectionHandler::getInstance(COLLECTION_DEVICES )->onChange(staleDaemon);
-	CollectionHandler::getInstance(COLLECTION_ELEMENTS)->onChange(staleDaemon);
-	CollectionHandler::getInstance(COLLECTION_GROUPS  )->onChange(staleDaemon);
+	CollectionHandler::getInstance(COLLECTION_DEVICES    )->onChange(staleDaemon);
+	CollectionHandler::getInstance(COLLECTION_ELEMENTS   )->onChange(staleDaemon);
+	CollectionHandler::getInstance(COLLECTION_GROUPS     )->onChange(staleDaemon);
+	CollectionHandler::getInstance(COLLECTION_RESTRICTORS)->onChange(staleDaemon);
 	inputPortNumber->signal_changed().connect(staleDaemon);
 
 	// command() asks this before every send; we refresh a stale daemon first.
-	DaemonHandler::getInstance().isReady = [this]() { return ensureDaemonReady(); };
+	DaemonHandler::getInstance().setReadyGate([this]() { return ensureDaemonReady(); });
+
+	// Rotator test reuses the readiness gate.
+	DialogRestrictor::getInstance()->setRotatorRunner(
+		[this](const StringVector& args, string& output) { return runRotatorTest(args, output); }
+	);
+	// runRotatorTest refreshes a stale config, so gate only on interactive + connected.
+	DialogRestrictor::getInstance()->setTestLive([this]() {
+		return Settings::get().isInteractive() and toggleConnect->get_active();
+	});
 
 	// Top directory information.
 	Gtk::HeaderBar* header;
@@ -490,7 +500,7 @@ bool MainWindow::connectDaemon() noexcept {
 	}
 	hideBusy();
 	if (ok) {
-		Settings::get().setDaemonStale(false);
+		Settings::get().setConfigDirty(false);
 		layout.setTesting(true);
 		StatusBar::getInstance().push("Daemon connected", StatusBar::Severity::Success);
 		return true;
@@ -511,7 +521,7 @@ bool MainWindow::ensureDaemonReady() noexcept {
 		return false;
 	// Live, but the base configuration drifted: redeploy it and cancel this test
 	// (the tile was paused mid-fire); the user reactivates to test the fresh daemon.
-	if (Settings::get().isDaemonStale()) {
+	if (Settings::get().isConfigDirty()) {
 		reconnectDaemon();
 		return false;
 	}
@@ -535,7 +545,7 @@ bool MainWindow::reconnectDaemon() noexcept {
 	}
 	hideBusy();
 	if (ok) {
-		Settings::get().setDaemonStale(false);
+		Settings::get().setConfigDirty(false);
 		layout.setTesting(true);   // resume consumers on the fresh daemon
 		return true;
 	}
@@ -548,6 +558,23 @@ bool MainWindow::reconnectDaemon() noexcept {
 		StatusBar::Severity::Warning
 	);
 	return false;
+}
+
+bool MainWindow::runRotatorTest(const StringVector& positional, string& output) noexcept {
+	if (not ensureDaemonReady())
+		return false;
+	const string rotator {
+		(std::filesystem::path(Settings::get().getBinaryPath()).parent_path() / ROTATOR_BINARY).string()
+	};
+	if (not std::filesystem::exists(rotator)) {
+		output = "Rotator binary not found next to the daemon.";
+		return false;
+	}
+	return Defaults::runCommand(
+		Glib::shell_quote(rotator) + " -c " + Glib::shell_quote(sandbox->getConfigPath())
+			+ " " + Defaults::implode(positional, ' '),
+		output
+	);
 }
 
 void MainWindow::showBusy(const Glib::ustring& text) noexcept {
@@ -588,8 +615,8 @@ void MainWindow::updateDaemonControls() noexcept {
 void MainWindow::onDaemonConfigChanged() noexcept {
 	// Element/port changes re-evaluate the toggle; data drift stales a live daemon.
 	updateDaemonControls();
-	if (toggleConnect->get_active() and not Settings::get().isDaemonStale()) {
-		Settings::get().setDaemonStale(true);
+	if (toggleConnect->get_active() and not Settings::get().isConfigDirty()) {
+		Settings::get().setConfigDirty(true);
 		StatusBar::getInstance().push(
 			"Base configuration changed — the daemon will refresh on your next test.",
 			StatusBar::Severity::Info

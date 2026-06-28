@@ -75,6 +75,9 @@ inline const string
 /// so the manual binary picker must also match this name.
 	DAEMON_BINARY {"ledspicerd"},
 
+/// Restrictor test executable; ships beside the daemon and reads the same config (restrictors section only).
+	ROTATOR_BINARY {"rotator"},
+
 /// LEDSpicer configuration file keys.
 	DEFAULT_USERID   {"1000"},
 	DEFAULT_GROUPID  {"1000"},
@@ -723,9 +726,6 @@ public:
 	 */
 	static double getLuminance(const string& color);
 
-	/// A list of all possible restrictors and rotators Ways (positions).
-	static constexpr std::array<Ways, 11> allWays{Ways::w2, Ways::w2v, Ways::w4, Ways::w4x, Ways::w8, Ways::w16, Ways::w49, Ways::analog, Ways::mouse, Ways::rotary8, Ways::rotary12};
-
 	/// A list of device to their information.
 	static const std::unordered_map<string, DeviceInfo> devicesInfo;
 
@@ -740,9 +740,6 @@ public:
 
 	/// A list of profile transition types to their information.
 	static const std::unordered_map<string, TransitionInfo> transitionsInfo;
-
-	/// A List of string names to its internal enumerated type.
-	static const std::unordered_map<string, Ways> wayIds;
 
 	/// A list of element types to their information.
 	static const std::unordered_map<string, ElementInfo> elementsInfo;
@@ -927,10 +924,17 @@ public:
 	static string extractAfter(const string& line, const string& prefix);
 
 	/**
-	 * Executes a command and captures stdout.
+	 * Executes a command, discarding its output.
 	 * @param command The command to run.
-	 * @param output Captured stdout.
-	 * @return true if command succeeded.
+	 * @return true if the command exited with status 0.
+	 */
+	static bool runCommand(const string& command);
+
+	/**
+	 * Executes a command and captures its output, with stderr appended to stdout.
+	 * @param command The command to run.
+	 * @param output Captured stdout; any stderr is appended after it.
+	 * @return true if the command exited with status 0.
 	 */
 	static bool runCommand(const string& command, string& output);
 

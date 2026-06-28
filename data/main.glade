@@ -5407,10 +5407,10 @@ Ships empty; place theme folders here, or point this anywhere you keep them.</pr
                           <object class="GtkBox">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
-                            <property name="tooltip-text" translatable="yes">When enabled, daemon test actions (lighting and clearing elements) are shown in the status bar.</property>
+                            <property name="tooltip-text" translatable="yes">When enabled, hardware test actions (lighting and clearing elements, restrictor moves) are shown in the status bar.</property>
                             <property name="spacing">5</property>
                             <child>
-                              <object class="GtkSwitch" id="SwitchSettingsDebugDaemon">
+                              <object class="GtkSwitch" id="SwitchSettingsDebugHardwareTest">
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
                               </object>
@@ -5425,7 +5425,7 @@ Ships empty; place theme folders here, or point this anywhere you keep them.</pr
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
                                 <property name="halign">end</property>
-                                <property name="label">Show daemon test actions</property>
+                                <property name="label">Show hardware test actions</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -7850,7 +7850,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                 <property name="can-focus">False</property>
                 <property name="orientation">vertical</property>
                 <child>
-                  <object class="GtkLabel">
+                  <object class="GtkLabel" id="LabelRestrictorWays">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="halign">start</property>
@@ -7871,7 +7871,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                     <property name="selection-mode">none</property>
                     <property name="activate-on-single-click">False</property>
                     <child>
-                      <object class="GtkFlowBoxChild" id="w2">
+                      <object class="GtkFlowBoxChild" id="2">
                         <property name="width-request">64</property>
                         <property name="height-request">64</property>
                         <property name="visible">True</property>
@@ -7889,7 +7889,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                       </object>
                     </child>
                     <child>
-                      <object class="GtkFlowBoxChild" id="w2v">
+                      <object class="GtkFlowBoxChild" id="vertical2">
                         <property name="width-request">64</property>
                         <property name="height-request">64</property>
                         <property name="visible">True</property>
@@ -7907,7 +7907,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                       </object>
                     </child>
                     <child>
-                      <object class="GtkFlowBoxChild" id="w4">
+                      <object class="GtkFlowBoxChild" id="4">
                         <property name="width-request">64</property>
                         <property name="height-request">64</property>
                         <property name="visible">True</property>
@@ -7925,7 +7925,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                       </object>
                     </child>
                     <child>
-                      <object class="GtkFlowBoxChild" id="w4x">
+                      <object class="GtkFlowBoxChild" id="4x">
                         <property name="width-request">64</property>
                         <property name="height-request">64</property>
                         <property name="visible">True</property>
@@ -7943,7 +7943,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                       </object>
                     </child>
                     <child>
-                      <object class="GtkFlowBoxChild" id="w8">
+                      <object class="GtkFlowBoxChild" id="8">
                         <property name="width-request">64</property>
                         <property name="height-request">64</property>
                         <property name="visible">True</property>
@@ -7961,7 +7961,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                       </object>
                     </child>
                     <child>
-                      <object class="GtkFlowBoxChild" id="w16">
+                      <object class="GtkFlowBoxChild" id="16">
                         <property name="width-request">64</property>
                         <property name="height-request">64</property>
                         <property name="visible">True</property>
@@ -7979,7 +7979,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                       </object>
                     </child>
                     <child>
-                      <object class="GtkFlowBoxChild" id="w49">
+                      <object class="GtkFlowBoxChild" id="49">
                         <property name="width-request">64</property>
                         <property name="height-request">64</property>
                         <property name="visible">True</property>
@@ -8094,7 +8094,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                     <property name="can-focus">False</property>
                     <property name="spacing">5</property>
                     <child>
-                      <object class="GtkLabel">
+                      <object class="GtkLabel" id="LabelRestrictorMappings">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="halign">start</property>

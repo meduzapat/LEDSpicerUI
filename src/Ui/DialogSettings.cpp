@@ -156,7 +156,7 @@ DialogSettings::DialogSettings(BaseObjectType* obj, const Glib::RefPtr<Gtk::Buil
 	builder->get_widget("SwitchSettingsRemoveInvalidItems", switchRemoveInvalidItems);
 	builder->get_widget("SwitchSettingsSaveBackup",         switchSaveBackup);
 	builder->get_widget("SwitchSettingsDebugFiles",         switchDebugFiles);
-	builder->get_widget("SwitchSettingsDebugDaemon",        switchDebugDaemon);
+	builder->get_widget("SwitchSettingsDebugHardwareTest",  switchDebugHardwareTest);
 
 	builder->get_widget("BtnSettingsStyleAuto",  btnStyleAuto);
 	builder->get_widget("BtnSettingsStyleLight", btnStyleLight);
@@ -184,7 +184,7 @@ DialogSettings::DialogSettings(BaseObjectType* obj, const Glib::RefPtr<Gtk::Buil
 		switchRemoveInvalidItems->set_active(s.shouldRemoveInvalidItems());
 		switchSaveBackup->set_active(s.shouldSaveBackup());
 		switchDebugFiles->set_active(s.shouldDebugFiles());
-		switchDebugDaemon->set_active(s.shouldDebugDaemon());
+		switchDebugHardwareTest->set_active(s.shouldDebugHardwareTest());
 		scaleLayoutGrid->set_value(s.getLayoutGrid());
 		spinLayoutTestTimeout->set_value(s.getLayoutTestTimeout() / 1000.0);
 		syncStyleButtons();
@@ -279,8 +279,8 @@ DialogSettings::DialogSettings(BaseObjectType* obj, const Glib::RefPtr<Gtk::Buil
 		Settings::get().setDebugFiles(switchDebugFiles->get_active());
 		commit(savedMessage);
 	});
-	switchDebugDaemon->property_active().signal_changed().connect([this]() {
-		Settings::get().setDebugDaemon(switchDebugDaemon->get_active());
+	switchDebugHardwareTest->property_active().signal_changed().connect([this]() {
+		Settings::get().setDebugHardwareTest(switchDebugHardwareTest->get_active());
 		commit(savedMessage);
 	});
 

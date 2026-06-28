@@ -70,13 +70,17 @@ public:
 	bool command(Command type, std::initializer_list<string> fields) noexcept;
 
 	/**
-	 * Readiness gate the owner installs at init: command() sends only when it
-	 * returns true, letting the owner refuse testing while offline and refresh
-	 * a stale daemon first.
+	 * Installs the readiness gate: command() sends only when it returns true,
+	 * letting the owner refuse testing while offline and refresh a stale daemon
+	 * first.
+	 * @param gate predicate consulted before each send.
 	 */
-	std::function<bool()> isReady;
+	void setReadyGate(std::function<bool()> gate) noexcept { readyGate = std::move(gate); }
 
 private:
+
+	/// Readiness gate consulted by command() before each send; installed by the owner.
+	std::function<bool()> readyGate;
 
 	/// Budget and step, in ms, while waiting for the daemon to start or stop.
 	static constexpr int START_TIMEOUT_MS = 5000;

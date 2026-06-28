@@ -111,7 +111,7 @@ protected:
 		* switchRemoveInvalidItems = nullptr,
 		* switchSaveBackup         = nullptr,
 		* switchDebugFiles         = nullptr,
-		* switchDebugDaemon        = nullptr;
+		* switchDebugHardwareTest  = nullptr;
 
 	Gtk::ToggleButton
 		* btnStyleAuto  = nullptr,

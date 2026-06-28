@@ -59,14 +59,12 @@ bool DaemonHandler::disconnect() noexcept {
 	// Nothing to stop: skip killall (and its "no process found" stderr).
 	if (not isRunning())
 		return true;
-	string out;
-	Defaults::runCommand("killall -15 " + Glib::shell_quote(processName()), out);
+	Defaults::runCommand("killall -15 " + Glib::shell_quote(processName()));
 	return waitUntil([this] { return not isRunning(); }, STOP_TIMEOUT_MS);
 }
 
 bool DaemonHandler::isRunning() const noexcept {
-	string out;
-	return Defaults::runCommand("pidof " + Glib::shell_quote(processName()), out);
+	return Defaults::runCommand("pidof " + Glib::shell_quote(processName()));
 }
 
 bool DaemonHandler::waitUntil(const std::function<bool()>& done, int timeoutMs) const noexcept {
@@ -81,7 +79,7 @@ bool DaemonHandler::waitUntil(const std::function<bool()>& done, int timeoutMs) 
 
 bool DaemonHandler::command(Command type, std::initializer_list<string> fields) noexcept {
 	// The owner gates testing: offline drops the command, stale refreshes first.
-	if (not isReady())
+	if (not readyGate())
 		return false;
 
 	const int portNumber {std::atoi(port.c_str())};

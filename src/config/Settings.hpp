@@ -55,7 +55,7 @@ public:
 		REMOVE_INVALID_ITEMS {"removeInvalidItems"},
 		SAVE_BACKUP          {"saveBackup"},
 		DEBUG_FILES          {"debugFiles"},
-		DEBUG_DAEMON         {"debugDaemon"},
+		DEBUG_HARDWARE_TEST  {"debugHardwareTest"},
 		LAYOUT_GRID          {"layoutGrid"},
 		LAYOUT_TEST_TIMEOUT  {"layoutTestTimeout"};
 
@@ -99,7 +99,7 @@ public:
 	 */
 	string getThemePath() const noexcept;
 
-	void setBinaryPath(const string& path)     noexcept; ///< Also recomputes currentMode.
+	void setBinaryPath(const string& path)     noexcept; // Also recomputes currentMode.
 	void setDataDir(const string& dir)         noexcept;
 	void setThemePath(const string& dir)       noexcept;
 	void setProjectsDir(const string& dir)     noexcept;
@@ -110,29 +110,38 @@ public:
 	bool shouldRemoveInvalidItems() const noexcept { return is(REMOVE_INVALID_ITEMS); }
 	bool shouldSaveBackup()         const noexcept { return is(SAVE_BACKUP);          }
 	bool shouldDebugFiles()         const noexcept { return is(DEBUG_FILES);          }
-	bool shouldDebugDaemon()        const noexcept { return is(DEBUG_DAEMON);         }
+	bool shouldDebugHardwareTest()  const noexcept { return is(DEBUG_HARDWARE_TEST);  }
 
-	void setInteractiveMode(bool value)    noexcept; ///< Also recomputes currentMode.
+	void setInteractiveMode(bool value)    noexcept; // Also recomputes currentMode.
 	void setPreserveEmptyDir(bool value)   noexcept;
 	void setRemoveInvalidItems(bool value) noexcept;
 	void setSaveBackup(bool value)         noexcept;
 	void setDebugFiles(bool value)         noexcept;
-	void setDebugDaemon(bool value)        noexcept;
+	void setDebugHardwareTest(bool value)  noexcept;
 
-	/// Layout snap-to-grid step in pixels (same on both axes). 0 = snap disabled.
-	int  getLayoutGrid() const noexcept { return getInt(LAYOUT_GRID); }
+	/**
+	 * @return Layout snap-to-grid step in pixels (same on both axes). 0 = snap disabled.
+	 */
+	int getLayoutGrid() const noexcept { return getInt(LAYOUT_GRID); }
 	void setLayoutGrid(int value) noexcept {
 		setValue(LAYOUT_GRID, value);
 		if (layoutGridChanged) layoutGridChanged();
 	}
 
-	/// Register a callback fired whenever the layout grid step changes.
+	/**
+	 * Register a callback fired whenever the layout grid step changes.
+	 * @param cb
+	 */
 	void onLayoutGridChanged(std::function<void()> cb) noexcept { layoutGridChanged = std::move(cb); }
 
-	/// Layout test light duration, in milliseconds. Stored as seconds (1 decimal); read on demand.
+	/**
+	 * Layout test light duration, in milliseconds. Stored as seconds (1 decimal); read on demand.
+	 */
 	unsigned getLayoutTestTimeout() const noexcept;
-	/// @param seconds duration in seconds; persisted with a single decimal.
-	void     setLayoutTestTimeout(double seconds) noexcept;
+	/**
+	 * @param seconds duration in seconds; persisted with a single decimal.
+	 */
+	void setLayoutTestTimeout(double seconds) noexcept;
 
 	const string& getThemeName()  const noexcept { return getValue(THEME_NAME); }
 	void setThemeName(const string& id)  noexcept { setValue(THEME_NAME, id);  }
@@ -145,9 +154,11 @@ public:
 	bool isLocal()      const noexcept { return currentMode == Mode::Local;       }
 	bool isInteractive() const noexcept { return currentMode == Mode::Interactive; }
 
-	/// Runtime flag: the connected test daemon's config no longer matches the live data.
-	bool isDaemonStale()      const noexcept { return daemonStale;  }
-	void setDaemonStale(bool value) noexcept { daemonStale = value; }
+	/**
+	 * Runtime flag: the staged config no longer matches the live data and must be redeployed.
+	 */
+	bool isConfigDirty()      const noexcept { return configDirty;  }
+	void setConfigDirty(bool value) noexcept { configDirty = value; }
 
 	const string&       getConfigPath()     const noexcept { return configPath;     }
 	const string&       getCurrentProject() const noexcept { return currentProject; }
@@ -157,26 +168,33 @@ public:
 	bool getHasControls() const noexcept { return hasControls; }
 
 	void setConfigPath(const string& path)     noexcept;
-	void setCurrentProject(const string& name) noexcept; ///< Also writes DEFAULT_PROJECT.
-	void setColorFiles(StringVector files)     noexcept; ///< Also calls colorFilesChanged if set.
+	void setCurrentProject(const string& name) noexcept; // Also writes DEFAULT_PROJECT.
+	void setColorFiles(StringVector files)     noexcept; // Also calls colorFilesChanged if set.
 
-	/// Register a callback fired whenever the color file list is replaced.
+	/**
+	 * Register a callback fired whenever the color file list is replaced.
+	 * @param cb
+	 */
 	void onColorFilesChanged(std::function<void()> cb) noexcept { colorFilesChanged = std::move(cb); }
 
 	void setDataDirStatus(bool gameData, bool colors, bool controls) noexcept;
 
-	/// projectsDir + currentProject + "/", or empty if either is unset.
+	/**
+	 * projectsDir + currentProject + "/", or empty if either is unset.
+	 */
 	string getProjectDir() const noexcept;
 
-	/// Portable: getProjectDir() + CONFIG_FILE.  Local/Interactive: configPath.
+	/**
+	 * Portable: getProjectDir() + CONFIG_FILE.  Local/Interactive: configPath.
+	 */
 	string getActiveConfigPath() const noexcept;
 
 protected:
 
 	Mode currentMode = Mode::Portable;
 
-	/// True when a connected test daemon needs a refresh to match edited data.
-	bool daemonStale = false;
+	/// True when the staged config needs a refresh to match edited data.
+	bool configDirty = false;
 
 	string
 		configPath,
@@ -199,7 +217,9 @@ private:
 	static const StringUMap DEFAULTS;
 	static Settings instance;
 
-	/// Derives currentMode from binaryPath (empty → Portable) and interactiveMode.
+	/**
+	 * Derives currentMode from binaryPath (empty → Portable) and interactiveMode.
+	 */
 	void updateMode() noexcept;
 };
 
