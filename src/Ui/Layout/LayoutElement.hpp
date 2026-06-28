@@ -169,9 +169,9 @@ private:
 	bool clearTarget(Storage::Element* target) noexcept;
 
 	/**
-	 * Pushes a daemon test action to the status bar when daemon debug is on.
+	 * Pushes a hardware test action to the status bar when hardware-test debug is on.
 	 */
-	void debugDaemon(const string& message) noexcept;
+	void debugHardwareTest(const string& message) noexcept;
 	const string& resolveColorName() const noexcept;
 
 	bool onButtonPress(GdkEventButton* ev)   noexcept;

@@ -173,6 +173,14 @@ protected:
 	bool reconnectDaemon() noexcept;
 
 	/**
+	 * Stages the config and runs the rotator with positional player/joystick/ways args.
+	 * @param positional flat token list passed after `rotator -c <conf>`.
+	 * @param output     captured rotator output (stdout with stderr appended).
+	 * @return true if the rotator ran and exited cleanly.
+	 */
+	bool runRotatorTest(const StringVector& positional, string& output) noexcept;
+
+	/**
 	 * Shows/enables the connect toggle per mode (hidden/disabled/enabled).
 	 */
 	void updateDaemonControls() noexcept;
