@@ -9011,7 +9011,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                     <property name="can-focus">False</property>
                     <property name="halign">end</property>
                     <property name="xpad">10</property>
-                    <property name="label">Mode</property>
+                    <property name="label">Algorithm</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -9053,7 +9053,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                     <property name="can-focus">False</property>
                     <property name="halign">end</property>
                     <property name="xpad">10</property>
-                    <property name="label">Mode</property>
+                    <property name="label">Render Mode</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -9110,7 +9110,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                     <property name="can-focus">False</property>
                     <property name="halign">end</property>
                     <property name="xpad">10</property>
-                    <property name="label">Mode</property>
+                    <property name="label">Display Mode</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -9357,7 +9357,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                 <property name="can-focus">False</property>
                 <property name="halign">end</property>
                 <property name="xpad">10</property>
-                <property name="label">Mode</property>
+                <property name="label">Render Mode</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -9442,7 +9442,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                         <property name="can-focus">False</property>
                         <property name="halign">end</property>
                         <property name="xpad">10</property>
-                        <property name="label">Mode</property>
+                        <property name="label">Color Mode</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
