@@ -215,6 +215,14 @@ protected:
 	void openProject(const string& name);
 
 	/**
+	 * Whether a project's on-disk origin is compatible with the current mode.
+	 * A new project (no directory yet) adopts the current mode.
+	 * @param name project directory name
+	 * @return true if it may be opened or saved now.
+	 */
+	bool projectMatchesMode(const string& name) const noexcept;
+
+	/**
 	 * Reads a ledspicer.conf file.
 	 * @param ledspicerconf
 	 * @param wipe if true, will clean before importing.

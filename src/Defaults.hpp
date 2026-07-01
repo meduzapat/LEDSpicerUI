@@ -833,6 +833,13 @@ public:
 	);
 
 	/**
+	 * @param comboBox
+	 * @param id
+	 * @return true if the combo already contains a row with this id.
+	 */
+	static bool comboBoxHasId(Gtk::ComboBox* comboBox, const string& id);
+
+	/**
 	 * Cleans and populates a combobox with IDs and mark used elements.
 	 * @param store the ListStore with to fill
 	 * @param max the maximum ID
@@ -899,6 +906,11 @@ public:
 	 * @param state True to ignore changes, false otherwise.
 	 */
 	static void setIgnoreChanges(bool state);
+
+	/**
+	 * @return true if change tracking is currently suppressed.
+	 */
+	static bool isIgnoringChanges() noexcept { return ignoreChanges; }
 
 	/**
 	 * Appends a numeric index to duplicate display labels in a StringMap.
