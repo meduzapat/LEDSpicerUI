@@ -41,7 +41,6 @@ public:
 	const string& getProjectName() const;
 
 	void setProjectsDir(const string& projectsDir, bool setFileProjectsDirSelector);
-	void setProjectName(const string& projectName);
 
 	/**
 	 * Scans projectsDir for available projects.
@@ -75,6 +74,18 @@ protected:
 	 * Activate open/select project if projects and data dirs are set.
 	 */
 	void updateBoxProjectActions();
+
+	/**
+	 * Validates a candidate new-project name.
+	 * @param name candidate name
+	 * @throws Message if the projects directory is unset, the name is reserved, or it exists.
+	 */
+	void checkNewName(const string& name) const;
+
+	/**
+	 * Sets Apply sensitivity and the name-entry error icon for the current selection.
+	 */
+	void refreshApplyState();
 
 };
 

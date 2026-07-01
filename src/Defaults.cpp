@@ -645,6 +645,17 @@ string Defaults::tab() {
 	return tabs;
 }
 
+bool Defaults::comboBoxHasId(Gtk::ComboBox* comboBox, const string& id) {
+	auto model {comboBox->get_model()};
+	const int idColumn {comboBox->get_id_column()};
+	for (const auto& row : model->children()) {
+		Glib::ustring rowId;
+		row.get_value(idColumn, rowId);
+		if (rowId.raw() == id) return true;
+	}
+	return false;
+}
+
 void Defaults::populateComboBoxTextWithNumbers(Gtk::ComboBoxText* comboBox, int from, int to, const StringVector& ignoreList) {
 	comboBox->remove_all();
 	for (int c = from; c <= to; c++) {

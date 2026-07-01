@@ -46,21 +46,23 @@ DialogProject::DialogProject(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> con
 
 	// Select project button
 	comboSelectProject->signal_changed().connect([this]() {
-		const string name{comboSelectProject->get_active_id()};
+		const string name {comboSelectProject->get_active_id()};
 		if (name.empty()) {
 			boxNewProjectName->set_visible(true);
 			inputNewProjectName->set_text("");
 			inputNewProjectName->grab_focus();
-			btnApply->set_sensitive(false);
-			return;
 		}
-		boxNewProjectName->set_visible(false);
-		setProjectName(name);
+		else {
+			boxNewProjectName->set_visible(false);
+			projectName = name;
+		}
+		refreshApplyState();
 	});
 
 	Defaults::attachFilenameFilter(inputNewProjectName);
 	inputNewProjectName->signal_changed().connect([this]() {
-		setProjectName(string(inputNewProjectName->get_text()));
+		projectName = inputNewProjectName->get_text().raw();
+		refreshApplyState();
 	});
 
 	// Dialog show
@@ -101,7 +103,9 @@ void DialogProject::scanProjects() {
 		Message::displayError(e.what(), this);
 	}
 
-	StringVector projects;
+	// Transient: collected only to sort before populating the combo, which is the
+	// single source of truth for the project list.
+	StringVector names;
 	Glib::RefPtr<Gio::FileInfo> fileInfo;
 	while ((fileInfo = enumerator->next_file())) {
 		if (fileInfo->get_file_type() != Gio::FILE_TYPE_DIRECTORY) continue;
@@ -111,14 +115,13 @@ void DialogProject::scanProjects() {
 		if (name.size() > BACKUP_SUFFIX.size() and
 			name.compare(name.size() - BACKUP_SUFFIX.size(), BACKUP_SUFFIX.size(), BACKUP_SUFFIX) == 0)
 			continue;
-		projects.push_back(name);
+		names.push_back(name);
 	}
 
-	std::sort(projects.begin(), projects.end());
+	std::sort(names.begin(), names.end());
 
-	for (const auto& project : projects) {
-		comboSelectProject->append(project, project);
-	}
+	for (const auto& name : names)
+		comboSelectProject->append(name, name);
 }
 
 void DialogProject::setProjectsDir(const string& projectsDir, bool setFileProjectsDirSelector) {
@@ -136,12 +139,44 @@ void DialogProject::setProjectsDir(const string& projectsDir, bool setFileProjec
 	updateBoxProjectActions();
 }
 
-void DialogProject::setProjectName(const string& projectName) {
-	this->projectName = projectName;
-	btnApply->set_sensitive(not this->projectName.empty());
+void DialogProject::updateBoxProjectActions() {
+	refreshApplyState();
+	boxProjectActions->show_all();
 }
 
-void DialogProject::updateBoxProjectActions() {
-	btnApply->set_sensitive(not projectName.empty());
-	boxProjectActions->show_all();
+void DialogProject::checkNewName(const string& name) const {
+	if (Settings::get().getProjectsDir().empty())
+		throw Message("Set a projects directory first.");
+	// Reserved by the save transaction for backups.
+	if (name.size() >= BACKUP_SUFFIX.size()
+		and name.compare(name.size() - BACKUP_SUFFIX.size(), BACKUP_SUFFIX.size(), BACKUP_SUFFIX) == 0)
+		throw Message("Names ending in \"" + BACKUP_SUFFIX + "\" are reserved.");
+	if (Defaults::comboBoxHasId(comboSelectProject, name))
+		throw Message("A project with that name already exists.");
+}
+
+void DialogProject::refreshApplyState() {
+	// An existing project chosen in the combo is always valid.
+	if (not comboSelectProject->get_active_id().empty()) {
+		inputNewProjectName->unset_icon(Gtk::ENTRY_ICON_SECONDARY);
+		btnApply->set_sensitive(true);
+		return;
+	}
+	const string name {inputNewProjectName->get_text()};
+	if (name.empty()) {
+		inputNewProjectName->unset_icon(Gtk::ENTRY_ICON_SECONDARY);
+		btnApply->set_sensitive(false);
+		return;
+	}
+	// New project: validate the typed name, flagging it inline on failure.
+	try {
+		checkNewName(name);
+		inputNewProjectName->unset_icon(Gtk::ENTRY_ICON_SECONDARY);
+		btnApply->set_sensitive(true);
+	}
+	catch (Message& e) {
+		inputNewProjectName->set_icon_from_icon_name("dialog-error", Gtk::ENTRY_ICON_SECONDARY);
+		inputNewProjectName->set_icon_tooltip_text(e.takeMessage(), Gtk::ENTRY_ICON_SECONDARY);
+		btnApply->set_sensitive(false);
+	}
 }

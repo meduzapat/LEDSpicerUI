@@ -140,6 +140,15 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 	// Save project
 	btnSaveProject->signal_clicked().connect([this]() {
 		try {
+			// Saving under the wrong mode would write the config to the other mode's
+			// location and duplicate it; block until the mode matches the project.
+			if (not projectMatchesMode(Settings::get().getCurrentProject())) {
+				const auto [appMode, projectMode] {Settings::getModeLabels(Settings::get().getMode())};
+				throw Message(
+					"This project was created for " + projectMode + " mode, but the application is running in "
+					+ appMode + " mode.\nSwitch back to " + projectMode + " mode to save it."
+				);
+			}
 			if (boxRandomColors->get_children().size() == 1) {
 				throw Message("The number of random colors need to be more than one or none.");
 			}
@@ -387,19 +396,45 @@ LEDSpicerUI::Values MainWindow::packLedspicerConfig() const noexcept {
 	return r;
 }
 
+bool MainWindow::projectMatchesMode(const string& name) const noexcept {
+	const string projectDir {Settings::get().getProjectsDir() + name + '/'};
+	// A new project (no directory yet) adopts the current mode on its first save.
+	if (not Glib::file_test(projectDir, Glib::FileTest::FILE_TEST_IS_DIR))
+		return true;
+	const bool portableProject {Glib::file_test(projectDir + CONFIG_FILE, Glib::FileTest::FILE_TEST_EXISTS)};
+	return portableProject == Settings::get().isPortable();
+}
+
 void MainWindow::openProject(const string& name) {
+
+	// Opening a project under the wrong mode reads the wrong config location; refuse
+	// before touching state.
+	if (not projectMatchesMode(name)) {
+		const auto [appMode, projectMode] {Settings::getModeLabels(Settings::get().getMode())};
+		Message::displayError(
+			"Unable to open project \"" + name + "\" because it was created for " + projectMode + " mode.\n"
+			"The application is currently running in " + appMode + " mode. Please switch modes to open this project.",
+			this
+		);
+		return;
+	}
+
 	Settings::get().setCurrentProject(name);
 	Defaults::setSubtitle(name);
 	comboColors->set_active_id("");
 
 	Message::beginBatch();
+	bool loadFailed {false};
 	try {
 		readConfigFile(Settings::get().getActiveConfigPath(), true, IMPORT_ALL);
 		DialogSettings::getInstance()->saveSettings();
 	}
 	catch (Message& e) {
-		if (Glib::file_test(Settings::get().getActiveConfigPath(), Glib::FileTest::FILE_TEST_EXISTS))
+		// A present but unreadable config is a real failure; an absent one is a new project.
+		if (Glib::file_test(Settings::get().getActiveConfigPath(), Glib::FileTest::FILE_TEST_EXISTS)) {
 			Message::collect(XMLHelper::cleanError("The config file raised an error: " + e.takeMessage()));
+			loadFailed = true;
+		}
 		// Order mirrors the destructor (dependents before sources).
 		profileNavigator.clear();
 		animationNavigator.clear();
@@ -417,9 +452,19 @@ void MainWindow::openProject(const string& name) {
 	DialogRestrictor::getInstance()->refreshItems();
 	DialogProcess::getInstance()->refreshItems();
 	Defaults::cleanDirty();
-	mainTabs->set_visible_child("configuration");
-	mainTabsBox->set_sensitive(true);
-	btnImportConfig->set_sensitive(true);
+
+	if (loadFailed) {
+		// Bad project: stay out of it, leave the UI idle.
+		Settings::get().setCurrentProject("");
+		Defaults::setSubtitle("");
+		mainTabsBox->set_sensitive(false);
+		btnImportConfig->set_sensitive(false);
+	}
+	else {
+		mainTabs->set_visible_child("configuration");
+		mainTabsBox->set_sensitive(true);
+		btnImportConfig->set_sensitive(true);
+	}
 
 	// Drop any previous test connection; this project's config is built on connect.
 	DaemonHandler::getInstance().disconnect();
@@ -429,7 +474,7 @@ void MainWindow::openProject(const string& name) {
 	ignoreConnectToggle = false;
 	updateDaemonControls();
 
-	Message::finishBatch("Project loaded");
+	Message::finishBatch(loadFailed ? "Project could not be loaded" : "Project loaded");
 }
 
 void MainWindow::onConnectToggled() {
@@ -688,10 +733,14 @@ void MainWindow::readConfigFile(const string& dataFilePath, bool wipe, uint8_t i
 }
 
 void MainWindow::populateColorsCombo() {
+	// Programmatic refresh, not a user edit: don't let it mark the project dirty.
+	const bool prev {Defaults::isIgnoringChanges()};
+	Defaults::setIgnoreChanges(true);
 	const string active = comboColors->get_active_id();
 	comboColors->remove_all();
 	for (const auto& c : Settings::get().getColorFiles())
 		comboColors->append(c, c);
 	if (not active.empty())
 		comboColors->set_active_id(active);
+	Defaults::setIgnoreChanges(prev);
 }

@@ -149,10 +149,20 @@ public:
 	ThemeStyle getThemeStyle()           const noexcept;
 	void       setThemeStyle(ThemeStyle) noexcept;
 
-	Mode getMode()      const noexcept { return currentMode;                      }
-	bool isPortable()   const noexcept { return currentMode == Mode::Portable;    }
-	bool isLocal()      const noexcept { return currentMode == Mode::Local;       }
+	Mode getMode()      const noexcept  { return currentMode;                      }
+	bool isPortable()   const noexcept  { return currentMode == Mode::Portable;    }
+	bool isLocal()      const noexcept  { return currentMode == Mode::Local;       }
 	bool isInteractive() const noexcept { return currentMode == Mode::Interactive; }
+
+	/**
+	 * @param mode
+	 * @return the two main modes, sorted by the passed mode.
+	 */
+	static std::pair<string, string> getModeLabels(Mode mode) noexcept {
+		// Local and Interactive share the non-portable "Local" label.
+		if (mode == Mode::Portable) return {"Portable", "Local"};
+		return {"Local", "Portable"};
+	}
 
 	/**
 	 * Runtime flag: the staged config no longer matches the live data and must be redeployed.
