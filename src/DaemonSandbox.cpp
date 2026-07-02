@@ -31,31 +31,11 @@ using LEDSpicerUI::Config::ConfigFile;
 using LEDSpicerUI::Config::ProjectFile;
 using LEDSpicerUI::Ui::Storage::BoxButtonCollection;
 
-DaemonSandbox::DaemonSandbox() :
-	sandboxDir(Glib::build_filename(Glib::get_tmp_dir(), TEST_SANDBOX_DIR))
-{
-	const string
-		profileDir  {Glib::build_filename(Glib::build_filename(sandboxDir, TEST_SANDBOX_PROJECT), PATH_PROFILE)},
-		profilePath {Glib::build_filename(profileDir, TEST_SANDBOX_DEFAULT_PROFILE + string(".xml"))};
-
-	// Start from a clean tree.
-	std::error_code ec;
-	std::filesystem::remove_all(sandboxDir, ec);
-	std::filesystem::create_directories(profileDir, ec);
-	if (ec)
-		throw Message("Could not create the test sandbox: " + ec.message());
-
-	// Empty profile so the daemon boots a blank board.
-	Values background;
-	background.setValue(BACKGROUND_COLOR, DEFAULT_PROFILE_BACKGROUND_COLOR);
-	string profileXml {XMLHelper::xmlHeader(TYPE_PROFILE, background)};
-	Defaults::reduceTab();
-	profileXml += XMLHelper::xmlFooter();
-	ProjectFile::saveFile(profilePath, profileXml);
-}
-
 DaemonSandbox::~DaemonSandbox() {
-	resetDir();
+	try {
+		resetDir();
+	}
+	catch (...) {}
 }
 
 void DaemonSandbox::resetDir() const {
@@ -90,10 +70,14 @@ void DaemonSandbox::regenerate(
 
 	// Create test ground.
 	std::filesystem::create_directories(sandboxDir, ec);
+	if (ec)
+		throw Message("Could not create the test sandbox: " + ec.message());
 
 	// Devices Test only.
 	if (devices.getSize() > 0) {
 		std::filesystem::create_directories(profileDir, ec);
+		if (ec)
+			throw Message("Could not create the test profile: " + ec.message());
 		createEmptyProfile(profileDir);
 	}
 

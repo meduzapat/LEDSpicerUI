@@ -41,7 +41,7 @@ public:
 	 * Builds the isolated tree and writes the empty test profile.
 	 * @throws Message on failure.
 	 */
-	DaemonSandbox();
+	DaemonSandbox() : sandboxDir(Glib::build_filename(Glib::get_tmp_dir(), TEST_SANDBOX_DIR)) {}
 
 	~DaemonSandbox();
 

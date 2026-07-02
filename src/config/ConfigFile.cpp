@@ -46,7 +46,7 @@ ConfigFile::ConfigFile(const string& ledspicerconf) : XMLHelper(ledspicerconf, "
 		if (not errors.empty()) errors += '\n';
 	}
 	// Optional only if devices are present.
-	if (haveDevices) {
+	if (haveRestrictors) {
 		errors += processRestrictors();
 	}
 
@@ -265,11 +265,14 @@ void ConfigFile::save(const ConfigData& data) {
 	// Build main values, not all values are necessary for Device/Restrictor-only configurations, but not harm.
 	string xmlData {xmlHeader(TYPE_CONFIGURATION, data.settings)};
 
-	// Helper: collect toXML() from a BoxButtonCollection into one string.
-	const auto collect {[](const BoxButtonCollection& col) {
+	// Helper: collect toXML() from a parent BoxButtonCollection into one string.
+	const auto collectParents {[](const BoxButtonCollection& col) {
 		string r;
-		for (const auto btn : col)
+		for (const auto btn : col) {
+			auto parent {static_cast<Ui::Storage::Parent*>(btn->getData())};
+			if (not parent->getPrimaryChild()->getSize()) continue;
 			r += btn->getData()->toXML();
+		}
 		return r;
 	}};
 
@@ -278,13 +281,16 @@ void ConfigFile::save(const ConfigData& data) {
 		Values plAttrs;
 		if (not data.runEvery.empty())
 			plAttrs.setValue(PARAM_MILLISECONDS, data.runEvery);
+		string pData;
+		for (const auto btn : data.processes)
+			pData += btn->getData()->toXML();
 
-		xmlData += xmlSection("processLookup", collect(data.processes), plAttrs);
+		xmlData += xmlSection("processLookup", pData, plAttrs);
 	}
 
 	if (haveRestrictors) {
 		// Restrictors (optional if devices are present)
-		xmlData += xmlSection("restrictors", collect(data.restrictors));
+		xmlData += xmlSection("restrictors", collectParents(data.restrictors));
 	}
 
 	// Devices needs elements and valid layout.
@@ -293,13 +299,13 @@ void ConfigFile::save(const ConfigData& data) {
 			throw Message("Select a default profile in the profile section");
 
 		// Devices (optional if restrictors are present)
-		xmlData += xmlSection("devices", collect(data.devices));
+		xmlData += xmlSection("devices", collectParents(data.devices));
 		// Layout with groups
 		Values layoutAttrs;
 		if (not data.defaultProject.empty())
 			layoutAttrs.setValue("defaultProject", data.defaultProject);
 		layoutAttrs.setValue("defaultProfile", data.defaultProfile);
-		xmlData += xmlSection("layout", collect(data.groups), layoutAttrs);
+		xmlData += xmlSection("layout", collectParents(data.groups), layoutAttrs);
 	}
 
 	Defaults::reduceTab();
