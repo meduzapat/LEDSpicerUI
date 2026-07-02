@@ -30,8 +30,8 @@ namespace LEDSpicerUI {
 /**
  * LEDSpicerUI::DaemonSandbox
  *
- * Isolated, throwaway projects tree for live layout testing, handed to the
- * daemon via --projects-dir so testing never touches the user's real project.
+ * Utility class to create a temporary sandbox for the daemon to run in,
+ * with its own isolated, throwaway projects tree for live layout testing.
  */
 class DaemonSandbox {
 
@@ -41,7 +41,7 @@ public:
 	 * Builds the isolated tree and writes the empty test profile.
 	 * @throws Message on failure.
 	 */
-	DaemonSandbox();
+	DaemonSandbox() : sandboxDir(Glib::build_filename(Glib::get_tmp_dir(), TEST_SANDBOX_DIR)) {}
 
 	~DaemonSandbox();
 
@@ -49,8 +49,23 @@ public:
 	DaemonSandbox& operator=(const DaemonSandbox&) = delete;
 
 	/**
+	 * Removes the sandbox directory and all its contents.
+	 * @throws Message on failure.
+	 */
+	void resetDir() const;
+
+	/**
+	 * Creates an empty test profile in the sandbox for Device testing.
+	 * @param profilePath The path to use.
+	 * @throws Message on failure.
+	 */
+	void createEmptyProfile(const string& profileDir) const;
+
+	/**
 	 * (Re)writes the test configuration from the current live data.
-	 * @param settings packed <settings> values (already carries the port).
+	 * Based on the devices and or restrictors it will create the necessary
+	 * config file for the daemon to run in the sandbox.
+	 * @param settings packed root values.
 	 * @param devices live device collection.
 	 * @param restrictors live restrictor collection.
 	 * @param groups live group collection.
@@ -61,22 +76,23 @@ public:
 		const Ui::Storage::BoxButtonCollection& devices,
 		const Ui::Storage::BoxButtonCollection& restrictors,
 		const Ui::Storage::BoxButtonCollection& groups
-	);
+	) const;
 
 	/**
-	 * @return the path to the configuration file in the sandbox (ledspicer.conf).
+	 * @return the path to the temp ledspicer.conf file in the sandbox.
 	 */
-	string getConfigPath() const noexcept { return Glib::build_filename(baseDir, CONFIG_FILE); }
+	string getConfigPath() const noexcept { return Glib::build_filename(sandboxDir, CONFIG_FILE); }
 
 	/**
-	 * @return the path to the isolated projects base directory (daemon -J).
+	 * @return the path to the isolated projects base directory.
 	 */
-	const string& getProjectsDir() const noexcept { return baseDir; }
+	const string& getProjectsDir() const noexcept { return sandboxDir; }
 
-private:
+protected:
 
-	/// <tmp>/ledspicerui-test — the --projects-dir base.
-	const string baseDir;
+	/// The base directory for the sandbox, which is created in a temporary location.
+	const string sandboxDir;
+
 };
 
 } // namespace

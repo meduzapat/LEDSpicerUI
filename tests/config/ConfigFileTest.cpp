@@ -133,7 +133,7 @@ TEST_F(ConfigFileTest, ProcessesAreProcessed) {
 	auto& processes = configFile->getData(COLLECTION_PROCESSES);
 	EXPECT_EQ(2u, processes.size());
 
-	EXPECT_EQ("test",   processes[0].getValue(PARAM_PROCESS_NAME));
+	EXPECT_EQ(TEST_STR, processes[0].getValue(PARAM_PROCESS_NAME));
 	EXPECT_EQ("arcade", processes[0].getValue(PARAM_SYSTEM));
 
 	EXPECT_EQ("gedit",  processes[1].getValue(PARAM_PROCESS_NAME));

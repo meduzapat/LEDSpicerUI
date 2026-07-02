@@ -37,12 +37,12 @@ Parent::~Parent() {
 }
 
 BoxButtonCollection* Parent::getChild(const string& collectionId) noexcept {
-	auto it{children.find(collectionId)};
+	auto it {children.find(collectionId)};
 	return (it != children.end()) ? &it->second : nullptr;
 }
 
 const BoxButtonCollection* Parent::getChild(const string& collectionId) const noexcept {
-	auto it{children.find(collectionId)};
+	auto it {children.find(collectionId)};
 	return (it != children.end()) ? &it->second : nullptr;
 }
 

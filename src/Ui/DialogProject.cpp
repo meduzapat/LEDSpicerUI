@@ -67,7 +67,7 @@ DialogProject::DialogProject(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> con
 
 	// Dialog show
 	signal_show().connect([this]() {
-		const string& pd = Settings::get().getProjectsDir();
+		const string& pd {Settings::get().getProjectsDir()};
 		comboSelectProject->set_active_id(projectName);
 		inputNewProjectName->set_text("");
 		if (not pd.empty()) fileProjectsDirSelect->set_filename(pd);
@@ -91,10 +91,10 @@ void DialogProject::scanProjects() {
 	comboSelectProject->append("", "Create New...");
 	comboSelectProject->set_active_id("");
 
-	const string& pd = Settings::get().getProjectsDir();
+	const string& pd {Settings::get().getProjectsDir()};
 	if (pd.empty()) return;
 
-	auto directory = Gio::File::create_for_path(pd);
+	const auto directory {Gio::File::create_for_path(pd)};
 	Glib::RefPtr<Gio::FileEnumerator> enumerator;
 	try {
 		enumerator = directory->enumerate_children();
@@ -109,7 +109,7 @@ void DialogProject::scanProjects() {
 	Glib::RefPtr<Gio::FileInfo> fileInfo;
 	while ((fileInfo = enumerator->next_file())) {
 		if (fileInfo->get_file_type() != Gio::FILE_TYPE_DIRECTORY) continue;
-		string name(fileInfo->get_name());
+		const string name {fileInfo->get_name()};
 		if (name.empty() or name[0] == '.') continue;
 		// Skip sibling backup directories left by the rename-based save transaction.
 		if (name.size() > BACKUP_SUFFIX.size() and
@@ -130,7 +130,7 @@ void DialogProject::setProjectsDir(const string& projectsDir, bool setFileProjec
 		labelProjectsPath->set_text("N/A");
 	}
 	else {
-		const string normalized = projectsDir + (projectsDir.back() != '/' ? "/" : "");
+		const string normalized {projectsDir + (projectsDir.back() != '/' ? "/" : "")};
 		Settings::get().setProjectsDir(normalized);
 		labelProjectsPath->set_text(normalized);
 		scanProjects();
@@ -148,8 +148,9 @@ void DialogProject::checkNewName(const string& name) const {
 	if (Settings::get().getProjectsDir().empty())
 		throw Message("Set a projects directory first.");
 	// Reserved by the save transaction for backups.
-	if (name.size() >= BACKUP_SUFFIX.size()
-		and name.compare(name.size() - BACKUP_SUFFIX.size(), BACKUP_SUFFIX.size(), BACKUP_SUFFIX) == 0)
+	if (name.size() >= BACKUP_SUFFIX.size() and
+		name.compare(name.size() - BACKUP_SUFFIX.size(), BACKUP_SUFFIX.size(), BACKUP_SUFFIX) == 0
+	)
 		throw Message("Names ending in \"" + BACKUP_SUFFIX + "\" are reserved.");
 	if (Defaults::comboBoxHasId(comboSelectProject, name))
 		throw Message("A project with that name already exists.");
