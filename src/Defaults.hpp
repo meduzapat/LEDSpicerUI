@@ -100,10 +100,11 @@ inline const string
 
 /// Profile configuration keys.
 	& DEFAULT_PROFILE  {DEFAULT},
+	TEST_STR           {"test"},
 	/// Throwaway layout-test sandbox handed to the daemon via --projects-dir.
-	TEST_SANDBOX_DIR             {"ledspicerui-test"},
-	TEST_SANDBOX_PROJECT         {"test"},
-	TEST_SANDBOX_DEFAULT_PROFILE {"test"},
+	& TEST_SANDBOX_DIR             {"ledspicerui-test"},
+	& TEST_SANDBOX_PROJECT         {TEST_STR},
+	& TEST_SANDBOX_DEFAULT_PROFILE {TEST_STR},
 	BACKGROUND_COLOR {"backgroundColor"},
 	& DEFAULT_PROFILE_BACKGROUND_COLOR {HUMAN_OFF},
 	TRANSITION       {"transition"},

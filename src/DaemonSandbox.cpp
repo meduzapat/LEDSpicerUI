@@ -32,21 +32,16 @@ using LEDSpicerUI::Config::ProjectFile;
 using LEDSpicerUI::Ui::Storage::BoxButtonCollection;
 
 DaemonSandbox::DaemonSandbox() :
-	baseDir(Glib::build_filename(Glib::get_tmp_dir(), TEST_SANDBOX_DIR))
+	sandboxDir(Glib::build_filename(Glib::get_tmp_dir(), TEST_SANDBOX_DIR))
 {
-	namespace fs = std::filesystem;
+	const string
+		profileDir  {Glib::build_filename(Glib::build_filename(sandboxDir, TEST_SANDBOX_PROJECT), PATH_PROFILE)},
+		profilePath {Glib::build_filename(profileDir, TEST_SANDBOX_DEFAULT_PROFILE + string(".xml"))};
 
-	const string profileDir {
-		Glib::build_filename(Glib::build_filename(baseDir, TEST_SANDBOX_PROJECT), PATH_PROFILE)
-	};
-	const string profilePath {
-		Glib::build_filename(profileDir, TEST_SANDBOX_DEFAULT_PROFILE + string(".xml"))
-	};
-
-	// Start from a clean tree (any leftover from a prior, ungraceful exit).
+	// Start from a clean tree.
 	std::error_code ec;
-	fs::remove_all(baseDir, ec);
-	fs::create_directories(profileDir, ec);
+	std::filesystem::remove_all(sandboxDir, ec);
+	std::filesystem::create_directories(profileDir, ec);
 	if (ec)
 		throw Message("Could not create the test sandbox: " + ec.message());
 
@@ -60,8 +55,24 @@ DaemonSandbox::DaemonSandbox() :
 }
 
 DaemonSandbox::~DaemonSandbox() {
+	resetDir();
+}
+
+void DaemonSandbox::resetDir() const {
 	std::error_code ec;
-	std::filesystem::remove_all(baseDir, ec);
+	std::filesystem::remove_all(sandboxDir, ec);
+	if (ec)
+		throw Message("Could not remove the test sandbox: " + ec.message());
+}
+
+void DaemonSandbox::createEmptyProfile(const string& profileDir) const {
+	const string profilePath {Glib::build_filename(profileDir, TEST_SANDBOX_DEFAULT_PROFILE + string(".xml"))};
+	Values background;
+	background.setValue(BACKGROUND_COLOR, DEFAULT_PROFILE_BACKGROUND_COLOR);
+	string profileXml {XMLHelper::xmlHeader(TYPE_PROFILE, background)};
+	Defaults::reduceTab();
+	profileXml += XMLHelper::xmlFooter();
+	ProjectFile::saveFile(profilePath, profileXml);
 }
 
 void DaemonSandbox::regenerate(
@@ -69,14 +80,31 @@ void DaemonSandbox::regenerate(
 	const BoxButtonCollection& devices,
 	const BoxButtonCollection& restrictors,
 	const BoxButtonCollection& groups
-) {
-	// Throwaway config: keep the hardware-defining data (devices, groups), force
-	// debug logging and the empty test profile, and drop the process lookup.
+) const {
+
+	const string profileDir {Glib::build_filename(Glib::build_filename(sandboxDir, TEST_SANDBOX_PROJECT), PATH_PROFILE)};
+
+	// Start from a clean tree.
+	std::error_code ec;
+	resetDir();
+
+	// Create test ground.
+	std::filesystem::create_directories(sandboxDir, ec);
+
+	// Devices Test only.
+	if (devices.getSize() > 0) {
+		std::filesystem::create_directories(profileDir, ec);
+		createEmptyProfile(profileDir);
+	}
+
 	settings.setValue("logLevel", "Debug");
-	const string configPath {getConfigPath()};
+
+	// Neither need processes.
 	const BoxButtonCollection noProcesses;
+
+	// save config will only save whatis necessary.
 	ConfigFile::save(ConfigFile::ConfigData(
-		configPath,
+		getConfigPath(),
 		TEST_SANDBOX_PROJECT,
 		TEST_SANDBOX_DEFAULT_PROFILE,
 		DEFAULT_RUNEVERY,

@@ -101,7 +101,7 @@ TEST_F(ProfileFileTest, AnimationsAreExtracted) {
 	auto& animations = profile->getData(sectionKey("profile", COLLECTION_PROFILE_ANIMATIONS));
 	ASSERT_EQ(2u, animations.size());
 	EXPECT_EQ("cabinetSoundAware", animations[0].getValue(NAME));
-	EXPECT_EQ("test",              animations[1].getValue(NAME));
+	EXPECT_EQ(TEST_STR,            animations[1].getValue(NAME));
 }
 
 TEST_F(ProfileFileTest, InputsAreExtracted) {

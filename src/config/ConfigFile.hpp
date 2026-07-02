@@ -28,6 +28,7 @@
 namespace LEDSpicerUI::Config {
 
 using Ui::Storage::BoxButtonCollection;
+using Ui::Storage::CollectionHandler;
 
 /**
  * LEDSpicerUI::ConfigFile
@@ -93,7 +94,7 @@ protected:
 
 	string processRestrictorMaps(tinyxml2::XMLElement* restrictorNode, const string& restrictorName);
 
-	string processGroups();
+	string processLayoutAndGroups();
 };
 
 } // namespace
