@@ -341,8 +341,16 @@ void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {
 		}
 		const string& newProject {DialogProject::getInstance()->getProjectName()};
 		if (newProject == Settings::get().getCurrentProject()) {
-			// TODO add revert option, instead of warning, ask to reload without saving.
-			Message::displayInfo("Already working on that project", DialogProject::getInstance());
+			if (not Defaults::isDirty()) {
+				Message::displayInfo("Already working on that project", DialogProject::getInstance());
+				DialogProject::getInstance()->hide();
+				return;
+			}
+			if (Message::ask("Discard unsaved changes and reload \"" + newProject + "\" from disk?", DialogProject::getInstance()) != Gtk::ResponseType::RESPONSE_YES) {
+				DialogProject::getInstance()->hide();
+				return;
+			}
+			openProject(newProject);
 			DialogProject::getInstance()->hide();
 			return;
 		}
@@ -364,10 +372,10 @@ void MainWindow::setConfiguration(const Values& values) {
 	comboColors->set_active_id(values.getValue("colors", DEFAULT_COLORS));
 	comboLogLevel->set_active_id(values.getValue("logLevel", DEFAULT_LOGLEVEL));
 	listBoxDataSource->sortAndMark(Defaults::explode(values.getValue("dataSource", DEFAULT_DATASOURCE), ','));
+	DialogColors::getInstance()->wipeColorPicker(boxRandomColors);
 	auto randomColors(Defaults::explode(values.getValue("randomColors"), ','));
-	if (not randomColors.empty()) {
+	if (not randomColors.empty())
 		DialogColors::getInstance()->populateColorBox(boxRandomColors, randomColors);
-	}
 
 	// DEFAULT_PROFILE
 	// emitter
@@ -721,10 +729,7 @@ void MainWindow::readConfigFile(const string& dataFilePath, bool wipe, uint8_t i
 
 	// Load inputs, animations and profiles from the project subdirectories.
 	if (wipe and not Settings::get().getProjectDir().empty()) {
-		inputNavigator.clear();
-		animationNavigator.clear();
 		profileNavigator.setDefaultProfileName(datafile.getRootInfo().getValue("defaultProfile"));
-		profileNavigator.clear();
 
 		inputNavigator.load();
 		animationNavigator.load();

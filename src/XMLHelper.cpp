@@ -107,13 +107,20 @@ string XMLHelper::xmlHeader(const string& type, const Values& attrs) noexcept {
 string XMLHelper::xmlSection(
 	const string& tag,
 	const string& content,
-	const Values& attrs
+	const Values& attrs,
+	bool          allowEmpty
 ) noexcept {
 
-	if (content.empty()) return "";
+	if (content.empty() and not allowEmpty) return "";
 	string r(Defaults::tab() + "<" + tag);
 	for (const auto& [k, v] : attrs)
 		r += " " + k + "=\"" + Defaults::escapeXmlValue(v) + "\"";
+
+	if (content.empty()) {
+		r += "/>\n";
+		return r;
+	}
+
 	r += ">\n";
 	Defaults::increaseTab();
 	// Fixes indentation for multi-line content, adds a tab if the line is not empty.

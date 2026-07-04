@@ -20,8 +20,9 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "ProjectFile.hpp"
 #include "Storage/BoxButtonCollection.hpp"
-#include "XMLHelper.hpp"
+#include "Storage/Element.hpp"
 
 #pragma once
 
@@ -81,6 +82,27 @@ public:
 	virtual ~ConfigFile() = default;
 
 	static void save(const ConfigData& data);
+
+	/**
+	 * Walks devices in order, expanding each strip into its children (never the
+	 * parent, which carries PROP_NO_SELECT and is never linkable itself) — the
+	 * order the daemon uses when it auto-builds All from the file.
+	 * @param devices Devices collection, in save/file order.
+	 * @return Flat, ordered list of every linkable element.
+	 */
+	static vector<Ui::Storage::Data*> expandDeviceElements(
+		const BoxButtonCollection& devices
+	) noexcept;
+
+	/**
+	 * @param links A group's links collection, in its current order.
+	 * @param deviceElementOrder Result of expandDeviceElements().
+	 * @return True if links is identical to deviceElementOrder, position for position.
+	 */
+	static bool matchesDeviceOrder(
+		const BoxButtonCollection& links,
+		const vector<Ui::Storage::Data*>& deviceElementOrder
+	) noexcept;
 
 protected:
 
