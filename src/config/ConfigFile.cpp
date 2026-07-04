@@ -21,7 +21,6 @@
  */
 
 #include "ConfigFile.hpp"
-#include "ProjectFile.hpp"
 
 using namespace LEDSpicerUI::Config;
 
@@ -252,6 +251,35 @@ string ConfigFile::processLayoutAndGroups() {
 	return errors;
 }
 
+vector<LEDSpicerUI::Ui::Storage::Data*> ConfigFile::expandDeviceElements(const BoxButtonCollection& devices) noexcept {
+	vector<Ui::Storage::Data*> order;
+	for (const auto deviceBtn : devices) {
+		for (const auto elementBtn : *static_cast<Ui::Storage::Parent*>(deviceBtn->getData())->getPrimaryChild()) {
+			auto element  {static_cast<Ui::Storage::Element*>(elementBtn->getData())};
+			auto children {element->copyStripChildren()};
+			if (children.empty())
+				order.push_back(element);
+			else
+				for (auto child : children)
+					order.push_back(child);
+		}
+	}
+	return order;
+}
+
+bool ConfigFile::matchesDeviceOrder(
+	const BoxButtonCollection& links,
+	const vector<Ui::Storage::Data*>& deviceElementOrder
+) noexcept {
+	return std::equal(
+		links.begin(), links.end(),
+		deviceElementOrder.begin(), deviceElementOrder.end(),
+		[](Ui::Storage::BoxButton* linkBtn, Ui::Storage::Data* element) {
+			return *linkBtn->getData() == *element;
+		}
+	);
+}
+
 void ConfigFile::save(const ConfigData& data) {
 
 	// Both Collections are app wide.
@@ -300,12 +328,34 @@ void ConfigFile::save(const ConfigData& data) {
 
 		// Devices (optional if restrictors are present)
 		xmlData += xmlSection("devices", collectParents(data.devices));
-		// Layout with groups
+
+		auto deviceElementOrder {expandDeviceElements(data.devices)};
+
+		// Same as collectParents, but omits All when it's just the default order.
+		const auto collectGroups {[&deviceElementOrder](const BoxButtonCollection& col) {
+			string r;
+			for (const auto btn : col) {
+				auto group {static_cast<Ui::Storage::Parent*>(btn->getData())};
+				auto links {group->getPrimaryChild()};
+				if (not links->getSize()) continue;
+
+				if (btn->getData()->getValue(NAME) == GROUP_ALL_NAME and matchesDeviceOrder(*links, deviceElementOrder))
+					continue;
+
+				r += btn->getData()->toXML();
+			}
+			return r;
+		}};
+
+		/*
+		Layout with groups. defaultProfile is required whenever devices exist, so the
+		tag must survive even when every group (including All) is empty or the default.
+		*/
 		Values layoutAttrs;
 		if (not data.defaultProject.empty())
 			layoutAttrs.setValue("defaultProject", data.defaultProject);
 		layoutAttrs.setValue("defaultProfile", data.defaultProfile);
-		xmlData += xmlSection("layout", collectParents(data.groups), layoutAttrs);
+		xmlData += xmlSection("layout", collectGroups(data.groups), layoutAttrs, true);
 	}
 
 	Defaults::reduceTab();

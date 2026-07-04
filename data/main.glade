@@ -5238,17 +5238,6 @@ Ships empty; place theme folders here, or point this anywhere you keep them.</pr
                             <property name="tooltip-text" translatable="yes">When this option is enabled, empty directories will be preserved when saving the project.</property>
                             <property name="spacing">5</property>
                             <child>
-                              <object class="GtkSwitch" id="SwitchSettingsPreserveEmptyDir">
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">0</property>
-                              </packing>
-                            </child>
-                            <child>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
@@ -5256,8 +5245,19 @@ Ships empty; place theme folders here, or point this anywhere you keep them.</pr
                                 <property name="label">Preserve empty directories</property>
                               </object>
                               <packing>
-                                <property name="expand">False</property>
+                                <property name="expand">True</property>
                                 <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkSwitch" id="SwitchSettingsPreserveEmptyDir">
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">False</property>
                                 <property name="position">1</property>
                               </packing>
                             </child>
@@ -5287,17 +5287,6 @@ Ships empty; place theme folders here, or point this anywhere you keep them.</pr
                             <property name="tooltip-text" translatable="yes">When this option is enabled, components that are empty or fail validation checks will be automatically removed.</property>
                             <property name="spacing">5</property>
                             <child>
-                              <object class="GtkSwitch" id="SwitchSettingsRemoveInvalidItems">
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">0</property>
-                              </packing>
-                            </child>
-                            <child>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
@@ -5305,8 +5294,19 @@ Ships empty; place theme folders here, or point this anywhere you keep them.</pr
                                 <property name="label">Remove invalid or empty components</property>
                               </object>
                               <packing>
-                                <property name="expand">False</property>
+                                <property name="expand">True</property>
                                 <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkSwitch" id="SwitchSettingsRemoveInvalidItems">
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">False</property>
                                 <property name="position">1</property>
                               </packing>
                             </child>
@@ -5324,17 +5324,6 @@ Ships empty; place theme folders here, or point this anywhere you keep them.</pr
                             <property name="tooltip-text" translatable="yes">When this option is enabled, a backup of the current project files will be created before saving changes.</property>
                             <property name="spacing">5</property>
                             <child>
-                              <object class="GtkSwitch" id="SwitchSettingsSaveBackup">
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">0</property>
-                              </packing>
-                            </child>
-                            <child>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
@@ -5342,8 +5331,19 @@ Ships empty; place theme folders here, or point this anywhere you keep them.</pr
                                 <property name="label">Backup project before saving</property>
                               </object>
                               <packing>
-                                <property name="expand">False</property>
+                                <property name="expand">True</property>
                                 <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkSwitch" id="SwitchSettingsSaveBackup">
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">False</property>
                                 <property name="position">1</property>
                               </packing>
                             </child>
@@ -5373,17 +5373,6 @@ Ships empty; place theme folders here, or point this anywhere you keep them.</pr
                             <property name="tooltip-text" translatable="yes">When enabled, generated files will be displayed in a dialog instead of being saved, and the project directory will remain unchanged.</property>
                             <property name="spacing">5</property>
                             <child>
-                              <object class="GtkSwitch" id="SwitchSettingsDebugFiles">
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">0</property>
-                              </packing>
-                            </child>
-                            <child>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
@@ -5391,8 +5380,19 @@ Ships empty; place theme folders here, or point this anywhere you keep them.</pr
                                 <property name="label">Display files instead of saving</property>
                               </object>
                               <packing>
-                                <property name="expand">False</property>
+                                <property name="expand">True</property>
                                 <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkSwitch" id="SwitchSettingsDebugFiles">
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">False</property>
                                 <property name="position">1</property>
                               </packing>
                             </child>
@@ -5410,17 +5410,6 @@ Ships empty; place theme folders here, or point this anywhere you keep them.</pr
                             <property name="tooltip-text" translatable="yes">When enabled, hardware test actions (lighting and clearing elements, restrictor moves) are shown in the status bar.</property>
                             <property name="spacing">5</property>
                             <child>
-                              <object class="GtkSwitch" id="SwitchSettingsDebugHardwareTest">
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">0</property>
-                              </packing>
-                            </child>
-                            <child>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
@@ -5428,8 +5417,19 @@ Ships empty; place theme folders here, or point this anywhere you keep them.</pr
                                 <property name="label">Show hardware test actions</property>
                               </object>
                               <packing>
-                                <property name="expand">False</property>
+                                <property name="expand">True</property>
                                 <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkSwitch" id="SwitchSettingsDebugHardwareTest">
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">False</property>
                                 <property name="position">1</property>
                               </packing>
                             </child>

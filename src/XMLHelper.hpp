@@ -101,15 +101,18 @@ public:
 
 	/**
 	 * Wraps content in a named XML section.
-	 * Skips output entirely if content is empty.
-	 * @param tag     Element tag name.
-	 * @param content Inner XML string.
-	 * @param attrs   Optional attributes on the opening tag.
+	 * Skips output entirely if content is empty, unless allowEmpty is set, in
+	 * which case a self-closing tag with just the attributes is emitted instead.
+	 * @param tag        Element tag name.
+	 * @param content    Inner XML string.
+	 * @param attrs      Optional attributes on the opening tag.
+	 * @param allowEmpty Emit the tag even when content is empty.
 	 */
 	static string xmlSection(
 		const string&     tag,
 		const string&     content,
-		const Values& attrs = {}
+		const Values& attrs = {},
+		bool          allowEmpty = false
 	) noexcept;
 
 	/**
