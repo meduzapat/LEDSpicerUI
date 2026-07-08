@@ -30,10 +30,8 @@ using namespace LEDSpicerUI::Constants;
 
 Layout::Layout(
 	const Glib::RefPtr<Gtk::Builder>& builder,
-	LayoutTester* t,
 	Storage::BoxButtonCollection* devices
 ) noexcept :
-	tester            {t},
 	devicesCollection {devices}
 {
 	builder->get_widget_derived("LayoutBoard", board);
@@ -56,12 +54,13 @@ Layout::~Layout() {
 void Layout::onAdded(Storage::Element* element) noexcept {
 	if (element->getProperties().isSet(PROP_STRIP)) return;
 
-	auto tile {Gtk::manage(new LayoutElement(element, tester))};
+	auto tile {Gtk::manage(new LayoutElement(element))};
 	tiles.emplace(element, tile);
 	placeNew(tile);
 	tile->signal_activated().connect(sigc::mem_fun(*this, &Layout::onTileActivated));
 	tile->signal_moved().connect(sigc::mem_fun(*this, &Layout::recomputeBoardSize));
 	tile->signal_editRequested().connect(sigc::mem_fun(*this, &Layout::onEditRequested));
+	tile->setTestGate([this] { return testing; });
 }
 
 void Layout::onRemoved(Storage::Element* element) noexcept {
@@ -115,6 +114,18 @@ void Layout::onTileActivated(LayoutElement* tile) noexcept {
 	if (current == tile) return;
 	if (current) current->setActive(false);
 	current = tile;
+}
+
+void Layout::setTesting(bool on) noexcept {
+	testing = on;
+	if (on)
+		return;
+	// Disabling testing closes the active tile and cancels its in-flight light.
+	if (current) {
+		current->stopTesting();
+		current->setActive(false);
+		current = nullptr;
+	}
 }
 
 void Layout::onEditRequested(LayoutElement* tile) noexcept {

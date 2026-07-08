@@ -74,8 +74,8 @@ string Data::toXML() const noexcept {
 	for (const auto& [k, v] : values)
 		if (shouldSerialize(k, v))
 			filtered.setValue(k, v);
-	string body(xmlBody());
-	string r(createOpeningXML(string(getXmlTag()), filtered, body.empty()));
+	const string body {xmlBody()};
+	string r {createOpeningXML(string(getXmlTag()), filtered, body.empty())};
 	if (not body.empty())
 		r += body + createClosingXML(string(getXmlTag()));
 	return r;
@@ -97,7 +97,7 @@ void Data::syncRegistration(const string& oldId) noexcept {
 }
 
 string Data::valuesXML(const Values& data) noexcept {
-	string r, el, tab(" ");
+	string r, el, tab {" "};
 	if (data.getSize() > 2) {
 		el  = "\n";
 		tab = Defaults::tab();
@@ -112,7 +112,7 @@ string Data::createOpeningXML(
 	const Values& data,
 	bool          empty
 ) noexcept {
-	string r(Defaults::tab() + "<" + node);
+	string r {Defaults::tab() + "<" + node};
 	if (data.getSize() > ATTRIBUTES_LIMIT_PER_ROW) {
 		r += "\n";
 		Defaults::increaseTab();
@@ -131,6 +131,5 @@ string Data::createOpeningXML(
 
 string Data::createClosingXML(const string& node) noexcept {
 	Defaults::reduceTab();
-	string r(Defaults::tab() + "</" + node + ">\n");
-	return r;
+	return {Defaults::tab() + "</" + node + ">\n"};
 }

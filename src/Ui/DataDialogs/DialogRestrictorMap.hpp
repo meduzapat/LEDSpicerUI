@@ -55,6 +55,12 @@ public:
 	 */
 	void trimToInterfaces(uint8_t maxInterfaces) noexcept;
 
+	/**
+	 * Installs a callback fired when a mapping is added or removed.
+	 * @param cb the observer (e.g. the host re-evaluating its test affordance).
+	 */
+	void setOnMapsChanged(std::function<void()> cb) noexcept { onMapsChanged = std::move(cb); }
+
 protected:
 
 	Gtk::Button* btnAdd = nullptr;
@@ -68,6 +74,9 @@ protected:
 
 	Gtk::ListStore* liststoreRestrictorMapId = nullptr;
 
+	/// Fired after a mapping add/remove; lets the host re-gate without a back-reference.
+	std::function<void()> onMapsChanged;
+
 	DialogRestrictorMap(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept;
 
 	/**
@@ -77,6 +86,8 @@ protected:
 	bool checkAvailableInterfaces() const noexcept;
 
 	const string& getType() const noexcept override { return TYPE_RESTRICTOR_MAP; }
+
+	const char* getLockClass() const noexcept override { return CSS_RO_LOCKED_CONFIG; }
 	Storage::Data* createData(Values& rawData) const noexcept override;
 
 	void afterCreate(Storage::BoxButton& boxButton) noexcept override;

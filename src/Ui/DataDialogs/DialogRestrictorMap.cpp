@@ -159,10 +159,12 @@ void DialogRestrictorMap::trimToInterfaces(uint8_t maxInterfaces) noexcept {
 void DialogRestrictorMap::afterCreate(Storage::BoxButton&) noexcept {
 	// This is necessary to disable the add if needed.
 	btnAdd->set_sensitive(checkAvailableInterfaces());
+	if (onMapsChanged) onMapsChanged();
 }
 
 void DialogRestrictorMap::afterDeleteConfirmation(Storage::BoxButton& boxButton) noexcept {
 	DialogForm::afterDeleteConfirmation(boxButton);
 	// Assume that after deleting we can add a new map
 	btnAdd->set_sensitive(true);
+	if (onMapsChanged) onMapsChanged();
 }

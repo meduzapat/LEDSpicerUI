@@ -47,6 +47,8 @@ set(COMMON_SRCS
 set(STORAGE_SRCS
 	${CMAKE_SOURCE_DIR}/src/Ui/Storage/Data.cpp
 	${CMAKE_SOURCE_DIR}/src/Ui/Storage/BoxButton.cpp
+	# BoxButtonCollection reads the writability state when populating.
+	${CMAKE_SOURCE_DIR}/src/config/Settings.cpp
 	${CMAKE_SOURCE_DIR}/src/Ui/Storage/BoxButtonCollection.cpp
 )
 
@@ -219,7 +221,7 @@ add_test_executable(AnimationTest
 
 add_test_executable(ConfigFileTest
 	"config/ConfigFileTest.cpp"
-	"${STORAGE_BASE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp;${CMAKE_SOURCE_DIR}/src/Ui/StatusBar.cpp;${CMAKE_SOURCE_DIR}/src/XMLHelper.cpp;${CMAKE_SOURCE_DIR}/src/config/Settings.cpp;${CMAKE_SOURCE_DIR}/src/config/ProjectFile.cpp;${CMAKE_SOURCE_DIR}/src/config/ConfigFile.cpp"
+	"${STORAGE_BASE_SRCS};${CMAKE_SOURCE_DIR}/src/Ui/Message.cpp;${CMAKE_SOURCE_DIR}/src/Ui/StatusBar.cpp;${CMAKE_SOURCE_DIR}/src/XMLHelper.cpp;${CMAKE_SOURCE_DIR}/src/config/Settings.cpp;${CMAKE_SOURCE_DIR}/src/config/ProjectFile.cpp;${CMAKE_SOURCE_DIR}/src/config/ConfigFile.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/Element.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/Link.cpp;${CMAKE_SOURCE_DIR}/src/Ui/Storage/DirNode.cpp"
 	"${TINYXML2_LIBRARIES}"
 )
 

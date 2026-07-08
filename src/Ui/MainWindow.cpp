@@ -37,7 +37,7 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 	inputNavigator(builder, this),
 	animationNavigator(builder, this),
 	profileNavigator(builder, this),
-	layout(builder, &layoutTester, &devices)
+	layout(builder, &devices)
 {
 
 	Storage::Element::setObserver(&layout);
@@ -95,6 +95,48 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 	builder->get_widget("BtnSaveProject", btnSaveProject);
 	builder->get_widget("BtnAbout",       btnAbout);
 
+	// Daemon connection toggle.
+	builder->get_widget("ToggleConnect", toggleConnect);
+	toggleConnect->signal_toggled().connect(sigc::mem_fun(*this, &MainWindow::onConnectToggled));
+
+	// Modal busy indicator for the connect/disconnect wait (defined in glade).
+	builder->get_widget("DaemonBusyWindow", busyWindow);
+	builder->get_widget("DaemonBusyLabel",  busyLabel);
+
+	// Refresh on close because settings has no Apply.
+	DialogSettings::getInstance()->onClose([this]() {
+		syncSandbox();
+		updateDaemonControls();
+		/*
+		 * A daemon change retargeted the paths: reload the project from the new
+		 * locations (which re-derives writability); otherwise just re-apply it.
+		 */
+		if (DialogSettings::getInstance()->takeProjectReload())
+			openProject(Settings::get().getCurrentProject());
+		else
+			applyWritability();
+	});
+
+	// Config changes stale the staged config; restrictors are included for the rotator test.
+	auto staleDaemon {[this]() { onDaemonConfigChanged(); }};
+	CollectionHandler::getInstance(COLLECTION_DEVICES    )->onChange(staleDaemon);
+	CollectionHandler::getInstance(COLLECTION_ELEMENTS   )->onChange(staleDaemon);
+	CollectionHandler::getInstance(COLLECTION_GROUPS     )->onChange(staleDaemon);
+	CollectionHandler::getInstance(COLLECTION_RESTRICTORS)->onChange(staleDaemon);
+	inputPortNumber->signal_changed().connect(staleDaemon);
+
+	// command() asks this before every send; we refresh a stale daemon first.
+	DaemonHandler::getInstance().setReadyGate([this]() { return ensureDaemonReady(); });
+
+	// Rotator test reuses the readiness gate.
+	DialogRestrictor::getInstance()->setRotatorRunner(
+		[this](const StringVector& args, string& output) { return runRotatorTest(args, output); }
+	);
+	// runRotatorTest refreshes a stale config, so gate only on interactive + connected.
+	DialogRestrictor::getInstance()->setTestLive([this]() {
+		return Settings::get().isInteractive() and toggleConnect->get_active();
+	});
+
 	// Top directory information.
 	Gtk::HeaderBar* header;
 	builder->get_widget("Header", header);
@@ -110,7 +152,21 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 				throw Message("The number of random colors need to be more than one or none.");
 			}
 
-			const bool backupKept {ProjectFile::saveProject([&]() {
+			const bool
+				rootWritable    {Settings::get().isRootConfigWritable()},
+				projectWritable {Settings::get().isProjectDirWritable()};
+
+			// RO project.
+			if (not rootWritable or not projectWritable) {
+				const string
+					skipped {rootWritable ? "project files are" : "root configuration is"},
+					saved   {rootWritable ? "root configuration" : "project files"};
+				if (Message::ask(
+					"The " + skipped + " read-only and will NOT be saved.\nSave the " + saved + "?", this
+				) != Gtk::ResponseType::RESPONSE_YES) return;
+			}
+
+			auto saveConfig {[&]() {
 				ConfigFile::save(ConfigFile::ConfigData(
 					Settings::get().getActiveConfigPath(),
 					Settings::get().getCurrentProject(),
@@ -122,15 +178,30 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 					groups,
 					processes
 				));
+			}};
 
-				inputNavigator.save();
-				animationNavigator.save();
-				profileNavigator.save();
-			})};
+			bool backupKept {false};
+			if (projectWritable) {
+				backupKept = ProjectFile::saveProject([&]() {
+					if (rootWritable) saveConfig();
+					inputNavigator.save();
+					animationNavigator.save();
+					profileNavigator.save();
+				});
+			}
+			else {
+				// A system-sourced config lives outside the project directory.
+				saveConfig();
+			}
 
 			Defaults::cleanDirty();
 			DialogSettings::getInstance()->saveSettings();
-			StatusBar::getInstance().push("Project saved", StatusBar::Severity::Success);
+			if (rootWritable and projectWritable)
+				StatusBar::getInstance().push("Project saved", StatusBar::Severity::Success);
+			else
+				StatusBar::getInstance().push(
+					"Project partially saved (read-only parts skipped)", StatusBar::Severity::Warning
+				);
 			if (backupKept)
 				StatusBar::getInstance().push("Backup saved", StatusBar::Severity::Success);
 		}
@@ -202,11 +273,17 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 		const string& defaultProject = Settings::get().getDefaultProject();
 		if (not defaultProject.empty())
 			openProject(defaultProject);
+		// Settings are loaded now: build the test sandbox.
+		syncSandbox();
+		updateDaemonControls();
 		Defaults::setIgnoreChanges(false);
 	});
 }
 
 MainWindow::~MainWindow() {
+
+	// Stop the test daemon we own; the sandbox member wipes its files on destruction.
+	DaemonHandler::getInstance().disconnect();
 
 	Geometry::get().terminate();
 
@@ -286,23 +363,37 @@ void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {
 	});
 
 	btnSelectProject->signal_clicked().connect([this]() {
-		if (DialogProject::getInstance()->run() != Gtk::ResponseType::RESPONSE_APPLY) {
-			DialogProject::getInstance()->hide();
+		auto dialog {DialogProject::getInstance()};
+		const auto response {dialog->run()};
+		dialog->hide();
+		/*
+		 * A conversion moved the open project's config on disk;
+		 * it must reload regardless of how the dialog was closed.
+		 * Conversions require a clean project, so the reload cannot lose work.
+		 */
+		const bool reloadCurrent {dialog->takeCurrentProjectConverted()};
+		if (response != Gtk::ResponseType::RESPONSE_APPLY) {
+			if (reloadCurrent) openProject(Settings::get().getCurrentProject());
 			return;
 		}
-		const string& newProject {DialogProject::getInstance()->getProjectName()};
+		const string& newProject {dialog->getProjectName()};
 		if (newProject == Settings::get().getCurrentProject()) {
-			// TODO add revert option, instead of warning, ask to reload without saving.
-			Message::displayInfo("Already working on that project", DialogProject::getInstance());
-			DialogProject::getInstance()->hide();
+			if (reloadCurrent) {
+				openProject(newProject);
+				return;
+			}
+			if (not Defaults::isDirty()) {
+				Message::displayInfo("Already working on that project");
+				return;
+			}
+			if (Message::ask("Discard unsaved changes and reload \"" + newProject + "\" from disk?") != Gtk::ResponseType::RESPONSE_YES)
+				return;
+			openProject(newProject);
 			return;
 		}
-		if (Defaults::isDirty() and Message::ask("All unsaved changes will be loss, are you sure?", DialogProject::getInstance()) != Gtk::ResponseType::RESPONSE_YES) {
-			DialogProject::getInstance()->hide();
+		if (Defaults::isDirty() and Message::ask("All unsaved changes will be loss, are you sure?") != Gtk::ResponseType::RESPONSE_YES)
 			return;
-		}
-		openProject(newProject);
-		DialogProject::getInstance()->hide();
+		openProject(newProject, dialog->isPortableRequested());
 	});
 }
 
@@ -315,10 +406,10 @@ void MainWindow::setConfiguration(const Values& values) {
 	comboColors->set_active_id(values.getValue("colors", DEFAULT_COLORS));
 	comboLogLevel->set_active_id(values.getValue("logLevel", DEFAULT_LOGLEVEL));
 	listBoxDataSource->sortAndMark(Defaults::explode(values.getValue("dataSource", DEFAULT_DATASOURCE), ','));
+	DialogColors::getInstance()->wipeColorPicker(boxRandomColors);
 	auto randomColors(Defaults::explode(values.getValue("randomColors"), ','));
-	if (not randomColors.empty()) {
+	if (not randomColors.empty())
 		DialogColors::getInstance()->populateColorBox(boxRandomColors, randomColors);
-	}
 
 	// DEFAULT_PROFILE
 	// emitter
@@ -347,19 +438,39 @@ LEDSpicerUI::Values MainWindow::packLedspicerConfig() const noexcept {
 	return r;
 }
 
-void MainWindow::openProject(const string& name) {
+void MainWindow::openProject(const string& name, bool portable) {
+
+	// Resolves the config source for the project (embedded config wins).
 	Settings::get().setCurrentProject(name);
-	Defaults::setSubtitle(name);
+	if (portable)
+		Settings::get().setConfigSource(Settings::ConfigSource::Project);
+
+	// A missing config is a new one; without a writable target it can never exist.
+	const string activeConfig {Settings::get().getActiveConfigPath()};
+	if (not Glib::file_test(activeConfig, Glib::FileTest::FILE_TEST_EXISTS)
+		and not Settings::get().isRootConfigWritable()) {
+		Message::displayError(
+			"There is no configuration for \"" + name + "\" and no writable location to create one.",
+			this
+		);
+		Settings::get().setCurrentProject("");
+		return;
+	}
+
 	comboColors->set_active_id("");
 
 	Message::beginBatch();
+	bool loadFailed {false};
 	try {
 		readConfigFile(Settings::get().getActiveConfigPath(), true, IMPORT_ALL);
 		DialogSettings::getInstance()->saveSettings();
 	}
 	catch (Message& e) {
-		if (Glib::file_test(Settings::get().getActiveConfigPath(), Glib::FileTest::FILE_TEST_EXISTS))
+		// A present but unreadable config is a real failure; an absent one is a new project.
+		if (Glib::file_test(Settings::get().getActiveConfigPath(), Glib::FileTest::FILE_TEST_EXISTS)) {
 			Message::collect(XMLHelper::cleanError("The config file raised an error: " + e.takeMessage()));
+			loadFailed = true;
+		}
 		// Order mirrors the destructor (dependents before sources).
 		profileNavigator.clear();
 		animationNavigator.clear();
@@ -377,10 +488,272 @@ void MainWindow::openProject(const string& name) {
 	DialogRestrictor::getInstance()->refreshItems();
 	DialogProcess::getInstance()->refreshItems();
 	Defaults::cleanDirty();
-	mainTabs->set_visible_child("configuration");
-	mainTabsBox->set_sensitive(true);
-	btnImportConfig->set_sensitive(true);
-	Message::finishBatch("Project loaded");
+
+	if (loadFailed) {
+		// Bad project: stay out of it, leave the UI idle.
+		Settings::get().setCurrentProject("");
+		Defaults::setSubtitle("");
+		mainTabsBox->set_sensitive(false);
+		btnImportConfig->set_sensitive(false);
+	}
+	else {
+		mainTabs->set_visible_child("configuration");
+		mainTabsBox->set_sensitive(true);
+		btnImportConfig->set_sensitive(true);
+	}
+
+	// Drop any previous test connection; this project's config is built on connect.
+	DaemonHandler::getInstance().disconnect();
+	layout.setTesting(false);
+	ignoreConnectToggle = true;
+	toggleConnect->set_active(false);
+	ignoreConnectToggle = false;
+	updateDaemonControls();
+	applyWritability();
+
+	Message::finishBatch(loadFailed ? "Project could not be loaded" : "Project loaded");
+}
+
+void MainWindow::applyWritability() noexcept {
+
+	auto& settings {Settings::get()};
+	// Without a project the whole tab area is already disabled.
+	if (settings.getCurrentProject().empty()) return;
+
+	const bool
+		rootWritable    {settings.isRootConfigWritable()},
+		projectWritable {settings.isProjectDirWritable()};
+
+	Defaults::applyWritability(CSS_RO_LOCKED_CONFIG,  rootWritable);
+	Defaults::applyWritability(CSS_RO_LOCKED_PROJECT, projectWritable);
+
+	DialogDevice::getInstance()->setReadOnly(not rootWritable);
+	DialogRestrictor::getInstance()->setReadOnly(not rootWritable);
+	DialogProcess::getInstance()->setReadOnly(not rootWritable);
+	DialogGroup::getInstance()->setReadOnly(not rootWritable);
+	DialogInput::getInstance()->setReadOnly(not projectWritable);
+	DialogAnimation::getInstance()->setReadOnly(not projectWritable);
+	DialogProfile::getInstance()->setReadOnly(not projectWritable);
+
+	// The lock and its explanation live with the project name.
+	string lockTip;
+	if (not rootWritable)
+		lockTip = "The root configuration is read-only.";
+	if (not projectWritable)
+		lockTip += string{lockTip.empty() ? "" : "\n"} + "The project directory is read-only.";
+	Defaults::setSubtitle(
+		(lockTip.empty() ? "" : "🔒 ") + settings.getCurrentProject() +
+		(settings.getConfigSource() == Settings::ConfigSource::Project ? " · portable" : ""),
+		lockTip
+	);
+}
+
+void MainWindow::onConnectToggled() {
+	if (ignoreConnectToggle)
+		return;
+	if (toggleConnect->get_active()) {
+		if (not connectDaemon()) {
+			// Connection failed: revert the toggle without re-entering.
+			ignoreConnectToggle = true;
+			toggleConnect->set_active(false);
+			ignoreConnectToggle = false;
+		}
+	}
+	else {
+		showBusy("Stopping…");
+		DaemonHandler::getInstance().disconnect();
+		layout.setTesting(false);
+		hideBusy();
+		StatusBar::getInstance().push("Test mode off", StatusBar::Severity::Info);
+	}
+}
+
+void MainWindow::syncSandbox() noexcept {
+	const bool want {Settings::get().isInteractive()};
+	if (want == static_cast<bool>(sandbox))
+		return;
+	if (want) {
+		try {
+			sandbox = std::make_unique<DaemonSandbox>();
+		}
+		catch (Message& e) {
+			StatusBar::getInstance().push(
+				"Could not prepare the test sandbox: " + e.takeMessage(),
+				StatusBar::Severity::Warning
+			);
+		}
+		return;
+	}
+	// Leaving interactive mode: drop any live test daemon, then the sandbox.
+	if (toggleConnect->get_active()) {
+		DaemonHandler::getInstance().disconnect();
+		layout.setTesting(false);
+		ignoreConnectToggle = true;
+		toggleConnect->set_active(false);
+		ignoreConnectToggle = false;
+	}
+	sandbox.reset();
+}
+
+bool MainWindow::launchDaemon() {
+	// Always stage the shared sandbox config; both zones read it.
+	sandbox->regenerate(packLedspicerConfig(), devices, restrictors, groups);
+	// Daemon zone: ledspicerd runs only when there are devices to drive.
+	if (CollectionHandler::getInstance(COLLECTION_DEVICES)->getSize() == 0)
+		return true;
+	return DaemonHandler::getInstance().connect(
+		sandbox->getConfigPath(), sandbox->getProjectsDir(), inputPortNumber->get_text()
+	);
+}
+
+bool MainWindow::connectDaemon() noexcept {
+	if (not sandbox)
+		return false;
+	const bool daemon {CollectionHandler::getInstance(COLLECTION_DEVICES)->getSize() > 0};
+	showBusy(daemon ? "Connecting…" : "Staging…");
+	bool ok {false};
+	string error;
+	try {
+		ok = launchDaemon();
+	}
+	catch (Message& e) {
+		error = e.takeMessage();
+	}
+	hideBusy();
+	if (ok) {
+		Settings::get().setConfigDirty(false);
+		// Layout consumers only make sense against a live daemon.
+		if (daemon)
+			layout.setTesting(true);
+		StatusBar::getInstance().push(
+			daemon ? "Daemon connected" : "Test mode ready",
+			StatusBar::Severity::Success
+		);
+		return true;
+	}
+	StatusBar::getInstance().push(
+		error.empty()
+			? "Could not connect to the daemon. Another daemon may be running, the "
+			  "hardware may be missing, or the settings may be invalid."
+			: "Cannot connect: " + error,
+		StatusBar::Severity::Error
+	);
+	return false;
+}
+
+bool MainWindow::ensureDaemonReady() noexcept {
+	// No live daemon: consumers stay asleep, the command is dropped.
+	if (not toggleConnect->get_active())
+		return false;
+	// Live, but the base configuration drifted: redeploy it and cancel this test
+	// (the tile was paused mid-fire); the user reactivates to test the fresh daemon.
+	if (Settings::get().isConfigDirty()) {
+		reconnectDaemon();
+		return false;
+	}
+	return true;
+}
+
+bool MainWindow::reconnectDaemon() noexcept {
+	if (not sandbox)
+		return false;
+	// Pause consumers before anything pumps the loop: closing the active tile and
+	// cancelling its timers means no command can fire to re-enter this refresh.
+	layout.setTesting(false);
+	showBusy("Refreshing…");
+	bool ok {false};
+	string error;
+	try {
+		ok = launchDaemon();
+	}
+	catch (Message& e) {
+		error = e.takeMessage();
+	}
+	hideBusy();
+	if (ok) {
+		Settings::get().setConfigDirty(false);
+		// Resume consumers only when a daemon is actually live (devices present).
+		if (CollectionHandler::getInstance(COLLECTION_DEVICES)->getSize() > 0)
+			layout.setTesting(true);
+		return true;
+	}
+	// Could not refresh: stay paused, drop the link and reflect it on the toggle.
+	ignoreConnectToggle = true;
+	toggleConnect->set_active(false);
+	ignoreConnectToggle = false;
+	StatusBar::getInstance().push(
+		error.empty() ? "Daemon refresh failed." : "Daemon refresh failed: " + error,
+		StatusBar::Severity::Warning
+	);
+	return false;
+}
+
+bool MainWindow::runRotatorTest(const StringVector& positional, string& output) noexcept {
+	if (not ensureDaemonReady())
+		return false;
+	const string rotator {
+		(std::filesystem::path(Settings::get().getBinaryPath()).parent_path() / ROTATOR_BINARY).string()
+	};
+	if (not std::filesystem::exists(rotator)) {
+		output = "Rotator binary not found next to the daemon.";
+		return false;
+	}
+	return Defaults::runCommand(
+		Glib::shell_quote(rotator) + " -c " + Glib::shell_quote(sandbox->getConfigPath())
+			+ " " + Defaults::implode(positional, ' '),
+		output
+	);
+}
+
+void MainWindow::showBusy(const Glib::ustring& text) noexcept {
+	busyLabel->set_text(text);
+	busyWindow->show_all();
+	// Paint the window before the blocking call begins.
+	auto context {Glib::MainContext::get_default()};
+	while (context->pending())
+		context->iteration(false);
+}
+
+void MainWindow::hideBusy() noexcept {
+	busyWindow->hide();
+}
+
+void MainWindow::updateDaemonControls() noexcept {
+	// Daemon zone needs devices + port; restrictor zone needs only restrictors.
+	// Enabled in interactive mode when either zone has data.
+	const bool
+		hasDevices {CollectionHandler::getInstance(COLLECTION_DEVICES)->getSize() > 0},
+		hasRestrictors {CollectionHandler::getInstance(COLLECTION_RESTRICTORS)->getSize() > 0},
+		portOk {not inputPortNumber->get_text().empty()};
+	const bool eligible {
+		Settings::get().isInteractive()
+		and ((hasDevices and portOk) or hasRestrictors)
+	};
+	// Hidden without a daemon binary; visible otherwise, enabled only when a test can run.
+	toggleConnect->set_visible(Settings::get().hasBinary());
+	toggleConnect->set_sensitive(eligible);
+
+	// A live test session whose project drifted out of eligibility must drop.
+	if (not eligible and toggleConnect->get_active()) {
+		DaemonHandler::getInstance().disconnect();
+		layout.setTesting(false);
+		ignoreConnectToggle = true;
+		toggleConnect->set_active(false);
+		ignoreConnectToggle = false;
+		StatusBar::getInstance().push("Test mode off", StatusBar::Severity::Info);
+	}
+}
+
+void MainWindow::onDaemonConfigChanged() noexcept {
+	// Element/port changes re-evaluate the toggle; data drift stales a live daemon.
+	updateDaemonControls();
+	if (toggleConnect->get_active() and not Settings::get().isConfigDirty()) {
+		Settings::get().setConfigDirty(true);
+		StatusBar::getInstance().push(
+			"Base configuration changed — it will refresh on your next test.",
+			StatusBar::Severity::Info
+		);
+	}
 }
 
 void MainWindow::readConfigFile(const string& dataFilePath, bool wipe, uint8_t importFlags) {
@@ -419,10 +792,7 @@ void MainWindow::readConfigFile(const string& dataFilePath, bool wipe, uint8_t i
 
 	// Load inputs, animations and profiles from the project subdirectories.
 	if (wipe and not Settings::get().getProjectDir().empty()) {
-		inputNavigator.clear();
-		animationNavigator.clear();
 		profileNavigator.setDefaultProfileName(datafile.getRootInfo().getValue("defaultProfile"));
-		profileNavigator.clear();
 
 		inputNavigator.load();
 		animationNavigator.load();
@@ -431,10 +801,14 @@ void MainWindow::readConfigFile(const string& dataFilePath, bool wipe, uint8_t i
 }
 
 void MainWindow::populateColorsCombo() {
+	// Programmatic refresh, not a user edit: don't let it mark the project dirty.
+	const bool prev {Defaults::isIgnoringChanges()};
+	Defaults::setIgnoreChanges(true);
 	const string active = comboColors->get_active_id();
 	comboColors->remove_all();
 	for (const auto& c : Settings::get().getColorFiles())
 		comboColors->append(c, c);
 	if (not active.empty())
 		comboColors->set_active_id(active);
+	Defaults::setIgnoreChanges(prev);
 }

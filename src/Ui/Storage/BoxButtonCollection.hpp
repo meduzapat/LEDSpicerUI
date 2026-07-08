@@ -23,6 +23,7 @@
 #include "SensitivityTracker.hpp"
 #include "SortableFlowBox.hpp"
 #include "BoxButton.hpp"
+#include "config/Settings.hpp"
 
 #pragma once
 

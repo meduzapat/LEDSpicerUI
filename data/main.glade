@@ -255,6 +255,9 @@ Author: Patricio A Rossi
                         <property name="vexpand">True</property>
                         <child>
                           <object class="GtkBox">
+                            <style>
+                              <class name="RoLockedConfig"/>
+                            </style>
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="margin-start">2</property>
@@ -636,6 +639,9 @@ You can reduce that list by adding only the colors you want to be used by Random
                         </child>
                         <child>
                           <object class="GtkBox">
+                            <style>
+                              <class name="RoLockedConfig"/>
+                            </style>
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="margin-start">2</property>
@@ -944,6 +950,9 @@ Very useful when MAME does not provide game's data, or when you want to customiz
                             <property name="orientation">vertical</property>
                             <child>
                               <object class="GtkBox">
+                                <style>
+                                  <class name="RoLockedConfig"/>
+                                </style>
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
                                 <child>
@@ -1111,6 +1120,9 @@ If nothing is set, the default is 1000ms.</property>
                         <property name="spacing">5</property>
                         <child>
                           <object class="GtkBox">
+                            <style>
+                              <class name="RoLockedConfig"/>
+                            </style>
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <child>
@@ -1200,6 +1212,9 @@ If nothing is set, the default is 1000ms.</property>
                         <property name="spacing">5</property>
                         <child>
                           <object class="GtkBox">
+                            <style>
+                              <class name="RoLockedConfig"/>
+                            </style>
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <child>
@@ -1334,6 +1349,9 @@ If nothing is set, the default is 1000ms.</property>
                     </child>
                     <child>
                       <object class="GtkBox">
+                        <style>
+                          <class name="RoLockedConfig"/>
+                        </style>
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="orientation">vertical</property>
@@ -1499,6 +1517,9 @@ If nothing is set, the default is 1000ms.</property>
                     </child>
                     <child>
                       <object class="GtkBox">
+                        <style>
+                          <class name="RoLockedProject"/>
+                        </style>
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="orientation">vertical</property>
@@ -1686,6 +1707,9 @@ If nothing is set, the default is 1000ms.</property>
                     </child>
                     <child>
                       <object class="GtkBox">
+                        <style>
+                          <class name="RoLockedProject"/>
+                        </style>
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="orientation">vertical</property>
@@ -1869,6 +1893,9 @@ If nothing is set, the default is 1000ms.</property>
                     </child>
                     <child>
                       <object class="GtkBox">
+                        <style>
+                          <class name="RoLockedProject"/>
+                        </style>
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="orientation">vertical</property>
@@ -2060,6 +2087,27 @@ If nothing is set, the default is 1000ms.</property>
           </packing>
         </child>
         <child>
+          <object class="GtkToggleButton" id="ToggleConnect">
+            <property name="visible">True</property>
+            <property name="sensitive">False</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
+            <property name="tooltip-text" translatable="yes">Enable test mode — layout testing for devices and rotation testing for restrictors</property>
+            <child>
+              <object class="GtkImage">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="icon-name">network-transmit-receive-symbolic</property>
+                <property name="use-fallback">True</property>
+                <property name="icon_size">3</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="position">3</property>
+          </packing>
+        </child>
+        <child>
           <object class="GtkLinkButton" id="BtnDonate">
             <property name="visible">True</property>
             <property name="can-focus">True</property>
@@ -2104,6 +2152,9 @@ If nothing is set, the default is 1000ms.</property>
         </child>
         <child>
           <object class="GtkButton" id="BtnImportConfig">
+            <style>
+              <class name="RoLockedConfig"/>
+            </style>
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="receives-default">True</property>
@@ -2142,6 +2193,48 @@ If nothing is set, the default is 1000ms.</property>
           <packing>
             <property name="pack-type">end</property>
             <property name="position">5</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkWindow" id="DaemonBusyWindow">
+    <property name="can-focus">False</property>
+    <property name="modal">True</property>
+    <property name="window-position">center-on-parent</property>
+    <property name="type-hint">dialog</property>
+    <property name="decorated">False</property>
+    <property name="transient-for">MainWindow</property>
+    <property name="border-width">16</property>
+    <child>
+      <object class="GtkBox">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <property name="spacing">12</property>
+        <child>
+          <object class="GtkSpinner">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="active">True</property>
+            <property name="width-request">32</property>
+            <property name="height-request">32</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="DaemonBusyLabel">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label"></property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
           </packing>
         </child>
       </object>
@@ -2323,6 +2416,9 @@ Compatible with version @MINIMUM_COMPATIBILITY@+</property>
         </child>
         <child>
           <object class="GtkBox">
+            <style>
+              <class name="RoLockedProject"/>
+            </style>
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="spacing">2</property>
@@ -2375,6 +2471,9 @@ Compatible with version @MINIMUM_COMPATIBILITY@+</property>
         </child>
         <child>
           <object class="GtkBox">
+            <style>
+              <class name="RoLockedProject"/>
+            </style>
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="spacing">5</property>
@@ -2765,6 +2864,9 @@ Compatible with version @MINIMUM_COMPATIBILITY@+</property>
             <property name="spacing">5</property>
             <child>
               <object class="GtkBox">
+                <style>
+                  <class name="RoLockedConfig"/>
+                </style>
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="homogeneous">True</property>
@@ -2877,6 +2979,9 @@ Compatible with version @MINIMUM_COMPATIBILITY@+</property>
                 <property name="spacing">2</property>
                 <child>
                   <object class="GtkBox">
+                    <style>
+                      <class name="RoLockedConfig"/>
+                    </style>
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="spacing">5</property>
@@ -3526,6 +3631,9 @@ Compatible with version @MINIMUM_COMPATIBILITY@+</property>
             <property name="spacing">2</property>
             <child>
               <object class="GtkBox">
+                <style>
+                  <class name="RoLockedProject"/>
+                </style>
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="spacing">5</property>
@@ -3646,6 +3754,9 @@ Compatible with version @MINIMUM_COMPATIBILITY@+</property>
                         <property name="orientation">vertical</property>
                         <child>
                           <object class="GtkBox">
+                            <style>
+                              <class name="RoLockedProject"/>
+                            </style>
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="spacing">5</property>
@@ -3803,6 +3914,9 @@ Compatible with version @MINIMUM_COMPATIBILITY@+</property>
                         <property name="orientation">vertical</property>
                         <child>
                           <object class="GtkBox">
+                            <style>
+                              <class name="RoLockedProject"/>
+                            </style>
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <child>
@@ -3910,6 +4024,9 @@ Compatible with version @MINIMUM_COMPATIBILITY@+</property>
                         <property name="orientation">vertical</property>
                         <child>
                           <object class="GtkBox">
+                            <style>
+                              <class name="RoLockedProject"/>
+                            </style>
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <child>
@@ -4003,6 +4120,9 @@ Compatible with version @MINIMUM_COMPATIBILITY@+</property>
                         <property name="orientation">vertical</property>
                         <child>
                           <object class="GtkBox">
+                            <style>
+                              <class name="RoLockedProject"/>
+                            </style>
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <child>
@@ -4322,11 +4442,77 @@ Autodetected if ledspicerd is detected</property>
                     <property name="position">1</property>
                   </packing>
                 </child>
+                <child>
+                  <object class="GtkToggleButton" id="ToggleNewProjectPortable">
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">False</property>
+                    <property name="tooltip-text">Stores ledspicer.conf inside the project directory instead of the system location</property>
+                    <property name="label">Portable</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
                 <property name="position">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkBox" id="BoxProjectConvert">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="spacing">5</property>
+                <property name="margin-top">10</property>
+                <child>
+                  <object class="GtkButton" id="BtnProjectMakePortable">
+                    <property name="label">Make portable</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">False</property>
+                    <property name="tooltip-text">Copy the system configuration into the project directory</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="BtnProjectDeploy">
+                    <property name="label">Deploy to system</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">False</property>
+                    <property name="tooltip-text">Copy the project configuration over the system one, keeping a backup</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="BtnProjectUseSystem">
+                    <property name="label">Use system config</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">False</property>
+                    <property name="tooltip-text">Stop using the embedded configuration, keeping it as a backup</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">3</property>
               </packing>
             </child>
           </object>
@@ -4523,6 +4709,7 @@ Autodetected if ledspicerd is detected</property>
               <object class="GtkStack" id="stackSettings">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
+                <property name="margin-left">5</property>
                 <property name="transition-type">slide-up-down</property>
                 <child>
                   <object class="GtkBox">
@@ -5174,17 +5361,6 @@ Ships empty; place theme folders here, or point this anywhere you keep them.</pr
                             <property name="tooltip-text" translatable="yes">When this option is enabled, empty directories will be preserved when saving the project.</property>
                             <property name="spacing">5</property>
                             <child>
-                              <object class="GtkSwitch" id="SwitchSettingsPreserveEmptyDir">
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">0</property>
-                              </packing>
-                            </child>
-                            <child>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
@@ -5192,8 +5368,19 @@ Ships empty; place theme folders here, or point this anywhere you keep them.</pr
                                 <property name="label">Preserve empty directories</property>
                               </object>
                               <packing>
-                                <property name="expand">False</property>
+                                <property name="expand">True</property>
                                 <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkSwitch" id="SwitchSettingsPreserveEmptyDir">
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">False</property>
                                 <property name="position">1</property>
                               </packing>
                             </child>
@@ -5223,17 +5410,6 @@ Ships empty; place theme folders here, or point this anywhere you keep them.</pr
                             <property name="tooltip-text" translatable="yes">When this option is enabled, components that are empty or fail validation checks will be automatically removed.</property>
                             <property name="spacing">5</property>
                             <child>
-                              <object class="GtkSwitch" id="SwitchSettingsRemoveInvalidItems">
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">0</property>
-                              </packing>
-                            </child>
-                            <child>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
@@ -5241,8 +5417,19 @@ Ships empty; place theme folders here, or point this anywhere you keep them.</pr
                                 <property name="label">Remove invalid or empty components</property>
                               </object>
                               <packing>
-                                <property name="expand">False</property>
+                                <property name="expand">True</property>
                                 <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkSwitch" id="SwitchSettingsRemoveInvalidItems">
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">False</property>
                                 <property name="position">1</property>
                               </packing>
                             </child>
@@ -5260,17 +5447,6 @@ Ships empty; place theme folders here, or point this anywhere you keep them.</pr
                             <property name="tooltip-text" translatable="yes">When this option is enabled, a backup of the current project files will be created before saving changes.</property>
                             <property name="spacing">5</property>
                             <child>
-                              <object class="GtkSwitch" id="SwitchSettingsSaveBackup">
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">0</property>
-                              </packing>
-                            </child>
-                            <child>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
@@ -5278,8 +5454,19 @@ Ships empty; place theme folders here, or point this anywhere you keep them.</pr
                                 <property name="label">Backup project before saving</property>
                               </object>
                               <packing>
-                                <property name="expand">False</property>
+                                <property name="expand">True</property>
                                 <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkSwitch" id="SwitchSettingsSaveBackup">
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">False</property>
                                 <property name="position">1</property>
                               </packing>
                             </child>
@@ -5301,23 +5488,13 @@ Ships empty; place theme folders here, or point this anywhere you keep them.</pr
                       <object class="GtkBox">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
+                        <property name="spacing">5</property>
                         <child>
                           <object class="GtkBox">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="tooltip-text" translatable="yes">When enabled, generated files will be displayed in a dialog instead of being saved, and the project directory will remain unchanged.</property>
                             <property name="spacing">5</property>
-                            <child>
-                              <object class="GtkSwitch" id="SwitchSettingsDebugFiles">
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">0</property>
-                              </packing>
-                            </child>
                             <child>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
@@ -5326,8 +5503,19 @@ Ships empty; place theme folders here, or point this anywhere you keep them.</pr
                                 <property name="label">Display files instead of saving</property>
                               </object>
                               <packing>
-                                <property name="expand">False</property>
+                                <property name="expand">True</property>
                                 <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkSwitch" id="SwitchSettingsDebugFiles">
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">False</property>
                                 <property name="position">1</property>
                               </packing>
                             </child>
@@ -5339,7 +5527,41 @@ Ships empty; place theme folders here, or point this anywhere you keep them.</pr
                           </packing>
                         </child>
                         <child>
-                          <placeholder/>
+                          <object class="GtkBox">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="tooltip-text" translatable="yes">When enabled, hardware test actions (lighting and clearing elements, restrictor moves) are shown in the status bar.</property>
+                            <property name="spacing">5</property>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="halign">end</property>
+                                <property name="label">Show hardware test actions</property>
+                              </object>
+                              <packing>
+                                <property name="expand">True</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkSwitch" id="SwitchSettingsDebugHardwareTest">
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">False</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
                         </child>
                       </object>
                       <packing>
@@ -5524,6 +5746,9 @@ Ships empty; place theme folders here, or point this anywhere you keep them.</pr
         </child>
         <child>
           <object class="GtkBox">
+            <style>
+              <class name="RoLockedConfig"/>
+            </style>
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="orientation">vertical</property>
@@ -5748,6 +5973,9 @@ Ships empty; place theme folders here, or point this anywhere you keep them.</pr
             <property name="spacing">2</property>
             <child>
               <object class="GtkBox">
+                <style>
+                  <class name="RoLockedConfig"/>
+                </style>
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="spacing">5</property>
@@ -5792,6 +6020,9 @@ Ships empty; place theme folders here, or point this anywhere you keep them.</pr
             </child>
             <child>
               <object class="GtkBox">
+                <style>
+                  <class name="RoLockedConfig"/>
+                </style>
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="spacing">5</property>
@@ -5894,6 +6125,9 @@ Ships empty; place theme folders here, or point this anywhere you keep them.</pr
             </child>
             <child>
               <object class="GtkBox">
+                <style>
+                  <class name="RoLockedConfig"/>
+                </style>
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="spacing">5</property>
@@ -5984,6 +6218,9 @@ If you have multiple serial devices, avoid using autodetect.</property>
             </child>
             <child>
               <object class="GtkBox">
+                <style>
+                  <class name="RoLockedConfig"/>
+                </style>
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="spacing">5</property>
@@ -6258,6 +6495,9 @@ If you have multiple serial devices, avoid using autodetect.</property>
         </child>
         <child>
           <object class="GtkBox">
+            <style>
+              <class name="RoLockedConfig"/>
+            </style>
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <child>
@@ -6328,6 +6568,9 @@ If you have multiple serial devices, avoid using autodetect.</property>
         </child>
         <child>
           <object class="GtkNotebook" id="NotebookDeviceConnections">
+            <style>
+              <class name="RoLockedConfig"/>
+            </style>
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <child>
@@ -6975,6 +7218,9 @@ If you have multiple serial devices, avoid using autodetect.</property>
         </child>
         <child>
           <object class="GtkScrolledWindow" id="ScrolledWindowConnections">
+            <style>
+              <class name="RoLockedConfig"/>
+            </style>
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="hadjustment">adjustmentMainWindowScrolledWindowsH</property>
@@ -7015,6 +7261,9 @@ If you have multiple serial devices, avoid using autodetect.</property>
         </child>
         <child>
           <object class="GtkBox">
+            <style>
+              <class name="RoLockedConfig"/>
+            </style>
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="spacing">5</property>
@@ -7239,6 +7488,9 @@ Default: 100%.</property>
         </child>
         <child>
           <object class="GtkBox" id="BoxLinkEditColor">
+            <style>
+              <class name="RoLockedProject"/>
+            </style>
             <property name="can-focus">False</property>
             <property name="spacing">5</property>
             <child>
@@ -7278,6 +7530,9 @@ Default: 100%.</property>
         </child>
         <child>
           <object class="GtkBox" id="BoxLinkEditCombo">
+            <style>
+              <class name="RoLockedProject"/>
+            </style>
             <property name="can-focus">False</property>
             <property name="spacing">5</property>
             <child>
@@ -7434,6 +7689,9 @@ Default: 100%.</property>
             <property name="spacing">2</property>
             <child>
               <object class="GtkBox">
+                <style>
+                  <class name="RoLockedConfig"/>
+                </style>
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="spacing">5</property>
@@ -7479,6 +7737,9 @@ Default: 100%.</property>
             </child>
             <child>
               <object class="GtkBox">
+                <style>
+                  <class name="RoLockedConfig"/>
+                </style>
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="spacing">2</property>
@@ -7581,6 +7842,9 @@ If you have multiple serial devices, avoid using autodetect.</property>
             </child>
             <child>
               <object class="GtkBox">
+                <style>
+                  <class name="RoLockedConfig"/>
+                </style>
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="homogeneous">True</property>
@@ -7678,6 +7942,9 @@ If you have multiple serial devices, avoid using autodetect.</property>
             </child>
             <child>
               <object class="GtkBox">
+                <style>
+                  <class name="RoLockedConfig"/>
+                </style>
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="spacing">5</property>
@@ -7708,6 +7975,9 @@ If you have multiple serial devices, avoid using autodetect.</property>
             </child>
             <child>
               <object class="GtkBox">
+                <style>
+                  <class name="RoLockedConfig"/>
+                </style>
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="spacing">5</property>
@@ -7751,7 +8021,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                 <property name="can-focus">False</property>
                 <property name="orientation">vertical</property>
                 <child>
-                  <object class="GtkLabel">
+                  <object class="GtkLabel" id="LabelRestrictorWays">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="halign">start</property>
@@ -7772,7 +8042,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                     <property name="selection-mode">none</property>
                     <property name="activate-on-single-click">False</property>
                     <child>
-                      <object class="GtkFlowBoxChild" id="w2">
+                      <object class="GtkFlowBoxChild" id="2">
                         <property name="width-request">64</property>
                         <property name="height-request">64</property>
                         <property name="visible">True</property>
@@ -7790,7 +8060,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                       </object>
                     </child>
                     <child>
-                      <object class="GtkFlowBoxChild" id="w2v">
+                      <object class="GtkFlowBoxChild" id="vertical2">
                         <property name="width-request">64</property>
                         <property name="height-request">64</property>
                         <property name="visible">True</property>
@@ -7808,7 +8078,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                       </object>
                     </child>
                     <child>
-                      <object class="GtkFlowBoxChild" id="w4">
+                      <object class="GtkFlowBoxChild" id="4">
                         <property name="width-request">64</property>
                         <property name="height-request">64</property>
                         <property name="visible">True</property>
@@ -7826,7 +8096,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                       </object>
                     </child>
                     <child>
-                      <object class="GtkFlowBoxChild" id="w4x">
+                      <object class="GtkFlowBoxChild" id="4x">
                         <property name="width-request">64</property>
                         <property name="height-request">64</property>
                         <property name="visible">True</property>
@@ -7844,7 +8114,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                       </object>
                     </child>
                     <child>
-                      <object class="GtkFlowBoxChild" id="w8">
+                      <object class="GtkFlowBoxChild" id="8">
                         <property name="width-request">64</property>
                         <property name="height-request">64</property>
                         <property name="visible">True</property>
@@ -7862,7 +8132,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                       </object>
                     </child>
                     <child>
-                      <object class="GtkFlowBoxChild" id="w16">
+                      <object class="GtkFlowBoxChild" id="16">
                         <property name="width-request">64</property>
                         <property name="height-request">64</property>
                         <property name="visible">True</property>
@@ -7880,7 +8150,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                       </object>
                     </child>
                     <child>
-                      <object class="GtkFlowBoxChild" id="w49">
+                      <object class="GtkFlowBoxChild" id="49">
                         <property name="width-request">64</property>
                         <property name="height-request">64</property>
                         <property name="visible">True</property>
@@ -7991,11 +8261,14 @@ If you have multiple serial devices, avoid using autodetect.</property>
                 <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkBox">
+                    <style>
+                      <class name="RoLockedConfig"/>
+                    </style>
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="spacing">5</property>
                     <child>
-                      <object class="GtkLabel">
+                      <object class="GtkLabel" id="LabelRestrictorMappings">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="halign">start</property>
@@ -8134,6 +8407,9 @@ If you have multiple serial devices, avoid using autodetect.</property>
         </child>
         <child>
           <object class="GtkBox">
+            <style>
+              <class name="RoLockedConfig"/>
+            </style>
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="spacing">5</property>
@@ -8188,6 +8464,9 @@ If you have multiple serial devices, avoid using autodetect.</property>
         </child>
         <child>
           <object class="GtkBox">
+            <style>
+              <class name="RoLockedConfig"/>
+            </style>
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="spacing">5</property>
@@ -8240,6 +8519,9 @@ If you have multiple serial devices, avoid using autodetect.</property>
         </child>
         <child>
           <object class="GtkBox">
+            <style>
+              <class name="RoLockedConfig"/>
+            </style>
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="spacing">5</property>
@@ -8350,6 +8632,9 @@ If you have multiple serial devices, avoid using autodetect.</property>
         </child>
         <child>
           <object class="GtkBox">
+            <style>
+              <class name="RoLockedProject"/>
+            </style>
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="spacing">5</property>
@@ -8499,6 +8784,9 @@ If you have multiple serial devices, avoid using autodetect.</property>
         </child>
         <child>
           <object class="GtkBox">
+            <style>
+              <class name="RoLockedProject"/>
+            </style>
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="spacing">5</property>
@@ -8576,6 +8864,9 @@ If you have multiple serial devices, avoid using autodetect.</property>
         </child>
         <child>
           <object class="GtkBox">
+            <style>
+              <class name="RoLockedProject"/>
+            </style>
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="spacing">5</property>
@@ -8688,6 +8979,9 @@ If you have multiple serial devices, avoid using autodetect.</property>
         </child>
         <child>
           <object class="GtkBox">
+            <style>
+              <class name="RoLockedProject"/>
+            </style>
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="spacing">10</property>
@@ -8773,6 +9067,9 @@ If you have multiple serial devices, avoid using autodetect.</property>
         </child>
         <child>
           <object class="GtkBox">
+            <style>
+              <class name="RoLockedProject"/>
+            </style>
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="homogeneous">True</property>
@@ -8899,6 +9196,9 @@ If you have multiple serial devices, avoid using autodetect.</property>
         </child>
         <child>
           <object class="GtkBox">
+            <style>
+              <class name="RoLockedProject"/>
+            </style>
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <child>
@@ -8912,7 +9212,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                     <property name="can-focus">False</property>
                     <property name="halign">end</property>
                     <property name="xpad">10</property>
-                    <property name="label">Mode</property>
+                    <property name="label">Algorithm</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -8954,7 +9254,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                     <property name="can-focus">False</property>
                     <property name="halign">end</property>
                     <property name="xpad">10</property>
-                    <property name="label">Mode</property>
+                    <property name="label">Render Mode</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -8997,6 +9297,9 @@ If you have multiple serial devices, avoid using autodetect.</property>
         </child>
         <child>
           <object class="GtkBox" id="BoxActorAudio">
+            <style>
+              <class name="RoLockedProject"/>
+            </style>
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="orientation">vertical</property>
@@ -9011,7 +9314,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                     <property name="can-focus">False</property>
                     <property name="halign">end</property>
                     <property name="xpad">10</property>
-                    <property name="label">Mode</property>
+                    <property name="label">Display Mode</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -9249,6 +9552,9 @@ If you have multiple serial devices, avoid using autodetect.</property>
         </child>
         <child>
           <object class="GtkBox" id="BoxActorGradient">
+            <style>
+              <class name="RoLockedProject"/>
+            </style>
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="spacing">5</property>
@@ -9258,7 +9564,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                 <property name="can-focus">False</property>
                 <property name="halign">end</property>
                 <property name="xpad">10</property>
-                <property name="label">Mode</property>
+                <property name="label">Render Mode</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -9330,6 +9636,9 @@ If you have multiple serial devices, avoid using autodetect.</property>
             <property name="spacing">2</property>
             <child>
               <object class="GtkBox">
+                <style>
+                  <class name="RoLockedProject"/>
+                </style>
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <child>
@@ -9343,7 +9652,7 @@ If you have multiple serial devices, avoid using autodetect.</property>
                         <property name="can-focus">False</property>
                         <property name="halign">end</property>
                         <property name="xpad">10</property>
-                        <property name="label">Mode</property>
+                        <property name="label">Color Mode</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -9446,6 +9755,9 @@ If you have multiple serial devices, avoid using autodetect.</property>
                 <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkBox">
+                    <style>
+                      <class name="RoLockedProject"/>
+                    </style>
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <child>
@@ -9541,6 +9853,9 @@ If you have multiple serial devices, avoid using autodetect.</property>
         </child>
         <child>
           <object class="GtkBox" id="BoxActorSerpentine">
+            <style>
+              <class name="RoLockedProject"/>
+            </style>
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="spacing">2</property>
@@ -9681,6 +9996,9 @@ If you have multiple serial devices, avoid using autodetect.</property>
         </child>
         <child>
           <object class="GtkBox" id="BoxActorFileReader">
+            <style>
+              <class name="RoLockedProject"/>
+            </style>
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <child>
@@ -9773,6 +10091,9 @@ If you have multiple serial devices, avoid using autodetect.</property>
             <property name="spacing">5</property>
             <child>
               <object class="GtkBox">
+                <style>
+                  <class name="RoLockedProject"/>
+                </style>
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="spacing">5</property>
@@ -9873,6 +10194,9 @@ If you have multiple serial devices, avoid using autodetect.</property>
                 <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkBox">
+                    <style>
+                      <class name="RoLockedProject"/>
+                    </style>
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="spacing">5</property>
@@ -9965,6 +10289,9 @@ If you have multiple serial devices, avoid using autodetect.</property>
                 <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkBox">
+                    <style>
+                      <class name="RoLockedProject"/>
+                    </style>
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="spacing">5</property>
@@ -10058,6 +10385,9 @@ If you have multiple serial devices, avoid using autodetect.</property>
                 <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkBox">
+                    <style>
+                      <class name="RoLockedProject"/>
+                    </style>
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="spacing">5</property>
@@ -10146,6 +10476,9 @@ If you have multiple serial devices, avoid using autodetect.</property>
             </child>
             <child>
               <object class="GtkBox">
+                <style>
+                  <class name="RoLockedProject"/>
+                </style>
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="spacing">5</property>
@@ -10298,6 +10631,9 @@ False: the element or group will stay ON.</property>
             </child>
             <child>
               <object class="GtkBox" id="BoxInputCreditsSettings">
+                <style>
+                  <class name="RoLockedProject"/>
+                </style>
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="spacing">5</property>
@@ -10521,6 +10857,9 @@ Multi will blink the next start</property>
         </child>
         <child>
           <object class="GtkBox">
+            <style>
+              <class name="RoLockedProject"/>
+            </style>
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="spacing">5</property>
@@ -10757,6 +11096,9 @@ Multi will blink the next start</property>
         </child>
         <child>
           <object class="GtkBox">
+            <style>
+              <class name="RoLockedProject"/>
+            </style>
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="orientation">vertical</property>
@@ -11054,6 +11396,9 @@ you can set the same trigger multiple time on different maps but only the last o
             <property name="orientation">vertical</property>
             <child>
               <object class="GtkBox">
+                <style>
+                  <class name="RoLockedProject"/>
+                </style>
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="tooltip-text" translatable="yes">Select a source from the list or type one manually.</property>
@@ -11113,6 +11458,9 @@ you can set the same trigger multiple time on different maps but only the last o
                 <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkBox">
+                    <style>
+                      <class name="RoLockedProject"/>
+                    </style>
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="spacing">5</property>
@@ -11250,6 +11598,9 @@ you can set the same trigger multiple time on different maps but only the last o
         </child>
         <child>
           <object class="GtkBox">
+            <style>
+              <class name="RoLockedProject"/>
+            </style>
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="spacing">5</property>
@@ -11296,6 +11647,9 @@ you can set the same trigger multiple time on different maps but only the last o
         </child>
         <child>
           <object class="GtkBox" id="BoxTransitionSpeed">
+            <style>
+              <class name="RoLockedProject"/>
+            </style>
             <property name="can-focus">False</property>
             <property name="spacing">5</property>
             <child>
@@ -11341,6 +11695,9 @@ you can set the same trigger multiple time on different maps but only the last o
         </child>
         <child>
           <object class="GtkBox" id="BoxTransitionColor">
+            <style>
+              <class name="RoLockedProject"/>
+            </style>
             <property name="can-focus">False</property>
             <property name="spacing">5</property>
             <child>

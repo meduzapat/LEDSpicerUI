@@ -48,7 +48,7 @@ TEST(DefaultsTest, IsBetween) {
 }
 
 TEST(DefaultsTest, AddUnitSeparator) {
-	EXPECT_EQ(Defaults::addUnitSeparator("test"), UNIT_SEPARATOR + string("test") + UNIT_SEPARATOR);
+	EXPECT_EQ(Defaults::addUnitSeparator(TEST_STR), UNIT_SEPARATOR + TEST_STR + UNIT_SEPARATOR);
 	EXPECT_EQ(Defaults::addUnitSeparator(emptyString), UNIT_SEPARATOR + emptyString + UNIT_SEPARATOR);
 	EXPECT_EQ(Defaults::addUnitSeparator("a b"), UNIT_SEPARATOR + string("a b") + UNIT_SEPARATOR);
 }
@@ -142,8 +142,8 @@ TEST(DefaultsTest, ImplodeString) {
 	StringVector values{"x", "y", "z"};
 	EXPECT_EQ(Defaults::implode(values, "---"), "x---y---z");
 
-	StringVector single{"test"};
-	EXPECT_EQ(Defaults::implode(single, "---"), "test");
+	StringVector single{TEST_STR};
+	EXPECT_EQ(Defaults::implode(single, "---"), TEST_STR);
 
 	StringVector empty;
 	EXPECT_EQ(Defaults::implode(empty, "---"), "");

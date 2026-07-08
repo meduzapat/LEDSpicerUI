@@ -71,6 +71,4 @@ void BoxButton::sync() noexcept {
 	if (not text.empty())
 		label->set_tooltip_text(text);
 	label->set_text(data->createPrettyName());
-	if (auto handler{data->getCollectionHandler()}; handler and handler->isSet(data))
-		handler->notifyChanged(data);
 }

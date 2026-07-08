@@ -21,18 +21,15 @@
  */
 
 #include "LayoutElement.hpp"
-#include "Defaults.hpp"
-#include "config/Settings.hpp"
 
 using namespace LEDSpicerUI::Ui::Layout;
 using namespace LEDSpicerUI::Constants;
 
 const string LayoutElement::ICON_DIR {RESOURCE_PREFIX + "images/elements/"};
 
-LayoutElement::LayoutElement(Storage::Element* el, LayoutTester* t) noexcept :
+LayoutElement::LayoutElement(Storage::Element* el) noexcept :
 	Gtk::EventBox(),
-	element {el},
-	tester  {t}
+	element {el}
 {
 	kind = categorize(element);
 	get_style_context()->add_class(CSS_LAYOUT_ELEMENT);
@@ -130,6 +127,9 @@ void LayoutElement::build() noexcept {
 		strip->signal_led_clicked().connect([this](uint16_t firstPhysicalIdx) {
 			fireCell(firstPhysicalIdx);
 		});
+		strip->signal_cell_expired().connect([this](uint16_t firstPhysicalIdx) {
+			clearCell(firstPhysicalIdx);
+		});
 
 		iconStripRow->pack_start(*strip, Gtk::PACK_EXPAND_WIDGET);
 		body->pack_start(*iconStripRow, Gtk::PACK_SHRINK);
@@ -199,14 +199,25 @@ void LayoutElement::setActive(bool on) noexcept {
 	}
 }
 
+void LayoutElement::stopTesting() noexcept {
+	lightTimer.disconnect();
+	if (not pendingTintClass.empty()) {
+		auto ctx {iconBtn->get_style_context()};
+		ctx->remove_class(CSS_LAYOUT_ELEMENT_FIRED);
+		ctx->remove_class(pendingTintClass);
+		pendingTintClass.clear();
+	}
+	iconBtn->set_active(false);
+	if (strip) strip->setAllOff();
+}
+
 void LayoutElement::fire(Storage::Element* target) noexcept {
 	if (lightTimer.connected()) return;
-	const string color {resolveColorName()};
 	lightTimer = Glib::signal_timeout().connect(
 		sigc::mem_fun(*this, &LayoutElement::onLightExpired),
 		Config::Settings::get().getLayoutTestTimeout()
 	);
-	tester->test(target, color);
+	lightTarget(target, resolveColorName());
 }
 
 void LayoutElement::fireAll() noexcept {
@@ -216,12 +227,10 @@ void LayoutElement::fireAll() noexcept {
 		& colorClass {ledCssClass(color)};
 	iconBtn->get_style_context()->add_class(CSS_LAYOUT_ELEMENT_FIRED);
 	iconBtn->get_style_context()->add_class(colorClass);
-	if (strip) {
-		const auto ledColor {colorEnumFor(color)};
-		for (uint16_t i = 0; i < strip->getCount(); i += strip->getGroupRatio())
-			strip->setLedState(i, ledColor);
-	}
+	if (strip)
+		strip->setAll(colorEnumFor(color));
 	pendingTintClass = colorClass;
+	debugHardwareTest((strip ? "Lighting strip " : "Lighting ") + element->getPrimaryValue() + ' ' + color);
 	fire(element);
 }
 
@@ -229,7 +238,40 @@ void LayoutElement::fireCell(uint16_t firstPhysicalIdx) noexcept {
 	const string& color {resolveColorName()};
 	strip->setLedState(firstPhysicalIdx, colorEnumFor(color));
 	strip->scheduleCellOff(firstPhysicalIdx);
-	tester->test(element->copyStripChildren()[firstPhysicalIdx], color);
+	// Light every element packed into the clicked segment; stop if a send is
+	// dropped (e.g. testing paused mid-group for a daemon refresh).
+	const auto children {element->copyStripChildren()};
+	const uint16_t groupSize {strip->getGroupSize(firstPhysicalIdx)};
+	debugHardwareTest("Lighting " + std::to_string(groupSize) + " LEDs " + color);
+	for (uint16_t i {0}; i < groupSize; ++i)
+		if (not lightTarget(children[firstPhysicalIdx + i], color))
+			break;
+}
+
+void LayoutElement::clearCell(uint16_t firstPhysicalIdx) noexcept {
+	// Clear the same elements the pack lit.
+	const auto children {element->copyStripChildren()};
+	const uint16_t groupSize {strip->getGroupSize(firstPhysicalIdx)};
+	debugHardwareTest("Clearing " + std::to_string(groupSize) + " LEDs");
+	for (uint16_t i {0}; i < groupSize; ++i)
+		if (not clearTarget(children[firstPhysicalIdx + i]))
+			break;
+}
+
+bool LayoutElement::lightTarget(Storage::Element* target, const string& colorName) noexcept {
+	const bool useGroup {target->isSet(STRIPSIZE) or target->getProperties().isSet(PROP_STRIP_UID)};
+	return DaemonHandler::getInstance().command(
+		useGroup ? DaemonHandler::Command::SetGroup : DaemonHandler::Command::SetElement,
+		{target->getPrimaryValue(), colorName, FILTER_NORMAL}
+	);
+}
+
+bool LayoutElement::clearTarget(Storage::Element* target) noexcept {
+	const bool useGroup {target->isSet(STRIPSIZE) or target->getProperties().isSet(PROP_STRIP_UID)};
+	return DaemonHandler::getInstance().command(
+		useGroup ? DaemonHandler::Command::ClearGroup : DaemonHandler::Command::ClearElement,
+		{target->getPrimaryValue()}
+	);
 }
 
 bool LayoutElement::onLightExpired() noexcept {
@@ -240,7 +282,14 @@ bool LayoutElement::onLightExpired() noexcept {
 	}
 	iconBtn->set_active(false);
 	if (strip) strip->setAllOff();
+	debugHardwareTest((strip ? "Clearing strip " : "Clearing ") + element->getPrimaryValue());
+	clearTarget(element);
 	return false;
+}
+
+void LayoutElement::debugHardwareTest(const string& message) noexcept {
+	if (Config::Settings::get().shouldDebugHardwareTest())
+		StatusBar::getInstance().push(message, StatusBar::Severity::Debug);
 }
 
 const string& LayoutElement::resolveColorName() const noexcept {
@@ -276,6 +325,8 @@ void LayoutElement::persistPosition() noexcept {
 bool LayoutElement::onButtonPress(GdkEventButton* ev) noexcept {
 	if (ev->button != 1) return false;
 	if (active) return true;
+	// Read-only root config: position writes are suppressed, so never start a drag.
+	if (not Config::Settings::get().isRootConfigWritable()) return true;
 	dragging    = true;
 	dragMoved   = false;
 	dragOffsetX = ev->x;
@@ -293,7 +344,8 @@ bool LayoutElement::onButtonRelease(GdkEventButton* ev) noexcept {
 			return false;
 		}
 	}
-	if (not active) {
+	// Elements are only testable when the board allows it (daemon up, fresh).
+	if (not active and testGate and testGate()) {
 		setActive(true);
 		return false;
 	}

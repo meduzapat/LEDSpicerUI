@@ -58,6 +58,8 @@ protected:
 
 	const string& getType() const noexcept override { return TYPE_MAP; }
 
+	const char* getLockClass() const noexcept override { return CSS_RO_LOCKED_CONFIG; }
+
 	Storage::Data* createData(Values& rawData) const noexcept override;
 };
 

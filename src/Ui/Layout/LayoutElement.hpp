@@ -21,8 +21,9 @@
  */
 
 #include "StripRenderer.hpp"
-#include "LayoutTester.hpp"
 #include "Storage/Element.hpp"
+#include "DaemonHandler.hpp"
+#include "config/Settings.hpp"
 
 #pragma once
 
@@ -49,7 +50,7 @@ public:
 		DRAG_THRESHOLD_PX = 5,
 		NAME_MAX_CHARS    = 20;
 
-	LayoutElement(Storage::Element* element, LayoutTester* tester) noexcept;
+	LayoutElement(Storage::Element* element) noexcept;
 
 	virtual ~LayoutElement();
 
@@ -60,7 +61,19 @@ public:
 
 	void setActive(bool on) noexcept;
 
+	/**
+	 * Cancels any in-flight test light — its timers and visuals — without
+	 * touching the daemon; used when testing is paused or stopped under the tile.
+	 */
+	void stopTesting() noexcept;
+
 	bool isActive() const noexcept { return active; }
+
+	/**
+	 * Installs the gate consulted before this tile may be tested; the tile may
+	 * activate only while it returns true. Without it the tile is not testable.
+	 */
+	void setTestGate(std::function<bool()> gate) noexcept { testGate = std::move(gate); }
 
 	Storage::Element* getElement() const noexcept { return element; }
 
@@ -90,8 +103,10 @@ private:
 
 	static const string ICON_DIR;
 
+	/// Gate consulted before this tile may be activated for testing.
+	std::function<bool()> testGate;
+
 	Storage::Element* element = nullptr;
-	LayoutTester*     tester  = nullptr;
 
 	Kind kind = Kind::Mono;
 
@@ -131,13 +146,32 @@ private:
 	string pendingTintClass;
 
 	void build() noexcept;
-	/// Sets the tile caption, truncating past NAME_MAX_CHARS with the full name in a tooltip.
+	/**
+	 * Sets the tile caption, truncating past NAME_MAX_CHARS with the full name in a tooltip.
+	 * @param full
+	 */
 	void setName(const Glib::ustring& full) noexcept;
 	void persistPosition() noexcept;
 	bool onLightExpired() noexcept;
 	void fire(Storage::Element* target) noexcept;
 	void fireAll() noexcept;
 	void fireCell(uint16_t firstPhysicalIdx) noexcept;
+	void clearCell(uint16_t firstPhysicalIdx) noexcept;
+	/**
+	 * Sends a Set command for target (Group for a strip master, else Element).
+	 * @return true if the command was sent (false when testing is unavailable).
+	 */
+	bool lightTarget(Storage::Element* target, const string& colorName) noexcept;
+	/**
+	 * Sends the matching Clear command for target.
+	 * @return true if the command was sent (false when testing is unavailable).
+	 */
+	bool clearTarget(Storage::Element* target) noexcept;
+
+	/**
+	 * Pushes a hardware test action to the status bar when hardware-test debug is on.
+	 */
+	void debugHardwareTest(const string& message) noexcept;
 	const string& resolveColorName() const noexcept;
 
 	bool onButtonPress(GdkEventButton* ev)   noexcept;

@@ -20,14 +20,15 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Storage/BoxButtonCollection.hpp"
-#include "XMLHelper.hpp"
+#include "ProjectFile.hpp"
+#include "Storage/Element.hpp"
 
 #pragma once
 
 namespace LEDSpicerUI::Config {
 
 using Ui::Storage::BoxButtonCollection;
+using Ui::Storage::CollectionHandler;
 
 /**
  * LEDSpicerUI::ConfigFile
@@ -81,6 +82,27 @@ public:
 
 	static void save(const ConfigData& data);
 
+	/**
+	 * Walks devices in order, expanding each strip into its children (never the
+	 * parent, which carries PROP_NO_SELECT and is never linkable itself) — the
+	 * order the daemon uses when it auto-builds All from the file.
+	 * @param devices Devices collection, in save/file order.
+	 * @return Flat, ordered list of every linkable element.
+	 */
+	static vector<Ui::Storage::Data*> expandDeviceElements(
+		const BoxButtonCollection& devices
+	) noexcept;
+
+	/**
+	 * @param links A group's links collection, in its current order.
+	 * @param deviceElementOrder Result of expandDeviceElements().
+	 * @return True if links is identical to deviceElementOrder, position for position.
+	 */
+	static bool matchesDeviceOrder(
+		const BoxButtonCollection& links,
+		const vector<Ui::Storage::Data*>& deviceElementOrder
+	) noexcept;
+
 protected:
 
 	string processDevices();
@@ -93,7 +115,7 @@ protected:
 
 	string processRestrictorMaps(tinyxml2::XMLElement* restrictorNode, const string& restrictorName);
 
-	string processGroups();
+	string processLayoutAndGroups();
 };
 
 } // namespace

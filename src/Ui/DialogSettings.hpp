@@ -70,6 +70,24 @@ public:
 	bool isValid() const;
 
 	/**
+	 * Registers a callback fired after the settings dialog closes, so the owner
+	 * can re-evaluate state that depends on settings (e.g. the daemon controls).
+	 * @param cb the callback.
+	 */
+	void onClose(std::function<void()> cb) noexcept { onClosed = std::move(cb); }
+
+	/**
+	 * Consumes the flag set when a binary change retargeted the open project's
+	 * paths; the caller must then reload it.
+	 * @return true once per such change.
+	 */
+	bool takeProjectReload() noexcept {
+		const bool value {needProjectReload};
+		needProjectReload = false;
+		return value;
+	}
+
+	/**
 	 * Sets the binary path, runs detection, and updates UI.
 	 * @param binaryPath
 	 * @param setFileBinarySelector if true, syncs the file chooser widget.
@@ -103,7 +121,8 @@ protected:
 		* switchPreserveEmptyDir   = nullptr,
 		* switchRemoveInvalidItems = nullptr,
 		* switchSaveBackup         = nullptr,
-		* switchDebugFiles         = nullptr;
+		* switchDebugFiles         = nullptr,
+		* switchDebugHardwareTest  = nullptr;
 
 	Gtk::ToggleButton
 		* btnStyleAuto  = nullptr,
@@ -116,13 +135,18 @@ protected:
 
 	Gtk::FlowBox* flowBoxThemes = nullptr;
 
+	/// Fired after the dialog closes, when set.
+	std::function<void()> onClosed;
+
 	bool
 		/// Guards against recursive signal firing when syncing style buttons.
 		settingStyle    = false,
 		/// Guards against recursive signal firing when syncing theme selection.
 		selectingTheme  = false,
 		/// True while signal_show() is mirroring Settings into widgets; suppresses auto-save.
-		syncing         = false;
+		syncing         = false,
+		/// True when a binary change retargeted the open project's paths; see takeProjectReload().
+		needProjectReload = false;
 
 	DialogSettings(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
 

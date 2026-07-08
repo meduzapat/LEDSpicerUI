@@ -49,6 +49,8 @@ public:
 		MAX_COLUMNS = 20,
 		MIN_COLUMNS = 10;
 
+	inline const static string DEFAULT_RGB_ORDER = "RGB";
+
 	virtual ~DialogElement() {
 		switchPageConnection.disconnect();
 	};
@@ -86,8 +88,6 @@ public:
 	void drawPins() noexcept;
 
 protected:
-
-	string defaultRGBFormat;
 
 	Gtk::SpinButton
 		* timeOn = nullptr,
@@ -132,6 +132,8 @@ protected:
 	void clearFormConditinal(uint8_t flags) noexcept;
 
 	const string& getType() const noexcept override { return TYPE_ELEMENT; }
+
+	const char* getLockClass() const noexcept override { return CSS_RO_LOCKED_CONFIG; }
 
 	Storage::Data* createData(Values& rawData) const noexcept override;
 

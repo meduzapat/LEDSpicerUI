@@ -80,6 +80,13 @@ public:
 	void setBox(SortableFlowBox* displayBox) noexcept { box = displayBox; }
 
 	/**
+	 * Flags this dialog's data source as read-only: edit opens in view mode.
+	 * Propagated to child dialogs when they are wired.
+	 * @param value
+	 */
+	void setReadOnly(bool value) noexcept { readOnly = value; }
+
+	/**
 	 * Clear the From leaving it empty for data entry.
 	 */
 	virtual void clearForm() noexcept abstract;
@@ -148,6 +155,16 @@ protected:
 
 	/// form action mode.
 	Actions action = Actions::ADD;
+
+	/// True when the data source cannot be written: edit becomes view.
+	bool readOnly = false;
+
+	/**
+	 * Writability marker for the item buttons this dialog creates
+	 * override it for different classes.
+	 * @return the marker CSS class.
+	 */
+	virtual const char* getLockClass() const noexcept { return CSS_RO_LOCKED_PROJECT; }
 
 	/// Maps family constants to their child DialogForm.
 	static std::unordered_map<string, DialogForm*> familyToDialog;

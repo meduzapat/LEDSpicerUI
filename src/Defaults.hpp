@@ -26,6 +26,7 @@
 
 #include <functional>
 
+#include <signal.h>
 #include <filesystem>
 #include <fstream>
 #include <sys/stat.h>
@@ -70,6 +71,13 @@ inline const string
 /// Application identity and embedded resource bundle (see data/ledspicerui.gresource.xml).
 	RESOURCE_PREFIX {"/org/ledspicer/ui/"},
 
+/// Canonical daemon executable name. Several LEDSpicer tools share the -v signature,
+/// so the manual binary picker must also match this name.
+	DAEMON_BINARY {"ledspicerd"},
+
+/// Restrictor test executable; ships beside the daemon and reads the same config (restrictors section only).
+	ROTATOR_BINARY {"rotator"},
+
 /// LEDSpicer configuration file keys.
 	DEFAULT_USERID   {"1000"},
 	DEFAULT_GROUPID  {"1000"},
@@ -92,6 +100,11 @@ inline const string
 
 /// Profile configuration keys.
 	& DEFAULT_PROFILE  {DEFAULT},
+	TEST_STR           {"test"},
+	/// Throwaway layout-test sandbox handed to the daemon via --projects-dir.
+	& TEST_SANDBOX_DIR             {"ledspicerui-test"},
+	& TEST_SANDBOX_PROJECT         {TEST_STR},
+	& TEST_SANDBOX_DEFAULT_PROFILE {TEST_STR},
 	BACKGROUND_COLOR {"backgroundColor"},
 	& DEFAULT_PROFILE_BACKGROUND_COLOR {HUMAN_OFF},
 	TRANSITION       {"transition"},
@@ -394,6 +407,12 @@ inline const string
 #define ICON_DELETE "edit-delete-symbolic"
 #define ICON_EDIT   "emblem-system-symbolic"
 #define ICON_TRASH  "user-trash-symbolic"
+#define ICON_VIEW   "view-reveal-symbolic"
+
+// Writability markers (see Defaults::applyWritability).
+#define CSS_RO_LOCKED_CONFIG  "RoLockedConfig"  // Locks when the root config source is read-only.
+#define CSS_RO_LOCKED_PROJECT "RoLockedProject" // Locks when the project directory is read-only.
+#define CSS_RO_VIEW           "RoView"          // Edit buttons that flip to a view button instead of locking.
 
 // Layout
 #define CSS_LAYOUT_ELEMENT        "layout-element"
@@ -714,9 +733,6 @@ public:
 	 */
 	static double getLuminance(const string& color);
 
-	/// A list of all possible restrictors and rotators Ways (positions).
-	static constexpr std::array<Ways, 11> allWays{Ways::w2, Ways::w2v, Ways::w4, Ways::w4x, Ways::w8, Ways::w16, Ways::w49, Ways::analog, Ways::mouse, Ways::rotary8, Ways::rotary12};
-
 	/// A list of device to their information.
 	static const std::unordered_map<string, DeviceInfo> devicesInfo;
 
@@ -731,9 +747,6 @@ public:
 
 	/// A list of profile transition types to their information.
 	static const std::unordered_map<string, TransitionInfo> transitionsInfo;
-
-	/// A List of string names to its internal enumerated type.
-	static const std::unordered_map<string, Ways> wayIds;
 
 	/// A list of element types to their information.
 	static const std::unordered_map<string, ElementInfo> elementsInfo;
@@ -757,6 +770,25 @@ public:
 	 * @param header to update the * when dirty.
 	 */
 	static void initialize(Gtk::HeaderBar* header, Gtk::Button* btnSave);
+
+	/**
+	 * Applies a writability state to every toplevel window.
+	 * Widgets marked with cssClass are locked or restored; those also marked
+	 * CSS_RO_VIEW flip icon and tooltip between edit and view instead, staying
+	 * sensitive. Unmarked widgets are untouched.
+	 * @param cssClass CSS_RO_LOCKED_CONFIG or CSS_RO_LOCKED_PROJECT.
+	 * @param writable false locks, true restores.
+	 */
+	static void applyWritability(const string& cssClass, bool writable) noexcept;
+
+	/**
+	 * Applies both writability states to a single widget tree.
+	 * Used when widgets become visible after the toplevel sweep ran.
+	 * @param widget          Root of the tree to process.
+	 * @param configWritable  State for CSS_RO_LOCKED_CONFIG markers.
+	 * @param projectWritable State for CSS_RO_LOCKED_PROJECT markers.
+	 */
+	static void applyWritability(Gtk::Widget* widget, bool configWritable, bool projectWritable) noexcept;
 
 	/**
 	 * Registers an Editable widget, so when it change the dirty flag is raised
@@ -795,8 +827,9 @@ public:
 	/**
 	 * Sets the subtitle in the header bar.
 	 * @param text The text to display, or empty to clear.
+	 * @param tooltip Header tooltip explaining subtitle markers, or empty to clear.
 	 */
-	static void setSubtitle(const string& text);
+	static void setSubtitle(const string& text, const string& tooltip = "");
 
 	/**
 	 * Add tabulation.
@@ -825,6 +858,13 @@ public:
 		int to,
 		const StringVector& ignoreList = {}
 	);
+
+	/**
+	 * @param comboBox
+	 * @param id
+	 * @return true if the combo already contains a row with this id.
+	 */
+	static bool comboBoxHasId(Gtk::ComboBox* comboBox, const string& id);
 
 	/**
 	 * Cleans and populates a combobox with IDs and mark used elements.
@@ -895,6 +935,11 @@ public:
 	static void setIgnoreChanges(bool state);
 
 	/**
+	 * @return true if change tracking is currently suppressed.
+	 */
+	static bool isIgnoringChanges() noexcept { return ignoreChanges; }
+
+	/**
 	 * Appends a numeric index to duplicate display labels in a StringMap.
 	 * Entries with unique labels are unchanged; duplicates become "Label 1", "Label 2", etc.
 	 * @param items id → display label map to process in-place.
@@ -918,10 +963,17 @@ public:
 	static string extractAfter(const string& line, const string& prefix);
 
 	/**
-	 * Executes a command and captures stdout.
+	 * Executes a command, discarding its output.
 	 * @param command The command to run.
-	 * @param output Captured stdout.
-	 * @return true if command succeeded.
+	 * @return true if the command exited with status 0.
+	 */
+	static bool runCommand(const string& command);
+
+	/**
+	 * Executes a command and captures its output, with stderr appended to stdout.
+	 * @param command The command to run.
+	 * @param output Captured stdout; any stderr is appended after it.
+	 * @return true if the command exited with status 0.
 	 */
 	static bool runCommand(const string& command, string& output);
 
@@ -973,6 +1025,15 @@ public:
 	static void attachNameFilter(Gtk::Entry* entry, size_t maxLen = 128) noexcept;
 
 protected:
+
+	/**
+	 * Recursively applies one writability marker to a widget tree.
+	 * Marked widgets do not nest.
+	 * @param widget   Root of the tree to process.
+	 * @param cssClass Marker selecting the widgets to act on.
+	 * @param writable false locks, true restores.
+	 */
+	static void sweepWritability(Gtk::Widget* widget, const string& cssClass, bool writable) noexcept;
 
 	/// Keeps track of the number of tabulations for XML files.
 	inline static string tabs;

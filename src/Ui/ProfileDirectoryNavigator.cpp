@@ -84,8 +84,8 @@ ProfileDirectoryNavigator::ProfileDirectoryNavigator(
 		if (selected.empty()) return;
 		auto bb {static_cast<Storage::BoxButton*>(selected.front())};
 		if (bb == defaultProfileBB) return;
-		// This is the only way we have to know if the selected is not a directory.
-		if (not dynamic_cast<Storage::Profile*>(bb->getData())) {
+
+		if (not dynamic_cast<Storage::Profile*>(bb->getData()) or not Settings::get().isProjectDirWritable()) {
 			if (defaultProfileBB and defaultProfileBB->get_parent() == box)
 				box->select_child(*defaultProfileBB);
 			else

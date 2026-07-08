@@ -22,9 +22,28 @@
 
 #include <gtest/gtest.h>
 #include "config/ConfigFile.hpp"
+#include "Storage/Link.hpp"
+#include "ElementObserverMock.hpp"
 
 using namespace LEDSpicerUI;
 using namespace LEDSpicerUI::Config;
+using namespace LEDSpicerUI::Ui::Storage;
+using LEDSpicerUI::Test::Mocks::MockElementObserver;
+
+/*
+Minimal Parent stand-in for a device: expandDeviceElements only needs a
+primary child collection to walk, nothing hardware-specific.
+*/
+class TestDevice : public Parent {
+
+public:
+
+	TestDevice(Values& data) noexcept : Parent(data, {COLLECTION_ELEMENTS}) {}
+
+	const string& getXmlTag()   const noexcept override { static const string s {"device"};    return s; }
+	const string& getCssClass() const noexcept override { static const string s {"TestDevice"}; return s; }
+	CollectionHandler* getCollectionHandler() const noexcept override { return nullptr; }
+};
 
 class ConfigFileTest : public ::testing::Test {
 
@@ -133,7 +152,7 @@ TEST_F(ConfigFileTest, ProcessesAreProcessed) {
 	auto& processes = configFile->getData(COLLECTION_PROCESSES);
 	EXPECT_EQ(2u, processes.size());
 
-	EXPECT_EQ("test",   processes[0].getValue(PARAM_PROCESS_NAME));
+	EXPECT_EQ(TEST_STR, processes[0].getValue(PARAM_PROCESS_NAME));
 	EXPECT_EQ("arcade", processes[0].getValue(PARAM_SYSTEM));
 
 	EXPECT_EQ("gedit",  processes[1].getValue(PARAM_PROCESS_NAME));
@@ -141,8 +160,165 @@ TEST_F(ConfigFileTest, ProcessesAreProcessed) {
 
 }
 
+// ConfigFile::expandDeviceElements / matchesDeviceOrder --------------
+
+namespace {
+	const string testLinkKey  = NAME;
+	const string testLinkType = TYPE_ELEMENT;
+	const vector<Link::LinkField> testLinkFields {};
+}
+
+class ConfigFileSaveTest : public ::testing::Test {
+
+protected:
+
+	void TearDown() override {
+		CollectionHandler::purgeAll();
+	}
+};
+
+TEST_F(ConfigFileSaveTest, ExpandDeviceElements_PlainElementsKeepOrder) {
+
+	Values deviceData {{NAME, "Device1"}};
+	auto device {new TestDevice(deviceData)};
+
+	Values e1Data {{NAME, "E1"}}, e2Data {{NAME, "E2"}};
+	auto& e1Btn {device->getPrimaryChild()->create(new Element(e1Data))};
+	auto& e2Btn {device->getPrimaryChild()->create(new Element(e2Data))};
+
+	BoxButtonCollection devices;
+	devices.create(device);
+
+	auto order {ConfigFile::expandDeviceElements(devices)};
+	ASSERT_EQ(2u, order.size());
+	EXPECT_EQ(e1Btn.getData(), order[0]);
+	EXPECT_EQ(e2Btn.getData(), order[1]);
+
+}
+
+TEST_F(ConfigFileSaveTest, ExpandDeviceElements_StripExpandsToChildrenNotParent) {
+
+	Values deviceData {{NAME, "Device1"}};
+	auto device {new TestDevice(deviceData)};
+
+	Values stripData {{NAME, "Strip1"}};
+	auto stripElement {new Element(stripData)};
+	auto c1 {new Element};
+	auto c2 {new Element};
+	stripElement->addStripChild(c1);
+	stripElement->addStripChild(c2);
+	device->getPrimaryChild()->create(stripElement);
+
+	BoxButtonCollection devices;
+	devices.create(device);
+
+	auto order {ConfigFile::expandDeviceElements(devices)};
+	ASSERT_EQ(2u, order.size());
+	EXPECT_EQ(c1, order[0]);
+	EXPECT_EQ(c2, order[1]);
+
+}
+
+TEST_F(ConfigFileSaveTest, ExpandDeviceElements_MixedPlainAndStripPreservesPosition) {
+
+	Values deviceData {{NAME, "Device1"}};
+	auto device {new TestDevice(deviceData)};
+
+	Values e1Data {{NAME, "E1"}}, stripData {{NAME, "Strip1"}}, e2Data {{NAME, "E2"}};
+	auto& e1Btn {device->getPrimaryChild()->create(new Element(e1Data))};
+
+	auto stripElement {new Element(stripData)};
+	auto c1 {new Element};
+	auto c2 {new Element};
+	stripElement->addStripChild(c1);
+	stripElement->addStripChild(c2);
+	device->getPrimaryChild()->create(stripElement);
+
+	auto& e2Btn {device->getPrimaryChild()->create(new Element(e2Data))};
+
+	BoxButtonCollection devices;
+	devices.create(device);
+
+	auto order {ConfigFile::expandDeviceElements(devices)};
+	ASSERT_EQ(4u, order.size());
+	EXPECT_EQ(e1Btn.getData(), order[0]);
+	EXPECT_EQ(c1,              order[1]);
+	EXPECT_EQ(c2,              order[2]);
+	EXPECT_EQ(e2Btn.getData(), order[3]);
+
+}
+
+TEST_F(ConfigFileSaveTest, MatchesDeviceOrder_TrueWhenIdentical) {
+
+	Values e1Data {{NAME, "E1"}}, e2Data {{NAME, "E2"}};
+	Element e1 {e1Data}, e2 {e2Data};
+	vector<Data*> order {&e1, &e2};
+
+	BoxButtonCollection links;
+	Values l1, l2;
+	links.create(new Link(l1, testLinkKey, testLinkType, testLinkFields, &e1));
+	links.create(new Link(l2, testLinkKey, testLinkType, testLinkFields, &e2));
+
+	EXPECT_TRUE(ConfigFile::matchesDeviceOrder(links, order));
+
+}
+
+TEST_F(ConfigFileSaveTest, MatchesDeviceOrder_FalseWhenReordered) {
+
+	Values e1Data {{NAME, "E1"}}, e2Data {{NAME, "E2"}};
+	Element e1 {e1Data}, e2 {e2Data};
+	vector<Data*> order {&e1, &e2};
+
+	BoxButtonCollection links;
+	Values l1, l2;
+	links.create(new Link(l1, testLinkKey, testLinkType, testLinkFields, &e2));
+	links.create(new Link(l2, testLinkKey, testLinkType, testLinkFields, &e1));
+
+	EXPECT_FALSE(ConfigFile::matchesDeviceOrder(links, order));
+
+}
+
+TEST_F(ConfigFileSaveTest, MatchesDeviceOrder_FalseWhenSizeDiffers) {
+
+	Values e1Data {{NAME, "E1"}}, e2Data {{NAME, "E2"}};
+	Element e1 {e1Data}, e2 {e2Data};
+	vector<Data*> order {&e1, &e2};
+
+	BoxButtonCollection links;
+	Values l1;
+	links.create(new Link(l1, testLinkKey, testLinkType, testLinkFields, &e1));
+
+	EXPECT_FALSE(ConfigFile::matchesDeviceOrder(links, order));
+
+}
+
+TEST_F(ConfigFileSaveTest, MatchesDeviceOrder_FalseWhenStripChildrenReordered) {
+
+	Values stripData {{NAME, "Strip1"}};
+	Element strip {stripData};
+	auto c1 {new Element};
+	auto c2 {new Element};
+	strip.addStripChild(c1);
+	strip.addStripChild(c2);
+
+	vector<Data*> order {c1, c2};
+
+	BoxButtonCollection links;
+	Values l1, l2;
+	// Reordered: c2 first, then c1 — must not match the canonical order.
+	links.create(new Link(l1, testLinkKey, testLinkType, testLinkFields, c2));
+	links.create(new Link(l2, testLinkKey, testLinkType, testLinkFields, c1));
+
+	EXPECT_FALSE(ConfigFile::matchesDeviceOrder(links, order));
+
+}
+
 int main(int argc, char** argv) {
+	MockElementObserver* observer {new MockElementObserver()};
+	Element::setObserver(observer);
 	auto app = Gtk::Application::create(argc, argv, "org.test");
 	::testing::InitGoogleTest(&argc, argv);
-	return RUN_ALL_TESTS();
+	auto result = RUN_ALL_TESTS();
+	delete observer;
+	return result;
 }

@@ -213,7 +213,7 @@ The registration is automatically released when the `Parent` is destroyed.
 
 ```cpp
 StringUMap extra{{COLOR, "Red"}};
-auto* link = new Storage::Link(extra, linkKey, linkType, linkFields, target);
+auto link = new Storage::Link(extra, linkKey, linkType, linkFields, target);
 ```
 
 - `linkKey` — field name used to identify the target in XML (e.g. `NAME`).

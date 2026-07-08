@@ -21,14 +21,54 @@
  */
 
 #include "DialogRestrictor.hpp"
+#include "config/Settings.hpp"
 
 using namespace LEDSpicerUI::Ui::DataDialogs;
+using LEDSpicerUI::Defaults;
+using LEDSpicerUI::StringVector;
+
+const std::unordered_map<string, Defaults::Ways> DialogRestrictor::wayTokens {
+	{"2",         Defaults::Ways::w2},
+	{"vertical2", Defaults::Ways::w2v},
+	{"4",         Defaults::Ways::w4},
+	{"4x",        Defaults::Ways::w4x},
+	{"8",         Defaults::Ways::w8},
+	{"16",        Defaults::Ways::w16},
+	{"49",        Defaults::Ways::w49},
+	{"analog",    Defaults::Ways::analog},
+	{"mouse",     Defaults::Ways::mouse},
+	{"rotary8",   Defaults::Ways::rotary8},
+	{"rotary12",  Defaults::Ways::rotary12},
+};
+
+const string& DialogRestrictor::wayToToken(Defaults::Ways way) noexcept {
+	for (const auto& [token, w] : wayTokens)
+		if (w == way)
+			return token;
+	return emptyString;
+}
+
+StringVector DialogRestrictor::buildRotatorArgs(
+	const std::vector<std::pair<string, string>>& mappings,
+	Defaults::Ways way
+) noexcept {
+	StringVector args;
+	args.reserve(mappings.size() * 3);
+	const string& token {wayToToken(way)};
+	for (const auto& [player, joystick] : mappings) {
+		args.push_back(player);
+		args.push_back(joystick);
+		args.push_back(token);
+	}
+	return args;
+}
 
 DialogRestrictor::DialogRestrictor(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept:
 	DialogFormHost(obj, builder)
 {
 
 	registerChildDialog<DialogRestrictorMap>(builder, "DialogRestrictorMap", COLLECTION_RESTRICTOR_MAPS);
+	DialogRestrictorMap::getInstance()->setOnMapsChanged([this]() { updateWaysTestState(); });
 
 	// Register self so child dialogs can resolve the visible host window via familyToDialog.
 	familyToDialog.emplace(COLLECTION_RESTRICTORS, this);
@@ -51,6 +91,8 @@ DialogRestrictor::DialogRestrictor(BaseObjectType* obj, const Glib::RefPtr<Gtk::
 	builder->get_widget("InputRestrictorSpeedOn",       speedOn);
 	builder->get_widget("InputRestrictorSpeedOff",      speedOff);
 	builder->get_widget("BriefRestrictor",              brief);
+	builder->get_widget("LabelRestrictorWays",          waysLabel);
+	builder->get_widget("LabelRestrictorMappings",      mappingsLabel);
 	builder->get_widget("BtnAddRestrictorMap",          btnAddRestrictorMap);
 
 
@@ -61,12 +103,18 @@ DialogRestrictor::DialogRestrictor(BaseObjectType* obj, const Glib::RefPtr<Gtk::
 	idListstore = static_cast<Gtk::ListStore*>(builder->get_object("liststoreRestrictorsId").get());
 
 	// Restrictor Icons.
-	for (auto& w : Defaults::wayIds) {
+	for (auto& w : wayTokens) {
 		Gtk::FlowBoxChild* i;
 		builder->get_widget(w.first, i);
 		i->hide();
 		waysIcons.emplace(w.second, i);
 	}
+
+	// Way icons are also the test toggle group (single active, none allowed).
+	builder->get_widget("FlowboxWays", flowboxWays);
+	flowboxWays->signal_child_activated().connect(
+		sigc::mem_fun(*this, &DialogRestrictor::onWayActivated)
+	);
 
 	selectorCombo->signal_changed().connect([this]() {
 		string newName{selectorCombo->get_active_id()};
@@ -125,6 +173,7 @@ void DialogRestrictor::resetForm() noexcept {
 	btnAddRestrictorMap->set_sensitive(
 		DialogRestrictorMap::getInstance()->getSize() < Defaults::restrictorsInfo.at(selectorCombo->get_active_id()).interfaces
 	);
+	updateWaysTestState();
 	DialogForm::resetForm();
 }
 
@@ -258,8 +307,8 @@ void DialogRestrictor::onEmpty() noexcept {
 	speedOn->set_value(GZ40_DEFAULT_SPEED);
 	speedOff->set_value(GZ40_DEFAULT_SPEED);
 
-	for (auto& w : Defaults::allWays) {
-		waysIcons.at(w)->hide();
+	for (auto& [way, child] : waysIcons) {
+		child->hide();
 	}
 	brief->set_label("");
 	btnApply->set_sensitive(false);
@@ -288,4 +337,90 @@ void DialogRestrictor::onSelected() noexcept {
 	const uint8_t newInterfaces {Defaults::restrictorsInfo.at(name).interfaces};
 	if (Defaults::restrictorsInfo.at(previousName).interfaces > newInterfaces)
 		DialogRestrictorMap::getInstance()->trimToInterfaces(newInterfaces);
+}
+
+void DialogRestrictor::updateWaysTestState() noexcept {
+	const bool live {
+		Config::Settings::get().isInteractive()
+		and testLive and testLive()
+		and DialogRestrictorMap::getInstance()->getSize() > 0
+	};
+	selectedWay = nullptr;
+	flowboxWays->unselect_all();
+	flowboxWays->set_selection_mode(live ? Gtk::SELECTION_SINGLE : Gtk::SELECTION_NONE);
+	flowboxWays->set_activate_on_single_click(live);
+	// No daemon: informational. Otherwise sensitive only when live.
+	flowboxWays->set_sensitive(live or not Config::Settings::get().hasBinary());
+
+	// Narrowing: multi-interface restrictor with 2+ mappings, while live.
+	const string name {selectorCombo->get_active_id()};
+	const bool multi {
+		live
+		and Defaults::isMulti(name)
+		and DialogRestrictorMap::getInstance()->getSize() >= 2
+	};
+	auto mapsBox {DialogRestrictorMap::getInstance()->getBox()};
+	mapsBox->unselect_all();
+	mapsBox->set_selection_mode(multi ? Gtk::SELECTION_MULTIPLE : Gtk::SELECTION_NONE);
+
+	// Selection mode re-enables child focus; these groups are mouse-driven.
+	for (auto child : flowboxWays->get_children())
+		child->set_can_focus(false);
+	for (auto child : mapsBox->get_children())
+		child->set_can_focus(false);
+
+	waysLabel->set_text(live
+		? "Click a direction or rotation to test the hardware"
+		: "Supported directions and rotations");
+	mappingsLabel->set_text(multi
+		? "Player mappings — select rows to scope the test (none tests all)"
+		: "Player mappings");
+}
+
+void DialogRestrictor::onWayActivated(Gtk::FlowBoxChild* child) noexcept {
+	if (rotatorRunning)
+		return;
+	// Re-click clears the toggle; sends nothing.
+	if (child == selectedWay) {
+		flowboxWays->unselect_all();
+		selectedWay = nullptr;
+		return;
+	}
+	flowboxWays->select_child(*child);
+	selectedWay = child;
+
+	if (not rotatorRunner)
+		return;
+
+	// Resolve the toggled way from its icon.
+	Defaults::Ways way {Defaults::Ways::invalid};
+	for (const auto& [w, icon] : waysIcons)
+		if (icon == child) {
+			way = w;
+			break;
+		}
+
+	// Scope: selected mappings, else all (none == all).
+	std::vector<std::pair<string, string>> mappings;
+	const auto selected {DialogRestrictorMap::getInstance()->getBox()->get_selected_children()};
+	if (not selected.empty())
+		for (auto child : selected) {
+			auto data {static_cast<Storage::BoxButton*>(child)->getData()};
+			mappings.emplace_back(data->getValue(PLAYER), data->getValue(JOYSTICK));
+		}
+	else if (auto maps {getChildCollection(COLLECTION_RESTRICTOR_MAPS)})
+		for (auto bb : *maps)
+			mappings.emplace_back(bb->getData()->getValue(PLAYER), bb->getData()->getValue(JOYSTICK));
+
+	rotatorRunning = true;
+	string output;
+	const bool ok {rotatorRunner(buildRotatorArgs(mappings, way), output)};
+	rotatorRunning = false;
+
+	if (ok) {
+		if (Config::Settings::get().shouldDebugHardwareTest() and not output.empty())
+			StatusBar::getInstance().push(output, StatusBar::Severity::Debug);
+	}
+	else if (not output.empty())
+		StatusBar::getInstance().push(output, StatusBar::Severity::Error);
 }

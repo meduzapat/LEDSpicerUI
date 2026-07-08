@@ -48,6 +48,15 @@ public:
 	void isValid()          const          override;
 	string createUniqueId() const noexcept override;
 
+	void setRotatorRunner(std::function<bool(const StringVector&, string&)> fn) noexcept { rotatorRunner = std::move(fn); }
+	void setTestLive(std::function<bool()> fn) noexcept { testLive = std::move(fn); }
+
+	/**
+	 * Re-evaluates the way-icon test affordance: the three modes, the live
+	 * test toggle, and whether the restrictor has any player mappings.
+	 */
+	void updateWaysTestState() noexcept;
+
 protected:
 
 	Gtk::ComboBox* comboBoxId = nullptr;
@@ -64,20 +73,66 @@ protected:
 	/// Restrictor ways icon map keyed by Ways enum value.
 	std::unordered_map<Defaults::Ways, Gtk::FlowBoxChild*> waysIcons;
 
+	/// Rotator CLI ways token to its internal Defaults::Ways type (also the way-icon glade ids).
+	static const std::unordered_map<string, Defaults::Ways> wayTokens;
+
+	/**
+	 * @param way
+	 * @return the rotator CLI token for a way (e.g. Ways::w2v -> "vertical2"), or empty if invalid.
+	 */
+	static const string& wayToToken(Defaults::Ways way) noexcept;
+
+	/**
+	 * Builds the positional rotator arguments to set player mappings to one way.
+	 * @param mappings player/joystick number pairs to include in the test.
+	 * @param way the requested way.
+	 * @return flat token list, three per mapping: <player> <joystick> <ways>.
+	 */
+	static StringVector buildRotatorArgs(
+		const std::vector<std::pair<string, string>>& mappings,
+		Defaults::Ways way
+	) noexcept;
+
 	Gtk::ListStore* idListstore = nullptr;
 
 	Gtk::Label* brief = nullptr;
 
+	/// Section labels that gain a test hint when the test affordance is active.
+	Gtk::Label
+		* waysLabel     = nullptr,
+		* mappingsLabel = nullptr;
+
 	Gtk::Button* btnAddRestrictorMap = nullptr;
+
+	/// Restrictor way-icon test group (one toggle per supported way).
+	Gtk::FlowBox* flowboxWays = nullptr;
+	/// Currently toggled way, or null when none.
+	Gtk::FlowBoxChild* selectedWay = nullptr;
+	/// Guards re-entrancy while a rotator run is in flight.
+	bool rotatorRunning = false;
+
+	/// Runs the rotator with positional args; true on a clean exit (set by MainWindow).
+	std::function<bool(const StringVector&, string&)> rotatorRunner;
+	/// True when a rotator test may run now: interactive, connected, fresh (set by MainWindow).
+	std::function<bool()> testLive;
 
 	DialogRestrictor(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder) noexcept;
 
 	void createSubItems(DataMap& values)               noexcept override;
 	const string& getType()                        const noexcept override { return TYPE_RESTRICTOR; }
+
+	const char* getLockClass() const noexcept override { return CSS_RO_LOCKED_CONFIG; }
 	Storage::Data* createData(Values& rawData) const noexcept override;
 
 	void onEmpty()    noexcept override;
 	void onSelected() noexcept override;
+
+	/**
+	 * Runs (or clears) the rotator test for the toggled way over all the
+	 * restrictor's player mappings.
+	 * @param child the activated way icon.
+	 */
+	void onWayActivated(Gtk::FlowBoxChild* child) noexcept;
 
 };
 

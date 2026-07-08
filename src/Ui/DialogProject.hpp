@@ -40,8 +40,25 @@ public:
 
 	const string& getProjectName() const;
 
+	/**
+	 * Whether a new project should embed its config despite an available system one.
+	 * @return true when portable was requested.
+	 */
+	bool isPortableRequested() const noexcept {
+		return toggleNewProjectPortable->get_active();
+	}
+
+	/**
+	 * keeps a single use flag.
+	 * @return true once per such conversion.
+	 */
+	bool takeCurrentProjectConverted() noexcept {
+		const bool value {currentProjectConverted};
+		currentProjectConverted = false;
+		return value;
+	}
+
 	void setProjectsDir(const string& projectsDir, bool setFileProjectsDirSelector);
-	void setProjectName(const string& projectName);
 
 	/**
 	 * Scans projectsDir for available projects.
@@ -60,11 +77,22 @@ protected:
 
 	Gtk::Entry* inputNewProjectName = nullptr;
 
+	Gtk::ToggleButton* toggleNewProjectPortable = nullptr;
+
 	Gtk::Button* btnApply = nullptr;
 
 	Gtk::Box
 		* boxNewProjectName = nullptr, // Label + Entry pair.
-		* boxProjectActions = nullptr; // Open / Select project actions.
+		* boxProjectActions = nullptr, // Open / Select project actions.
+		* boxProjectConvert = nullptr; // Config location conversions for the selected project.
+
+	Gtk::Button
+		* btnProjectMakePortable = nullptr,
+		* btnProjectDeploy       = nullptr,
+		* btnProjectUseSystem    = nullptr;
+
+	/// True when a conversion changed the open project's config location; see takeCurrentProjectConverted().
+	bool currentProjectConverted = false;
 
 	Gtk::ComboBoxText* comboSelectProject = nullptr;
 
@@ -75,6 +103,49 @@ protected:
 	 * Activate open/select project if projects and data dirs are set.
 	 */
 	void updateBoxProjectActions();
+
+	/**
+	 * Validates a candidate new-project name.
+	 * @param name candidate name
+	 * @throws Message if the projects directory is unset, the name is reserved, or it exists.
+	 */
+	void checkNewName(const string& name) const;
+
+	/**
+	 * Sets Apply sensitivity and the name-entry error icon for the current selection.
+	 */
+	void refreshApplyState();
+
+	/**
+	 * Shows the conversion actions matching the selected project's on-disk
+	 * config location, disabled with the reason when not executable.
+	 */
+	void updateConvertActions();
+
+	/**
+	 * Copies the system config into the selected project's directory.
+	 */
+	void makePortable();
+
+	/**
+	 * Copies the selected project's embedded config over the system one,
+	 * keeping the previous system config as a backup.
+	 */
+	void deployToSystem();
+
+	/**
+	 * Renames the selected project's embedded config to a backup so the
+	 * project follows the system config again.
+	 */
+	void useSystemConfig();
+
+	/**
+	 * Reports a finished conversion and refreshes the actions.
+	 * @param message status bar text.
+	 * @param sourceChanged true when the project's config location moved,
+	 *        requiring a reload if it is the open project.
+	 */
+	void afterConversion(const string& message, bool sourceChanged);
 
 };
 

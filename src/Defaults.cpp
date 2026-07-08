@@ -262,20 +262,6 @@ const std::unordered_map<string, Defaults::TransitionInfo> Defaults::transitions
 	}},
 };
 
-const std::unordered_map<string, Defaults::Ways> Defaults::wayIds {
-	{"w2",       Ways::w2},
-	{"w2v",      Ways::w2v},
-	{"w4",       Ways::w4},
-	{"w4x",      Ways::w4x},
-	{"w8",       Ways::w8},
-	{"w16",      Ways::w16},
-	{"w49",      Ways::w49},
-	{"analog",   Ways::analog},
-	{"mouse",    Ways::mouse},
-	{"rotary8",  Ways::rotary8},
-	{"rotary12", Ways::rotary12},
-};
-
 const std::unordered_map<string, Defaults::ElementInfo> Defaults::elementsInfo = {
 	{ELEMENT_TYPE_ACTUATOR,  {"Actuator",             "Force-feedback items: solenoids, knockers, recoils, motors."}},
 	{ELEMENT_TYPE_BAR,       {"LEDs Light Strip",     "Addressable RGB strip used as a single element."}},
@@ -608,6 +594,41 @@ void Defaults::initialize(Gtk::HeaderBar* header, Gtk::Button* btnSave) {
 	btnSave->set_sensitive(false);
 }
 
+void Defaults::sweepWritability(Gtk::Widget* widget, const string& cssClass, bool writable) noexcept {
+
+	auto context {widget->get_style_context()};
+	if (context->has_class(cssClass)) {
+		// Marked edit buttons flip to view buttons instead of locking.
+		if (context->has_class(CSS_RO_VIEW)) {
+			auto button {static_cast<Gtk::Button*>(widget)};
+			button->set_image_from_icon_name(writable ? ICON_EDIT : ICON_VIEW, Gtk::ICON_SIZE_BUTTON);
+			// Swap the leading verb, keeping any trailing subject.
+			const string tooltip {button->get_tooltip_text()};
+			const auto subject {tooltip.find(' ')};
+			button->set_tooltip_text(
+				(writable ? "Edit" : "View") + (subject == string::npos ? "" : tooltip.substr(subject))
+			);
+			return;
+		}
+		widget->set_sensitive(writable);
+		return;
+	}
+
+	if (auto container {dynamic_cast<Gtk::Container*>(widget)}; container)
+		for (auto child : container->get_children())
+			sweepWritability(child, cssClass, writable);
+}
+
+void Defaults::applyWritability(const string& cssClass, bool writable) noexcept {
+	for (auto window : Gtk::Window::list_toplevels())
+		sweepWritability(window, cssClass, writable);
+}
+
+void Defaults::applyWritability(Gtk::Widget* widget, bool configWritable, bool projectWritable) noexcept {
+	sweepWritability(widget, CSS_RO_LOCKED_CONFIG,  configWritable);
+	sweepWritability(widget, CSS_RO_LOCKED_PROJECT, projectWritable);
+}
+
 void Defaults::registerWidget(Gtk::Editable* widget) {
 	widget->signal_changed().connect(&Defaults::markDirty);
 }
@@ -641,8 +662,9 @@ void Defaults::cleanDirty() {
 	btnSave->set_sensitive(false);
 }
 
-void Defaults::setSubtitle(const string& text) {
+void Defaults::setSubtitle(const string& text, const string& tooltip) {
 	header->set_subtitle(text);
+	header->set_tooltip_text(tooltip);
 }
 
 void Defaults::increaseTab() {
@@ -657,6 +679,17 @@ void Defaults::reduceTab() {
 
 string Defaults::tab() {
 	return tabs;
+}
+
+bool Defaults::comboBoxHasId(Gtk::ComboBox* comboBox, const string& id) {
+	auto model {comboBox->get_model()};
+	const int idColumn {comboBox->get_id_column()};
+	for (const auto& row : model->children()) {
+		Glib::ustring rowId;
+		row.get_value(idColumn, rowId);
+		if (rowId.raw() == id) return true;
+	}
+	return false;
 }
 
 void Defaults::populateComboBoxTextWithNumbers(Gtk::ComboBoxText* comboBox, int from, int to, const StringVector& ignoreList) {
@@ -803,10 +836,21 @@ string Defaults::extractAfter(const string& line, const string& prefix) {
 	return result;
 }
 
+bool Defaults::runCommand(const string& command) {
+	string discard;
+	return runCommand(command, discard);
+}
+
 bool Defaults::runCommand(const string& command, string& output) {
 	try {
 		int exitStatus;
-		Glib::spawn_command_line_sync(command, &output, nullptr, &exitStatus);
+		string error;
+		Glib::spawn_command_line_sync(command, &output, &error, &exitStatus);
+		if (not error.empty()) {
+			if (not output.empty() and output.back() != '\n')
+				output += '\n';
+			output += error;
+		}
 		return (exitStatus == 0);
 	}
 	catch (const Glib::Error&) {

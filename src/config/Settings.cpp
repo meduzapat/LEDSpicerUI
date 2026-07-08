@@ -20,10 +20,6 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <glibmm.h>
-#include <cmath>
-#include <iomanip>
-
 #include "Settings.hpp"
 
 using namespace LEDSpicerUI;
@@ -51,12 +47,10 @@ const StringUMap Settings::DEFAULTS = {
 void Settings::load(const Values& raw) noexcept {
 	for (const auto& [key, def] : DEFAULTS)
 		setValue(key, raw.getValue(key, def));
-	updateMode();
 }
 
 void Settings::setBinaryPath(const string& path) noexcept {
 	setValue(PATH_BINARY, path);
-	updateMode();
 }
 
 void Settings::setDataDir(const string& dir) noexcept {
@@ -83,7 +77,6 @@ void Settings::setDefaultProject(const string& name) noexcept {
 
 void Settings::setInteractiveMode(bool value) noexcept {
 	setValue(INTERACTIVE_MODE, value);
-	updateMode();
 }
 
 Settings::ThemeStyle Settings::getThemeStyle() const noexcept {
@@ -105,6 +98,7 @@ void Settings::setPreserveEmptyDir(bool value)   noexcept { setValue(PRESERVE_EM
 void Settings::setRemoveInvalidItems(bool value) noexcept { setValue(REMOVE_INVALID_ITEMS, value); }
 void Settings::setSaveBackup(bool value)         noexcept { setValue(SAVE_BACKUP,          value); }
 void Settings::setDebugFiles(bool value)         noexcept { setValue(DEBUG_FILES,          value); }
+void Settings::setDebugHardwareTest(bool value)  noexcept { setValue(DEBUG_HARDWARE_TEST,  value); }
 
 unsigned Settings::getLayoutTestTimeout() const noexcept {
 	return static_cast<unsigned>(std::lround(getDouble(LAYOUT_TEST_TIMEOUT) * 1000));
@@ -123,6 +117,7 @@ void Settings::setConfigPath(const string& path) noexcept {
 void Settings::setCurrentProject(const string& name) noexcept {
 	currentProject = name;
 	setValue(DEFAULT_PROJECT, name);
+	resolveConfigSource();
 }
 
 void Settings::setColorFiles(StringVector files) noexcept {
@@ -136,23 +131,55 @@ void Settings::setDataDirStatus(bool gameData, bool colors, bool controls) noexc
 	hasControls = controls;
 }
 
-string Settings::getProjectDir() const noexcept {
+string Settings::getProjectDir(const string& name) const noexcept {
 	const string& proj = getValue(PATH_PROJECT);
-	if (proj.empty() || currentProject.empty())
+	if (proj.empty() or name.empty())
 		return {};
-	return proj + currentProject + "/";
+	return proj + name + "/";
 }
 
 string Settings::getActiveConfigPath() const noexcept {
-	if (isPortable())
+	if (configSource == ConfigSource::Project)
 		return getProjectDir() + CONFIG_FILE;
 	return configPath;
 }
 
-void Settings::updateMode() noexcept {
-	if (getValue(PATH_BINARY).empty()) {
-		currentMode = Mode::Portable;
+void Settings::resolveConfigSource() noexcept {
+
+	if (currentProject.empty()) {
+		configSource = ConfigSource::System;
 		return;
 	}
-	currentMode = (getValue(INTERACTIVE_MODE) == HUMAN_TRUE) ? Mode::Iterative : Mode::Local;
+	// An embedded config makes the project portable.
+	if (Glib::file_test(getProjectDir() + CONFIG_FILE, Glib::FILE_TEST_EXISTS)) {
+		configSource = ConfigSource::Project;
+		return;
+	}
+	// No embedded config: use the system config when it exists or can be created there.
+	configSource = isSystemConfigAvailable() ? ConfigSource::System : ConfigSource::Project;
 }
+
+bool Settings::isSystemConfigAvailable() const noexcept {
+	return Glib::file_test(configPath, Glib::FILE_TEST_EXISTS) or isPathWritable(configPath);
+}
+
+bool Settings::isRootConfigWritable() const noexcept {
+	if (configSource == ConfigSource::Project)
+		return isProjectDirWritable();
+	return isPathWritable(configPath);
+}
+
+bool Settings::isProjectDirWritable() const noexcept {
+	return isPathWritable(getProjectDir());
+}
+
+bool Settings::isPathWritable(const string& path) noexcept {
+	if (path.empty())
+		return false;
+	string target {path};
+	// Missing target: probe the closest existing ancestor (can the target be created?).
+	while (not Glib::file_test(target, Glib::FILE_TEST_EXISTS))
+		target = Glib::path_get_dirname(target);
+	return access(target.c_str(), W_OK) == 0;
+}
+

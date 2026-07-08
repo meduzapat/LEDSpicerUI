@@ -208,20 +208,20 @@ void DialogElement::clearFormConditinal(uint8_t flags) noexcept {
 	// RGB.
 	if (not flags or (flags & (1 << tabIndex::RGB))) {
 		positionRGB->set_text("");
-		comboBoxRGBRGB->set_active_id(defaultRGBFormat);
+		comboBoxRGBRGB->set_active_id(DEFAULT_RGB_ORDER);
 	}
 
 	// RGB Strip.
 	if (not flags or (flags & (1 << tabIndex::Strip))) {
 		positionStrip->set_text("");
 		sizeStrip->set_text("");
-		comboBoxRGBStrip->set_active_id(defaultRGBFormat);
+		comboBoxRGBStrip->set_active_id(DEFAULT_RGB_ORDER);
 	}
 
 	// Multi RGB.
 	if (not flags or (flags & (1 << tabIndex::mRGB))) {
 		positionsMRGB->set_text("");
-		comboBoxRGBMRGB->set_active_id(defaultRGBFormat);
+		comboBoxRGBMRGB->set_active_id(DEFAULT_RGB_ORDER);
 	}
 
 	if (not flags) {
@@ -496,13 +496,7 @@ void DialogElement::storeData() noexcept {
 		}
 	}
 
-	/*
-	 * New Elements created by the user (or by clone — action is ADD in both)
-	 * are auto-linked into the system All group. Strip parents have
-	 * PROP_NO_SELECT and are silently skipped by linkInto.
-	 * TODO: decide expansion site (daemon vs UI) before auto-linking strip
-	 *       children — handle the new-child branch above accordingly.
-	 */
+	// Any new Element needs to be added to All, except for strip parents.
 	if (action == Actions::ADD)
 		DialogGroup::getInstance()->linkInto(GROUP_ALL_NAME, currentData);
 

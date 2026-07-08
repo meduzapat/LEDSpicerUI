@@ -50,7 +50,7 @@ class StatusBar {
 
 public:
 
-	enum class Severity : uint8_t {Info, Success, Warning, Error};
+	enum class Severity : uint8_t {Info, Success, Warning, Error, Debug};
 
 	StatusBar(const StatusBar&)            = delete;
 	StatusBar& operator=(const StatusBar&) = delete;
@@ -105,14 +105,16 @@ private:
 		MIN_MS        = 3000,
 		MAX_MS        = 8000,
 		MS_PER_CHAR   = 70,
-		SEVERE_FACTOR = 2;
+		SEVERE_FACTOR = 2,
+		FLASH_MS      = 500;
 
 	/// CSS classes for each Severity. Order matches the enum's underlying value.
-	static constexpr std::array<const char*, 4> SEVERITY_CLASSES {
+	static constexpr std::array<const char*, 5> SEVERITY_CLASSES {
 		CSS_STATUS_INFO,
 		CSS_STATUS_SUCCESS,
 		CSS_STATUS_WARNING,
 		CSS_STATUS_ERROR,
+		CSS_STATUS_INFO,   // Debug reuses the info style.
 	};
 
 	static StatusBar instance;

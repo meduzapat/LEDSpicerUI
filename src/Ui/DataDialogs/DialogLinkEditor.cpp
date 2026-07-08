@@ -74,7 +74,6 @@ void DialogLinkEditor::open(Storage::Link* link) noexcept {
 		return;
 	}
 
-	// Store TODO verify
 	for (const auto& field : link->getLinkFields()) {
 		switch (field.widgetType) {
 			case Storage::Link::LinkField::Widget::COLOR_PICKER:

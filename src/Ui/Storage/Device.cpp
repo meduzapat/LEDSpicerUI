@@ -25,9 +25,11 @@
 using namespace LEDSpicerUI::Ui::Storage;
 
 string Device::createPrettyName() const noexcept {
+
 	string
-		name{getValue(NAME)},
-		r{Defaults::devicesInfo.at(name).name};
+		name {getValue(NAME)},
+		r    {Defaults::devicesInfo.at(name).name};
+
 	if (Defaults::isIdUser(name))
 		r += " Id: " + getValue(ID);
 	if (Defaults::isSerial(name))

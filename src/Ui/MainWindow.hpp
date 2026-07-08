@@ -35,7 +35,8 @@
 #include "DataDialogs/DialogProcess.hpp"
 #include "DataDialogs/DialogGroup.hpp"
 #include "Layout/Layout.hpp"
-#include "Layout/LayoutTester.hpp"
+#include "DaemonHandler.hpp"
+#include "DaemonSandbox.hpp"
 #include "StatusBar.hpp"
 
 #pragma once
@@ -88,6 +89,15 @@ protected:
 	Gtk::Box*    mainTabsBox    = nullptr;
 	Gtk::Button* btnImportConfig = nullptr;
 
+	/// Daemon connection toggle (top bar).
+	Gtk::ToggleButton* toggleConnect = nullptr;
+	/// Guards reentrancy while reverting toggleConnect in code.
+	bool ignoreConnectToggle = false;
+
+	/// Modal busy indicator (from glade); its label text is swapped per operation.
+	Gtk::Window* busyWindow = nullptr;
+	Gtk::Label*  busyLabel  = nullptr;
+
 	/// @name Storage Collections
 	Storage::BoxButtonCollection
 		/// Created devices in the dialog devices.
@@ -108,11 +118,11 @@ protected:
 	/// Navigator for profile files.
 	ProfileDirectoryNavigator profileNavigator;
 
-	/// Daemon test dispatcher used by the layout board (stub until #60).
-	Layout::LayoutTester layoutTester;
-
 	/// Visual board controller. Subscribed to Storage::Element lifecycle events.
 	Layout::Layout layout;
+
+	/// Isolated test environment for the daemon; exists only in interactive mode.
+	std::unique_ptr<DaemonSandbox> sandbox;
 
 	/**
 	 * Populates the configuration.
@@ -126,6 +136,72 @@ protected:
 	Values packLedspicerConfig() const noexcept;
 
 	/**
+	 * Handles the daemon connect/disconnect toggle, reverting on failure.
+	 */
+	void onConnectToggled();
+
+	/**
+	 * Creates or drops the test sandbox to match interactive mode.
+	 */
+	void syncSandbox() noexcept;
+
+	/**
+	 * Stages the shared test config; launches the daemon only when devices are present.
+	 * @return true once staged (and, with devices, the daemon is up).
+	 * @throws Message if the config cannot be written.
+	 */
+	bool launchDaemon();
+
+	/**
+	 * Connects for a new test session (busy spinner, status, enables testing).
+	 * @return true on success.
+	 */
+	bool connectDaemon() noexcept;
+
+	/**
+	 * Daemon readiness gate installed on DaemonHandler: command() asks before
+	 * each send. Reports whether the daemon is online and, refreshing it in
+	 * place when the base configuration drifted, fresh.
+	 * @return true if a test may fire now.
+	 */
+	bool ensureDaemonReady() noexcept;
+
+	/**
+	 * Refreshes a stale daemon in place before a test; drops the link on failure.
+	 * @return true if testing is usable afterwards.
+	 */
+	bool reconnectDaemon() noexcept;
+
+	/**
+	 * Stages the config and runs the rotator with positional player/joystick/ways args.
+	 * @param positional flat token list passed after `rotator -c <conf>`.
+	 * @param output     captured rotator output (stdout with stderr appended).
+	 * @return true if the rotator ran and exited cleanly.
+	 */
+	bool runRotatorTest(const StringVector& positional, string& output) noexcept;
+
+	/**
+	 * Shows/enables the connect toggle per mode (hidden/disabled/enabled).
+	 */
+	void updateDaemonControls() noexcept;
+
+	/**
+	 * Stales the staged test config when test-relevant data (devices, elements,
+	 * groups, restrictors, port) changes, so it refreshes on the next test.
+	 */
+	void onDaemonConfigChanged() noexcept;
+
+	/**
+	 * Shows the modal busy spinner with text and paints it before blocking.
+	 */
+	void showBusy(const Glib::ustring& text) noexcept;
+
+	/**
+	 * Hides the modal busy spinner.
+	 */
+	void hideBusy() noexcept;
+
+	/**
 	 * Connects Dialogs with buttons.
 	 * @param builder
 	 */
@@ -135,8 +211,17 @@ protected:
 	 * Opens a project by name: sets current project, loads its config, and activates the UI.
 	 * Persists the project to UI settings immediately if the config file already exists.
 	 * @param name project directory name
+	 * @param portable keep a new project's config inside its directory even
+	 *        when the system config is available.
 	 */
-	void openProject(const string& name);
+	void openProject(const string& name, bool portable = false);
+
+	/**
+	 * Applies the writability of both config sources to the UI: locks the
+	 * affected tab pages and flags the data dialogs read-only. Runs after a
+	 * project is opened and whenever the settings dialog closes.
+	 */
+	void applyWritability() noexcept;
 
 	/**
 	 * Reads a ledspicer.conf file.

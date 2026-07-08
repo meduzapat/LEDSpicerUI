@@ -20,12 +20,14 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <filesystem>
+#include <fstream>
+#include <unistd.h>
 #include <gtest/gtest.h>
 #include "config/Settings.hpp"
 
 using namespace LEDSpicerUI;
 using namespace LEDSpicerUI::Config;
-using Mode       = Settings::Mode;
 using ThemeStyle = Settings::ThemeStyle;
 
 class SettingsTest : public ::testing::Test {
@@ -52,8 +54,7 @@ TEST_F(SettingsTest, DefaultState) {
 	EXPECT_FALSE(s.shouldDebugFiles());
 	EXPECT_EQ(0, s.getLayoutGrid());
 	EXPECT_EQ(1500u, s.getLayoutTestTimeout());
-	EXPECT_EQ(Mode::Portable, s.getMode());
-	EXPECT_TRUE(s.isPortable());
+	EXPECT_FALSE(s.hasBinary());
 }
 
 TEST_F(SettingsTest, LoadAndSerialize) {
@@ -85,7 +86,7 @@ TEST_F(SettingsTest, LoadAndSerialize) {
 	EXPECT_TRUE (s.shouldDebugFiles());
 	EXPECT_EQ(30, s.getLayoutGrid());
 	EXPECT_EQ(2500u, s.getLayoutTestTimeout());
-	EXPECT_EQ(Mode::Local, s.getMode());
+	EXPECT_TRUE(s.hasBinary());
 
 	// Round-trip: snapshot → reset → load → same values.
 	const Values snap(s.begin(), s.end());
@@ -95,7 +96,6 @@ TEST_F(SettingsTest, LoadAndSerialize) {
 	EXPECT_EQ(ThemeStyle::Dark,      s.getThemeStyle());
 	EXPECT_EQ(30,                    s.getLayoutGrid());
 	EXPECT_EQ(2500u,                 s.getLayoutTestTimeout());
-	EXPECT_EQ(Mode::Local,           s.getMode());
 }
 
 TEST_F(SettingsTest, LoadFillsMissingKeysWithDefaults) {
@@ -107,31 +107,8 @@ TEST_F(SettingsTest, LoadFillsMissingKeysWithDefaults) {
 	EXPECT_EQ(ThemeStyle::Light, s.getThemeStyle());
 	EXPECT_TRUE(s.shouldSaveBackup());     // missing → default True
 	EXPECT_FALSE(s.shouldDebugFiles());    // missing → default False
-	// interactive mode defaults to True → with binary set, mode is Iterative
-	EXPECT_EQ(Mode::Iterative, s.getMode());
-}
-
-TEST_F(SettingsTest, ModeDerivation) {
-	auto& s = Settings::get();
-
-	// No binary → Portable regardless of interactive preference.
-	s.setBinaryPath("");
-	s.setInteractiveMode(true);
-	EXPECT_EQ(Mode::Portable, s.getMode());
-	EXPECT_TRUE(s.isPortable());
-
-	// Binary + interactive → Iterative.
-	s.setBinaryPath("/usr/bin/ledspicerd");
-	EXPECT_EQ(Mode::Iterative, s.getMode());
-	EXPECT_TRUE(s.isIterative());
-
-	// Binary, interactive off → Local.
-	s.setInteractiveMode(false);
-	EXPECT_EQ(Mode::Local, s.getMode());
-
-	// Clear binary → Portable again.
-	s.setBinaryPath("");
-	EXPECT_EQ(Mode::Portable, s.getMode());
+	// interactive mode defaults to True → with binary set, testing is enabled
+	EXPECT_TRUE(s.isInteractive());
 }
 
 TEST_F(SettingsTest, VolatileState) {
@@ -145,16 +122,6 @@ TEST_F(SettingsTest, VolatileState) {
 	EXPECT_EQ("arcade", s.getCurrentProject());
 	EXPECT_EQ("arcade", s.getDefaultProject()); // setCurrentProject also writes DEFAULT_PROJECT
 	EXPECT_EQ("/home/user/projects/arcade/", s.getProjectDir());
-
-	// Portable mode → active config is inside the project dir.
-	EXPECT_TRUE(s.isPortable());
-	EXPECT_EQ("/home/user/projects/arcade/" CONFIG_FILE, s.getActiveConfigPath());
-
-	// Local mode → active config is configPath.
-	s.setBinaryPath("/usr/bin/ledspicerd");
-	s.setInteractiveMode(false);
-	EXPECT_TRUE(s.isLocal());
-	EXPECT_EQ("/etc/ledspicer/ledspicer.conf", s.getActiveConfigPath());
 
 	StringVector files = {"colors.ini", "extra.ini"};
 	s.setColorFiles(files);
@@ -229,6 +196,125 @@ TEST_F(SettingsTest, LayoutTestTimeoutConversion) {
 	s.load(Values{});
 	s.load(snap);
 	EXPECT_EQ(500u, s.getLayoutTestTimeout());
+}
+
+TEST_F(SettingsTest, Writability) {
+	namespace fs = std::filesystem;
+	auto& s = Settings::get();
+
+	// Volatile state survives load(); reset it so this test is order-independent.
+	s.setConfigPath("");
+	s.setCurrentProject("");
+
+	// Nothing configured → nothing writable.
+	EXPECT_FALSE(s.isProjectDirWritable());
+	EXPECT_FALSE(s.isRootConfigWritable());
+
+	const string base {::testing::TempDir() + "settingsWritability/"};
+	fs::create_directories(base + "projects/arcade");
+
+	// No system config anywhere → the config lives inside the project.
+	s.setProjectsDir(base + "projects/");
+	s.setCurrentProject("arcade");
+	EXPECT_TRUE(s.isProjectDirWritable());
+	EXPECT_EQ(Settings::ConfigSource::Project, s.getConfigSource());
+	EXPECT_TRUE(s.isRootConfigWritable());
+
+	// Missing project dir → probes the closest existing ancestor.
+	s.setCurrentProject("brandNew");
+	EXPECT_TRUE(s.isProjectDirWritable());
+
+	// Creatable system config → System source; missing file probes its directory.
+	s.setConfigPath(base + "ledspicer.conf");
+	s.setCurrentProject("brandNew");
+	EXPECT_EQ(Settings::ConfigSource::System, s.getConfigSource());
+	EXPECT_TRUE(s.isRootConfigWritable());
+
+	// Permission bits are bypassed by root, so the negative case only runs unprivileged.
+	if (geteuid() != 0) {
+		fs::create_directories(base + "locked");
+		std::ofstream(base + "locked/" CONFIG_FILE) << "";
+		fs::permissions(base + "locked/" CONFIG_FILE, fs::perms::owner_read);
+		s.setConfigPath(base + "locked/" CONFIG_FILE);
+		s.setCurrentProject("brandNew");
+		// An existing read-only system config stays the source, locked.
+		EXPECT_EQ(Settings::ConfigSource::System, s.getConfigSource());
+		EXPECT_FALSE(s.isRootConfigWritable());
+		fs::permissions(base + "locked/" CONFIG_FILE, fs::perms::owner_all);
+	}
+
+	fs::remove_all(base);
+}
+
+TEST_F(SettingsTest, ConfigSourceResolution) {
+	namespace fs = std::filesystem;
+	auto& s = Settings::get();
+
+	const string base {::testing::TempDir() + "settingsConfigSource/"};
+	fs::create_directories(base + "projects/existing");
+	s.setProjectsDir(base + "projects/");
+
+	// No project selected → System.
+	s.setConfigPath("");
+	s.setCurrentProject("");
+	EXPECT_EQ(Settings::ConfigSource::System, s.getConfigSource());
+
+	// No binary (empty system path) → the config lives inside the project.
+	s.setCurrentProject("existing");
+	EXPECT_EQ(Settings::ConfigSource::Project, s.getConfigSource());
+
+	// No config anywhere, system location writable → System.
+	s.setConfigPath(base + CONFIG_FILE);
+	s.setCurrentProject("existing");
+	EXPECT_EQ(Settings::ConfigSource::System, s.getConfigSource());
+
+	// Same resolution when the project directory does not exist yet.
+	s.setCurrentProject("brandNew");
+	EXPECT_EQ(Settings::ConfigSource::System, s.getConfigSource());
+
+	// An existing system config wins over creation logic, for both
+	// existing and not-yet-created projects.
+	std::ofstream(base + CONFIG_FILE) << "";
+	s.setCurrentProject("existing");
+	EXPECT_EQ(Settings::ConfigSource::System, s.getConfigSource());
+	s.setCurrentProject("brandNew");
+	EXPECT_EQ(Settings::ConfigSource::System, s.getConfigSource());
+
+	// An embedded config wins even when the system config exists.
+	std::ofstream(base + "projects/existing/" CONFIG_FILE) << "";
+	s.setCurrentProject("existing");
+	EXPECT_EQ(Settings::ConfigSource::Project, s.getConfigSource());
+
+	// No config anywhere and a read-only system location → Project.
+	// Permission bits are bypassed by root, so this only runs unprivileged.
+	if (geteuid() != 0) {
+		fs::create_directories(base + "locked");
+		fs::permissions(base + "locked", fs::perms::owner_read | fs::perms::owner_exec);
+		s.setConfigPath(base + "locked/" CONFIG_FILE);
+		s.setCurrentProject("brandNew");
+		EXPECT_EQ(Settings::ConfigSource::Project, s.getConfigSource());
+		fs::permissions(base + "locked", fs::perms::owner_all);
+	}
+
+	fs::remove_all(base);
+}
+
+TEST_F(SettingsTest, BinaryAndInteractive) {
+	auto& s = Settings::get();
+
+	// Preference without a binary never enables testing.
+	s.setBinaryPath("");
+	s.setInteractiveMode(true);
+	EXPECT_FALSE(s.hasBinary());
+	EXPECT_FALSE(s.isInteractive());
+
+	s.setBinaryPath("/usr/bin/ledspicerd");
+	EXPECT_TRUE(s.hasBinary());
+	EXPECT_TRUE(s.isInteractive());
+
+	// Binary without the preference: testable machine, testing declined.
+	s.setInteractiveMode(false);
+	EXPECT_FALSE(s.isInteractive());
 }
 
 int main(int argc, char** argv) {

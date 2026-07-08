@@ -105,8 +105,18 @@ void DialogSelect::open() noexcept {
 
 void DialogSelect::refresh() noexcept {
 	request->displayBox->wipe();
-	for (auto btn : *destination)
+	/*
+	 * Link rows live detached in their owner's collection and bypass BoxButtonCollection::populateBox,
+	 * so this display moment must apply the writability state itself.
+	 */
+	const auto& settings {Config::Settings::get()};
+	const bool
+		configWritable  {settings.isRootConfigWritable()},
+		projectWritable {settings.isProjectDirWritable()};
+	for (auto btn : *destination) {
+		Defaults::applyWritability(btn, configWritable, projectWritable);
 		request->displayBox->add(*btn);
+	}
 	request->displayBox->show_all();
 }
 
@@ -220,6 +230,8 @@ void DialogSelect::addDisplayButtons(Storage::BoxButton& boxButton) noexcept {
 		boxButton.packButtonStart(*btn);
 		btn->set_image_from_icon_name(ICON_EDIT, Gtk::ICON_SIZE_BUTTON);
 		btn->get_style_context()->add_class(CSS_BOX_BACKGROUND_EDIT);
+		btn->get_style_context()->add_class(request->lockClass);
+		btn->get_style_context()->add_class(CSS_RO_VIEW);
 		btn->set_tooltip_text("Edit");
 		btn->signal_clicked().connect([&boxButton, this]() {
 			DialogLinkEditor::getInstance()->open(
@@ -234,6 +246,7 @@ void DialogSelect::addDisplayButtons(Storage::BoxButton& boxButton) noexcept {
 	boxButton.packButtonStart(*btn);
 	btn->set_image_from_icon_name(ICON_DELETE, Gtk::ICON_SIZE_BUTTON);
 	btn->get_style_context()->add_class(CSS_BOX_BACKGROUND_DELETE);
+	btn->get_style_context()->add_class(request->lockClass);
 	btn->set_tooltip_text("Remove");
 	btn->signal_clicked().connect([&boxButton, this]() {
 		Defaults::markDirty();

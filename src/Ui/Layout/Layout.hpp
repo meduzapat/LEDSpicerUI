@@ -22,7 +22,6 @@
 
 #include "LayoutElement.hpp"
 #include "LayoutBoard.hpp"
-#include "LayoutTester.hpp"
 #include "Storage/ElementObserver.hpp"
 #include "Storage/BoxButtonCollection.hpp"
 
@@ -52,7 +51,6 @@ public:
 
 	Layout(
 		const Glib::RefPtr<Gtk::Builder>& builder,
-		LayoutTester* tester,
 		Storage::BoxButtonCollection* devicesCollection
 	) noexcept;
 
@@ -65,10 +63,18 @@ public:
 	void onRemoved(Storage::Element* element) noexcept override;
 	void onChanged(Storage::Element* element) noexcept override;
 
+	/**
+	 * Enables or disables tile testing; disabling closes the active tile and
+	 * cancels its in-flight light. Cosmetic only — command() guards the daemon link.
+	 */
+	void setTesting(bool on) noexcept;
+
 private:
 
 	LayoutBoard*  board  = nullptr;
-	LayoutTester* tester = nullptr;
+
+	/// True while the daemon is up and tiles may be tested.
+	bool testing = false;
 
 	/// Points to Devices Collection to lookup the Device and Element on edit.
 	Storage::BoxButtonCollection* devicesCollection = nullptr;
