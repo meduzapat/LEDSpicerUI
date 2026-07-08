@@ -94,7 +94,16 @@ void BoxButtonCollection::swap(BoxButtonCollection& other) noexcept {
 }
 
 void BoxButtonCollection::populateBox(SortableFlowBox* box) noexcept {
+	/*
+	 * Items created while detached from any window miss the toplevel writability
+	 * sweep; becoming visible is the moment their state must be current.
+	 */
+	const auto& settings {Config::Settings::get()};
+	const bool
+		configWritable  {settings.isRootConfigWritable()},
+		projectWritable {settings.isProjectDirWritable()};
 	for (auto item : items) {
+		Defaults::applyWritability(item, configWritable, projectWritable);
 		box->add(*item);
 	}
 	box->show_all();

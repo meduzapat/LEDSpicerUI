@@ -594,6 +594,41 @@ void Defaults::initialize(Gtk::HeaderBar* header, Gtk::Button* btnSave) {
 	btnSave->set_sensitive(false);
 }
 
+void Defaults::sweepWritability(Gtk::Widget* widget, const string& cssClass, bool writable) noexcept {
+
+	auto context {widget->get_style_context()};
+	if (context->has_class(cssClass)) {
+		// Marked edit buttons flip to view buttons instead of locking.
+		if (context->has_class(CSS_RO_VIEW)) {
+			auto button {static_cast<Gtk::Button*>(widget)};
+			button->set_image_from_icon_name(writable ? ICON_EDIT : ICON_VIEW, Gtk::ICON_SIZE_BUTTON);
+			// Swap the leading verb, keeping any trailing subject.
+			const string tooltip {button->get_tooltip_text()};
+			const auto subject {tooltip.find(' ')};
+			button->set_tooltip_text(
+				(writable ? "Edit" : "View") + (subject == string::npos ? "" : tooltip.substr(subject))
+			);
+			return;
+		}
+		widget->set_sensitive(writable);
+		return;
+	}
+
+	if (auto container {dynamic_cast<Gtk::Container*>(widget)}; container)
+		for (auto child : container->get_children())
+			sweepWritability(child, cssClass, writable);
+}
+
+void Defaults::applyWritability(const string& cssClass, bool writable) noexcept {
+	for (auto window : Gtk::Window::list_toplevels())
+		sweepWritability(window, cssClass, writable);
+}
+
+void Defaults::applyWritability(Gtk::Widget* widget, bool configWritable, bool projectWritable) noexcept {
+	sweepWritability(widget, CSS_RO_LOCKED_CONFIG,  configWritable);
+	sweepWritability(widget, CSS_RO_LOCKED_PROJECT, projectWritable);
+}
+
 void Defaults::registerWidget(Gtk::Editable* widget) {
 	widget->signal_changed().connect(&Defaults::markDirty);
 }
@@ -627,8 +662,9 @@ void Defaults::cleanDirty() {
 	btnSave->set_sensitive(false);
 }
 
-void Defaults::setSubtitle(const string& text) {
+void Defaults::setSubtitle(const string& text, const string& tooltip) {
 	header->set_subtitle(text);
+	header->set_tooltip_text(tooltip);
 }
 
 void Defaults::increaseTab() {

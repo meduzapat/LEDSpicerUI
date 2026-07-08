@@ -129,7 +129,8 @@ void DialogForm::wireChildrenDialogs() noexcept {
 	if (not parent) return;
 	for (auto& [family, items] : parent->getChildren()) {
 		auto child{familyToDialog.at(family)};
-		child->action = action;
+		child->action   = action;
+		child->readOnly = readOnly;
 		child->setOwner(&items, currentData);
 	}
 
@@ -173,13 +174,14 @@ void DialogForm::createDeleteButton(BoxButton& boxButton, bool askConfirmation) 
 	boxButton.packButtonStart(*button);
 	button->set_image_from_icon_name(ICON_TRASH, Gtk::ICON_SIZE_BUTTON);
 	button->get_style_context()->add_class(CSS_BOX_BACKGROUND_DELETE);
+	button->get_style_context()->add_class(getLockClass());
 	button->set_tooltip_text("Delete " + boxButton.getData()->createPrettyName());
 	button->signal_clicked().connect([&, askConfirmation]() {
 		if (askConfirmation) {
 			if (Message::ask(
-					"Are you sure you want to remove " +
-					boxButton.getData()->createPrettyName() + "?", this
-				) != Gtk::ResponseType::RESPONSE_YES) return;
+				"Are you sure you want to remove " +
+				boxButton.getData()->createPrettyName() + "?", this
+			) != Gtk::ResponseType::RESPONSE_YES) return;
 		}
 		onDelClicked(boxButton);
 	});
@@ -190,6 +192,8 @@ void DialogForm::createEditButton(BoxButton& boxButton) noexcept {
 	boxButton.packButtonStart(*button);
 	button->set_image_from_icon_name(ICON_EDIT, Gtk::ICON_SIZE_BUTTON);
 	button->get_style_context()->add_class(CSS_BOX_BACKGROUND_EDIT);
+	button->get_style_context()->add_class(getLockClass());
+	button->get_style_context()->add_class(CSS_RO_VIEW);
 	button->set_tooltip_text("Edit " + boxButton.getData()->createPrettyName());
 	button->signal_clicked().connect([&]() {
 		onEditClicked(boxButton);
@@ -201,6 +205,7 @@ void DialogForm::createCloneButton(BoxButton& boxButton) noexcept {
 	boxButton.packButtonStart(*button);
 	button->set_image_from_icon_name(ICON_COPY, Gtk::ICON_SIZE_BUTTON);
 	button->get_style_context()->add_class(CSS_BOX_BACKGROUND_COPY);
+	button->get_style_context()->add_class(getLockClass());
 	button->set_tooltip_text("Clone " + boxButton.getData()->createPrettyName());
 	button->signal_clicked().connect([&]() {
 		onCloneClicked(boxButton);
@@ -220,6 +225,8 @@ void DialogForm::onAddClicked() noexcept {
 	clearForm();
 	set_title("Add New " + Defaults::titleCase(getType()));
 	btnApply->set_label("Create");
+	// A prior view session may have hidden it; Add only fires on writable sources.
+	btnApply->set_visible(true);
 
 	// Ask form to create an empty Data, and connect any children dialogs.
 	currentData = createData();
@@ -259,8 +266,11 @@ void DialogForm::onEditClicked(BoxButton& boxButton) noexcept {
 	action = Actions::EDIT;
 	clearForm();
 	currentData = boxButton.getData();
-	set_title("Edit " + Defaults::titleCase(getType()) + " " + currentData->createPrettyName());
+	set_title(
+		(readOnly ? "View " : "Edit ") + Defaults::titleCase(getType()) + " " + currentData->createPrettyName()
+	);
 	btnApply->set_label("Save");
+	btnApply->set_visible(not readOnly);
 
 	// Connect any children dialogs.
 	wireChildrenDialogs();

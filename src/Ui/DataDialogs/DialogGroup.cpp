@@ -35,7 +35,10 @@ DialogGroup::DialogGroup(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& 
 		emptyString,
 		{},
 		CollectionHandler::getInstance(COLLECTION_ELEMENTS),
-		{}
+		{},
+		1,
+		// Group links are root config data.
+		CSS_RO_LOCKED_CONFIG
 	}
 {
 	Gtk::Button

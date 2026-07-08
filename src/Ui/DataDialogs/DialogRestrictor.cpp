@@ -349,8 +349,8 @@ void DialogRestrictor::updateWaysTestState() noexcept {
 	flowboxWays->unselect_all();
 	flowboxWays->set_selection_mode(live ? Gtk::SELECTION_SINGLE : Gtk::SELECTION_NONE);
 	flowboxWays->set_activate_on_single_click(live);
-	// Portable: informational. Otherwise sensitive only when live.
-	flowboxWays->set_sensitive(live or Config::Settings::get().isPortable());
+	// No daemon: informational. Otherwise sensitive only when live.
+	flowboxWays->set_sensitive(live or not Config::Settings::get().hasBinary());
 
 	// Narrowing: multi-interface restrictor with 2+ mappings, while live.
 	const string name {selectorCombo->get_active_id()};

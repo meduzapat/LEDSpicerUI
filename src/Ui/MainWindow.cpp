@@ -103,10 +103,18 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 	builder->get_widget("DaemonBusyWindow", busyWindow);
 	builder->get_widget("DaemonBusyLabel",  busyLabel);
 
-	// Settings has no Apply: re-evaluate the sandbox and daemon controls on close.
+	// Refresh on close because settings has no Apply.
 	DialogSettings::getInstance()->onClose([this]() {
 		syncSandbox();
 		updateDaemonControls();
+		/*
+		 * A daemon change retargeted the paths: reload the project from the new
+		 * locations (which re-derives writability); otherwise just re-apply it.
+		 */
+		if (DialogSettings::getInstance()->takeProjectReload())
+			openProject(Settings::get().getCurrentProject());
+		else
+			applyWritability();
 	});
 
 	// Config changes stale the staged config; restrictors are included for the rotator test.
@@ -140,20 +148,25 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 	// Save project
 	btnSaveProject->signal_clicked().connect([this]() {
 		try {
-			// Saving under the wrong mode would write the config to the other mode's
-			// location and duplicate it; block until the mode matches the project.
-			if (not projectMatchesMode(Settings::get().getCurrentProject())) {
-				const auto [appMode, projectMode] {Settings::getModeLabels(Settings::get().getMode())};
-				throw Message(
-					"This project was created for " + projectMode + " mode, but the application is running in "
-					+ appMode + " mode.\nSwitch back to " + projectMode + " mode to save it."
-				);
-			}
 			if (boxRandomColors->get_children().size() == 1) {
 				throw Message("The number of random colors need to be more than one or none.");
 			}
 
-			const bool backupKept {ProjectFile::saveProject([&]() {
+			const bool
+				rootWritable    {Settings::get().isRootConfigWritable()},
+				projectWritable {Settings::get().isProjectDirWritable()};
+
+			// RO project.
+			if (not rootWritable or not projectWritable) {
+				const string
+					skipped {rootWritable ? "project files are" : "root configuration is"},
+					saved   {rootWritable ? "root configuration" : "project files"};
+				if (Message::ask(
+					"The " + skipped + " read-only and will NOT be saved.\nSave the " + saved + "?", this
+				) != Gtk::ResponseType::RESPONSE_YES) return;
+			}
+
+			auto saveConfig {[&]() {
 				ConfigFile::save(ConfigFile::ConfigData(
 					Settings::get().getActiveConfigPath(),
 					Settings::get().getCurrentProject(),
@@ -165,15 +178,30 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 					groups,
 					processes
 				));
+			}};
 
-				inputNavigator.save();
-				animationNavigator.save();
-				profileNavigator.save();
-			})};
+			bool backupKept {false};
+			if (projectWritable) {
+				backupKept = ProjectFile::saveProject([&]() {
+					if (rootWritable) saveConfig();
+					inputNavigator.save();
+					animationNavigator.save();
+					profileNavigator.save();
+				});
+			}
+			else {
+				// A system-sourced config lives outside the project directory.
+				saveConfig();
+			}
 
 			Defaults::cleanDirty();
 			DialogSettings::getInstance()->saveSettings();
-			StatusBar::getInstance().push("Project saved", StatusBar::Severity::Success);
+			if (rootWritable and projectWritable)
+				StatusBar::getInstance().push("Project saved", StatusBar::Severity::Success);
+			else
+				StatusBar::getInstance().push(
+					"Project partially saved (read-only parts skipped)", StatusBar::Severity::Warning
+				);
 			if (backupKept)
 				StatusBar::getInstance().push("Backup saved", StatusBar::Severity::Success);
 		}
@@ -245,7 +273,7 @@ MainWindow::MainWindow(BaseObjectType* obj, Glib::RefPtr<Gtk::Builder> const &bu
 		const string& defaultProject = Settings::get().getDefaultProject();
 		if (not defaultProject.empty())
 			openProject(defaultProject);
-		// Settings (and thus the mode) are loaded now: build the test sandbox.
+		// Settings are loaded now: build the test sandbox.
 		syncSandbox();
 		updateDaemonControls();
 		Defaults::setIgnoreChanges(false);
@@ -335,31 +363,37 @@ void MainWindow::prepareDialogs(Glib::RefPtr<Gtk::Builder> const &builder) {
 	});
 
 	btnSelectProject->signal_clicked().connect([this]() {
-		if (DialogProject::getInstance()->run() != Gtk::ResponseType::RESPONSE_APPLY) {
-			DialogProject::getInstance()->hide();
+		auto dialog {DialogProject::getInstance()};
+		const auto response {dialog->run()};
+		dialog->hide();
+		/*
+		 * A conversion moved the open project's config on disk;
+		 * it must reload regardless of how the dialog was closed.
+		 * Conversions require a clean project, so the reload cannot lose work.
+		 */
+		const bool reloadCurrent {dialog->takeCurrentProjectConverted()};
+		if (response != Gtk::ResponseType::RESPONSE_APPLY) {
+			if (reloadCurrent) openProject(Settings::get().getCurrentProject());
 			return;
 		}
-		const string& newProject {DialogProject::getInstance()->getProjectName()};
+		const string& newProject {dialog->getProjectName()};
 		if (newProject == Settings::get().getCurrentProject()) {
+			if (reloadCurrent) {
+				openProject(newProject);
+				return;
+			}
 			if (not Defaults::isDirty()) {
-				Message::displayInfo("Already working on that project", DialogProject::getInstance());
-				DialogProject::getInstance()->hide();
+				Message::displayInfo("Already working on that project");
 				return;
 			}
-			if (Message::ask("Discard unsaved changes and reload \"" + newProject + "\" from disk?", DialogProject::getInstance()) != Gtk::ResponseType::RESPONSE_YES) {
-				DialogProject::getInstance()->hide();
+			if (Message::ask("Discard unsaved changes and reload \"" + newProject + "\" from disk?") != Gtk::ResponseType::RESPONSE_YES)
 				return;
-			}
 			openProject(newProject);
-			DialogProject::getInstance()->hide();
 			return;
 		}
-		if (Defaults::isDirty() and Message::ask("All unsaved changes will be loss, are you sure?", DialogProject::getInstance()) != Gtk::ResponseType::RESPONSE_YES) {
-			DialogProject::getInstance()->hide();
+		if (Defaults::isDirty() and Message::ask("All unsaved changes will be loss, are you sure?") != Gtk::ResponseType::RESPONSE_YES)
 			return;
-		}
-		openProject(newProject);
-		DialogProject::getInstance()->hide();
+		openProject(newProject, dialog->isPortableRequested());
 	});
 }
 
@@ -404,31 +438,25 @@ LEDSpicerUI::Values MainWindow::packLedspicerConfig() const noexcept {
 	return r;
 }
 
-bool MainWindow::projectMatchesMode(const string& name) const noexcept {
-	const string projectDir {Settings::get().getProjectsDir() + name + '/'};
-	// A new project (no directory yet) adopts the current mode on its first save.
-	if (not Glib::file_test(projectDir, Glib::FileTest::FILE_TEST_IS_DIR))
-		return true;
-	const bool portableProject {Glib::file_test(projectDir + CONFIG_FILE, Glib::FileTest::FILE_TEST_EXISTS)};
-	return portableProject == Settings::get().isPortable();
-}
+void MainWindow::openProject(const string& name, bool portable) {
 
-void MainWindow::openProject(const string& name) {
+	// Resolves the config source for the project (embedded config wins).
+	Settings::get().setCurrentProject(name);
+	if (portable)
+		Settings::get().setConfigSource(Settings::ConfigSource::Project);
 
-	// Opening a project under the wrong mode reads the wrong config location; refuse
-	// before touching state.
-	if (not projectMatchesMode(name)) {
-		const auto [appMode, projectMode] {Settings::getModeLabels(Settings::get().getMode())};
+	// A missing config is a new one; without a writable target it can never exist.
+	const string activeConfig {Settings::get().getActiveConfigPath()};
+	if (not Glib::file_test(activeConfig, Glib::FileTest::FILE_TEST_EXISTS)
+		and not Settings::get().isRootConfigWritable()) {
 		Message::displayError(
-			"Unable to open project \"" + name + "\" because it was created for " + projectMode + " mode.\n"
-			"The application is currently running in " + appMode + " mode. Please switch modes to open this project.",
+			"There is no configuration for \"" + name + "\" and no writable location to create one.",
 			this
 		);
+		Settings::get().setCurrentProject("");
 		return;
 	}
 
-	Settings::get().setCurrentProject(name);
-	Defaults::setSubtitle(name);
 	comboColors->set_active_id("");
 
 	Message::beginBatch();
@@ -481,8 +509,43 @@ void MainWindow::openProject(const string& name) {
 	toggleConnect->set_active(false);
 	ignoreConnectToggle = false;
 	updateDaemonControls();
+	applyWritability();
 
 	Message::finishBatch(loadFailed ? "Project could not be loaded" : "Project loaded");
+}
+
+void MainWindow::applyWritability() noexcept {
+
+	auto& settings {Settings::get()};
+	// Without a project the whole tab area is already disabled.
+	if (settings.getCurrentProject().empty()) return;
+
+	const bool
+		rootWritable    {settings.isRootConfigWritable()},
+		projectWritable {settings.isProjectDirWritable()};
+
+	Defaults::applyWritability(CSS_RO_LOCKED_CONFIG,  rootWritable);
+	Defaults::applyWritability(CSS_RO_LOCKED_PROJECT, projectWritable);
+
+	DialogDevice::getInstance()->setReadOnly(not rootWritable);
+	DialogRestrictor::getInstance()->setReadOnly(not rootWritable);
+	DialogProcess::getInstance()->setReadOnly(not rootWritable);
+	DialogGroup::getInstance()->setReadOnly(not rootWritable);
+	DialogInput::getInstance()->setReadOnly(not projectWritable);
+	DialogAnimation::getInstance()->setReadOnly(not projectWritable);
+	DialogProfile::getInstance()->setReadOnly(not projectWritable);
+
+	// The lock and its explanation live with the project name.
+	string lockTip;
+	if (not rootWritable)
+		lockTip = "The root configuration is read-only.";
+	if (not projectWritable)
+		lockTip += string{lockTip.empty() ? "" : "\n"} + "The project directory is read-only.";
+	Defaults::setSubtitle(
+		(lockTip.empty() ? "" : "🔒 ") + settings.getCurrentProject() +
+		(settings.getConfigSource() == Settings::ConfigSource::Project ? " · portable" : ""),
+		lockTip
+	);
 }
 
 void MainWindow::onConnectToggled() {
@@ -666,8 +729,8 @@ void MainWindow::updateDaemonControls() noexcept {
 		Settings::get().isInteractive()
 		and ((hasDevices and portOk) or hasRestrictors)
 	};
-	// Hidden on portable; visible otherwise, enabled only when a test can run.
-	toggleConnect->set_visible(not Settings::get().isPortable());
+	// Hidden without a daemon binary; visible otherwise, enabled only when a test can run.
+	toggleConnect->set_visible(Settings::get().hasBinary());
 	toggleConnect->set_sensitive(eligible);
 
 	// A live test session whose project drifted out of eligibility must drop.

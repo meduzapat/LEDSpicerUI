@@ -173,6 +173,7 @@ void DirectoryNavigator::wireDirButtons(Storage::BoxButton& bb) noexcept {
 	bb.packButtonStart(*editBtn);
 	editBtn->set_image_from_icon_name(ICON_EDIT, Gtk::ICON_SIZE_BUTTON);
 	editBtn->get_style_context()->add_class(CSS_BOX_BACKGROUND_EDIT);
+	editBtn->get_style_context()->add_class(CSS_RO_LOCKED_PROJECT);
 	editBtn->set_tooltip_text("Rename " + de->createPrettyName());
 	editBtn->signal_clicked().connect([this, de, &bb]() {
 
@@ -194,6 +195,7 @@ void DirectoryNavigator::wireDirButtons(Storage::BoxButton& bb) noexcept {
 	bb.packButtonStart(*delBtn);
 	delBtn->set_image_from_icon_name(ICON_TRASH, Gtk::ICON_SIZE_BUTTON);
 	delBtn->get_style_context()->add_class(CSS_BOX_BACKGROUND_DELETE);
+	delBtn->get_style_context()->add_class(CSS_RO_LOCKED_PROJECT);
 	delBtn->set_tooltip_text("Delete " + de->createPrettyName());
 	delBtn->signal_clicked().connect([this, de, &bb]() {
 		if (Message::ask(

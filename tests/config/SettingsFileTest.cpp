@@ -52,7 +52,7 @@ TEST_F(SettingsFileTest, MissingFile) {
 	EXPECT_FALSE(SettingsFile::initialize());
 	const auto& s = Settings::get();
 	EXPECT_TRUE(s.getBinaryPath().empty());
-	EXPECT_TRUE(s.isPortable());
+	EXPECT_FALSE(s.hasBinary());
 	EXPECT_TRUE(s.shouldSaveBackup());
 	EXPECT_FALSE(s.shouldDebugFiles());
 }

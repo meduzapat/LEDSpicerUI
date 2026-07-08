@@ -23,6 +23,7 @@
 #include "DialogLinkEditor.hpp"
 #include "Storage/CollectionHandler.hpp"
 #include "Storage/Selection.hpp"
+#include "config/Settings.hpp"
 
 #pragma once
 
@@ -75,6 +76,9 @@ public:
 
 		/// Minimum number of items that must be selected to enable the Apply button.
 		const int minSelection = 1;
+
+		/// Writability marker for the per-link buttons.
+		const char* lockClass = CSS_RO_LOCKED_PROJECT;
 
 	};
 

@@ -76,6 +76,8 @@ protected:
 
 	void createSubItems(DataMap& values) noexcept override;
 	const string& getType()          const noexcept override { return TYPE_GROUP; }
+
+	const char* getLockClass() const noexcept override { return CSS_RO_LOCKED_CONFIG; }
 	Storage::Data* createData(Values& rawData) const noexcept override;
 
 	void wireChildrenDialogs()       noexcept override;

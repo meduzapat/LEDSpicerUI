@@ -86,6 +86,8 @@ protected:
 	bool checkAvailableInterfaces() const noexcept;
 
 	const string& getType() const noexcept override { return TYPE_RESTRICTOR_MAP; }
+
+	const char* getLockClass() const noexcept override { return CSS_RO_LOCKED_CONFIG; }
 	Storage::Data* createData(Values& rawData) const noexcept override;
 
 	void afterCreate(Storage::BoxButton& boxButton) noexcept override;
