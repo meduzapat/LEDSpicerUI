@@ -31,8 +31,8 @@ namespace LEDSpicerUI::Ui::DataDialogs {
 /**
  * LEDSpicerUI::Ui::DataDialogs::DialogInputSource
  * Dialog to add/edit event sources (hardware input devices) for multi-source inputs.
- * When running locally, scans /dev/input/ for event devices and populates a combo.
- * Selecting "Other" or running in portable mode falls back to a manual text entry.
+ * With a daemon binary present, scans /dev/input/ for event devices and populates a combo.
+ * Selecting "Other" or lacking the binary falls back to a manual text entry.
  * Both the combo and entry resolve to a single source value via resolvedSource().
  */
 class DialogInputSource : public DialogFormHost, public SingletonDialog<DialogInputSource> {

@@ -407,6 +407,12 @@ inline const string
 #define ICON_DELETE "edit-delete-symbolic"
 #define ICON_EDIT   "emblem-system-symbolic"
 #define ICON_TRASH  "user-trash-symbolic"
+#define ICON_VIEW   "view-reveal-symbolic"
+
+// Writability markers (see Defaults::applyWritability).
+#define CSS_RO_LOCKED_CONFIG  "RoLockedConfig"  // Locks when the root config source is read-only.
+#define CSS_RO_LOCKED_PROJECT "RoLockedProject" // Locks when the project directory is read-only.
+#define CSS_RO_VIEW           "RoView"          // Edit buttons that flip to a view button instead of locking.
 
 // Layout
 #define CSS_LAYOUT_ELEMENT        "layout-element"
@@ -766,6 +772,25 @@ public:
 	static void initialize(Gtk::HeaderBar* header, Gtk::Button* btnSave);
 
 	/**
+	 * Applies a writability state to every toplevel window.
+	 * Widgets marked with cssClass are locked or restored; those also marked
+	 * CSS_RO_VIEW flip icon and tooltip between edit and view instead, staying
+	 * sensitive. Unmarked widgets are untouched.
+	 * @param cssClass CSS_RO_LOCKED_CONFIG or CSS_RO_LOCKED_PROJECT.
+	 * @param writable false locks, true restores.
+	 */
+	static void applyWritability(const string& cssClass, bool writable) noexcept;
+
+	/**
+	 * Applies both writability states to a single widget tree.
+	 * Used when widgets become visible after the toplevel sweep ran.
+	 * @param widget          Root of the tree to process.
+	 * @param configWritable  State for CSS_RO_LOCKED_CONFIG markers.
+	 * @param projectWritable State for CSS_RO_LOCKED_PROJECT markers.
+	 */
+	static void applyWritability(Gtk::Widget* widget, bool configWritable, bool projectWritable) noexcept;
+
+	/**
 	 * Registers an Editable widget, so when it change the dirty flag is raised
 	 * @param widget
 	 */
@@ -802,8 +827,9 @@ public:
 	/**
 	 * Sets the subtitle in the header bar.
 	 * @param text The text to display, or empty to clear.
+	 * @param tooltip Header tooltip explaining subtitle markers, or empty to clear.
 	 */
-	static void setSubtitle(const string& text);
+	static void setSubtitle(const string& text, const string& tooltip = "");
 
 	/**
 	 * Add tabulation.
@@ -999,6 +1025,15 @@ public:
 	static void attachNameFilter(Gtk::Entry* entry, size_t maxLen = 128) noexcept;
 
 protected:
+
+	/**
+	 * Recursively applies one writability marker to a widget tree.
+	 * Marked widgets do not nest.
+	 * @param widget   Root of the tree to process.
+	 * @param cssClass Marker selecting the widgets to act on.
+	 * @param writable false locks, true restores.
+	 */
+	static void sweepWritability(Gtk::Widget* widget, const string& cssClass, bool writable) noexcept;
 
 	/// Keeps track of the number of tabulations for XML files.
 	inline static string tabs;

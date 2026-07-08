@@ -211,16 +211,17 @@ protected:
 	 * Opens a project by name: sets current project, loads its config, and activates the UI.
 	 * Persists the project to UI settings immediately if the config file already exists.
 	 * @param name project directory name
+	 * @param portable keep a new project's config inside its directory even
+	 *        when the system config is available.
 	 */
-	void openProject(const string& name);
+	void openProject(const string& name, bool portable = false);
 
 	/**
-	 * Whether a project's on-disk origin is compatible with the current mode.
-	 * A new project (no directory yet) adopts the current mode.
-	 * @param name project directory name
-	 * @return true if it may be opened or saved now.
+	 * Applies the writability of both config sources to the UI: locks the
+	 * affected tab pages and flags the data dialogs read-only. Runs after a
+	 * project is opened and whenever the settings dialog closes.
 	 */
-	bool projectMatchesMode(const string& name) const noexcept;
+	void applyWritability() noexcept;
 
 	/**
 	 * Reads a ledspicer.conf file.

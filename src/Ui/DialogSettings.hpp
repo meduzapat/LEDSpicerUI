@@ -77,6 +77,17 @@ public:
 	void onClose(std::function<void()> cb) noexcept { onClosed = std::move(cb); }
 
 	/**
+	 * Consumes the flag set when a binary change retargeted the open project's
+	 * paths; the caller must then reload it.
+	 * @return true once per such change.
+	 */
+	bool takeProjectReload() noexcept {
+		const bool value {needProjectReload};
+		needProjectReload = false;
+		return value;
+	}
+
+	/**
 	 * Sets the binary path, runs detection, and updates UI.
 	 * @param binaryPath
 	 * @param setFileBinarySelector if true, syncs the file chooser widget.
@@ -133,7 +144,9 @@ protected:
 		/// Guards against recursive signal firing when syncing theme selection.
 		selectingTheme  = false,
 		/// True while signal_show() is mirroring Settings into widgets; suppresses auto-save.
-		syncing         = false;
+		syncing         = false,
+		/// True when a binary change retargeted the open project's paths; see takeProjectReload().
+		needProjectReload = false;
 
 	DialogSettings(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& builder);
 

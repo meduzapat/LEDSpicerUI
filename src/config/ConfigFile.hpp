@@ -21,7 +21,6 @@
  */
 
 #include "ProjectFile.hpp"
-#include "Storage/BoxButtonCollection.hpp"
 #include "Storage/Element.hpp"
 
 #pragma once

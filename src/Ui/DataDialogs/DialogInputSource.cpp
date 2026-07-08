@@ -241,8 +241,9 @@ LEDSpicerUI::StringMap DialogInputSource::scanEventDevices() noexcept{
 
 	StringMap devices;
 
+	// Without a daemon binary this machine is not a target; its devices are misleading.
 	if (
-		Settings::get().isPortable() or
+		not Settings::get().hasBinary() or
 		not Defaults::isDevInputListener(comboBoxInputSelectInput->get_active_id())
 	) {
 		return devices;

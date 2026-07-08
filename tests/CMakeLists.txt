@@ -47,6 +47,8 @@ set(COMMON_SRCS
 set(STORAGE_SRCS
 	${CMAKE_SOURCE_DIR}/src/Ui/Storage/Data.cpp
 	${CMAKE_SOURCE_DIR}/src/Ui/Storage/BoxButton.cpp
+	# BoxButtonCollection reads the writability state when populating.
+	${CMAKE_SOURCE_DIR}/src/config/Settings.cpp
 	${CMAKE_SOURCE_DIR}/src/Ui/Storage/BoxButtonCollection.cpp
 )
 

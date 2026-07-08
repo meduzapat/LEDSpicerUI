@@ -74,9 +74,9 @@ bool DialogSettings::startup(Gtk::Window* parent) {
 		"ledspicerd was not found in your system.\n\n"
 		"You can:\n"
 		"• Locate the binary manually if LEDSpicer is installed\n"
-		"• Continue in portable mode (requires data directory)\n\n"
-		"Note: In portable mode, ledspicer.conf is stored\n"
-		"within the project directory."
+		"• Continue without it (requires data directory)\n\n"
+		"Note: Without the daemon binary, ledspicer.conf is\n"
+		"stored within each project directory."
 		:
 		"LEDSpicer was found but the data directory is missing or invalid.\n\n"
 		"Please configure the data directory to continue.\n"
@@ -177,6 +177,17 @@ DialogSettings::DialogSettings(BaseObjectType* obj, const Glib::RefPtr<Gtk::Buil
 		const auto& s = Settings::get();
 		if (not s.getBinaryPath().empty())
 			fileBinary->set_filename(s.getBinaryPath());
+		/*
+		 * Unsaved project changes freeze the binary: changing it retargets the
+		 * config and projects paths and forces a reload. Dirtiness cannot change
+		 * while this modal dialog is open, so evaluating here is enough.
+		 */
+		const bool pathsFrozen {not s.getCurrentProject().empty() and Defaults::isDirty()};
+		fileBinary->set_sensitive(not pathsFrozen);
+		// Insensitive widgets get no tooltip; explain on the enclosing row.
+		fileBinary->get_parent()->set_tooltip_text(
+			pathsFrozen ? "Save or discard the project changes to change the binary." : ""
+		);
 		if (not s.getDataDir().empty())
 			fileDataDirSelect->set_filename(s.getDataDir());
 		switchInteractiveMode->set_active(s.isInteractiveMode());
@@ -357,11 +368,23 @@ bool DialogSettings::detectLedspicerVersion() {
 }
 
 void DialogSettings::setBinaryPath(const string& binaryPath, bool setFileBinarySelector) {
-	Settings::get().setBinaryPath(binaryPath);
+
+	auto& settings {Settings::get()};
+
+	const string
+		oldConfigPath {settings.getActiveConfigPath()},
+		oldProjectDir {settings.getProjectDir()};
+
+	settings.setBinaryPath(binaryPath);
 	if (detectLedspicerVersion()) {
 		processBinary();
 		if (setFileBinarySelector) fileBinary->set_filename(binaryPath);
 	}
+
+	// The open project must be reloaded from the new locations on close.
+	if (not settings.getCurrentProject().empty() and (
+		oldConfigPath != settings.getActiveConfigPath() or oldProjectDir != settings.getProjectDir()
+	)) needProjectReload = true;
 }
 
 void DialogSettings::updateBinaryStatusLabel(const string& version) {
@@ -378,7 +401,6 @@ void DialogSettings::updateBinaryStatusLabel(const string& version) {
 		labelBinaryPath->set_text(Settings::get().getBinaryPath());
 	}
 	switchInteractiveMode->set_sensitive(detected);
-	// Mode is derived automatically by Settings from binaryPath state.
 }
 
 void DialogSettings::processBinary() {
@@ -425,25 +447,13 @@ void DialogSettings::processBinary() {
 
 void DialogSettings::setConfigPath(const string& configPath) {
 
+	Settings::get().setConfigPath(configPath);
 	if (configPath.empty()) {
-		Settings::get().setConfigPath("");
 		labelConfigPath->set_text("N/A");
 		return;
 	}
-
-	bool isWritable = false;
-	try {
-		auto file = Gio::File::create_for_path(configPath);
-		auto info = file->query_info("access::can-write");
-		isWritable = info->get_attribute_boolean("access::can-write");
-	}
-	catch (...) {
-		Settings::get().setConfigPath("");
-		return;
-	}
-
-	Settings::get().setConfigPath(configPath);
-	labelConfigPath->set_text((isWritable ? "" : "🔒") + configPath);
+	// The label describes this exact path; the active source may differ.
+	labelConfigPath->set_text((Settings::isPathWritable(configPath) ? "" : "🔒") + configPath);
 }
 
 void DialogSettings::setDataDir(const string& dataDir, bool setFileDataDirSelector) {

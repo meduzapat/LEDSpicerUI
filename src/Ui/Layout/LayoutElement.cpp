@@ -325,6 +325,8 @@ void LayoutElement::persistPosition() noexcept {
 bool LayoutElement::onButtonPress(GdkEventButton* ev) noexcept {
 	if (ev->button != 1) return false;
 	if (active) return true;
+	// Read-only root config: position writes are suppressed, so never start a drag.
+	if (not Config::Settings::get().isRootConfigWritable()) return true;
 	dragging    = true;
 	dragMoved   = false;
 	dragOffsetX = ev->x;
