@@ -1,0 +1,30 @@
+# Changelog
+
+All notable changes to LEDSpicer UI are documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.1.0] - 2026-07-10
+
+First stable release, following the alpha and beta cycles.
+
+### Added
+- Visual cabinet layout editor with in-place element editing, snap-to-grid, and drag-and-drop placement (#74, #75).
+- Live testing against a running LEDSpicer daemon over real IPC, gated by a central test-readiness check (#60, #83).
+- Configurable test-light timeout for layout testing (#62).
+- Restrictor Test button that drives the rotator binary (#84), and a restrictor-only test mode (#85, #87).
+- Project migration tool that upgrades older projects and reacts to read-only project configs (#90, #95).
+- Core UI assets compiled into the binary as a GResource bundle (#78, #79).
+- Persistence of window and dialog geometry across sessions (#57).
+
+### Changed
+- Refreshed main theme and CSS (#81).
+- Consolidated UI element types and detection logic (#59); renamed Ordenable components to Sortable.
+- Reorganized restrictor images into a dedicated directory (#61).
+
+### Fixed
+- Projects no longer fail to load (empty UI) when opened under a different mode than they were created in (#88).
+- Save validation now rejects invalid data instead of writing it (#89).
+- Fixed a crash when clicking a pin box on the Scattered RGB tab with non-RGB hardware (#80).
+- Layout view and label corrections (#91).

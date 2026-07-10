@@ -1,0 +1,29 @@
+# Maintainer: Patricio A. Rossi (MeduZa) <meduzapat@netscape.net>
+#
+# pkgver and sha256sums are updated by packaging/generate-changelogs.sh from
+# CMakeLists.txt and the released tag tarball — do not edit them by hand.
+
+pkgname=ledspicerui
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="Graphical configuration editor for LEDSpicer"
+arch=('x86_64')
+url="https://github.com/meduzapat/LEDSpicerUI"
+license=('GPL3')
+depends=('gtkmm3' 'tinyxml2')
+makedepends=('cmake' 'glib2' 'libxml2')
+optdepends=('ledspicer: the LED daemon this UI configures')
+source=("${pkgname}-${pkgver}.tar.gz::${url}/archive/refs/tags/${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+	cmake -B build -S "LEDSpicerUI-${pkgver}" \
+		-DCMAKE_BUILD_TYPE=Release \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DINSTALL_DESKTOP_ENTRY=ON
+	cmake --build build
+}
+
+package() {
+	DESTDIR="${pkgdir}" cmake --install build
+}
