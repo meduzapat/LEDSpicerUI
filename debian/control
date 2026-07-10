@@ -1,0 +1,33 @@
+Source: ledspicerui
+Section: utils
+Priority: optional
+Maintainer: Patricio A. Rossi (MeduZa) <meduzapat@netscape.net>
+Build-Depends:
+ debhelper-compat (= 13),
+ cmake (>= 3.16),
+ pkg-config,
+ libgtkmm-3.0-dev (>= 3.24),
+ libtinyxml2-dev (>= 6.0),
+ libglib2.0-bin,
+ libxml2-utils
+Standards-Version: 4.6.2
+Homepage: https://github.com/meduzapat/LEDSpicerUI
+Vcs-Browser: https://github.com/meduzapat/LEDSpicerUI
+Vcs-Git: https://github.com/meduzapat/LEDSpicerUI.git
+Rules-Requires-Root: no
+
+Package: ledspicerui
+Architecture: any
+Depends:
+ ${shlibs:Depends},
+ ${misc:Depends}
+Recommends:
+ ledspicer
+Description: Graphical configuration editor for LEDSpicer
+ LEDSpicer UI is the visual editor for the LEDSpicer platform. It replaces
+ hand-editing XML configuration files with a point-and-click interface for
+ designing control-panel layouts, configuring LED hardware, and managing
+ profiles and animations for arcade cabinets and interactive projects.
+ .
+ It can drive a running LEDSpicer daemon to test layouts and lights live, and
+ imports and migrates existing projects.

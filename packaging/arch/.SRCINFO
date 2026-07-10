@@ -1,0 +1,17 @@
+pkgbase = ledspicerui
+	pkgdesc = Graphical configuration editor for LEDSpicer
+	pkgver = 0.1.0
+	pkgrel = 1
+	url = https://github.com/meduzapat/LEDSpicerUI
+	arch = x86_64
+	license = GPL3
+	makedepends = cmake
+	makedepends = glib2
+	makedepends = libxml2
+	depends = gtkmm3
+	depends = tinyxml2
+	optdepends = ledspicer: the LED daemon this UI configures
+	source = ledspicerui-0.1.0.tar.gz::https://github.com/meduzapat/LEDSpicerUI/archive/refs/tags/0.1.0.tar.gz
+	sha256sums = SKIP
+
+pkgname = ledspicerui
